@@ -31,8 +31,8 @@
 @implementation MSALRedirectUriVerifier
 
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error
+                                         clientId:(__unused NSString *)clientId
+                                            error:(__unused NSError * __autoreleasing *)error
 {
     if (![NSString msidIsStringNilOrBlank:customRedirectUri])
     {

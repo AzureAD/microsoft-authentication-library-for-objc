@@ -37,7 +37,10 @@
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
+@class MSALWebviewParameters;
+@class MSALSignoutParameters;
 @class WKWebView;
+@class MSALParameters;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -227,6 +230,15 @@
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
+
+/**
+    Returns account for the given account identifying parameters including locally cached accounts and accounts from the SSO extension
+    Accounts from SSO extension are only available on iOS 13+. On earlier versions, this method will return same results as a local account query.
+
+    @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+*/
+- (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
 #pragma mark - Handling MSAL responses
 
@@ -435,5 +447,24 @@
 - (BOOL)removeAccount:(nonnull MSALAccount *)account
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
+/**
+   Removes all tokens from the cache for this application for the provided account.
+   Additionally, this API will remove account from the system browser or the embedded webView by navigating to the OIDC end session endpoint if requested in parameters (see more https://openid.net/specs/openid-connect-session-1_0.html).
+   Moreover, if device has an SSO extension installed, the signout request will be handled through the SSO extension.
+ 
+   As a result of the signout operation, application will not be able to get tokens for the given account without user entering credentials.
+   However, this will not sign out from other signed in apps on the device, unless it is explicitly enabled by the administrator configuration through an MDM profile.
+*/
+- (void)signoutWithAccount:(nonnull MSALAccount *)account
+         signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
+           completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock;
+
+#pragma mark - Device information
+
+/**
+   Reads device information from the authentication broker if present on the device. 
+*/
+- (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
+                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end

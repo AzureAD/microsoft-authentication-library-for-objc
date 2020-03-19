@@ -30,9 +30,7 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDTestSwizzle.h"
 #import "MSALTestBundle.h"
-#import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
-#import "MSIDClientInfo.h"
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -58,7 +56,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDLocalInteractiveController.h"
-#import "MSIDInteractiveRequestParameters.h"
+#import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDSilentController.h"
 #import "MSALRedirectUri.h"
@@ -80,6 +78,13 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALSignoutParameters.h"
+#import "MSIDSignoutController.h"
+#import "MSIDSSOExtensionGetAccountsRequest.h"
+#import "MSALPublicClientApplication+SingleAccount.h"
+#import "MSALDeviceInfoProvider.h"
+#import "MSALDeviceInformation+Internal.h"
+#import "MSIDDeviceInfo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -97,7 +102,6 @@
 
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
-@property (nonatomic) MSIDClientInfo *clientInfo;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
@@ -109,8 +113,6 @@
 {
     [super setUp];
     
-    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
-    self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
 #if TARGET_OS_IPHONE
     id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
@@ -408,7 +410,7 @@
                               block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedTelemetryAPIId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquire];
@@ -463,7 +465,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          XCTAssertTrue(params.validateAuthority);
@@ -593,10 +595,17 @@
     
     MSALInteractiveTokenParameters *params = nil;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    UIViewController *controller = nil;
+
+    static dispatch_once_t once;
+    static UIViewController *controller;
+    
+    dispatch_once(&once, ^{
+        controller = [UIViewController new];
+    });
+    
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
-    params.parentViewController = [self.class sharedViewControllerStub];
+    params.parentViewController = controller;
     params.parentViewController.view = nil;
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
@@ -805,7 +814,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          XCTAssertFalse(params.validateAuthority);
@@ -939,7 +948,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHint];
@@ -995,7 +1004,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1064,7 +1073,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1142,7 +1151,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
@@ -1206,7 +1215,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1282,7 +1291,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -2005,6 +2014,404 @@
     XCTAssertEqual([allAccounts count], 0);
 }
 
+
+#if TARGET_OS_IPHONE
+#pragma mark - All accounts from device
+ 
+- (void)testAllAccountsFromDevice_whenBrokerEnabled_andEncounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 0);
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"test error", nil, nil, nil, nil, nil, NO);
+        callback(nil, NO, error);
+    }];
+    
+    XCTestExpectation *accountsExpectation = [self expectationWithDescription:@"Accounts from device"];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"uid.utid"];
+    
+    [application accountsFromDeviceForParameters:params
+                                 completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        XCTAssertNil(accounts);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInteractionRequired);
+        [accountsExpectation fulfill];
+        
+    }];
+    
+    [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
+}
+
+- (void)testAllAccountsFromDevice_whenBrokerEnabled_andFoundAccounts_shouldReturnAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 0);
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDAccount *account2 = [MSIDAccount new];
+        account2.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+        account2.environment = @"login.windows.net";
+        
+        MSIDAccount *account3 = [MSIDAccount new];
+        account3.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user2@contoso.com" homeAccountId:@"uid2.utid"];
+        account3.environment = @"login.windows.net";
+        
+        callback(@[account2, account3], NO, nil);
+    }];
+    
+    XCTestExpectation *accountsExpectation = [self expectationWithDescription:@"Accounts from device"];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"uid.utid"];
+    
+    [application accountsFromDeviceForParameters:params
+                                 completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        XCTAssertNotNil(accounts);
+        XCTAssertEqual([accounts count], 2);
+        
+        MSALAccount *firstAccount = accounts[0];
+        XCTAssertEqualObjects(firstAccount.identifier, @"uid.tid");
+        
+        MSALAccount *secondAccount = accounts[1];
+        XCTAssertEqualObjects(secondAccount.identifier, @"uid2.utid");
+        
+        XCTAssertNil(error);
+        [accountsExpectation fulfill];
+        
+    }];
+    
+    [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
+}
+
+#pragma mark - Get device info
+
+- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoAndNilError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider  class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParameters, MSALDeviceInformationCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
+        msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+        MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        callback(deviceInfo, nil);
+    }];
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get device info"];
+    
+    [application getDeviceInformationWithParameters:nil
+                                    completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
+}
+
+#pragma mark - Get current account
+
+- (void)testCurrentAccount_whenBrokerDisabled_shouldReturnCurrentLocalAccount API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [self msalStoreTokenResponseInCache];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+        
+    XCTestExpectation *accountsExpectation = [self expectationWithDescription:@"Accounts from device"];
+        
+    [application getCurrentAccountWithParameters:nil
+                                 completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
+        
+        XCTAssertNil(error);
+        XCTAssertNil(previousAccount);
+        XCTAssertNotNil(account);
+        XCTAssertEqualObjects(account.identifier, @"myuid.utid");
+        [accountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[accountsExpectation] timeout:1];
+}
+
+- (void)testCurrentAccount_whenBrokerDisabled_andMultipleAccounts_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+        
+    XCTestExpectation *accountsExpectation = [self expectationWithDescription:@"Accounts from device"];
+        
+    [application getCurrentAccountWithParameters:nil
+                                 completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
+        
+        XCTAssertNotNil(error);
+        XCTAssertNil(previousAccount);
+        XCTAssertNil(account);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorAmbiguousAccount);
+        [accountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[accountsExpectation] timeout:1];
+}
+
+- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andNoPreviousAccount_shouldReturnCurrentAccount API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 0);
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDAccount *account2 = [MSIDAccount new];
+        account2.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+        account2.environment = @"login.windows.net";
+        
+        callback(@[account2], YES, nil);
+    }];
+    
+    XCTestExpectation *accountsExpectation = [self expectationWithDescription:@"Accounts from device"];
+        
+    [application getCurrentAccountWithParameters:nil
+                                 completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
+        
+        XCTAssertNil(error);
+        XCTAssertNil(previousAccount);
+        XCTAssertNotNil(account);
+        XCTAssertEqualObjects(account.identifier, @"uid.tid");
+        [accountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
+}
+
+- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andPreviousAccount_shouldReturnCurrentAccount_andPreviousAccount API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [self msalStoreTokenResponseInCache];
+    
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+        
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    expectation.expectedFulfillmentCount = 2;
+    
+    __block NSString *b_accountIdSuffix;
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDAccount *account2 = [MSIDAccount new];
+        NSString *homeAccountId = [NSString stringWithFormat:@"myuid.utid%@", b_accountIdSuffix ?: @""];
+        account2.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:homeAccountId];
+        account2.environment = @"login.windows.net";
+        account2.username = @"user@contoso.com";
+        
+        callback(@[account2], YES, nil);
+    }];
+    
+    XCTestExpectation *accountsExpectation1 = [self expectationWithDescription:@"Accounts from device call 1"];
+        
+    [application getCurrentAccountWithParameters:nil
+                                 completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
+        
+        XCTAssertNil(error);
+        XCTAssertNil(previousAccount);
+        XCTAssertNotNil(account);
+        XCTAssertEqualObjects(account.identifier, @"myuid.utid");
+        [accountsExpectation1 fulfill];
+    }];
+    
+    [self waitForExpectations:@[accountsExpectation1] timeout:1];
+    
+    b_accountIdSuffix = @".second.account";
+    
+    XCTestExpectation *accountsExpectation2 = [self expectationWithDescription:@"Accounts from device call 2"];
+    
+    // Call second time
+    [application getCurrentAccountWithParameters:nil
+                                 completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
+        
+        XCTAssertNil(error);
+        XCTAssertNotNil(previousAccount);
+        XCTAssertNotNil(account);
+        XCTAssertEqualObjects(account.identifier, @"myuid.utid.second.account");
+        XCTAssertEqualObjects(previousAccount.identifier, @"myuid.utid");
+        [accountsExpectation2 fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, accountsExpectation2] timeout:1];
+}
+
+#endif
+
 #pragma mark - allAccountsFilteredByAuthority
 
 #pragma clang diagnostic push
@@ -2250,6 +2657,11 @@
     
     // Make sure the user is now gone
     XCTAssertEqual([application allAccounts:nil].count, 0);
+    
+    // Account metadata should mark account as signed out
+    MSIDAccountMetadataState signInState = [self.accountMetadataCache signInStateForHomeAccountId:@"myuid.utid" clientId:UNIT_TEST_CLIENT_ID context:nil error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(signInState, MSIDAccountMetadataStateSignedOut);
 }
 
 
@@ -2387,6 +2799,156 @@
     XCTAssertNotNil(error);
     XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
 }
+
+#pragma mark - Signout
+
+- (void)testSignoutWithAccount_whenNilAccount_shouldReturnError
+{
+    MSALAccount *account = nil;
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+#if TARGET_OS_IPHONE
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+#else
+    MSALWebviewParameters *webParams = [MSALWebviewParameters new];
+#endif
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:account
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertFalse(success);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+#if TARGET_OS_IPHONE
+
+- (void)testSignoutWithAccount_whenNonNilaccount_andSignoutFromBrowserFalse_andBrokerDisabled_shouldRemoveAccountLocallyOnly
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.signoutFromBrowser = NO;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testSignoutWithAccount_whenNonNilAccount_andSignoutFromBrowserTrue_andBrokerDisabled_shouldRemoveAccountFromBrowser
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.signoutFromBrowser = YES;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                             class:[MSIDSignoutController class]
+                             block:(id)^(MSIDSignoutController *obj, MSIDSignoutRequestCompletionBlock completionBlock)
+    {
+        XCTAssertTrue([obj isKindOfClass:[MSIDSignoutController class]]);
+        
+        MSIDInteractiveRequestParameters *params = [obj parameters];
+        XCTAssertNotNil(params);
+        
+        XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"fakeuser@contoso.com");
+        XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"myuid.utid");
+        
+        XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
+        XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
+        
+        XCTAssertNotNil(params.correlationId);
+        
+        completionBlock(YES, nil);
+    }];
+    
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+#endif
 
 #pragma mark - Helpers
 

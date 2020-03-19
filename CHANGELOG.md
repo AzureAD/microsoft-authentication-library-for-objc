@@ -1,3 +1,10 @@
+## [1.1.0] - 2020-03-20
+### Added
+- iOS 13 SSO Extension support
+- Support ASWebAuthenticationSession on macOS 10.15
+- Track account sign-in and sign-out state
+- Support signOut from device if device is configured as shared through MDM
+
 ## [1.0.7] - 2020-01-29
 ### Fixed
 - Keyed unarchiver deserialization fix for iOS 11.2
@@ -40,11 +47,11 @@
 - Remove arm64e architecture
 - Pass custom keychain group for broker requests
 
-# [1.0.0-hotfix2] - 2020-01-27
+## [1.0.0-hotfix2] - 2020-01-27
 ### Fixed
 - [Broker patch] Keyed unarchiver deserialization fix for iOS 11.2
 
-# [1.0.0-hotfix1] - 2020-01-21
+## [1.0.0-hotfix1] - 2020-01-21
 ### Fixed
 - [Broker patch] Fixed account lookups and validation with the same email (#827)
 

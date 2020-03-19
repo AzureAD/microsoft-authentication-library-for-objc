@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccount.h"
-#import "MSIDClientInfo.h"
 #import "MSIDAccount.h"
 #import "MSALAccount+Internal.h"
 #import "NSURL+MSIDExtensions.h"

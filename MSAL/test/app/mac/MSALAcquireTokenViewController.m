@@ -102,14 +102,14 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-- (IBAction)selectedProfileChanged:(id)sender
+- (IBAction)selectedProfileChanged:(__unused id)sender
 {
     [self.settings setCurrentProfile:[self.profilesPopUp indexOfSelectedItem]];
     self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
     self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
 }
 
-- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(__unused id)sender
 {
     if ([segue.identifier isEqualToString:@"addScopesSegue"])
     {
@@ -193,7 +193,7 @@ static NSString * const defaultScope = @"User.Read";
     });
 }
 
-- (IBAction)clearCache:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
@@ -236,7 +236,7 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-- (IBAction)clearCookies:(id)sender
+- (IBAction)clearCookies:(__unused id)sender
 {
     // Clear WKWebView cookies
     if (@available(macOS 10.11, *)) {
@@ -313,7 +313,7 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;

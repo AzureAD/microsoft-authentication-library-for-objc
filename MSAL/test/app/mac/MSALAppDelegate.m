@@ -33,12 +33,12 @@
 
 @implementation MSALAppDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+- (void)applicationDidFinishLaunching:(__unused NSNotification *)aNotification {
     // Insert code here to initialize your application
 }
 
 
-- (void)applicationWillTerminate:(NSNotification *)aNotification {
+- (void)applicationWillTerminate:(__unused NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
 

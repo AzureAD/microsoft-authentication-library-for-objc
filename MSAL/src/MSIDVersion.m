@@ -49,5 +49,10 @@
     return @"msal.";
 }
 
++ (NSString *)aadApiVersion
+{
+    return @"v2.0";
+}
+
 @end
 

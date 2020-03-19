@@ -38,8 +38,8 @@
 
 @implementation MSALAuthority
 
-- (instancetype)initWithURL:(nonnull NSURL *)url
-                      error:(NSError * _Nullable __autoreleasing * _Nullable)error
+- (instancetype)initWithURL:(nonnull __unused NSURL *)url
+                      error:(__unused NSError * _Nullable __autoreleasing * _Nullable)error
 {
     return [super init];
 }

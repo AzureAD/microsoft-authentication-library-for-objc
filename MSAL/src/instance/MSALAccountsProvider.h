@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSIDAccountMetadata.h"
+#import "MSALSSOExtensionRequestHandler.h"
 
 @class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
@@ -34,18 +36,28 @@
 @class MSIDIdTokenClaims;
 @class MSALExternalAccountHandler;
 @class MSALAccountEnumerationParameters;
+@class MSIDAccountMetadataCacheAccessor;
+@class MSIDRequestParameters;
+@class MSIDAccountIdentifier;
+@class MSIDRequestParameters;
 
-@interface MSALAccountsProvider : NSObject
+@interface MSALAccountsProvider : MSALSSOExtensionRequestHandler
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId;
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
            externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider NS_DESIGNATED_INITIALIZER;
+
+- (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
+            requestParameters:(MSIDRequestParameters *)requestParameters
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
 // Authority filtering (deprecated)
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
@@ -60,5 +72,15 @@
 // Filtering
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError * __autoreleasing *)error;
+
+// Check sign in state
+- (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
+                                                context:(id<MSIDRequestContext>)context
+                                                  error:(NSError **)error;
+
+#pragma mark - Principal account id
+
+- (MSALAccount *)currentPrincipalAccount:(NSError **)error;
+- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId accountEnvironment:(NSString *)accountEnvironment error:(NSError **)error;
 
 @end

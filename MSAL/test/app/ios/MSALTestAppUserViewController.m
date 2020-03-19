@@ -31,6 +31,7 @@
 #import "MSALAccountId.h"
 #import "MSALAccount.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSALPublicClientApplication+SingleAccount.h"
 
 @interface MSALTestAppUserViewController ()
 
@@ -39,6 +40,7 @@
 @implementation MSALTestAppUserViewController
 {
     NSArray<MSALAccount *> *_accounts;
+    MSALAccount *_currentAccount;
 }
 
 + (instancetype)sharedController
@@ -88,7 +90,33 @@
     MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
     parameters.returnOnlySignedInAccounts = YES;
     
-    _accounts = [application accountsForParameters:parameters error:nil];
+    if (@available(iOS 13.0, *))
+    {
+        [application accountsFromDeviceForParameters:parameters
+                                     completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
+        {
+            [self refreshWithAccounts:accounts];
+        }];
+        
+        [application getCurrentAccountWithParameters:parameters
+                                     completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
+        {
+            _currentAccount = account;
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super refresh];
+            });
+        }];
+    }
+    else
+    {
+        [self refreshWithAccounts:[application accountsForParameters:parameters error:nil]];
+    }
+}
+
+- (void)refreshWithAccounts:(NSArray *)accounts
+{
+    _accounts = accounts;
     dispatch_async(dispatch_get_main_queue(), ^{
         [super refresh];
     });
@@ -105,7 +133,16 @@
     {
         return @"(nil)";
     }
-    return _accounts[row - 1].username;
+    
+    MSALAccount *rowAccount = _accounts[row - 1];
+    NSString *title = rowAccount.username;
+    
+    if ([rowAccount.username isEqualToString:_currentAccount.username])
+    {
+        title = [title stringByAppendingString:@" (current)"];
+    }
+    
+    return title;
 }
 
 - (NSString *)subLabelForRow:(NSInteger)row

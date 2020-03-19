@@ -43,7 +43,7 @@
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(NSZone *)zone
+- (id)copyWithZone:(__unused NSZone *)zone
 {
     MSALExtraQueryParameters *params = [MSALExtraQueryParameters new];
     params->_extraTokenURLParameters = [_extraTokenURLParameters mutableCopy];

@@ -30,7 +30,6 @@
 
 @class MSIDAccountIdentifier;
 @class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
 @class MSIDAccount;
 @class MSALAccountId;
 @class MSIDIdTokenClaims;

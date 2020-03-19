@@ -60,7 +60,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorRedirectSchemeNotRegistered): @(MSALInternalErrorRedirectSchemeNotRegistered),
 
                                    // Cache
-                                   @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
+                                   @(MSIDErrorCacheMultipleUsers) : @(MSALInternalErrorAmbiguousAccount),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALInternalErrorFailedAuthorityValidation),
@@ -89,6 +89,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorBrokerUnknown): @(MSALInternalErrorBrokerUnknown),
                                    @(MSIDErrorBrokerApplicationTokenReadFailed): @(MSALInternalErrorBrokerApplicationTokenReadFailed),
                                    @(MSIDErrorBrokerApplicationTokenWriteFailed): @(MSALInternalErrorBrokerApplicationTokenWriteFailed),
+                                   @(MSIDErrorBrokerNotAvailable) : @(MSALInternalBrokerNotAvailable),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
@@ -152,7 +153,7 @@ static NSSet *s_recoverableErrorCode;
                   oauthError:(NSString *)oauthError
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
+               correlationId:(__unused NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
@@ -199,14 +200,11 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
-    msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
-    msalUserInfo[MSALOAuthErrorKey] = oauthError;
-    msalUserInfo[MSALOAuthSubErrorKey] = subError;
+    if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
+    if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
+    if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
     
-    if (underlyingError)
-    {
-        msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
-    }
+    if (underlyingError) msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
     
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 

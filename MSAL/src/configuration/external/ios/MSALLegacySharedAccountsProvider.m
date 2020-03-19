@@ -147,7 +147,7 @@
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                          withParameters:(MSALAccountEnumerationParameters *)parameters
-                                                                  error:(NSError **)error
+                                                                  error:(__unused NSError **)error
 {
     NSMutableArray *resultAccounts = [NSMutableArray new];
     
@@ -180,7 +180,7 @@
 
 #pragma mark - Update
 
-- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
+- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
     

@@ -45,7 +45,7 @@
 #import "NSString+MSALTestUtil.h"
 
 #import "MSIDWebviewAuthorization.h"
-#import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebAADAuthCodeResponse.h"
 
 #import "MSALResult.h"
 #import "MSALAccount.h"
@@ -72,7 +72,6 @@
 
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -80,7 +79,6 @@
 {
     [super tearDown];
 
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -123,13 +121,13 @@
     __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
 
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                     context:nil error:nil];    
          completionHandler(oauthResponse, nil);
      }];

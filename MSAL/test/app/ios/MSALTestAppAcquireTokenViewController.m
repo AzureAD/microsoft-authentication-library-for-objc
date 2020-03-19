@@ -57,6 +57,7 @@
 @property (nonatomic) IBOutlet UIButton *profileButton;
 @property (nonatomic) IBOutlet UIButton *authorityButton;
 @property (nonatomic) IBOutlet UISegmentedControl *validateAuthoritySegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *instanceAwareSegmentControl;
 @property (nonatomic) IBOutlet UITextField *loginHintTextField;
 @property (nonatomic) IBOutlet UITextField *extraQueryParamsTextField;
 @property (nonatomic) IBOutlet UIButton *userButton;
@@ -132,6 +133,7 @@
     
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
+    self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
     
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
@@ -147,19 +149,15 @@
     
 }
 
-#pragma mark - IBAction
+#pragma mark - Helper
 
-- (IBAction)onAcquireTokenInteractiveButtonTapped:(id)sender
+- (MSALPublicClientApplication *)msalTestPublicClientApplication
 {
-    (void)sender;
-    
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
-    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
-    
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
@@ -168,6 +166,8 @@
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
     
+    pcaConfig.multipleCloudsSupported = self.instanceAwareSegmentControl.selectedSegmentIndex == 0;
+    
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
@@ -175,22 +175,123 @@
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [self.resultTextView setText:resultText];
+        return nil;
+    }
+    
+    return application;
+}
+
+- (MSALWebviewParameters *)msalTestWebViewParameters
+{
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
+    webviewParameters.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    
+    if (webviewParameters.webviewType == MSALWebviewTypeWKWebView
+        && self.customWebviewTypeSegmentControl.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
+    {
+        webviewParameters.customWebview = self.customWebview;
+        self.customWebviewContainer.hidden = NO;
+    }
+    
+    if (@available(iOS 13.0, *))
+    {
+        webviewParameters.parentViewController = self;
+        webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
+    }
+    
+    return webviewParameters;
+}
+
+- (BOOL)checkAccountSelected
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    if (!settings.currentAccount)
+    {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                       message:@"User needs to be selected for acquire token silent call"
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)showCompletionBlockHitMultipleTimesAlert
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                       message:@"Completion block was hit multiple times!"
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
+}
+
+#pragma mark - IBAction
+
+- (IBAction)onSignoutTapped:(__unused id)sender
+{
+    if (![self checkAccountSelected])
+    {
         return;
     }
     
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+    
+    if (!application)
+    {
+        return;
+    }
+    
+    __block BOOL fBlockHit = NO;
+    
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:[self msalTestWebViewParameters]];
+    
+    [application signoutWithAccount:settings.currentAccount
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        if (fBlockHit)
+        {
+            [self showCompletionBlockHitMultipleTimesAlert];
+            return;
+        }
+        
+        fBlockHit = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (!success)
+            {
+                [self updateResultViewError:error];
+            }
+            else
+            {
+                NSString *successText = [NSString stringWithFormat:@"Signout succeeded for user %@", settings.currentAccount.username];
+                self.resultTextView.text = successText;
+            }
+        });
+    }];
+}
+
+- (IBAction)onAcquireTokenInteractiveButtonTapped:(__unused id)sender
+{
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+    
+    if (!application)
+    {
+        return;
+    }
+        
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
         
         if (fBlockHit)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                               message:@"Completion block was hit multiple times!"
-                                                                        preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                [self presentViewController:alert animated:YES completion:nil];
-            });
-            
+            [self showCompletionBlockHitMultipleTimesAlert];
             return;
         }
         
@@ -212,71 +313,34 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
-
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
-    webviewParameters.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     
-    if (webviewParameters.webviewType == MSALWebviewTypeWKWebView
-        && self.customWebviewTypeSegmentControl.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
-    {
-        webviewParameters.customWebview = self.customWebview;
-        self.customWebviewContainer.hidden = NO;
-    }
-    
-    if (@available(iOS 13.0, *))
-    {
-        webviewParameters.parentViewController = self;
-        webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
-    }
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
-                                                                                      webviewParameters:webviewParameters];
+                                                                                      webviewParameters:[self msalTestWebViewParameters]];
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptTypeValue];
-    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
-- (IBAction)onAcquireTokenSilentButtonTapped:(id)sender
+- (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
 {
-    (void)sender;
-    
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    
-    if (!settings.currentAccount)
+    if (![self checkAccountSelected])
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                       message:@"User needs to be selected for acquire token silent call"
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-        [self presentViewController:alert animated:YES completion:nil];
         return;
     }
     
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    __auto_type authority = [settings authority];
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
     
-    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri
-                                                                                                     authority:authority];
-    
-    if (self.validateAuthoritySegmentControl.selectedSegmentIndex == 1)
-    {
-        pcaConfig.knownAuthorities = @[pcaConfig.authority];
-    }
-    
-    NSError *error;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)
     {
-        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultTextView setText:resultText];
         return;
     }
+    
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     __auto_type scopes = [settings.scopes allObjects];
     __auto_type account = settings.currentAccount;
@@ -288,15 +352,7 @@
     {
         if (fBlockHit)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.acquireSilentButton.enabled = YES;
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                               message:@"Completion block was hit multiple times!"
-                                                                        preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                [self presentViewController:alert animated:YES completion:nil];
-            });
-            
+            [self showCompletionBlockHitMultipleTimesAlert];
             return;
         }
         
