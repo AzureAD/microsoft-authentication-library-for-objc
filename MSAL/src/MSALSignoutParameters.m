@@ -36,7 +36,7 @@
     if (self)
     {
         _webviewParameters = [webviewParameters copy];
-        _signoutFromBrowser = YES;
+        _signoutFromBrowser = NO;
     }
     return self;
 }
