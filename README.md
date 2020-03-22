@@ -432,9 +432,7 @@ MSALAccount *account = ... /* account retrieved above */;
 MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webViewParameters];
 signoutParameters.signoutFromBrowser = NO;
         
-[application signoutWithAccount:account
-							signoutParameters:signoutParameters
-								completionBlock:^(BOOL success, NSError * _Nullable error)
+[application signoutWithAccount:account signoutParameters:signoutParameters completionBlock:^(BOOL success, NSError * _Nullable error)
 {
 	if (!success)
 	{
