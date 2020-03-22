@@ -348,8 +348,8 @@ msalParameters.completionBlockQueue = DispatchQueue.main
                 
 application.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
             
-		// currentAccount is the currently signed in account
-		// previousAccount is the previously signed in account if any
+	// currentAccount is the currently signed in account
+	// previousAccount is the previously signed in account if any
 })
 ```
 
@@ -362,8 +362,8 @@ parameters.completionBlockQueue = dispatch_get_main_queue();
 [application getCurrentAccountWithParameters:parameters
                              completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error)
 {
-		// currentAccount is the currently signed in account
-		// previousAccount is the previously signed in account if any
+	// currentAccount is the currently signed in account
+	// previousAccount is the previously signed in account if any
 }];
 ```
 
@@ -376,12 +376,12 @@ Use following code to read current device configuration, including whether devic
 ```swift
 application.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
                 
-		guard let deviceInfo = deviceInformation else {
-				return
-		}
+	guard let deviceInfo = deviceInformation else {
+		return
+	}
                 
-		let isSharedDevice = deviceInfo.deviceMode == .shared
-		// Change your app UX if needed
+	let isSharedDevice = deviceInfo.deviceMode == .shared
+	// Change your app UX if needed
 })
 ```
 
@@ -391,13 +391,13 @@ application.getDeviceInformation(with: nil, completionBlock: { (deviceInformatio
 [application getDeviceInformationWithParameters:nil
                                 completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
 {
-		if (!deviceInformation)
-		{
-				return;
-		}
+	if (!deviceInformation)
+	{
+		return;
+	}
             
-		BOOL isSharedDevice = deviceInformation.deviceMode == MSALDeviceModeShared;
-		// Change your app UX if needed
+	BOOL isSharedDevice = deviceInformation.deviceMode == MSALDeviceModeShared;
+	// Change your app UX if needed
 }];
 ```
 
@@ -415,12 +415,12 @@ signoutParameters.signoutFromBrowser = false
             
 application.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
                 
-		if let error = error {
-				// Signout failed
-				return
-		}
+	if let error = error {
+		// Signout failed
+		return
+	}
                 
-		// Sign out completed successfully
+	// Sign out completed successfully
 })
 ```
 
@@ -436,13 +436,13 @@ signoutParameters.signoutFromBrowser = NO;
 							signoutParameters:signoutParameters
 								completionBlock:^(BOOL success, NSError * _Nullable error)
 {
-		if (!success)
-		{
-				// Signout failed
-				return;
-		}
+	if (!success)
+	{
+		// Signout failed
+		return;
+	}
             
-		// Sign out completed successfully
+	// Sign out completed successfully
 }];
 ```
 
