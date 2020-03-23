@@ -39,6 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
 */
 @property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
+/**
+ Additional device information
+*/
+@property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
+
 @end
 
 NS_ASSUME_NONNULL_END
