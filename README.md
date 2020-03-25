@@ -334,11 +334,11 @@ Occasionally user interaction will be required to get a new access token, when t
 
 For more information, please see [MSAL error handling guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-handling-exceptions).
 
-### Retrieving current account
+### Single Account Mode
 
-If your app needs to support just one signed-in user at a time, MSAL provides a simpler way to read currently signed in account. This API should be also used when you are building an application to run on devices that are configured as shared devices - meaning that a single corporate device is shared between multiple employees. Employees can sign in to their devices and access customer information quickly. When they are finished with their shift or task, they will be able to sign-out of all apps on the shared device.
+If your app needs to support just one signed-in user at a time, MSAL provides a simple way to read the signed in account. This API must be also used when you are building an application to run on devices that are configured as shared devices - meaning that a single corporate device is shared between multiple employees. Employees can sign in to their devices and access customer information quickly. When they are finished with their shift or task, they will be able to sign-out of all apps on the shared device.
 
-Here is a code snippet that shows how you can retrieve current account. You can call API every time when your app comes to foreground or before performing a sensitive operation to detect any signed-in account changes. 
+Here is a code snippet that shows how you can retrieve current account. You must call API every time when your app comes to foreground or before performing a sensitive operation to detect any signed-in account changes. 
 
 #### Swift
 
