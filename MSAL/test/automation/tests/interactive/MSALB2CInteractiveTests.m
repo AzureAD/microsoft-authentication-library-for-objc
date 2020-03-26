@@ -85,16 +85,14 @@
 
 - (NSString *)runSharedB2CMSALoginWithRequest:(MSIDAutomationTestRequest *)request
                               closeResultView:(BOOL)closeResultView
+                          shouldEnterPassword:(BOOL)shouldEnterPassword
 {
     if (!request.loginHint && !request.homeAccountIdentifier)
     {
         [self aadEnterEmail];
     }
 
-    [self aadEnterPassword];
-    
-    // Keep me signed in
-    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:request.usesEmbeddedWebView];
+    if (shouldEnterPassword) [self aadEnterPassword];
     
     // Consent
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
@@ -130,7 +128,7 @@
     [self runSharedB2CLoginStartWithTestRequest:request];
 
     // 2. Sign in with MSA
-    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO];
+    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
     
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
@@ -164,18 +162,19 @@
     [self runSharedB2CLoginStartWithTestRequest:request];
 
     // 2. Sign in with MSA
-    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO];
+    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
     
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
     NSString *homeTenantId = result.userInformation.tenantId;
     
     [self closeResultView];
+    [self clearCookies];
         
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     request.usePassedWebView = YES;
     [self runSharedB2CLoginStartWithTestRequest:request];
-    NSString *homeAccountId2 = [self runSharedB2CMSALoginWithRequest:request closeResultView:YES];
+    NSString *homeAccountId2 = [self runSharedB2CMSALoginWithRequest:request closeResultView:YES shouldEnterPassword:YES];
     XCTAssertEqualObjects(homeAccountId, homeAccountId2);
 }
 
@@ -194,7 +193,7 @@
     [self runSharedB2CLoginStartWithTestRequest:request];
 
     // 2. Sign in with MSA
-    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO];
+    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
     
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
@@ -228,7 +227,7 @@
     [self runSharedB2CLoginStartWithTestRequest:request];
 
     // 2. Sign in with MSA
-    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO];
+    NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
     
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];

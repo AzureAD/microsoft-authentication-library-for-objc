@@ -668,6 +668,7 @@
 		B2E2A9432393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */; };
 		B2E2A94A2393192400BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = B2E2A9402393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.h */; };
 		B2E2A94C2393192700BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */; };
+		B2E2B0A124231B130059F8B9 /* MSALB2CInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45744211E41C100818910 /* MSALB2CInteractiveTests.m */; };
 		B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */; };
 		B2F45738211D376F00818910 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
@@ -3578,6 +3579,7 @@
 				D61A64AA1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m in Sources */,
 				D61A64AB1E5AABC50086D120 /* MSALTestAppCacheViewController.m in Sources */,
 				1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */,
+				B2E2B0A124231B130059F8B9 /* MSALB2CInteractiveTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
