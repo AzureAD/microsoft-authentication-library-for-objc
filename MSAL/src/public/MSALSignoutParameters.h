@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
   Specifies whether signout should also open the browser and send a network request to the end_session_endpoint.
-  YES by default.
+  NO by default.
  */
 @property (nonatomic) BOOL signoutFromBrowser;
 
