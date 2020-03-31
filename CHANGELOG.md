@@ -1,4 +1,15 @@
+## [1.1.1] - 2020-03-27
+
+### Fixed
+* Fixed macOS cache on 10.15 when App Identifier Prefix is different from TeamId
+* Remove SHA-1 dependency from production library
+* Fixed SSO extension + MSIT MFA
+* Fixed SSO extension swipe down cancellation case
+* Handle http headers coming from iOS broker when it is either a NSDictionary or NSString
+* Updated readme to include information about Microsoft Enterprise SSO plug-in for Apple devices and shared device scenarios (#881)
+
 ## [1.1.0] - 2020-03-20
+
 ### Added
 - iOS 13 SSO Extension support
 - Support ASWebAuthenticationSession on macOS 10.15
