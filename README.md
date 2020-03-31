@@ -334,6 +334,128 @@ Occasionally user interaction will be required to get a new access token, when t
 
 For more information, please see [MSAL error handling guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-handling-exceptions).
 
+### Microsoft Enterprise SSO plug-in for Apple devices
+
+Microsoft has recently released a new plug-in that uses the newly announced Apple feature called [Enterprise Single Sign-On](https://developer.apple.com/documentation/authenticationservices). Microsoft Enterprise SSO plug-in for Apple devices offers the following benefits: 
+
+* Comes delivered in Microsoft Authenticator app automatically and can be enabled by any MDM.
+* Provides seamless SSO for Active Directory joined accounts across all applications that support Apple's Enterprise Single Sign-On feature.
+* COMING SOON: Provides seamless SSO across Safari browsers and applications on the device.
+
+MSAL 1.1.0 and above will use Microsoft Enterprise SSO plug-in automatically instead of the Microsoft Authenticator app when it is active on the device. To use Microsoft Enterprise SSO plug-in in your tenant, you need to enable it in your MDM profile. 
+
+See [more information](https://docs.microsoft.com/en-us/azure/active-directory/develop/apple-sso-plugin) about configuring Microsoft Enterprise SSO plug-in for your device [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/apple-sso-plugin)
+
+### Single Account Mode
+
+If your app needs to support just one signed-in user at a time, MSAL provides a simple way to read the signed in account. This API must be also used when you are building an application to run on devices that are configured as shared devices - meaning that a single corporate device is shared between multiple employees. Employees can sign in to their devices and access customer information quickly. When they are finished with their shift or task, they will be able to sign-out of all apps on the shared device.
+
+Here is a code snippet that shows how you can retrieve current account. You must call API every time when your app comes to foreground or before performing a sensitive operation to detect any signed-in account changes. 
+
+#### Swift
+
+```swift
+let msalParameters = MSALParameters()
+msalParameters.completionBlockQueue = DispatchQueue.main
+                
+application.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
+            
+	// currentAccount is the currently signed in account
+	// previousAccount is the previously signed in account if any
+})
+```
+
+#### Objective-C
+
+```objective-c
+MSALParameters *parameters = [MSALParameters new];
+parameters.completionBlockQueue = dispatch_get_main_queue();
+        
+[application getCurrentAccountWithParameters:parameters
+                             completionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error)
+{
+	// currentAccount is the currently signed in account
+	// previousAccount is the previously signed in account if any
+}];
+```
+
+### Detect shared device mode
+
+Use following code to read current device configuration, including whether device is configured as shared:
+
+#### Swift
+
+```swift
+application.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
+                
+	guard let deviceInfo = deviceInformation else {
+		return
+	}
+                
+	let isSharedDevice = deviceInfo.deviceMode == .shared
+	// Change your app UX if needed
+})
+```
+
+#### Objective-C
+
+```objective-c
+[application getDeviceInformationWithParameters:nil
+                                completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+{
+	if (!deviceInformation)
+	{
+		return;
+	}
+            
+	BOOL isSharedDevice = deviceInformation.deviceMode == MSALDeviceModeShared;
+	// Change your app UX if needed
+}];
+```
+
+### Implement signout
+
+To signout account from your app, call MSAL's signout API. You can also optionally sign out from the browser. When MSAL is running on a shared device, signout API will signout globally from all apps on user's device.
+
+#### Swift
+
+```swift
+let account = .... /* account retrieved above */
+
+let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!)
+signoutParameters.signoutFromBrowser = false
+            
+application.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
+                
+	if let error = error {
+		// Signout failed
+		return
+	}
+                
+	// Sign out completed successfully
+})
+```
+
+#### Objective-C
+
+```objective-c
+MSALAccount *account = ... /* account retrieved above */;
+        
+MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webViewParameters];
+signoutParameters.signoutFromBrowser = NO;
+        
+[application signoutWithAccount:account signoutParameters:signoutParameters completionBlock:^(BOOL success, NSError * _Nullable error)
+{
+	if (!success)
+	{
+		// Signout failed
+		return;
+	}
+            
+	// Sign out completed successfully
+}];
+```
+
 ## Supported Versions
 
 **iOS** - MSAL supports iOS 10 and above.
