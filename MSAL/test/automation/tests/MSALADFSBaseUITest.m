@@ -45,7 +45,8 @@
         [self aadEnterEmail];
     }
 
-    [self enterADFSPassword];
+    sleep(1);
+    [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
     
     if (!request.usesEmbeddedWebView)
@@ -65,7 +66,8 @@
 
 - (void)enterADFSPassword
 {
-    XCUIElement *passwordTextField = self.testApp.secureTextFields[@"Password"];
+    XCUIElement *passwordTextField = self.testApp.secureTextFields.firstMatch;
+        
     [self waitForElement:passwordTextField];
     [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];

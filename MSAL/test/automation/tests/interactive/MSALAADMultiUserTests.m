@@ -28,6 +28,7 @@
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
 #import "NSString+MSIDAutomationUtils.h"
+#import "MSIDAutomationTemporaryAccountRequest.h"
 
 @interface MSALAADMultiUserTests : MSALBaseAADUITest
 
@@ -45,28 +46,33 @@
     
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
-    // Load multiple accounts conf
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.needsMultipleUsers = YES;
-    // TODO: no other app returns multiple accounts
-    configurationRequest.appName = @"IDLABSAPP";
-    [self loadTestConfiguration:configurationRequest];
-
-    XCTAssertTrue([self.testConfiguration.accounts count] >= 2);
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = self.testEnvironment;
+    
+    MSIDTestAutomationAccountConfigurationRequest *secondAccountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    secondAccountConfigurationRequest.environmentType = self.testEnvironment;
+    secondAccountConfigurationRequest.protectionPolicyType = MSIDTestAccountProtectionPolicyTypeMAMCASPO;
+    
+    [self loadTestAccounts:@[accountConfigurationRequest, secondAccountConfigurationRequest]];
 }
 
 #pragma mark - Different accounts
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andMultipleAccounts
 {
-    MSIDTestAccount *firstAccount = self.testConfiguration.accounts[0];
-    MSIDTestAccount *secondaryAccount = self.testConfiguration.accounts[1];
+    MSIDTestAutomationAccount *firstAccount = self.testAccounts[0];
+    MSIDTestAutomationAccount *secondaryAccount = self.testAccounts[1];
 
     // 1. Sign in with first account
     self.primaryAccount = firstAccount;
 
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -78,9 +84,8 @@
 
     // 2. Sign in with second account
     self.primaryAccount = secondaryAccount;
-    [self loadPasswordForAccount:self.primaryAccount];
 
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.upn;
     request.testAccount = self.primaryAccount;
 
     NSString *secondHomeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -115,7 +120,7 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -138,8 +143,7 @@
     
     [self selectAccountWithTitle:@"Use another account"];
 
-    self.primaryAccount = self.testConfiguration.accounts[1];
-    [self loadPasswordForAccount:self.primaryAccount];
+    self.primaryAccount = self.testAccounts[1];
     [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
