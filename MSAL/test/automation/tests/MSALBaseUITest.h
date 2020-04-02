@@ -24,19 +24,23 @@
 #import <XCTest/XCTest.h>
 #import "MSIDTestConfigurationProvider.h"
 #import "XCUIElement+MSALiOSUITests.h"
-#import "MSIDTestAutomationConfiguration.h"
-#import "MSIDAutomationConfigurationRequest.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSIDAutomationSuccessResult.h"
 #import "MSIDAutomationAccountsResult.h"
+#import "MSIDTestAutomationAppConfigurationRequest.h"
+#import "MSIDTestAutomationApplication.h"
+#import "MSIDTestAutomationAccountConfigurationRequest.h"
+#import "MSIDTestAutomationAccount.h"
 
 @interface MSALBaseUITest : XCTestCase
 
 @property (nonatomic) XCUIApplication *testApp;
 @property (nonatomic, class) MSIDTestConfigurationProvider *confProvider;
-@property (nonatomic) MSIDTestAccount *primaryAccount;
-@property (nonatomic) MSIDTestAutomationConfiguration *testConfiguration;
+@property (nonatomic) NSArray *testAccounts;
+@property (nonatomic) MSIDTestAutomationAccount *primaryAccount;
+@property (nonatomic) MSIDTestAutomationApplication *testApplication;
+@property (nonatomic) NSString *redirectUriPrefix;
 
 // Common checks/assertions
 - (void)assertRefreshTokenInvalidated;
@@ -77,8 +81,6 @@
 - (void)readAccounts:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
-- (void)loadTestConfiguration:(MSIDAutomationConfigurationRequest *)request;
-- (void)loadPasswordForAccount:(MSIDTestAccount *)account;
 
 - (MSIDAutomationErrorResult *)automationErrorResult;
 - (MSIDAutomationSuccessResult *)automationSuccessResult;
@@ -88,5 +90,11 @@
 - (NSDictionary *)automationResultDictionary;
 - (void)performAction:(NSString *)action
            withConfig:(NSDictionary *)config;
+
+
+// New lab APIs
+- (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest;
+- (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest;
+- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests;
 
 @end

@@ -42,23 +42,28 @@
     
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
-    // Load multiple accounts conf
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.needsMultipleUsers = YES;
-    // TODO: no other app returns multiple accounts
-    configurationRequest.appName = @"IDLABSAPP";
-    [self loadTestConfiguration:configurationRequest];
-
-    XCTAssertTrue([self.testConfiguration.accounts count] >= 2);
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = self.testEnvironment;
+    
+    MSIDTestAutomationAccountConfigurationRequest *secondAccountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    secondAccountConfigurationRequest.environmentType = self.testEnvironment;
+    secondAccountConfigurationRequest.protectionPolicyType = MSIDTestAccountProtectionPolicyTypeMAMCASPO;
+    
+    [self loadTestAccounts:@[accountConfigurationRequest, secondAccountConfigurationRequest]];
 }
 
 - (void)testRemoveAADAccount_whenOnlyOneAccountInCache_andConvergedApp
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.upn;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -78,12 +83,12 @@
 
 - (void)testRemoveAADAccount_whenMultipleAccountsInCache_andConvergedApp
 {
-    MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     firstRequest.promptBehavior = @"force";
     firstRequest.testAccount = self.primaryAccount;
     firstRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     firstRequest.expectedResultScopes = firstRequest.requestScopes;
-    firstRequest.loginHint = self.primaryAccount.account;
+    firstRequest.loginHint = self.primaryAccount.upn;
     firstRequest.testAccount = self.primaryAccount;
     firstRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     firstRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -92,15 +97,14 @@
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:firstRequest];
     XCTAssertNotNil(firstHomeAccountId);
 
-    self.primaryAccount = self.testConfiguration.accounts[1];
-    [self loadPasswordForAccount:self.primaryAccount];
+    self.primaryAccount = self.testAccounts[1];
 
-    MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     secondRequest.promptBehavior = @"force";
     secondRequest.testAccount = self.primaryAccount;
     secondRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     secondRequest.expectedResultScopes = secondRequest.requestScopes;
-    secondRequest.loginHint = self.primaryAccount.account;
+    secondRequest.loginHint = self.primaryAccount.upn;
     secondRequest.testAccount = self.primaryAccount;
     secondRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     secondRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -110,7 +114,7 @@
     XCTAssertNotNil(secondHomeAccountId);
 
     // 3. Remove first account
-    self.primaryAccount = self.testConfiguration.accounts[0];
+    self.primaryAccount = self.testAccounts[0];
     firstRequest.homeAccountIdentifier = firstHomeAccountId;
     NSDictionary *config = [self configWithTestRequest:firstRequest];
     [self signout:config];
@@ -123,7 +127,7 @@
     [self closeResultView];
 
     // 5. Expect silent to still work for the second account
-    self.primaryAccount = self.testConfiguration.accounts[1];
+    self.primaryAccount = self.testAccounts[1];
     secondRequest.homeAccountIdentifier = secondHomeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:secondRequest];
 }

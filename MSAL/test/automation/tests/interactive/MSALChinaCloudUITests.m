@@ -29,11 +29,11 @@
 #import "XCUIElement+CrossPlat.h"
 #import "MSALNationalCloudUITest.h"
 
-@interface MSALBlackforestUITests : MSALNationalCloudUITest
+@interface MSALChinaCloudUITests : MSALNationalCloudUITest
 
 @end
 
-@implementation MSALBlackforestUITests
+@implementation MSALChinaCloudUITests
 
 #pragma mark - Setup
 
@@ -43,36 +43,36 @@
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
     appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentGermanCloud;
+    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentChinaCloud;
     
     [self loadTestApp:appConfigurationRequest];
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
-    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeGermanCloud;
+    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeChinaCloud;
     
     [self loadTestAccount:accountConfigurationRequest];
     
-    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeGermanCloud;
+    self.nationalCloudEnvironment = [NSString stringWithFormat:@"%@-instance_aware", MSIDTestAccountEnvironmentTypeChinaCloud];
 }
 
 #pragma mark - Interactive tests
 
-- (void)testInstanceAwareWithNationalCloud_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withChinaCloud
 {
     [self runInstanceAwareTestWithNationalCloud];
 }
 
-- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withChinaCloud
 {
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority];
 }
 
-- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withChinaCloud
 {
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP];
 }
 
-- (void)testNonInstanceAwareWithNationalCloud_withSystemWebView
+- (void)testNonInstanceAwareWithNationalCloud_withSystemWebView_withChinaCloud
 {
     [self runNonInstanceAwareTestWithNationalCloud_withSystemWebView];
 }
