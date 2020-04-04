@@ -52,12 +52,23 @@
     return self;
 }
 
+- (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController
+{
+    self = [super init];
+    if (self)
+    {
+        _parentViewController = parentViewController;
+    }
+    
+    return self;
+}
+
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(__unused NSZone *)zone
 {
     MSALWebviewParameters *item;
-    item = [[MSALWebviewParameters alloc] initWithParentViewController:_parentViewController];
+    item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
     item.parentViewController = _parentViewController;
 
 #if TARGET_OS_IPHONE

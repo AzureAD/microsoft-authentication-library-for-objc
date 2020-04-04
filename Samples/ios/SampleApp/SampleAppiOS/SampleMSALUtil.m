@@ -146,7 +146,7 @@
     // want to use so the service can request consent for them up front and minimize
     // how much users are interrupted for interactive auth.
     
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"User.Read", @"Calendars.Read"] webviewParameters:webParameters];
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
@@ -209,7 +209,7 @@
         return;
     }
     
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
     parameters.account = currentAccount;
     parameters.promptType = MSALPromptTypeDefault;
