@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import "MSALDefinitions.h"
 
 #if TARGET_OS_IPHONE
 typedef UIViewController    MSALViewController;

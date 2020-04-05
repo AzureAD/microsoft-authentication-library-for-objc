@@ -30,6 +30,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSALErrorConverter.h"
 #import "NSURL+MSIDAADUtils.h"
+#import "MSAL_Internal.h"
 
 @implementation MSALAADAuthority
 

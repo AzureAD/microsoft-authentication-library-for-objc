@@ -23,6 +23,7 @@
 
 #import "NSString+MSALAccountIdenfiers.h"
 #import "NSString+MSIDExtensions.h"
+#import "MSAL_Internal.h"
 
 @implementation NSString (MSALAccountIdenfiers)
 

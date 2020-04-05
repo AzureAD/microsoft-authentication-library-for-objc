@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSIDVersion.h"
+#import "MSAL_Internal.h"
 
 @implementation MSIDVersion
 

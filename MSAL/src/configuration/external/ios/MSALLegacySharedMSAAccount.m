@@ -28,6 +28,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "NSString+MSALAccountIdenfiers.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSAL_Internal.h"
 
 static NSString *kMSAAccountType = @"MSA";
 

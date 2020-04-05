@@ -30,6 +30,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSALGlobalConfig.h"
 #import "MSALWebviewType_Internal.h"
+#import "IdentityCore_Internal.h"
 
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 

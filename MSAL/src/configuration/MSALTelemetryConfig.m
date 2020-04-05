@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+#if ENABLE_SPM
+#import "MSAL_Internal.h"
+#endif
 #import "MSALTelemetryConfig+Internal.h"
 #import "MSIDTelemetryEventInterface.h"
 #import "MSIDTelemetry.h"

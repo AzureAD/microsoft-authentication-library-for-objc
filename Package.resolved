@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "IdentityCore",
+        "repositoryURL": "https://github.com/AzureAD/microsoft-authentication-library-common-for-objc.git",
+        "state": {
+          "branch": "oldalton/swift_package_manager_support",
+          "revision": "c2bae74b039780aa6102742b6a7d4be7c00d3d0b",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

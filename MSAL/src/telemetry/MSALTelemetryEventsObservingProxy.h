@@ -23,6 +23,9 @@
 
 #import <Foundation/Foundation.h>
 #import "MSIDTelemetryEventsObserving.h"
+#ifdef ENABLE_SPM
+#import "MSALDefinitions.h"
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
