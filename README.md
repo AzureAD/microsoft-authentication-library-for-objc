@@ -19,7 +19,7 @@ if let application = try? MSALPublicClientApplication(configuration: config) {
             
 	#if os(iOS)
 	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
 	#else
 	let webviewParameters = MSALWebviewParameters()
 	#endif
@@ -55,7 +55,7 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
     
 #if TARGET_OS_IPHONE
     UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:viewController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
 #endif
@@ -226,7 +226,7 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
 ```swift
 #if os(iOS)
 	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
 #else
 	let webviewParameters = MSALWebviewParameters()
 #endif
@@ -250,7 +250,7 @@ application.acquireToken(with: interactiveParameters, completionBlock: { (result
 ```obj-c
 #if TARGET_OS_IPHONE
     UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:viewController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
 #endif 
