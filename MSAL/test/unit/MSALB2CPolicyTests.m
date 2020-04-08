@@ -145,7 +145,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"] webviewParameters:webParameters];
