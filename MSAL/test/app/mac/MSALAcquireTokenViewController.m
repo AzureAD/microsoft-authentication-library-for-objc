@@ -313,7 +313,7 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;
