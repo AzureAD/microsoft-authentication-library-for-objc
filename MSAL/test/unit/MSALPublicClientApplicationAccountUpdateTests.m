@@ -91,9 +91,7 @@
          completionBlock([self testTokenResult], nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
 #if TARGET_OS_IPHONE

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -395,8 +395,6 @@
                                             <constraint firstItem="vM0-VN-Vm6" firstAttribute="leading" secondItem="nD8-Re-oHc" secondAttribute="leading" id="cDt-iA-dlG"/>
                                             <constraint firstAttribute="bottom" secondItem="vM0-VN-Vm6" secondAttribute="bottom" id="zZs-LG-Bg3"/>
                                         </constraints>
-                                        <viewLayoutGuide key="contentLayoutGuide" id="6KV-IQ-yuL"/>
-                                        <viewLayoutGuide key="frameLayoutGuide" id="xsD-MJ-t06"/>
                                     </scrollView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T9E-F1-l3O">
                                         <rect key="frame" x="0.0" y="788" width="414" height="30"/>
