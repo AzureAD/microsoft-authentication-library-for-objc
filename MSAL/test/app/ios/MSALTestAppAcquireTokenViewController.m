@@ -183,7 +183,7 @@
 
 - (MSALWebviewParameters *)msalTestWebViewParameters
 {
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
     webviewParameters.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     
     if (webviewParameters.webviewType == MSALWebviewTypeWKWebView

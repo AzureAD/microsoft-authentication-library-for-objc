@@ -36,8 +36,8 @@
                                             error:(NSError * __autoreleasing *)error
 {
 #if AD_BROKER
-    // Allow the broker app to use a special redirect URI when acquiring tokens
-    if ([customRedirectUri isEqualToString:MSID_AUTHENTICATOR_REDIRECT_URI])
+    // Allow the broker app to use any non-empty redirect URI when acquiring tokens
+    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
     {
         return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
                                               brokerCapable:YES];
