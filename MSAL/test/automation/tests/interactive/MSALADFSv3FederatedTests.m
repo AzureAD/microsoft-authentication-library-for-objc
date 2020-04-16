@@ -43,10 +43,18 @@
     
     self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderADfsv3;
-    configurationRequest.appVersion = MSIDAppVersionV1;
-    [self loadTestConfiguration:configurationRequest];
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = self.testEnvironment;
+    accountConfigurationRequest.accountType = MSIDTestAccountTypeFederated;
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeADFSV3;
+    
+    [self loadTestAccount:accountConfigurationRequest];
 }
 
 #pragma mark - Tests
@@ -54,7 +62,7 @@
 // #290995 iteration 11
 - (void)testInteractiveADFSv3Login_withPromptAlways_noLoginHint_andSystemWebView
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -73,14 +81,14 @@
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andSafariViewController
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
-    request.loginHint = self.primaryAccount.username;
+    request.loginHint = self.primaryAccount.upn;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
@@ -89,14 +97,14 @@
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andEmbeddedWebView
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.loginHint = self.primaryAccount.username;
+    request.loginHint = self.primaryAccount.upn;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];

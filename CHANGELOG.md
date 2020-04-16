@@ -1,3 +1,11 @@
+## [1.1.2] - 2020-04-17
+
+### Added
+* Support SSO in Safari in AAD SSO extension
+* Additional automation tests for AAD national cloud scenarios 
+* Convert access denied error to cancelled on MSAL side (#894)
+* Resolved conflict between initWithParentController API on App Store upload (#893)
+
 ## [1.1.1] - 2020-03-27
 
 ### Fixed

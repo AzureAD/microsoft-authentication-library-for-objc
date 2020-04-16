@@ -25,19 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       1
-#define MSAL_VER_LOW        1
-#define MSAL_VER_PATCH      2
+#import "MSALBaseAADUITest.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+NS_ASSUME_NONNULL_BEGIN
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+@interface MSALNationalCloudUITest : MSALBaseAADUITest
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+@property (nonatomic) NSString *nationalCloudEnvironment;
+
+- (void)runInstanceAwareTestWithNationalCloud;
+- (void)runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority;
+- (void)runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP;
+- (void)runNonInstanceAwareTestWithNationalCloud_withSystemWebView;
+
+@end
+
+NS_ASSUME_NONNULL_END

@@ -52,7 +52,7 @@
     __auto_type emailTextField = brokerApp.tables.textFields[@"Organization email"];
     [self waitForElement:emailTextField];
     [self tapElementAndWaitForKeyboardToAppear:emailTextField app:brokerApp];
-    [emailTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account]];
+    [emailTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn]];
 
     __auto_type registerButton = brokerApp.tables.buttons[@"Register device"];
     [registerButton tap];

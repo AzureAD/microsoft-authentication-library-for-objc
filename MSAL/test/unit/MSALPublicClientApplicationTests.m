@@ -512,7 +512,7 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     params.parentViewController = [self.class sharedViewControllerStub];
 #else
@@ -559,7 +559,7 @@
     MSALInteractiveTokenParameters *params = nil;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
@@ -603,7 +603,7 @@
         controller = [UIViewController new];
     });
     
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     params.parentViewController = controller;
     params.parentViewController.view = nil;
@@ -645,7 +645,7 @@
         MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
         
         UIViewController *controller = nil;
-        MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+        MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
         params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"] webviewParameters:webParams];
         params.parentViewController = [self.class sharedViewControllerStub];
     #else
@@ -774,7 +774,7 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
 #else
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
@@ -1029,7 +1029,7 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
@@ -1097,7 +1097,7 @@
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
@@ -1240,7 +1240,7 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
@@ -1317,7 +1317,7 @@
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
 #else
     MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
@@ -2819,7 +2819,7 @@
     XCTAssertNil(error);
     
 #if TARGET_OS_IPHONE
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
 #else
     MSALWebviewParameters *webParams = [MSALWebviewParameters new];
 #endif
@@ -2863,7 +2863,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     parameters.signoutFromBrowser = NO;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
@@ -2905,7 +2905,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     parameters.signoutFromBrowser = YES;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;

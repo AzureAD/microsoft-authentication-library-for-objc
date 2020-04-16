@@ -29,11 +29,11 @@
 #import "XCUIElement+CrossPlat.h"
 #import "MSALNationalCloudUITest.h"
 
-@interface MSALBlackforestUITests : MSALNationalCloudUITest
+@interface MSALUSGovUITests : MSALNationalCloudUITest
 
 @end
 
-@implementation MSALBlackforestUITests
+@implementation MSALUSGovUITests
 
 #pragma mark - Setup
 
@@ -43,36 +43,36 @@
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
     appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentGermanCloud;
+    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentUSGovCloud;
     
     [self loadTestApp:appConfigurationRequest];
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
-    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeGermanCloud;
+    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeUSGovCloud;
     
     [self loadTestAccount:accountConfigurationRequest];
     
-    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeGermanCloud;
+    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeUSGovCloud;
 }
 
 #pragma mark - Interactive tests
 
-- (void)testInstanceAwareWithNationalCloud_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withArlingtonCloud
 {
     [self runInstanceAwareTestWithNationalCloud];
 }
 
-- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withArlingtonCloud
 {
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority];
 }
 
-- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withBlackForest
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withArlingtonCloud
 {
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP];
 }
 
-- (void)testNonInstanceAwareWithNationalCloud_withSystemWebView
+- (void)testNonInstanceAwareWithNationalCloud_withSystemWebView_withArlingtonCloud
 {
     [self runNonInstanceAwareTestWithNationalCloud_withSystemWebView];
 }

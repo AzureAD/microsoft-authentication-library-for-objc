@@ -130,7 +130,7 @@ extension SampleMSALAuthentication {
         do {
             let clientApplication = try createClientApplication()
             
-            let webParameters = MSALWebviewParameters(parentViewController: parentController)
+            let webParameters = MSALWebviewParameters(authPresentationViewController: parentController)
             let parameters = MSALInteractiveTokenParameters(scopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue], webviewParameters: webParameters)
             clientApplication.acquireToken(with: parameters) {
                 (result: MSALResult?, error: Error?) in
@@ -185,7 +185,7 @@ extension SampleMSALAuthentication {
             let application = try createClientApplication()
             let account = try currentAccount()
             
-            let webParameters = MSALWebviewParameters(parentViewController: parentController)
+            let webParameters = MSALWebviewParameters(authPresentationViewController: parentController)
             let parameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webParameters)
             parameters.account = account
             parameters.promptType = .default

@@ -44,9 +44,17 @@
 
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderPing;
-    [self loadTestConfiguration:configurationRequest];
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypePing;
+    accountConfigurationRequest.accountType = MSIDTestAccountTypeFederated;
+    
+    [self loadTestAccount:accountConfigurationRequest];
 }
 
 #pragma mark - Shared
@@ -88,7 +96,7 @@
 // #290995 iteration 9
 - (void)testInteractivePingLogin_withNonConvergedApp_withPromptAlways_noLoginHint_andEmbeddedWebView
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -111,7 +119,7 @@
 // #290995 iteration 10
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andSystemWebView
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
@@ -124,7 +132,7 @@
 
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
@@ -142,15 +150,17 @@
 {
     XCUIElement *usernameTextField = [self.testApp.textFields elementBoundByIndex:0];
     [self waitForElement:usernameTextField];
+    [usernameTextField msidTap];
     [self tapElementAndWaitForKeyboardToAppear:usernameTextField];
     [usernameTextField activateTextField];
-    [usernameTextField typeText:self.primaryAccount.username];
+    [usernameTextField typeText:self.primaryAccount.domainUsername];
 }
 
 - (void)pingEnterPassword
 {
     XCUIElement *passwordTextField = [self.testApp.secureTextFields elementBoundByIndex:0];
     [self waitForElement:passwordTextField];
+    [passwordTextField msidTap];
     [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
     [passwordTextField activateTextField];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];

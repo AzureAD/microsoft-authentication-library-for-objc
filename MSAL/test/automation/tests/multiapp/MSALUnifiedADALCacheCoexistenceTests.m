@@ -51,9 +51,16 @@ static BOOL adalAppInstalled = NO;
         [self closeResultView];
     }
 
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    [self loadTestConfiguration:configurationRequest];
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = self.testEnvironment;
+    
+    [self loadTestAccount:accountConfigurationRequest];
 }
 
 #pragma mark - Tests
@@ -63,7 +70,7 @@ static BOOL adalAppInstalled = NO;
     // 1. Install previous ADAL version and signin
     self.testApp = [self adalUnifiedApp];
     
-    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     adalRequest.promptBehavior = @"always";
     adalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
 
@@ -80,9 +87,9 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
     
-    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     msalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
-    msalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    msalRequest.legacyAccountIdentifier = self.primaryAccount.upn;
     msalRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     msalRequest.expectedResultScopes = msalRequest.requestScopes;
     
@@ -92,7 +99,7 @@ static BOOL adalAppInstalled = NO;
     XCTAssertNotNil(legacyAccountsResult);
     XCTAssertEqual(legacyAccountsResult.accounts.count, 1);
     MSIDAutomationUserInformation *firstAccount = legacyAccountsResult.accounts[0];
-    XCTAssertEqualObjects(firstAccount.username, self.primaryAccount.account);
+    XCTAssertEqualObjects(firstAccount.username, self.primaryAccount.upn);
     [self closeResultView];
 
     // 4. Run silent tests
@@ -104,12 +111,12 @@ static BOOL adalAppInstalled = NO;
     XCTAssertNotNil(msalAccountsResult);
     XCTAssertEqual(msalAccountsResult.accounts.count, 1);
     MSIDAutomationUserInformation *firstMSALAccount = msalAccountsResult.accounts[0];
-    XCTAssertEqualObjects(firstMSALAccount.username, self.primaryAccount.account);
+    XCTAssertEqualObjects(firstMSALAccount.username, self.primaryAccount.upn);
     XCTAssertEqualObjects(firstMSALAccount.homeAccountId, self.primaryAccount.homeAccountId);
     [self closeResultView];
     
     // 6. Switch back to ADAL and make sure ADAL still works
-    adalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    adalRequest.legacyAccountIdentifier = self.primaryAccount.upn;
     adalRequest.cacheAuthority = adalRequest.configurationAuthority;
     NSDictionary *adalSilentConfig = [self configWithTestRequest:adalRequest];
     self.testApp = [self adalUnifiedApp];
@@ -128,10 +135,10 @@ static BOOL adalAppInstalled = NO;
 
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
 {
-    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     msalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:nil];
     msalRequest.promptBehavior = @"force";
-    msalRequest.loginHint = self.primaryAccount.account;
+    msalRequest.loginHint = self.primaryAccount.upn;
     msalRequest.testAccount = self.primaryAccount;
     msalRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     msalRequest.expectedResultScopes = msalRequest.requestScopes;
@@ -143,10 +150,10 @@ static BOOL adalAppInstalled = NO;
     // 2.Switch to unified ADAL and acquire token silently with common authority
     self.testApp = [self adalUnifiedApp];
     
-    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     adalRequest.promptBehavior = @"always";
     adalRequest.requestResource = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph"];
-    adalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    adalRequest.legacyAccountIdentifier = self.primaryAccount.upn;
     adalRequest.configurationAuthority = msalRequest.configurationAuthority;
     adalRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     
@@ -178,7 +185,7 @@ static BOOL adalAppInstalled = NO;
     MSIDAutomationTestRequest *firstAppRequest = [self.class.confProvider defaultFociRequestWithBroker];
     firstAppRequest.promptBehavior = @"force";
     firstAppRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:@"organizations"];
-    firstAppRequest.loginHint = self.primaryAccount.account;
+    firstAppRequest.loginHint = self.primaryAccount.upn;
     firstAppRequest.testAccount = self.primaryAccount;
     firstAppRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     firstAppRequest.expectedResultScopes = firstAppRequest.requestScopes;
@@ -193,7 +200,7 @@ static BOOL adalAppInstalled = NO;
     MSIDAutomationTestRequest *secondAppRequest = [self.class.confProvider defaultFociRequestWithoutBroker];
     secondAppRequest.promptBehavior = @"always";
     secondAppRequest.requestResource = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph"];
-    secondAppRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    secondAppRequest.legacyAccountIdentifier = self.primaryAccount.upn;
     secondAppRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     
     NSDictionary *adalConfig = [self configWithTestRequest:secondAppRequest];

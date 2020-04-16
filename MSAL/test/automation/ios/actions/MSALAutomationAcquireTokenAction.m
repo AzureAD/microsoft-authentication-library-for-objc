@@ -137,7 +137,7 @@
         parentController = containerController.presentedViewController;
     }
     
-    MSALWebviewParameters *webviewParameters= [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webviewParameters= [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     
     MSIDWebviewType webviewSelection = testRequest.webViewType;
     
