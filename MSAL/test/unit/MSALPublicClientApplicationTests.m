@@ -485,6 +485,46 @@
      }];
 }
 
+- (void)testAcquireToken_whenKnownCustomAADAuthority_shouldValidate
+{
+    __auto_type authority = [@"https://login.custom.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertTrue(params.validateAuthority);
+            XCTAssertTrue(params.authority.isDeveloperKnown);
+         completionBlock(nil, nil);
+     }];
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
 - (void)testAcquireToken_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
