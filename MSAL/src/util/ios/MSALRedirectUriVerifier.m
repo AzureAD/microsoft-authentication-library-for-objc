@@ -28,6 +28,7 @@
 #import "MSALRedirectUriVerifier.h"
 #import "MSALRedirectUri+Internal.h"
 #import "MSIDConstants.h"
+#import "MSIDAppExtensionUtil.h"
 
 @implementation MSALRedirectUriVerifier
 
@@ -120,6 +121,11 @@
         // HTTPS schemes don't need to be registered in the Info.plist file
         return YES;
     }
+    
+    if (([MSIDAppExtensionUtil isExecutingInAppExtension]))
+    {
+        return YES;
+    }
 
     NSArray *urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
 
@@ -141,6 +147,12 @@
 + (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
 {
 #if !AD_BROKER
+    
+    if (([MSIDAppExtensionUtil isExecutingInAppExtension]))
+    {
+        return YES;
+    }
+    
     NSArray *querySchemes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSApplicationQueriesSchemes"];
     
     if (![querySchemes containsObject:@"msauthv2"]
