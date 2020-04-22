@@ -446,7 +446,7 @@
 
 #pragma mark - Known authorities
 
-- (void)testAcquireToken_whenKnownAADAuthority_shouldValidate
+- (void)testAcquireToken_whenKnownAADAuthority_shouldNotForceValidation
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
@@ -468,7 +468,7 @@
          MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         XCTAssertTrue(params.validateAuthority);
+         XCTAssertFalse(params.validateAuthority);
          completionBlock(nil, nil);
      }];
     
@@ -485,7 +485,7 @@
      }];
 }
 
-- (void)testAcquireToken_whenKnownCustomAADAuthority_shouldValidate
+- (void)testAcquireToken_whenKnownCustomAADAuthority_shouldNotForceValidation
 {
     __auto_type authority = [@"https://login.custom.microsoftonline.com/common" msalAuthority];
     
@@ -507,8 +507,8 @@
          MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         XCTAssertTrue(params.validateAuthority);
-            XCTAssertTrue(params.authority.isDeveloperKnown);
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertTrue(params.authority.isDeveloperKnown);
          completionBlock(nil, nil);
      }];
     
