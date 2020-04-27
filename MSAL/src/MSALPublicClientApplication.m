@@ -833,19 +833,15 @@
                  parameters.claimsRequest);
     
     // Return early if account is in signed out state
-    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         accountMetadataCache:self.accountMetadataCache
-                                                                                     clientId:self.internalConfig.clientId
-                                                                      externalAccountProvider:self.externalAccountHandler];
     NSError *signInStateError;
-    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
-                                                                                 context:msidParams
-                                                                                   error:&signInStateError];
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:&signInStateError];
     
-    if (signInStateError) {
+    if (signInStateError)
+    {
         block(nil, signInStateError, msidParams);
         return;
     }
+    
     if (signInState == MSIDAccountMetadataStateSignedOut)
     {
         NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
@@ -889,6 +885,25 @@
         
         block(msalResult, resultError, msidParams);
     }];
+}
+
+- (MSIDAccountMetadataState)accountStateForParameters:(MSIDRequestParameters *)msidParams error:(NSError **)signInStateError
+{
+    if (!msidParams.accountIdentifier.homeAccountId)
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:signInStateError];
+    
+    return signInState;
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -1100,6 +1115,13 @@
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
     msidParams.shouldValidateResultAccount = YES;
+    
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
+    
+    if (signInState == MSIDAccountMetadataStateSignedOut && msidParams.promptType != MSIDPromptTypeConsent)
+    {
+        msidParams.promptType = MSIDPromptTypeLogin;
+    }
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
