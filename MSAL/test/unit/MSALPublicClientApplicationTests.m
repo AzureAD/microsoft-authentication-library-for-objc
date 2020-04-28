@@ -446,7 +446,7 @@
 
 #pragma mark - Known authorities
 
-- (void)testAcquireToken_whenKnownAADAuthority_shouldValidate
+- (void)testAcquireToken_whenKnownAADAuthority_shouldNotForceValidation
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
@@ -468,7 +468,47 @@
          MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         XCTAssertTrue(params.validateAuthority);
+         XCTAssertFalse(params.validateAuthority);
+         completionBlock(nil, nil);
+     }];
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
+- (void)testAcquireToken_whenKnownCustomAADAuthority_shouldNotForceValidation
+{
+    __auto_type authority = [@"https://login.custom.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertTrue(params.authority.isDeveloperKnown);
          completionBlock(nil, nil);
      }];
     
