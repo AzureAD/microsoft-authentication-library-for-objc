@@ -95,14 +95,12 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
 
 typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
 {
-#if TARGET_OS_IPHONE
     /**
     The SDK determines automatically the most suitable option, optimized for user experience.
     E.g. it may invoke another application for a single sign on (Microsoft Authenticator), if such application is present.
     This is the default option.
     */
     MSALBrokeredAvailabilityAuto,
-#endif
     
     /**
     The SDK will present a webview within the application. It will not invoke external application.
