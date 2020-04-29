@@ -72,4 +72,24 @@
     return [NSURL URLWithString:redirectUri];
 }
 
++ (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
+{
+    NSURL *defaultRedirectUri = [MSALRedirectUri defaultBrokerCapableRedirectUri];
+
+    // Check default MSAL format
+    if ([defaultRedirectUri isEqual:redirectUri])
+    {
+        return YES;
+    }
+
+    // Check default ADAL format
+    if ([redirectUri.host isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]
+        && redirectUri.scheme.length > 0)
+    {
+        return YES;
+    }
+
+    return NO;
+}
+
 @end

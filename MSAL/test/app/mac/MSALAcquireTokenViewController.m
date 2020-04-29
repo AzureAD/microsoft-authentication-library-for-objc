@@ -93,12 +93,26 @@ static NSString * const defaultScope = @"User.Read";
     
     if (application && !error)
     {
-        self.accounts = [application allAccounts:&error];
+        MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+        parameters.completionBlockQueue = dispatch_get_main_queue();
         
-        for (MSALAccount *account in self.accounts)
+        [application accountsFromDeviceForParameters:parameters completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error)
         {
-            [self.userPopup addItemWithTitle:account.username];
-        }
+            if (error)
+            {
+                [self updateResultViewError:error];
+                return;
+            }
+            
+            self.accounts = accounts;
+            
+            [self.userPopup addItemWithTitle:@""];
+            
+            for (MSALAccount *account in self.accounts)
+            {
+                [self.userPopup addItemWithTitle:account.username];
+            }
+        }];
     }
 }
 
@@ -324,8 +338,8 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes
                                                                                       webviewParameters:webviewParameters];
-    parameters.loginHint = [self.loginHintTextField stringValue];
-    parameters.account = self.settings.currentAccount;
+    parameters.loginHint = [self.loginHintTextField stringValue].length ? [self.loginHintTextField stringValue] : nil;
+    parameters.account = [self selectedAccount];
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
@@ -346,21 +360,7 @@ static NSString * const defaultScope = @"User.Read";
     
     __block BOOL fBlockHit = NO;
     
-    NSString *userName = [self.userPopup titleOfSelectedItem];
-    MSALAccount *currentAccount = nil;
-    
-    if (!self.accounts)
-    {
-        self.accounts = [application allAccounts:nil];
-    }
-    
-    for (MSALAccount *account in self.accounts)
-    {
-        if ([account.username isEqualToString:userName])
-        {
-            currentAccount = account;
-        }
-    }
+    MSALAccount *currentAccount = [self selectedAccount];
     
     if (!currentAccount)
     {
@@ -397,5 +397,55 @@ static NSString * const defaultScope = @"User.Read";
      }];
 }
 
+- (IBAction)signout:(id)sender
+{
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
+    if (!application || error)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultTextView setString:resultText];
+        return;
+    }
+    
+    MSALAccount *currentAccount = [self selectedAccount];
+    
+    if (!currentAccount)
+    {
+        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+        return;
+    }
+    
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webviewParameters];
+    signoutParameters.signoutFromBrowser = YES;
+    signoutParameters.completionBlockQueue = dispatch_get_main_queue();
+    
+    [application signoutWithAccount:currentAccount
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error)
+    {
+        if (!success)
+        {
+            [self updateResultViewError:error];
+        }
+        else
+        {
+            [self.resultTextView setString:@"Signout succeeded"];
+            [self populateUsers];
+        }
+    }];
+    
+}
+
+- (MSALAccount *)selectedAccount
+{
+    if (self.userPopup.indexOfSelectedItem == 0 || self.userPopup.indexOfSelectedItem > [self.accounts count])
+    {
+        return nil;
+    }
+    
+    return self.accounts[self.userPopup.indexOfSelectedItem-1];
+}
 
 @end

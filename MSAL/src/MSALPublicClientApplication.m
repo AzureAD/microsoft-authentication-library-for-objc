@@ -750,8 +750,9 @@
     }
     
     BOOL shouldValidate = _validateAuthority;
+    BOOL isDeveloperKnownAuthority = [self shouldExcludeValidationForAuthority:requestAuthority];
     
-    if (shouldValidate && [self shouldExcludeValidationForAuthority:requestAuthority])
+    if (shouldValidate && isDeveloperKnownAuthority)
     {
         shouldValidate = NO;
     }
@@ -775,6 +776,8 @@
         
         return;
     }
+    
+    requestAuthority.isDeveloperKnown = isDeveloperKnownAuthority;
     
     NSError *msidError = nil;
     
@@ -1013,6 +1016,8 @@
         block(nil, authorityError, nil);
         return;
     }
+    
+    requestAuthority.isDeveloperKnown = [self shouldExcludeValidationForAuthority:requestAuthority];
     
     NSError *msidError = nil;
     
@@ -1395,9 +1400,6 @@
         for (MSALAuthority *knownAuthority in self.internalConfig.knownAuthorities)
         {
             if ([authority isKindOfClass:knownAuthority.msidAuthority.class]
-                // Treat  AAD authorities differently, since they should always succeed validation
-                // Therefore, even if they are added to known authorities, still do validation
-                && ![authority isKindOfClass:[MSIDAADAuthority class]]
                 && [knownAuthority.url isEqual:authority.url])
             {
                 return YES;
@@ -1419,11 +1421,8 @@
 
 - (MSIDRequestType)requestType
 {
-    MSIDRequestType requestType = MSIDRequestLocalType;
-        
-#if TARGET_OS_IPHONE
-    requestType = MSIDRequestBrokeredType;
-    
+    MSIDRequestType requestType = MSIDRequestBrokeredType;
+            
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
     {
         requestType = MSIDRequestLocalType;
@@ -1432,7 +1431,6 @@
     {
         requestType = MSIDRequestLocalType;
     }
-#endif
     
     return requestType;
 }
