@@ -428,9 +428,9 @@
          
          completionBlock(nil, nil);
      }];
-#if TARGET_OS_IPHONE
+
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
+
     [application acquireTokenForScopes:@[@"fakescope"]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -512,9 +512,7 @@
          completionBlock(nil, nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -1008,9 +1006,7 @@
          completionBlock(nil, nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -1065,9 +1061,8 @@
          completionBlock(nil, nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
+#if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -1134,8 +1129,8 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -1214,9 +1209,7 @@
          completionBlock(nil, nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
@@ -1276,9 +1269,8 @@
          completionBlock(nil, nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
+#if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -1354,8 +1346,8 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;

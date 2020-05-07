@@ -56,7 +56,7 @@
             return nil;
         }
 
-        BOOL brokerCapable = [self redirectUriIsBrokerCapable:redirectURI];
+        BOOL brokerCapable = [MSALRedirectUri redirectUriIsBrokerCapable:redirectURI];
 
         MSALRedirectUri *redirectUri = [[MSALRedirectUri alloc] initWithRedirectUri:redirectURI
                                                                       brokerCapable:brokerCapable];
@@ -87,26 +87,6 @@
     }
 
     return nil;
-}
-
-+ (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
-{
-    NSURL *defaultRedirectUri = [MSALRedirectUri defaultBrokerCapableRedirectUri];
-
-    // Check default MSAL format
-    if ([defaultRedirectUri isEqual:redirectUri])
-    {
-        return YES;
-    }
-
-    // Check default ADAL format
-    if ([redirectUri.host isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]
-        && redirectUri.scheme.length > 0)
-    {
-        return YES;
-    }
-
-    return NO;
 }
 
 #pragma mark - Helpers

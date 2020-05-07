@@ -1443,11 +1443,8 @@
 
 - (MSIDRequestType)requestType
 {
-    MSIDRequestType requestType = MSIDRequestLocalType;
-        
-#if TARGET_OS_IPHONE
-    requestType = MSIDRequestBrokeredType;
-    
+    MSIDRequestType requestType = MSIDRequestBrokeredType;
+            
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
     {
         requestType = MSIDRequestLocalType;
@@ -1456,7 +1453,6 @@
     {
         requestType = MSIDRequestLocalType;
     }
-#endif
     
     return requestType;
 }
