@@ -41,6 +41,7 @@
 #import "MSALAccountsProvider.h"
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
+#import "MSIDDevicePopManager.h"
 
 @implementation MSALResult
 
@@ -61,7 +62,8 @@
                         correlationId:(NSUUID *)correlationId
 {
     MSALResult *result = [MSALResult new];
-    
+    NSString *signedAccessToken = [self getSignedAccessToken:accessToken];
+    [self sendRequestWithAuthorizationHeader:signedAccessToken];
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
@@ -124,6 +126,21 @@
                                 scopes:[tokenResult.accessToken.scopes array]
                              authority:authority
                          correlationId:tokenResult.correlationId];
+}
+
++ (NSString *)getSignedAccessToken:(NSString *)accessToken
+{
+    MSIDDevicePopManager *popManager = [MSIDDevicePopManager sharedManager];
+    return [popManager createSignedAccessToken:accessToken
+                                     timeStamp:0
+                                    httpMethod:@"GET"
+                                    requestUrl:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"
+                                         nonce:@"nonce"
+                                         error:nil];
+}
+
++ (void)sendRequestWithAuthorizationHeader:(NSString *)accessToken
+{
 }
 
 @end
