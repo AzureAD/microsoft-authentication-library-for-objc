@@ -100,4 +100,6 @@
  */
 @property (readonly, nonnull) NSUUID *correlationId;
 
+- (NSString *_Nonnull)getAuthorizationHeader;
+
 @end

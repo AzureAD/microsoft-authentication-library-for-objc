@@ -45,6 +45,11 @@
 
 @implementation MSALResult
 
+- (NSString *)getAuthorizationHeader
+{
+    return nil;
+}
+
 @end
 
 @implementation MSALResult (Internal)

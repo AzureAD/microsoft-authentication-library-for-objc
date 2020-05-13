@@ -46,6 +46,7 @@
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
 #import "MSALWebviewParameters.h"
+#import "MSALAuthenticationSchemePop.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -318,6 +319,10 @@
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
+    
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPost requestUrl:requestUrl];
+    
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptTypeValue];

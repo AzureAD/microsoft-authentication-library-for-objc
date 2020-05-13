@@ -202,3 +202,30 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message
 typedef void(^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
 
 #endif /* MSALConstants_h */
+
+typedef NS_ENUM(NSUInteger, MSALAuthScheme)
+{
+    /*
+        Bearer is the default authentication scheme
+    */
+    MSALAuthSchemeBearer,
+    
+    /*
+        To access pop protected resources, set scheme to Pop
+     */
+    MSALAuthSchemePop
+};
+
+typedef NS_ENUM(NSUInteger, MSALHttpMethod)
+{
+    /*
+        Bearer is the default authentication scheme
+    */
+    MSALHttpMethodGet,
+    
+    /*
+        To access pop protected resources, set scheme to Pop
+     */
+    MSALHttpMethodPost,
+    
+};

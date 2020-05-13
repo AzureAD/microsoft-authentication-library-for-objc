@@ -31,6 +31,7 @@
 @class MSALAccount;
 @class MSALAuthority;
 @class MSALClaimsRequest;
+@class MSALAuthenticationScheme;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -75,6 +76,11 @@ NS_ASSUME_NONNULL_BEGIN
  UUID to correlate this request with the server.
  */
 @property (nonatomic, nullable) NSUUID *correlationId;
+
+/**
+ Authentication Scheme to access the resource
+ */
+@property (nonatomic, nullable) MSALAuthenticationScheme *authenticationScheme;
 
 #pragma mark - Creating MSALTokenParameters
 
