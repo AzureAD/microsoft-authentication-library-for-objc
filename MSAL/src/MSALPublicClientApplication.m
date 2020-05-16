@@ -102,6 +102,7 @@
 #import "MSALSignoutParameters.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
+#import "MSIDCurrentRequestTelemetry.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -813,6 +814,10 @@
     msidParams.providedAuthority = providedAuthority;
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1115,6 +1120,10 @@
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
     msidParams.shouldValidateResultAccount = YES;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = NO;
     
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
