@@ -2209,7 +2209,9 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
-        MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        MSALDeviceInformation *deviceInfo = [MSALDeviceInformation new];
+        [deviceInfo addExtraDeviceInformation:msidDeviceInfo];
+
         callback(deviceInfo, nil);
     }];
     

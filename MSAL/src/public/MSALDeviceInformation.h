@@ -29,6 +29,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY;
+extern NSString *const MSAL_DEVICE_INFORMATION_UPN_ID_KEY;
+extern NSString *const MSAL_DEVICE_INFORMATION_AAD_DEVICE_ID_KEY;
+extern NSString *const MSAL_DEVICE_INFORMATION_AAD_TENANT_ID_KEY;
+
 /**
  Information about the device that is applicable to MSAL scenarios. 
 */
@@ -37,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Device mode configured by the administrator
 */
-@property (nonatomic, readonly) MSALDeviceMode deviceMode;
+@property (nonatomic, readonly) MSALDeviceMode deviceMode API_AVAILABLE(ios(13.0), macos(10.15));
 
 /**
  Specifies whether AAD SSO extension was detected on the device.

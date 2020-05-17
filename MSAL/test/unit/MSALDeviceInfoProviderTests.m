@@ -76,7 +76,9 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNil(deviceInformation);
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorInternal);
@@ -156,7 +158,9 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNil(deviceInformation);
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorUnsupportedFunctionality);
