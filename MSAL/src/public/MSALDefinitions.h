@@ -219,13 +219,10 @@ typedef NS_ENUM(NSUInteger, MSALAuthScheme)
 typedef NS_ENUM(NSUInteger, MSALHttpMethod)
 {
     /*
-        Bearer is the default authentication scheme
+        Http Method for the pop resource
     */
     MSALHttpMethodGet,
     
-    /*
-        To access pop protected resources, set scheme to Pop
-     */
     MSALHttpMethodPost,
     
 };
