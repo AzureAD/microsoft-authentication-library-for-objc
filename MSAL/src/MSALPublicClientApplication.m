@@ -817,7 +817,7 @@
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 2;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
-    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh;
+    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh; 
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
