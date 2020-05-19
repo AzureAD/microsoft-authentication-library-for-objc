@@ -2841,6 +2841,8 @@
     // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
     
     NSString *url = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
     
