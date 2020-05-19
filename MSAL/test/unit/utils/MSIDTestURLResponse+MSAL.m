@@ -150,7 +150,9 @@
                                         user:(MSALAccount *)user
                                       claims:(NSString *)claims
 {
-    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
+    NSMutableDictionary *tokenReqHeaders = [[self msalDefaultRequestHeaders] mutableCopy];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
     
     NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                            MSID_OAUTH2_SCOPE : [scopes msidToString],
@@ -193,7 +195,9 @@
                                            claims:(NSString *)claims
                                      refreshToken:(NSString *)refreshToken
 {
-    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
+    NSMutableDictionary *tokenReqHeaders = [[self msalDefaultRequestHeaders] mutableCopy];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
 
     NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                            MSID_OAUTH2_SCOPE : [scopes msidToString],
@@ -240,7 +244,9 @@
                                clientInfo:(NSDictionary *)clientInfo
                                    claims:(NSString *)claims
 {
-    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
+    NSMutableDictionary *tokenReqHeaders = [[self msalDefaultRequestHeaders] mutableCopy];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
     
     NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
     if (query)
