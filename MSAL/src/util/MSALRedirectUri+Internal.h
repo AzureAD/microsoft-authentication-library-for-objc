@@ -37,6 +37,7 @@
 
 + (nullable NSURL *)defaultNonBrokerRedirectUri:(nonnull NSString *)clientId;
 + (nullable NSURL *)defaultBrokerCapableRedirectUri;
++ (BOOL)redirectUriIsBrokerCapable:(nonnull NSURL *)redirectUri;
 
 @end
 

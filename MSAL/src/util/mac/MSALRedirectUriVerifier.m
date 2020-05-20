@@ -36,12 +36,13 @@
 {
     if (![NSString msidIsStringNilOrBlank:customRedirectUri])
     {
+        BOOL isBrokerCapable = [MSALRedirectUri redirectUriIsBrokerCapable:[NSURL URLWithString:customRedirectUri]];
         return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
-                                              brokerCapable:NO];
+                                              brokerCapable:isBrokerCapable];
     }
 
     return [[MSALRedirectUri alloc] initWithRedirectUri:[MSALRedirectUri defaultBrokerCapableRedirectUri]
-                                          brokerCapable:NO];
+                                          brokerCapable:YES];
 }
 
 + (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
