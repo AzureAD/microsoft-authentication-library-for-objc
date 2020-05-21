@@ -7,6 +7,8 @@
 //
 
 #import "MSALAuthenticationSchemePop.h"
+#import "MSIDAuthenticationScheme.h"
+#import "MSALHttpMethod.h"
 
 @implementation MSALAuthenticationSchemePop
 
@@ -22,5 +24,11 @@
     
     return self;
 }
+
+- (MSIDAuthenticationScheme *)msidAuthScheme
+{
+    return [[MSIDAuthenticationScheme alloc] initWithHttpMethod:MSIDHttpMethodForHttpMethod(_httpMethod) requestUrl:self.requestUrl nonce:self.nonce];
+}
+
 
 @end

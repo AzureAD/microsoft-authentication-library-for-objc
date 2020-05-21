@@ -321,7 +321,7 @@
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
     
     NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
-    parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPost requestUrl:requestUrl];
+    parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl];
     
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;

@@ -7,6 +7,7 @@
 //
 
 #import "MSALAuthenticationSchemeBearer.h"
+#import "MSIDAuthenticationScheme.h"
 
 @implementation MSALAuthenticationSchemeBearer
 
@@ -14,6 +15,11 @@
 {
     self = [super initWithScheme:MSALAuthSchemeBearer];
     return self;
+}
+
+- (MSIDAuthenticationScheme *)msidAuthScheme
+{
+    return [[MSIDAuthenticationScheme alloc] init];
 }
 
 @end

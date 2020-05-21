@@ -102,6 +102,7 @@
 #import "MSALSignoutParameters.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
+#import "MSALAuthenticationScheme+Internal.h"
 
 @interface MSALPublicClientApplication()
 {

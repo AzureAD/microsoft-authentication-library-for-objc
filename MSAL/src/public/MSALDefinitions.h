@@ -221,8 +221,8 @@ typedef NS_ENUM(NSUInteger, MSALHttpMethod)
     /*
         Http Method for the pop resource
     */
-    MSALHttpMethodGet,
+    MSALHttpMethodGET,
     
-    MSALHttpMethodPost,
+    MSALHttpMethodPOST,
     
 };

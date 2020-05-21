@@ -6,9 +6,9 @@
 //  Copyright © 2020 Microsoft. All rights reserved.
 //
 
-#import "MSALAuthenticationScheme.h"
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationScheme+Internal.h"
 
 @implementation MSALAuthenticationScheme
 
