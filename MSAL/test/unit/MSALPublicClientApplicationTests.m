@@ -2698,87 +2698,80 @@
     XCTAssertEqual(signInState, MSIDAccountMetadataStateSignedOut);
 }
 
-
 - (void)testRemoveAccount_whenAccountExists_andIsFociClient_shouldRemoveAccount_andMarkClientNonFoci
 {
     // 1. Save response for a different clientId
     NSString *authorityUrl = @"https://login.microsoftonline.com/utid";
     MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:authorityUrl familyId:@"1"];
     MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:authorityUrl];
-    
+
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
                                                                factory:[MSIDAADV2Oauth2Factory new]
                                                                context:nil
                                                                  error:nil];
-    
+
     XCTAssertTrue(result);
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     // 2. Create PublicClientApplication for a different app
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"myclient" error:nil];
     application.tokenCache = self.tokenCacheAccessor;
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:@"myclient" authority:configuration.authority context:nil error:nil];
 
     MSIDAuthority *authority = [authorityUrl aadAuthority];
-    
+
     configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                      redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                         clientId:@"myclient"
                                                           target:@"fakescope1 fakescope2"];
-    
+
     MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:msidResponse
                                                                configuration:configuration];
     MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
-    
+
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
-    
+
     // 3. Remove account
     NSError *error = nil;
     result = [application removeAccount:msalAccount error:&error];
-    
+
     XCTAssertTrue(result);
     XCTAssertNil(error);
-    
+
     // 4. Make sure the account is now gone
     XCTAssertEqual([application allAccounts:nil].count, 0);
-    
+
     // 5. Make sure account and FOCI tokens are still in cache
     MSIDAccount *cachedAccount = [self.tokenCacheAccessor getAccountForIdentifier:account.accountIdentifier authority:authority realmHint:nil context:nil error:nil];
     XCTAssertNotNil(cachedAccount);
-    
+
     MSIDRefreshToken *fociToken = [self.tokenCacheAccessor getRefreshTokenWithAccount:account.accountIdentifier familyId:@"1" configuration:configuration context:nil error:nil];
     XCTAssertNotNil(fociToken);
-    
+
     MSIDRefreshToken *mrrtToken = [self.tokenCacheAccessor getRefreshTokenWithAccount:account.accountIdentifier familyId:nil configuration:configuration context:nil error:nil];
     XCTAssertNil(mrrtToken);
-    
+
     [self msalAddDiscoveryResponse:authorityUrl appendDefaultHeaders:YES];
-    
+
     // 5. Try to acquire token silently, expecting to get interaction required back
     // That means FOCI wasn't used by the app although present
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token silent"];
-    
-    // Save account metadata authority map from common to the specific tenant id.
-    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authorityUrl]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
-                                    homeAccountId:account.accountIdentifier.homeAccountId
-                                         clientId:@"myclient" instanceAware:NO context:nil error:nil];
-    
+
     [application acquireTokenSilentForScopes:@[@"fakescope1"]
                                      account:msalAccount
                              completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-                                 
-                                 
+
+
                                  XCTAssertNil(result);
                                  XCTAssertNotNil(error);
                                  XCTAssertEqual(error.code, MSALErrorInteractionRequired);
                                  [expectation fulfill];
                              }];
-    
+
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
