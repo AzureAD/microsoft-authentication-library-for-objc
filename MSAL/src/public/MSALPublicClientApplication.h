@@ -233,7 +233,7 @@
 
 /**
     Returns account for the given account identifying parameters including locally cached accounts and accounts from the SSO extension
-    Accounts from SSO extension are only available on iOS 13+. On earlier versions, this method will return same results as a local account query.
+    Accounts from SSO extension are only available on iOS 13+ and macOS 10.15+. On earlier versions, this method will return same results as a local account query.
 
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
 */
