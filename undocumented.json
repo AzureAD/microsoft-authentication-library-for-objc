@@ -1,0 +1,61 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALAccount+MultiTenantAccount.h",
+      "line": 33,
+      "symbol": "MSALAccount(MultiTenantAccount)",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.category",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 147,
+      "symbol": "MSALDeviceMode.MSALDeviceModeDefault",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 152,
+      "symbol": "MSALDeviceMode.MSALDeviceModeShared",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALParameters.h",
+      "line": 32,
+      "symbol": "MSALParameters",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALSignoutParameters.h",
+      "line": 35,
+      "symbol": "MSALSignoutParameters",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 32,
+      "symbol": "MSALViewController",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 99,
+      "symbol": "MSALWebviewParameters.-init",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 101,
+      "symbol": "MSALWebviewParameters.+new",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.class",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/travis/build/AzureAD/microsoft-authentication-library-for-objc/docs.temp"
+}
