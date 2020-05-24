@@ -185,7 +185,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          resultAccount = result.account;
          XCTAssertNotNil(resultAccount);
@@ -207,7 +207,7 @@
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
                                  [silentExpectation fulfill];
                              }];
     
@@ -281,7 +281,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          resultAccount = result.account;
          XCTAssertNotNil(resultAccount);
@@ -308,7 +308,7 @@
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
                                  [silentExpectation fulfill];
                              }];
     
@@ -366,7 +366,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          [expectation fulfill];
      }];
@@ -380,7 +380,7 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -394,7 +394,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -426,7 +426,7 @@
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
     
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
@@ -454,7 +454,7 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -468,7 +468,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -500,7 +500,7 @@
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID uid:DEFAULT_TEST_UID user:account claims:nil];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
     json[@"access_token"] = @"i am an updated access token!";
     json[@"scope"] = [expectedScopes msidToString];
@@ -813,7 +813,7 @@
         XCTAssertNil(error);
         XCTAssertNotNil(result);
         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/1234-5678-90abcdefg");
+        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/00000000-0000-1234-5678-90abcdefffff");
         [expectation fulfill];
     }];
     
@@ -1247,7 +1247,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1263,7 +1263,7 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
@@ -1324,7 +1324,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -1341,7 +1341,7 @@
     XCTAssertTrue(result);
 
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -1389,7 +1389,6 @@
 
 - (void)testAcquireTokenSilent_whenATAvailable_andMixedCaseInputScope_shouldReturnToken
 {
-    
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -1404,7 +1403,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -1420,8 +1419,7 @@
                                                          error:nil];
     XCTAssertTrue(result);
 
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
-    
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
@@ -1472,7 +1470,7 @@
 
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -1489,7 +1487,7 @@
     XCTAssertTrue(result);
 
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USeR.reAD", @"openid", @"profile", @"offline_access"]];
     
@@ -1554,7 +1552,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1571,7 +1569,7 @@
 
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -1582,7 +1580,7 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Set up two 504 network responses
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID uid:DEFAULT_TEST_UID user:account claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:504 headerFields:@{}];
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
@@ -1709,7 +1707,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1724,17 +1722,18 @@
                                                          error:nil];
     XCTAssertTrue(result);
     
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     [MSIDTestURLSession addResponse:discoveryResponse];
     
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
-                                      responseUrl:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
+    [MSIDTestURLResponse oidcResponseForAuthority:authority
+                                      responseUrl:authority
                                             query:nil];
     
     // Save account metadata authority map from common to the specific tenant id.
-    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Mock token response
@@ -1745,7 +1744,7 @@
                                                     @"client_info" : @"1",
                                                     @"grant_type" : @"refresh_token",
                                                     MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!" }
-                                       authority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+                                       authority:authority];
     
     // Call Acquire token silent call
     NSError *error = nil;
@@ -1806,7 +1805,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1814,7 +1813,7 @@
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1823,8 +1822,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:claims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -1892,7 +1891,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1908,7 +1907,7 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -1965,7 +1964,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1981,7 +1980,7 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -2038,14 +2037,14 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *expectedClaims =  @"{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"llt\"]}}}";
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2054,8 +2053,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *responseJson = [[response jsonDictionary] mutableCopy];
@@ -2124,7 +2123,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2133,7 +2132,7 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2142,8 +2141,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -2213,7 +2212,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2221,7 +2220,7 @@
     // Add mock error response for refresh token grant
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2291,7 +2290,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2308,14 +2307,14 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
@@ -2368,7 +2367,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2384,15 +2383,15 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     
@@ -2447,7 +2446,7 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2461,7 +2460,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:@"1"];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2555,7 +2554,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2581,7 +2580,7 @@
     [self.accountCache saveCredential:frt.tokenCacheItem context:nil error:nil];
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
@@ -2649,7 +2648,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2666,14 +2665,14 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USER.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     
@@ -2842,6 +2841,8 @@
     // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
     
     NSString *url = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
     
