@@ -1,3 +1,16 @@
+## [1.1.3] - 2020-05-22
+
+### Added
+* Support client side telemetry in ESTS requests (#930)
+
+### Fixed
+* Add logging for enrollment id mismatch for access tokens (#932)
+* Protect legacy macOS cache when MSAL writes into ADAL cache (common core #729)
+* Fix NTLM crash when window is not key (common core #724)
+* Fixed authority validation for developer known authorities (#913)
+* Pass prompt=login for signed out accounts (#919)
+* Don't require URL scheme registration in Info.plist for app extensions (#914)
+
 ## [1.1.2] - 2020-04-17
 
 ### Added
