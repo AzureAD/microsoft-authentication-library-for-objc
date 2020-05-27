@@ -31,11 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readwrite) MSALDeviceMode deviceMode;
 
-- (instancetype)init;
-- (void) addExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo;
-- (void) addWorkPlaceJoinedUPN:(NSString *)upn;
-- (void) addWorkPlaceJoinedDeviceId:(NSString *)deviceId;
-- (void) addWorkPlaceJoinedTenantId:(NSString *)tenantId;
+- (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo;
+
+- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
 
 @end
 

@@ -41,46 +41,27 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    MSALDeviceInformation *deviceInformation = [MSALDeviceInformation new];
-
-    MSIDRegistrationInformation* regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
-    if (regInfo && regInfo.isWorkPlaceJoined)
+    if (![requestParameters shouldUseBroker])
     {
-        // Certificate subject is nothing but the AAD deviceID
-        NSString *deviceId = regInfo.certificateSubject;
-        if (deviceId)
-        {
-            [deviceInformation addWorkPlaceJoinedDeviceId:deviceId];
-        }
-
-        NSString *upn = [MSIDWorkPlaceJoinUtil getWPJStringData:nil identifier:kMSIDUPNKeyIdentifier error:nil];
-        if (upn)
-        {
-            [deviceInformation addWorkPlaceJoinedUPN:upn];
-        }
-
-        NSString *tenantID = [MSIDWorkPlaceJoinUtil getWPJStringData:nil identifier:kMSIDTenantKeyIdentifier error:nil];
-        if (tenantID)
-        {
-            [deviceInformation addWorkPlaceJoinedTenantId:tenantID];
-        }
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
+        completionBlock(nil, error);
+        return;
     }
 
     if (@available(iOS 13.0, macOS 10.15, *))
     {
-        if (![requestParameters shouldUseBroker])
-        {
-            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
-            completionBlock(deviceInformation, error);
-            return;
-        }
-
         if (![MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest])
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
 
-            deviceInformation.deviceMode = MSALDeviceModeDefault;
-            completionBlock(deviceInformation, nil);
+            MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
+            msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
+            MSIDRegistrationInformation* regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
+            if (regInfo && regInfo.isWorkPlaceJoined)
+            {
+                [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+            }
+            completionBlock(msalDeviceInfo, nil);
             return;
         }
 
@@ -90,14 +71,14 @@
 
         if (!ssoExtensionRequest)
         {
-            completionBlock(deviceInformation, requestError);
+            completionBlock(nil, requestError);
             return;
         }
 
         if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
         {
             NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
-            completionBlock(deviceInformation, error);
+            completionBlock(nil, error);
             return;
         }
 
@@ -107,15 +88,28 @@
 
             if (!deviceInfo)
             {
-                completionBlock(deviceInformation, error);
+                completionBlock(nil, error);
                 return;
             }
 
-            [deviceInformation addExtraDeviceInformation:deviceInfo];
-            completionBlock(deviceInformation, nil);
+            MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
+            MSIDRegistrationInformation* regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
+            if (regInfo && regInfo.isWorkPlaceJoined)
+            {
+                [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+            }
+            completionBlock(msalDeviceInfo, nil);
         }];
-    } else {
-        completionBlock(deviceInformation, nil);
+    }
+    else
+    {
+        MSIDRegistrationInformation *regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
+        if (regInfo && regInfo.isWorkPlaceJoined)
+        {
+            MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
+            [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+            completionBlock(msalDeviceInfo, nil);
+        }
     }
 }
 
