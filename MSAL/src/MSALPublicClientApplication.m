@@ -786,6 +786,7 @@
     
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                              authScheme:parameters.authenticationScheme.msidAuthScheme
                                                                          redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                             clientId:self.internalConfig.clientId
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
@@ -1049,6 +1050,7 @@
 #endif
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
+                                                          authScheme:parameters.authenticationScheme.msidAuthScheme
                                                     redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                        clientId:self.internalConfig.clientId
                                                          scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
@@ -1279,6 +1281,7 @@
     
     NSError *paramsError;
     MSIDInteractiveRequestParameters *msidParams = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                                                    authScheme:nil
                                                                                                    redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                                                       clientId:self.internalConfig.clientId
                                                                                                         scopes:nil
@@ -1458,6 +1461,7 @@
 - (MSIDRequestParameters *)defaultRequestParametersWithError:(NSError **)requestParamsError
 {
     MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                 authScheme:nil
                                                                                 redirectUri:self.internalConfig.redirectUri
                                                                                    clientId:self.internalConfig.clientId
                                                                                      scopes:nil
