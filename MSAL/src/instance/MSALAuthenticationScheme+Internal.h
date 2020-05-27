@@ -26,13 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthenticationScheme.h"
-#import "MSIDAuthenticationScheme.h"
+#import "MSIDAuthenticationSchemeProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALAuthenticationScheme ()
 
-@property (nonatomic, readonly) MSIDAuthenticationScheme *msidAuthScheme;
+@property (nonatomic, readonly) id<MSIDAuthenticationSchemeProtocol> msidAuthScheme;
 
 @end
 

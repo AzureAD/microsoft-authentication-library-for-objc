@@ -45,7 +45,7 @@ MSIDHttpMethod MSIDHttpMethodForHttpMethod(MSALHttpMethod httpMethod)
     {
         case MSALHttpMethodGET : return MSIDHttpMethodGET;
         case MSALHttpMethodPOST : return MSIDHttpMethodPOST;
-        default : return MSIDHttpMethodGET;
+        default : return MSIDHttpMethodPOST;
     }
 }
 

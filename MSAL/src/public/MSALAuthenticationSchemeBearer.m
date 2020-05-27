@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthenticationSchemeBearer.h"
-#import "MSIDAuthenticationScheme.h"
+#import "MSIDAuthenticationSchemeBearer.h"
 
 @implementation MSALAuthenticationSchemeBearer
 
@@ -36,9 +36,9 @@
     return self;
 }
 
-- (MSIDAuthenticationScheme *)msidAuthScheme
+- (id<MSIDAuthenticationSchemeProtocol>)msidAuthScheme
 {
-    return [[MSIDAuthenticationScheme alloc] init];
+    return [MSIDAuthenticationSchemeBearer new];
 }
 
 @end

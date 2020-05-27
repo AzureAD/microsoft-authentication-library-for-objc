@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthenticationSchemePop.h"
-#import "MSIDAuthenticationScheme.h"
+#import "MSIDAuthenticationSchemePop.h"
 #import "MSALHttpMethod.h"
 
 @implementation MSALAuthenticationSchemePop
@@ -44,9 +44,9 @@
     return self;
 }
 
-- (MSIDAuthenticationScheme *)msidAuthScheme
+- (id<MSIDAuthenticationSchemeProtocol>)msidAuthScheme
 {
-    return [[MSIDAuthenticationScheme alloc] initWithHttpMethod:MSIDHttpMethodForHttpMethod(_httpMethod) requestUrl:self.requestUrl nonce:self.nonce];
+    return [[MSIDAuthenticationSchemePop alloc] initWithHttpMethod:MSIDHttpMethodForHttpMethod(self.httpMethod) requestUrl:self.requestUrl];
 }
 
 
