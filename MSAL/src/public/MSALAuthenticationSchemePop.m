@@ -33,9 +33,10 @@
 
 - (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod requestUrl:(NSURL *)requestUrl
 {
-    self = [super initWithScheme:MSALAuthSchemePop];
+    self = [super init];
     if (self)
     {
+        _scheme = MSALAuthSchemePop;
         _httpMethod = httpMethod;
         _requestUrl = requestUrl;
         _nonce = [[NSUUID UUID] UUIDString];

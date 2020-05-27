@@ -25,11 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthenticationScheme.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthenticationSchemeProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAuthenticationSchemeBearer : MSALAuthenticationScheme
+@interface MSALAuthenticationSchemeBearer : NSObject <MSALAuthenticationSchemeProtocol>
+
+@property (nonatomic) MSALAuthScheme scheme;
 
 - (instancetype)init;
 

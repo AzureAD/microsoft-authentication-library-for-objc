@@ -32,7 +32,12 @@
 
 - (instancetype)init
 {
-    self = [super initWithScheme:MSALAuthSchemeBearer];
+    self = [super init];
+    if (self)
+    {
+        _scheme = MSALAuthSchemeBearer;
+    }
+    
     return self;
 }
 

@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthenticationScheme.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAuthenticationSchemePop : MSALAuthenticationScheme
+@interface MSALAuthenticationSchemePop : NSObject<MSALAuthenticationSchemeProtocol>
 
+@property (nonatomic) MSALAuthScheme scheme;
 @property (nonatomic) MSALHttpMethod httpMethod;
 @property (nonatomic) NSURL *requestUrl;
 @property (nonatomic, nullable) NSString *nonce;

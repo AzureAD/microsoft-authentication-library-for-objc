@@ -31,7 +31,7 @@
 @class MSALAccount;
 @class MSALAuthority;
 @class MSALClaimsRequest;
-@class MSALAuthenticationScheme;
+@protocol MSALAuthenticationSchemeProtocol;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -80,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Authentication Scheme to access the resource
  */
-@property (nonatomic, nullable) MSALAuthenticationScheme *authenticationScheme;
+@property (nonatomic, nullable) id<MSALAuthenticationSchemeProtocol> authenticationScheme;
 
 #pragma mark - Creating MSALTokenParameters
 
