@@ -56,10 +56,10 @@
 
             MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
             msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
-            MSIDRegistrationInformation* regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
-            if (regInfo && regInfo.isWorkPlaceJoined)
+            NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+            if (deviceRegMetadataInfo)
             {
-                [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+                [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
             }
             completionBlock(msalDeviceInfo, nil);
             return;
@@ -93,21 +93,21 @@
             }
 
             MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
-            MSIDRegistrationInformation* regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
-            if (regInfo && regInfo.isWorkPlaceJoined)
+            NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+            if (deviceRegMetadataInfo)
             {
-                [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+                [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
             }
             completionBlock(msalDeviceInfo, nil);
         }];
     }
     else
     {
-        MSIDRegistrationInformation *regInfo = [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil urlChallenge:nil];
-        if (regInfo && regInfo.isWorkPlaceJoined)
+        MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
+        NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+        if (deviceRegMetadataInfo)
         {
-            MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
-            [msalDeviceInfo addRegisteredDeviceMetadataInformation:regInfo.registeredDeviceMetadata];
+            [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
             completionBlock(msalDeviceInfo, nil);
         }
     }
