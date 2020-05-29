@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo;
 
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
 
 @end
 

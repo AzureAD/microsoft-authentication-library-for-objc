@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Device mode configured by the administrator
 */
-@property (nonatomic, readonly) MSALDeviceMode deviceMode API_AVAILABLE(ios(13.0), macos(10.15));
+@property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
 /**
  Specifies whether AAD SSO extension was detected on the device.

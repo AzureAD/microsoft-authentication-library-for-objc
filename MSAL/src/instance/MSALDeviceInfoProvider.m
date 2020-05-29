@@ -48,23 +48,30 @@
         return;
     }
 
+    BOOL canCallSSOExtension = NO;
     if (@available(iOS 13.0, macOS 10.15, *))
     {
-        if (![MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest])
+        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
+    }
+
+    if (!canCallSSOExtension)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
+
+        MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
+        msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
+        NSDictionary *deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+        if (deviceRegMetadataInfo)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
-
-            MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
-            msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
-            NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
-            if (deviceRegMetadataInfo)
-            {
-                [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
-            }
-            completionBlock(msalDeviceInfo, nil);
-            return;
+            [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
         }
-
+        completionBlock(msalDeviceInfo, nil);
+        return;
+    }
+    
+    if (@available(iOS 13.0, macOS 10.15, *))
+    {
+        // We are here means canCallSSOExtension is TRUE
         NSError *requestError;
         MSIDSSOExtensionGetDeviceInfoRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetDeviceInfoRequest alloc] initWithRequestParameters:requestParameters
                                                                                                                                       error:&requestError];
@@ -93,23 +100,14 @@
             }
 
             MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
-            NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+            NSDictionary *deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
             if (deviceRegMetadataInfo)
             {
                 [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
             }
             completionBlock(msalDeviceInfo, nil);
+            return;
         }];
-    }
-    else
-    {
-        MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
-        NSDictionary* deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
-        if (deviceRegMetadataInfo)
-        {
-            [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
-            completionBlock(msalDeviceInfo, nil);
-        }
     }
 }
 

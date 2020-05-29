@@ -156,7 +156,7 @@
     {
         NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
         [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
-        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipleName"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
         [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
         return deviceMetadata;
     }];
@@ -174,7 +174,7 @@
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
         XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
-        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipleName"], @"TestUPN");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
         [failExpectation fulfill];
     }];
@@ -284,7 +284,7 @@
     {
         NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
         [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
-        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipleName"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
         [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
         return deviceMetadata;
     }];
@@ -320,7 +320,7 @@
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
-        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipleName"], @"TestUPN");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
         [successExpectation fulfill];
     }];
