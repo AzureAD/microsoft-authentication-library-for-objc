@@ -103,6 +103,7 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSIDCurrentRequestTelemetry.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -815,6 +816,10 @@
     msidParams.providedAuthority = providedAuthority;
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh; 
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -835,19 +840,15 @@
                  parameters.claimsRequest);
     
     // Return early if account is in signed out state
-    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         accountMetadataCache:self.accountMetadataCache
-                                                                                     clientId:self.internalConfig.clientId
-                                                                      externalAccountProvider:self.externalAccountHandler];
     NSError *signInStateError;
-    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
-                                                                                 context:msidParams
-                                                                                   error:&signInStateError];
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:&signInStateError];
     
-    if (signInStateError) {
+    if (signInStateError)
+    {
         block(nil, signInStateError, msidParams);
         return;
     }
+    
     if (signInState == MSIDAccountMetadataStateSignedOut)
     {
         NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
@@ -891,6 +892,25 @@
         
         block(msalResult, resultError, msidParams);
     }];
+}
+
+- (MSIDAccountMetadataState)accountStateForParameters:(MSIDRequestParameters *)msidParams error:(NSError **)signInStateError
+{
+    if (!msidParams.accountIdentifier.homeAccountId)
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:signInStateError];
+    
+    return signInState;
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -1103,6 +1123,17 @@
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
     msidParams.shouldValidateResultAccount = YES;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = NO;
+    
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
+    
+    if (signInState == MSIDAccountMetadataStateSignedOut && msidParams.promptType != MSIDPromptTypeConsent)
+    {
+        msidParams.promptType = MSIDPromptTypeLogin;
+    }
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
@@ -1425,11 +1456,8 @@
 
 - (MSIDRequestType)requestType
 {
-    MSIDRequestType requestType = MSIDRequestLocalType;
-        
-#if TARGET_OS_IPHONE
-    requestType = MSIDRequestBrokeredType;
-    
+    MSIDRequestType requestType = MSIDRequestBrokeredType;
+            
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
     {
         requestType = MSIDRequestLocalType;
@@ -1438,7 +1466,6 @@
     {
         requestType = MSIDRequestLocalType;
     }
-#endif
     
     return requestType;
 }

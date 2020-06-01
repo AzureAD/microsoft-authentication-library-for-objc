@@ -65,14 +65,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
 
-#if TARGET_OS_IPHONE
 /**
     Setting to define MSAL behavior when Microsoft Authenticator application is installed.
     By default, MSAL will always try to use Microsoft Authenticator application when getting a token interactively. 
     Set this property to MSALBrokeredAvailabilityNone to disable this behavior
  */
 @property (class) MSALBrokeredAvailability brokerAvailability;
-#endif
 
 #pragma mark - Unavailable initializers
 

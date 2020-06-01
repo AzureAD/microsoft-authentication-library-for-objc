@@ -28,6 +28,8 @@
 #import "MSALDeviceInformation.h"
 #import "MSALDeviceInformation+Internal.h"
 #import "MSIDDeviceInfo.h"
+#import <AuthenticationServices/AuthenticationServices.h>
+#import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
 
 NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
 
@@ -36,18 +38,40 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
     NSMutableDictionary *_extraDeviceInformation;
 }
 
+- (instancetype)init
+{
+    self = [super init];
+
+    if (self)
+    {
+        _deviceMode = MSALDeviceModeDefault;
+        _extraDeviceInformation = [NSMutableDictionary new];
+    }
+
+    return self;
+}
+
 - (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo
 {
     self = [super init];
-    
+
     if (self)
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
-        
+
+        if (@available(iOS 13.0, macOS 10.15, *))
+        {
+            _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
+        }
+        else
+        {
+            _hasAADSSOExtension = NO;
+        }
+
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
     }
-    
+
     return self;
 }
 
@@ -82,6 +106,11 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
 - (void) initExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo
 {
     [_extraDeviceInformation setValue:deviceInfo.ssoExtensionMode == MSIDSSOExtensionModeFull ? @"Yes" : @"No" forKey:MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY];
+}
+
+- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+{
+    [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
 }
 
 - (NSString *)description

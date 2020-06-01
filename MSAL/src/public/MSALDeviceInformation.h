@@ -40,6 +40,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
 /**
+ Specifies whether AAD SSO extension was detected on the device.
+*/
+@property (nonatomic, readonly) BOOL hasAADSSOExtension;
+
+/**
  Additional device information
 */
 @property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
