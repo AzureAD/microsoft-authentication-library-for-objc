@@ -42,6 +42,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDDevicePopManager.h"
+#import "MSIDAuthenticationSchemeProtocol.h"
 
 @implementation MSALResult
 
@@ -118,7 +119,7 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    return [self resultWithAccessToken:tokenResult.accessToken.accessToken
+    return [self resultWithAccessToken:[tokenResult.accessToken.authScheme getRawAccessToken:tokenResult.accessToken]
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
