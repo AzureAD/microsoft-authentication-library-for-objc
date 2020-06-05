@@ -136,13 +136,24 @@ static NSSet *s_recoverableErrorCode;
                      classifyErrors:(BOOL)shouldClassifyErrors
                  msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
+    return [self msalErrorFromMsidError:msidError
+                         classifyErrors:shouldClassifyErrors
+                     msalOauth2Provider:oauth2Provider
+                          correlationId:nil];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+                     classifyErrors:(BOOL)shouldClassifyErrors
+                 msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                            correlationId:(NSUUID *)correlationId
+{
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
                 errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
                       oauthError:msidError.userInfo[MSIDOAuthErrorKey]
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
-                   correlationId:msidError.userInfo[MSIDCorrelationIdKey]
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId
                         userInfo:msidError.userInfo
                   classifyErrors:shouldClassifyErrors
               msalOauth2Provider:oauth2Provider];
