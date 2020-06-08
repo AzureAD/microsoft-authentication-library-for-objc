@@ -1,3 +1,8 @@
+## [1.1.4] - 2020-06-05
+
+### Fixed
+* Fix handling of certificate based authentication challenge.
+
 ## [1.1.3] - 2020-05-22
 
 ### Added
