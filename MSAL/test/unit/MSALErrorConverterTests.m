@@ -407,47 +407,60 @@
 - (void)testErrorConversion_whenCorrelationIdIsValidInUserInfo_shouldUseCorrelationIdFromUserInfo
 {
     NSUUID *uuid = [NSUUID UUID];
-    NSError *msidError = [[NSError alloc] initWithDomain:MSIDErrorDomain
-                                                     code:MSIDErrorInternal
-                                                userInfo:@{MSIDCorrelationIdKey:uuid}];
     
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         uuid,
+                                         nil,
+                                         NO);
     NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
                                                      classifyErrors:YES
                                                  msalOauth2Provider:nil
-                                                      correlationId: nil];
-    
-    XCTAssertNotNil(msalError.userInfo[MSIDCorrelationIdKey]);
-    XCTAssertEqual(msalError.userInfo[MSIDCorrelationIdKey], uuid);
+                                                      correlationId:nil];
+    XCTAssertNotNil(msalError.userInfo[MSALCorrelationIDKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALCorrelationIDKey], uuid.UUIDString);
 }
 
 - (void)testErrorConversion_whenCorrelationIdIsNilInUserInfo_shouldUseCorrelationIdThatPassedIn
 {
     NSUUID *uuid = [NSUUID UUID];
-    NSError *msidError = [[NSError alloc] initWithDomain:MSIDErrorDomain
-                                                     code:MSIDErrorInternal
-                                                 userInfo:[NSDictionary new]];
-    
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         NO);
     NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
                                                      classifyErrors:YES
                                                  msalOauth2Provider:nil
                                                       correlationId: uuid];
-    
-    XCTAssertNotNil(msalError.userInfo[MSIDCorrelationIdKey]);
-    XCTAssertEqual(msalError.userInfo[MSIDCorrelationIdKey], uuid);
+    XCTAssertNotNil(msalError.userInfo[MSALCorrelationIDKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALCorrelationIDKey], uuid.UUIDString);
 }
 
 - (void)testErrorConversion_whenCorrelationIdIsNilInBothUserInfoAndPassedIn_shouldBeNil
 {
-    NSError *msidError = [[NSError alloc] initWithDomain:MSIDErrorDomain
-                                                     code:MSIDErrorInternal
-                                                 userInfo:[NSDictionary new]];
-    
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         NO);
     NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
                                                      classifyErrors:YES
                                                  msalOauth2Provider:nil
-                                                      correlationId: nil];
-    
-    XCTAssertNil(msalError.userInfo[MSIDCorrelationIdKey]);
+                                                      correlationId:nil];
+    XCTAssertNil(msalError.userInfo[MSALCorrelationIDKey]);
 }
 
 @end

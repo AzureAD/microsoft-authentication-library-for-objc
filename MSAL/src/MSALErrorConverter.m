@@ -212,7 +212,7 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
-    if (!msalUserInfo[MSIDCorrelationIdKey] && correlationId) msalUserInfo[MSIDCorrelationIdKey] = correlationId;
+    if (!msalUserInfo[MSALCorrelationIDKey] && correlationId) msalUserInfo[MSALCorrelationIDKey] = correlationId.UUIDString;
     if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
     if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
