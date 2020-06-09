@@ -102,4 +102,6 @@
 
 - (NSString *_Nonnull)getAuthorizationHeader;
 
+- (NSString *_Nonnull)getAuthenticationScheme;
+
 @end

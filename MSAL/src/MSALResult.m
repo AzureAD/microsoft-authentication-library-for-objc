@@ -44,11 +44,23 @@
 #import "MSIDDevicePopManager.h"
 #import "MSIDAuthenticationSchemeProtocol.h"
 
+@interface MSALResult()
+
+@property id<MSIDAuthenticationSchemeProtocol> authScheme;
+
+@end
+
+
 @implementation MSALResult
 
 - (NSString *)getAuthorizationHeader
 {
-    return nil;
+    return [self.authScheme getAuthorizationHeader:self.accessToken];
+}
+
+- (NSString *)getAuthenticationScheme
+{
+    return [self.authScheme getAuthenticationScheme];
 }
 
 @end
@@ -56,6 +68,7 @@
 @implementation MSALResult (Internal)
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
+                           authScheme:(id<MSIDAuthenticationSchemeProtocol>)authScheme
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
@@ -79,7 +92,7 @@
     result->_scopes = scopes;
     result->_authority = authority;
     result->_correlationId = correlationId;
-    
+    result->_authScheme = authScheme;
     return result;
 }
 
@@ -119,7 +132,8 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    return [self resultWithAccessToken:[tokenResult.accessToken.authScheme getRawAccessToken:tokenResult.accessToken]
+    return [self resultWithAccessToken:[tokenResult.accessToken.authScheme getSecret:tokenResult.accessToken.accessToken]
+                            authScheme:tokenResult.accessToken.authScheme
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
