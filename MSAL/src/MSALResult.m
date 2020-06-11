@@ -53,12 +53,12 @@
 
 @implementation MSALResult
 
-- (NSString *)getAuthorizationHeader
+- (NSString *)authorizationHeader
 {
     return [self.authScheme getAuthorizationHeader:self.accessToken];
 }
 
-- (NSString *)getAuthenticationScheme
+- (NSString *)authenticationScheme
 {
     return [self.authScheme getAuthenticationScheme];
 }
