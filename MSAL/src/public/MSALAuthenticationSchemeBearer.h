@@ -32,9 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALAuthenticationSchemeBearer : NSObject <MSALAuthenticationSchemeProtocol>
 
-@property (nonatomic) MSALAuthScheme scheme;
-
-- (instancetype)init;
+@property (nonatomic, readonly) MSALAuthScheme scheme;
 
 @end
 

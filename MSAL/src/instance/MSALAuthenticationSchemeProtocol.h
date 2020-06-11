@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol MSALAuthenticationSchemeProtocol <NSObject>
 
-@property (nonatomic) MSALAuthScheme scheme;
+@property (nonatomic, readonly) MSALAuthScheme scheme;
 @property (nonatomic, readonly) id<MSIDAuthenticationSchemeProtocol> msidAuthScheme;
 
 @end

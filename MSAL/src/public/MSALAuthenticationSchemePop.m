@@ -39,7 +39,6 @@
         _scheme = MSALAuthSchemePop;
         _httpMethod = httpMethod;
         _requestUrl = requestUrl;
-        _nonce = [[NSUUID UUID] UUIDString];
     }
 
     return self;
