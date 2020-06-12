@@ -132,7 +132,14 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    return [self resultWithAccessToken:[tokenResult.accessToken.authScheme getSecret:tokenResult.accessToken.accessToken]
+    NSString *accessToken = [tokenResult.accessToken.authScheme getSecret:tokenResult.accessToken.accessToken error:error];
+    
+    if (!accessToken)
+    {
+        return nil;
+    }
+    
+    return [self resultWithAccessToken:accessToken
                             authScheme:tokenResult.accessToken.authScheme
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
