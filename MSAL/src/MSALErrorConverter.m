@@ -136,13 +136,24 @@ static NSSet *s_recoverableErrorCode;
                      classifyErrors:(BOOL)shouldClassifyErrors
                  msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
+    return [self msalErrorFromMsidError:msidError
+                         classifyErrors:shouldClassifyErrors
+                     msalOauth2Provider:oauth2Provider
+                          correlationId:nil];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+                     classifyErrors:(BOOL)shouldClassifyErrors
+                 msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                            correlationId:(NSUUID *)correlationId
+{
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
                 errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
                       oauthError:msidError.userInfo[MSIDOAuthErrorKey]
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
-                   correlationId:msidError.userInfo[MSIDCorrelationIdKey]
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId.UUIDString
                         userInfo:msidError.userInfo
                   classifyErrors:shouldClassifyErrors
               msalOauth2Provider:oauth2Provider];
@@ -154,7 +165,7 @@ static NSSet *s_recoverableErrorCode;
                   oauthError:(NSString *)oauthError
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
-               correlationId:(__unused NSUUID *)correlationId
+               correlationId:(NSString *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
@@ -201,6 +212,7 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
+    if (!msalUserInfo[MSALCorrelationIDKey] && correlationId) msalUserInfo[MSALCorrelationIDKey] = correlationId;
     if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
     if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
