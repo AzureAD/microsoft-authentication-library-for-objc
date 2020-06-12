@@ -153,7 +153,7 @@ static NSSet *s_recoverableErrorCode;
                       oauthError:msidError.userInfo[MSIDOAuthErrorKey]
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
-                   correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId.UUIDString
                         userInfo:msidError.userInfo
                   classifyErrors:shouldClassifyErrors
               msalOauth2Provider:oauth2Provider];
@@ -165,7 +165,7 @@ static NSSet *s_recoverableErrorCode;
                   oauthError:(NSString *)oauthError
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
-               correlationId:(__unused NSUUID *)correlationId
+               correlationId:(NSString *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
@@ -212,7 +212,7 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
-    if (!msalUserInfo[MSALCorrelationIDKey] && correlationId) msalUserInfo[MSALCorrelationIDKey] = correlationId.UUIDString;
+    if (!msalUserInfo[MSALCorrelationIDKey] && correlationId) msalUserInfo[MSALCorrelationIDKey] = correlationId;
     if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
     if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
