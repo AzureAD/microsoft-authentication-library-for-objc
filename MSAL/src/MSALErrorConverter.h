@@ -33,5 +33,5 @@
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError;
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError classifyErrors:(BOOL)shouldClassifyErrors msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider;
-
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError classifyErrors:(BOOL)shouldClassifyErrors msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider correlationId:(NSUUID *)correlationId;
 @end
