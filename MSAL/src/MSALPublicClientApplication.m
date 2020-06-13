@@ -129,6 +129,9 @@
     MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
     MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
+    #if TARGET_OS_IPHONE
+        [MSIDCertAuthHandler setUseAuthSession:YES];
+    #endif
 }
 
 #pragma mark - Properties
@@ -714,7 +717,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -1013,7 +1016,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -1260,7 +1263,7 @@
 {
     __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
         
         if (!result)
         {
