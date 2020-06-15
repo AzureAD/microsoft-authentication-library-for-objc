@@ -60,7 +60,7 @@
 
 - (NSString *)authenticationScheme
 {
-    return [self.authScheme getAuthenticationScheme];
+    return self.authScheme.authenticationScheme;
 }
 
 @end
@@ -132,15 +132,10 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [tokenResult.accessToken.authScheme getSecret:tokenResult.accessToken.accessToken error:error];
-    
-    if (!accessToken)
-    {
-        return nil;
-    }
-    
-    return [self resultWithAccessToken:accessToken
-                            authScheme:tokenResult.accessToken.authScheme
+    // TODO: we currently have unit tests that allow MSIDTokenResult to have a nil access token
+    // TODO: This behavior will change for pop tokens where we need to verify the kid claim in the access token before returning it
+    return [self resultWithAccessToken:[tokenResult.authScheme getSecret:tokenResult.accessToken error:error]
+                            authScheme:tokenResult.authScheme
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId

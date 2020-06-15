@@ -350,6 +350,8 @@
     __auto_type scopes = [settings.scopes allObjects];
     __auto_type account = settings.currentAccount;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl];
     parameters.authority = settings.authority;
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;

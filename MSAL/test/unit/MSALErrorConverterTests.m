@@ -308,7 +308,8 @@
                                                                    account:account
                                                                  authority:authority
                                                              correlationId:[NSUUID UUID]
-                                                             tokenResponse:response];
+                                                             tokenResponse:response
+                                                                authScheme:conf.authScheme];
 
     return result;
 }
