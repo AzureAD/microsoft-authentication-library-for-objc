@@ -40,6 +40,7 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSALAccount+MultiTenantAccount.h"
+#import "MSIDAccessToken.h"
 
 @interface MSALResultTests : MSALTestCase
 
@@ -120,6 +121,8 @@
     account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"uid.tenant_id"];
     tokenResult.account = account;
     tokenResult.correlationId = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000001"];
+    tokenResult.accessToken = [MSIDAccessToken new];
+    tokenResult.accessToken.accessToken = @"access_token";
     
     NSError *error = nil;
     MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority error:&error];

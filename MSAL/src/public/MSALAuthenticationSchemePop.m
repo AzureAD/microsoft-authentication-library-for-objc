@@ -44,10 +44,9 @@
     return self;
 }
 
-- (id<MSIDAuthenticationSchemeProtocol>)msidAuthScheme
+- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthSchemeWithCacheConfig:(MSIDCacheConfig *)cacheConfig
 {
-    return [[MSIDAuthenticationSchemePop alloc] initWithHttpMethod:MSIDHttpMethodForHttpMethod(self.httpMethod) requestUrl:self.requestUrl];
+    return [[MSIDAuthenticationSchemePop alloc] initWithCacheConfig:cacheConfig httpMethod:MSIDHttpMethodForHttpMethod(self.httpMethod) requestUrl:self.requestUrl];
 }
-
 
 @end

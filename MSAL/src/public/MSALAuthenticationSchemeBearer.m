@@ -41,9 +41,9 @@
     return self;
 }
 
-- (id<MSIDAuthenticationSchemeProtocol>)msidAuthScheme
+- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthSchemeWithCacheConfig:(MSIDCacheConfig *)cacheConfig
 {
-    return [MSIDAuthenticationSchemeBearer new];
+    return [[MSIDAuthenticationSchemeBearer alloc] initWithCacheConfig:cacheConfig];
 }
 
 @end

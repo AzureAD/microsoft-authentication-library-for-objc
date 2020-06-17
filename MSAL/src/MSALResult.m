@@ -50,7 +50,6 @@
 
 @end
 
-
 @implementation MSALResult
 
 - (NSString *)authorizationHeader
@@ -132,9 +131,16 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
+    NSString *accessToken = [tokenResult.authScheme getSecret:tokenResult.accessToken error:error];
+    
+    if (!accessToken)
+    {
+        return nil;
+    }
+    
     // TODO: we currently have unit tests that allow MSIDTokenResult to have a nil access token
     // TODO: This behavior will change for pop tokens where we need to verify the kid claim in the access token before returning it
-    return [self resultWithAccessToken:[tokenResult.authScheme getSecret:tokenResult.accessToken error:error]
+    return [self resultWithAccessToken:accessToken
                             authScheme:tokenResult.authScheme
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken

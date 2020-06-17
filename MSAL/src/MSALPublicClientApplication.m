@@ -104,6 +104,7 @@
 #import "MSALDeviceInfoProvider.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSIDCurrentRequestTelemetry.h"
+#import "MSIDCacheConfig.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -113,6 +114,7 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
+@property (nonatomic) MSIDCacheConfig *msidCacheConfig;
 
 @end
 
@@ -292,6 +294,7 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     self.tokenCache = defaultAccessor;
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
     return YES;
 }
 #else
@@ -313,12 +316,16 @@
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
         }
+        
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(secondaryDataSource.accessControlForNonSharedItems)];
     }
     else
     {
         dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                   trustedApplications:config.cacheConfig.trustedApplications
                                                                 error:&dataSourceError];
+        
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(dataSource.accessControlForNonSharedItems)];
     }
     
     if (!dataSource)
@@ -788,9 +795,11 @@
     
     MSIDRequestType requestType = [self requestType];
     
+    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthSchemeWithCacheConfig:self.msidCacheConfig];
+    
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
-                                                                              authScheme:parameters.authenticationScheme.msidAuthScheme
+                                                                              authScheme:msidAuthScheme
                                                                          redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                             clientId:self.internalConfig.clientId
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
@@ -1071,9 +1080,12 @@
                                                                   aadRequestVersion:MSIDBrokerAADRequestVersionV2];
 
 #endif
+    
+    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthSchemeWithCacheConfig:self.msidCacheConfig];
+    
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
-                                                          authScheme:parameters.authenticationScheme.msidAuthScheme
+                                                          authScheme:msidAuthScheme
                                                     redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                        clientId:self.internalConfig.clientId
                                                          scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
