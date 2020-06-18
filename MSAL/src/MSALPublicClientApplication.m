@@ -128,7 +128,7 @@
     MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
     MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
-    #if TARGET_OS_IPHONE
+    #if TARGET_OS_IPHONE && !AD_BROKER
         [MSIDCertAuthHandler setUseAuthSession:YES];
     #endif
 }
