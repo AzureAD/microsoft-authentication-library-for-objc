@@ -29,13 +29,26 @@
 #import "MSIDAuthenticationSchemeProtocol.h"
 
 @class MSIDCacheConfig;
+@class MSIDDevicePopManager;
+@class MSIDAccessToken;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol MSALAuthenticationSchemeProtocol <NSObject>
 
 @property (nonatomic, readonly) MSALAuthScheme scheme;
 
-- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthSchemeWithCacheConfig:(MSIDCacheConfig *)cacheConfig;
+@property (nonatomic, readonly) NSString *authenticationScheme;
+
+- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
+
+- (nullable NSDictionary *)getSchemeParameters:(nullable MSIDDevicePopManager *)popManager;
+
+- (nullable NSString *)getAuthorizationHeader:(nullable NSString *)accessToken;
+
+- (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken
+                      popManager:(nullable MSIDDevicePopManager *)popManager
+                           error:(NSError **)error;
 
 @end
 

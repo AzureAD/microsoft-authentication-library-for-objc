@@ -28,11 +28,15 @@
 #import "MSALResult.h"
 
 @class MSIDTokenResult;
+@protocol MSALAuthenticationSchemeProtocol;
+@class MSIDDevicePopManager;
 
 @interface MSALResult (Internal)
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
+                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error;
 
 @end

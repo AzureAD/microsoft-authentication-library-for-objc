@@ -139,13 +139,17 @@ static NSSet *s_recoverableErrorCode;
     return [self msalErrorFromMsidError:msidError
                          classifyErrors:shouldClassifyErrors
                      msalOauth2Provider:oauth2Provider
-                          correlationId:nil];
+                          correlationId:nil
+                             authScheme:nil
+                             popManager:nil];
 }
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
                      classifyErrors:(BOOL)shouldClassifyErrors
                  msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
                             correlationId:(NSUUID *)correlationId
+                         authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                         popManager:(MSIDDevicePopManager *)popManager
 {
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
@@ -156,7 +160,9 @@ static NSSet *s_recoverableErrorCode;
                    correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId.UUIDString
                         userInfo:msidError.userInfo
                   classifyErrors:shouldClassifyErrors
-              msalOauth2Provider:oauth2Provider];
+              msalOauth2Provider:oauth2Provider
+                      authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                      popManager:(MSIDDevicePopManager *)popManager];
 }
 
 + (NSError *)errorWithDomain:(NSString *)domain
@@ -169,6 +175,8 @@ static NSSet *s_recoverableErrorCode;
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                  popManager:(MSIDDevicePopManager *)popManager
 {
     if ([NSString msidIsStringNilOrBlank:domain])
     {
@@ -224,7 +232,7 @@ static NSSet *s_recoverableErrorCode;
     if (userInfo[MSIDInvalidTokenResultKey] && oauth2Provider)
     {
         NSError *resultError = nil;
-        MSALResult *msalResult = [oauth2Provider resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+        MSALResult *msalResult = [oauth2Provider resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] authScheme:authScheme popManager:popManager error:&resultError];
 
         if (!msalResult)
         {

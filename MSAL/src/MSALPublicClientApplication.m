@@ -105,6 +105,7 @@
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSIDCurrentRequestTelemetry.h"
 #import "MSIDCacheConfig.h"
+#import "MSIDDevicePopManager.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -115,6 +116,7 @@
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
 @property (nonatomic) MSIDCacheConfig *msidCacheConfig;
+@property (nonatomic) MSIDDevicePopManager *popManager;
 
 @end
 
@@ -724,7 +726,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -795,7 +797,8 @@
     
     MSIDRequestType requestType = [self requestType];
     
-    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthSchemeWithCacheConfig:self.msidCacheConfig];
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
@@ -894,7 +897,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
         
         if (result.tokenResponse)
         {
@@ -1025,7 +1028,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -1081,7 +1084,8 @@
 
 #endif
     
-    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthSchemeWithCacheConfig:self.msidCacheConfig];
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
@@ -1202,7 +1206,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
         block(msalResult, resultError, msidParams);
@@ -1275,7 +1279,7 @@
 {
     __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:nil popManager:nil];
         
         if (!result)
         {
@@ -1516,6 +1520,16 @@
     
     requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
     return requestParams;
+}
+
+- (MSIDDevicePopManager *)popManager
+{
+    if (_popManager == nil)
+    {
+        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig cache:_tokenCache];
+    }
+    
+    return _popManager;
 }
 
 @end

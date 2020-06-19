@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSALTenantProfile;
 @class MSALAccountId;
 @class MSIDAccountMetadataCacheAccessor;
+@protocol MSALAuthenticationSchemeProtocol;
+@class MSIDDevicePopManager;
 
 @interface MSALOauth2Provider : NSObject
 
@@ -53,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
             accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
 
 - (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                    authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                                    popManager:(MSIDDevicePopManager *)popManager
                                          error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account

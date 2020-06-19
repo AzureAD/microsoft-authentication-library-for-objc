@@ -28,6 +28,18 @@
 #import "MSALAuthenticationSchemePop.h"
 #import "MSIDAuthenticationSchemePop.h"
 #import "MSALHttpMethod.h"
+#import "MSIDDevicePopManager.h"
+#import "MSALAuthScheme.h"
+#import "MSIDAccessToken.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+
+static NSString *keyDelimiter = @" ";
+
+@interface MSALAuthenticationSchemePop()
+
+@property (nonatomic) NSString *nonce;
+
+@end
 
 @implementation MSALAuthenticationSchemePop
 
@@ -39,14 +51,84 @@
         _scheme = MSALAuthSchemePop;
         _httpMethod = httpMethod;
         _requestUrl = requestUrl;
+        _nonce = [[NSUUID new] UUIDString];
     }
 
     return self;
 }
 
-- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthSchemeWithCacheConfig:(MSIDCacheConfig *)cacheConfig
+- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
-    return [[MSIDAuthenticationSchemePop alloc] initWithCacheConfig:cacheConfig httpMethod:MSIDHttpMethodForHttpMethod(self.httpMethod) requestUrl:self.requestUrl];
+    return [[MSIDAuthenticationSchemePop alloc] initWithSchemeParameters:params];
+}
+
+- (NSDictionary *)getSchemeParameters:(MSIDDevicePopManager *)popManager
+{
+    NSMutableDictionary *schemeParams = [NSMutableDictionary new];
+    NSString *requestConf = popManager.requestConfirmation;
+    if (requestConf)
+    {
+        [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
+        [schemeParams setObject:requestConf forKey:MSID_OAUTH2_REQUEST_CONFIRMATION];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to append public key jwk to request headers.");
+    }
+    
+    return schemeParams;
+}
+
+- (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
+{
+    NSString *kid = popManager.kid;
+    if (!kid || !accessToken.kid || ![accessToken.kid isEqualToString:kid])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to match access token key thumbprint.");
+        BOOL result = [popManager.tokenCache removeToken:accessToken context:nil error:nil];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to remove access token after thumprint mismatch.");
+        }
+        
+        if (error)
+        {
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Failed to match access token key thumbprint.", nil, nil, nil, nil, nil, YES);
+        }
+        
+        return nil;
+    }
+    
+    NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
+                                                           httpMethod:MSALStringForHttpMethod(self.httpMethod)
+                                                           requestUrl:self.requestUrl.absoluteString
+                                                                nonce:self.nonce
+                                                                error:error];
+    
+    if (!signedAccessToken)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to sign access token.");
+        
+        if (error)
+        {
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Failed to sign access token.", nil, nil, nil, nil, nil, YES);
+        }
+        
+        return nil;
+    }
+    
+    return signedAccessToken;
+}
+
+- (NSString *)authenticationScheme
+{
+    return MSALParameterStringForAuthScheme(self.scheme);
+}
+
+- (NSString *)getAuthorizationHeader:(nullable NSString *)accessToken
+{
+    return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
 }
 
 @end

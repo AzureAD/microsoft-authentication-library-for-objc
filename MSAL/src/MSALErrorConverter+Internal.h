@@ -28,6 +28,8 @@
 #import "MSALErrorConverter.h"
 
 @class MSALOauth2Provider;
+@protocol MSALAuthenticationSchemeProtocol;
+@class MSIDDevicePopManager;
 
 @interface MSALErrorConverter (Internal)
 
@@ -40,6 +42,8 @@
                correlationId:(NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider;
+          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                  popManager:(MSIDDevicePopManager *)popManager;
 
 @end

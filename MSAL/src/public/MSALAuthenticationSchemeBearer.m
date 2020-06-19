@@ -27,6 +27,10 @@
 
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSIDAuthenticationSchemeBearer.h"
+#import "MSALAuthScheme.h"
+#import "MSIDAccessToken.h"
+
+static NSString *keyDelimiter = @" ";
 
 @implementation MSALAuthenticationSchemeBearer
 
@@ -41,9 +45,29 @@
     return self;
 }
 
-- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthSchemeWithCacheConfig:(MSIDCacheConfig *)cacheConfig
+- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
-    return [[MSIDAuthenticationSchemeBearer alloc] initWithCacheConfig:cacheConfig];
+    return [[MSIDAuthenticationSchemeBearer alloc] initWithSchemeParameters:params];
+}
+
+- (NSDictionary *)getSchemeParameters:(nullable __unused MSIDDevicePopManager *)popManager
+{
+    return nil;
+}
+
+- (NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable __unused MSIDDevicePopManager *)popManager error:(__unused NSError **)error
+{
+    return accessToken.accessToken;
+}
+
+- (NSString *)authenticationScheme
+{
+    return MSALParameterStringForAuthScheme(self.scheme);
+}
+
+- (NSString *)getAuthorizationHeader:(nullable NSString *)accessToken
+{
+    return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
 }
 
 @end

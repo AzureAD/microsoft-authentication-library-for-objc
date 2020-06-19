@@ -42,11 +42,11 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDDevicePopManager.h"
-#import "MSIDAuthenticationSchemeProtocol.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 
 @interface MSALResult()
 
-@property id<MSIDAuthenticationSchemeProtocol> authScheme;
+@property id<MSALAuthenticationSchemeProtocol> authScheme;
 
 @end
 
@@ -67,7 +67,6 @@
 @implementation MSALResult (Internal)
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                           authScheme:(id<MSIDAuthenticationSchemeProtocol>)authScheme
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
@@ -78,6 +77,7 @@
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
                         correlationId:(NSUUID *)correlationId
+                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
 {
     MSALResult *result = [MSALResult new];
     result->_accessToken = accessToken;
@@ -97,6 +97,8 @@
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
+                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error
 {
     if (!tokenResult)
@@ -131,17 +133,13 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [tokenResult.authScheme getSecret:tokenResult.accessToken error:error];
-    
+    NSString *accessToken = [authScheme getSecret:tokenResult.accessToken popManager:popManager error:error];
     if (!accessToken)
     {
         return nil;
     }
     
-    // TODO: we currently have unit tests that allow MSIDTokenResult to have a nil access token
-    // TODO: This behavior will change for pop tokens where we need to verify the kid claim in the access token before returning it
     return [self resultWithAccessToken:accessToken
-                            authScheme:tokenResult.authScheme
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
@@ -151,7 +149,8 @@
                               uniqueId:tenantProfile.identifier
                                 scopes:[tokenResult.accessToken.scopes array]
                              authority:authority
-                         correlationId:tokenResult.correlationId];
+                         correlationId:tokenResult.correlationId
+                            authScheme:authScheme];
 }
 
 @end
