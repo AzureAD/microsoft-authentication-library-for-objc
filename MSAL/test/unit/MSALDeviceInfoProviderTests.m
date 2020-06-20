@@ -29,6 +29,7 @@
 #import "MSIDDeviceInfo.h"
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALDeviceInformation.h"
+#import "MSIDWorkPlaceJoinUtil.h"
 
 @interface MSALDeviceInfoProviderTests : XCTestCase
 
@@ -77,6 +78,8 @@
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
         XCTAssertNil(deviceInformation);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorInternal);
@@ -126,6 +129,59 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
+- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetDeviceInfoRequest class]
+                           block:(id)^(id obj)
+    {
+        return NO;
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    expectation.inverted = YES;
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetDeviceInfoRequest  class]
+                              block:(id)^(id obj, MSIDGetDeviceInfoRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+    }];
+
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    XCTestExpectation *failExpectation = [self expectationWithDescription:@"Get device info"];
+
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
+                                        completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [failExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation, failExpectation] timeout:1];
+}
+
 - (void)testGetDeviceInfo_whenSSOExtensionPresent_encounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
@@ -157,6 +213,8 @@
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
         XCTAssertNil(deviceInformation);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorUnsupportedFunctionality);
@@ -208,6 +266,65 @@
         [successExpectation fulfill];
     }];
     
+    [self waitForExpectations:@[expectation, successExpectation] timeout:1];
+}
+
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetDeviceInfoRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetDeviceInfoRequest  class]
+                              block:(id)^(id obj, MSIDGetDeviceInfoRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+
+        MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
+        deviceInfo.brokerVersion = @"test";
+        deviceInfo.deviceMode = MSIDDeviceModeShared;
+        deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
+
+        callback(deviceInfo, nil);
+    }];
+
+    XCTestExpectation *successExpectation = [self expectationWithDescription:@"Get device info"];
+
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
+                                        completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [successExpectation fulfill];
+    }];
+
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
 

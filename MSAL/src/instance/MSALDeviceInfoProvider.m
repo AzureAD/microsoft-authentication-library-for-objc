@@ -32,10 +32,14 @@
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALDeviceInformation+Internal.h"
 
+#import "MSIDWorkPlaceJoinConstants.h"
+#import "MSIDWorkPlaceJoinUtil.h"
+#import "MSIDRegistrationInformation.h"
+
 @implementation MSALDeviceInfoProvider
 
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
     if (![requestParameters shouldUseBroker])
     {
@@ -43,48 +47,68 @@
         completionBlock(nil, error);
         return;
     }
-    
-    
-    if (![MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest])
+
+    BOOL canCallSSOExtension = NO;
+    if (@available(iOS 13.0, macOS 10.15, *))
+    {
+        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
+    }
+
+    if (!canCallSSOExtension)
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
-        
+
         MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
         msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
+        NSDictionary *deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+        if (deviceRegMetadataInfo)
+        {
+            [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
+        }
         completionBlock(msalDeviceInfo, nil);
         return;
     }
     
-    NSError *requestError;
-    MSIDSSOExtensionGetDeviceInfoRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetDeviceInfoRequest alloc] initWithRequestParameters:requestParameters
-                                                                                                                                  error:&requestError];
-    
-    if (!ssoExtensionRequest)
+    if (@available(iOS 13.0, macOS 10.15, *))
     {
-        completionBlock(nil, requestError);
-        return;
-    }
-    
-    if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
-    {
-        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
-        completionBlock(nil, error);
-        return;
-    }
-    
-    [ssoExtensionRequest executeRequestWithCompletion:^(MSIDDeviceInfo * _Nullable deviceInfo, NSError * _Nullable error)
-    {
-        [self copyAndClearCurrentSSOExtensionRequest];
-        
-        if (!deviceInfo)
+        // We are here means canCallSSOExtension is TRUE
+        NSError *requestError;
+        MSIDSSOExtensionGetDeviceInfoRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetDeviceInfoRequest alloc] initWithRequestParameters:requestParameters
+                                                                                                                                      error:&requestError];
+
+        if (!ssoExtensionRequest)
         {
+            completionBlock(nil, requestError);
+            return;
+        }
+
+        if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
+        {
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
             completionBlock(nil, error);
             return;
         }
-        
-        MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
-        completionBlock(msalDeviceInfo, nil);
-    }];
+
+        [ssoExtensionRequest executeRequestWithCompletion:^(MSIDDeviceInfo * _Nullable deviceInfo, NSError * _Nullable error)
+        {
+            [self copyAndClearCurrentSSOExtensionRequest];
+
+            if (!deviceInfo)
+            {
+                completionBlock(nil, error);
+                return;
+            }
+
+            MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
+            NSDictionary *deviceRegMetadataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+            if (deviceRegMetadataInfo)
+            {
+                [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetadataInfo];
+            }
+            completionBlock(msalDeviceInfo, nil);
+            return;
+        }];
+    }
 }
 
 @end

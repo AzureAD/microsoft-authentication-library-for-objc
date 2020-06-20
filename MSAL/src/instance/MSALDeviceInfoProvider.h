@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
 
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
 
 @end
 
