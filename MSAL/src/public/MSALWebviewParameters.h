@@ -52,6 +52,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Modal presentation style for displaying authentication web content.
+ Note that presentationStyle has no effect when webviewType == MSALWebviewType.MSALWebviewTypeDefault or
+ webviewType == MSALWebviewType.MSALWebviewTypeAuthenticationSession.
  */
 @property (nonatomic) UIModalPresentationStyle presentationStyle;
 
