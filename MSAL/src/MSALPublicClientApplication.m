@@ -309,6 +309,8 @@
     if (@available(macOS 10.15, *)) {
         dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
         
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
+        
         NSError *secondaryDataSourceError = nil;
         secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                            trustedApplications:config.cacheConfig.trustedApplications
@@ -318,8 +320,6 @@
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
         }
-        
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(secondaryDataSource.accessControlForNonSharedItems)];
     }
     else
     {
@@ -327,7 +327,8 @@
                                                   trustedApplications:config.cacheConfig.trustedApplications
                                                                 error:&dataSourceError];
         
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(dataSource.accessControlForNonSharedItems)];
+        MSIDMacKeychainTokenCache *macCache = (MSIDMacKeychainTokenCache *)dataSource;
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macCache.accessControlForNonSharedItems)];
     }
     
     if (!dataSource)
@@ -1526,7 +1527,7 @@
 {
     if (_popManager == nil)
     {
-        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig cache:_tokenCache];
+        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig];
     }
     
     return _popManager;

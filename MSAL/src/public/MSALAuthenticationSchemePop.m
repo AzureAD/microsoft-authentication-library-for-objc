@@ -81,25 +81,6 @@ static NSString *keyDelimiter = @" ";
 
 - (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
-    NSString *kid = popManager.kid;
-    if (!kid || !accessToken.kid || ![accessToken.kid isEqualToString:kid])
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to match access token key thumbprint.");
-        BOOL result = [popManager.tokenCache removeToken:accessToken context:nil error:nil];
-        
-        if (!result)
-        {
-            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to remove access token after thumprint mismatch.");
-        }
-        
-        if (error)
-        {
-            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Failed to match access token key thumbprint.", nil, nil, nil, nil, nil, YES);
-        }
-        
-        return nil;
-    }
-    
     NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
                                                            httpMethod:MSALStringForHttpMethod(self.httpMethod)
                                                            requestUrl:self.requestUrl.absoluteString
