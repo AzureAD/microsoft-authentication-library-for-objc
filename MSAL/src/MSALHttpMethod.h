@@ -26,6 +26,4 @@
 //------------------------------------------------------------------------------
 #import "MSIDConstants.h"
 
-extern NSString *MSALStringForHttpMethod(MSALHttpMethod httpMethod);
-extern MSIDHttpMethod MSIDHttpMethodForHttpMethod(MSALHttpMethod httpMethod);
 extern NSString *MSALParameterStringForHttpMethod(MSALHttpMethod httpMethod);

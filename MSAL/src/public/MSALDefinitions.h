@@ -220,7 +220,13 @@ typedef NS_ENUM(NSUInteger, MSALHttpMethod)
         Http Method for the pop resource
     */
     MSALHttpMethodGET,
-    
+    MSALHttpMethodHEAD,
     MSALHttpMethodPOST,
+    MSALHttpMethodPUT,
+    MSALHttpMethodDELETE,
+    MSALHttpMethodCONNECT,
+    MSALHttpMethodOPTIONS,
+    MSALHttpMethodTRACE,
+    MSALHttpMethodPATCH
     
 };

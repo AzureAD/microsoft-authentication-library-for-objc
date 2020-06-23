@@ -82,7 +82,7 @@ static NSString *keyDelimiter = @" ";
 - (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
     NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
-                                                           httpMethod:MSALStringForHttpMethod(self.httpMethod)
+                                                           httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
                                                            requestUrl:self.requestUrl.absoluteString
                                                                 nonce:self.nonce
                                                                 error:error];

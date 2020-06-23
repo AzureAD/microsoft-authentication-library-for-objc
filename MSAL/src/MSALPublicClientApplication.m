@@ -325,12 +325,12 @@
     }
     else
     {
-        dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                   trustedApplications:config.cacheConfig.trustedApplications
                                                                 error:&dataSourceError];
         
-        MSIDMacKeychainTokenCache *macCache = (MSIDMacKeychainTokenCache *)dataSource;
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macCache.accessControlForNonSharedItems)];
+        dataSource = macDataSource;
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
     }
     
     if (!dataSource)

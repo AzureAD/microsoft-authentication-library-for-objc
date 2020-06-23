@@ -26,34 +26,19 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDConstants.h"
-
-NSString *MSALStringForHttpMethod(MSALHttpMethod httpMethod)
-{
-    switch (httpMethod)
-    {
-            STRING_CASE(MSALHttpMethodGET);
-            STRING_CASE(MSALHttpMethodPOST);
-    }
-    
-    @throw @"Unrecognized httpMethod";
-}
-
-MSIDHttpMethod MSIDHttpMethodForHttpMethod(MSALHttpMethod httpMethod)
-{
-    switch (httpMethod)
-    {
-        case MSALHttpMethodGET : return MSIDHttpMethodGET;
-        case MSALHttpMethodPOST : return MSIDHttpMethodPOST;
-        default : return MSIDHttpMethodPOST;
-    }
-}
 
 NSString *MSALParameterStringForHttpMethod(MSALHttpMethod httpMethod)
 {
     switch (httpMethod)
     {
         case MSALHttpMethodGET : return @"GET";
+        case MSALHttpMethodHEAD : return @"HEAD";
         case MSALHttpMethodPOST : return @"POST";
+        case MSALHttpMethodPUT : return @"PUT";
+        case MSALHttpMethodDELETE : return @"DELETE";
+        case MSALHttpMethodCONNECT : return @"CONNECT";
+        case MSALHttpMethodOPTIONS : return @"OPTIONS";
+        case MSALHttpMethodTRACE : return @"TRACE";
+        case MSALHttpMethodPATCH : return @"PATCH";
     }
 }
