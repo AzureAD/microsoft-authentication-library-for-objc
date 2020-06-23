@@ -228,6 +228,8 @@
     {
         return nil;
     }
+    
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig];
         
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
@@ -1521,16 +1523,6 @@
     
     requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
     return requestParams;
-}
-
-- (MSIDDevicePopManager *)popManager
-{
-    if (_popManager == nil)
-    {
-        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig];
-    }
-    
-    return _popManager;
 }
 
 @end
