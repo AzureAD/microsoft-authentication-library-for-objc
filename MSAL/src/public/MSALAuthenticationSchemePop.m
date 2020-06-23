@@ -79,6 +79,14 @@ static NSString *keyDelimiter = @" ";
     return schemeParams;
 }
 
+/// <summary>
+/// Proof-of-Possession Key for JWTs
+/// </summary>
+/// <remarks>
+/// This SDK will use RFC7800
+/// See https://tools.ietf.org/html/rfc7800 Section 3.2
+/// </remarks>
+
 - (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
     NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
