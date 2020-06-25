@@ -26,11 +26,10 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDAuthenticationSchemeProtocol.h"
 
-@class MSIDCacheConfig;
 @class MSIDDevicePopManager;
 @class MSIDAccessToken;
+@class MSIDAuthenticationScheme;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -40,11 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSString *authenticationScheme;
 
-- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
+- (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
 
-- (nullable NSDictionary *)getSchemeParameters:(nullable MSIDDevicePopManager *)popManager;
+- (nullable NSDictionary *)getSchemeParameters:(nonnull MSIDDevicePopManager *)popManager;
 
-- (nullable NSString *)getAuthorizationHeader:(nullable NSString *)accessToken;
+- (nullable NSString *)getAuthorizationHeader:(nonnull NSString *)accessToken;
 
 - (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken
                       popManager:(nullable MSIDDevicePopManager *)popManager

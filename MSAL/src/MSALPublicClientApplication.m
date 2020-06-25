@@ -801,7 +801,7 @@
     MSIDRequestType requestType = [self requestType];
     
     NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
-    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
@@ -1088,22 +1088,22 @@
 #endif
     
     NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
-    id<MSIDAuthenticationSchemeProtocol> msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
                                                           authScheme:msidAuthScheme
-                                                    redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
-                                                       clientId:self.internalConfig.clientId
-                                                         scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
-                                                     oidcScopes:[self.class defaultOIDCScopes]
-                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
-                                                  correlationId:parameters.correlationId
-                                                 telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                                  brokerOptions:brokerOptions
-                                                    requestType:requestType
-                                            intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
-                                                          error:&msidError];
+                                                         redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                            clientId:self.internalConfig.clientId
+                                                              scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
+                                                          oidcScopes:[self.class defaultOIDCScopes]
+                                                extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]        initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
+                                                       correlationId:parameters.correlationId
+                                                      telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                       brokerOptions:brokerOptions
+                                                         requestType:requestType
+                                                 intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                               error:&msidError];
     
     if (!msidParams)
     {

@@ -57,7 +57,7 @@ static NSString *keyDelimiter = @" ";
     return self;
 }
 
-- (id<MSIDAuthenticationSchemeProtocol>)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
+- (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
     return [[MSIDAuthenticationSchemePop alloc] initWithSchemeParameters:params];
 }
@@ -115,7 +115,7 @@ static NSString *keyDelimiter = @" ";
     return MSALParameterStringForAuthScheme(self.scheme);
 }
 
-- (NSString *)getAuthorizationHeader:(nullable NSString *)accessToken
+- (NSString *)getAuthorizationHeader:(NSString *)accessToken
 {
     return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
 }
