@@ -37,6 +37,8 @@ static NSString *keyDelimiter = @" ";
 
 @interface MSALAuthenticationSchemePop()
 
+@property (nonatomic) MSALHttpMethod httpMethod;
+@property (nonatomic) NSURL *requestUrl;
 @property (nonatomic) NSString *nonce;
 @property (nonatomic) NSDictionary *additionalParameters;
 
