@@ -38,12 +38,16 @@ static NSString *keyDelimiter = @" ";
 @interface MSALAuthenticationSchemePop()
 
 @property (nonatomic) NSString *nonce;
+@property (nonatomic) NSDictionary *additionalParameters;
 
 @end
 
 @implementation MSALAuthenticationSchemePop
 
-- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod requestUrl:(NSURL *)requestUrl
+- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                        requestUrl:(NSURL *)requestUrl
+                             nonce:(NSString *)nonce
+              additionalParameters:(NSDictionary *)additionalParameters
 {
     self = [super init];
     if (self)
@@ -51,7 +55,8 @@ static NSString *keyDelimiter = @" ";
         _scheme = MSALAuthSchemePop;
         _httpMethod = httpMethod;
         _requestUrl = requestUrl;
-        _nonce = [[NSUUID new] UUIDString];
+        _nonce = nonce ? nonce : [[NSUUID new] UUIDString];
+        _additionalParameters = additionalParameters ? additionalParameters : [NSDictionary new];
     }
 
     return self;

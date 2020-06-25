@@ -35,7 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) MSALHttpMethod httpMethod;
 @property (nonatomic, readonly) NSURL *requestUrl;
 
-- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod requestUrl:(NSURL *)requestUrl;
+- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                        requestUrl:(NSURL *)requestUrl
+                             nonce:(nullable NSString *)nonce
+              additionalParameters:(nullable NSDictionary *)additionalParameters;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
