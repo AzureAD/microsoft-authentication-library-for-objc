@@ -100,4 +100,14 @@
  */
 @property (readonly, nonnull) NSUUID *correlationId;
 
+/**
+ The authorization header for the specific authentication scheme . For instance "Bearer ..." or "Pop ...".
+ */
+@property (readonly, nonnull) NSString *authorizationHeader;
+
+/**
+ The authentication scheme for the tokens issued. For instance "Bearer " or "Pop".
+ */
+@property (readonly, nonnull) NSString *authenticationScheme;
+
 @end

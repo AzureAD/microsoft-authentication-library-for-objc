@@ -25,25 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALErrorConverter (Internal)
+@interface MSALAuthenticationSchemePop : NSObject<MSALAuthenticationSchemeProtocol>
 
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
+@property (nonatomic, readonly) MSALAuthScheme scheme;
+
+- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                        requestUrl:(NSURL *)requestUrl
+                             nonce:(nullable NSString *)nonce
+              additionalParameters:(nullable NSDictionary *)additionalParameters;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 
 @end
+
+NS_ASSUME_NONNULL_END

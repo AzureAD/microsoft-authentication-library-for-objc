@@ -57,6 +57,8 @@
 }
 
 - (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                           popManager:(MSIDDevicePopManager *)popManager
                                 error:(NSError **)error
 {
     NSError *authorityError = nil;
@@ -72,7 +74,7 @@
         return nil;
     }
     
-    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:error];
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority authScheme:authScheme popManager:popManager error:error];
 }
 
 - (BOOL)removeAdditionalAccountInfo:(__unused MSALAccount *)account
