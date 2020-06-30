@@ -102,7 +102,10 @@
 #import "MSALSignoutParameters.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 #import "MSIDCurrentRequestTelemetry.h"
+#import "MSIDCacheConfig.h"
+#import "MSIDDevicePopManager.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -112,6 +115,8 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
+@property (nonatomic) MSIDCacheConfig *msidCacheConfig;
+@property (nonatomic) MSIDDevicePopManager *popManager;
 
 @end
 
@@ -223,6 +228,8 @@
     {
         return nil;
     }
+    
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig];
         
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
@@ -291,6 +298,7 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     self.tokenCache = defaultAccessor;
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
     return YES;
 }
 #else
@@ -302,6 +310,8 @@
     
     if (@available(macOS 10.15, *)) {
         dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+        
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
         
         NSError *secondaryDataSourceError = nil;
         secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
@@ -315,9 +325,12 @@
     }
     else
     {
-        dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                   trustedApplications:config.cacheConfig.trustedApplications
                                                                 error:&dataSourceError];
+        
+        dataSource = macDataSource;
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
     }
     
     if (!dataSource)
@@ -716,7 +729,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -787,8 +800,12 @@
     
     MSIDRequestType requestType = [self requestType];
     
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                              authScheme:msidAuthScheme
                                                                          redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                             clientId:self.internalConfig.clientId
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
@@ -883,7 +900,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
         
         if (result.tokenResponse)
         {
@@ -1014,7 +1031,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -1069,19 +1086,24 @@
                                                                   aadRequestVersion:MSIDBrokerAADRequestVersionV2];
 
 #endif
+    
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
-                                                    redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
-                                                       clientId:self.internalConfig.clientId
-                                                         scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
-                                                     oidcScopes:[self.class defaultOIDCScopes]
-                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
-                                                  correlationId:parameters.correlationId
-                                                 telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                                  brokerOptions:brokerOptions
-                                                    requestType:requestType
-                                            intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
-                                                          error:&msidError];
+                                                          authScheme:msidAuthScheme
+                                                         redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                            clientId:self.internalConfig.clientId
+                                                              scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
+                                                          oidcScopes:[self.class defaultOIDCScopes]
+                                                extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]        initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
+                                                       correlationId:parameters.correlationId
+                                                      telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                       brokerOptions:brokerOptions
+                                                         requestType:requestType
+                                                 intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                               error:&msidError];
     
     if (!msidParams)
     {
@@ -1187,7 +1209,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
         block(msalResult, resultError, msidParams);
@@ -1260,7 +1282,7 @@
 {
     __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:nil popManager:nil];
         
         if (!result)
         {
@@ -1312,6 +1334,7 @@
     
     NSError *paramsError;
     MSIDInteractiveRequestParameters *msidParams = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                                                    authScheme:nil
                                                                                                    redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                                                       clientId:self.internalConfig.clientId
                                                                                                         scopes:nil
@@ -1487,6 +1510,7 @@
 - (MSIDRequestParameters *)defaultRequestParametersWithError:(NSError **)requestParamsError
 {
     MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                 authScheme:nil
                                                                                 redirectUri:self.internalConfig.redirectUri
                                                                                    clientId:self.internalConfig.clientId
                                                                                      scopes:nil

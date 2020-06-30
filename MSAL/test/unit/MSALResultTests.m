@@ -40,6 +40,8 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSALAccount+MultiTenantAccount.h"
+#import "MSIDAccessToken.h"
+#import "MSALAuthenticationSchemeBearer.h"
 
 @interface MSALResultTests : MSALTestCase
 
@@ -63,7 +65,7 @@
     
     NSError *error = nil;
     MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://my.issuer.com/contoso.com"] error:nil];
-    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority authScheme:[MSALAuthenticationSchemeBearer new] popManager:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -78,7 +80,7 @@
     
     NSError *error = nil;
     MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://my.issuer.com/contoso.com"] error:nil];
-    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority authScheme:[MSALAuthenticationSchemeBearer new] popManager:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -94,7 +96,7 @@
     
     NSError *error = nil;
     MSALAADAuthority *authority = nil;
-    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority authScheme:[MSALAuthenticationSchemeBearer new] popManager:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -120,9 +122,11 @@
     account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"uid.tenant_id"];
     tokenResult.account = account;
     tokenResult.correlationId = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000001"];
+    tokenResult.accessToken = [MSIDAccessToken new];
+    tokenResult.accessToken.accessToken = @"access_token";
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority error:&error];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority authScheme:[MSALAuthenticationSchemeBearer new] popManager:nil error:&error];
     
     XCTAssertNotNil(result);
 #pragma clang diagnostic push

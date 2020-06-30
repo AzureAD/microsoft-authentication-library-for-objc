@@ -3,7 +3,7 @@
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -69,10 +69,10 @@
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="788"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vM0-VN-Vm6">
-                                                <rect key="frame" x="0.0" y="0.0" width="414" height="782"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="825"/>
                                                 <subviews>
                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="QvZ-VB-tXG">
-                                                        <rect key="frame" x="20" y="20" width="374" height="742"/>
+                                                        <rect key="frame" x="20" y="20" width="374" height="785"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="oeX-eO-Koe">
                                                                 <rect key="frame" x="0.0" y="0.0" width="374" height="34"/>
@@ -332,8 +332,29 @@
                                                                     </textField>
                                                                 </subviews>
                                                             </stackView>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="RFr-Ol-fNL">
+                                                                <rect key="frame" x="0.0" y="546" width="374" height="31"/>
+                                                                <subviews>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="authScheme" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0g6-Tx-rd4">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="112" height="31"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="g13-1c-rmi"/>
+                                                                        </constraints>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="PIA-l0-Kme">
+                                                                        <rect key="frame" x="124" y="0.0" width="250" height="32"/>
+                                                                        <segments>
+                                                                            <segment title="Bearer"/>
+                                                                            <segment title="Pop"/>
+                                                                        </segments>
+                                                                    </segmentedControl>
+                                                                </subviews>
+                                                            </stackView>
                                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="euI-bP-fOW">
-                                                                <rect key="frame" x="0.0" y="546" width="374" height="34"/>
+                                                                <rect key="frame" x="0.0" y="589" width="374" height="34"/>
                                                                 <subviews>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tSH-Rx-X2s">
                                                                         <rect key="frame" x="0.0" y="0.0" width="116.5" height="34"/>
@@ -359,7 +380,7 @@
                                                                 </subviews>
                                                             </stackView>
                                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="rBo-1H-H5p">
-                                                                <rect key="frame" x="0.0" y="592" width="374" height="150"/>
+                                                                <rect key="frame" x="0.0" y="635" width="374" height="150"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="height" constant="150" id="meA-TD-weO"/>
                                                                 </constraints>
@@ -463,6 +484,7 @@
                     <connections>
                         <outlet property="acquireButtonsViewBottomConstraint" destination="MeM-tM-vjr" id="gcj-MQ-VY5"/>
                         <outlet property="acquireSilentButton" destination="B1a-QA-wzK" id="5Sx-IL-YWT"/>
+                        <outlet property="authSchemeSegmentControl" destination="PIA-l0-Kme" id="r4h-be-0gW"/>
                         <outlet property="authorityButton" destination="VO4-Cz-Zs9" id="c2d-hA-UUm"/>
                         <outlet property="customWebviewContainer" destination="Md9-M0-FKl" id="eEx-2S-FNk"/>
                         <outlet property="customWebviewTypeSegmentControl" destination="iH2-2a-wwo" id="uDh-ew-9ht"/>

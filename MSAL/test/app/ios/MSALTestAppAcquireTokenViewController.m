@@ -46,6 +46,8 @@
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
 #import "MSALWebviewParameters.h"
+#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -72,6 +74,7 @@
 @property (nonatomic) IBOutlet UIView *customWebviewContainer;
 @property (nonatomic) IBOutlet UIView *wkWebViewContainer;
 @property (nonatomic) WKWebView *customWebview;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
 
 @end
 
@@ -318,6 +321,17 @@
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
+    
+    if (self.authSchemeSegmentControl.selectedSegmentIndex == 0)
+    {
+        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    }
+    else
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptTypeValue];
@@ -345,6 +359,17 @@
     __auto_type scopes = [settings.scopes allObjects];
     __auto_type account = settings.currentAccount;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    
+    if (self.authSchemeSegmentControl.selectedSegmentIndex == 0)
+    {
+        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    }
+    else
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
     parameters.authority = settings.authority;
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;

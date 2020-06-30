@@ -25,25 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import "MSALAuthenticationSchemeBearer.h"
+#import "MSIDAuthenticationScheme.h"
+#import "MSALAuthScheme.h"
+#import "MSIDAccessToken.h"
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
+static NSString *keyDelimiter = @" ";
 
-@interface MSALErrorConverter (Internal)
+@implementation MSALAuthenticationSchemeBearer
 
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        _scheme = MSALAuthSchemeBearer;
+    }
+    
+    return self;
+}
+
+- (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
+{
+    return [[MSIDAuthenticationScheme alloc] initWithSchemeParameters:params];
+}
+
+- (NSDictionary *)getSchemeParameters:(__unused MSIDDevicePopManager *)popManager
+{
+    return [NSDictionary new];
+}
+
+- (NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable __unused MSIDDevicePopManager *)popManager error:(__unused NSError **)error
+{
+    return accessToken.accessToken;
+}
+
+- (NSString *)authenticationScheme
+{
+    return MSALParameterStringForAuthScheme(self.scheme);
+}
+
+- (NSString *)getAuthorizationHeader:(NSString *)accessToken
+{
+    return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
+}
 
 @end

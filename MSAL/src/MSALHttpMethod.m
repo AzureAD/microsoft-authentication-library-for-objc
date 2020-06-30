@@ -25,25 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import <Foundation/Foundation.h>
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
-
-@interface MSALErrorConverter (Internal)
-
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
-
-@end
+NSString *MSALParameterStringForHttpMethod(MSALHttpMethod httpMethod)
+{
+    switch (httpMethod)
+    {
+        case MSALHttpMethodGET : return @"GET";
+        case MSALHttpMethodHEAD : return @"HEAD";
+        case MSALHttpMethodPOST : return @"POST";
+        case MSALHttpMethodPUT : return @"PUT";
+        case MSALHttpMethodDELETE : return @"DELETE";
+        case MSALHttpMethodCONNECT : return @"CONNECT";
+        case MSALHttpMethodOPTIONS : return @"OPTIONS";
+        case MSALHttpMethodTRACE : return @"TRACE";
+        case MSALHttpMethodPATCH : return @"PATCH";
+    }
+}

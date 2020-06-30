@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTokenParameters.h"
+#import "MSALAuthenticationSchemeBearer.h"
 
 @implementation MSALTokenParameters
 
@@ -35,7 +36,9 @@
     if (self)
     {
         _scopes = scopes;
+        _authenticationScheme = [MSALAuthenticationSchemeBearer new];
     }
+    
     return self;
 }
 
