@@ -418,6 +418,7 @@
                                                                                                     error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
+    result &= [self clearAllTokenKeys];
     
     if (result)
     {
@@ -434,6 +435,19 @@
     {
         self.resultTextView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
+}
+
+- (BOOL)clearAllTokenKeys
+{
+    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
+    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
+    if (status != errSecSuccess && status != errSecItemNotFound)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to delete key (status: %d)", (int)status);
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender

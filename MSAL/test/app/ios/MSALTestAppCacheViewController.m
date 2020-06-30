@@ -49,9 +49,11 @@
 #import "MSIDConfiguration.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAccessTokenWithAuthScheme.h"
+#import "MSIDConstants.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"app-metadata"
+#define POP_TOKEN_KEYS @"pop_token_keys"
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @interface MSALTestAppCacheViewController () <UITableViewDataSource, UITableViewDelegate>
@@ -61,6 +63,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 @property (strong) NSArray *accounts;
 @property (strong) NSArray *appMetadataEntries;
+@property (strong) NSArray *tokenKeys;
 
 @end
 
@@ -104,6 +107,25 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         [_tokenCache removeAppMetadata:appMetadata context:nil error:nil];
         [self loadCache];
     }
+}
+
+- (void)deleteKey:(NSString *)tag
+{
+    NSString *accessGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
+    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
+                                  tag, (__bridge id)kSecAttrApplicationTag,
+                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
+                                  accessGroup, (__bridge id)kSecAttrAccessGroup,
+                                  nil];
+    
+    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
+    if (status != errSecSuccess && status != errSecItemNotFound)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to delete key (status: %d)", (int)status);
+    }
+    
+    [self loadCache];
 }
 
 - (void)deleteToken:(MSIDBaseToken *)token
@@ -243,11 +265,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                 error:nil]];
         
         [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
+        [self setTokenKeys:[self getPopTokenKeys]];
         
         _cacheSections = [NSMutableDictionary dictionary];
         if ([[self appMetadataEntries] count])
         {
             [_cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
+        }
+        
+        if ([[self tokenKeys] count])
+        {
+            [_cacheSections setObject:[self getPopTokenKeys] forKey:POP_TOKEN_KEYS];
         }
         
         for (MSIDAccount *account in [self accounts])
@@ -273,6 +301,43 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             [self.refreshControl endRefreshing];
         });
     });
+}
+
+- (NSArray *)getPopTokenKeys
+{
+    NSString *accessGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
+    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  (__bridge id)kCFBooleanTrue, (__bridge id)kSecReturnAttributes,
+                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
+                                  (__bridge id)kSecMatchLimitAll, (__bridge id)kSecMatchLimit,
+                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
+                                  accessGroup, (__bridge id)kSecAttrAccessGroup,
+                                  nil];
+    
+    CFTypeRef cfItems = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &cfItems);
+    if (status == errSecItemNotFound)
+    {
+        return @[];
+    }
+    else if (status != errSecSuccess)
+    {
+        return nil;
+    }
+    
+    NSArray *items = CFBridgingRelease(cfItems);
+    NSMutableArray *filteredItems = [NSMutableArray new];
+    for (NSDictionary *itemDict in items)
+    {
+        NSData *keyData = [itemDict objectForKey:(__bridge id)kSecAttrApplicationTag];
+        NSString *keyIdentifier = [[NSString alloc] initWithData:keyData encoding:NSUTF8StringEncoding];
+        if ([keyIdentifier isEqualToString:MSID_POP_TOKEN_PRIVATE_KEY] || [keyIdentifier isEqualToString:MSID_POP_TOKEN_PUBLIC_KEY])
+        {
+            [filteredItems addObject:keyIdentifier];
+        }
+    }
+    
+    return [filteredItems copy];
 }
 
 - (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
@@ -417,6 +482,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         cell.textLabel.text = [NSString stringWithFormat:@"[AC] %@", account.environment];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"[Account Identifier] %@", [self rowIdentifier:account.accountIdentifier]];
     }
+    else if([cacheEntry isKindOfClass:[NSString class]])
+    {
+        NSString *keyTag = (NSString *)cacheEntry;
+        cell.textLabel.text = keyTag;
+        cell.detailTextLabel.text = @"";
+    }
     
     return cell;
 }
@@ -507,6 +578,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteAccountAction]];
         return configuration;
     }
+    else if ([cacheEntry isKindOfClass:[NSString class]])
+    {
+        NSString *keyTag = (NSString *)cacheEntry;
+        __auto_type deleteKeyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
+                                               title:@"Delete"
+                                             handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
+        {
+            [self deleteKey:keyTag];
+        }];
+        
+        __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteKeyAction]];
+        return configuration;
+    }
+    
     
     return nil;
 }
@@ -596,6 +681,16 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                   handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
                   {
                       [self deleteAllEntriesForAccount:account];
+                  }]];
+    }
+    else if ([cacheEntry isKindOfClass:[NSString class]])
+    {
+        NSString *keyTag = (NSString *)cacheEntry;
+        return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
+                                                    title:@"Delete"
+                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
+                  {
+                      [self deleteKey:keyTag];
                   }]];
     }
     
