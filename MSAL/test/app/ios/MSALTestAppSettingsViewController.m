@@ -30,6 +30,10 @@
 #import "MSIDAuthority.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
+#import "MSIDKeychainUtil.h"
+#import "MSIDWorkPlaceJoinUtil.h"
+#import "MSALPublicClientApplicationConfig.h"
+#import "MSALCacheConfig.h"
 
 static NSArray* s_profileRows = nil;
 static NSArray* s_deviceRows = nil;
@@ -75,7 +79,7 @@ static NSArray* s_deviceRows = nil;
     NSArray* _profileRows;
     NSArray* _deviceRows;
     
-    NSString* _keychainId;
+    NSString* _keychainSharingGroup;
     NSString* _wpjState;
 }
 
@@ -88,25 +92,6 @@ static NSArray* s_deviceRows = nil;
     self.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Settings"
                                                     image:[UIImage imageNamed:@"Settings"]
                                                       tag:0];
-    
-    // TODO: Keychain ID
-    /*
-    NSString* teamId = [ADKeychainUtil keychainTeamId:nil];
-    _keychainId = teamId ? teamId : @"<No Team ID>";*/
-    
-    MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    clientIdRow.valueBlock = ^NSString *{ return clientId; };
-    MSALTestAppSettingsRow* authorityRow = [MSALTestAppSettingsRow rowWithTitle:@"authority"];
-    authorityRow.valueBlock = ^NSString *{ return MSALTestAppSettings.settings.authority.msidAuthority.url.absoluteString; };
-    
-    _profileRows = @[ authorityRow, clientIdRow ];
-    
-    
-    
-    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"TeamID" value:^NSString *{ return _keychainId; }],
-                     [MSALTestAppSettingsRow rowWithTitle:@"WPJ State" value:^NSString *{ return _wpjState; }]];
     
     return self;
 }
@@ -133,24 +118,36 @@ static NSArray* s_deviceRows = nil;
 {
     (void)animated;
     
-    // TODO: WPJ state
-    /*
-    ADRegistrationInformation* regInfo =
-    [ADWorkPlaceJoinUtil getRegistrationInformation:nil error:nil];
+    MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_CLIENT_ID];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    clientIdRow.valueBlock = ^NSString *{ return clientId; };
+    MSALTestAppSettingsRow* redirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_REDIRECT_URI];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    redirectUriRow.valueBlock = ^NSString *{ return redirectUri; };
     
-    NSString* wpjLabel = @"No WPJ Registration Found";
-    
-    if (regInfo.userPrincipalName)
+    MSIDRegistrationInformation* regInfo =
+    [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil workplacejoinChallenge:nil];
+    _wpjState = @"No WPJ Registration Found";
+
+    if (regInfo)
     {
-        wpjLabel = regInfo.userPrincipalName;
+        _wpjState = @"WPJ Registration Found";
     }
-    else if (regInfo)
-    {
-        wpjLabel = @"WPJ Registration Found";
-    }
+       
+    _profileRows = @[ clientIdRow, redirectUriRow];
     
-    _wpjState = wpjLabel;
-     */
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:nil];
+    
+    NSString *accessGroup = pcaConfig.cacheConfig.keychainSharingGroup;
+    NSString *keychainSharingGroup = [[MSIDKeychainUtil sharedInstance] accessGroup:accessGroup];
+    _keychainSharingGroup = keychainSharingGroup? keychainSharingGroup : @"<No Keychain Sharing Group>";
+    
+    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"Keychain Sharing Group"
+                                                    value:^NSString *{ return _keychainSharingGroup; }],
+                     [MSALTestAppSettingsRow rowWithTitle:@"WPJ State" value:^NSString *{ return _wpjState; }]];
     
     self.navigationController.navigationBarHidden = YES;
     

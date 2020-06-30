@@ -48,6 +48,7 @@
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDConfiguration.h"
 #import "MSALAuthority_Internal.h"
+#import "MSIDAccessTokenWithAuthScheme.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"app-metadata"
@@ -138,6 +139,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                     [self.defaultAccessor removeToken:token context:nil error:nil];
                 }
                 
+                break;
+            }
+            case MSIDAccessTokenWithAuthSchemeType:
+            {
+                [self.defaultAccessor removeToken:(MSIDAccessTokenWithAuthScheme *)token context:nil error:nil];
                 break;
             }
             default:
@@ -390,6 +396,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
                 break;
             }
+            case MSIDAccessTokenWithAuthSchemeType:
+                       {
+                           MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *) token;
+                           cell.textLabel.text = [NSString stringWithFormat:@"[AT_POP] %@/%@", [accessToken.scopes msidToString], accessToken.realm];
+                           cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", accessToken.clientId];
+                           if (accessToken.isExpired)
+                           {
+                               cell.textLabel.textColor = [UIColor redColor];
+                           }
+                           break;
+                       }
             default:
                 break;
         }
@@ -468,6 +485,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             case MSIDIDTokenType:
             {
                 return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction]];
+            }
+            case MSIDAccessTokenWithAuthSchemeType:
+            {
+                return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction, expireTokenAction]];
             }
             default:
                 return nil;
@@ -558,6 +579,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             case MSIDIDTokenType:
             {
                 return @[deleteTokenAction];
+            }
+            case MSIDAccessTokenWithAuthSchemeType:
+            {
+               return @[deleteTokenAction, expireTokenAction];
             }
             default:
                 return nil;

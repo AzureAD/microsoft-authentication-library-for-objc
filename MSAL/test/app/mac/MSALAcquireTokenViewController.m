@@ -35,6 +35,9 @@
 #import "MSALSilentTokenParameters.h"
 #import "WebKit/WebKit.h"
 #import "MSALWebviewParameters.h"
+#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
@@ -55,6 +58,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSStackView *acquireTokenView;
 @property (weak) IBOutlet WKWebView *webView;
 @property (weak) IBOutlet NSPopUpButton *userPopup;
+@property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
 
 @property MSALTestAppSettings *settings;
@@ -176,6 +180,19 @@ static NSString * const defaultScope = @"User.Read";
         return MSALPromptTypeConsent;
     
     @throw @"Do not recognize prompt behavior";
+}
+
+- (id<MSALAuthenticationSchemeProtocol>)authScheme
+{
+    NSString *authSchemeType = [self.authSchemeSegment labelForSegment:[self.authSchemeSegment selectedSegment]];
+    
+    if ([authSchemeType isEqualToString:@"Pop"])
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        return [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
+    return [MSALAuthenticationSchemeBearer new];
 }
 
 - (BOOL)passedInWebview
@@ -342,6 +359,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.account = [self selectedAccount];
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
+    parameters.authenticationScheme = [self authScheme];
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
@@ -370,6 +388,7 @@ static NSString * const defaultScope = @"User.Read";
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
     parameters.authority = self.settings.authority;
+    parameters.authenticationScheme = [self authScheme];
     
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
