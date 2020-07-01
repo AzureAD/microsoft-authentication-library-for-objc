@@ -50,10 +50,16 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDAccessTokenWithAuthScheme.h"
 #import "MSIDConstants.h"
+#import "MSIDAssymetricKeyLookupAttributes.h"
+#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSALTestAppAsymmetricKey.h"
+#import "MSIDDevicePopManager+Internal.h"
+#import "MSIDCacheConfig.h"
+#import "MSIDAssymetricKeyPair.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
-#define APP_METADATA @"app-metadata"
-#define POP_TOKEN_KEYS @"pop_token_keys"
+#define APP_METADATA @"App-Metadata"
+#define POP_TOKEN_KEYS @"RSA Key-Pair"
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @interface MSALTestAppCacheViewController () <UITableViewDataSource, UITableViewDelegate>
@@ -63,7 +69,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 @property (strong) NSArray *accounts;
 @property (strong) NSArray *appMetadataEntries;
-@property (strong) NSArray *tokenKeys;
+@property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
+@property (nonatomic) MSIDAssymetricKeyKeychainGenerator *keyGenerator;
+@property (nonatomic) NSMutableArray *tokenKeys;
+@property (nonatomic) MSIDDevicePopManager *popManager;
+@property (nonatomic) MSIDCacheConfig *cacheConfig;
 
 @end
 
@@ -71,7 +81,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     NSMutableDictionary<NSString *, NSMutableArray *> *_tokensPerAccount;
     NSMutableDictionary *_cacheSections;
-    NSArray *_cacheSectionTitles;
+    NSMutableArray *_cacheSectionTitles;
     UITableView *_cacheTableView;
 }
 
@@ -97,6 +107,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
+    _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
+    _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
+    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    
+    NSString *keychainGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
+    _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:keychainGroup error:nil];
+    
+    _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:keychainGroup];
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
     return self;
 }
 
@@ -109,22 +128,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 }
 
-- (void)deleteKey:(NSString *)tag
+- (void)deleteKey:(MSALTestAppAsymmetricKey *)key
 {
-    NSString *accessGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
     NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
                                   (__bridge id)kSecClassKey, (__bridge id)kSecClass,
-                                  tag, (__bridge id)kSecAttrApplicationTag,
+                                  [key.name dataUsingEncoding:NSUTF8StringEncoding], (__bridge id)kSecAttrApplicationTag,
                                   (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
-                                  accessGroup, (__bridge id)kSecAttrAccessGroup,
                                   nil];
     
-    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
-    if (status != errSecSuccess && status != errSecItemNotFound)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to delete key (status: %d)", (int)status);
-    }
+    [self.keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
     
+    [self.tokenKeys removeObject:key];
     [self loadCache];
 }
 
@@ -265,17 +279,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                 error:nil]];
         
         [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
-        [self setTokenKeys:[self getPopTokenKeys]];
         
         _cacheSections = [NSMutableDictionary dictionary];
         if ([[self appMetadataEntries] count])
         {
             [_cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
-        }
-        
-        if ([[self tokenKeys] count])
-        {
-            [_cacheSections setObject:[self getPopTokenKeys] forKey:POP_TOKEN_KEYS];
         }
         
         for (MSIDAccount *account in [self accounts])
@@ -288,56 +296,38 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         NSArray *legacyTokens = [self.legacyAccessor allTokensWithContext:nil error:nil];
         [allTokens addObjectsFromArray:legacyTokens];
         
+        BOOL isPopToken = NO;
         for (MSIDBaseToken *token in allTokens)
         {
+            if ([token isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
+            {
+                isPopToken = YES;
+            }
+            
             NSMutableArray *tokens = _cacheSections[[self rowIdentifier:token.accountIdentifier]];
             [tokens addObject:token];
         }
         
-        _cacheSectionTitles = [_cacheSections allKeys];
+        _cacheSectionTitles = [NSMutableArray arrayWithArray:[_cacheSections allKeys]];
+        if (isPopToken)
+        {
+            MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:_keyPairAttributes error:nil];
+            if (keyPair)
+            {
+                NSString *kid = [_popManager generateKidFromModulus:keyPair.keyModulus exponent:keyPair.keyExponent];
+                MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:kid];
+                MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:kid];
+                _tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+                [_cacheSections setObject:_tokenKeys forKey:POP_TOKEN_KEYS];
+                [_cacheSectionTitles addObject:POP_TOKEN_KEYS];
+            }
+        }
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [_cacheTableView reloadData];
             [self.refreshControl endRefreshing];
         });
     });
-}
-
-- (NSArray *)getPopTokenKeys
-{
-    NSString *accessGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
-    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  (__bridge id)kCFBooleanTrue, (__bridge id)kSecReturnAttributes,
-                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
-                                  (__bridge id)kSecMatchLimitAll, (__bridge id)kSecMatchLimit,
-                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
-                                  accessGroup, (__bridge id)kSecAttrAccessGroup,
-                                  nil];
-    
-    CFTypeRef cfItems = nil;
-    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &cfItems);
-    if (status == errSecItemNotFound)
-    {
-        return @[];
-    }
-    else if (status != errSecSuccess)
-    {
-        return nil;
-    }
-    
-    NSArray *items = CFBridgingRelease(cfItems);
-    NSMutableArray *filteredItems = [NSMutableArray new];
-    for (NSDictionary *itemDict in items)
-    {
-        NSData *keyData = [itemDict objectForKey:(__bridge id)kSecAttrApplicationTag];
-        NSString *keyIdentifier = [[NSString alloc] initWithData:keyData encoding:NSUTF8StringEncoding];
-        if ([keyIdentifier isEqualToString:MSID_POP_TOKEN_PRIVATE_KEY] || [keyIdentifier isEqualToString:MSID_POP_TOKEN_PUBLIC_KEY])
-        {
-            [filteredItems addObject:keyIdentifier];
-        }
-    }
-    
-    return [filteredItems copy];
 }
 
 - (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
@@ -399,8 +389,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
     
     cell.backgroundColor = [UIColor whiteColor];
-    cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    cell.textLabel.font  = [UIFont fontWithName: @"Arial" size: 16.0];
     cell.textLabel.textColor = [UIColor darkTextColor];
+    cell.textLabel.numberOfLines = 0;
+    cell.detailTextLabel.numberOfLines = 0;
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
     id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
@@ -408,8 +400,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     if ([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
     {
         MSIDAppMetadataCacheItem *appMetadata = [self appMetadataEntries][indexPath.row];
-        cell.textLabel.text = [NSString stringWithFormat:@"[ClientId] %@", appMetadata.clientId];
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"[Environment] %@, FamilyId %@", appMetadata.environment, appMetadata.familyId];
+        cell.textLabel.text = [NSString stringWithFormat:@"Client_Id : %@", appMetadata.clientId];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"Environment: %@, FamilyId : %@", appMetadata.environment, [appMetadata.familyId length] != 0 ? appMetadata.familyId : @"0"];
         
     }
     else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
@@ -422,27 +414,27 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {
-                    cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.realm, refreshToken.clientId];
-                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
+                    cell.textLabel.text = [NSString stringWithFormat:@"Legacy RefreshToken : %@, FRT %@", token.realm, refreshToken.clientId];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", refreshToken.clientId];
                 }
                 else
                 {
-                    cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.realm, refreshToken.familyId];
-                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
+                    cell.textLabel.text = [NSString stringWithFormat:@"RefreshToken : %@, FamilyId : %@", refreshToken.clientId, refreshToken.familyId ? refreshToken.familyId : @"0"];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", refreshToken.clientId];
                 }
                 
                 if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
                 {
                     cell.textLabel.textColor = [UIColor orangeColor];
-                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", refreshToken.clientId];
                 }
                 break;
             }
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
-                cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.realm];
-                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", accessToken.clientId];
+                cell.textLabel.text = [NSString stringWithFormat:@"AccessToken [%@] : %@ / %@", @"Bearer", [accessToken.scopes msidToString], accessToken.realm];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", accessToken.clientId];
                 if (accessToken.isExpired)
                 {
                     cell.textLabel.textColor = [UIColor redColor];
@@ -451,27 +443,27 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             }
             case MSIDIDTokenType:
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.realm];
-                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
+                cell.textLabel.text = [NSString stringWithFormat:@"Id Token : %@", token.realm];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", token.clientId];
                 break;
             }
             case MSIDLegacySingleResourceTokenType:
             {
                 cell.textLabel.text = @"Legacy single resource token";
-                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", token.clientId];
                 break;
             }
             case MSIDAccessTokenWithAuthSchemeType:
-                       {
-                           MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *) token;
-                           cell.textLabel.text = [NSString stringWithFormat:@"[AT_POP] %@/%@", [accessToken.scopes msidToString], accessToken.realm];
-                           cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", accessToken.clientId];
-                           if (accessToken.isExpired)
-                           {
-                               cell.textLabel.textColor = [UIColor redColor];
-                           }
-                           break;
-                       }
+            {
+                MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *) token;
+                cell.textLabel.text = [NSString stringWithFormat:@"AccessToken [%@] : %@ / %@",accessToken.tokenType, [accessToken.scopes msidToString], accessToken.realm];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@, Kid : %@", accessToken.clientId, accessToken.kid];
+                if (accessToken.isExpired)
+                {
+                   cell.textLabel.textColor = [UIColor redColor];
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -479,14 +471,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     else if([cacheEntry isKindOfClass:[MSIDAccount class]])
     {
         MSIDAccount *account = (MSIDAccount *)cacheEntry;
-        cell.textLabel.text = [NSString stringWithFormat:@"[AC] %@", account.environment];
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"[Account Identifier] %@", [self rowIdentifier:account.accountIdentifier]];
+        cell.textLabel.text = [NSString stringWithFormat:@"Account : %@", account.environment];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"Account Identifier : %@", [self rowIdentifier:account.accountIdentifier]];
     }
-    else if([cacheEntry isKindOfClass:[NSString class]])
+    else if([cacheEntry isKindOfClass:[MSALTestAppAsymmetricKey class]])
     {
-        NSString *keyTag = (NSString *)cacheEntry;
-        cell.textLabel.text = keyTag;
-        cell.detailTextLabel.text = @"";
+        MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)cacheEntry;
+        cell.textLabel.text = [NSString stringWithFormat:@"Key Identifier : %@", key.name];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"Kid : %@", key.kid];
     }
     
     return cell;
@@ -578,14 +570,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteAccountAction]];
         return configuration;
     }
-    else if ([cacheEntry isKindOfClass:[NSString class]])
+    else if ([cacheEntry isKindOfClass:[MSALTestAppAsymmetricKey class]])
     {
-        NSString *keyTag = (NSString *)cacheEntry;
+        MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)cacheEntry;
         __auto_type deleteKeyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
                                                title:@"Delete"
                                              handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
         {
-            [self deleteKey:keyTag];
+            [self deleteKey:key];
         }];
         
         __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteKeyAction]];
@@ -685,12 +677,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
     else if ([cacheEntry isKindOfClass:[NSString class]])
     {
-        NSString *keyTag = (NSString *)cacheEntry;
+        MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)cacheEntry;
         return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                                     title:@"Delete"
                                                   handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
                   {
-                      [self deleteKey:keyTag];
+                      [self deleteKey:key];
                   }]];
     }
     

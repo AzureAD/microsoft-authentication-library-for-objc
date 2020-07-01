@@ -48,6 +48,7 @@
 #import "MSALWebviewParameters.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALAuthenticationSchemeBearer.h"
+#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
