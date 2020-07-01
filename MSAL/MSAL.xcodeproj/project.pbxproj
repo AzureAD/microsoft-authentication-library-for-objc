@@ -210,6 +210,10 @@
 		23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		38880DF423280C5900688C24 /* MSALPublicClientApplicationConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */; };
 		38880DF523280C5A00688C24 /* MSALPublicClientApplicationConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */; };
+		58B81F6624AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */; };
+		58B81F6724AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */; };
+		58B81F7124AC5D7200E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
+		58B81F7224AC5D7300E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
 		6077D4A022498BFF001798A2 /* MSALTenantProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 6077D49F22498BFF001798A2 /* MSALTenantProfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6077D4A122498BFF001798A2 /* MSALTenantProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 6077D49F22498BFF001798A2 /* MSALTenantProfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6077D4A922498D87001798A2 /* MSALTenantProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 6077D4A822498D87001798A2 /* MSALTenantProfile.m */; };
@@ -1120,6 +1124,8 @@
 		23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTestURLResponse+MSAL.h"; sourceTree = "<group>"; };
 		23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTestURLResponse+MSAL.m"; sourceTree = "<group>"; };
 		23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonDeserializable.h; sourceTree = "<group>"; };
+		58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestCacheTokenResponse.h; sourceTree = "<group>"; };
+		58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestCacheTokenResponse.m; sourceTree = "<group>"; };
 		6077D49F22498BFF001798A2 /* MSALTenantProfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTenantProfile.h; sourceTree = "<group>"; };
 		6077D4A822498D87001798A2 /* MSALTenantProfile.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTenantProfile.m; sourceTree = "<group>"; };
 		609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountsProviderTests.m; sourceTree = "<group>"; };
@@ -2338,6 +2344,8 @@
 				9612C6141EB28F9D00816915 /* MSALTestConstants.h */,
 				23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */,
 				23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */,
+				58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */,
+				58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -2656,6 +2664,7 @@
 				B221CEEB20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */,
 				96CF951A2268FD0400D97374 /* MSALHTTPConfig.h in Headers */,
 				B273D0E6226E85F9005A7BB4 /* MSALResult+Internal.h in Headers */,
+				58B81F6624AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */,
 				96CF95152268FD0400D97374 /* MSALPublicClientApplicationConfig.h in Headers */,
 				1EF395FD246DFAD200647FDB /* MSALAuthScheme.h in Headers */,
 				B2A3C2892145FD0F0082525C /* MSALAccountsProvider.h in Headers */,
@@ -2752,6 +2761,7 @@
 				23A68A8120F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
 				D65A6FAA1E3FF3D900C69FBA /* MSALLogger.h in Headers */,
 				96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */,
+				58B81F6724AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */,
 				1EF395FE246DFAD200647FDB /* MSALAuthScheme.h in Headers */,
 				B2A3C28A2145FD0F0082525C /* MSALAccountsProvider.h in Headers */,
 				B273D0D2226E85D0005A7BB4 /* MSALTelemetryConfig+Internal.h in Headers */,
@@ -3820,6 +3830,7 @@
 				23A68A9320F59E6B0071E435 /* NSString+MSALTestUtil.m in Sources */,
 				1E8FC6A3221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
 				B2ADD76E22C08B6A0093FD43 /* MSALLegacySharedAccountTestUtil.m in Sources */,
+				58B81F7124AC5D7200E8799E /* MSALTestCacheTokenResponse.m in Sources */,
 				960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
 				B286BA00238A08F6007833AD /* MSALB2CPolicyTests.m in Sources */,
 				B2725ED222C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m in Sources */,
@@ -3854,6 +3865,7 @@
 				D69ADB361E516F9B00952049 /* MSALTestBundle.m in Sources */,
 				B2D6672D210E766F00952595 /* MSALPublicClientApplicationTests.m in Sources */,
 				1E8FC6A4221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
+				58B81F7224AC5D7300E8799E /* MSALTestCacheTokenResponse.m in Sources */,
 				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				233E970C226571AC007FCE2A /* MSALTelemetryAggregatedTests.m in Sources */,
 			);
