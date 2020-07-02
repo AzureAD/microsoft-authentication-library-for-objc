@@ -48,6 +48,7 @@
 #import "MSALWebviewParameters.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALAuthenticationSchemeBearer.h"
+#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -418,6 +419,7 @@
                                                                                                     error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
+    result &= [self clearAllTokenKeysForAccessGroup:pcaConfig.cacheConfig.keychainSharingGroup];
     
     if (result)
     {
@@ -434,6 +436,15 @@
     {
         self.resultTextView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
+}
+
+- (BOOL)clearAllTokenKeysForAccessGroup:(NSString *)accessGroup
+{
+    MSIDAssymetricKeyKeychainGenerator *keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:accessGroup error:nil];
+    
+    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
+    return [keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
+    
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender
