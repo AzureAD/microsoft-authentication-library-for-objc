@@ -106,6 +106,7 @@
 #import "MSIDCurrentRequestTelemetry.h"
 #import "MSIDCacheConfig.h"
 #import "MSIDDevicePopManager.h"
+#import "MSIDAssymetricKeyLookupAttributes.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -117,6 +118,7 @@
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
 @property (nonatomic) MSIDCacheConfig *msidCacheConfig;
 @property (nonatomic) MSIDDevicePopManager *popManager;
+@property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 
 @end
 
@@ -229,7 +231,10 @@
         return nil;
     }
     
-    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig];
+    _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
+    _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
+    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:_keyPairAttributes];
         
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
