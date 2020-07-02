@@ -27,36 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAuthority;
+NS_ASSUME_NONNULL_BEGIN
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@interface MSALTestAppAsymmetricKey : NSObject
 
-@interface MSALTestAppSettings : NSObject
+@property (nonatomic) NSString *name;
+@property (nonatomic) NSString *kid;
 
-#define MSAL_APP_CLIENT_ID @"clientId"
-#define MSAL_APP_PROFILE @"currentProfile"
-#define MSAL_APP_REDIRECT_URI @"redirectUri"
-#define MSAL_APP_KEYCHAIN_GROUP @"keychainGroup"
-
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-
-+ (NSDictionary *)profiles;
-+ (NSString *)currentProfileName;
-+ (NSDictionary *)currentProfile;
-+ (NSString *)profileTitleForIndex:(NSUInteger)index;
-- (void)setCurrentProfile:(NSUInteger)index;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (instancetype)initWithName:(NSString *)name kid:(NSString *)kid;
 
 @end
+
+NS_ASSUME_NONNULL_END

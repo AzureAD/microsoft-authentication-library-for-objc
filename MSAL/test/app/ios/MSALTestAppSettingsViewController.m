@@ -30,9 +30,17 @@
 #import "MSIDAuthority.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
+#import "MSIDKeychainUtil.h"
+#import "MSIDWorkPlaceJoinUtil.h"
+#import "MSALPublicClientApplicationConfig.h"
+#import "MSALCacheConfig.h"
 
 static NSArray* s_profileRows = nil;
 static NSArray* s_deviceRows = nil;
+
+NSString *const MSID_DEVICE_INFORMATION_UPN_ID_KEY        = @"userPrincipalName";
+NSString *const MSID_DEVICE_INFORMATION_AAD_DEVICE_ID_KEY = @"aadDeviceIdentifier";
+NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifier";
 
 @interface MSALTestAppSettingsRow : NSObject
 
@@ -74,9 +82,6 @@ static NSArray* s_deviceRows = nil;
     
     NSArray* _profileRows;
     NSArray* _deviceRows;
-    
-    NSString* _keychainId;
-    NSString* _wpjState;
 }
 
 - (id)init
@@ -88,25 +93,6 @@ static NSArray* s_deviceRows = nil;
     self.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Settings"
                                                     image:[UIImage imageNamed:@"Settings"]
                                                       tag:0];
-    
-    // TODO: Keychain ID
-    /*
-    NSString* teamId = [ADKeychainUtil keychainTeamId:nil];
-    _keychainId = teamId ? teamId : @"<No Team ID>";*/
-    
-    MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    clientIdRow.valueBlock = ^NSString *{ return clientId; };
-    MSALTestAppSettingsRow* authorityRow = [MSALTestAppSettingsRow rowWithTitle:@"authority"];
-    authorityRow.valueBlock = ^NSString *{ return MSALTestAppSettings.settings.authority.msidAuthority.url.absoluteString; };
-    
-    _profileRows = @[ authorityRow, clientIdRow ];
-    
-    
-    
-    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"TeamID" value:^NSString *{ return _keychainId; }],
-                     [MSALTestAppSettingsRow rowWithTitle:@"WPJ State" value:^NSString *{ return _wpjState; }]];
     
     return self;
 }
@@ -133,24 +119,44 @@ static NSArray* s_deviceRows = nil;
 {
     (void)animated;
     
-    // TODO: WPJ state
-    /*
-    ADRegistrationInformation* regInfo =
-    [ADWorkPlaceJoinUtil getRegistrationInformation:nil error:nil];
+    MSALTestAppSettingsRow *clientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_CLIENT_ID];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    clientIdRow.valueBlock = ^NSString *{ return clientId; };
+    MSALTestAppSettingsRow* redirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_REDIRECT_URI];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    redirectUriRow.valueBlock = ^NSString *{ return redirectUri; };
     
-    NSString* wpjLabel = @"No WPJ Registration Found";
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:nil];
     
-    if (regInfo.userPrincipalName)
+    NSString *accessGroup = pcaConfig.cacheConfig.keychainSharingGroup;
+    NSString *keychainGroup = [[MSIDKeychainUtil sharedInstance] accessGroup:accessGroup];
+    NSString *keychainSharingGroup = keychainGroup? keychainGroup : @"<No Keychain Group Found>";
+    
+    MSALTestAppSettingsRow* keychainGroupRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_KEYCHAIN_GROUP];
+    keychainGroupRow.valueBlock = ^NSString *{ return keychainSharingGroup; };
+    
+    _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow];
+
+    NSString *userPrincipalName = @"<No User Info Found>";
+    NSString *aadDeviceIdentifier = @"<No Device Info Group Found>";
+    NSString *tenantIdentifier = @"<No Tenant Info Group Found>";
+    
+    NSDictionary *regInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+
+    if ([regInfo count])
     {
-        wpjLabel = regInfo.userPrincipalName;
-    }
-    else if (regInfo)
-    {
-        wpjLabel = @"WPJ Registration Found";
+        userPrincipalName = [regInfo objectForKey:MSID_DEVICE_INFORMATION_UPN_ID_KEY];
+        aadDeviceIdentifier = [regInfo objectForKey:MSID_DEVICE_INFORMATION_AAD_DEVICE_ID_KEY];
+        tenantIdentifier = [regInfo objectForKey:MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY];
     }
     
-    _wpjState = wpjLabel;
-     */
+    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - User UPN"
+                                                    value:^NSString *{ return userPrincipalName; }],
+                     [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Device Id" value:^NSString *{ return aadDeviceIdentifier; }],
+                     [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Tenant Id" value:^NSString *{ return tenantIdentifier; }]];
     
     self.navigationController.navigationBarHidden = YES;
     

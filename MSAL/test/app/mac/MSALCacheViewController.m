@@ -39,6 +39,7 @@
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDKeychainTokenCache.h"
+#import "MSIDAccessTokenWithAuthScheme.h"
 
 static NSString *s_appMetadata = @"App-Metadata";
 static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
@@ -232,6 +233,10 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
         {
             [self expireAccessToken:(MSIDAccessToken *)item];
         }
+        else if([item isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
+        {
+            [self expireAccessToken:(MSIDAccessTokenWithAuthScheme *)item];
+        }
     }
 }
 
@@ -316,6 +321,20 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
                 {
                     MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
                     textValue = [NSString stringWithFormat:@"AccessToken: ClientId - %@, Scopes - %@, Realm - %@", accessToken.clientId, [accessToken.scopes msidToString],accessToken.realm];
+                    
+                    if (accessToken.isExpired)
+                    {
+                        cellView.textField.textColor = [NSColor redColor];
+                        [cellView.textField setStringValue:textValue];
+                        return cellView;
+                    }
+                    
+                    break;
+                }
+                case MSIDAccessTokenWithAuthSchemeType:
+                {
+                    MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *)token;
+                    textValue = [NSString stringWithFormat:@"AccessToken_Pop: ClientId - %@, Scopes - %@, Realm - %@", accessToken.clientId, [accessToken.scopes msidToString],accessToken.realm];
                     
                     if (accessToken.isExpired)
                     {

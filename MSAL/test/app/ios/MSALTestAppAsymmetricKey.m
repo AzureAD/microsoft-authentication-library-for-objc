@@ -25,38 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppAsymmetricKey.h"
 
-@class MSALAuthority;
+@implementation MSALTestAppAsymmetricKey
 
-extern NSString* MSALTestAppCacheChangeNotification;
+- (instancetype)initWithName:(NSString *)name kid:(NSString *)kid
+{
+    self = [super init];
+    if (self)
+    {
+        _name = name;
+        _kid = kid;
+    }
+    
+    return self;
+}
 
-@interface MSALTestAppSettings : NSObject
+- (BOOL)isEqual:(id)object
+{
+    if (self == object)
+    {
+        return YES;
+    }
+    
+    if (![object isKindOfClass:MSALTestAppAsymmetricKey.class])
+    {
+        return NO;
+    }
+    
+    return [self isEqualToItem:(MSALTestAppAsymmetricKey *)object];
+}
 
-#define MSAL_APP_CLIENT_ID @"clientId"
-#define MSAL_APP_PROFILE @"currentProfile"
-#define MSAL_APP_REDIRECT_URI @"redirectUri"
-#define MSAL_APP_KEYCHAIN_GROUP @"keychainGroup"
+- (NSUInteger)hash
+{
+    NSUInteger hash = 0;
+    hash = hash * 31 + self.name.hash;
+    hash = hash * 31 + self.kid.hash;
+    return hash;
+}
 
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-
-+ (NSDictionary *)profiles;
-+ (NSString *)currentProfileName;
-+ (NSDictionary *)currentProfile;
-+ (NSString *)profileTitleForIndex:(NSUInteger)index;
-- (void)setCurrentProfile:(NSUInteger)index;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (BOOL)isEqualToItem:(MSALTestAppAsymmetricKey *)key
+{
+    if (!key) return NO;
+    
+    BOOL result = YES;
+    result &= (!self.name && !key.name) || [self.name isEqualToString:key.name];
+    result &= (!self.kid && !key.kid) || [self.kid isEqualToString:key.kid];
+    return result;
+}
 
 @end
