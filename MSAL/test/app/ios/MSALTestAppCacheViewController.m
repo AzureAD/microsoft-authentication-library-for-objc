@@ -56,6 +56,7 @@
 #import "MSIDDevicePopManager+Internal.h"
 #import "MSIDCacheConfig.h"
 #import "MSIDAssymetricKeyPair.h"
+#import "MSIDAuthScheme.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -74,6 +75,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) NSMutableArray *tokenKeys;
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
+@property (nonatomic) NSString *keychainSharingGroup;
 
 @end
 
@@ -87,7 +89,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (id)init
 {
-    if (!(self = [super initWithStyle:UITableViewStylePlain]))
+    if (!(self = [super initWithStyle:UITableViewStyleGrouped]))
     {
         return nil;
     }
@@ -111,10 +113,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     
-    NSString *keychainGroup = [[MSIDKeychainTokenCache defaultKeychainCache] keychainGroup];
-    _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:keychainGroup error:nil];
+    _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
+    _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:_keychainSharingGroup error:nil];
     
-    _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:keychainGroup];
+    _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:_keychainSharingGroup];
     _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
     return self;
 }
@@ -301,7 +303,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         {
             if ([token isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
             {
-                isPopToken = YES;
+                MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *)token;
+                if(MSIDAuthSchemeTypeFromString(accessToken.tokenType) == MSIDAuthSchemePop)
+                {
+                    isPopToken = YES;
+                }
             }
             
             NSMutableArray *tokens = _cacheSections[[self rowIdentifier:token.accountIdentifier]];
@@ -368,7 +374,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
     
     label.textAlignment = NSTextAlignmentCenter;
-    label.backgroundColor = [UIColor colorWithRed:0.27 green:0.43 blue:0.7 alpha:1.0];
+    label.backgroundColor = [UIColor lightGrayColor];
     return label;
 }
 

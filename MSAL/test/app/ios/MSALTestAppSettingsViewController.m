@@ -38,6 +38,10 @@
 static NSArray* s_profileRows = nil;
 static NSArray* s_deviceRows = nil;
 
+NSString *const MSID_DEVICE_INFORMATION_UPN_ID_KEY        = @"userPrincipalName";
+NSString *const MSID_DEVICE_INFORMATION_AAD_DEVICE_ID_KEY = @"aadDeviceIdentifier";
+NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifier";
+
 @interface MSALTestAppSettingsRow : NSObject
 
 @property (nonatomic, retain) NSString* title;
@@ -78,9 +82,6 @@ static NSArray* s_deviceRows = nil;
     
     NSArray* _profileRows;
     NSArray* _deviceRows;
-    
-    NSString* _keychainSharingGroup;
-    NSString* _wpjState;
 }
 
 - (id)init
@@ -118,7 +119,7 @@ static NSArray* s_deviceRows = nil;
 {
     (void)animated;
     
-    MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_CLIENT_ID];
+    MSALTestAppSettingsRow *clientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_CLIENT_ID];
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     clientIdRow.valueBlock = ^NSString *{ return clientId; };
@@ -126,28 +127,36 @@ static NSArray* s_deviceRows = nil;
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     redirectUriRow.valueBlock = ^NSString *{ return redirectUri; };
     
-    MSIDRegistrationInformation* regInfo =
-    [MSIDWorkPlaceJoinUtil getRegistrationInformation:nil workplacejoinChallenge:nil];
-    _wpjState = @"No WPJ Registration Found";
-
-    if (regInfo)
-    {
-        _wpjState = @"WPJ Registration Found";
-    }
-       
-    _profileRows = @[ clientIdRow, redirectUriRow];
-    
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:nil];
     
     NSString *accessGroup = pcaConfig.cacheConfig.keychainSharingGroup;
-    NSString *keychainSharingGroup = [[MSIDKeychainUtil sharedInstance] accessGroup:accessGroup];
-    _keychainSharingGroup = keychainSharingGroup? keychainSharingGroup : @"<No Keychain Sharing Group>";
+    NSString *keychainGroup = [[MSIDKeychainUtil sharedInstance] accessGroup:accessGroup];
+    NSString *keychainSharingGroup = keychainGroup? keychainGroup : @"<No Keychain Group Found>";
     
-    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"Keychain Sharing Group"
-                                                    value:^NSString *{ return _keychainSharingGroup; }],
-                     [MSALTestAppSettingsRow rowWithTitle:@"WPJ State" value:^NSString *{ return _wpjState; }]];
+    MSALTestAppSettingsRow* keychainGroupRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_KEYCHAIN_GROUP];
+    keychainGroupRow.valueBlock = ^NSString *{ return keychainSharingGroup; };
+    
+    _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow];
+
+    NSString *userPrincipalName = @"<No User Info Found>";
+    NSString *aadDeviceIdentifier = @"<No Device Info Group Found>";
+    NSString *tenantIdentifier = @"<No Tenant Info Group Found>";
+    
+    NSDictionary *regInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+
+    if ([regInfo count])
+    {
+        userPrincipalName = [regInfo objectForKey:MSID_DEVICE_INFORMATION_UPN_ID_KEY];
+        aadDeviceIdentifier = [regInfo objectForKey:MSID_DEVICE_INFORMATION_AAD_DEVICE_ID_KEY];
+        tenantIdentifier = [regInfo objectForKey:MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY];
+    }
+    
+    _deviceRows = @[ [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - User UPN"
+                                                    value:^NSString *{ return userPrincipalName; }],
+                     [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Device Id" value:^NSString *{ return aadDeviceIdentifier; }],
+                     [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Tenant Id" value:^NSString *{ return tenantIdentifier; }]];
     
     self.navigationController.navigationBarHidden = YES;
     

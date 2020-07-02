@@ -419,7 +419,7 @@
                                                                                                     error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
-    result &= [self clearAllTokenKeys];
+    result &= [self clearAllTokenKeysForAccessGroup:pcaConfig.cacheConfig.keychainSharingGroup];
     
     if (result)
     {
@@ -438,17 +438,13 @@
     }
 }
 
-- (BOOL)clearAllTokenKeys
+- (BOOL)clearAllTokenKeysForAccessGroup:(NSString *)accessGroup
 {
-    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
-    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
-    if (status != errSecSuccess && status != errSecItemNotFound)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to delete key (status: %d)", (int)status);
-        return NO;
-    }
+    MSIDAssymetricKeyKeychainGenerator *keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:accessGroup error:nil];
     
-    return YES;
+    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
+    return [keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
+    
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender
