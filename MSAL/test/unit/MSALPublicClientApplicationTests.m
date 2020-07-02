@@ -1946,8 +1946,7 @@
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common"
-                                                                                                    familyId:@"1"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -1982,8 +1981,7 @@
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithNoFamilyIdInCache_shouldReturnNoAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common"
-                                                                                                    familyId:@"1"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
@@ -2018,8 +2016,7 @@
 - (void)testAllAccount_whenAccountExistsForOtherClient_andNotFociClient_shouldReturnNoAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common"
-                                                                                                    familyId:nil];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
@@ -2556,8 +2553,7 @@
 - (void)testAccountWithHomeAccountId_whenFociTokenExistsForOtherClient_andAppMetadataInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common"
-                                                                                                    familyId:@"1"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
@@ -2636,8 +2632,7 @@
 - (void)testAccountWithUsername_whenFociTokenExistsForOtherClient_andNoAppMetadataInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common"
-                                                                                                    familyId:@"1"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
@@ -2706,7 +2701,7 @@
     // 1. Save response for a different clientId
     NSString *authorityUrl = @"https://login.microsoftonline.com/utid";
     
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:authorityUrl familyId:@"1"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:authorityUrl];
 
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -3044,7 +3039,7 @@
 
 - (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString
 {
-    return [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:authorityString familyId:nil];
+    return [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
 }
 
 - (MSIDConfiguration *)msalDefaultConfiguration

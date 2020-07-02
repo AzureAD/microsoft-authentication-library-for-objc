@@ -33,11 +33,10 @@
 
 @interface MSALTestCacheTokenResponse : NSObject
 
-+(BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
++ (BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
                                tokenCacheAccessor:(MSIDDefaultTokenCacheAccessor *)tokenCacheAccessor
                                             error:(NSError **)error;
 
-+(MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString
-                                                        familyId:(NSString *)familyId;
-+(MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString;
++ (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithFamilyId:(NSString *)familyId;
++ (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString;
 @end

@@ -33,16 +33,16 @@
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALTestConstants.h"
+#import "MSIDTestTokenResponse.h"
 
 @implementation MSALTestCacheTokenResponse
 
-+(BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
++ (BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
                                tokenCacheAccessor:(MSIDDefaultTokenCacheAccessor *)tokenCacheAccessor
                                             error:(NSError **)error
 {
     //store at & rt in cache
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithAuthority:authorityString
-                                                                                                    familyId:nil];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:authorityString];
     
     return [tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -52,37 +52,19 @@
                                                                  error:error];
 }
 
-+ (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString
-                                                         familyId:(NSString *)familyId
++ (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithFamilyId:(NSString *)familyId
 {
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com", @"tid": @"utid"};
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"myuid", @"utid" : @"utid"};
-    
+    NSDictionary *idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com", @"tid": @"utid"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     
-    NSMutableDictionary *responseDict = [@{
-                                           @"access_token": @"access_token",
-                                           @"refresh_token": @"fakeRefreshToken",
-                                           @"authority" : authorityString,
-                                           @"scope": @"fakescope1 fakescope2",
-                                           @"client_id": UNIT_TEST_CLIENT_ID,
-                                           @"id_token": rawIdToken,
-                                           @"client_info": rawClientInfo,
-                                           @"expires_on" : @"1"
-                                           } mutableCopy];
-    
-    if (familyId)
-    {
-        responseDict[@"foci"] = familyId;
-    }
-    
-    MSIDAADV2TokenResponse *msidResponse =
-    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:responseDict
-                                                     error:nil];
-    
-    return msidResponse;
+    return [MSIDTestTokenResponse v2TokenResponseWithAT:@"access_token"
+                                                     RT:@"fakeRefreshToken"
+                                                 scopes:[[NSOrderedSet alloc] initWithArray:@[@"fakescope1 fakescope2"]]
+                                                idToken:rawIdToken
+                                                    uid:@"myuid"
+                                                   utid:@"utid"
+                                               familyId:familyId];
 }
 
 + (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString
