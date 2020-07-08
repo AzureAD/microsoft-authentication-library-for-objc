@@ -41,7 +41,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDMacKeychainTokenCache.h"
 #import "MSALCacheConfig.h"
-
+#import "MSIDMacACLKeychainAccessor.h"
 @implementation MSALDevicePopManagerUtil
 
 + (MSIDDevicePopManager *)test_initWithValidCacheConfig
@@ -75,6 +75,7 @@
 #endif
     keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
     
     manager = [[MSIDDevicePopManager alloc] initWithCacheConfig:msidCacheConfig keyPairAttributes:keyPairAttributes];
     [manager setValue:[MSALDevicePopManagerUtil keyGeneratorWithConfig:msidCacheConfig] forKey:@"keyGeneratorFactory"];
@@ -86,7 +87,8 @@
 #if TARGET_OS_IPHONE
     return [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:cacheConfig.keychainGroup error:nil];
 #else
-    return [[MSIDAssymetricKeyLoginKeychainGenerator alloc] initWithKeychainGroup:cacheConfig.keychainGroup accessRef:cacheConfig.accessRef error:nil];
+    MSIDMacACLKeychainAccessor *keychainAccessor = [[MSIDMacACLKeychainAccessor alloc] initWithTrustedApplications:nil accessLabel:@"Access Control List" error:nil];;
+    return [[MSIDAssymetricKeyLoginKeychainGenerator alloc] initWithKeychainGroup:cacheConfig.keychainGroup accessRef:(__bridge SecAccessRef _Nullable)(keychainAccessor.accessControlForNonSharedItems) error:nil];
 #endif
 }
 @end
