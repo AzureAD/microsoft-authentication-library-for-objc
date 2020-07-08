@@ -346,7 +346,6 @@
     XCTAssertNil(msalError.userInfo[MSIDInvalidTokenResultKey]);
     
     // This can only be run in local
-    XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
     MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
     XCTAssertNotNil(result.accessToken);
     

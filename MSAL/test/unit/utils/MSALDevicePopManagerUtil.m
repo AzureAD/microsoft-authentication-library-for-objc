@@ -77,16 +77,16 @@
     keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     
     manager = [[MSIDDevicePopManager alloc] initWithCacheConfig:msidCacheConfig keyPairAttributes:keyPairAttributes];
-    [manager setValue:[MSALDevicePopManagerUtil keyGenerator] forKey:@"keyGeneratorFactory"];
+    [manager setValue:[MSALDevicePopManagerUtil keyGeneratorWithConfig:msidCacheConfig] forKey:@"keyGeneratorFactory"];
     return manager;
 }
 
-+ (MSIDAssymetricKeyKeychainGenerator *)keyGenerator
++ (MSIDAssymetricKeyKeychainGenerator *)keyGeneratorWithConfig:(MSIDCacheConfig *)cacheConfig
 {
 #if TARGET_OS_IPHONE
-    return [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:nil error:nil];
+    return [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:cacheConfig.keychainGroup error:nil];
 #else
-    return [[MSIDAssymetricKeyLoginKeychainGenerator alloc] initWithGroup:nil error:nil];
+    return [[MSIDAssymetricKeyLoginKeychainGenerator alloc] initWithKeychainGroup:cacheConfig.keychainGroup accessRef:cacheConfig.accessRef error:nil];
 #endif
 }
 @end

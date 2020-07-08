@@ -33,6 +33,6 @@
 
 + (MSIDDevicePopManager *)test_initWithValidCacheConfig;
 
-+ (MSIDAssymetricKeyKeychainGenerator *)keyGenerator;
++ (MSIDAssymetricKeyKeychainGenerator *)keyGeneratorWithConfig:(MSIDCacheConfig *)cacheConfig;
 
 @end
