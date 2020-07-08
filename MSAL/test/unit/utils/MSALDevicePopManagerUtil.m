@@ -48,7 +48,6 @@
 {
     MSIDDevicePopManager *manager;
     MSIDCacheConfig *msidCacheConfig;
-    NSError *error;
     MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
     
 #if TARGET_OS_IPHONE
@@ -58,7 +57,8 @@
     
 #else
     keyPairAttributes = [[MSIDAssymetricKeyLookupAttributes alloc] init];
-    
+    NSError *error;
+
     if (@available(macOS 10.15, *))
     {
         msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:[MSIDKeychainTokenCache defaultKeychainGroup]];
