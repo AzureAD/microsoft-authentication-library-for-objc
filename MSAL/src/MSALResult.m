@@ -133,7 +133,7 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [authScheme getSecret:tokenResult.accessToken popManager:popManager error:error];
+    NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
     if (!accessToken)
     {
         return nil;

@@ -94,7 +94,7 @@ static NSString *keyDelimiter = @" ";
 /// See https://tools.ietf.org/html/rfc7800 Section 3.2
 /// </remarks>
 
-- (nullable NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
+- (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
     NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
                                                            httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
@@ -124,7 +124,7 @@ static NSString *keyDelimiter = @" ";
 
 - (NSString *)getAuthorizationHeader:(NSString *)accessToken
 {
-    return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
+    return [NSString stringWithFormat:@"%@%@%@", self.authenticationScheme, keyDelimiter, accessToken];
 }
 
 @end
