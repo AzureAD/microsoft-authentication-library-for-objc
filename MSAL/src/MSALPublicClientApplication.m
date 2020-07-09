@@ -234,6 +234,8 @@
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
+    
     _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:_keyPairAttributes];
         
     // Maintain an internal copy of config.

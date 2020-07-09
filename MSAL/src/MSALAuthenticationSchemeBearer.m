@@ -55,7 +55,7 @@ static NSString *keyDelimiter = @" ";
     return [NSDictionary new];
 }
 
-- (NSString *)getSecret:(MSIDAccessToken *)accessToken popManager:(nullable __unused MSIDDevicePopManager *)popManager error:(__unused NSError **)error
+- (NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken popManager:(nullable __unused MSIDDevicePopManager *)popManager error:(__unused NSError **)error
 {
     return accessToken.accessToken;
 }
@@ -67,7 +67,7 @@ static NSString *keyDelimiter = @" ";
 
 - (NSString *)getAuthorizationHeader:(NSString *)accessToken
 {
-    return [NSString stringWithFormat:@"%@%@@%@", self.authenticationScheme, keyDelimiter, accessToken];
+    return [NSString stringWithFormat:@"%@%@%@", self.authenticationScheme, keyDelimiter, accessToken];
 }
 
 @end
