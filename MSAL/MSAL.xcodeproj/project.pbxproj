@@ -140,6 +140,7 @@
 		1EE776C5246C98E700F7EBFC /* MSALAuthenticationSchemePop.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1EE776C6246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */; };
 		1EE776C7246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */; };
+		1EF0A58B24B689E2004A9510 /* MSALTestAppAsymmetricKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */; };
 		1EF395FD246DFAD200647FDB /* MSALAuthScheme.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF395FB246DFAD200647FDB /* MSALAuthScheme.h */; };
 		1EF395FE246DFAD200647FDB /* MSALAuthScheme.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF395FB246DFAD200647FDB /* MSALAuthScheme.h */; };
 		1EF395FF246DFAD200647FDB /* MSALAuthScheme.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EF395FC246DFAD200647FDB /* MSALAuthScheme.m */; };
@@ -3570,6 +3571,7 @@
 				1E4522AD22581B8A00D27CA7 /* MSALScopesViewController.m in Sources */,
 				1E614BE922558D8300EBF62F /* main.m in Sources */,
 				1E614BDE22558D8300EBF62F /* MSALAppDelegate.m in Sources */,
+				1EF0A58B24B689E2004A9510 /* MSALTestAppAsymmetricKey.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
