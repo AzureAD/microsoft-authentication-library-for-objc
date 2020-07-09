@@ -112,7 +112,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
-    
+    _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
+
     _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
     _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:_keychainSharingGroup error:nil];
     
