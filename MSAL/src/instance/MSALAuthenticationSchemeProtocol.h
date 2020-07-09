@@ -46,8 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSString *)getAuthorizationHeader:(nonnull NSString *)accessToken;
 
 - (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken
-                      popManager:(nullable MSIDDevicePopManager *)popManager
-                           error:(NSError **)error;
+                                 popManager:(nullable MSIDDevicePopManager *)popManager
+                                      error:(NSError **)error;
 
 @end
 
