@@ -441,16 +441,15 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     [self.outLineView enumerateAvailableRowViewsUsingBlock:^(__kindof NSTableRowView * _Nonnull rowView, __unused NSInteger row) {
         NSTableCellView *cellView = [rowView viewAtColumn:0];
         NSTextField *textField = cellView.textField;
+        textField.font = [NSFont systemFontOfSize:14];
         if (rowView.selected)
         {
             rowView.emphasized = NO;
             rowView.backgroundColor = [NSColor lightGrayColor];
-            textField.font = [NSFont boldSystemFontOfSize:14];
         } else
         {
-            rowView.emphasized = NO;
+            rowView.emphasized = YES;
             rowView.backgroundColor = [NSColor clearColor];
-            textField.font = [NSFont systemFontOfSize:14];
         }
     }];
 }
