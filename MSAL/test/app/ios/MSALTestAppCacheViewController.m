@@ -436,6 +436,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         MSIDAccountMetadataCacheItem *accountMetadata = [self accountMetadataEntries][indexPath.row];
         cell.textLabel.text = [NSString stringWithFormat:@"Client_Id : %@", accountMetadata.clientId];
+        cell.detailTextLabel.text = @"";
         
     }
     else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
