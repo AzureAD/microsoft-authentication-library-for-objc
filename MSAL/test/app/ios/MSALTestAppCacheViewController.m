@@ -58,9 +58,12 @@
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDAuthScheme.h"
 #import "MSALCacheItemDetailViewController.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSIDAccountMetadataCacheItem.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
+#define ACCOUNT_METADATA @"Account-Metadata"
 #define POP_TOKEN_KEYS @"RSA Key-Pair"
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
@@ -71,12 +74,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 @property (strong) NSArray *accounts;
 @property (strong) NSArray *appMetadataEntries;
+@property (strong) NSMutableArray *accountMetadataEntries;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 @property (nonatomic) MSIDAssymetricKeyKeychainGenerator *keyGenerator;
 @property (nonatomic) NSMutableArray *tokenKeys;
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
 @property (nonatomic) NSString *keychainSharingGroup;
+@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
 @end
 
@@ -108,6 +113,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
@@ -120,6 +126,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:_keychainSharingGroup];
     _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
+    _accountMetadataEntries = [NSMutableArray new];
     return self;
 }
 
@@ -287,6 +294,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         if ([[self appMetadataEntries] count])
         {
             [_cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
+            for (MSIDAppMetadataCacheItem *item in self.appMetadataEntries)
+            {
+                MSIDAccountMetadataCacheItem *accountMetadata = [self.accountMetadataCache retrieveAccountMetadataCacheItemForClientId:item.clientId context:nil error:nil];
+                if (accountMetadata)
+                {
+                    [self.accountMetadataEntries addObject:accountMetadata];
+                }
+            }
+        }
+        
+        if ([[self accountMetadataEntries] count])
+        {
+            [_cacheSections setObject:[self accountMetadataEntries] forKey:ACCOUNT_METADATA];
         }
         
         for (MSIDAccount *account in [self accounts])
@@ -410,6 +430,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDAppMetadataCacheItem *appMetadata = [self appMetadataEntries][indexPath.row];
         cell.textLabel.text = [NSString stringWithFormat:@"Client_Id : %@", appMetadata.clientId];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"Environment: %@, FamilyId : %@", appMetadata.environment, [appMetadata.familyId length] != 0 ? appMetadata.familyId : @"0"];
+        
+    }
+    else if ([cacheEntry isKindOfClass:[MSIDAccountMetadataCacheItem class]])
+    {
+        MSIDAccountMetadataCacheItem *accountMetadata = [self accountMetadataEntries][indexPath.row];
+        cell.textLabel.text = [NSString stringWithFormat:@"Client_Id : %@", accountMetadata.clientId];
         
     }
     else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])

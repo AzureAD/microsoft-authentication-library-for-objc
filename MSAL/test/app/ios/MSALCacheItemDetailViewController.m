@@ -32,6 +32,8 @@
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDAccount.h"
 #import "MSIDRefreshToken.h"
+#import "MSALTestAppAsymmetricKey.h"
+#import "MSIDAccountMetadataCacheItem.h"
 
 @interface MSALCacheItemDetailViewController ()
 
@@ -76,10 +78,23 @@
             MSIDAccount *account = (MSIDAccount *)self.cacheItem;
             jsonDict = account.jsonDictionary;
         }
+        else if([self.cacheItem isKindOfClass:[MSALTestAppAsymmetricKey class]])
+        {
+            MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)self.cacheItem;
+            NSMutableDictionary *keyDict = [NSMutableDictionary new];
+            [keyDict setObject:key.kid forKey:@"kid"];
+            [keyDict setObject:key.name forKey:@"label"];
+            jsonDict = keyDict;
+        }
+        else if([self.cacheItem isKindOfClass:[MSIDAccountMetadataCacheItem class]])
+        {
+            MSIDAccountMetadataCacheItem *accountMetadata = (MSIDAccountMetadataCacheItem *)self.cacheItem;
+            jsonDict = accountMetadata.jsonDictionary;
+        }
         
         NSError *error = nil;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonDict options:NSJSONWritingPrettyPrinted error:&error];
-        if ([jsonData length] > 0 && error == nil)
+        if ([jsonData length] > 0)
         {
             NSLog(@"Successfully serialized the dictionary into data = %@", jsonData);
             NSString *jsonString = [[NSString alloc] initWithData:jsonData
@@ -87,11 +102,7 @@
             NSLog(@"JSON String = %@", jsonString);
             _cacheItemView.text = jsonString;
         }
-        else if ([jsonData length] == 0 && error == nil)
-        {
-            NSLog(@"No data was returned after serialization.");
-        }
-        else if (error != nil)
+        else
         {
             NSLog(@"An error happened = %@", error);
         }
