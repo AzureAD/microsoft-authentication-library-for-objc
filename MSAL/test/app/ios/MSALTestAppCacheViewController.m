@@ -57,6 +57,7 @@
 #import "MSIDCacheConfig.h"
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDAuthScheme.h"
+#import "MSALCacheItemDetailViewController.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -247,7 +248,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [_cacheTableView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
     [_cacheTableView setDelegate:self];
     [_cacheTableView setDataSource:self];
-    [_cacheTableView setAllowsSelection:NO];
     
     // Move the content down so it's not covered by the status bar
     [_cacheTableView setContentInset:UIEdgeInsetsMake(20, 0, 0, 0)];
@@ -398,8 +398,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     cell.backgroundColor = [UIColor whiteColor];
     cell.textLabel.font  = [UIFont fontWithName: @"Arial" size: 16.0];
     cell.textLabel.textColor = [UIColor darkTextColor];
-    cell.textLabel.numberOfLines = 0;
-    cell.detailTextLabel.numberOfLines = 0;
+    cell.textLabel.numberOfLines = 2;
+    cell.detailTextLabel.numberOfLines = 2;
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
     id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
@@ -703,6 +704,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     (void)tableView;
     (void)editingStyle;
     (void)indexPath;
+}
+
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
+    NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
+    id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
+    MSALCacheItemDetailViewController *vc = [[MSALCacheItemDetailViewController alloc] init];
+    vc.cacheItem = cacheEntry;
+    [[self navigationController] pushViewController:vc animated:YES];
 }
 
 @end

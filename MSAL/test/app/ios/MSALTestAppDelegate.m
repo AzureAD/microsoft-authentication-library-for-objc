@@ -78,7 +78,9 @@
     [_tabBar addChildViewController:navController];
     
     MSALTestAppCacheViewController* cacheController = [MSALTestAppCacheViewController new];
-    [_tabBar addChildViewController:cacheController];
+    UINavigationController* cacheNavController = [[UINavigationController alloc] initWithRootViewController:cacheController];
+    cacheNavController.tabBarItem = cacheController.tabBarItem;
+    [_tabBar addChildViewController:cacheNavController];
     MSALTestAppLogViewController* logController = [MSALTestAppLogViewController new];
     [_tabBar addChildViewController:logController];
     
