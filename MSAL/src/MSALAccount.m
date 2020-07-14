@@ -58,7 +58,17 @@
         _environment = environment;
         _homeAccountId = homeAccountId;
         _identifier = homeAccountId.identifier;
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
+        
+        // If homeAccountId is present, displayableId is not needed for account lookup. Leaving it nil allows accounts to appear in guest
+        // tenants under a different upn and still acquire tokens silently.
+        if (homeAccountId)
+        {
+            _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:homeAccountId.identifier];
+        }
+        else
+        {
+            _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
+        }
         
         [self addTenantProfiles:tenantProfiles];
     }
