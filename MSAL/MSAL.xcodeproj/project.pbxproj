@@ -1628,7 +1628,6 @@
 				B253152923DD66A300432133 /* MSALDeviceInfoProvider.m */,
 				B253152E23DD684E00432133 /* MSALSSOExtensionRequestHandler.h */,
 				B253152F23DD684E00432133 /* MSALSSOExtensionRequestHandler.m */,
-				1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */,
 			);
 			path = instance;
 			sourceTree = "<group>";
@@ -2155,6 +2154,7 @@
 		D65A6F7E1E3FF3D900C69FBA /* public */ = {
 			isa = PBXGroup;
 			children = (
+				1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */,
 				1E72193724773D1B00AB9B67 /* MSALHttpMethod.h */,
 				9627C7B8225432690028A859 /* configuration */,
 				D65A6F811E3FF3D900C69FBA /* MSAL.h */,
