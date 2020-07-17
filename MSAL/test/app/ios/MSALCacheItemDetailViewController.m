@@ -34,6 +34,7 @@
 #import "MSIDRefreshToken.h"
 #import "MSALTestAppAsymmetricKey.h"
 #import "MSIDAccountMetadataCacheItem.h"
+#import "MSIDJsonSerializable.h"
 
 @interface MSALCacheItemDetailViewController ()
 
@@ -61,22 +62,17 @@
         [self.view addSubview:_cacheItemView];
         NSDictionary *jsonDict = [NSDictionary new];
         
-        if ([self.cacheItem isKindOfClass:[MSIDBaseToken class]])
+        if ([self.cacheItem respondsToSelector:@selector(jsonDictionary)])
         {
-            MSIDBaseToken *token = (MSIDBaseToken *)self.cacheItem;
-            MSIDCredentialCacheItem *item = token.tokenCacheItem;
-            jsonDict = item.jsonDictionary;
+            jsonDict = [self.cacheItem jsonDictionary];
         }
-        else if ([self.cacheItem isKindOfClass:[MSIDAppMetadataCacheItem class]])
+        if ([self.cacheItem respondsToSelector:@selector(tokenCacheItem)])
         {
-            MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)self.cacheItem;
-            jsonDict = appMetadata.jsonDictionary;
-            
-        }
-        else if([self.cacheItem isKindOfClass:[MSIDAccount class]])
-        {
-            MSIDAccount *account = (MSIDAccount *)self.cacheItem;
-            jsonDict = account.jsonDictionary;
+            id tokenCacheItem = [self.cacheItem tokenCacheItem];
+            if ([tokenCacheItem respondsToSelector:@selector(jsonDictionary)])
+            {
+                jsonDict = [tokenCacheItem jsonDictionary];
+            }
         }
         else if([self.cacheItem isKindOfClass:[MSALTestAppAsymmetricKey class]])
         {
@@ -86,36 +82,20 @@
             [keyDict setObject:key.name forKey:@"label"];
             jsonDict = keyDict;
         }
-        else if([self.cacheItem isKindOfClass:[MSIDAccountMetadataCacheItem class]])
-        {
-            MSIDAccountMetadataCacheItem *accountMetadata = (MSIDAccountMetadataCacheItem *)self.cacheItem;
-            jsonDict = accountMetadata.jsonDictionary;
-        }
         
         NSError *error = nil;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonDict options:NSJSONWritingPrettyPrinted error:&error];
         if ([jsonData length] > 0)
         {
-            NSLog(@"Successfully serialized the dictionary into data = %@", jsonData);
             NSString *jsonString = [[NSString alloc] initWithData:jsonData
                                                          encoding:NSUTF8StringEncoding];
-            NSLog(@"JSON String = %@", jsonString);
             _cacheItemView.text = jsonString;
         }
         else
         {
-            NSLog(@"An error happened = %@", error);
+            _cacheItemView.text = [NSString stringWithFormat:@"An error happened : %@", error];
         }
     }
 }
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

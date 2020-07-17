@@ -58,8 +58,9 @@
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDAuthScheme.h"
 #import "MSALCacheItemDetailViewController.h"
-#import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSIDMetadataCache.h"
 #import "MSIDAccountMetadataCacheItem.h"
+#import "MSIDAccountMetadataCacheKey.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -81,7 +82,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
 @property (nonatomic) NSString *keychainSharingGroup;
-@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
+@property (nonatomic) MSIDMetadataCache *metadataCache;
 
 @end
 
@@ -113,7 +114,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
-    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.metadataCache = [[MSIDMetadataCache alloc] initWithPersistentDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
@@ -126,7 +127,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:_keychainSharingGroup];
     _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
-    _accountMetadataEntries = [NSMutableArray new];
     return self;
 }
 
@@ -135,6 +135,16 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     if (appMetadata)
     {
         [_tokenCache removeAppMetadata:appMetadata context:nil error:nil];
+        [self loadCache];
+    }
+}
+
+- (void)deleteAccountMetadata:(MSIDAccountMetadataCacheItem *)accountMetadata
+{
+    if (accountMetadata)
+    {
+        MSIDAccountMetadataCacheKey *key = [[MSIDAccountMetadataCacheKey alloc] initWithClientId:accountMetadata.clientId];
+        [self.metadataCache removeAccountMetadataCacheItemForKey:key context:nil error:nil];
         [self loadCache];
     }
 }
@@ -294,9 +304,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         if ([[self appMetadataEntries] count])
         {
             [_cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
+            self.accountMetadataEntries = [NSMutableArray new];
             for (MSIDAppMetadataCacheItem *item in self.appMetadataEntries)
             {
-                MSIDAccountMetadataCacheItem *accountMetadata = [self.accountMetadataCache retrieveAccountMetadataCacheItemForClientId:item.clientId context:nil error:nil];
+                MSIDAccountMetadataCacheKey *key = [[MSIDAccountMetadataCacheKey alloc] initWithClientId:item.clientId];
+                MSIDAccountMetadataCacheItem *accountMetadata = [self.metadataCache accountMetadataCacheItemWithKey:key context:nil error:nil];
                 if (accountMetadata)
                 {
                     [self.accountMetadataEntries addObject:accountMetadata];
@@ -618,7 +630,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteKeyAction]];
         return configuration;
     }
-    
+    else if ([cacheEntry isKindOfClass:[MSIDAccountMetadataCacheItem class]])
+    {
+        MSIDAccountMetadataCacheItem *accountMetadata = (MSIDAccountMetadataCacheItem *)cacheEntry;
+        __auto_type deleteMetadataAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
+                                               title:@"Delete"
+                                             handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
+        {
+            [self deleteAccountMetadata:accountMetadata];
+        }];
+        
+        __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteMetadataAction]];
+        return configuration;
+    }
     
     return nil;
 }
@@ -710,7 +734,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       [self deleteAllEntriesForAccount:account];
                   }]];
     }
-    else if ([cacheEntry isKindOfClass:[NSString class]])
+    else if ([cacheEntry isKindOfClass:[MSALTestAppAsymmetricKey class]])
     {
         MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)cacheEntry;
         return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
@@ -718,6 +742,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                   handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
                   {
                       [self deleteKey:key];
+                  }]];
+    }
+    
+    else if ([cacheEntry isKindOfClass:[MSIDAccountMetadataCacheItem class]])
+    {
+        MSIDAccountMetadataCacheItem *accountMetadata = (MSIDAccountMetadataCacheItem *)cacheEntry;
+        return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
+                                                    title:@"Delete"
+                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
+                  {
+                      [self deleteAccountMetadata:accountMetadata];
                   }]];
     }
     
