@@ -1541,7 +1541,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -1616,7 +1616,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -1743,7 +1743,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -1815,7 +1815,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -1876,7 +1876,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -1941,7 +1941,7 @@
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
+         XCTAssertNil(params.accountIdentifier.displayableId);
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
@@ -3085,7 +3085,7 @@
         MSIDInteractiveRequestParameters *params = [obj parameters];
         XCTAssertNotNil(params);
         
-        XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"fakeuser@contoso.com");
+        XCTAssertNil(params.accountIdentifier.displayableId);
         XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"myuid.utid");
         
         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
