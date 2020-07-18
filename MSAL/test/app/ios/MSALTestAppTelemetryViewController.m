@@ -32,10 +32,9 @@
 #import <MSAL/MSALTelemetryConfig.h>
 
 @interface MSALTestAppTelemetryViewController ()
-{
-    NSMutableArray<NSDictionary<NSString *, NSString *> *> *_telemetryEvents;
-    NSInteger _expandedRowIndex;
-}
+
+@property (nonatomic) NSMutableArray<NSDictionary<NSString *, NSString *> *> *telemetryEvents;
+@property (nonatomic) NSInteger expandedRowIndex;
 
 @end
 
@@ -76,7 +75,7 @@
     MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSDictionary<NSString *, NSString *> *event)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [_telemetryEvents addObject:event];
+            [self.telemetryEvents addObject:event];
             [self refresh];
         });
     };

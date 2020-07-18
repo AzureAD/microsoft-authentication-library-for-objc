@@ -35,13 +35,13 @@
 
 @interface MSALTestAppUserViewController ()
 
+@property (nonatomic) NSArray<MSALAccount *> *accounts;
+@property (nonatomic) MSALAccount *currentAccount;
+
 @end
 
 @implementation MSALTestAppUserViewController
-{
-    NSArray<MSALAccount *> *_accounts;
-    MSALAccount *_currentAccount;
-}
+
 
 + (instancetype)sharedController
 {
@@ -101,7 +101,7 @@
         [application getCurrentAccountWithParameters:parameters
                                      completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
         {
-            _currentAccount = account;
+            self.currentAccount = account;
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [super refresh];

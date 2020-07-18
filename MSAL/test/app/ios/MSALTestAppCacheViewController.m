@@ -83,15 +83,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
 @property (nonatomic) NSString *keychainSharingGroup;
 @property (nonatomic) MSIDMetadataCache *metadataCache;
+@property (nonatomic) NSMutableDictionary *cacheSections;
+@property (nonatomic) NSMutableArray *cacheSectionTitles;
+@property (nonatomic) UITableView *cacheTableView;
 
 @end
 
 @implementation MSALTestAppCacheViewController
 {
     NSMutableDictionary<NSString *, NSMutableArray *> *_tokensPerAccount;
-    NSMutableDictionary *_cacheSections;
-    NSMutableArray *_cacheSectionTitles;
-    UITableView *_cacheTableView;
 }
 
 - (id)init
@@ -300,10 +300,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
         
-        _cacheSections = [NSMutableDictionary dictionary];
+        self.cacheSections = [NSMutableDictionary dictionary];
         if ([[self appMetadataEntries] count])
         {
-            [_cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
+            [self.cacheSections setObject:[self appMetadataEntries] forKey:APP_METADATA];
             self.accountMetadataEntries = [NSMutableArray new];
             for (MSIDAppMetadataCacheItem *item in self.appMetadataEntries)
             {
@@ -318,13 +318,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         if ([[self accountMetadataEntries] count])
         {
-            [_cacheSections setObject:[self accountMetadataEntries] forKey:ACCOUNT_METADATA];
+            [self.cacheSections setObject:[self accountMetadataEntries] forKey:ACCOUNT_METADATA];
         }
         
         for (MSIDAccount *account in [self accounts])
         {
-            _cacheSections[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
-            [_cacheSections[[self rowIdentifier:account.accountIdentifier]] addObject:account];
+            self.cacheSections[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
+            [self.cacheSections[[self rowIdentifier:account.accountIdentifier]] addObject:account];
         }
         
         NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
@@ -343,27 +343,27 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 }
             }
             
-            NSMutableArray *tokens = _cacheSections[[self rowIdentifier:token.accountIdentifier]];
+            NSMutableArray *tokens = self.cacheSections[[self rowIdentifier:token.accountIdentifier]];
             [tokens addObject:token];
         }
         
-        _cacheSectionTitles = [NSMutableArray arrayWithArray:[_cacheSections allKeys]];
+        self.cacheSectionTitles = [NSMutableArray arrayWithArray:[self.cacheSections allKeys]];
         if (isPopToken)
         {
-            MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:_keyPairAttributes error:nil];
+            MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:self.keyPairAttributes error:nil];
             if (keyPair)
             {
-                NSString *kid = [_popManager generateKidFromModulus:keyPair.keyModulus exponent:keyPair.keyExponent];
+                NSString *kid = [self.popManager generateKidFromModulus:keyPair.keyModulus exponent:keyPair.keyExponent];
                 MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:kid];
                 MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:kid];
-                _tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
-                [_cacheSections setObject:_tokenKeys forKey:POP_TOKEN_KEYS];
-                [_cacheSectionTitles addObject:POP_TOKEN_KEYS];
+                self.tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+                [self.cacheSections setObject:self.tokenKeys forKey:POP_TOKEN_KEYS];
+                [self.cacheSectionTitles addObject:POP_TOKEN_KEYS];
             }
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [_cacheTableView reloadData];
+            [self.cacheTableView reloadData];
             [self.refreshControl endRefreshing];
         });
     });
