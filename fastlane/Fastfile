@@ -31,7 +31,7 @@ lane :ui_test do
     workspace: File.absolute_path('../MSAL.xcworkspace'),
     scheme: "MSAL Test Automation (iOS)",
     try_count: 3,
-    batch_count: 30,
+    batch_count: 6,
     fail_build: false,
     parallel_testrun_count: 4,
     reset_simulator: true,
