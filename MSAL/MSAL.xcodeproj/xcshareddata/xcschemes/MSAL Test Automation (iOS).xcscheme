@@ -3,9 +3,65 @@
    LastUpgradeVersion = "0820"
    version = "1.3">
    <BuildAction
-      parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+      parallelizeBuildables = "NO"
+      buildImplicitDependencies = "NO">
       <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B27551C7208179EE00AA7A38"
+               BuildableName = "libIdentityAutomationAppLib iOS.a"
+               BlueprintName = "IdentityAutomationAppLib iOS"
+               ReferencedContainer = "container:IdentityCore/IdentityCore/IdentityCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B2ED1BA52204D24700A24E82"
+               BuildableName = "libIdentityAutomationTestLib iOS.a"
+               BlueprintName = "IdentityAutomationTestLib iOS"
+               ReferencedContainer = "container:IdentityCore/IdentityCore/IdentityCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D68FB4861FBA698A005308BB"
+               BuildableName = "libIdentityCore.a"
+               BlueprintName = "IdentityCore iOS"
+               ReferencedContainer = "container:IdentityCore/IdentityCore/IdentityCore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D65A6F421E3FD30A00C69FBA"
+               BuildableName = "MSAL.framework"
+               BlueprintName = "MSAL (iOS Framework)"
+               ReferencedContainer = "container:MSAL.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
@@ -27,6 +83,15 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "962E37A61E720C5D00DE71FE"
+            BuildableName = "MSAL Test Automation (iOS).app"
+            BlueprintName = "MSAL Test Automation (iOS)"
+            ReferencedContainer = "container:MSAL.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -49,17 +114,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "962E37A61E720C5D00DE71FE"
-            BuildableName = "MSAL Test Automation (iOS).app"
-            BlueprintName = "MSAL Test Automation (iOS)"
-            ReferencedContainer = "container:MSAL.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -88,8 +142,6 @@
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
