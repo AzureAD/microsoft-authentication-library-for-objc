@@ -1,0 +1,47 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+lane :ui_test do
+  
+  test_run_block = lambda do |testrun_info|
+    failed_test_count = testrun_info[:failed].size
+    passed_test_count = testrun_info[:passing].size
+    try_attempt = testrun_info[:try_count]
+    batch = testrun_info[:batch]
+
+    # UI.abort_with_message!('You could conditionally abort')
+    UI.message("\ὠA everything is fine, let's continue try #{try_attempt + 1} for batch #{batch}")
+  end
+  
+  result = multi_scan(
+    workspace: File.absolute_path('../MSAL.xcworkspace'),
+    scheme: "MSAL",
+    try_count: 3,
+    batch_count: 10,
+    fail_build: false,
+    parallel_testrun_count: 4,
+    reset_simulator: true,
+    device: 'iPhone 8 Plus',
+    sdk: 'iphonesimulator',
+    deployment_target_version: '13.5',
+    testrun_completed_block: test_run_block
+  )
+  
+  unless result[:failed_testcount].zero?
+    UI.message("There are #{result[:failed_testcount]} failing E2E tests that require your attention")
+  end
+end

@@ -24,6 +24,5 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-#import "MSIDConstants.h"
 
 extern NSString *MSALParameterStringForHttpMethod(MSALHttpMethod httpMethod);
