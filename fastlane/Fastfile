@@ -29,7 +29,7 @@ lane :ui_test do
   
   result = multi_scan(
     workspace: File.absolute_path('../MSAL.xcworkspace'),
-    scheme: "MSAL",
+    scheme: "MSAL Test Automation (iOS)",
     try_count: 3,
     batch_count: 10,
     fail_build: false,
