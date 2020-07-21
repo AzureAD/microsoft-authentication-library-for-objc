@@ -195,7 +195,11 @@ static MSIDTestConfigurationProvider *s_confProvider;
         [expectation fulfill];
     }];
 
-    [self waitForExpectationsWithTimeout:60 handler:nil];
+    [self waitForExpectationsWithTimeout:60 handler:^(NSError * _Nullable error) {
+        
+        NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
+        NSLog(@"Expectation unfulfilled with error %@. Debug Info: conf provider %@, conf path %@", error, self.class.confProvider, confPath);
+    }];
 }
 
 - (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
