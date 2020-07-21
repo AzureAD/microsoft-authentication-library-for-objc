@@ -177,7 +177,10 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest
 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Get configuration"];
+    NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
+    NSString *expectationDesctiption = [NSString stringWithFormat:@"Get configuration. Debug Info: conf provider %@, conf path %@", self.class.confProvider, confPath];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:expectationDesctiption];
     
     MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationApplication.class];
     
@@ -195,9 +198,8 @@ static MSIDTestConfigurationProvider *s_confProvider;
         [expectation fulfill];
     }];
 
-    [self waitForExpectationsWithTimeout:60 handler:^(NSError * _Nullable error) {
+    [self waitForExpectationsWithTimeout:10 handler:^(NSError * _Nullable error) {
         
-        NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
         NSLog(@"Expectation unfulfilled with error %@. Debug Info: conf provider %@, conf path %@", error, self.class.confProvider, confPath);
     }];
 }
