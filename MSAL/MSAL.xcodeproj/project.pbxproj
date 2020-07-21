@@ -2957,7 +2957,6 @@
 			buildPhases = (
 				B2BB736C2112C32C000EA4C5 /* Sources */,
 				B2BB736D2112C32C000EA4C5 /* Frameworks */,
-				B2BB736E2112C32C000EA4C5 /* Resources */,
 				B2BB739A2112C588000EA4C5 /* ShellScript */,
 				B20E245621FEB30F0037CA5E /* CopyFiles */,
 				B286864824037DCB004E83FC /* ShellScript */,
@@ -3337,13 +3336,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B2BB736E2112C32C000EA4C5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		D61A64311E5A29580086D120 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3456,7 +3448,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\nfi\n";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
