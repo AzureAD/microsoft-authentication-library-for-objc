@@ -2899,6 +2899,7 @@
 			buildPhases = (
 				962E37A91E720C5D00DE71FE /* Sources */,
 				962E37B51E720C5D00DE71FE /* Frameworks */,
+				B267C8B124C6B90300ED101D /* ShellScript */,
 				962E37B71E720C5D00DE71FE /* Resources */,
 				B2FE601E20E5BB5900502BA6 /* Embed Frameworks */,
 			);
@@ -3390,6 +3391,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		B267C8B124C6B90300ED101D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Executing build script! Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
+		};
 		B286864824037DCB004E83FC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -3448,7 +3466,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Executing build script! Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
