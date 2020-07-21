@@ -5,3 +5,4 @@ MSAL.xcscmblueprint
 ## Build generated
 build/
 DerivedData/
+MSAL/test/automation/conf.json
