@@ -1273,6 +1273,7 @@
 		B26756D422921CC4000F01D7 /* MSALOauth2Provider+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALOauth2Provider+Internal.h"; sourceTree = "<group>"; };
 		B26756D722922375000F01D7 /* MSALOauth2Authority.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALOauth2Authority.h; sourceTree = "<group>"; };
 		B26756D822922375000F01D7 /* MSALOauth2Authority.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2Authority.m; sourceTree = "<group>"; };
+		B267C8B324C6BC6E00ED101D /* conf.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = conf.json; sourceTree = "<group>"; };
 		B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMSABasicInteractiveTests.m; sourceTree = "<group>"; };
 		B2725E7E22BD88BE009B454A /* NSStringAccountIdentifiersTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSStringAccountIdentifiersTest.m; sourceTree = "<group>"; };
 		B2725EAB22BF2759009B454A /* MSALExternalAccountHandlerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALExternalAccountHandlerTests.m; sourceTree = "<group>"; };
@@ -1691,6 +1692,7 @@
 		962E37BE1E720E1700DE71FE /* automation */ = {
 			isa = PBXGroup;
 			children = (
+				B267C8B324C6BC6E00ED101D /* conf.json */,
 				B2BB737F2112C351000EA4C5 /* tests */,
 				962E37BF1E720E4F00DE71FE /* ios */,
 			);
@@ -3406,7 +3408,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Executing build script! Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=$(PROJECT_DIR)/test/automation\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH .$BUILD_APP_DIR/$FILENAME\nfi\n";
 		};
 		B286864824037DCB004E83FC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3466,7 +3468,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\necho \"Executing build script! Build app dir = $BUILD_APP_DIR\"\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\necho \"Copying files from $RESOURCE_PATH to $BUILD_APP_DIR/$FILENAME\"\nfi\n";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=$(PROJECT_DIR)/test/automation\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH .$BUILD_APP_DIR/$FILENAME\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
