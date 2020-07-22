@@ -412,6 +412,7 @@
 		B26756DA22922375000F01D7 /* MSALOauth2Authority.h in Headers */ = {isa = PBXBuildFile; fileRef = B26756D722922375000F01D7 /* MSALOauth2Authority.h */; };
 		B26756DB22922375000F01D7 /* MSALOauth2Authority.m in Sources */ = {isa = PBXBuildFile; fileRef = B26756D822922375000F01D7 /* MSALOauth2Authority.m */; };
 		B26756DC22922375000F01D7 /* MSALOauth2Authority.m in Sources */ = {isa = PBXBuildFile; fileRef = B26756D822922375000F01D7 /* MSALOauth2Authority.m */; };
+		B267C8CC24C7D81400ED101D /* conf.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = B267C8B324C6BC6E00ED101D /* conf.json */; };
 		B2725E7F22BD88BE009B454A /* NSStringAccountIdentifiersTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725E7E22BD88BE009B454A /* NSStringAccountIdentifiersTest.m */; };
 		B2725EAC22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EAB22BF2759009B454A /* MSALExternalAccountHandlerTests.m */; };
 		B2725EAD22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EAB22BF2759009B454A /* MSALExternalAccountHandlerTests.m */; };
@@ -1028,6 +1029,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				B20E246021FEB3E20037CA5E /* MSAL.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B267C8C524C7D81000ED101D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				B267C8CC24C7D81400ED101D /* conf.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2961,6 +2972,7 @@
 				B2BB736C2112C32C000EA4C5 /* Sources */,
 				B2BB736D2112C32C000EA4C5 /* Frameworks */,
 				B2BB739A2112C588000EA4C5 /* ShellScript */,
+				B267C8C524C7D81000ED101D /* CopyFiles */,
 				B20E245621FEB30F0037CA5E /* CopyFiles */,
 				B286864824037DCB004E83FC /* ShellScript */,
 			);
