@@ -178,9 +178,33 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest
 {
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
-    NSString *expectationDesctiption = [NSString stringWithFormat:@"Get configuration. Debug Info: conf provider %@, conf path %@", self.class.confProvider, confPath];
+    NSString *debugLog = [NSString stringWithFormat:@"Get configuration. Debug Info: conf provider %@, conf path %@", self.class.confProvider, confPath];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:expectationDesctiption];
+    if (!self.class.confProvider)
+    {
+        NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
+        self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
+        
+        debugLog = [debugLog stringByAppendingFormat:@" + creating new conf provider %@", self.class.confProvider];
+        
+        NSData *configurationData = [NSData dataWithContentsOfFile:confPath];
+
+        if (!configurationData)
+        {
+            debugLog = [debugLog stringByAppendingString:@" + no configuration data"];
+            configurationData = [@"" dataUsingEncoding:NSUTF8StringEncoding];
+        }
+
+        NSError *jsonError = nil;
+        NSDictionary *configurationDictionary = [NSJSONSerialization JSONObjectWithData:configurationData options:0 error:&jsonError];
+
+        if (jsonError || !configurationDictionary)
+        {
+            debugLog = [debugLog stringByAppendingFormat:@" + failed to deserialize with error %@, dictionary %@, data %@, string %@", jsonError, configurationDictionary, configurationData, [[NSString alloc] initWithData:configurationData encoding:NSUTF8StringEncoding]];
+        }
+    }
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:debugLog];
     
     MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationApplication.class];
     
