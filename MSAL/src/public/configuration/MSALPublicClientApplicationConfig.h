@@ -96,6 +96,12 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
 - (nonnull instancetype)initWithClientId:(NSString *)clientId;
 
 /**
+ Default is disable
+ Enable to bypass Redirect URL check.
+ */
+@property BOOL bypassRedirectURIValidation;
+
+/**
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
