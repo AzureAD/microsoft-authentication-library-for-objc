@@ -436,7 +436,7 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     return nil;
 }
 
-- (void)outlineViewSelectionDidChange:(NSNotification *)notification
+- (void)outlineViewSelectionDidChange:(__unused NSNotification *)notification
 {
     [self.outLineView enumerateAvailableRowViewsUsingBlock:^(__kindof NSTableRowView * _Nonnull rowView, __unused NSInteger row) {
         NSTableCellView *cellView = [rowView viewAtColumn:0];
