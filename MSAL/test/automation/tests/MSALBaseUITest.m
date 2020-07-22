@@ -200,7 +200,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
         if (jsonError || !configurationDictionary)
         {
-            debugLog = [debugLog stringByAppendingFormat:@" + failed to deserialize with error %@, dictionary %@, data %@, string %@", jsonError, configurationDictionary, configurationData, [[NSString alloc] initWithData:configurationData encoding:NSUTF8StringEncoding]];
+            debugLog = [debugLog stringByAppendingFormat:@" + failed to deserialize with error %@, dictionary %@, data %@, string %@, %@", jsonError, configurationDictionary, configurationData, [[NSString alloc] initWithData:configurationData encoding:NSUTF8StringEncoding], [[[NSString alloc] initWithData:configurationData encoding:NSUTF8StringEncoding] msidBase64UrlEncode]];
         }
     }
     
