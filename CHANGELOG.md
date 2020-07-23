@@ -1,5 +1,5 @@
 ## [1.1.5] - 2020-06-19
-
+ 
 ### Added
 * Switch to PkeyAuth on macOS (common library #734)
 * Support returning additional WPJ info (#931)
