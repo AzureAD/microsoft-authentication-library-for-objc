@@ -25,25 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import <Foundation/Foundation.h>
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSIDAADV2TokenResponse;
+@class MSIDConfiguration;
 
-@interface MSALErrorConverter (Internal)
+@interface MSALTestCacheTokenResponse : NSObject
 
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
++ (BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
+                               tokenCacheAccessor:(MSIDDefaultTokenCacheAccessor *)tokenCacheAccessor
+                                            error:(NSError **)error;
 
++ (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithFamilyId:(NSString *)familyId;
++ (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString;
 @end

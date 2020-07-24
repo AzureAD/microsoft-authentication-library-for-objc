@@ -116,6 +116,9 @@ static NSDictionary *s_currentProfile = nil;
     [titles addObjectsFromArray:[s_profiles allKeys]];
     
     s_profileTitles = titles;
+    
+    s_currentProfileIdx = 0;
+    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
 }
 
 + (MSALTestAppSettings*)settings
@@ -178,9 +181,6 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)readFromDefaults
 {
-    s_currentProfileIdx = 0;
-    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
-    
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {

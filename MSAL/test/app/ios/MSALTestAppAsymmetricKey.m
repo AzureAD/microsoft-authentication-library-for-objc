@@ -25,25 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import "MSALTestAppAsymmetricKey.h"
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
+@implementation MSALTestAppAsymmetricKey
 
-@interface MSALErrorConverter (Internal)
+- (instancetype)initWithName:(NSString *)name kid:(NSString *)kid
+{
+    self = [super init];
+    if (self)
+    {
+        _name = name;
+        _kid = kid;
+    }
+    
+    return self;
+}
 
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
+- (BOOL)isEqual:(id)object
+{
+    if (self == object)
+    {
+        return YES;
+    }
+    
+    if (![object isKindOfClass:MSALTestAppAsymmetricKey.class])
+    {
+        return NO;
+    }
+    
+    return [self isEqualToItem:(MSALTestAppAsymmetricKey *)object];
+}
+
+- (NSUInteger)hash
+{
+    NSUInteger hash = 0;
+    hash = hash * 31 + self.name.hash;
+    hash = hash * 31 + self.kid.hash;
+    return hash;
+}
+
+- (BOOL)isEqualToItem:(MSALTestAppAsymmetricKey *)key
+{
+    if (!key) return NO;
+    
+    BOOL result = YES;
+    result &= (!self.name && !key.name) || [self.name isEqualToString:key.name];
+    result &= (!self.kid && !key.kid) || [self.kid isEqualToString:key.kid];
+    return result;
+}
 
 @end

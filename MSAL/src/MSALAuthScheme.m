@@ -25,25 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthScheme.h"
 
-@class MSALOauth2Provider;
-@protocol MSALAuthenticationSchemeProtocol;
-@class MSIDDevicePopManager;
+NSString *MSALStringForAuthScheme(MSALAuthScheme authScheme)
+{
+    switch (authScheme)
+    {
+            STRING_CASE(MSALAuthSchemeBearer);
+            STRING_CASE(MSALAuthSchemePop);
+    }
+    
+    @throw @"Unrecognized MSALAuthScheme";
+}
 
-@interface MSALErrorConverter (Internal)
+MSIDAuthScheme MSIDAuthSchemeForAuthScheme(MSALAuthScheme authScheme)
+{
+    switch (authScheme)
+    {
+        case MSALAuthSchemePop : return MSIDAuthSchemePop;
+        case MSALAuthSchemeBearer : return MSIDAuthSchemeBearer;
+        default : return MSIDAuthSchemeBearer;
+    }
+}
 
-+ (NSError *)errorWithDomain:(NSString *)domain
-                        code:(NSInteger)code
-            errorDescription:(NSString *)errorDescription
-                  oauthError:(NSString *)oauthError
-                    subError:(NSString *)subError
-             underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo
-              classifyErrors:(BOOL)shouldClassifyErrors
-          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
-                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                  popManager:(MSIDDevicePopManager *)popManager;
-
-@end
+NSString *MSALParameterStringForAuthScheme(MSALAuthScheme authScheme)
+{
+    switch (authScheme)
+    {
+        case MSALAuthSchemePop : return @"Pop";
+        case MSALAuthSchemeBearer : return @"Bearer";
+    }
+}

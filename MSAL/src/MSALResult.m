@@ -41,8 +41,26 @@
 #import "MSALAccountsProvider.h"
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
+#import "MSIDDevicePopManager.h"
+#import "MSALAuthenticationSchemeProtocol.h"
+
+@interface MSALResult()
+
+@property id<MSALAuthenticationSchemeProtocol> authScheme;
+
+@end
 
 @implementation MSALResult
+
+- (NSString *)authorizationHeader
+{
+    return [self.authScheme getAuthorizationHeader:self.accessToken];
+}
+
+- (NSString *)authenticationScheme
+{
+    return self.authScheme.authenticationScheme;
+}
 
 @end
 
@@ -59,9 +77,9 @@
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
                         correlationId:(NSUUID *)correlationId
+                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
 {
     MSALResult *result = [MSALResult new];
-    
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
@@ -73,12 +91,14 @@
     result->_scopes = scopes;
     result->_authority = authority;
     result->_correlationId = correlationId;
-    
+    result->_authScheme = authScheme;
     return result;
 }
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
+                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error
 {
     if (!tokenResult)
@@ -113,7 +133,13 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    return [self resultWithAccessToken:tokenResult.accessToken.accessToken
+    NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+    if (!accessToken)
+    {
+        return nil;
+    }
+    
+    return [self resultWithAccessToken:accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
@@ -123,7 +149,8 @@
                               uniqueId:tenantProfile.identifier
                                 scopes:[tokenResult.accessToken.scopes array]
                              authority:authority
-                         correlationId:tokenResult.correlationId];
+                         correlationId:tokenResult.correlationId
+                            authScheme:authScheme];
 }
 
 @end

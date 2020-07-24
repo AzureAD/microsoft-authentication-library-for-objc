@@ -54,7 +54,6 @@
 #import "MSIDDeviceId.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDAADNetworkConfiguration.h"
-#import "NSString+MSIDTestUtil.h"
 #import "MSIDLocalInteractiveController.h"
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALTelemetryApiId.h"
@@ -85,6 +84,8 @@
 #import "MSALDeviceInfoProvider.h"
 #import "MSALDeviceInformation+Internal.h"
 #import "MSIDDeviceInfo.h"
+#import "MSALTestCacheTokenResponse.h"
+#import "MSALAuthenticationSchemePop.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -188,6 +189,7 @@
     XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.configuration.authority, authority);
     XCTAssertEqualObjects(application.configuration.redirectUri, nil);
+    
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
@@ -523,7 +525,7 @@
      }];
 }
 
-- (void)testAcquireToken_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
+- (void)testAcquireToken_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue_BearerFlow
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
@@ -572,6 +574,58 @@
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
+- (void)testAcquireToken_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue_PopFlow
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+        XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+        completionBlock(nil, nil);
+    }];
+    
+    MSALInteractiveTokenParameters *params = nil;
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    UIViewController *controller = nil;
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
+    params.parentViewController = [self.class sharedViewControllerStub];
+#else
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
+#endif
+    
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    params.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
+    [application acquireTokenWithParameters:params
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        
+        const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+        XCTAssertEqual(l1, l2);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
 #if TARGET_OS_IPHONE
 - (void)testAcquireToken_whenCustomCompletionBlockQueueAndParentControllerNilError_shouldExecuteOnThatQueue
 {
@@ -705,7 +759,7 @@
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
-- (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
+- (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue_BearerFlow
 {
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:[@"https://login.microsoftonline.com/common" msalAuthority]];
     
@@ -740,6 +794,48 @@
                                       const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
                                       XCTAssertEqual(l1, l2);
                                       [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+- (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue_PopFlow
+{
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:[@"https://login.microsoftonline.com/common" msalAuthority]];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+        XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+        completionBlock(nil, nil);
+    }];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"username"
+                                                   homeAccountId:[[MSALAccountId alloc] initWithAccountIdentifier:@"kk" objectId:@"oid" tenantId:@"tid"]
+                                                     environment:@"env"
+                                                  tenantProfiles:nil];
+    
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    params.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+        XCTAssertEqual(l1, l2);
+        [expectation fulfill];
     }];
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
@@ -832,7 +928,7 @@
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
-- (void)testAcquireToken_whenKnownB2CAuthority_shouldNotValidate
+- (void)testAcquireToken_whenKnownB2CAuthority_shouldNotValidate_BearerFlow
 {
     NSURL *authorityURL = [NSURL URLWithString:@"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2?policyId=queryParam"];
     MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
@@ -871,6 +967,48 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
      }];
+}
+
+- (void)testAcquireToken_whenKnownB2CAuthority_shouldNotValidate_PopFlow
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2?policyId=queryParam"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+        XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+        
+        MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
+        
+        XCTAssertNotNil(params);
+        
+        XCTAssertFalse(params.validateAuthority);
+        XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2");
+        completionBlock(nil, nil);
+    }];
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireTokenSilent_whenKnownB2CAuthority_shouldNotValidate
@@ -1946,8 +2084,8 @@
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
@@ -1981,8 +2119,8 @@
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithNoFamilyIdInCache_shouldReturnNoAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -2016,8 +2154,8 @@
 - (void)testAllAccount_whenAccountExistsForOtherClient_andNotFociClient_shouldReturnNoAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:nil];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -2553,8 +2691,8 @@
 - (void)testAccountWithHomeAccountId_whenFociTokenExistsForOtherClient_andAppMetadataInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -2632,8 +2770,8 @@
 - (void)testAccountWithUsername_whenFociTokenExistsForOtherClient_andNoAppMetadataInCache_shouldReturnAccountNoError
 {
     //store at & rt in cache with foci flag
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
     
     NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
@@ -2700,8 +2838,9 @@
 {
     // 1. Save response for a different clientId
     NSString *authorityUrl = @"https://login.microsoftonline.com/utid";
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:authorityUrl familyId:@"1"];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:authorityUrl];
+    
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
+    MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:authorityUrl];
 
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
@@ -2977,25 +3116,19 @@
 
 #pragma mark - Helpers
 
+- (void)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
+{
+    NSError *error = nil;
+    BOOL result = [MSALTestCacheTokenResponse msalStoreTokenResponseInCacheWithAuthority:authorityString
+                                                                      tokenCacheAccessor:self.tokenCacheAccessor
+                                                                                   error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+}
+
 - (void)msalStoreTokenResponseInCache
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
-}
-
-- (void)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
-{
-    //store at & rt in cache
-    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:authorityString];
-    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:authorityString];
-    
-    NSError *error = nil;
-    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
-                                                              response:msidResponse
-                                                               factory:[MSIDAADV2Oauth2Factory new]
-                                                               context:nil
-                                                                 error:&error];
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
 }
 
 - (void)msalAddDiscoveryResponse
@@ -3044,54 +3177,12 @@
 
 - (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString
 {
-    return [self msalDefaultTokenResponseWithAuthority:authorityString familyId:nil];
-}
-
-- (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString familyId:(NSString *)familyId
-{
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com", @"tid": @"utid"};
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"myuid", @"utid" : @"utid"};
-    
-    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
-    NSMutableDictionary *responseDict = [@{
-                                           @"access_token": @"access_token",
-                                           @"refresh_token": @"fakeRefreshToken",
-                                           @"authority" : authorityString,
-                                           @"scope": @"fakescope1 fakescope2",
-                                           @"client_id": UNIT_TEST_CLIENT_ID,
-                                           @"id_token": rawIdToken,
-                                           @"client_info": rawClientInfo,
-                                           @"expires_on" : @"1"
-                                           } mutableCopy];
-    
-    if (familyId)
-    {
-        responseDict[@"foci"] = familyId;
-    }
-    
-    MSIDAADV2TokenResponse *msidResponse =
-    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:responseDict
-                                                     error:nil];
-    
-    return msidResponse;
+    return [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
 }
 
 - (MSIDConfiguration *)msalDefaultConfiguration
 {
     MSIDAuthority *authority = [@"https://login.microsoftonline.com/common" aadAuthority];
-    
-    return [[MSIDConfiguration alloc] initWithAuthority:authority
-                                            redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
-                                               clientId:UNIT_TEST_CLIENT_ID
-                                                 target:@"fakescope1 fakescope2"];
-}
-
-- (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString
-{
-    MSIDAuthority *authority = [authorityString aadAuthority];
     
     return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
