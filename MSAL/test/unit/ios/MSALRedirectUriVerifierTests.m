@@ -47,7 +47,10 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
@@ -65,7 +68,10 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
@@ -83,7 +89,10 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
@@ -101,7 +110,10 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNil(result);
     XCTAssertNotNil(error);
@@ -117,7 +129,10 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.url.absoluteString, @"msauth.test.bundle.identifier://auth");
@@ -134,7 +149,9 @@
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO error:&error];
 
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.url.absoluteString, @"msalmsalclient://auth");
@@ -150,7 +167,10 @@
     NSString *clientId = @"msalclient";
     NSError *error = nil;
     
-    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil
+                                                                           clientId:clientId
+                                                           bypassRedirectValidation:NO
+                                                                              error:&error];
 
     XCTAssertNil(result);
     XCTAssertNotNil(error);
