@@ -96,6 +96,12 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
 - (nonnull instancetype)initWithClientId:(NSString *)clientId;
 
 /**
+ For client that wants to bypass redirectURI check in MSAL, set this to YES. NO by default.
+ If set to YES, MSAL will skip the verification of redirectURI. Brokered authentication will be disabled in this case.
+ */
+@property BOOL bypassRedirectURIValidation;
+
+/**
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
