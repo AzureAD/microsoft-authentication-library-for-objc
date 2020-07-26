@@ -15,13 +15,6 @@
 
 default_platform(:ios)
 
-desc "Generate test reports"
-def generate_report
-  puts "Generating Test Report ..."
-  sh 'xchtmlreport -r test_output/MSAL\ Test\ Automation\ (iOS).test_result'
-  puts "Test Report Succesfully generated"
-end
-
 lane :ui_test do
   
   test_run_block = lambda do |testrun_info|
@@ -50,6 +43,5 @@ lane :ui_test do
   
   unless result[:failed_testcount].zero?
     UI.user_error!("There are #{result[:failed_testcount]} failing E2E tests that require your attention")
-    generate_report
   end
 end
