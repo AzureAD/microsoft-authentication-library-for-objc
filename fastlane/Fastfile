@@ -38,8 +38,11 @@ lane :ui_test do
     device: 'iPhone 8 Plus',
     sdk: 'iphonesimulator',
     deployment_target_version: '13.5',
-    testrun_completed_block: test_run_block
+    testrun_completed_block: test_run_block,
+    result_bundle: true
   )
+  
+  xchtmlreport
   
   unless result[:failed_testcount].zero?
     UI.user_error!("There are #{result[:failed_testcount]} failing E2E tests that require your attention")

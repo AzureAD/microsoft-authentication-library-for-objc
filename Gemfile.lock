@@ -87,6 +87,7 @@ GEM
       plist
       xcodeproj
       xctest_list (>= 1.1.8)
+    fastlane-plugin-xchtmlreport (0.1.1)
     gh_inspector (1.1.3)
     google-api-client (0.38.0)
       addressable (~> 2.5, >= 2.5.1)
@@ -182,6 +183,7 @@ PLATFORMS
 DEPENDENCIES
   fastlane
   fastlane-plugin-test_center
+  fastlane-plugin-xchtmlreport
 
 BUNDLED WITH
    1.17.2
