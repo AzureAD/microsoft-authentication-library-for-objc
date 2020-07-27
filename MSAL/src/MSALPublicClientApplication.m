@@ -204,6 +204,7 @@
     NSError *msidError = nil;
     MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirectUri
                                                                                     clientId:config.clientId
+                                                                    bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
     if (!msalRedirectUri)

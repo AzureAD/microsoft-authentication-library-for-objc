@@ -34,6 +34,7 @@
 
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
                                          clientId:(NSString *)clientId
+                         bypassRedirectValidation:(BOOL)bypassRedirectValidation
                                             error:(NSError * __autoreleasing *)error
 {
 #if AD_BROKER
@@ -50,13 +51,13 @@
     if (![NSString msidIsStringNilOrBlank:customRedirectUri])
     {
         NSURL *redirectURI = [NSURL URLWithString:customRedirectUri];
-
-        if (![self verifySchemeIsRegistered:redirectURI error:error])
+        
+        if (!bypassRedirectValidation && ![self verifySchemeIsRegistered:redirectURI error:error])
         {
             return nil;
         }
 
-        BOOL brokerCapable = [MSALRedirectUri redirectUriIsBrokerCapable:redirectURI];
+        BOOL brokerCapable = !bypassRedirectValidation && [MSALRedirectUri redirectUriIsBrokerCapable:redirectURI];
 
         MSALRedirectUri *redirectUri = [[MSALRedirectUri alloc] initWithRedirectUri:redirectURI
                                                                       brokerCapable:brokerCapable];
