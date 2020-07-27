@@ -44,7 +44,7 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
 #import "MSALTestAppAsymmetricKey.h"
-#import "MSIDDevicePopManager+Internal.h"
+#import "MSIDDevicePopManager.h"
 #import "MSIDCacheConfig.h"
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDAuthScheme.h"
@@ -166,9 +166,8 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
         MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:_keyPairAttributes error:nil];
         if (keyPair)
         {
-            NSString *kid = [_popManager generateKidFromModulus:keyPair.keyModulus exponent:keyPair.keyExponent];
-            MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:kid];
-            MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:kid];
+            MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:keyPair.kid];
+            MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:keyPair.kid];
             _tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
             [self.cacheDict setObject:_tokenKeys forKey:s_pop_token_keys];
         }
