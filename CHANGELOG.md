@@ -1,5 +1,6 @@
 ## [TBD] - TBD
 * update new variable in configuration to allow user by pass URI check #1013
+* Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 
 ## [1.1.5] - 2020-06-19
  
