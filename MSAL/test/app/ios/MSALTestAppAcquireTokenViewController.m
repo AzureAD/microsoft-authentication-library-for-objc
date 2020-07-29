@@ -76,7 +76,7 @@
 @property (nonatomic) IBOutlet UIView *wkWebViewContainer;
 @property (nonatomic) WKWebView *customWebview;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
-@property NSString *accountIdentifier;
+@property (nonatomic) NSString *accountIdentifier;
 @end
 
 @implementation MSALTestAppAcquireTokenViewController
@@ -164,8 +164,8 @@
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = ssoSeedingCall ?  @"29d9ed98-a469-4536-ade2-f981bc1d605e" : [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = ssoSeedingCall ? @"msauth://Microsoft.AAD.BrokerPlugin" : [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
@@ -197,10 +197,7 @@
 - (MSALInteractiveTokenParameters *)tokenParams:(BOOL)isSSOSeedingCall
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
-    [ssoSeedingScopes addObject:@"urn:ms-drs:enterpriseregistration.windows.net/.default"];
-
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? ssoSeedingScopes : [settings.scopes allObjects]
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [self getSSOSeedingScope] : [settings.scopes allObjects]
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
     
     if (self.authSchemeSegmentControl.selectedSegmentIndex == 0 || isSSOSeedingCall)
@@ -340,11 +337,11 @@
             if (!success)
             {
                 NSString *errorString = [NSString stringWithFormat:@"ssoSeeding sign out error %@", error];
-                NSLog(@"%@",errorString);
+                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", errorString);
             }
             else
             {
-                NSLog(@"ssoSeeding clear succesfully");
+                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"ssoSeeding clear succesfully");
             }
         });
     }];
@@ -498,7 +495,7 @@
         resultSSOClear &=[self clearAllTokenKeysForAccessGroup:ssoSeedingApplication.configuration.cacheConfig.keychainSharingGroup];
         NSString *resultString ;
         resultString = resultSSOClear ? @"successfully" : @"failed";
-        NSLog(@"Clear sso seeding %@", resultString);
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", resultString);
     }
 }
 
@@ -661,8 +658,6 @@
 {
     NSString *resultText = [NSString stringWithFormat:@"%@", error];
     [self.resultTextView setText:resultText];
-    
-    NSLog(@"%@", resultText);
 }
 
 - (void)updateResultView:(MSALResult *)result
@@ -671,8 +666,6 @@
                             [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
     
     [self.resultTextView setText:resultText];
-    
-    NSLog(@"%@", resultText);
 }
 
 - (MSALPromptType)promptTypeValue
@@ -752,4 +745,17 @@
        self.customWebviewContainer.hidden = YES;
     }
 }
+
+- (NSArray<NSString *> *)getSSOSeedingScope
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
+    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
+    if ([ssoSeedingScopes count])
+    {
+        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
+    }
+    return ssoSeedingScopes;
+}
+
 @end
