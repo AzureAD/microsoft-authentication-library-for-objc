@@ -90,6 +90,7 @@
 		04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
 		04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
 		1E04572324BD5A7D00444756 /* MSALCacheItemDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E04572024BD5A7D00444756 /* MSALCacheItemDetailViewController.m */; };
+		1E06CD6524D116F800E3D0E5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
 		1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E1A2E052256D194001009ED /* AppKit.framework */; };
 		1E3658A7247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1588,6 +1589,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E06CD6524D116F800E3D0E5 /* Security.framework in Frameworks */,
 				B286B9E42389E751007833AD /* AuthenticationServices.framework in Frameworks */,
 				96902DF920E157B400200E6F /* WebKit.framework in Frameworks */,
 				231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */,
