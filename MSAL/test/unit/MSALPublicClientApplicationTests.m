@@ -3119,7 +3119,7 @@
 
 #pragma mark - Broker Availability
 
-- (void)testIsCompatibleBrokerAvailable_whenUniversalLinkRedirectUri_andOldBrokerPresent_shouldReturnNo
+- (void)testIsCompatibleAADBrokerAvailable_whenUniversalLinkRedirectUri_andOldBrokerPresent_shouldReturnNo
 {
 #if TARGET_OS_IPHONE
     MSIDApplicationTestUtil.canOpenURLSchemes = @[@"msauthv2"];
@@ -3137,11 +3137,11 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    XCTAssertFalse([application isCompatibleBrokerAvailable]);
+    XCTAssertFalse([application isCompatibleAADBrokerAvailable]);
 #endif
 }
 
-- (void)testIsCompatibleBrokerAvailable_whenUniversalLinkRedirectUri_andNewBrokerPresent_shouldReturnNo
+- (void)testIsCompatibleAADBrokerAvailable_whenUniversalLinkRedirectUri_andNewBrokerPresent_shouldReturnNo
 {
 #if TARGET_OS_IPHONE
     MSIDApplicationTestUtil.canOpenURLSchemes = @[@"msauthv2", @"msauthv3"];
@@ -3159,11 +3159,11 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    XCTAssertTrue([application isCompatibleBrokerAvailable]);
+    XCTAssertTrue([application isCompatibleAADBrokerAvailable]);
 #endif
 }
 
-- (void)testIsCompatibleBrokerAvailable_whenMacOS_shouldReturnNo
+- (void)testIsCompatibleAADBrokerAvailable_whenMacOS_shouldReturnNo
 {
 #if !TARGET_OS_IPHONE
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -3179,7 +3179,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    XCTAssertFalse([application isCompatibleBrokerAvailable]);
+    XCTAssertFalse([application isCompatibleAADBrokerAvailable]);
 #endif
 }
 

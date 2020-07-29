@@ -1442,7 +1442,7 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
 }
 
-- (BOOL)isCompatibleBrokerAvailable
+- (BOOL)isCompatibleAADBrokerAvailable
 {
 #if TARGET_OS_IPHONE
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
