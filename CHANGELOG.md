@@ -1,3 +1,6 @@
+## [TBD] - TBD
+* add a new API to check if compatible AAD broker is available (#1011)
+
 ## [1.1.6] - 2020-07-24
 
 ### Added
