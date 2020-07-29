@@ -1,5 +1,14 @@
 ## [TBD] - TBD
-* update new variable in configuration to allow user by pass URI check #1013
+* update new variable in configuration to allow user by pass URI check (#1013)
+
+## [1.1.6] - 2020-07-24
+
+### Added
+* Support proof of posession for access tokens (#926)
+
+### Fixed
+* Clean up account metadata on account removal (#999)
+* Silent token lookup for guest accounts with different UPNs (#986)
 
 ## [1.1.5] - 2020-06-19
  
