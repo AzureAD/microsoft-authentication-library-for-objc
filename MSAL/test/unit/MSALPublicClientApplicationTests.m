@@ -3115,6 +3115,29 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testInitWithConfiguration_WhenBypassRedirectURIIsDefault_ShouldBlockInvalidURI
+{
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id"
+                                                                                                   redirectUri:@"invalid_uri"
+                                                                                                     authority:nil];
+    NSError *error;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    XCTAssertTrue(error);
+    XCTAssertNil(application);
+}
+
+- (void)testInitWithConfiguration_WhenBypassRedirectURIIsDYes_ShouldAllowInvalidURI
+{
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id"
+                                                                                                   redirectUri:@"invalid_uri"
+                                                                                                     authority:nil];
+    pcaConfig.bypassRedirectURIValidation = YES;
+    NSError *error;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    XCTAssertTrue(application);
+    XCTAssertNil(error);
+}
+
 #endif
 
 #pragma mark - Broker Availability
