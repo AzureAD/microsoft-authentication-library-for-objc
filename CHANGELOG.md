@@ -1,4 +1,3 @@
-
 * update new variable in configuration to allow user by pass URI check #1013
 
 ## [1.1.5] - 2020-06-19
