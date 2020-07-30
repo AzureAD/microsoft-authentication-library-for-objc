@@ -1,6 +1,6 @@
 ## [TBD] - TBD
-* update new variable in configuration to allow user by pass URI check (#1013)
-* add a new API to check if compatible AAD broker is available (#1011)
+* update new variable in configuration to allow user by pass URI check #1013
+* Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 
 ## [1.1.6] - 2020-07-24
 
