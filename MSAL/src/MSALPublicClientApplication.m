@@ -1443,6 +1443,35 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
 }
 
+- (BOOL)isCompatibleAADBrokerAvailable
+{
+#if TARGET_OS_IPHONE
+    MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
+    
+    if (@available(iOS 13.0, *))
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    // Parameter protocolType does not matter here
+    MSIDBrokerInvocationOptions *brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
+                                                                                                    protocolType:MSIDBrokerProtocolTypeCustomScheme
+                                                                                               aadRequestVersion:MSIDBrokerAADRequestVersionV2];
+    
+    return [brokerOptions isRequiredBrokerPresent];
+    
+#else
+    return NO;
+#endif
+
+    
+}
+
 #pragma mark - Authority validation
 
 - (BOOL)shouldValidateAuthorityForRequestAuthority:(MSIDAuthority *)requestAuthority
