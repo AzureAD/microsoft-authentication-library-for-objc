@@ -467,4 +467,9 @@
 - (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
                            completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
 
+/**
+   A boolean indicates if a compatible broker is present in device for AAD requests.
+*/
+@property (readonly) BOOL isCompatibleAADBrokerAvailable;
+
 @end
