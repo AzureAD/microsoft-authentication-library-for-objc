@@ -86,6 +86,9 @@
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
+#if TARGET_OS_IPHONE
+#import "MSIDApplicationTestUtil.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -3136,6 +3139,72 @@
 }
 
 #endif
+
+#pragma mark - Broker Availability
+
+- (void)testIsCompatibleAADBrokerAvailable_whenUniversalLinkRedirectUri_andOldBrokerPresent_shouldReturnNo
+{
+#if TARGET_OS_IPHONE
+    MSIDApplicationTestUtil.canOpenURLSchemes = @[@"msauthv2"];
+    
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:@"https://abc.com"
+                                                                                                  authority:authority];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    XCTAssertFalse([application isCompatibleAADBrokerAvailable]);
+#endif
+}
+
+- (void)testIsCompatibleAADBrokerAvailable_whenUniversalLinkRedirectUri_andNewBrokerPresent_shouldReturnNo
+{
+#if TARGET_OS_IPHONE
+    MSIDApplicationTestUtil.canOpenURLSchemes = @[@"msauthv2", @"msauthv3"];
+    
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:@"https://abc.com"
+                                                                                                  authority:authority];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    XCTAssertTrue([application isCompatibleAADBrokerAvailable]);
+#endif
+}
+
+- (void)testIsCompatibleAADBrokerAvailable_whenMacOS_shouldReturnNo
+{
+#if !TARGET_OS_IPHONE
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    XCTAssertFalse([application isCompatibleAADBrokerAvailable]);
+#endif
+}
 
 #pragma mark - Helpers
 
