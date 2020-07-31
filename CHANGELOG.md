@@ -1,8 +1,8 @@
 ## [1.1.7] - 2020-07-31
-
+ 
 ### Added
 * New variable in configuration to allow user bypass redirect URI check (#1013)
-* New API to check if compatible AAD broker is available (#1011) 
+* New API to check if compatible AAD broker is available (#1011)
 
 ## [1.1.6] - 2020-07-24
 
