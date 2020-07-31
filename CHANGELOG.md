@@ -61,6 +61,7 @@ This API can be found in MSALWebviewParameters.h, and an example of usage has be
 * New variable in configuration to allow user bypass redirect URI check (#1013)
 * New API to check if compatible AAD broker is available (#1011) 
 
+
 ## [1.1.6] - 2020-07-24
 
 ### Added    
