@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode12u
+osx_image: xcode12
 
 # Set up our rubygems (slather and xcpretty, namely)
 install: 
