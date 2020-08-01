@@ -308,5 +308,10 @@ static NSDictionary *s_currentProfile = nil;
     [self setValue:profileName forKey:MSAL_APP_PROFILE];
 }
 
++ (BOOL)isSSOSeeding
+{
+    NSString *currentProfile = [MSALTestAppSettings currentProfileName];
+    return [currentProfile isEqualToString:@"CompanyPortal"];
+}
 
 @end

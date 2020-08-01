@@ -1,6 +1,9 @@
+## [TBD] - TBD
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
+* update new variable in configuration to allow user by pass URI check (#1013)
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair (#1018)
 * update MSAL test app for SSO Seeding flow #1021
+* update new variable in configuration to allow user by pass URI check #1013
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 
 ## [1.1.7] - 2020-07-31
@@ -9,6 +12,15 @@
 * New API to check if compatible AAD broker is available (#1011) 
 
 ## [1.1.6] - 2020-07-24
+
+### Added	
+* Support proof of posession for access tokens (#926)	
+
+### Fixed	
+* Clean up account metadata on account removal (#999)	
+* Silent token lookup for guest accounts with different UPNs (#986)	
+
+## [1.1.6] - 2020-07-24	 * update new variable in configuration to allow user by pass URI check #1013
 
 ### Added	
 * Support proof of posession for access tokens (#926)	
