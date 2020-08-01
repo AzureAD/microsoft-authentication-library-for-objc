@@ -47,15 +47,15 @@ static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 - (id)initWithURL:(NSURL *)URL
 {
-    return [self initWithURL:URL entersReaderIfAvailable:NO];
+    return [self initWithURL:URL configuration:[SFSafariViewControllerConfiguration new]];
 }
 
-- (id)initWithURL:(NSURL *)URL entersReaderIfAvailable:(BOOL)entersReaderIfAvailable
+- (id)initWithURL:(NSURL *)URL configuration:(SFSafariViewControllerConfiguration *)configuration
 {
     MSALFakeViewController *fakeController = [MSALFakeViewController new];
     if (s_svcValidationBlock)
     {
-        s_svcValidationBlock(fakeController, URL, entersReaderIfAvailable);
+        s_svcValidationBlock(fakeController, URL, configuration.entersReaderIfAvailable);
     }
     return (SFSafariViewController *)fakeController;
 }

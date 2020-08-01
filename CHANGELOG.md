@@ -1,5 +1,9 @@
+* Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
+* Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair (#1018)
+* update MSAL test app for SSO Seeding flow #1021
+* Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
+
 ## [1.1.7] - 2020-07-31
- 
 ### Added
 * New variable in configuration to allow user bypass redirect URI check (#1013)
 * New API to check if compatible AAD broker is available (#1011) 
@@ -14,7 +18,7 @@
 * Silent token lookup for guest accounts with different UPNs (#986)	
 
 ## [1.1.5] - 2020-06-19
-
+ 
 ### Added
 * Switch to PkeyAuth on macOS (common library #734)
 * Support returning additional WPJ info (#931)
