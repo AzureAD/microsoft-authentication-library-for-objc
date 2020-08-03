@@ -39,6 +39,7 @@ ios_sim_device = "iPhone 8"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=latest'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
+mac_sim_flags = "GCC_TREAT_WARNINGS_AS_ERRORS=YES"
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
 
@@ -158,6 +159,9 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
+		
+		if (self.platform == "Mac") :
+			command += " " + mac_sim_flags
 		
 		if (xcpretty) :
 			command += " | xcpretty"
