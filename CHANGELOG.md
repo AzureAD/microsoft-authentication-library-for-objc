@@ -1,4 +1,5 @@
 ## [TBD] - TBD
+* Mark RSA public key as extractable
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
 * update new variable in configuration to allow user by pass URI check (#1013)
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair (#1018)
