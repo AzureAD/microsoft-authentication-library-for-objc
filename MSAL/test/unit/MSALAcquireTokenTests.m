@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALTestConstants.h"
 #import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
@@ -121,9 +121,9 @@
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
@@ -216,9 +216,9 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthority_shouldCacheTokens
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
@@ -317,9 +317,9 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     MSIDTestURLResponse *oidcResponse =
@@ -376,9 +376,9 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_andInvalidRT_shouldReturnInteractionRequired
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
@@ -450,9 +450,9 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
@@ -531,9 +531,9 @@
     NSString *claims = @"{\"id_token\":{\"nickname\":null}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -619,9 +619,9 @@
 
 - (void)skipTest_testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -711,9 +711,9 @@
 
 - (void)testAcquireTokenInteractive_whenDuplicateClaimsIsPassedInEQP_shouldReturnError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -751,9 +751,9 @@
 
 - (void)testAcquireTokenInteractive_whenMultipleCloudsSetToYes_shouldSendInstanceAwareToServer
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -824,9 +824,9 @@
 {
     NSString *expectedClaims = @"{\"access_token\":{\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -920,9 +920,9 @@
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1015,9 +1015,9 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1105,9 +1105,9 @@
 
 - (void)testAcquireTokenInteractive_whenInstanceAware_shouldReturnCloudAuthorityInResult
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1232,9 +1232,9 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenEnabledAndServiceUnavailable_shouldReturnExtendedLifetimeToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1309,9 +1309,9 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenDisabledAndServiceUnavailable_shouldNotReturnToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1389,9 +1389,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailable_andMixedCaseInputScope_shouldReturnToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1454,9 +1454,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExpired_andMixedCaseInputScope_shouldReturnToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1538,9 +1538,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExtendedLifetimeTokenEnabled_shouldReturnTokenWithExtendedFlagBeingNo
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1615,9 +1615,9 @@
 
 - (void)testAcquireTokenInteractive_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
@@ -1693,9 +1693,9 @@
 
 - (void)testAcquireTokenSilent_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1782,9 +1782,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassed_shouldSkipAtAndUseRt
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1868,9 +1868,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsEmpty_shouldNotSkipAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1941,9 +1941,9 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSet_shouldNotSkipAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2012,9 +2012,9 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSetAndExpiredAt_shouldSendCapabilitiesToServer
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an expired AT and valid RT to cache
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2100,9 +2100,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndCapabilitiesSet_shouldSkipAtAndUseRt
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2189,9 +2189,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndInvalidRt_shouldReturnInteractionRequired
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2275,9 +2275,9 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2352,9 +2352,9 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndNoAppMetadataInCacheAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2442,9 +2442,9 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsClientMismatch_shouldUpdateAppMetadata
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
@@ -2539,9 +2539,9 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsInvalidGrant_ShouldUseMRRTToRefreshAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2633,9 +2633,9 @@
 
 - (void)testAcquireTokenSilent_whenNoFRTInCache_ShouldUseMRRTToRefreshAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2710,9 +2710,9 @@
 
 - (void)testAcquireTokenSilent_whenNilAccountPassed_shouldReturnInteractionRequiredError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -2740,9 +2740,9 @@
 
 - (void)testAcquireTokenInteractive_whenAccountMismatch_shouldReturnAccountMismatchError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
