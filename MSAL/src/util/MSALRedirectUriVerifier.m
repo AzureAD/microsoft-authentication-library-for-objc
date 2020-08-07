@@ -26,29 +26,31 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRedirectUriVerifier.h"
+#import "MSIDRedirectUriVerifier.h"
 #import "MSALRedirectUri+Internal.h"
+#import "MSIDRedirectUri.h"
 
 @implementation MSALRedirectUriVerifier
 
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(__unused NSString *)clientId
+                                         clientId:(NSString *)clientId
                          bypassRedirectValidation:(BOOL)bypassRedirectValidation
-                                            error:(__unused NSError * __autoreleasing *)error
+                                            error:(NSError * __autoreleasing *)error
 {
-    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
-    {
-        BOOL isBrokerCapable = [MSALRedirectUri redirectUriIsBrokerCapable:[NSURL URLWithString:customRedirectUri]];
-        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
-                                              brokerCapable:isBrokerCapable];
-    }
-
-    return [[MSALRedirectUri alloc] initWithRedirectUri:[MSALRedirectUri defaultBrokerCapableRedirectUri]
-                                          brokerCapable:YES];
+    MSIDRedirectUri *msidredirectUri = [MSIDRedirectUriVerifier
+                                        msidRedirectUriWithCustomUri:customRedirectUri
+                                        clientId:clientId
+                                        bypassRedirectValidation:bypassRedirectValidation
+                                        error:error];
+    
+    return msidredirectUri ? [[MSALRedirectUri alloc] initWithRedirectUri:msidredirectUri.url brokerCapable:msidredirectUri.brokerCapable] : nil;
 }
+
+#pragma mark - Helpers
 
 + (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
 {
-    return YES;
+    return [MSIDRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:error];
 }
 
 @end

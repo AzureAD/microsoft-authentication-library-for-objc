@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRedirectUri.h"
+#import "MSIDRedirectUri.h"
 
 @implementation MSALRedirectUri
 
@@ -56,40 +57,17 @@
 
 + (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
 {
-    if ([NSString msidIsStringNilOrBlank:clientId])
-    {
-        return nil;
-    }
-    
-    NSString *redirectUri = [NSString stringWithFormat:@"msal%@://auth", clientId];
-    return [NSURL URLWithString:redirectUri];
+    return [MSIDRedirectUri defaultNonBrokerRedirectUri:clientId];
 }
 
 + (NSURL *)defaultBrokerCapableRedirectUri
 {
-    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *redirectUri = [NSString stringWithFormat:@"msauth.%@://auth", bundleID];
-    return [NSURL URLWithString:redirectUri];
+    return [MSIDRedirectUri defaultBrokerCapableRedirectUri];
 }
 
 + (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
 {
-    NSURL *defaultRedirectUri = [MSALRedirectUri defaultBrokerCapableRedirectUri];
-
-    // Check default MSAL format
-    if ([defaultRedirectUri isEqual:redirectUri])
-    {
-        return YES;
-    }
-
-    // Check default ADAL format
-    if ([redirectUri.host isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]
-        && redirectUri.scheme.length > 0)
-    {
-        return YES;
-    }
-
-    return NO;
+    return [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri];
 }
 
 @end

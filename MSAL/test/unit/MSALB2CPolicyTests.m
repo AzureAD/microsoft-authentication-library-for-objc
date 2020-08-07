@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALTestConstants.h"
 #import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
@@ -113,9 +113,9 @@
 
 - (void)testAcquireToken_whenMultipleB2CPolicies_shouldHaveMultipleUsers
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Setup acquireToken with first policy (b2c_1_policy)
     __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
