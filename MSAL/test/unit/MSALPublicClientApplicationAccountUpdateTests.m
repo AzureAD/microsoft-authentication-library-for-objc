@@ -42,7 +42,7 @@
 #import "MSALAccountId+Internal.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALOauth2Provider.h"
 #import "XCTestCase+HelperMethods.h"
 #import "MSIDTokenResponse.h"
@@ -69,7 +69,7 @@
 {
     [super setUp];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]
                                                                     otherCacheAccessors:nil];
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]];
