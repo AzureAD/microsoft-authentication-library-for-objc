@@ -1,4 +1,5 @@
 ## [TBD] - TBD
+* Mark RSA public key as extractable (#1049)
 * Cleanup main product targets from test files (#1046)
 * Modify MSALRedirectUri and MSALRedirectUriVerifier to use existing methods from common core  (#1045)
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
