@@ -1,5 +1,6 @@
 ## [TBD] - TBD
 * Cleanup noisy SSO extension logs (#1047)
+* Cleanup main product targets from test files (#1046)
 * Modify MSALRedirectUri and MSALRedirectUriVerifier to use existing methods from common core  (#1045)
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
 * update new variable in configuration to allow user by pass URI check (#1013)
