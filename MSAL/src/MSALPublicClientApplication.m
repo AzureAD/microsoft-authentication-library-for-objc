@@ -1513,7 +1513,7 @@
 
 + (NSString *)sdkVersion
 {
-    return [[NSBundle bundleForClass:MSALPublicClientApplication.class] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    return @MSAL_VERSION_STRING;
 }
 
 
