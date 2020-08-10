@@ -472,4 +472,9 @@
 */
 @property (readonly) BOOL isCompatibleAADBrokerAvailable;
 
+/**
+   A String indicates the version of current MSAL SDK
+*/
+@property (nullable, class, readonly) NSString *sdkVersion;
+
 @end

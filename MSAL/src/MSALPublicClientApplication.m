@@ -1511,6 +1511,12 @@
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
 }
 
++ (NSString *)sdkVersion
+{
+    return [[NSBundle bundleForClass:MSALPublicClientApplication.class] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+}
+
+
 #pragma mark - Private
 
 - (MSIDRequestType)requestType

@@ -38,6 +38,9 @@
 // Unit test redirect scheme : msal<clientId>
 #define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
 
+// Unit test MSAL SDK Version
+#define UNIT_TEST_SDK_VERSION   @"1.1.9"
+
 // Unit test redirect uri : msal<clientId>://auth
 #if TARGET_OS_IPHONE
 #define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"

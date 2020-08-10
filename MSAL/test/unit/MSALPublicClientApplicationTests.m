@@ -198,6 +198,14 @@
 #endif
 }
 
+- (void)test_non_nil_sdkVersion
+{
+    [MSIDTestBundle overrideObject:UNIT_TEST_SDK_VERSION forKey:@"CFBundleShortVersionString"];
+    NSString *version = [MSALPublicClientApplication sdkVersion];
+    XCTAssertNotNil(version);
+    XCTAssertEqualObjects(version, UNIT_TEST_SDK_VERSION);
+}
+
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
