@@ -2,6 +2,7 @@
 * Cleanup noisy SSO extension logs (#1047)
 * Mark RSA public key as extractable (#1049)
 * Cleanup main product targets from test files (#1046)
+* Replaced launch image by launch controller and update test app icon with correct size  (#1048)
 * Modify MSALRedirectUri and MSALRedirectUriVerifier to use existing methods from common core  (#1045)
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
 * update new variable in configuration to allow user by pass URI check (#1013)
