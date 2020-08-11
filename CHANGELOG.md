@@ -1,4 +1,5 @@
 ## [TBD] - TBD
+* Expose MSAL SDK Version in public client (#1051)
 * Cleanup noisy SSO extension logs (#1047)
 * Mark RSA public key as extractable (#1049)
 * Cleanup main product targets from test files (#1046)
