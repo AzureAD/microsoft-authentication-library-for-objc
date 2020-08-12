@@ -1743,6 +1743,7 @@
                                                     MSID_OAUTH2_SCOPE : @"user.read fakescope1 fakescope2 fakescope3 openid profile offline_access",
                                                     @"client_info" : @"1",
                                                     @"grant_type" : @"refresh_token",
+                                                    MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
                                                     MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!" }
                                        authority:authority];
     
