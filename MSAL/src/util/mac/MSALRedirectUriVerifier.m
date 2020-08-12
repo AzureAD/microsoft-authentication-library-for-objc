@@ -32,7 +32,7 @@
 
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
                                          clientId:(__unused NSString *)clientId
-                         bypassRedirectValidation:(BOOL)bypassRedirectValidation
+                         bypassRedirectValidation:(__unused BOOL)bypassRedirectValidation
                                             error:(__unused NSError * __autoreleasing *)error
 {
     if (![NSString msidIsStringNilOrBlank:customRedirectUri])
