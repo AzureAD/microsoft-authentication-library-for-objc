@@ -12,6 +12,7 @@
 * update MSAL test app for SSO Seeding flow #1021
 * update new variable in configuration to allow user by pass URI check #1013
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
+* Update logger from Identity Core. (#1009)
 
 ## [1.1.7] - 2020-07-31
 ### Added

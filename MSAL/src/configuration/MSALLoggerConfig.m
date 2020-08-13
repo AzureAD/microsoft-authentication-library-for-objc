@@ -79,12 +79,12 @@
 
 - (void)setPiiEnabled:(BOOL)piiEnabled
 {
-    [MSIDLogger sharedLogger].PiiLoggingEnabled = piiEnabled;
+    [MSIDLogger sharedLogger].piiLoggingEnabled = piiEnabled;
 }
 
 - (BOOL)piiEnabled
 {
-    return [MSIDLogger sharedLogger].PiiLoggingEnabled;
+    return [MSIDLogger sharedLogger].piiLoggingEnabled;
 }
 
 @end
