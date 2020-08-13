@@ -29,7 +29,7 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALTestConstants.h"
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALLegacySharedAccountTestUtil.h"
