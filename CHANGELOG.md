@@ -1,4 +1,5 @@
 ## [TBD] - TBD
+* Move openBroswerResponse code into its operation (#1020)
 * Include redirect uri in body when redeeming refresh token at token endpoint (#1020)
 * Expose MSAL SDK Version in public client (#1051)
 * Cleanup noisy SSO extension logs (#1047)
