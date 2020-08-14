@@ -1,20 +1,34 @@
 ## [TBD] - TBD
 * Fix unused parameter errors for macOS target.
+* Move openBroswerResponse code into its operation (#1020)
+* Include redirect uri in body when redeeming refresh token at token endpoint (#1020)
+* Expose MSAL SDK Version in public client (#1051)
+* Cleanup noisy SSO extension logs (#1047)
+* Mark RSA public key as extractable (#1049)
+* Cleanup main product targets from test files (#1046)
+* Replaced launch image by launch controller and update test app icon with correct size  (#1048)
+* Modify MSALRedirectUri and MSALRedirectUriVerifier to use existing methods from common core  (#1045)
 * Save PRT expiry interval in cache to calculate PRT refresh interval more reliably (#1019)
 * update new variable in configuration to allow user by pass URI check (#1013)
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair (#1018)
 * update MSAL test app for SSO Seeding flow #1021
 * update new variable in configuration to allow user by pass URI check #1013
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
+* Update logger from Identity Core. (#1009)
+
+## [1.1.7] - 2020-07-31
+### Added
+* New variable in configuration to allow user bypass redirect URI check (#1013)
+* New API to check if compatible AAD broker is available (#1011) 
 
 ## [1.1.6] - 2020-07-24
 
-### Added
-* Support proof of posession for access tokens (#926)
+### Added	
+* Support proof of posession for access tokens (#926)	
 
-### Fixed
-* Clean up account metadata on account removal (#999)
-* Silent token lookup for guest accounts with different UPNs (#986)
+### Fixed	
+* Clean up account metadata on account removal (#999)	
+* Silent token lookup for guest accounts with different UPNs (#986)	
 
 ## [1.1.6] - 2020-07-24	 * update new variable in configuration to allow user by pass URI check #1013
 

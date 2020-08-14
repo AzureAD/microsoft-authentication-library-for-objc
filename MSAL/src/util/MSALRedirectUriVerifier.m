@@ -25,28 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALRedirectUriVerifier.h"
+#import "MSIDRedirectUriVerifier.h"
+#import "MSALRedirectUri+Internal.h"
+#import "MSIDRedirectUri.h"
 
-/*!
-    This class allows tests to override values returned by various NSBundle
-    methods. It is automatically reset at the beginning of each test case in
-    subclasses of MSALTestCase.
- */
- 
-@interface MSALTestBundle : NSObject
+@implementation MSALRedirectUriVerifier
 
-+ (void)reset;
++ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
+                                         clientId:(NSString *)clientId
+                         bypassRedirectValidation:(BOOL)bypassRedirectValidation
+                                            error:(NSError * __autoreleasing *)error
+{
+    MSIDRedirectUri *msidredirectUri = [MSIDRedirectUriVerifier
+                                        msidRedirectUriWithCustomUri:customRedirectUri
+                                        clientId:clientId
+                                        bypassRedirectValidation:bypassRedirectValidation
+                                        error:error];
+    
+    return msidredirectUri ? [[MSALRedirectUri alloc] initWithRedirectUri:msidredirectUri.url brokerCapable:msidredirectUri.brokerCapable] : nil;
+}
 
-/*!
-    Objects set with this method will override values returned by -[NSBundle
-    objectForInfoDictionaryKey:]
- */
-+ (void)overrideObject:(id)object
-                forKey:(NSString *)key;
+#pragma mark - Helpers
 
-/*!
-    Overrides the string returned by -[NSBundle bundleIdentifier]
- */
-+ (void)overrideBundleId:(NSString *)bundleId;
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error
+{
+    return [MSIDRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:error];
+}
 
 @end
