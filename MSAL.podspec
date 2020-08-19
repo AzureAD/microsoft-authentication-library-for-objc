@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "MSAL"
-  s.version      = "1.1.7"
+  s.version      = "1.1.8"
   s.summary      = "Microsoft Authentication Library (MSAL) Preview for iOS"
 
   s.description  = <<-DESC

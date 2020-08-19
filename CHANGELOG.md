@@ -1,4 +1,4 @@
-## [TBD] - TBD
+## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
 * Fix unused parameter errors and add macOS specific test mocks.
 * Move openBroswerResponse code into its operation (#1020)
