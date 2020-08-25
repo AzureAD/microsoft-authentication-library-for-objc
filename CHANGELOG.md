@@ -18,7 +18,7 @@
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 * Update logger from Identity Core. (#1009)
 
-## [1.1.8] - 2020-08-20
+## [1.1.9] - 2020-08-20
 ### Added
 * Enabled the following XCODE 11.4 recommended settings by default per customer request
  -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
