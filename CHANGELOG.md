@@ -1,4 +1,5 @@
 ## [TBD] - TBD
+* Add swift static lib target to common core to support AES GCM.
 * Disabling check for validating result Account.
 * Fix unused parameter errors and add macOS specific test mocks.
 * Move openBroswerResponse code into its operation (#1020)
