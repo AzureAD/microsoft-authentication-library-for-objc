@@ -1145,14 +1145,13 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
-    msidParams.shouldValidateResultAccount = YES;
     
     msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
-    msidParams.shouldValidateResultAccount = YES;
+    msidParams.shouldValidateResultAccount = NO;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 2;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
@@ -1510,6 +1509,12 @@
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
 }
+
++ (NSString *)sdkVersion
+{
+    return @MSAL_VERSION_STRING;
+}
+
 
 #pragma mark - Private
 

@@ -416,7 +416,7 @@ static NSString * const defaultScope = @"User.Read";
      }];
 }
 
-- (IBAction)signout:(id)sender
+- (IBAction)signout:(__unused id)sender
 {
     NSError *error = nil;
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error];

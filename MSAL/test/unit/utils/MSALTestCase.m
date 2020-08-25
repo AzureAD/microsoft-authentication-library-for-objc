@@ -29,7 +29,7 @@
 
 #import "MSALAuthority.h"
 
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSIDTestSwizzle.h"
 
 #import "MSIDTestURLSession.h"
@@ -47,7 +47,7 @@
 - (void)setUp
 {
     [super setUp];
-    [MSALTestBundle reset];
+    [MSIDTestBundle reset];
     [MSIDTestSwizzle reset];
     [MSALAuthority initialize];
     

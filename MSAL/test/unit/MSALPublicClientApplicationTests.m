@@ -29,7 +29,7 @@
 #import "XCTestCase+HelperMethods.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDTestSwizzle.h"
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALTestConstants.h"
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
@@ -58,7 +58,7 @@
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDSilentController.h"
-#import "MSALRedirectUri.h"
+#import "MSIDRedirectUri.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDTestURLResponse+Util.h"
 #import "MSALTenantProfile.h"
@@ -127,7 +127,7 @@
 #endif
     
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -179,7 +179,7 @@
 - (void)testInitWithClientIdAndAuthority_whenValidClientIdAndAuthority_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
@@ -198,10 +198,18 @@
 #endif
 }
 
+- (void)test_non_nil_sdkVersion
+{
+    NSString *versionFromInfo = [[NSBundle bundleForClass:MSALPublicClientApplication.class] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    NSString *version = [MSALPublicClientApplication sdkVersion];
+    XCTAssertNotNil(version);
+    XCTAssertEqualObjects(version, versionFromInfo);
+}
+
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
@@ -227,7 +235,7 @@
     // By default the initializer for MSALPublicClientApplication should fail due to the redirect URI
     // not being listed in the info plist
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     NSError *error = nil;
     
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -244,11 +252,11 @@
 - (void)testInitWithClientId_whenBrokerQuerySchemeIsNotRegistered_shouldReturnNilApplicationAndFillError
 {
     NSArray *schemes = @[@"msauthv2", @"msauthv-wrong"];
-    [MSALTestBundle overrideObject:schemes forKey:@"LSApplicationQueriesSchemes"];
+    [MSIDTestBundle overrideObject:schemes forKey:@"LSApplicationQueriesSchemes"];
     
     NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauth.test.bundle.identifier"]}];
-    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
-    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
     
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
     
@@ -267,7 +275,7 @@
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
@@ -317,7 +325,7 @@
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
@@ -337,7 +345,7 @@
 - (void)testInitWithClientId_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
@@ -346,7 +354,7 @@
 - (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
@@ -356,7 +364,7 @@
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
@@ -366,7 +374,7 @@
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupDefault
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
@@ -380,7 +388,7 @@
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
@@ -1227,7 +1235,7 @@
 
 - (void)testAcquireScopesAddlScopesLoginHintuiBehaviorEQPAuthorityCorrelationId
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unit-test-host"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unit-test-host"];
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
@@ -2104,7 +2112,7 @@
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2140,7 +2148,7 @@
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2173,7 +2181,7 @@
     
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2195,7 +2203,7 @@
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -2254,10 +2262,10 @@
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
-    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -2331,10 +2339,10 @@
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
-    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     
@@ -2443,7 +2451,7 @@
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -2504,10 +2512,10 @@
     
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
-    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -2717,7 +2725,7 @@
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2787,7 +2795,7 @@
     
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSString *clientId = @"myclient";
     NSError *appError = nil;
@@ -2856,7 +2864,7 @@
 
     // 2. Create PublicClientApplication for a different app
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"myclient" error:nil];
     application.tokenCache = self.tokenCacheAccessor;
@@ -3205,6 +3213,8 @@
     XCTAssertFalse([application isCompatibleAADBrokerAvailable]);
 #endif
 }
+
+#pragma mark - Broker Availability
 
 #pragma mark - Helpers
 
