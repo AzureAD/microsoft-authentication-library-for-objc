@@ -53,4 +53,9 @@
  */
 @property (readonly, nullable) MSALAccountId *homeAccountId;
 
+/**
+ Indicates that account is used for device wide SSO.
+*/
+@property (readonly) BOOL isSSOAccount;
+
 @end
