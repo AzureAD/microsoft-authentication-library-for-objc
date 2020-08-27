@@ -3214,6 +3214,8 @@
 #endif
 }
 
+#pragma mark - Broker Availability
+
 #pragma mark - Helpers
 
 - (void)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
