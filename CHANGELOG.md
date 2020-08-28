@@ -1,3 +1,6 @@
+## [TBD] - TBD
+* Add swift static lib target to common core to support AES GCM.
+
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
 * Fix unused parameter errors and add macOS specific test mocks.
