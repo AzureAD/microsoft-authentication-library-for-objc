@@ -458,7 +458,7 @@ signoutParameters.signoutFromBrowser = NO;
 
 ## Supported Versions
 
-**iOS** - MSAL supports iOS 10 and above.
+**iOS** - MSAL supports iOS 11 and above.
 
 **macOS** - MSAL supports macOS (OSX) 10.12 and above.
 
