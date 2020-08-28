@@ -1,5 +1,7 @@
 ## [TBD] - TBD
 * Add swift static lib target to common core to support AES GCM.
+
+## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
 * Fix unused parameter errors and add macOS specific test mocks.
 * Move openBroswerResponse code into its operation (#1020)
@@ -34,20 +36,11 @@
 ## [1.1.6] - 2020-07-24
 
 ### Added	
-* Support proof of posession for access tokens (#926)	
+* Support proof of possession for access tokens (#926)	
 
 ### Fixed	
 * Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)	
-
-## [1.1.6] - 2020-07-24	 * update new variable in configuration to allow user by pass URI check #1013
-
-### Added	
-* Support proof of posession for access tokens (#926)	
-
-### Fixed	
-* Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)	
+* Silent token lookup for guest accounts with different UPNs (#986)		
 
 ## [1.1.5] - 2020-06-19
  
