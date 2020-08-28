@@ -1,5 +1,5 @@
 ## [1.1.9] - 2020-08-28
-* Enabled the following XCODE 11.4 recommended settings by default per customer request (#1004)
+* Enabled the following XCODE 11.4 recommended settings by default per customer request (#1070)
  -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
  -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
  -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
