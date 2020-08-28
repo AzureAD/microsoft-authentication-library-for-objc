@@ -1,8 +1,6 @@
-## [1.1.9] - 2020-08-28
-* Enabled the following XCODE 11.4 recommended settings by default per customer request (#1070)
- -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
- -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
- -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+## [TBD] - TBD
+* Add swift static lib target to common core to support AES GCM.
+* Enable XCODE 11.4 recommended settings by default. (#1070)
 
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
@@ -22,6 +20,14 @@
 * update new variable in configuration to allow user by pass URI check #1013
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 * Update logger from Identity Core. (#1009)
+
+## [1.1.9] - 2020-08-20
+### Added
+* Enabled the following XCODE 11.4 recommended settings by default per customer request
+ -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+ -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+ -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+ -Renamed private properties within "MSIDLastRequestTelemetry.m" to address nested dispatch call issues that arise by enabling above implicit retain self setting.
 
 ## [1.1.7] - 2020-07-31
 ### Added
