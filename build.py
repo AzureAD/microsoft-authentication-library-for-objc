@@ -81,6 +81,7 @@ target_specifiers = [
         "operations" : [ "build" ],
         "platform" : "iOS",
     },
+    
 	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
