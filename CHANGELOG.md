@@ -1,4 +1,4 @@
-## [TBD] - TBD
+* Indicate whether SSO extension account is available for device wide SSO (#1065)
 * Add swift static lib target to common core to support AES GCM.
 * Enable XCODE 11.4 recommended settings by default (#1070)
 
