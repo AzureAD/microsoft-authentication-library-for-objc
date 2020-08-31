@@ -282,6 +282,11 @@ static NSString * const defaultScope = @"User.Read";
 
 - (MSALPublicClientApplication *)createPublicClientApplication:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
+    return [self createPublicClientApplication:error SSOSeeding:NO];
+}
+
+- (MSALPublicClientApplication *)createPublicClientApplication:(NSError * _Nullable __autoreleasing * _Nullable)error SSOSeeding:(BOOL)ssoSeedingCall
+{
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
@@ -295,6 +300,12 @@ static NSString * const defaultScope = @"User.Read";
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
     
+    if (ssoSeedingCall)
+    {
+        pcaConfig.cacheConfig.keychainSharingGroup = @"com.microsoft.ssoseeding";
+        pcaConfig.bypassRedirectURIValidation = YES;
+    }
+
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:error];
     
     return application;
@@ -329,8 +340,15 @@ static NSString * const defaultScope = @"User.Read";
             
             if (result)
             {
-                [self updateResultView:result];
-                [self populateUsers];
+                if ([MSALTestAppSettings isSSOSeeding])
+                {
+                    [self acquireSSOSeeding];
+                }
+                else
+                {
+                    [self updateResultView:result];
+                    [self populateUsers];
+                }
             }
             else
             {
@@ -348,6 +366,7 @@ static NSString * const defaultScope = @"User.Read";
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;
+        webviewParameters.webviewType = MSALWebviewTypeWKWebView;
         [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
@@ -361,6 +380,44 @@ static NSString * const defaultScope = @"User.Read";
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
     
+    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+}
+
+- (void)acquireSSOSeeding
+{
+    NSError *error = nil;
+
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error SSOSeeding:YES];
+    
+    if (!application)
+    {
+        return;
+    }
+    
+    __block BOOL fBlockHit = NO;
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        
+        if (fBlockHit)
+        {
+            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+            return;
+        }
+        
+        fBlockHit = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (!result)
+            {
+                [self updateResultViewError:error];
+            }
+            [self.webView setHidden:YES];
+            [self.acquireTokenView setHidden:NO];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    };
+    
+    MSALInteractiveTokenParameters *parameters = [self tokenParams:YES];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -465,6 +522,56 @@ static NSString * const defaultScope = @"User.Read";
     }
     
     return self.accounts[self.userPopup.indexOfSelectedItem-1];
+}
+
+- (MSALInteractiveTokenParameters *)tokenParams:(BOOL)isSSOSeedingCall
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [self getSSOSeedingScope] : [settings.scopes allObjects]
+                                                                                      webviewParameters:[self msalTestWebViewParameters]];
+    
+    if (isSSOSeedingCall)
+    {
+        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    }
+    else
+    {
+        parameters.authenticationScheme = [self authScheme];
+    }
+    
+    parameters.loginHint = [self.loginHintTextField stringValue].length ? [self.loginHintTextField stringValue] : nil;
+    parameters.account = settings.currentAccount;
+    parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptType];
+    
+    parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
+//    parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary new] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
+
+    return parameters;
+}
+
+- (NSArray<NSString *> *)getSSOSeedingScope
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
+    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
+    if ([ssoSeedingScopes count])
+    {
+        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
+    }
+    return ssoSeedingScopes;
+}
+
+- (MSALWebviewParameters *)msalTestWebViewParameters
+{
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    if ([self passedInWebview])
+    {
+        webviewParameters.customWebview = self.webView;
+        webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+        [self.acquireTokenView setHidden:YES];
+        [self.webView setHidden:NO];
+    }
+    return webviewParameters;
 }
 
 @end
