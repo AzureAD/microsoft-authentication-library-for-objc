@@ -417,7 +417,7 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALInteractiveTokenParameters *parameters = [self tokenParams:YES];
+    MSALInteractiveTokenParameters *parameters = [self tokenParamsWithSSOSeeding:YES];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -524,10 +524,10 @@ static NSString * const defaultScope = @"User.Read";
     return self.accounts[self.userPopup.indexOfSelectedItem-1];
 }
 
-- (MSALInteractiveTokenParameters *)tokenParams:(BOOL)isSSOSeedingCall
+- (MSALInteractiveTokenParameters *)tokenParamsWithSSOSeeding:(BOOL)isSSOSeedingCall
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [self getSSOSeedingScope] : [settings.scopes allObjects]
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [MSALTestAppSettings getSSOSeedingScope] : [settings.scopes allObjects]
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
     
     if (isSSOSeedingCall)
@@ -544,21 +544,8 @@ static NSString * const defaultScope = @"User.Read";
     parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptType];
     
     parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
-//    parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary new] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
 
     return parameters;
-}
-
-- (NSArray<NSString *> *)getSSOSeedingScope
-{
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
-    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
-    if ([ssoSeedingScopes count])
-    {
-        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
-    }
-    return ssoSeedingScopes;
 }
 
 - (MSALWebviewParameters *)msalTestWebViewParameters

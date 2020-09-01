@@ -314,4 +314,16 @@ static NSDictionary *s_currentProfile = nil;
     return [currentProfile isEqualToString:@"CompanyPortal"];
 }
 
++ (NSArray<NSString *> *)getSSOSeedingScope
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
+    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
+    if ([ssoSeedingScopes count])
+    {
+        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
+    }
+    return ssoSeedingScopes;
+}
+
 @end
