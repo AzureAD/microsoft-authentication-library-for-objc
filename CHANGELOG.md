@@ -2,6 +2,7 @@
 * Indicate whether SSO extension account is available for device wide SSO (#1065)
 * Add swift static lib target to common core to support AES GCM.
 * Enable XCODE 11.4 recommended settings by default (#1070)
+* Update the MSAL embedded within WPJ Library to point to the latest dev build. (#1079)
 
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
