@@ -3123,6 +3123,8 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+#endif
+
 - (void)testInitWithConfiguration_WhenBypassRedirectURIIsDefault_ShouldBlockInvalidURI
 {
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id"
@@ -3145,8 +3147,6 @@
     XCTAssertTrue(application);
     XCTAssertNil(error);
 }
-
-#endif
 
 #pragma mark - Broker Availability
 
