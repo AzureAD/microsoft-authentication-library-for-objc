@@ -1,5 +1,13 @@
 ## [TBD] - TBD
 * update MSIDBaseBrokerOperationRequest in common-core
+* Support bypassing redirect uri validation on macOS (#1076)
+* Indicate whether SSO extension account is available for device wide SSO (#1065)
+* Add swift static lib target to common core to support AES GCM.
+* Enable XCODE 11.4 recommended settings by default (#1070)
+
+## [1.1.8] - 2020-08-24
+* Disabling check for validating result Account.
+* Fix unused parameter errors and add macOS specific test mocks.
 * Move openBroswerResponse code into its operation (#1020)
 * Include redirect uri in body when redeeming refresh token at token endpoint (#1020)
 * Expose MSAL SDK Version in public client (#1051)
@@ -16,6 +24,15 @@
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 * Update logger from Identity Core. (#1009)
 
+## [1.1.9] - 2020-08-20
+### Added
+* Enabled the following XCODE 11.4 recommended settings by default per customer request
+ -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+ -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+ -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+ -Renamed private properties within "MSIDLastRequestTelemetry.m" to address nested dispatch call issues that arise by enabling above implicit retain self setting.
+ * Updated supported platforms in readme
+
 ## [1.1.7] - 2020-07-31
 ### Added
 * New variable in configuration to allow user bypass redirect URI check (#1013)
@@ -24,20 +41,11 @@
 ## [1.1.6] - 2020-07-24
 
 ### Added	
-* Support proof of posession for access tokens (#926)	
+* Support proof of possession for access tokens (#926)	
 
 ### Fixed	
 * Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)	
-
-## [1.1.6] - 2020-07-24	 * update new variable in configuration to allow user by pass URI check #1013
-
-### Added	
-* Support proof of posession for access tokens (#926)	
-
-### Fixed	
-* Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)	
+* Silent token lookup for guest accounts with different UPNs (#986)		
 
 ## [1.1.5] - 2020-06-19
  
