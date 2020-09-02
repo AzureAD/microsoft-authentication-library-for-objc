@@ -23,7 +23,6 @@
 
 #import "MSALBaseUITest.h"
 #import "NSDictionary+MSALiOSUITests.h"
-#import "MSIDAutomationConfigurationRequest.h"
 #import "MSIDTestConfigurationProvider.h"
 #import "XCTestCase+TextFieldTap.h"
 #import "NSDictionary+MSALiOSUITests.h"
@@ -32,6 +31,9 @@
 #import "MSIDAADIdTokenClaimsFactory.h"
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDTestConfigurationProvider.h"
+#import "MSIDTestAutomationAppConfigurationRequest.h"
+#import "MSIDTestAutomationApplication.h"
+#import "MSIDAutomationOperationResponseHandler.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
 
@@ -40,9 +42,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 + (void)setUp
 {
     [super setUp];
-    
-    MSIDTestAutomationConfiguration.defaultRegisteredScheme = @"x-msauth-msalautomationapp";
-    
+        
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
     self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
 }
@@ -52,6 +52,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super setUp];
     
     self.continueAfterFailure = NO;
+    self.redirectUriPrefix = @"x-msauth-msalautomationapp";
     
     self.testApp = [XCUIApplication new];
     [self.testApp launch];
@@ -174,59 +175,99 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 #pragma mark - API fetch
 
-- (void)loadTestConfiguration:(MSIDAutomationConfigurationRequest *)request
+- (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest
 {
-    __block MSIDTestAutomationConfiguration *testConfig = nil;
-
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get configuration"];
     
-    [self.class.confProvider.userAPIRequestHandler executeAPIRequest:request
-                                                   completionHandler:^(MSIDTestAutomationConfiguration *result, NSError *error) {
-
-                                                       XCTAssertNil(error);
-                                                       testConfig = result;
-                                                       [expectation fulfill];
-                                  }];
-
-    [self waitForExpectationsWithTimeout:60 handler:nil];
-
-    if (!testConfig || ![testConfig.accounts count])
-    {
-        XCTAssertTrue(NO);
-    }
-
-    [self loadPasswordForAccount:testConfig.accounts[0]];
-
-    self.testConfiguration = testConfig;
-    XCTAssertTrue([self.testConfiguration.accounts count] >= 1);
-    self.primaryAccount = self.testConfiguration.accounts[0];
-}
-
-- (void)loadPasswordForAccount:(MSIDTestAccount *)account
-{
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Get password"];
+    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationApplication.class];
     
-    [self.class.confProvider.passwordRequestHandler loadPasswordForAccount:account
-                                                         completionHandler:^(NSString *password, NSError *error) {
+    [self.class.confProvider.operationAPIRequestHandler executeAPIRequest:appRequest
+                                                          responseHandler:responseHandler
+                                                        completionHandler:^(id result, __unused NSError *error)
+    {
+        XCTAssertNotNil(result);
+        XCTAssertTrue([result isKindOfClass:[NSArray class]]);
         
-                                                             XCTAssertNil(error);
-                                                             XCTAssertNotNil(password);
-                                                             [expectation fulfill];
+        NSArray *results = (NSArray *)result;
+        XCTAssertTrue(results.count >= 1);
+        self.testApplication = results[0];
+        self.testApplication.redirectUriPrefix = self.redirectUriPrefix;
+        [expectation fulfill];
     }];
 
     [self waitForExpectationsWithTimeout:60 handler:nil];
+}
 
-    if (!account.password)
+- (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
+{
+    NSArray *accounts = [self loadTestAccountRequest:accountRequest];
+    self.primaryAccount = accounts[0];
+    self.testAccounts = accounts;
+}
+
+- (NSArray *)loadTestAccountRequest:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get account"];
+    
+    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
+    
+    __block NSArray *results = nil;
+    
+    [self.class.confProvider.operationAPIRequestHandler executeAPIRequest:accountRequest
+                                                          responseHandler:responseHandler
+                                                        completionHandler:^(id result, __unused NSError *error)
     {
-        XCTAssertTrue(NO);
+        XCTAssertNotNil(result);
+        XCTAssertTrue([result isKindOfClass:[NSArray class]]);
+        
+        results = (NSArray *)result;
+        XCTAssertTrue(results.count >= 1);
+        
+        XCTestExpectation *passwordLoadExpecation = [self expectationWithDescription:@"Get password"];
+        passwordLoadExpecation.expectedFulfillmentCount = results.count;
+        
+        for (MSIDTestAutomationAccount *account in results)
+        {
+            [self.class.confProvider.passwordRequestHandler loadPasswordForTestAccount:account
+                                                                     completionHandler:^(NSString *password, __unused NSError *error)
+            {
+                XCTAssertNotNil(password);
+                [passwordLoadExpecation fulfill];
+            }];
+        }
+        
+        [self waitForExpectations:@[passwordLoadExpecation] timeout:60];
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:120];
+    return results;
+}
+
+- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests
+{
+    NSMutableArray *allAccounts = [NSMutableArray new];
+    
+    for (MSIDTestAutomationAccountConfigurationRequest *request in accountRequests)
+    {
+        NSArray *accounts = [self loadTestAccountRequest:request];
+        if (accounts)
+        {
+            [allAccounts addObjectsFromArray:accounts];
+        }
     }
+    
+    XCTAssertTrue(allAccounts.count >= 1);
+    
+    self.primaryAccount = allAccounts[0];
+    self.testAccounts = allAccounts;
 }
 
 #pragma mark - Actions
 
 - (void)aadEnterEmail
 {
-    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account] app:self.testApp];
+    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn] app:self.testApp];
 }
 
 - (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app
@@ -238,8 +279,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
         return;
     }
 
-    [self tapElementAndWaitForKeyboardToAppear:emailTextField app:app];
-    [emailTextField selectTextWithApp:app];
+    [emailTextField msidTap];
     [emailTextField typeText:email];
 }
 
@@ -253,7 +293,9 @@ static MSIDTestConfigurationProvider *s_confProvider;
     // Enter password
     XCUIElement *passwordTextField = app.secureTextFields.firstMatch;
     [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:app];
+    sleep(0.1f);
+    [passwordTextField msidTap];
+    sleep(0.1f);
     [passwordTextField typeText:password];
 }
 
@@ -448,7 +490,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request
 {
-    MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request config:self.testConfiguration account:self.primaryAccount];
+    MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request appConfig:self.testApplication];
     return updatedRequest.jsonDictionary;
 }
 

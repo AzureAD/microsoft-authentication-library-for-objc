@@ -46,6 +46,9 @@
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
 #import "MSALWebviewParameters.h"
+#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer.h"
+#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -57,6 +60,7 @@
 @property (nonatomic) IBOutlet UIButton *profileButton;
 @property (nonatomic) IBOutlet UIButton *authorityButton;
 @property (nonatomic) IBOutlet UISegmentedControl *validateAuthoritySegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *instanceAwareSegmentControl;
 @property (nonatomic) IBOutlet UITextField *loginHintTextField;
 @property (nonatomic) IBOutlet UITextField *extraQueryParamsTextField;
 @property (nonatomic) IBOutlet UIButton *userButton;
@@ -71,7 +75,8 @@
 @property (nonatomic) IBOutlet UIView *customWebviewContainer;
 @property (nonatomic) IBOutlet UIView *wkWebViewContainer;
 @property (nonatomic) WKWebView *customWebview;
-
+@property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
+@property (nonatomic) NSString *accountIdentifier;
 @end
 
 @implementation MSALTestAppAcquireTokenViewController
@@ -132,6 +137,7 @@
     
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
+    self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
     
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
@@ -147,19 +153,20 @@
     
 }
 
-#pragma mark - IBAction
+#pragma mark - Helper
 
-- (IBAction)onAcquireTokenInteractiveButtonTapped:(id)sender
+- (MSALPublicClientApplication *)msalTestPublicClientApplication
 {
-    (void)sender;
-    
+    return [self msalTestPublicClientApplicationWithSSOSeeding:NO];
+}
+
+- (MSALPublicClientApplication *)msalTestPublicClientApplicationWithSSOSeeding:(BOOL)ssoSeedingCall
+{
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
-    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
-    
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
@@ -168,6 +175,12 @@
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
     
+    pcaConfig.multipleCloudsSupported = self.instanceAwareSegmentControl.selectedSegmentIndex == 0;
+    if (ssoSeedingCall)
+    {
+        pcaConfig.cacheConfig.keychainSharingGroup = @"com.microsoft.ssoseeding";
+        pcaConfig.bypassRedirectURIValidation = YES;
+    }
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
@@ -175,45 +188,40 @@
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [self.resultTextView setText:resultText];
-        return;
+        return nil;
     }
     
-    __block BOOL fBlockHit = NO;
-    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-        
-        if (fBlockHit)
-        {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                               message:@"Completion block was hit multiple times!"
-                                                                        preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                [self presentViewController:alert animated:YES completion:nil];
-            });
-            
-            return;
-        }
-        
-        fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (result)
-            {
-                [self updateResultView:result];
-            }
-            else
-            {
-                [self updateResultViewError:error];
-            }
-            
-            [self.customWebview loadHTMLString:@"<html><head></head></html>" baseURL:nil];
-            self.customWebviewContainer.hidden = YES;
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
-    };
+    return application;
+}
 
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
+- (MSALInteractiveTokenParameters *)tokenParams:(BOOL)isSSOSeedingCall
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [self getSSOSeedingScope] : [settings.scopes allObjects]
+                                                                                      webviewParameters:[self msalTestWebViewParameters]];
+    
+    if (self.authSchemeSegmentControl.selectedSegmentIndex == 0 || isSSOSeedingCall)
+    {
+        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    }
+    else
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
+    parameters.loginHint = self.loginHintTextField.text;
+    parameters.account = settings.currentAccount;
+    parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptTypeValue];
+    
+    parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
+
+    return parameters;
+}
+
+- (MSALWebviewParameters *)msalTestWebViewParameters
+{
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
     webviewParameters.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     
     if (webviewParameters.webviewType == MSALWebviewTypeWKWebView
@@ -229,22 +237,12 @@
         webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
     }
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
-                                                                                      webviewParameters:webviewParameters];
-    parameters.loginHint = self.loginHintTextField.text;
-    parameters.account = settings.currentAccount;
-    parameters.promptType = [self promptTypeValue];
-    parameters.extraQueryParameters = extraQueryParameters;
-    
-    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+    return webviewParameters;
 }
 
-- (IBAction)onAcquireTokenSilentButtonTapped:(id)sender
+- (BOOL)checkAccountSelected
 {
-    (void)sender;
-    
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    
     if (!settings.currentAccount)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
@@ -252,35 +250,177 @@
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
-        return;
+        return NO;
     }
     
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    __auto_type authority = [settings authority];
+    return YES;
+}
+
+- (void)showCompletionBlockHitMultipleTimesAlert
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                       message:@"Completion block was hit multiple times!"
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
+}
+
+- (void)acquireSSOSeeding
+{
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplicationWithSSOSeeding:YES];
     
-    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri
-                                                                                                     authority:authority];
-    
-    if (self.validateAuthoritySegmentControl.selectedSegmentIndex == 1)
-    {
-        pcaConfig.knownAuthorities = @[pcaConfig.authority];
-    }
-    
-    NSError *error;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)
     {
-        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultTextView setText:resultText];
         return;
     }
+    
+    __block BOOL fBlockHit = NO;
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        
+        if (fBlockHit)
+        {
+            [self showCompletionBlockHitMultipleTimesAlert];
+            return;
+        }
+        
+        fBlockHit = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (!result)
+            {
+                [self updateResultViewError:error];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+        [self hideCustomeWebViewIfNeed];
+    };
+    
+    MSALInteractiveTokenParameters *parameters = [self tokenParams:YES];
+    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+}
+
+#pragma mark - IBAction
+- (IBAction)onSignoutTapped:(__unused id)sender
+{
+    if (![self checkAccountSelected])
+    {
+        return;
+    }
+
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+
+    if (!application)
+    {
+        return;
+    }
+
+    __block BOOL fBlockHit = NO;
+
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:[self msalTestWebViewParameters]];
+
+    [application signoutWithAccount:settings.currentAccount
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error) {
+
+        if (fBlockHit)
+        {
+            [self showCompletionBlockHitMultipleTimesAlert];
+            return;
+        }
+
+        fBlockHit = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+
+            if (!success)
+            {
+                NSString *errorString = [NSString stringWithFormat:@"ssoSeeding sign out error %@", error];
+                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", errorString);
+            }
+            else
+            {
+                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"ssoSeeding clear succesfully");
+            }
+        });
+    }];
+}
+
+- (IBAction)onAcquireTokenInteractiveButtonTapped:(__unused id)sender
+{
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+    if (!application)
+    {
+        return;
+    }
+        
+    __block BOOL fBlockHit = NO;
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+
+        if (fBlockHit)
+        {
+            [self showCompletionBlockHitMultipleTimesAlert];
+            return;
+        }
+        
+        fBlockHit = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (result)
+            {
+                if ([MSALTestAppSettings isSSOSeeding])
+                {
+                    [self acquireSSOSeeding];
+                }
+                else
+                {
+                    [self updateResultView:result];
+                    [self hideCustomeWebViewIfNeed];
+                }
+            }
+            else
+            {
+                [self updateResultViewError:error];
+                [self hideCustomeWebViewIfNeed];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    };
+    
+    [application acquireTokenWithParameters:[self tokenParams:NO] completionBlock:completionBlock];
+}
+
+- (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
+{
+    if (![self checkAccountSelected])
+    {
+        return;
+    }
+    
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+    
+    if (!application)
+    {
+        return;
+    }
+    
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     __auto_type scopes = [settings.scopes allObjects];
     __auto_type account = settings.currentAccount;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    
+    if (self.authSchemeSegmentControl.selectedSegmentIndex == 0)
+    {
+        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    }
+    else
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
     parameters.authority = settings.authority;
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
@@ -288,15 +428,7 @@
     {
         if (fBlockHit)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.acquireSilentButton.enabled = YES;
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                               message:@"Completion block was hit multiple times!"
-                                                                        preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                [self presentViewController:alert animated:YES completion:nil];
-            });
-            
+            [self showCompletionBlockHitMultipleTimesAlert];
             return;
         }
         
@@ -332,12 +464,13 @@
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
-    
+    if ([MSALTestAppSettings isSSOSeeding]) pcaConfig.bypassRedirectURIValidation = YES;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
                                                                                                     error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
-    
+    result &= [self clearAllTokenKeysForAccessGroup:pcaConfig.cacheConfig.keychainSharingGroup];
+       
     if (result)
     {
         self.resultTextView.text = @"Successfully cleared cache.";
@@ -353,6 +486,26 @@
     {
         self.resultTextView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
+    // we clear sso Seeding without updating the result
+    if ([MSALTestAppSettings isSSOSeeding])
+    {
+        BOOL resultSSOClear = TRUE;
+        MSALPublicClientApplication *ssoSeedingApplication = [self msalTestPublicClientApplicationWithSSOSeeding:YES];
+        resultSSOClear &=[ssoSeedingApplication.tokenCache clearWithContext:nil error:&error];
+        resultSSOClear &=[self clearAllTokenKeysForAccessGroup:ssoSeedingApplication.configuration.cacheConfig.keychainSharingGroup];
+        NSString *resultString ;
+        resultString = resultSSOClear ? @"successfully" : @"failed";
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", resultString);
+    }
+}
+
+- (BOOL)clearAllTokenKeysForAccessGroup:(NSString *)accessGroup
+{
+    MSIDAssymetricKeyKeychainGenerator *keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:accessGroup error:nil];
+    
+    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
+    return [keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
+    
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender
@@ -505,8 +658,6 @@
 {
     NSString *resultText = [NSString stringWithFormat:@"%@", error];
     [self.resultTextView setText:resultText];
-    
-    NSLog(@"%@", resultText);
 }
 
 - (void)updateResultView:(MSALResult *)result
@@ -515,8 +666,6 @@
                             [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
     
     [self.resultTextView setText:resultText];
-    
-    NSLog(@"%@", resultText);
 }
 
 - (MSALPromptType)promptTypeValue
@@ -526,6 +675,7 @@
     if ([label isEqualToString:@"Select"]) return MSALPromptTypeSelectAccount;
     if ([label isEqualToString:@"Login"]) return MSALPromptTypeLogin;
     if ([label isEqualToString:@"Consent"]) return MSALPromptTypeConsent;
+    if ([label isEqualToString:@"Default"]) return MSALPromptTypeDefault;
     
     @throw @"Do not recognize prompt behavior";
 }
@@ -548,6 +698,10 @@
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
+    
+    MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.microsoft.adalcache" serviceIdentifier:@"legacy-accounts-service" applicationIdentifier:@"my.msal.testapp"];
+    provider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
+    [pcaConfig.cacheConfig addExternalAccountProvider:provider];
     
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
@@ -580,6 +734,28 @@
     {
         self.resultTextView.text = @"Cannot start test, because other test is currently running!";
     }
+}
+
+- (void)hideCustomeWebViewIfNeed
+{
+    if (self.webviewTypeSegmentControl.selectedSegmentIndex == 0 &&
+        self.customWebviewTypeSegmentControl.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
+    {
+       [self.customWebview loadHTMLString:@"<html><head></head></html>" baseURL:nil];
+       self.customWebviewContainer.hidden = YES;
+    }
+}
+
+- (NSArray<NSString *> *)getSSOSeedingScope
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
+    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
+    if ([ssoSeedingScopes count])
+    {
+        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
+    }
+    return ssoSeedingScopes;
 }
 
 @end

@@ -39,8 +39,9 @@
 {
     return [super new];
 }
+#endif
 
-- (instancetype)initWithParentViewController:(UIViewController *)parentViewController
+- (instancetype)initWithParentViewController:(MSALViewController *)parentViewController
 {
     self = [super init];
     if (self)
@@ -50,24 +51,34 @@
     
     return self;
 }
-#endif
+
+- (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController
+{
+    self = [super init];
+    if (self)
+    {
+        _parentViewController = parentViewController;
+    }
+    
+    return self;
+}
 
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(__unused NSZone *)zone
 {
     MSALWebviewParameters *item;
-#if TARGET_OS_IPHONE
-    item = [[MSALWebviewParameters alloc] initWithParentViewController:_parentViewController];
+    item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
     item.parentViewController = _parentViewController;
+
+#if TARGET_OS_IPHONE
     item.presentationStyle = _presentationStyle;
-    if (@available(iOS 13.0, *))
+#endif
+    
+    if (@available(iOS 13.0, macOS 10.15, *))
     {
         item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
     }
-#else
-    item = [MSALWebviewParameters new];
-#endif
     
     item.webviewType = _webviewType;
     item.customWebview = _customWebview;

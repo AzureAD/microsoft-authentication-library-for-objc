@@ -46,6 +46,8 @@
 #pragma mark - Public
 
 - (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                           popManager:(MSIDDevicePopManager *)popManager
                                 error:(NSError **)error
 {
     NSError *authorityError = nil;
@@ -61,7 +63,7 @@
         return nil;
     }
     
-    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority authScheme:authScheme popManager:popManager error:error];
 }
 
 - (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account

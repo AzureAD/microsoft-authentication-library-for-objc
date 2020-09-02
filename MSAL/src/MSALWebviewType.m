@@ -32,11 +32,11 @@ extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
 {
     switch (type) {
             STRING_CASE(MSALWebviewTypeWKWebView);
-#if TARGET_OS_IPHONE
             STRING_CASE(MSALWebviewTypeDefault);
+#if TARGET_OS_IPHONE
             STRING_CASE(MSALWebviewTypeSafariViewController);
-            STRING_CASE(MSALWebviewTypeAuthenticationSession);
 #endif
+            STRING_CASE(MSALWebviewTypeAuthenticationSession);
     }
     
     @throw @"Unrecognized MSALWebviewType";
@@ -45,11 +45,11 @@ extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
 extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type, NSError **error)
 {
     switch (type) {
-#if TARGET_OS_IPHONE
         case MSALWebviewTypeDefault:
             return MSIDWebviewTypeDefault;
         case MSALWebviewTypeAuthenticationSession:
             return MSIDWebviewTypeAuthenticationSession;
+#if TARGET_OS_IPHONE
         case MSALWebviewTypeSafariViewController:
             return MSIDWebviewTypeSafariViewController;
 #endif

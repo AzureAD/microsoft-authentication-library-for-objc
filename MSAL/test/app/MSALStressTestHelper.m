@@ -38,6 +38,7 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALResult.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALAccount.h"
 
 @implementation MSALStressTestHelper
 
@@ -79,7 +80,7 @@ static BOOL s_runningTest = NO;
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        __block dispatch_semaphore_t sem = dispatch_semaphore_create(10);
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(50);
         __block NSUInteger userIndex = 0;
 
         while (!s_stop)
@@ -87,14 +88,15 @@ static BOOL s_runningTest = NO;
             dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-
-                MSALAccount *account = accounts[userIndex];
-
+                
                 if (multipleUsers)
                 {
                     userIndex = ++userIndex >= [accounts count] ? 0 : userIndex;
                 }
                 
+                MSALAccount *account = accounts[userIndex];
+                account = [application accountForIdentifier:account.identifier error:nil];
+
                 __auto_type scopes = [[MSALTestAppSettings settings].scopes allObjects];
                 MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
                 
@@ -104,7 +106,7 @@ static BOOL s_runningTest = NO;
                      {
                          [self expireAllAccessTokens];
                      }
-                     
+                                         
                      dispatch_semaphore_signal(sem);
                  }];
             });

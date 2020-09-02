@@ -29,7 +29,7 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALTestConstants.h"
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALLegacySharedAccountTestUtil.h"
@@ -208,6 +208,8 @@
     XCTAssertNotNil(updatedAt);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
+    NSString *homeAccountId = [account jsonDictionary][@"additionalProperties"][@"home_account_id"];
+    XCTAssertEqualObjects(homeAccountId, @"uid.utid");
 }
 
 - (void)testUpdateAccountWithMSALAccount_whenUpdateOperation_shouldUpdateSigninStatusAndUpdatedDict
@@ -238,6 +240,8 @@
     XCTAssertNotNil(updatedAt);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
+    NSString *homeAccountId = [account jsonDictionary][@"additionalProperties"][@"home_account_id"];
+    XCTAssertEqualObjects(homeAccountId, @"uid.utid");
 }
 
 @end

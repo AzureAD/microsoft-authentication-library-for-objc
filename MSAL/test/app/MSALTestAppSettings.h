@@ -36,6 +36,7 @@ extern NSString* MSALTestAppCacheChangeNotification;
 #define MSAL_APP_CLIENT_ID @"clientId"
 #define MSAL_APP_PROFILE @"currentProfile"
 #define MSAL_APP_REDIRECT_URI @"redirectUri"
+#define MSAL_APP_KEYCHAIN_GROUP @"keychainGroup"
 
 @property (nonatomic) MSALAuthority *authority;
 @property (nonatomic) MSALAccount *currentAccount;
@@ -57,5 +58,6 @@ extern NSString* MSALTestAppCacheChangeNotification;
 
 - (BOOL)addScope:(NSString *)scope;
 - (BOOL)removeScope:(NSString *)scope;
++ (BOOL)isSSOSeeding;
 
 @end

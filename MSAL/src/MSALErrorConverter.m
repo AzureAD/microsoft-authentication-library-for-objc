@@ -60,7 +60,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorRedirectSchemeNotRegistered): @(MSALInternalErrorRedirectSchemeNotRegistered),
 
                                    // Cache
-                                   @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
+                                   @(MSIDErrorCacheMultipleUsers) : @(MSALInternalErrorAmbiguousAccount),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALInternalErrorFailedAuthorityValidation),
@@ -89,6 +89,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorBrokerUnknown): @(MSALInternalErrorBrokerUnknown),
                                    @(MSIDErrorBrokerApplicationTokenReadFailed): @(MSALInternalErrorBrokerApplicationTokenReadFailed),
                                    @(MSIDErrorBrokerApplicationTokenWriteFailed): @(MSALInternalErrorBrokerApplicationTokenWriteFailed),
+                                   @(MSIDErrorBrokerNotAvailable) : @(MSALInternalBrokerNotAvailable),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
@@ -101,6 +102,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerInvalidGrant) : @(MSALInternalErrorInvalidGrant),
                                    @(MSIDErrorServerInvalidScope) : @(MSALInternalErrorInvalidScope),
                                    @(MSIDErrorServerUnauthorizedClient): @(MSALInternalErrorUnauthorizedClient),
+                                   @(MSIDErrorServerAccessDenied): @(MSALErrorUserCanceled),
                                    @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
@@ -134,16 +136,33 @@ static NSSet *s_recoverableErrorCode;
                      classifyErrors:(BOOL)shouldClassifyErrors
                  msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
+    return [self msalErrorFromMsidError:msidError
+                         classifyErrors:shouldClassifyErrors
+                     msalOauth2Provider:oauth2Provider
+                          correlationId:nil
+                             authScheme:nil
+                             popManager:nil];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+                     classifyErrors:(BOOL)shouldClassifyErrors
+                 msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                            correlationId:(NSUUID *)correlationId
+                         authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                         popManager:(MSIDDevicePopManager *)popManager
+{
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
                 errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
                       oauthError:msidError.userInfo[MSIDOAuthErrorKey]
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
-                   correlationId:msidError.userInfo[MSIDCorrelationIdKey]
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey] ? : correlationId.UUIDString
                         userInfo:msidError.userInfo
                   classifyErrors:shouldClassifyErrors
-              msalOauth2Provider:oauth2Provider];
+              msalOauth2Provider:oauth2Provider
+                      authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                      popManager:(MSIDDevicePopManager *)popManager];
 }
 
 + (NSError *)errorWithDomain:(NSString *)domain
@@ -152,10 +171,12 @@ static NSSet *s_recoverableErrorCode;
                   oauthError:(NSString *)oauthError
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
-               correlationId:(__unused NSUUID *)correlationId
+               correlationId:(NSString *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                  authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                  popManager:(MSIDDevicePopManager *)popManager
 {
     if ([NSString msidIsStringNilOrBlank:domain])
     {
@@ -199,21 +220,19 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
-    msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
-    msalUserInfo[MSALOAuthErrorKey] = oauthError;
-    msalUserInfo[MSALOAuthSubErrorKey] = subError;
+    if (!msalUserInfo[MSALCorrelationIDKey] && correlationId) msalUserInfo[MSALCorrelationIDKey] = correlationId;
+    if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
+    if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
+    if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
     
-    if (underlyingError)
-    {
-        msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
-    }
+    if (underlyingError) msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
     
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
     if (userInfo[MSIDInvalidTokenResultKey] && oauth2Provider)
     {
         NSError *resultError = nil;
-        MSALResult *msalResult = [oauth2Provider resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+        MSALResult *msalResult = [oauth2Provider resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] authScheme:authScheme popManager:popManager error:&resultError];
 
         if (!msalResult)
         {

@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALTestConstants.h"
 #import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
@@ -45,7 +45,7 @@
 #import "NSString+MSALTestUtil.h"
 
 #import "MSIDWebviewAuthorization.h"
-#import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebAADAuthCodeResponse.h"
 
 #import "MSALResult.h"
 #import "MSALAccount.h"
@@ -113,21 +113,21 @@
 
 - (void)testAcquireToken_whenMultipleB2CPolicies_shouldHaveMultipleUsers
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Setup acquireToken with first policy (b2c_1_policy)
     __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
 
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                     context:nil error:nil];    
          completionHandler(oauthResponse, nil);
      }];
@@ -145,7 +145,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"] webviewParameters:webParameters];

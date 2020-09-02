@@ -49,7 +49,7 @@
 #import "MSALResult+Internal.h"
 #import "MSIDRequestControllerFactory.h"
 #import "MSIDRequestParameters.h"
-#import "MSIDInteractiveRequestParameters.h"
+#import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDDefaultTokenRequestProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
@@ -86,6 +86,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
 #import "MSALWebviewParameters.h"
+#import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
@@ -94,7 +95,18 @@
 #import "MSIDMacKeychainTokenCache.h"
 #endif
 
+#import "MSIDInteractiveRequestParameters+MSALRequest.h"
+#import "MSIDTokenResult.h"
 #import "MSIDKeychainTokenCache.h"
+#import "MSIDSignoutController.h"
+#import "MSALSignoutParameters.h"
+#import "MSALPublicClientApplication+SingleAccount.h"
+#import "MSALDeviceInfoProvider.h"
+#import "MSALAuthenticationSchemeProtocol.h"
+#import "MSIDCurrentRequestTelemetry.h"
+#import "MSIDCacheConfig.h"
+#import "MSIDDevicePopManager.h"
+#import "MSIDAssymetricKeyLookupAttributes.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -104,6 +116,9 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
+@property (nonatomic) MSIDCacheConfig *msidCacheConfig;
+@property (nonatomic) MSIDDevicePopManager *popManager;
+@property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 
 @end
 
@@ -120,6 +135,9 @@
     MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
     MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
+    #if TARGET_OS_IPHONE && !AD_BROKER
+        [MSIDCertAuthHandler setUseAuthSession:YES];
+    #endif
 }
 
 #pragma mark - Properties
@@ -186,6 +204,7 @@
     NSError *msidError = nil;
     MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirectUri
                                                                                     clientId:config.clientId
+                                                                    bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
     if (!msalRedirectUri)
@@ -193,6 +212,16 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+        
+#if TARGET_OS_IPHONE
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityAuto
+        && msalRedirectUri.brokerCapable
+        && ![MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&msidError])
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
+#endif
     
     config.verifiedRedirectUri = msalRedirectUri;
     
@@ -202,6 +231,13 @@
     {
         return nil;
     }
+    
+    _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
+    _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
+    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
+    
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:_keyPairAttributes];
         
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
@@ -270,6 +306,7 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     self.tokenCache = defaultAccessor;
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
     return YES;
 }
 #else
@@ -281,6 +318,8 @@
     
     if (@available(macOS 10.15, *)) {
         dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+        
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
         
         NSError *secondaryDataSourceError = nil;
         secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
@@ -294,9 +333,12 @@
     }
     else
     {
-        dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                   trustedApplications:config.cacheConfig.trustedApplications
                                                                 error:&dataSourceError];
+        
+        dataSource = macDataSource;
+        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
     }
     
     if (!dataSource)
@@ -338,6 +380,7 @@
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -356,7 +399,10 @@
 - (MSALAccount *)accountForIdentifier:(NSString *)identifier
                                 error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for identifier %@", MSID_PII_LOG_TRACKABLE(identifier));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -367,13 +413,18 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
+    
     return account;
 }
 
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -381,13 +432,18 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+    
     return accounts;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -395,6 +451,8 @@
     MSALAccount *account = [request accountForParameters:parameters error:&msidError];
 
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
 
     return account;
 }
@@ -402,12 +460,149 @@
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
 
     [request allAccountsFilteredByAuthority:self.internalConfig.authority
                             completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
         completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:msidError]);
+    }];
+}
+
+- (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
+    __auto_type block = ^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(accounts, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(accounts, msalError);
+        }
+    };
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        block(nil, requestParamsError);
+        return;
+    }
+        
+    [request allAccountsFromDevice:parameters
+                 requestParameters:requestParams
+                   completionBlock:block];
+}
+
+#pragma mark - Single Account
+
+- (void)getCurrentAccountWithParameters:(MSALParameters *)parameters
+                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock
+{
+    __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with current account %@, previous account %@", MSID_PII_LOG_EMAIL(account.username), MSID_PII_LOG_EMAIL(previousAccount.username));
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(account, previousAccount, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(account, previousAccount, msalError);
+        }
+    };
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    
+    NSError *localError;
+    MSALAccount *previousAccount = [request currentPrincipalAccount:&localError];
+    
+    if (localError)
+    {
+        block(nil, nil, localError);
+        return;
+    }
+    
+    MSALAccountEnumerationParameters *accountParameters = [MSALAccountEnumerationParameters new];
+    accountParameters.returnOnlySignedInAccounts = YES;
+    
+    [self accountsFromDeviceForParameters:accountParameters
+                          completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        if (error)
+        {
+            block(nil, nil, error);
+            return;
+        }
+        
+        if ([accounts count] > 1)
+        {
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorCacheMultipleUsers, @"Multiple accounts found in cache.", nil, nil, nil, nil, nil, YES);
+            block(nil, nil, error);
+            return;
+        }
+        
+        MSALAccount *newAccount = [accounts count] ? accounts[0] : nil;
+        MSIDAccountIdentifier *newIdentifier = newAccount.lookupAccountIdentifier ?: nil;
+        
+        NSError *accountUpdateError;
+        BOOL result = [request setCurrentPrincipalAccountId:newIdentifier accountEnvironment:newAccount.environment error:&accountUpdateError];
+        
+        if (!result)
+        {
+            block(nil, nil, accountUpdateError);
+            return;
+        }
+        
+        block(newAccount, previousAccount, nil);
     }];
 }
 
@@ -427,7 +622,7 @@
         return YES;
     }
 
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response error:nil])
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
     {
         return YES;
     }
@@ -542,7 +737,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -580,8 +775,9 @@
     }
     
     BOOL shouldValidate = _validateAuthority;
+    BOOL isDeveloperKnownAuthority = [self shouldExcludeValidationForAuthority:requestAuthority];
     
-    if (shouldValidate && [self shouldExcludeValidationForAuthority:requestAuthority])
+    if (shouldValidate && isDeveloperKnownAuthority)
     {
         shouldValidate = NO;
     }
@@ -606,10 +802,18 @@
         return;
     }
     
+    requestAuthority.isDeveloperKnown = isDeveloperKnownAuthority;
+    
     NSError *msidError = nil;
+    
+    MSIDRequestType requestType = [self requestType];
+    
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                              authScheme:msidAuthScheme
                                                                          redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
                                                                             clientId:self.internalConfig.clientId
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
@@ -617,6 +821,7 @@
                                                                        correlationId:parameters.correlationId
                                                                       telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                                                  intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                                             requestType:requestType
                                                                                error:&msidError];
     
     if (!msidParams)
@@ -637,6 +842,10 @@
     msidParams.providedAuthority = providedAuthority;
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh; 
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -656,6 +865,23 @@
                  self.internalConfig.clientApplicationCapabilities,
                  parameters.claimsRequest);
     
+    // Return early if account is in signed out state
+    NSError *signInStateError;
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:&signInStateError];
+    
+    if (signInStateError)
+    {
+        block(nil, signInStateError, msidParams);
+        return;
+    }
+    
+    if (signInState == MSIDAccountMetadataStateSignedOut)
+    {
+        NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
+        block(nil, interactionError, msidParams);
+        return;
+    }
+    
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache
                                                                                                   accountMetadataAccessor:self.accountMetadataCache
@@ -672,7 +898,7 @@
         block(nil, requestError, msidParams);
         return;
     }
-    
+        
     [requestController acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
         
         if (error)
@@ -682,10 +908,35 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
+        
+        if (result.tokenResponse)
+        {
+            // Only update external accounts if we got new result from network as an optimization
+            [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        }
+        
         block(msalResult, resultError, msidParams);
     }];
+}
+
+- (MSIDAccountMetadataState)accountStateForParameters:(MSIDRequestParameters *)msidParams error:(NSError **)signInStateError
+{
+    if (!msidParams.accountIdentifier.homeAccountId)
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:signInStateError];
+    
+    return signInState;
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -788,7 +1039,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -805,32 +1056,24 @@
         }
     };
     
-    MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    NSError *authorityError;
+    MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:parameters.authority.msidAuthority error:&authorityError];
     
-    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    if (!requestAuthority)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
-        block(nil, msidError, nil);
-        
+        block(nil, authorityError, nil);
         return;
     }
+    
+    requestAuthority.isDeveloperKnown = [self shouldExcludeValidationForAuthority:requestAuthority];
     
     NSError *msidError = nil;
     
     MSIDBrokerInvocationOptions *brokerOptions = nil;
     
-    MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
+    MSIDRequestType requestType = [self requestType];
     
 #if TARGET_OS_IPHONE
-    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
-    {
-        interactiveRequestType = MSIDInteractiveRequestLocalType;
-    }
-    else if (!self.internalConfig.verifiedRedirectUri.brokerCapable)
-    {
-        interactiveRequestType = MSIDInteractiveRequestLocalType;
-    }
-    
     MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
@@ -851,19 +1094,24 @@
                                                                   aadRequestVersion:MSIDBrokerAADRequestVersionV2];
 
 #endif
-    MSIDInteractiveRequestParameters *msidParams =
-    [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
-                                                    redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
-                                                       clientId:self.internalConfig.clientId
-                                                         scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
-                                                     oidcScopes:[self.class defaultOIDCScopes]
-                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
-                                                  correlationId:parameters.correlationId
-                                                 telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                                  brokerOptions:brokerOptions
-                                                    requestType:interactiveRequestType
-                                            intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
-                                                          error:&msidError];
+    
+    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    
+    MSIDInteractiveTokenRequestParameters *msidParams =
+    [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
+                                                          authScheme:msidAuthScheme
+                                                         redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                            clientId:self.internalConfig.clientId
+                                                              scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
+                                                          oidcScopes:[self.class defaultOIDCScopes]
+                                                extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]        initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
+                                                       correlationId:parameters.correlationId
+                                                      telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                       brokerOptions:brokerOptions
+                                                         requestType:requestType
+                                                 intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                               error:&msidError];
     
     if (!msidParams)
     {
@@ -871,11 +1119,22 @@
         return;
     }
     
+    NSError *webViewParamsError;
+    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
+                                                             account:parameters.account
+                                      useWebviewTypeFromGlobalConfig:useWebviewTypeFromGlobalConfig
+                                                       customWebView:_customWebview
+                                                               error:&webViewParamsError];
+    
+    if (!webViewParamsResult)
+    {
+        block(nil, webViewParamsError, nil);
+        return;
+    }
+    
     msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
     msidParams.extraAuthorizeURLQueryParameters = parameters.extraQueryParameters;
-    msidParams.accountIdentifier = parameters.account.lookupAccountIdentifier;
-    
     msidParams.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
     
     NSMutableDictionary *extraAuthorizeURLQueryParameters = [self.internalConfig.extraQueryParameters.extraAuthorizeURLQueryParameters mutableCopy];
@@ -887,60 +1146,23 @@
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
-    msidParams.validateAuthority = _validateAuthority;
+    msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
-    
-    if (msidParams.validateAuthority
-        && [self shouldExcludeValidationForAuthority:requestAuthority])
-    {
-        msidParams.validateAuthority = NO;
-    }
-    
-#if TARGET_OS_IPHONE
-    if (@available(iOS 13.0, *))
-    {
-        if (parameters.webviewParameters.parentViewController == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
-            block(nil, msidError, msidParams);
-            return;
-        }
-        
-        if (parameters.webviewParameters.parentViewController.view.window == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
-            block(nil, msidError, msidParams);
-            return;
-        }
-        
-        msidParams.prefersEphemeralWebBrowserSession = parameters.webviewParameters.prefersEphemeralWebBrowserSession;
-    }
-    
-    msidParams.parentViewController = parameters.webviewParameters.parentViewController;
-    msidParams.presentationType = parameters.webviewParameters.presentationStyle;
-#endif
-    
-    // Configure webview
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    MSALWebviewType webviewType = useWebviewTypeFromGlobalConfig ? MSALGlobalConfig.defaultWebviewType : parameters.webviewParameters.webviewType;
-#pragma clang diagnostic pop
-    
-    NSError *msidWebviewError = nil;
-    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);
-    
-    if (msidWebviewError)
-    {
-        block(nil, msidWebviewError, msidParams);
-        return;
-    }
-    
-    msidParams.webviewType = msidWebViewType;
-    msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
-    msidParams.customWebview = parameters.webviewParameters.customWebview ?: _customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
+    msidParams.shouldValidateResultAccount = NO;
+    msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
+    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
+    msidParams.currentRequestTelemetry.forceRefresh = NO;
+    
+    MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
+    
+    if (signInState == MSIDAccountMetadataStateSignedOut && msidParams.promptType != MSIDPromptTypeConsent)
+    {
+        msidParams.promptType = MSIDPromptTypeLogin;
+    }
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
@@ -962,7 +1184,7 @@
                           MSALStringForPromptType(parameters.promptType),
                           parameters.extraQueryParameters,
                           parameters.authority,
-                          MSALStringForMSALWebviewType(webviewType),
+                          MSALStringForMSALWebviewType(parameters.webviewParameters.webviewType),
                           parameters.webviewParameters.customWebview ? @"Yes" : @"No",
                           parameters.correlationId,
                           self.internalConfig.clientApplicationCapabilities,
@@ -984,7 +1206,7 @@
         block(nil, requestError, msidParams);
         return;
     }
-    
+        
     [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
     {
         if (error)
@@ -994,7 +1216,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
         block(msalResult, resultError, msidParams);
@@ -1039,17 +1261,229 @@
         }
     }
 
-    if (self.accountMetadataCache && ![self.accountMetadataCache clearForHomeAccountId:account.identifier
-                                                                              clientId:self.internalConfig.clientId
-                                                                               context:nil
-                                                                                 error:error])
+    if (!self.accountMetadataCache)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        NSError *noAccountMetadataCacheError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"accountMetadataCache is nil when removing account!.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:noAccountMetadataCacheError];
         return NO;
     }
     
-    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
-                                                          error:error];
+    msidError = nil;
+    if (![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
+                                                             clientId:self.internalConfig.clientId
+                                                                state:MSIDAccountMetadataStateSignedOut
+                                                              context:nil
+                                                                error:&msidError])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)signoutWithAccount:(nonnull MSALAccount *)account
+         signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
+           completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock
+{
+    __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:nil popManager:nil];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, context, @"Failed to complete signout operation for account %@ with error %@", MSID_PII_LOG_EMAIL(account.username), MSID_PII_LOG_MASKABLE(msalError));
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, context, @"Successfully completed signout operation for account %@", MSID_PII_LOG_EMAIL(account.username));
+        }
+        
+        if (!signoutCompletionBlock) return;
+        
+        if ([NSThread isMainThread] && !signoutParameters.completionBlockQueue)
+        {
+            signoutCompletionBlock(result, msalError);
+        }
+        else
+        {
+            dispatch_async(signoutParameters.completionBlockQueue ? signoutParameters.completionBlockQueue : dispatch_get_main_queue(), ^{
+                signoutCompletionBlock(result, msalError);
+            });
+        }
+    };
+    
+    if (!account)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Account is required", nil, nil, nil, nil, nil, NO);
+        block(NO, error, nil);
+        return;
+    }
+    
+    NSError *localError;
+    BOOL localRemovalResult = [self removeAccount:account error:&localError];
+    
+    if (!localRemovalResult)
+    {
+        block(NO, localError, nil);
+        return;
+    }
+    
+    NSError *authorityError;
+    MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:nil error:&authorityError];
+    
+    if (!requestAuthority)
+    {
+        block(NO, authorityError, nil);
+        return;
+    }
+    
+    NSError *paramsError;
+    MSIDInteractiveRequestParameters *msidParams = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
+                                                                                                    authScheme:nil
+                                                                                                   redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                                                                      clientId:self.internalConfig.clientId
+                                                                                                        scopes:nil
+                                                                                                    oidcScopes:nil
+                                                                                                 correlationId:[NSUUID UUID]
+                                                                                                telemetryApiId:nil
+                                                                                           intuneAppIdentifier:nil
+                                                                                                   requestType:[self requestType]
+                                                                                                         error:&paramsError];
+    
+    if (!msidParams)
+    {
+        block(NO, paramsError, nil);
+        return;
+    }
+    
+    NSError *webViewParamsError;
+    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
+                                                             account:account
+                                      useWebviewTypeFromGlobalConfig:NO
+                                                       customWebView:_customWebview
+                                                               error:&webViewParamsError];
+    
+    if (!webViewParamsResult)
+    {
+        block(NO, webViewParamsError, msidParams);
+        return;
+    }
+    
+    msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
+    msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
+    msidParams.providedAuthority = requestAuthority;
+    
+    NSError *controllerError;
+    MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
+                                                                                        oauthFactory:self.msalOauth2Provider.msidOauth2Factory
+                                                                            shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                               error:&controllerError];
+    
+    if (!controller)
+    {
+        block(NO, controllerError, msidParams);
+        return;
+    }
+    
+    [controller executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [controller class]);
+        block(success, error, msidParams);
+    }];
+}
+
+#pragma mark - Device information
+
+- (void)getDeviceInformationWithParameters:(MSALParameters *)parameters
+                           completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying device info");
+    
+    __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", deviceInformation);
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(deviceInformation, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(deviceInformation, msalError);
+        }
+    };
+        
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        block(nil, requestParamsError);
+        return;
+    }
+    
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
+}
+
+- (BOOL)isCompatibleAADBrokerAvailable
+{
+#if TARGET_OS_IPHONE
+    MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
+    
+    if (@available(iOS 13.0, *))
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    // Parameter protocolType does not matter here
+    MSIDBrokerInvocationOptions *brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
+                                                                                                    protocolType:MSIDBrokerProtocolTypeCustomScheme
+                                                                                               aadRequestVersion:MSIDBrokerAADRequestVersionV2];
+    
+    return [brokerOptions isRequiredBrokerPresent];
+    
+#else
+    return NO;
+#endif
+
+    
+}
+
+#pragma mark - Authority validation
+
+- (BOOL)shouldValidateAuthorityForRequestAuthority:(MSIDAuthority *)requestAuthority
+{
+    BOOL validateAuthority = _validateAuthority;
+    
+    if (validateAuthority
+        && [self shouldExcludeValidationForAuthority:requestAuthority])
+    {
+        return NO;
+    }
+    
+    return validateAuthority;
 }
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
@@ -1059,9 +1493,6 @@
         for (MSALAuthority *knownAuthority in self.internalConfig.knownAuthorities)
         {
             if ([authority isKindOfClass:knownAuthority.msidAuthority.class]
-                // Treat  AAD authorities differently, since they should always succeed validation
-                // Therefore, even if they are added to known authorities, still do validation
-                && ![authority isKindOfClass:[MSIDAADAuthority class]]
                 && [knownAuthority.url isEqual:authority.url])
             {
                 return YES;
@@ -1077,6 +1508,63 @@
     return [NSOrderedSet orderedSetWithObjects:MSID_OAUTH2_SCOPE_OPENID_VALUE,
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
+}
+
++ (NSString *)sdkVersion
+{
+    return @MSAL_VERSION_STRING;
+}
+
+
+#pragma mark - Private
+
+- (MSIDRequestType)requestType
+{
+    MSIDRequestType requestType = MSIDRequestBrokeredType;
+            
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
+    {
+        requestType = MSIDRequestLocalType;
+    }
+    else if (!self.internalConfig.verifiedRedirectUri.brokerCapable)
+    {
+        requestType = MSIDRequestLocalType;
+    }
+    
+    return requestType;
+}
+
+- (MSIDAuthority *)interactiveRequestAuthorityWithCustomAuthority:(MSIDAuthority *)customAuthority
+                                                            error:(NSError **)error
+{
+    MSIDAuthority *requestAuthority = customAuthority ?: self.internalConfig.authority.msidAuthority;
+    
+    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return nil;
+    }
+    
+    return requestAuthority;
+}
+
+- (MSIDRequestParameters *)defaultRequestParametersWithError:(NSError **)requestParamsError
+{
+    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                 authScheme:nil
+                                                                                redirectUri:self.internalConfig.redirectUri
+                                                                                   clientId:self.internalConfig.clientId
+                                                                                     scopes:nil
+                                                                                 oidcScopes:nil
+                                                                              correlationId:nil
+                                                                             telemetryApiId:nil
+                                                                        intuneAppIdentifier:nil
+                                                                                requestType:[self requestType]
+                                                                                      error:requestParamsError];
+    
+    requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
+    return requestParams;
 }
 
 @end

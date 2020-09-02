@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALTestConstants.h"
 #import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
@@ -63,7 +63,7 @@
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSALB2CAuthority.h"
 #import "MSIDWebviewAuthorization.h"
-#import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebAADAuthCodeResponse.h"
 #import "MSIDWebviewFactory.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAadAuthorityCache.h"
@@ -121,9 +121,9 @@
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
@@ -140,17 +140,17 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
-         
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
-                                                                                     context:nil error:nil];
-         
-         completionHandler(oauthResponse, nil);
-     }];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+        NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
+        
+        MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                    context:nil error:nil];
+        
+        completionHandler(oauthResponse, nil);
+    }];
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
@@ -185,7 +185,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          resultAccount = result.account;
          XCTAssertNotNil(resultAccount);
@@ -207,7 +207,7 @@
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
                                  [silentExpectation fulfill];
                              }];
     
@@ -216,9 +216,9 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthority_shouldCacheTokens
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
@@ -235,13 +235,13 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          
          completionHandler(oauthResponse, nil);
@@ -281,7 +281,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          resultAccount = result.account;
          XCTAssertNotNil(resultAccount);
@@ -308,7 +308,7 @@
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
                                  [silentExpectation fulfill];
                              }];
     
@@ -317,9 +317,9 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     MSIDTestURLResponse *oidcResponse =
@@ -335,13 +335,13 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          
          completionHandler(oauthResponse, nil);
@@ -366,7 +366,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/00000000-0000-1234-5678-90abcdefffff/b2c_1_policy");
          
          [expectation fulfill];
      }];
@@ -376,11 +376,11 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_andInvalidRT_shouldReturnInteractionRequired
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -394,7 +394,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -426,7 +426,7 @@
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
     
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
@@ -450,11 +450,11 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -468,7 +468,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -500,7 +500,7 @@
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID uid:DEFAULT_TEST_UID user:account claims:nil];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
     json[@"access_token"] = @"i am an updated access token!";
     json[@"scope"] = [expectedScopes msidToString];
@@ -531,9 +531,9 @@
     NSString *claims = @"{\"id_token\":{\"nickname\":null}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -553,11 +553,11 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -582,7 +582,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -619,9 +619,9 @@
 
 - (void)skipTest_testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -641,11 +641,11 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -671,7 +671,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -689,7 +689,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                                       webviewParameters:webParameters];
@@ -711,9 +711,9 @@
 
 - (void)testAcquireTokenInteractive_whenDuplicateClaimsIsPassedInEQP_shouldReturnError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -751,9 +751,9 @@
 
 - (void)testAcquireTokenInteractive_whenMultipleCloudsSetToYes_shouldSendInstanceAwareToServer
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -773,17 +773,17 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-        NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+        NSURL *url = configuration.startURL;
         XCTAssertNotNil(url);
         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
         XCTAssertEqualObjects(QPs[@"instance_aware"], @"true");
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@&cloud_instance_host_name=login.microsoftonline.de", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -813,7 +813,7 @@
         XCTAssertNil(error);
         XCTAssertNotNil(result);
         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/1234-5678-90abcdefg");
+        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/00000000-0000-1234-5678-90abcdefffff");
         [expectation fulfill];
     }];
     
@@ -824,9 +824,9 @@
 {
     NSString *expectedClaims = @"{\"access_token\":{\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -846,11 +846,11 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -876,7 +876,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -920,9 +920,9 @@
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -942,11 +942,11 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -972,7 +972,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -1015,9 +1015,9 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1037,11 +1037,11 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -1067,7 +1067,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -1105,9 +1105,9 @@
 
 - (void)testAcquireTokenInteractive_whenInstanceAware_shouldReturnCloudAuthorityInResult
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1136,11 +1136,11 @@
     [MSIDTestURLSession addResponse:sovereignOidcResponse];
     
     // Check if instance_aware parameter is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
+         NSURL *url = configuration.startURL;
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
@@ -1166,7 +1166,7 @@
          
          // Mock auth code response with cloud_instance_host_name
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"login.microsoftonline.de", @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -1232,9 +1232,9 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenEnabledAndServiceUnavailable_shouldReturnExtendedLifetimeToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1247,7 +1247,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1263,7 +1263,7 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
@@ -1309,9 +1309,9 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenDisabledAndServiceUnavailable_shouldNotReturnToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1324,7 +1324,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -1341,7 +1341,7 @@
     XCTAssertTrue(result);
 
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -1389,10 +1389,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailable_andMixedCaseInputScope_shouldReturnToken
 {
-    
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1404,7 +1403,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -1420,8 +1419,7 @@
                                                          error:nil];
     XCTAssertTrue(result);
 
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
-    
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
@@ -1456,9 +1454,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExpired_andMixedCaseInputScope_shouldReturnToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1472,7 +1470,7 @@
 
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -1489,7 +1487,7 @@
     XCTAssertTrue(result);
 
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USeR.reAD", @"openid", @"profile", @"offline_access"]];
     
@@ -1540,9 +1538,9 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExtendedLifetimeTokenEnabled_shouldReturnTokenWithExtendedFlagBeingNo
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1554,7 +1552,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1571,7 +1569,7 @@
 
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -1582,7 +1580,7 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Set up two 504 network responses
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:DEFAULT_TEST_UTID uid:DEFAULT_TEST_UID user:account claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:504 headerFields:@{}];
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
@@ -1617,9 +1615,9 @@
 
 - (void)testAcquireTokenInteractive_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
@@ -1642,13 +1640,13 @@
                                        authority:DEFAULT_TEST_AUTHORITY];
     
     // Check if instance_aware parameter is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          
          completionHandler(oauthResponse, nil);
@@ -1695,9 +1693,9 @@
 
 - (void)testAcquireTokenSilent_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1709,7 +1707,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1724,17 +1722,18 @@
                                                          error:nil];
     XCTAssertTrue(result);
     
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     [MSIDTestURLSession addResponse:discoveryResponse];
     
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
-                                      responseUrl:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
+    [MSIDTestURLResponse oidcResponseForAuthority:authority
+                                      responseUrl:authority
                                             query:nil];
     
     // Save account metadata authority map from common to the specific tenant id.
-    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Mock token response
@@ -1744,8 +1743,9 @@
                                                     MSID_OAUTH2_SCOPE : @"user.read fakescope1 fakescope2 fakescope3 openid profile offline_access",
                                                     @"client_info" : @"1",
                                                     @"grant_type" : @"refresh_token",
+                                                    MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
                                                     MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!" }
-                                       authority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+                                       authority:authority];
     
     // Call Acquire token silent call
     NSError *error = nil;
@@ -1783,9 +1783,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassed_shouldSkipAtAndUseRt
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1806,7 +1806,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1814,7 +1814,7 @@
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -1823,8 +1823,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:claims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -1869,9 +1869,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsEmpty_shouldNotSkipAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1892,7 +1892,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1908,7 +1908,7 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -1942,9 +1942,9 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSet_shouldNotSkipAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -1965,7 +1965,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -1981,7 +1981,7 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
@@ -2013,9 +2013,9 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSetAndExpiredAt_shouldSendCapabilitiesToServer
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an expired AT and valid RT to cache
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2038,14 +2038,14 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *expectedClaims =  @"{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"llt\"]}}}";
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2054,8 +2054,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *responseJson = [[response jsonDictionary] mutableCopy];
@@ -2101,9 +2101,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndCapabilitiesSet_shouldSkipAtAndUseRt
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2124,7 +2124,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2133,7 +2133,7 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2142,8 +2142,8 @@
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -2190,9 +2190,9 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndInvalidRt_shouldReturnInteractionRequired
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2213,7 +2213,7 @@
     XCTAssertTrue(tokenSetSuccessful);
     
     // Add mock response for authority validation
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2221,7 +2221,7 @@
     // Add mock error response for refresh token grant
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2276,9 +2276,9 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2291,7 +2291,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2308,14 +2308,14 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
@@ -2353,9 +2353,9 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndNoAppMetadataInCacheAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2368,7 +2368,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2384,15 +2384,15 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     
@@ -2443,11 +2443,11 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsClientMismatch_shouldUpdateAppMetadata
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
@@ -2461,7 +2461,7 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:@"1"];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2540,9 +2540,9 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsInvalidGrant_ShouldUseMRRTToRefreshAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2555,7 +2555,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2581,7 +2581,7 @@
     [self.accountCache saveCredential:frt.tokenCacheItem context:nil error:nil];
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
@@ -2634,9 +2634,9 @@
 
 - (void)testAcquireTokenSilent_whenNoFRTInCache_ShouldUseMRRTToRefreshAccessToken
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
@@ -2649,7 +2649,7 @@
     [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
@@ -2666,14 +2666,14 @@
     XCTAssertTrue(result);
     
     // Set up the network responses for OIDC discovery
-    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USER.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:@"1234-5678-90abcdefg"
-                                                                              uid:@"1"
+                                                                         tenantId:DEFAULT_TEST_UTID
+                                                                              uid:DEFAULT_TEST_UID
                                                                              user:account
                                                                            claims:nil];
     
@@ -2711,9 +2711,9 @@
 
 - (void)testAcquireTokenSilent_whenNilAccountPassed_shouldReturnInteractionRequiredError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -2741,9 +2741,9 @@
 
 - (void)testAcquireTokenInteractive_whenAccountMismatch_shouldReturnAccountMismatchError
 {
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
@@ -2767,13 +2767,13 @@
                                        authority:DEFAULT_TEST_AUTHORITY];
     
     // Check if instance_aware parameter is in start url
-    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startSessionWithWebView:oauth2Factory:configuration:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
+                           block:(id)^(id obj, NSObject<MSIDWebviewInteracting> * webview, MSIDOauth2Factory *oauth2Factory, MSIDBaseWebRequestConfiguration *configuration, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+    {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthCodeResponse *oauthResponse = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          
          completionHandler(oauthResponse, nil);
@@ -2808,13 +2808,9 @@
                             completionBlock:^(MSALResult *rlt, NSError *error)
      {
          result = rlt;
-         
-         XCTAssertNotNil(error);
-         XCTAssertNil(result);
-         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInternal);
-         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
-         XCTAssertEqual(internalErrorCode, MSALInternalErrorMismatchedUser);
+        // Assuming msidRequestParameters.shouldValidateAccount = NO
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
          
          [expectation fulfill];
      }];
@@ -2842,6 +2838,8 @@
     // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-current-telemetry"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"x-client-last-telemetry"];
     
     NSString *url = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
     

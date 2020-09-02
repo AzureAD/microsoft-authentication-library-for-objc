@@ -100,12 +100,15 @@ static NSDictionary *s_currentProfile = nil;
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
     
-    
     NSString *defaultKey = @"MSAL-TestApp";
     NSDictionary *defaultValue = @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
                                    @"redirectUri" :@"msauth.com.microsoft.MSALTestApp://auth"};
     
-    s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, nil];
+    NSString *defaultMacKey = @"MSAL-Mac-TestApp";
+    NSDictionary *defaultMacValue = @{@"clientId" : @"70cc5569-23e9-45e3-8e15-137722eabf72",
+                                   @"redirectUri" :@"msauth.com.microsoft.MSALMacTestApp://auth"};
+    
+    s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, defaultMacValue, defaultMacKey, nil];
     s_additionalProfiles = _additionalProfiles();
     [s_profiles addEntriesFromDictionary:s_additionalProfiles];
     
@@ -113,6 +116,9 @@ static NSDictionary *s_currentProfile = nil;
     [titles addObjectsFromArray:[s_profiles allKeys]];
     
     s_profileTitles = titles;
+    
+    s_currentProfileIdx = 0;
+    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
 }
 
 + (MSALTestAppSettings*)settings
@@ -175,9 +181,6 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)readFromDefaults
 {
-    s_currentProfileIdx = 0;
-    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
-    
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {
@@ -305,5 +308,10 @@ static NSDictionary *s_currentProfile = nil;
     [self setValue:profileName forKey:MSAL_APP_PROFILE];
 }
 
++ (BOOL)isSSOSeeding
+{
+    NSString *currentProfile = [MSALTestAppSettings currentProfileName];
+    return [currentProfile isEqualToString:@"CompanyPortal"];
+}
 
 @end

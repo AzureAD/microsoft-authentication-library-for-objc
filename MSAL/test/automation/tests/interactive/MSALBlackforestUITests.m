@@ -27,8 +27,9 @@
 
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
+#import "MSALNationalCloudUITest.h"
 
-@interface MSALBlackforestUITests : MSALBaseAADUITest
+@interface MSALBlackforestUITests : MSALNationalCloudUITest
 
 @end
 
@@ -39,156 +40,41 @@
 - (void)setUp
 {
     [super setUp];
-
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderBlackForest;
-    configurationRequest.needsMultipleUsers = NO;
-    [self loadTestConfiguration:configurationRequest];
+    
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentGermanCloud;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeGermanCloud;
+    
+    [self loadTestAccount:accountConfigurationRequest];
+    
+    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeGermanCloud;
 }
 
 #pragma mark - Interactive tests
 
-- (void)testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
+- (void)testInstanceAwareWithNationalCloud_withBlackForest
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
-    request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-    request.webViewType = MSIDWebviewTypeWKWebView;
-    request.instanceAware = YES;
-
-    // 1. Run interactive
-    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountID);
-
-    // 2. Run auth UI appears step
-    [self runSharedAuthUIAppearsStepWithTestRequest:request];
-
-    // 3. Run silent with wrong authority
-    // In 0.5.0+ it should succeed
-    // TODO: verify expected behavior for this in 0.6.0 MSAL release
-    request.homeAccountIdentifier = homeAccountID;
-    request.acquireTokenAuthority = request.configurationAuthority;
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
-
-    // 4. Run silent with correct authority
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
-    request.acquireTokenAuthority = request.configurationAuthority;
-    [self runSharedSilentAADLoginWithTestRequest:request];
+    [self runInstanceAwareTestWithNationalCloud];
 }
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withBlackForest
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
-    request.promptBehavior = @"force";
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
-    request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
-    request.instanceAware = YES;
-    request.webViewType = MSIDWebviewTypeWKWebView;
-    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-
-    // 1. Run interactive
-    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountID);
-
-    // 2. Run auth UI appears step
-    [self runSharedAuthUIAppearsStepWithTestRequest:request];
-
-    // 3. Run silent with wrong authority
-    // In 0.5.0+ it should succeed
-    // TODO: verify expected behavior for this in 0.6.0 MSAL release
-    request.homeAccountIdentifier = homeAccountID;
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
-
-    // 4. Run silent with correct authority
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
-    request.acquireTokenAuthority = request.configurationAuthority;
-    [self runSharedSilentAADLoginWithTestRequest:request];
+    [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority];
 }
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
+- (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withBlackForest
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
-    request.promptBehavior = @"force";
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
-    request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
-    request.extraQueryParameters = @{@"instance_aware": @"true"};
-    request.webViewType = MSIDWebviewTypeWKWebView;
-    request.loginHint = self.primaryAccount.account;
-
-    // 1. Run interactive
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireToken:config];
-    [self blackForestWaitForNextButton:self.testApp];
-    [self aadEnterPassword];
-    [self assertAccessTokenNotNil];
+    [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP];
 }
 
-
-// The following test needs slice parameter to be sent to instance discovery endpoint to work.
-// Therefore disable the it for now as that is not happening.
-- (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
+- (void)testNonInstanceAwareWithNationalCloud_withSystemWebView
 {
-    NSString *environment = @"de";
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
-    request.promptBehavior = @"force";
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
-    request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
-    request.extraQueryParameters = @{@"instance_aware": @"true"};
-
-    // 1. Run interactive
-    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountID);
-
-    // 2. Run silent with correct authority
-    request.homeAccountIdentifier = homeAccountID;
-    [self runSharedSilentAADLoginWithTestRequest:request];
-}
-
-/*
- There seems to be some flakiness around sovereign user with login hint provided,
- where ESTS sometimes shows the username page with next button and sometimes redirects to the password page correctly. This portion of code waits for the "Next" button for 10 seconds if it appears.
- */
-- (void)blackForestWaitForNextButton:(XCUIApplication *)application
-{
-    XCUIElement *emailTextField = application.textFields[@"Enter your email, phone, or Skype."];
-
-    for (int i = 0; i < 10; i++)
-    {
-        if (emailTextField.exists)
-        {
-            [application.buttons[@"Next"] msidTap];
-            break;
-        }
-        else
-        {
-            sleep(1);
-        }
-    }
+    [self runNonInstanceAwareTestWithNationalCloud_withSystemWebView];
 }
 
 @end

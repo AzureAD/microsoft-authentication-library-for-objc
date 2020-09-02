@@ -26,11 +26,12 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALParameters.h"
 
 /**
     MSALAccountEnumerationParameters represents possible account identifying parameters that could be used for filtering cached accounts.
  */
-@interface MSALAccountEnumerationParameters : NSObject
+@interface MSALAccountEnumerationParameters : MSALParameters
 
 #pragma mark - Filtering options
 

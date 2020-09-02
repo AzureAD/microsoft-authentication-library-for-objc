@@ -32,9 +32,10 @@
 
 @implementation MSALGlobalConfig
 
+static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
+
 #if TARGET_OS_IPHONE
 static MSALWebviewType s_webviewType = MSALWebviewTypeDefault;
-static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
 #else
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
@@ -58,10 +59,8 @@ static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 + (MSALHTTPConfig *)httpConfig { return MSALGlobalConfig.sharedInstance.httpConfig; }
 + (MSALTelemetryConfig *)telemetryConfig { return MSALGlobalConfig.sharedInstance.telemetryConfig; }
 + (MSALLoggerConfig *)loggerConfig { return MSALGlobalConfig.sharedInstance.loggerConfig; }
-#if TARGET_OS_IPHONE
 + (MSALBrokeredAvailability)brokerAvailability { return s_brokerAvailability; }
 + (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { s_brokerAvailability = brokerAvailability; }
-#endif
 + (MSALWebviewType)defaultWebviewType { return s_webviewType; }
 + (void)setDefaultWebviewType:(MSALWebviewType)defaultWebviewType { s_webviewType = defaultWebviewType; }
 

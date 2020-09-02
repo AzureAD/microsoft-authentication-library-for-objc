@@ -39,9 +39,19 @@
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDKeychainTokenCache.h"
+#import "MSIDAccessTokenWithAuthScheme.h"
+#import "MSIDConstants.h"
+#import "MSIDAssymetricKeyLookupAttributes.h"
+#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSALTestAppAsymmetricKey.h"
+#import "MSIDDevicePopManager.h"
+#import "MSIDCacheConfig.h"
+#import "MSIDAssymetricKeyPair.h"
+#import "MSIDAuthScheme.h"
 
 static NSString *s_appMetadata = @"App-Metadata";
 static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
+static NSString *s_pop_token_keys = @"RSA Key-Pair";
 
 @interface MSALCacheViewController ()
 
@@ -52,6 +62,12 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
 @property (strong) NSArray *accounts;
 @property (strong) NSArray *appMetadataEntries;
 @property (strong) NSMutableDictionary *cacheDict;
+@property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
+@property (nonatomic) MSIDAssymetricKeyKeychainGenerator *keyGenerator;
+@property (nonatomic) NSMutableArray *tokenKeys;
+@property (nonatomic) MSIDDevicePopManager *popManager;
+@property (nonatomic) MSIDCacheConfig *cacheConfig;
+@property (nonatomic) NSString *keychainSharingGroup;
 
 @end
 
@@ -61,6 +77,18 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     [super viewDidLoad];
     self.outLineView.delegate = self;
     self.outLineView.dataSource = self;
+    self.outLineView.autoresizesOutlineColumn = YES;
+    
+    _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
+    _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
+    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
+    
+    _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
+    _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:_keychainSharingGroup error:nil];
+    
+    _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:_keychainSharingGroup];
+    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
+    
     [self loadCache];
     // Do view setup here.
 }
@@ -90,7 +118,7 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     }
     
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
-    self.tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDMacKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:dataSource];
     
     self.cacheDict = [NSMutableDictionary dictionary];
     
@@ -117,12 +145,33 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
     [allTokens addObjectsFromArray:[self.legacyAccessor allTokensWithContext:nil error:nil]];
     
+    BOOL isPopToken = NO;
     for (MSIDBaseToken *token in allTokens)
     {
+        if ([token isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
+        {
+            MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *)token;
+            if(MSIDAuthSchemeTypeFromString(accessToken.tokenType) == MSIDAuthSchemePop)
+            {
+                isPopToken = YES;
+            }
+        }
+        
         NSMutableArray *tokens = self.cacheDict[[self accountIdentifier:token.accountIdentifier]];
         [tokens addObject:token];
     }
     
+    if (isPopToken)
+    {
+        MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:_keyPairAttributes error:nil];
+        if (keyPair)
+        {
+            MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:keyPair.kid];
+            MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:keyPair.kid];
+            _tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+            [self.cacheDict setObject:_tokenKeys forKey:s_pop_token_keys];
+        }
+    }
     [self.outLineView reloadData];
 }
 
@@ -210,15 +259,29 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     }
 }
 
+- (void)deleteKey:(MSALTestAppAsymmetricKey *)key
+{
+    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
+                                  [key.name dataUsingEncoding:NSUTF8StringEncoding], (__bridge id)kSecAttrApplicationTag,
+                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
+                                  nil];
+    
+    [self.keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
+    
+    [self.tokenKeys removeObject:key];
+    [self loadCache];
+}
+
 #pragma mark Button Actions
 
-- (IBAction)refreshCache:(id)sender
+- (IBAction)refreshCache:(__unused id)sender
 {
     [self loadCache];
 }
 
 
-- (IBAction)expireOrInvalidateToken:(id)sender
+- (IBAction)expireOrInvalidateToken:(__unused id)sender
 {
     id item = [self.outLineView itemAtRow:[self.outLineView selectedRow]];
     
@@ -232,10 +295,14 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
         {
             [self expireAccessToken:(MSIDAccessToken *)item];
         }
+        else if([item isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
+        {
+            [self expireAccessToken:(MSIDAccessTokenWithAuthScheme *)item];
+        }
     }
 }
 
-- (IBAction)deleteItem:(id)sender
+- (IBAction)deleteItem:(__unused id)sender
 {
     id item = [self.outLineView itemAtRow:[self.outLineView selectedRow]];
     if ([item isKindOfClass:[MSIDAccount class]])
@@ -250,21 +317,25 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     {
         [self deleteAppMetadata:(MSIDAppMetadataCacheItem *)item];
     }
+    else if ([item isKindOfClass:[MSALTestAppAsymmetricKey class]])
+    {
+        [self deleteKey:(MSALTestAppAsymmetricKey *)item];
+    }
 }
 
 #pragma mark NSOutlineView Data Source Test Methods
 
-- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(__unused NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] count] : [[self.cacheDict allKeys] count];
 }
 
-- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+- (BOOL)outlineView:(__unused NSOutlineView *)outlineView isItemExpandable:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] count] : YES;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
+- (id)outlineView:(__unused NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] objectAtIndex:index] : [[self.cacheDict allKeys] objectAtIndex:index];
 }
@@ -276,11 +347,12 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     {
         NSString *textValue;
         NSTableCellView *cellView = [outlineView makeViewWithIdentifier:@"cacheCell" owner:self];
+        [cellView.textField setFont:[NSFont systemFontOfSize:14]];
         
         id parent = [outlineView parentForItem:item];
         if (!parent)
         {
-            textValue = [self getUPN:item] ? [self getUPN:item] : s_appMetadata;
+            textValue = [self getUPN:item] ? [self getUPN:item] : (NSString *)item;
         }
         else if ([item isKindOfClass:[MSIDAccount class]])
         {
@@ -292,6 +364,11 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
             MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)item;
             textValue = [NSString stringWithFormat:@"AppMetadata: ClientId - %@, Environment - %@, FamilyId - %@", appMetadata.clientId, appMetadata.environment, appMetadata.familyId];
             
+        }
+        else if([item isKindOfClass:[MSALTestAppAsymmetricKey class]])
+        {
+            MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)item;
+            textValue = [NSString stringWithFormat:@"Asymmetric Key: Key Identifier - %@, Kid - %@", key.name, key.kid];
         }
         else if ([item isKindOfClass:[MSIDBaseToken class]])
         {
@@ -326,6 +403,20 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
                     
                     break;
                 }
+                case MSIDAccessTokenWithAuthSchemeType:
+                {
+                    MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *)token;
+                    textValue = [NSString stringWithFormat:@"AccessToken_Pop: Kid - %@, ClientId - %@, Scopes - %@, Realm - %@",accessToken.kid, accessToken.clientId, [accessToken.scopes msidToString],accessToken.realm];
+                    
+                    if (accessToken.isExpired)
+                    {
+                        cellView.textField.textColor = [NSColor redColor];
+                        [cellView.textField setStringValue:textValue];
+                        return cellView;
+                    }
+                    
+                    break;
+                }
                 case MSIDIDTokenType:
                 {
                     textValue = [NSString stringWithFormat:@"IdToken: ClientId - %@, Realm - %@", token.clientId, token.realm];
@@ -342,6 +433,24 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     }
     
     return nil;
+}
+
+- (void)outlineViewSelectionDidChange:(__unused NSNotification *)notification
+{
+    [self.outLineView enumerateAvailableRowViewsUsingBlock:^(__kindof NSTableRowView * _Nonnull rowView, __unused NSInteger row) {
+        NSTableCellView *cellView = [rowView viewAtColumn:0];
+        NSTextField *textField = cellView.textField;
+        textField.font = [NSFont systemFontOfSize:14];
+        if (rowView.selected)
+        {
+            rowView.emphasized = NO;
+            rowView.backgroundColor = [NSColor lightGrayColor];
+        } else
+        {
+            rowView.emphasized = YES;
+            rowView.backgroundColor = [NSColor clearColor];
+        }
+    }];
 }
 
 @end

@@ -26,27 +26,17 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALSSOExtensionRequestHandler.h"
 
-/*!
-    This class allows tests to override values returned by various NSBundle
-    methods. It is automatically reset at the beginning of each test case in
-    subclasses of MSALTestCase.
- */
- 
-@interface MSALTestBundle : NSObject
+@class MSIDRequestParameters;
 
-+ (void)reset;
+NS_ASSUME_NONNULL_BEGIN
 
-/*!
-    Objects set with this method will override values returned by -[NSBundle
-    objectForInfoDictionaryKey:]
- */
-+ (void)overrideObject:(id)object
-                forKey:(NSString *)key;
+@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
 
-/*!
-    Overrides the string returned by -[NSBundle bundleIdentifier]
- */
-+ (void)overrideBundleId:(NSString *)bundleId;
+- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
 
 @end
+
+NS_ASSUME_NONNULL_END

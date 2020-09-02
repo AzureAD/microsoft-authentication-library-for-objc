@@ -33,6 +33,9 @@
 
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
                                          clientId:(NSString *)clientId
+                         bypassRedirectValidation:(BOOL)bypassRedirectValidation
                                             error:(NSError * __autoreleasing *)error;
+
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
 
 @end

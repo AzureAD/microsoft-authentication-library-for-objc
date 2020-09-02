@@ -38,7 +38,10 @@
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
 #import "MSALAADOauth2Provider.h"
-
+#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer.h"
+#import "MSALAuthenticationSchemeProtocol.h"
+#import "MSALDevicePopManagerUtil.h"
 @interface MSALErrorConverterTests : XCTestCase
 
 @end
@@ -71,7 +74,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     XCTAssertNil(msalError);
 }
 
@@ -96,7 +101,9 @@
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
                                                                @"additional_user_info": @"unmapped_userinfo"}
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     NSString *expectedErrorDomain = NSOSStatusErrorDomain;
     XCTAssertNotNil(msalError);
@@ -132,7 +139,39 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
+    
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALInternalErrorCodeKey], @(-42400));
+}
+
+- (void)testErrorConversion_whenUnclassifiedInternalMSALErrorPassed_andErrorDescriptionPassedInDictionary_shouldMapToInternal_andPreserveErrorDescription
+{
+    NSInteger errorCode = -42400;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSALErrorDomain
+                                                        code:errorCode
+                                            errorDescription:nil
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:@{MSALErrorDescriptionKey : errorDescription}
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     XCTAssertNotNil(msalError);
@@ -160,7 +199,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     XCTAssertNotNil(msalError);
@@ -188,7 +229,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:NO
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     XCTAssertNotNil(msalError);
@@ -200,7 +243,7 @@
     XCTAssertNil(msalError.userInfo[MSALInternalErrorCodeKey]);
 }
 
-- (void)testErrorConversion_whenBothErrorDomainAndCodeAreMapped_shouldMapBoth {
+- (void)testErrorConversion_whenBothErrorDomainAndCodeAreMapped_shouldMapBoth_ATBearerFlow {
     NSInteger errorCode = MSIDErrorInteractionRequired;
     NSString *errorDescription = @"a fake error description.";
     NSString *oauthError = @"a fake oauth error message.";
@@ -224,7 +267,9 @@
                                               classifyErrors:YES
                                           msalOauth2Provider:[[MSALAADOauth2Provider alloc] initWithClientId:@"someClientId"
                                                                                                   tokenCache:nil
-                                                                                        accountMetadataCache:nil]];
+                                                                                        accountMetadataCache:nil]
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     NSInteger expectedErrorCode = MSALErrorInteractionRequired;
@@ -246,6 +291,63 @@
     XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
     MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
     XCTAssertEqualObjects(result.accessToken, @"access-token");
+    
+    NSError *mappedUnderlyingError = msalError.userInfo[NSUnderlyingErrorKey];
+    XCTAssertEqualObjects(mappedUnderlyingError.domain, MSALErrorDomain);
+    XCTAssertEqual(mappedUnderlyingError.code, MSALErrorInternal);
+    XCTAssertEqual(mappedUnderlyingError.userInfo[MSALOAuthSubErrorKey], @"basic_action");
+    XCTAssertEqual([mappedUnderlyingError.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidGrant);
+}
+
+- (void)testErrorConversion_whenBothErrorDomainAndCodeAreMapped_shouldMapBoth_ATPopFlow {
+    NSInteger errorCode = MSIDErrorInteractionRequired;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    NSError *underlyingError = [NSError errorWithDomain:MSIDErrorDomain code:MSIDErrorServerInvalidGrant userInfo:@{MSIDOAuthSubErrorKey : @"basic_action"}];
+    NSUUID *correlationId = [NSUUID UUID];
+    NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
+    NSString *httpResponseCode = @"-99999";
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDOAuthErrorDomain
+                                                        code:errorCode
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:underlyingError
+                                               correlationId:correlationId
+                                                    userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
+                                                               MSIDHTTPResponseCodeKey : httpResponseCode,
+                                                               @"additional_user_info": @"unmapped_userinfo",
+                                                               MSIDInvalidTokenResultKey : [self testTokenResult]}
+                                              classifyErrors:YES
+                                          msalOauth2Provider:[[MSALAADOauth2Provider alloc] initWithClientId:@"someClientId"
+                                                                                                  tokenCache:nil
+                                                                                        accountMetadataCache:nil]
+                                                  authScheme:[self generateAuthSchemePopInstance]
+                                                  popManager:[MSALDevicePopManagerUtil test_initWithValidCacheConfig]];
+    
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    NSInteger expectedErrorCode = MSALErrorInteractionRequired;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, expectedErrorCode);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertNil(msalError.userInfo[MSIDErrorDescriptionKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthErrorKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthSubErrorKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPHeadersKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
+    XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
+    XCTAssertNil(msalError.userInfo[MSIDInvalidTokenResultKey]);
+    
+    // This can only be run in local
+    MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
+    XCTAssertNotNil(result.accessToken);
     
     NSError *mappedUnderlyingError = msalError.userInfo[NSUnderlyingErrorKey];
     XCTAssertEqualObjects(mappedUnderlyingError.domain, MSALErrorDomain);
@@ -313,7 +415,9 @@
                                                    correlationId:nil
                                                         userInfo:nil
                                                   classifyErrors:YES
-                                              msalOauth2Provider:nil];
+                                              msalOauth2Provider:nil
+                                                      authScheme:[MSALAuthenticationSchemeBearer new]
+                                                      popManager:nil];
             
             XCTAssertNotEqual(error.code, errorCode);
             XCTAssertNotEqualObjects(error.domain, domain);
@@ -333,7 +437,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
     XCTAssertEqual(msalError.code, MSALErrorInternal);
@@ -351,7 +457,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
     XCTAssertEqual(msalError.code, MSIDErrorUserCancel);
@@ -368,7 +476,9 @@
                                                correlationId:nil
                                                     userInfo:nil
                                               classifyErrors:YES
-                                          msalOauth2Provider:nil];
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
     
     XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
     XCTAssertEqual(msalError.code, MSALErrorInternal);
@@ -376,5 +486,77 @@
     XCTAssertEqual([internalCode integerValue], MSALInternalErrorUnexpected);
 }
 
-@end
+- (void)testErrorConversion_whenCorrelationIdIsValidInUserInfo_shouldUseCorrelationIdFromUserInfo
+{
+    NSUUID *uuid = [NSUUID UUID];
+    
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         uuid,
+                                         nil,
+                                         NO);
+    NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
+                                                     classifyErrors:YES
+                                                 msalOauth2Provider:nil
+                                                      correlationId:nil
+                                                         authScheme:[MSALAuthenticationSchemeBearer new]
+                                                         popManager:nil];
+    XCTAssertNotNil(msalError.userInfo[MSALCorrelationIDKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALCorrelationIDKey], uuid.UUIDString);
+}
 
+- (void)testErrorConversion_whenCorrelationIdIsNilInUserInfo_shouldUseCorrelationIdThatPassedIn
+{
+    NSUUID *uuid = [NSUUID UUID];
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         NO);
+    NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
+                                                     classifyErrors:YES
+                                                 msalOauth2Provider:nil
+                                                      correlationId: uuid
+                                                         authScheme:[MSALAuthenticationSchemeBearer new]
+                                                         popManager:nil];
+    XCTAssertNotNil(msalError.userInfo[MSALCorrelationIDKey]);
+    XCTAssertEqualObjects(msalError.userInfo[MSALCorrelationIDKey], uuid.UUIDString);
+}
+
+- (void)testErrorConversion_whenCorrelationIdIsNilInBothUserInfoAndPassedIn_shouldBeNil
+{
+    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInternal,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         NO);
+    NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError
+                                                     classifyErrors:YES
+                                                 msalOauth2Provider:nil
+                                                      correlationId:nil
+                                                         authScheme:[MSALAuthenticationSchemeBearer new]
+                                                         popManager:nil];
+    XCTAssertNil(msalError.userInfo[MSALCorrelationIDKey]);
+}
+
+- (MSALAuthenticationSchemePop *) generateAuthSchemePopInstance
+{
+    MSALAuthenticationSchemePop *authScheme;
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    authScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    return authScheme;
+}
+
+@end

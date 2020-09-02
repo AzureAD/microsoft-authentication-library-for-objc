@@ -42,14 +42,22 @@
 #import "MSALAccountId+Internal.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
-#import "MSALTestBundle.h"
+#import "MSIDTestBundle.h"
 #import "MSALOauth2Provider.h"
 #import "XCTestCase+HelperMethods.h"
+#import "MSIDTokenResponse.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSIDTestCacheDataSource.h"
+#import "MSALOauth2ProviderFactory.h"
+#import "MSALTestCacheTokenResponse.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 @interface MSALPublicClientApplicationAccountUpdateTests : XCTestCase
+
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
+@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
 @end
 
@@ -61,7 +69,16 @@
 {
     [super setUp];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]
+                                                                    otherCacheAccessors:nil];
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]];
+}
+
+- (void)tearDown
+{
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    [application.tokenCache clearWithContext:nil error:nil];
 }
 
 #pragma mark - Tests
@@ -84,9 +101,7 @@
          completionBlock([self testTokenResult], nil);
      }];
     
-#if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
 #if TARGET_OS_IPHONE
@@ -105,11 +120,14 @@
 
 - (void)testAcquireTokenSilent_whenSuccessfulResponse_shouldUpdateExternalAccount
 {
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                               error:&error];
+
     MSALMockExternalAccountHandler *mockExternalAccountHandler = [MSALMockExternalAccountHandler new];
     application.externalAccountHandler = mockExternalAccountHandler;
-    
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -117,19 +135,33 @@
                               class:[MSIDSilentController class]
                               block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
      {
-         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
-         
-         completionBlock([self testTokenResult], nil);
+            XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+        
+            MSIDTokenResult *result = [self testTokenResult];
+            result.tokenResponse = [MSIDTokenResponse new];
+            completionBlock(result, nil);
      }];
     
+    XCTestExpectation *updateExpectation = [self keyValueObservingExpectationForObject:mockExternalAccountHandler keyPath:@"updateInvokedCount" expectedValue:@1];
+    XCTestExpectation *acquireTokenExpectation = [self expectationWithDescription:@"Acquire token silent"];
+    
+    application.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority
+                                                                                 clientId:UNIT_TEST_CLIENT_ID
+                                                                               tokenCache:self.tokenCacheAccessor
+                                                                     accountMetadataCache:self.accountMetadataCache
+                                                                                  context:nil
+                                                                                    error:nil];
+    application.accountMetadataCache = self.accountMetadataCache;
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:[self testMSALAccount]
                              completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
                                  
                                  XCTAssertNotNil(result);
                                  XCTAssertNil(error);
-                                 XCTAssertEqual(mockExternalAccountHandler.updateInvokedCount, 1);
+                                 [acquireTokenExpectation fulfill];
                              }];
+    
+    [self waitForExpectations:@[updateExpectation, acquireTokenExpectation] timeout:1];
 }
 
 - (void)testRemoveAccount_whenAccountExistsInExternalCache_shouldCallRemoveAccountFromExternalCache
@@ -139,7 +171,12 @@
     MSALMockExternalAccountHandler *mockExternalAccountHandler = [MSALMockExternalAccountHandler new];
     mockExternalAccountHandler.accountOperationResult = YES;
     application.externalAccountHandler = mockExternalAccountHandler;
-    application.msalOauth2Provider = [[MSALOauth2Provider alloc] initWithClientId:UNIT_TEST_CLIENT_ID tokenCache:nil accountMetadataCache:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+    application.accountMetadataCache = self.accountMetadataCache;
+    XCTAssertEqual([application allAccounts:nil].count, 0);
+    [self msalStoreTokenResponseInCache];
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    application.msalOauth2Provider = [[MSALOauth2Provider alloc] initWithClientId:UNIT_TEST_CLIENT_ID tokenCache:self.tokenCacheAccessor accountMetadataCache:self.accountMetadataCache];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -175,6 +212,18 @@
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"login.microsoftonline.com" tenantProfiles:nil];
     return account;
 }
+
+- (void)msalStoreTokenResponseInCache
+{
+    
+    NSError *error = nil;
+    BOOL result = [MSALTestCacheTokenResponse msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"
+                                                                      tokenCacheAccessor:self.tokenCacheAccessor
+                                                                                   error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+}
+
 
 @end
 

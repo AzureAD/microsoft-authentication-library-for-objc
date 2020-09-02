@@ -30,7 +30,6 @@
 
 @class MSIDAccountIdentifier;
 @class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
 @class MSIDAccount;
 @class MSALAccountId;
 @class MSIDIdTokenClaims;
@@ -42,10 +41,11 @@
 @property (nonatomic) MSALAccountId *homeAccountId;
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+@property (nonatomic) NSMutableDictionary<NSString *, MSALTenantProfile *> *mTenantProfiles;
 @property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
+@property (nonatomic) BOOL isSSOAccount;
 
 - (instancetype)initWithUsername:(NSString *)username
                    homeAccountId:(MSALAccountId *)homeAccountId

@@ -35,6 +35,9 @@
 #import "MSALSilentTokenParameters.h"
 #import "WebKit/WebKit.h"
 #import "MSALWebviewParameters.h"
+#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer.h"
+#import "MSALAuthenticationSchemeProtocol.h"
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
@@ -55,6 +58,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSStackView *acquireTokenView;
 @property (weak) IBOutlet WKWebView *webView;
 @property (weak) IBOutlet NSPopUpButton *userPopup;
+@property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
 
 @property MSALTestAppSettings *settings;
@@ -93,23 +97,37 @@ static NSString * const defaultScope = @"User.Read";
     
     if (application && !error)
     {
-        self.accounts = [application allAccounts:&error];
+        MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+        parameters.completionBlockQueue = dispatch_get_main_queue();
         
-        for (MSALAccount *account in self.accounts)
+        [application accountsFromDeviceForParameters:parameters completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error)
         {
-            [self.userPopup addItemWithTitle:account.username];
-        }
+            if (error)
+            {
+                [self updateResultViewError:error];
+                return;
+            }
+            
+            self.accounts = accounts;
+            
+            [self.userPopup addItemWithTitle:@""];
+            
+            for (MSALAccount *account in self.accounts)
+            {
+                [self.userPopup addItemWithTitle:account.username];
+            }
+        }];
     }
 }
 
-- (IBAction)selectedProfileChanged:(id)sender
+- (IBAction)selectedProfileChanged:(__unused id)sender
 {
     [self.settings setCurrentProfile:[self.profilesPopUp indexOfSelectedItem]];
     self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
     self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
 }
 
-- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(__unused id)sender
 {
     if ([segue.identifier isEqualToString:@"addScopesSegue"])
     {
@@ -164,6 +182,19 @@ static NSString * const defaultScope = @"User.Read";
     @throw @"Do not recognize prompt behavior";
 }
 
+- (id<MSALAuthenticationSchemeProtocol>)authScheme
+{
+    NSString *authSchemeType = [self.authSchemeSegment labelForSegment:[self.authSchemeSegment selectedSegment]];
+    
+    if ([authSchemeType isEqualToString:@"Pop"])
+    {
+        NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+        return [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
+    return [MSALAuthenticationSchemeBearer new];
+}
+
 - (BOOL)passedInWebview
 {
     NSString* webViewType = [self.webViewSegment labelForSegment:[self.webViewSegment selectedSegment]];
@@ -193,7 +224,7 @@ static NSString * const defaultScope = @"User.Read";
     });
 }
 
-- (IBAction)clearCache:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
@@ -236,7 +267,7 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-- (IBAction)clearCookies:(id)sender
+- (IBAction)clearCookies:(__unused id)sender
 {
     // Clear WKWebView cookies
     if (@available(macOS 10.11, *)) {
@@ -313,7 +344,7 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;
@@ -324,10 +355,11 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes
                                                                                       webviewParameters:webviewParameters];
-    parameters.loginHint = [self.loginHintTextField stringValue];
-    parameters.account = self.settings.currentAccount;
+    parameters.loginHint = [self.loginHintTextField stringValue].length ? [self.loginHintTextField stringValue] : nil;
+    parameters.account = [self selectedAccount];
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
+    parameters.authenticationScheme = [self authScheme];
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
@@ -346,21 +378,7 @@ static NSString * const defaultScope = @"User.Read";
     
     __block BOOL fBlockHit = NO;
     
-    NSString *userName = [self.userPopup titleOfSelectedItem];
-    MSALAccount *currentAccount = nil;
-    
-    if (!self.accounts)
-    {
-        self.accounts = [application allAccounts:nil];
-    }
-    
-    for (MSALAccount *account in self.accounts)
-    {
-        if ([account.username isEqualToString:userName])
-        {
-            currentAccount = account;
-        }
-    }
+    MSALAccount *currentAccount = [self selectedAccount];
     
     if (!currentAccount)
     {
@@ -370,6 +388,7 @@ static NSString * const defaultScope = @"User.Read";
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
     parameters.authority = self.settings.authority;
+    parameters.authenticationScheme = [self authScheme];
     
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -397,5 +416,55 @@ static NSString * const defaultScope = @"User.Read";
      }];
 }
 
+- (IBAction)signout:(__unused id)sender
+{
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
+    if (!application || error)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultTextView setString:resultText];
+        return;
+    }
+    
+    MSALAccount *currentAccount = [self selectedAccount];
+    
+    if (!currentAccount)
+    {
+        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+        return;
+    }
+    
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webviewParameters];
+    signoutParameters.signoutFromBrowser = YES;
+    signoutParameters.completionBlockQueue = dispatch_get_main_queue();
+    
+    [application signoutWithAccount:currentAccount
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error)
+    {
+        if (!success)
+        {
+            [self updateResultViewError:error];
+        }
+        else
+        {
+            [self.resultTextView setString:@"Signout succeeded"];
+            [self populateUsers];
+        }
+    }];
+    
+}
+
+- (MSALAccount *)selectedAccount
+{
+    if (self.userPopup.indexOfSelectedItem == 0 || self.userPopup.indexOfSelectedItem > [self.accounts count])
+    {
+        return nil;
+    }
+    
+    return self.accounts[self.userPopup.indexOfSelectedItem-1];
+}
 
 @end

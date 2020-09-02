@@ -33,6 +33,7 @@
 				<string>ms-onedrive</string>
 				<string>msalb6c69a37-df96-4db0-9088-2ab96e1d8215</string>
 				<string>ms-sharepoint-auth</string>
+				<string>msauth.com.microsoft.msal.automationapp</string>
 			</array>
 		</dict>
 	</array>
