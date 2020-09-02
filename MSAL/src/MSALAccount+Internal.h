@@ -45,6 +45,7 @@
 @property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
+@property (nonatomic) BOOL isSSOAccount;
 
 - (instancetype)initWithUsername:(NSString *)username
                    homeAccountId:(MSALAccountId *)homeAccountId

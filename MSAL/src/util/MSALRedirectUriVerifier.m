@@ -48,7 +48,7 @@
 
 #pragma mark - Helpers
 
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error
 {
     return [MSIDRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:error];
 }
