@@ -1,6 +1,7 @@
 ##TBD
 * Add SSO Seeding call in MSAL Test MacApp 
 * Fix custom webview bug in MSAL Test MacApp
+* Support bypassing redirect uri validation on macOS (#1076)
 * Indicate whether SSO extension account is available for device wide SSO (#1065)
 * Add swift static lib target to common core to support AES GCM.
 * Enable XCODE 11.4 recommended settings by default (#1070)
