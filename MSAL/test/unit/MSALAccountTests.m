@@ -68,6 +68,7 @@
     __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     msidAccount.environment = authority.environment;
     msidAccount.realm = authority.realm;
+    msidAccount.isSSOAccount = YES;
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"tid"
                                         };
@@ -91,6 +92,7 @@
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.identifier, @"uid.tid");
     XCTAssertNil(account.accountClaims);
+    XCTAssertTrue(account.isSSOAccount);
     XCTAssertEqual(account.tenantProfiles.count, 1);
     XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"localoid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
@@ -134,6 +136,7 @@
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.identifier, @"uid.tid");
     XCTAssertNil(account.accountClaims);
+    XCTAssertFalse(account.isSSOAccount);
     XCTAssertNil(account.tenantProfiles);
 }
 
