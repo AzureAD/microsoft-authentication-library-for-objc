@@ -89,10 +89,13 @@
                                                                            objectId:account.accountIdentifier.uid
                                                                            tenantId:account.accountIdentifier.utid];
     
-    return [self initWithUsername:account.username
-                    homeAccountId:homeAccountId
-                      environment:account.storageEnvironment ?: account.environment
-                   tenantProfiles:tenantProfiles];
+    MSALAccount *msalAccount = [self initWithUsername:account.username
+                                        homeAccountId:homeAccountId
+                                          environment:account.storageEnvironment ?: account.environment
+                                       tenantProfiles:tenantProfiles];
+    
+    msalAccount.isSSOAccount = account.isSSOAccount;
+    return msalAccount;
 }
 
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount

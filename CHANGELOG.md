@@ -1,4 +1,5 @@
-## [TBD] - TBD
+* Support bypassing redirect uri validation on macOS (#1076)
+* Indicate whether SSO extension account is available for device wide SSO (#1065)
 * Add swift static lib target to common core to support AES GCM.
 * Enable XCODE 11.4 recommended settings by default
 
@@ -28,6 +29,7 @@
  -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
  -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
  -Renamed private properties within "MSIDLastRequestTelemetry.m" to address nested dispatch call issues that arise by enabling above implicit retain self setting.
+ * Updated supported platforms in readme
 
 ## [1.1.7] - 2020-07-31
 ### Added
