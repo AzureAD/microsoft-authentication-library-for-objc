@@ -1,6 +1,6 @@
 ## [TBD] - TBD
 * Add swift static lib target to common core to support AES GCM.
-* Enable XCODE 11.4 recommended settings by default (#1070)
+* Enable XCODE 11.4 recommended settings by default
 
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
