@@ -1,4 +1,6 @@
-## [TBD] - TBD
+##TBD
+* Add SSO Seeding call in MSAL Test MacApp 
+* Fix custom webview bug in MSAL Test MacApp
 * Update MSIDBaseBrokerOperationRequest in common-core
 * Fix grammar in comments.
 * Support bypassing redirect uri validation on macOS (#1076)
