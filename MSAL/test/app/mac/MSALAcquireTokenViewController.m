@@ -527,25 +527,27 @@ static NSString * const defaultScope = @"User.Read";
 - (MSALInteractiveTokenParameters *)tokenParamsWithSSOSeeding:(BOOL)isSSOSeedingCall
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [MSALTestAppSettings getSSOSeedingScope] : [settings.scopes allObjects]
+    NSArray<NSString *> *scopes = isSSOSeedingCall ? [MSALTestAppSettings getScopes] : [settings.scopes allObjects];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
-    
-    if (isSSOSeedingCall)
-    {
-        parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
-    }
-    else
-    {
-        parameters.authenticationScheme = [self authScheme];
-    }
-    
-    parameters.loginHint = [self.loginHintTextField stringValue].length ? [self.loginHintTextField stringValue] : nil;
+    parameters.loginHint = [self.loginHintTextField stringValue];
     parameters.account = settings.currentAccount;
-    parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptType];
+    parameters.authenticationScheme = [self authScheme];
+    parameters.promptType = [self promptType];
+    parameters.extraQueryParameters =[NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     
-    parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
-
+    if(isSSOSeedingCall)
+    {
+        [self fillTokenParamsWithSSOSeedingValue:parameters];
+    }
     return parameters;
+}
+
+- (void)fillTokenParamsWithSSOSeedingValue:(MSALInteractiveTokenParameters *)parameters
+{
+    parameters.authenticationScheme = [MSALAuthenticationSchemeBearer new];
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"];
 }
 
 - (MSALWebviewParameters *)msalTestWebViewParameters

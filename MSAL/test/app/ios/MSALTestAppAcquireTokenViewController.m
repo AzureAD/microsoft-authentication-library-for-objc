@@ -197,7 +197,7 @@
 - (MSALInteractiveTokenParameters *)tokenParams:(BOOL)isSSOSeedingCall
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [MSALTestAppSettings getSSOSeedingScope] : [settings.scopes allObjects]
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:isSSOSeedingCall ? [MSALTestAppSettings getScopes] : [settings.scopes allObjects]
                                                                                       webviewParameters:[self msalTestWebViewParameters]];
     
     if (self.authSchemeSegmentControl.selectedSegmentIndex == 0 || isSSOSeedingCall)
