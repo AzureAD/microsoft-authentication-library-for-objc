@@ -35,8 +35,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSIDInteractiveRequestParameters (MSALRequest)
 
+- (void)fillWithAccount:(MSALAccount *)account;
+
 - (BOOL)fillWithWebViewParameters:(nonnull MSALWebviewParameters *)webParameters
-                          account:(nullable MSALAccount *)account
    useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(nullable WKWebView *)customWebView
                             error:(NSError * _Nullable * _Nullable)error;
