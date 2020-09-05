@@ -1228,17 +1228,28 @@
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
 {
+    return [self removeAccountImpl:account clearAccounts:NO error:error];
+}
+
+- (BOOL)removeAccountImpl:(MSALAccount *)account
+            clearAccounts:(BOOL)clearAccount
+                    error:(NSError * __autoreleasing *)error
+{
     if (!account)
     {
         return YES;
     }
 
     NSError *msidError = nil;
+    
+    // If developer is passing a wipeAccount flag, we want to wipe cache for any clientId
+    NSString *clientId = clearAccount ? nil : self.internalConfig.clientId;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                               authority:nil
-                                               clientId:self.internalConfig.clientId
+                                               clientId:clientId
                                                familyId:nil
+                                          clearAccounts:clearAccount
                                                 context:nil
                                                   error:&msidError];
     if (!result)
@@ -1322,7 +1333,7 @@
     }
     
     NSError *localError;
-    BOOL localRemovalResult = [self removeAccount:account error:&localError];
+    BOOL localRemovalResult = [self removeAccountImpl:account clearAccounts:signoutParameters.wipeAccount error:&localError];
     
     if (!localRemovalResult)
     {
@@ -1379,6 +1390,7 @@
     MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
                                                                                         oauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                             shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                   shouldWipeAccount:signoutParameters.wipeAccount
                                                                                                error:&controllerError];
     
     if (!controller)
