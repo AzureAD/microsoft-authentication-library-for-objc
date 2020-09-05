@@ -39,7 +39,8 @@ typedef NS_ENUM(NSInteger, MSALLegacySharedAccountVersion)
 typedef NS_ENUM(NSInteger, MSALLegacySharedAccountWriteOperation)
 {
     MSALLegacySharedAccountRemoveOperation = 0,
-    MSALLegacySharedAccountUpdateOperation
+    MSALLegacySharedAccountUpdateOperation,
+    MSALLegacySharedAccountWipeOperation
 };
 
 NS_ASSUME_NONNULL_BEGIN
