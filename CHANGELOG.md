@@ -1,4 +1,5 @@
 ##TBD
+* Support forgetting cached account (#1077)
 * Add SSO Seeding call in MSAL Test MacApp 
 * Fix custom webview bug in MSAL Test MacApp
 * Update MSIDBaseBrokerOperationRequest in common-core
