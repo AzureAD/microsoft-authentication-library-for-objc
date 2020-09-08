@@ -58,7 +58,7 @@
    | **AT issued by STS**          | “Bearer” AT           | “PoP” AT               |
    | **Authorization Header**      | Bearer AT             | **SHR** **{ PoP AT }** |
 
-5. *Configure MSAL to request Proof-of-Possession Access tokens**.
+5. **Configure MSAL to request Proof-of-Possession Access tokens.**
 
    5.1	For an interactive acquireToken request, create an instance of MSALInteractiveTokenParameters as shown below.
 
@@ -142,7 +142,7 @@
 
    
 
-   5.3	Assign the authenticatioScheme initialized in the step 5.2 above to authenticationScheme property of MSALInteractiveTokenParameters (interactiveParams) / MSALSilentTokenParameters (silentParams) object initialized in step 5.1 as shown below. 
+   5.3	Assign the authenticatioScheme initialized in the **step 5.2** above to authenticationScheme property of MSALInteractiveTokenParameters (interactiveParams) / MSALSilentTokenParameters (silentParams) object initialized in **step 5.1** as shown below. 
 
    **Note:** This step is only required if you need to set the authentication scheme to MSALAuthenticationSchemePop. The default authenticationScheme property of MSALTokenParameters is set to MSALAuthenticationSchemeBearer in the initializer as shown below.
 
@@ -167,7 +167,7 @@
    silentParams.authenticationScheme = authScheme
    ```
 
-   5.4	**Get the Signed Http Request (SHR) which is sent to the RP to access the pop protected resource.**
+   5.4	**Get the Signed Http Request (SHR) which is sent to the Resource Provider (RP) to access the pop protected resource.**
 
    MSALResult has been extended to include two additional properties as shown below. For pop protected resource, the accessToken property returns the Signed Http Request minus the scheme prefix (Pop).
 
