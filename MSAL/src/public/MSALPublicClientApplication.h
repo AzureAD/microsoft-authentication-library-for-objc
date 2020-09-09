@@ -288,7 +288,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
@@ -303,7 +303,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
                             beginning of the interactive authentication flow. The account returned
                             in the completion block is not guaranteed to match the loginHint.
@@ -322,7 +322,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -370,7 +370,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -385,7 +385,7 @@
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
-                                    gauranteed to be included in the access token returned.
+                                    guaranteed to be included in the access token returned.
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.

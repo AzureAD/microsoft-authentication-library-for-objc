@@ -45,6 +45,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL signoutFromBrowser;
 
+/*
+  Removes account from the keychain with either com.microsoft.adalcache shared group by default or the one provided when configuring MSALPublicClientApplication.
+
+  This is a destructive action and will remove the SSO state from all apps sharing the same cache!
+  It's intended to be used only as a way to achieve GDPR compliance and make sure all user artifacts are cleaned on user sign out.
+  It's not intended to be used as a way to reset or fix token cache.
+  Please make sure end user is shown UI and/or warning before this flag gets set to YES.
+  NO by default.
+*/
+@property (nonatomic) BOOL wipeAccount;
+
 /**
  Initialize MSALSignoutParameters with web parameters.
  

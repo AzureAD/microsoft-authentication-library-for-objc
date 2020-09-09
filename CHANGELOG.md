@@ -1,7 +1,16 @@
 * Ignore duplicate certificate authentication challenge in system webview.
+##TBD
+* Add documentation for Proof-of-Possession for Access tokens.
+* Support forgetting cached account (#1077)
+* Add SSO Seeding call in MSAL Test MacApp 
+* Fix custom webview bug in MSAL Test MacApp
+* Update MSIDBaseBrokerOperationRequest in common-core
+* Fix grammar in comments.
+* Support bypassing redirect uri validation on macOS (#1076)
 * Indicate whether SSO extension account is available for device wide SSO (#1065)
 * Add swift static lib target to common core to support AES GCM.
-* Enable XCODE 11.4 recommended settings by default (#1070)
+* Enabled XCODE 11.4 recommended settings by default per customer request.
+* Append 'PkeyAuth/1.0' keyword to the User Agent String to reliably advertise PkeyAuth capability to ADFS.
 
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
