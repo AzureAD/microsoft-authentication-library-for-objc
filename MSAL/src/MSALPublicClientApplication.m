@@ -1229,11 +1229,11 @@
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
 {
-    return [self removeAccountImpl:account clearAccounts:NO error:error];
+    return [self removeAccountImpl:account wipeAccount:NO error:error];
 }
 
 - (BOOL)removeAccountImpl:(MSALAccount *)account
-            clearAccounts:(BOOL)clearAccount
+              wipeAccount:(BOOL)wipeAccount
                     error:(NSError * __autoreleasing *)error
 {
     if (!account)
@@ -1244,13 +1244,13 @@
     NSError *msidError = nil;
     
     // If developer is passing a wipeAccount flag, we want to wipe cache for any clientId
-    NSString *clientId = clearAccount ? nil : self.internalConfig.clientId;
+    NSString *clientId = wipeAccount ? nil : self.internalConfig.clientId;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                               authority:nil
                                                clientId:clientId
                                                familyId:nil
-                                          clearAccounts:clearAccount
+                                          clearAccounts:wipeAccount
                                                 context:nil
                                                   error:&msidError];
     if (!result)
@@ -1263,7 +1263,7 @@
     if (self.externalAccountHandler)
     {
         NSError *externalError = nil;
-        result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        result &= [self.externalAccountHandler removeAccount:account wipeAccount:wipeAccount error:&externalError];
         
         MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"External account removed with result %d", (int)result);
         
@@ -1389,7 +1389,7 @@
     msidParams.providedAuthority = requestAuthority;
     
     NSError *localError;
-    BOOL localRemovalResult = [self removeAccountImpl:account clearAccounts:signoutParameters.wipeAccount error:&localError];
+    BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
     
     if (!localRemovalResult)
     {

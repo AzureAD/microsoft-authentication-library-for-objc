@@ -244,6 +244,7 @@
 #pragma mark - Removal
 
 - (BOOL)removeAccount:(id<MSALAccount>)account
+          wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
@@ -253,10 +254,13 @@
     __block NSError *removeError;
     
     dispatch_barrier_sync(self.synchronizationQueue, ^{
+        
+        MSALLegacySharedAccountWriteOperation operation = wipeAccount ? MSALLegacySharedAccountWipeOperation : MSALLegacySharedAccountRemoveOperation;
+        
         result = [self updateAccountImpl:account
                            idTokenClaims:nil
                           tenantProfiles:tenantProfiles
-                               operation:MSALLegacySharedAccountRemoveOperation
+                               operation:operation
                                    error:&removeError];
         
         if (!result)
@@ -272,6 +276,17 @@
     
     return result;
 }
+
+- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
+                error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    return [self removeAccount:account
+                   wipeAccount:NO
+                tenantProfiles:tenantProfiles
+                         error:error];
+}
+
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                                      msalAccount:(id<MSALAccount>)account
@@ -375,19 +390,19 @@
         
         NSArray<MSALLegacySharedAccount *> *accounts = nil;
         
-        if (operation == MSALLegacySharedAccountRemoveOperation)
-        {
-            accounts = [self removableAccountsFromJsonObject:[jsonObject jsonDictionary]
-                                                 msalAccount:account
-                                              tenantProfiles:tenantProfiles
-                                                       error:&updateError];
-        }
-        else
+        if (operation == MSALLegacySharedAccountUpdateOperation)
         {
             accounts = [self updatableAccountsFromJsonObject:[jsonObject jsonDictionary]
                                                  msalAccount:account
                                                idTokenClaims:idTokenClaims
                                                      version:version
+                                                       error:&updateError];
+        }
+        else
+        {
+            accounts = [self removableAccountsFromJsonObject:[jsonObject jsonDictionary]
+                                                 msalAccount:account
+                                              tenantProfiles:tenantProfiles
                                                        error:&updateError];
         }
         
@@ -436,6 +451,12 @@
     
     for (MSALLegacySharedAccount *sharedAccount in accounts)
     {
+        if (operation == MSALLegacySharedAccountWipeOperation)
+        {
+            resultDictionary[sharedAccount.accountIdentifier] = nil;
+            continue;
+        }
+        
         NSError *updateError = nil;
         BOOL updateResult = [sharedAccount updateAccountWithMSALAccount:account
                                                         applicationName:self.applicationIdentifier
