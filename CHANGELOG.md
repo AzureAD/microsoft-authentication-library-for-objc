@@ -63,12 +63,12 @@ This API can be found in MSALWebviewParameters.h, and an example of usage has be
 
 ## [1.1.6] - 2020-07-24
 
-### Added	
-* Support proof of possession for access tokens (#926)	
+### Added    
+* Support proof of possession for access tokens (#926)    
 
-### Fixed	
-* Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)		
+### Fixed    
+* Clean up account metadata on account removal (#999)    
+* Silent token lookup for guest accounts with different UPNs (#986)        
 
 ## [1.1.5] - 2020-06-19
  
