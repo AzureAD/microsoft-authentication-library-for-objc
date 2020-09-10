@@ -80,6 +80,7 @@
     if (self.accountOperationError && error)
     {
         *error = self.accountOperationError;
+        return nil;
     }
     
     return self.resultAccounts;
@@ -96,6 +97,7 @@
     if (self.accountOperationError && error)
     {
         *error = self.accountOperationError;
+        return NO;
     }
     
     return self.accountOperationResult;
@@ -362,7 +364,7 @@
     XCTAssertFalse(testProvider.wipeAccountValue);
 }
 
-- (void)testRemoveAccount_whenRemovalSucceeded_shouldReturnYesAndNilError
+- (void)testRemoveAccount_whenWipeSucceeded_shouldReturnYesAndNilError
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
     testProvider.accountOperationResult = YES;
