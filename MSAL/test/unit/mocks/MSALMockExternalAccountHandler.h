@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSUInteger updateInvokedCount;
 @property (nonatomic) NSUInteger removeAccountCount;
 @property (nonatomic) NSUInteger allExternalAccountsInvokedCount;
+@property (nonatomic) BOOL wipeAccountValue;
 
 @property (nonatomic) NSError *accountOperationError;
 @property (nonatomic) BOOL accountOperationResult;

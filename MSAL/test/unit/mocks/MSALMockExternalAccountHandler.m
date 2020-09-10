@@ -51,9 +51,10 @@
     return self.accountOperationResult;
 }
 
-- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
+- (BOOL)removeAccount:(MSALAccount *)account wipeAccount:(BOOL)wipeAccount error:(NSError * _Nullable * _Nullable)error
 {
     self.removeAccountCount++;
+    self.wipeAccountValue = wipeAccount;
     
     if (self.accountOperationError)
     {
