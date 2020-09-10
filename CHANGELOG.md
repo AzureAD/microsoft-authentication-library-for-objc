@@ -1,5 +1,6 @@
 ##TBD
 * Normalize account ID for cache lookups (#1084)
+* Add documentation for Proof-of-Possession for Access tokens.
 * Support forgetting cached account (#1077)
 * Add SSO Seeding call in MSAL Test MacApp 
 * Fix custom webview bug in MSAL Test MacApp
