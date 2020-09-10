@@ -308,5 +308,23 @@ static NSDictionary *s_currentProfile = nil;
     [self setValue:profileName forKey:MSAL_APP_PROFILE];
 }
 
++ (BOOL)isSSOSeeding
+{
+    NSString *currentProfile = [MSALTestAppSettings currentProfileName];
+    return [currentProfile isEqualToString:@"CompanyPortal"];
+}
+
++ (NSArray<NSString *> *)getScopes
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSMutableArray<NSString *> *ssoSeedingScopes = [NSMutableArray new];
+    [ssoSeedingScopes addObject:[currentProfile objectForKey:@"resourceId"]];
+    if ([ssoSeedingScopes count])
+    {
+        // DRS resource - GUID representation of urn:ms-drs:enterpriseregistration.windows.net/.default
+        [ssoSeedingScopes addObject:@"01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9/.default"];
+    }
+    return ssoSeedingScopes;
+}
 
 @end

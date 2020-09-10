@@ -1145,14 +1145,13 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
-    msidParams.shouldValidateResultAccount = YES;
     
     msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
-    msidParams.shouldValidateResultAccount = YES;
+    msidParams.shouldValidateResultAccount = NO;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 2;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
@@ -1229,17 +1228,28 @@
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
 {
+    return [self removeAccountImpl:account clearAccounts:NO error:error];
+}
+
+- (BOOL)removeAccountImpl:(MSALAccount *)account
+            clearAccounts:(BOOL)clearAccount
+                    error:(NSError * __autoreleasing *)error
+{
     if (!account)
     {
         return YES;
     }
 
     NSError *msidError = nil;
+    
+    // If developer is passing a wipeAccount flag, we want to wipe cache for any clientId
+    NSString *clientId = clearAccount ? nil : self.internalConfig.clientId;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                               authority:nil
-                                               clientId:self.internalConfig.clientId
+                                               clientId:clientId
                                                familyId:nil
+                                          clearAccounts:clearAccount
                                                 context:nil
                                                   error:&msidError];
     if (!result)
@@ -1323,7 +1333,7 @@
     }
     
     NSError *localError;
-    BOOL localRemovalResult = [self removeAccount:account error:&localError];
+    BOOL localRemovalResult = [self removeAccountImpl:account clearAccounts:signoutParameters.wipeAccount error:&localError];
     
     if (!localRemovalResult)
     {
@@ -1380,6 +1390,7 @@
     MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
                                                                                         oauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                             shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                   shouldWipeAccount:signoutParameters.wipeAccount
                                                                                                error:&controllerError];
     
     if (!controller)
@@ -1510,6 +1521,12 @@
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
 }
+
++ (NSString *)sdkVersion
+{
+    return @MSAL_VERSION_STRING;
+}
+
 
 #pragma mark - Private
 

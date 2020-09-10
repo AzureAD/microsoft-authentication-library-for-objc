@@ -58,5 +58,7 @@ extern NSString* MSALTestAppCacheChangeNotification;
 
 - (BOOL)addScope:(NSString *)scope;
 - (BOOL)removeScope:(NSString *)scope;
++ (BOOL)isSSOSeeding;
++ (NSArray<NSString *> *)getScopes;
 
 @end
