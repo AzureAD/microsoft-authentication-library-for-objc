@@ -1,4 +1,5 @@
 ##TBD
+* Make webview parameters optional in MSALSignoutParameters #1086
 * Support wiping external account #1085
 * Normalize account ID for cache lookups (#1084)
 * Add documentation for Proof-of-Possession for Access tokens.
