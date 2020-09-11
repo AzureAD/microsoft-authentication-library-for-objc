@@ -3060,6 +3060,47 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testSignoutWithAccount_whenSignoutFromBrowserFalse_andNilWebViewParameters_shouldremoveAccount
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALSignoutParameters *parameters = [MSALSignoutParameters new];
+    parameters.signoutFromBrowser = NO;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 - (void)testSignoutWithAccount_whenSignoutFromBrowserTrue_andNilWebViewParameters_shouldFailWithError_andNotRemoveAccount
 {
     [self msalStoreTokenResponseInCache];
