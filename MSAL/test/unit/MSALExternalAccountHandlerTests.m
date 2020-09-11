@@ -36,6 +36,7 @@
 @interface MSALTestExternalAccountsProvider : NSObject<MSALExternalAccountProviding>
 
 @property (nonatomic) BOOL accountOperationResult;
+@property (nonatomic) BOOL wipeAccountValue;
 @property (nonatomic) NSError *accountOperationError;
 @property (nonatomic) NSArray *resultAccounts;
 
@@ -65,14 +66,10 @@
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
-    self.removeAccountInvokedCount++;
-    
-    if (self.accountOperationError && error)
-    {
-        *error = self.accountOperationError;
-    }
-    
-    return self.accountOperationResult;
+    return [self removeAccount:account
+                   wipeAccount:NO
+                tenantProfiles:tenantProfiles
+                         error:error];
 }
 
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
@@ -83,10 +80,29 @@
     if (self.accountOperationError && error)
     {
         *error = self.accountOperationError;
+        return nil;
     }
     
     return self.resultAccounts;
 }
+
+- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+          wipeAccount:(BOOL)wipeAccount
+       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
+                error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    self.removeAccountInvokedCount++;
+    self.wipeAccountValue = wipeAccount;
+    
+    if (self.accountOperationError && error)
+    {
+        *error = self.accountOperationError;
+        return NO;
+    }
+    
+    return self.accountOperationResult;
+}
+
 
 @end
 
@@ -316,13 +332,14 @@
     
     MSALAccount *nilAccount = nil;
     NSError *removeError = nil;
-    BOOL result = [handler removeAccount:nilAccount error:&removeError];
+    BOOL result = [handler removeAccount:nilAccount wipeAccount:NO error:&removeError];
     XCTAssertFalse(result);
     XCTAssertNotNil(removeError);
     XCTAssertEqual(removeError.code, MSALErrorInternal);
     XCTAssertEqual(testProvider.removeAccountInvokedCount, 0);
+    XCTAssertFalse(testProvider.wipeAccountValue);
 }
-
+ 
 - (void)testRemoveAccount_whenFailedToRemove_shouldReturnNoAndFillError
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
@@ -338,15 +355,16 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"username" homeAccountId:nil environment:@"login.microsoftonline.com" tenantProfiles:nil];
     NSError *removeError = nil;
-    BOOL result = [handler removeAccount:account error:&removeError];
+    BOOL result = [handler removeAccount:account wipeAccount:NO error:&removeError];
     XCTAssertFalse(result);
     XCTAssertNotNil(removeError);
     XCTAssertEqual(removeError.code, MSALErrorInternal);
     XCTAssertEqualObjects(removeError.userInfo[MSALErrorDescriptionKey], @"Unexpected removal error");
     XCTAssertEqual(testProvider.removeAccountInvokedCount, 1);
+    XCTAssertFalse(testProvider.wipeAccountValue);
 }
 
-- (void)testRemoveAccount_whenRemovalSucceeded_shouldReturnYesAndNilError
+- (void)testRemoveAccount_whenWipeSucceeded_shouldReturnYesAndNilError
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
     testProvider.accountOperationResult = YES;
@@ -359,10 +377,11 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"username" homeAccountId:nil environment:@"login.microsoftonline.com" tenantProfiles:nil];
     NSError *removeError = nil;
-    BOOL result = [handler removeAccount:account error:&removeError];
+    BOOL result = [handler removeAccount:account wipeAccount:YES error:&removeError];
     XCTAssertTrue(result);
     XCTAssertNil(removeError);
     XCTAssertEqual(testProvider.removeAccountInvokedCount, 1);
+    XCTAssertTrue(testProvider.wipeAccountValue);
 }
 
 @end

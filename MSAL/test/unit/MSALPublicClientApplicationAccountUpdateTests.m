@@ -50,6 +50,7 @@
 #import "MSIDTestCacheDataSource.h"
 #import "MSALOauth2ProviderFactory.h"
 #import "MSALTestCacheTokenResponse.h"
+#import "MSALSignoutParameters.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -186,6 +187,7 @@
     XCTAssertTrue(result);
     XCTAssertNil(removalError);
     XCTAssertEqual(mockExternalAccountHandler.removeAccountCount, 1);
+    XCTAssertFalse(mockExternalAccountHandler.wipeAccountValue);
 }
 
 #pragma mark - Helpers

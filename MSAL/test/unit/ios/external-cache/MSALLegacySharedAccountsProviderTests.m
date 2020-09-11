@@ -354,7 +354,7 @@
 
 #pragma mark - Remove
 
-- (void)testRemoveAccount_whenEmptyBlob_shouldUpdateTimeStamp
+- (void)testRemoveAccount_whenWipeAccountNO_whenEmptyBlob_shouldUpdateTimeStamp
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
@@ -363,7 +363,7 @@
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
-    BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:NO tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
@@ -371,7 +371,7 @@
     [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:1];
 }
 
-- (void)testRemoveAccount_whenCorruptSingleEntry_shouldUpdateTimestamp
+- (void)testRemoveAccount_whenWipeAccountNO_whenCorruptSingleEntry_shouldUpdateTimestamp
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
@@ -383,7 +383,7 @@
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
-    BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:NO tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
@@ -394,7 +394,7 @@
     XCTAssertEqualObjects(v3Blob[accountId], singleAccountBlob); // make sure we didn't touch corrupted dict
 }
 
-- (void)testRemoveAccount_whenMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
+- (void)testRemoveAccount_whenWipeAccountNO_whenMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
@@ -406,7 +406,7 @@
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
-    BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:NO tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
@@ -423,7 +423,33 @@
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
 }
 
-- (void)testRemoveAccount_whenTenantProfilesPassed_andMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
+- (void)testRemoveAccount_whenWipeAccountYES_whenMatchingAccountsPresent_shouldRemoveEntireAccountBlob
+{
+    self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
+    
+    NSString *accountId = [NSUUID UUID].UUIDString;
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"];
+    NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
+    
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
+    NSError *error = nil;
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:YES tenantProfiles:nil error:&error];
+    
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+    
+    [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:1];
+    
+    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
+    XCTAssertNil(v2Blob[accountId]);
+    
+    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
+    XCTAssertNil(v3Blob[accountId]);
+}
+
+- (void)testRemoveAccount_whenWipeAccountNO_whenTenantProfilesPassed_andMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
@@ -447,7 +473,7 @@
                                                                   isHomeTenantProfile:YES
                                                                                claims:nil];
     
-    BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:@[tenantProfile2, tenantProfile1] error:&error];
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:NO tenantProfiles:@[tenantProfile2, tenantProfile1] error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
@@ -464,7 +490,45 @@
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
 }
 
-- (void)testRemoveAccount_whenNonMatchingAccountPresent_shouldOnlyUpdateTimestamps
+- (void)testRemoveAccount_whenWipeAccountYES_whenTenantProfilesPassed_andMatchingAccountsPresent_shouldRemoveEntireMatchingAccountBlob
+{
+    self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
+    
+    NSString *accountId = [NSUUID UUID].UUIDString;
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"];
+    NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
+    
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
+    NSError *error = nil;
+    MSALTenantProfile *tenantProfile1 = [[MSALTenantProfile alloc] initWithIdentifier:@"uid"
+                                                                             tenantId:@"tid"
+                                                                          environment:@"login.microoftonline.com"
+                                                                  isHomeTenantProfile:YES
+                                                                               claims:nil];
+    
+    MSALTenantProfile *tenantProfile2 = [[MSALTenantProfile alloc] initWithIdentifier:@"guest-uid"
+                                                                             tenantId:@"guest-tid"
+                                                                          environment:@"login.microoftonline.com"
+                                                                  isHomeTenantProfile:YES
+                                                                               claims:nil];
+    
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:YES tenantProfiles:@[tenantProfile2, tenantProfile1] error:&error];
+    
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+    
+    [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:1];
+    
+    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
+    XCTAssertNil(v2Blob[accountId]);
+
+    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
+    XCTAssertNil(v3Blob[accountId]);
+}
+
+- (void)testRemoveAccount_whenWipeAccountNO_whenNonMatchingAccountPresent_shouldOnlyUpdateTimestamps
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
@@ -476,7 +540,7 @@
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
-    BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:NO tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
