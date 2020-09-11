@@ -61,19 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */
-- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
-
-#pragma mark - Unavailable initializers
-
-/**
-    Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
- */
-+ (instancetype)new NS_UNAVAILABLE;
-
-/**
-   Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
-*/
-- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters;
 
 @end
 
