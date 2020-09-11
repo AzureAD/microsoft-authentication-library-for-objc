@@ -111,7 +111,6 @@
 @interface MSALPublicClientApplication()
 {
     WKWebView *_customWebview;
-    NSString *_defaultKeychainGroup;
 }
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
