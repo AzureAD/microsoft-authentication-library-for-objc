@@ -34,14 +34,11 @@
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 
 - (BOOL)fillWithWebViewParameters:(MSALWebviewParameters *)webParameters
-                          account:(MSALAccount *)account
    useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
-    self.accountIdentifier = account.lookupAccountIdentifier;
-    
-    #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     if (@available(iOS 13.0, *))
     {
         if (webParameters.parentViewController == nil)
@@ -88,6 +85,11 @@
     self.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
     self.customWebview = webParameters.customWebview ?: customWebView;
     return YES;
+}
+
+- (void)setAccountIdentifierFromMSALAccount:(MSALAccount *)account
+{
+    self.accountIdentifier = account.lookupAccountIdentifier;
 }
 
 @end

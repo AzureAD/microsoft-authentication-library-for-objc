@@ -74,7 +74,7 @@
 
 #pragma mark - Accounts
 
-- (BOOL)removeAccount:(MSALAccount *)account error:(NSError **)error
+- (BOOL)removeAccount:(MSALAccount *)account wipeAccount:(BOOL)wipeAccount error:(NSError **)error
 {
     if (!account)
     {
@@ -85,7 +85,7 @@
     for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
         NSError *removalError = nil;
-        BOOL result = [provider removeAccount:account tenantProfiles:account.tenantProfiles error:&removalError];
+        BOOL result = [provider removeAccount:account wipeAccount:wipeAccount tenantProfiles:account.tenantProfiles error:&removalError];
         
         if (!result)
         {
