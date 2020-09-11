@@ -1130,8 +1130,8 @@
         block(nil, webViewParamsError, nil);
         return;
     }
-    
-    [msidParams fillWithAccount:parameters.account];
+        
+    [msidParams setAccountIdentifierFromMSALAccount:parameters.account];
     
     msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
@@ -1361,7 +1361,7 @@
         return;
     }
     
-    [msidParams fillWithAccount:account];
+    [msidParams setAccountIdentifierFromMSALAccount:account];
     
     if (signoutParameters.webviewParameters)
     {

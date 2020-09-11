@@ -87,7 +87,7 @@
     return YES;
 }
 
-- (void)fillWithAccount:(MSALAccount *)account
+- (void)setAccountIdentifierFromMSALAccount:(MSALAccount *)account
 {
     self.accountIdentifier = account.lookupAccountIdentifier;
 }
