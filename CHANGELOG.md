@@ -1,3 +1,4 @@
+* Ignore duplicate certificate authentication challenge in system webview.
 ##TBD
 * Make webview parameters optional in MSALSignoutParameters #1086
 * Support wiping external account #1085
