@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
                                                     error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)updateWithResult:(MSALResult *)result error:(NSError * _Nullable * _Nullable)error;
-- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(MSALAccount *)account wipeAccount:(BOOL)wipeAccount error:(NSError * _Nullable * _Nullable)error;
 - (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError * _Nullable * _Nullable)error;
 
 @end

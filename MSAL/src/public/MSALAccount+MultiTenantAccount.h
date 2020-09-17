@@ -53,4 +53,11 @@
  */
 @property (readonly, nullable) MSALAccountId *homeAccountId;
 
+/**
+ Indicates that account is used for device wide SSO.
+ This property is only available for organizational accounts when AAD SSO plugin is present on the device.
+ It will be NO in all other cases.
+*/
+@property (readonly) BOOL isSSOAccount;
+
 @end

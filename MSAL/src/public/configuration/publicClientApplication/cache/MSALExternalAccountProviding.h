@@ -56,6 +56,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)removeAccount:(id<MSALAccount>)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
+                error:(NSError * _Nullable * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -removeAccount:wipeAccount:tenantProfiles:error: instead");
+
+/**
+ This is triggered when removal of an account is necessary.
+ It normally happens when the app calls removeAccount API in MSAL.
+ But it can also happen in other circumstances when MSAL needs to cleanup account.
+ If wipeAccount == YES, it means application requested full removal of the account and all related artifacts. 
+ */
+- (BOOL)removeAccount:(id<MSALAccount>)account
+          wipeAccount:(BOOL)wipeAccount
+       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error;
 
 /**

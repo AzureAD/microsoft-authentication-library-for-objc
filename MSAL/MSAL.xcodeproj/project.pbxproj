@@ -216,8 +216,6 @@
 		583BFD0F24DC8E670035B901 /* MSALRedirectUriVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */; };
 		583BFD1024DC8EE80035B901 /* MSALRedirectUriVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */; };
 		583BFD1624DDF9B10035B901 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 583BFD1524DDF9B10035B901 /* Launch Screen.storyboard */; };
-		58B81F6624AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */; };
-		58B81F6724AC59A000E8799E /* MSALTestCacheTokenResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */; };
 		58B81F7124AC5D7200E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
 		58B81F7224AC5D7300E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
 		6077D4A022498BFF001798A2 /* MSALTenantProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 6077D49F22498BFF001798A2 /* MSALTenantProfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -996,6 +994,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 962E37A61E720C5D00DE71FE;
 			remoteInfo = "MSAL Test Automation (iOS)";
+		};
+		E7A6569524FEE45300931BAE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8FF5624F4BB3800CA1445;
+			remoteInfo = IdentityCoreSwift;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -2371,6 +2376,7 @@
 				B29520A420B4CB9F0068C021 /* libIdentityAutomationAppLib Mac.dylib */,
 				B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */,
 				B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */,
+				E7A6569624FEE45300931BAE /* libIdentityCoreSwift.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3280,6 +3286,13 @@
 			fileType = wrapper.cfbundle;
 			path = IdentityCoreTests.xctest;
 			remoteRef = D6A2062C1FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E7A6569624FEE45300931BAE /* libIdentityCoreSwift.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityCoreSwift.a;
+			remoteRef = E7A6569524FEE45300931BAE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -4633,6 +4646,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
@@ -4651,6 +4665,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = UBF8T346G9;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
@@ -4791,6 +4806,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */;
 			buildSettings = {
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -4802,6 +4818,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */;
 			buildSettings = {
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = NO;
 			};
 			name = Release;
 		};

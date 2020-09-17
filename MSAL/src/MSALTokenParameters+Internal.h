@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param scopes  Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
+ guaranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
 

@@ -1121,7 +1121,6 @@
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
-                                                             account:parameters.account
                                       useWebviewTypeFromGlobalConfig:useWebviewTypeFromGlobalConfig
                                                        customWebView:_customWebview
                                                                error:&webViewParamsError];
@@ -1131,6 +1130,8 @@
         block(nil, webViewParamsError, nil);
         return;
     }
+        
+    [msidParams setAccountIdentifierFromMSALAccount:parameters.account];
     
     msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
@@ -1228,17 +1229,28 @@
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
 {
+    return [self removeAccountImpl:account wipeAccount:NO error:error];
+}
+
+- (BOOL)removeAccountImpl:(MSALAccount *)account
+              wipeAccount:(BOOL)wipeAccount
+                    error:(NSError * __autoreleasing *)error
+{
     if (!account)
     {
         return YES;
     }
 
     NSError *msidError = nil;
+    
+    // If developer is passing a wipeAccount flag, we want to wipe cache for any clientId
+    NSString *clientId = wipeAccount ? nil : self.internalConfig.clientId;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                               authority:nil
-                                               clientId:self.internalConfig.clientId
+                                               clientId:clientId
                                                familyId:nil
+                                          clearAccounts:wipeAccount
                                                 context:nil
                                                   error:&msidError];
     if (!result)
@@ -1251,7 +1263,7 @@
     if (self.externalAccountHandler)
     {
         NSError *externalError = nil;
-        result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        result &= [self.externalAccountHandler removeAccount:account wipeAccount:wipeAccount error:&externalError];
         
         MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"External account removed with result %d", (int)result);
         
@@ -1321,15 +1333,6 @@
         return;
     }
     
-    NSError *localError;
-    BOOL localRemovalResult = [self removeAccount:account error:&localError];
-    
-    if (!localRemovalResult)
-    {
-        block(NO, localError, nil);
-        return;
-    }
-    
     NSError *authorityError;
     MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:nil error:&authorityError];
     
@@ -1358,16 +1361,26 @@
         return;
     }
     
-    NSError *webViewParamsError;
-    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
-                                                             account:account
-                                      useWebviewTypeFromGlobalConfig:NO
-                                                       customWebView:_customWebview
-                                                               error:&webViewParamsError];
+    [msidParams setAccountIdentifierFromMSALAccount:account];
     
-    if (!webViewParamsResult)
+    if (signoutParameters.webviewParameters)
     {
-        block(NO, webViewParamsError, msidParams);
+        NSError *webViewParamsError;
+        BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
+                                          useWebviewTypeFromGlobalConfig:NO
+                                                           customWebView:_customWebview
+                                                                   error:&webViewParamsError];
+        
+        if (!webViewParamsResult)
+        {
+            block(NO, webViewParamsError, msidParams);
+            return;
+        }
+    }
+    else if (signoutParameters.signoutFromBrowser)
+    {
+        NSError *browserError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Valid MSALWebviewParameters are required if signoutFromBrowser is requested. Please use [MSALSignoutParameters initWithWebviewParameters:] initializer", nil, nil, nil, nil, nil, YES);
+        block(NO, browserError, msidParams);
         return;
     }
     
@@ -1375,10 +1388,20 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
     
+    NSError *localError;
+    BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
+    
+    if (!localRemovalResult)
+    {
+        block(NO, localError, nil);
+        return;
+    }
+    
     NSError *controllerError;
     MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
                                                                                         oauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                             shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                   shouldWipeAccount:signoutParameters.wipeAccount
                                                                                                error:&controllerError];
     
     if (!controller)

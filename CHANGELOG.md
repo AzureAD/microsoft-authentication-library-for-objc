@@ -1,3 +1,21 @@
+## [1.1.9] - 2020-09-16
+* Ignore duplicate certificate authentication challenge in system webview.
+* Make webview parameters optional in MSALSignoutParameters #1086
+* Support wiping external account #1085
+* Normalize account ID for cache lookups (#1084)
+* Add documentation for Proof-of-Possession for Access tokens.
+* Support forgetting cached account (#1077)
+* Add SSO Seeding call in MSAL Test MacApp 
+* Fix custom webview bug in MSAL Test MacApp
+* Update MSIDBaseBrokerOperationRequest in common-core
+* Fix grammar in comments.
+* Support bypassing redirect uri validation on macOS (#1076)
+* Indicate whether SSO extension account is available for device wide SSO (#1065)
+* Add swift static lib target to common core to support AES GCM.
+* Enabled XCODE 11.4 recommended settings by default per customer request.
+* Append 'PkeyAuth/1.0' keyword to the User Agent String to reliably advertise PkeyAuth capability to ADFS.
+* Add a flag to disable logger queue.
+
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
 * Fix unused parameter errors and add macOS specific test mocks.
@@ -16,6 +34,15 @@
 * update new variable in configuration to allow user by pass URI check #1013
 * Refactor crypto code for cpp integration and add api to generate ephemeral asymmetric key pair. #1018
 * Update logger from Identity Core. (#1009)
+
+## [1.1.9] - 2020-08-20
+### Added
+* Enabled the following XCODE 11.4 recommended settings by default per customer request
+ -CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+ -CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+ -CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+ -Renamed private properties within "MSIDLastRequestTelemetry.m" to address nested dispatch call issues that arise by enabling above implicit retain self setting.
+ * Updated supported platforms in readme
 
 ## [1.1.7] - 2020-07-31
 ### Added
