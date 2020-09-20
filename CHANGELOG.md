@@ -1,3 +1,6 @@
+## [1.1.10] - 2020-09-21
+* Fixed isSSOAccount flag on the MSALAccount when MSAL reads accounts from multiple sources.
+
 ## [1.1.9] - 2020-09-16
 * Ignore duplicate certificate authentication challenge in system webview.
 * Make webview parameters optional in MSALSignoutParameters #1086

@@ -297,6 +297,11 @@
         existingAccount.accountClaims = accountClaims;
         existingAccount.username = account.username;
     }
+    
+    if (account.isSSOAccount)
+    {
+        existingAccount.isSSOAccount = YES;
+    }
 }
 
 #pragma mark - Authority (deprecated)
