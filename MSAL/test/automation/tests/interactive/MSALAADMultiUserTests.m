@@ -147,8 +147,7 @@
     [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
-    [self assertErrorCode:MSALErrorInternal];
-    [self assertInternalErrorCode:MSALInternalErrorMismatchedUser];
+    [self assertAccessTokenNotNil];
 }
 
 @end
