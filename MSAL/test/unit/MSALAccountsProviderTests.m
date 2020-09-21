@@ -1012,6 +1012,7 @@
 {
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.tid" objectId:nil tenantId:nil];
     MSALAccount *externalAccount = [[MSALAccount alloc] initWithUsername:@"user@contoso.com" homeAccountId:accountId environment:@"login.microsoftonline.com" tenantProfiles:nil];
+    externalAccount.isSSOAccount = YES;
     MSALMockExternalAccountHandler *externalAccountsHandler = [[MSALMockExternalAccountHandler alloc] initMock];
     externalAccountsHandler.externalAccountsResult = @[externalAccount];
     
@@ -1049,6 +1050,7 @@
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
     XCTAssertNotNil([allAccounts[0] accountClaims]);
+    XCTAssertTrue(allAccounts[0].isSSOAccount);
 }
 
 - (void)testAllAccounts_whenLegacyAccountInCache_andDifferentExternalAccountExists_shouldReturnTwoAccounts
