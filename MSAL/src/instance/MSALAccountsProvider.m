@@ -210,15 +210,32 @@
                                              msidAccounts:(NSArray<MSIDAccount *> *)msidAccounts
                                      includeExternalAccounts:(BOOL)includeExternalAccounts
 {
-    if (![NSString msidIsStringNilOrBlank:parameters.tenantProfileIdentifier])
+    BOOL filterByLocalId = ![NSString msidIsStringNilOrBlank:parameters.tenantProfileIdentifier];
+    BOOL filterByUsername = ![NSString msidIsStringNilOrBlank:parameters.username];
+    BOOL filterByAccountId = ![NSString msidIsStringNilOrBlank:parameters.identifier];
+    
+    if (filterByLocalId || filterByUsername || filterByAccountId)
     {
         NSMutableArray *filteredAccounts = [NSMutableArray new];
         
         for (MSIDAccount *account in msidAccounts)
         {
-            if ([account.localAccountId isEqualToString:parameters.tenantProfileIdentifier])
+            BOOL accountMatches = !filterByAccountId || (account.accountIdentifier.homeAccountId
+                                                        && [account.accountIdentifier.homeAccountId caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+            
+            if (filterByUsername)
             {
-                [filteredAccounts addObject:account.localAccountId];
+                accountMatches &= account.accountIdentifier.displayableId && [account.accountIdentifier.displayableId caseInsensitiveCompare:parameters.username] == NSOrderedSame;
+            }
+            
+            if (filterByLocalId)
+            {
+                accountMatches &= account.localAccountId && [account.localAccountId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame;
+            }
+            
+            if (accountMatches)
+            {
+                [filteredAccounts addObject:account];
             }
         }
         
