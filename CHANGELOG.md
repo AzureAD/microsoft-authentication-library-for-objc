@@ -1,3 +1,7 @@
+## [1.2.0] - 2020-09-21
+* Enabled PKeyAuth via UserAgent String on MacOS 
+* Added a public API for both iOS and MacOS that returns a custom WKWebviewConfig object with PKeyAuth UserAgent String within MSALWebviewParameters;
+
 ## [1.1.9] - 2020-09-16
 * Ignore duplicate certificate authentication challenge in system webview.
 * Make webview parameters optional in MSALSignoutParameters #1086

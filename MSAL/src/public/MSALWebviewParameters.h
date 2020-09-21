@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import "MSIDWorkPlaceJoinConstants.h"
 
 #if TARGET_OS_IPHONE
 typedef UIViewController    MSALViewController;
@@ -93,6 +94,13 @@ NS_ASSUME_NONNULL_BEGIN
    @note parentViewController is mandatory on iOS 13+. It is strongly recommended on macOS 10.15+ to allow correct presentation of ASWebAuthenticationSession. If parentViewController is not provided on macOS 10.15+, MSAL will use application's keyWindow for presentation
 */
 - (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
+
+
+#if !MSID_EXCLUDE_WEBKIT
+
++ (WKWebViewConfiguration *)createWebViewConfigWithPKeyAuthUserAgent;
+
+#endif
 
 #if TARGET_OS_IPHONE
 
