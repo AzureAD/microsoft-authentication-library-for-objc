@@ -86,7 +86,7 @@
     return item;
 }
 
-+ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
+- (WKWebViewConfiguration *)defaultWKWebviewConfiguration
 {
     return [MSIDWebviewUIController defaultWKWebviewConfiguration];
 }
