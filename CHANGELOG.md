@@ -1,3 +1,4 @@
+* Add missing functionality to MSIDAssymetricKeyPair to match Djinni Interface
 ## [1.1.9] - 2020-09-16
 * Ignore duplicate certificate authentication challenge in system webview.
 * Make webview parameters optional in MSALSignoutParameters #1086
