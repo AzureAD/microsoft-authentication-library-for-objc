@@ -1,6 +1,10 @@
-## [1.2.0] - 2020-09-21
+## TBD
 * Enabled PKeyAuth via UserAgent String on MacOS 
 * Added a public API for both iOS and MacOS that returns a custom WKWebviewConfig object with PKeyAuth UserAgent String within MSALWebviewParameters;
+
+## [1.1.10] - 2020-09-21
+* Fixed account filtering logic by accountId or username where accounts are queried from multiple sources.
+* Fixed isSSOAccount flag on the MSALAccount when MSAL reads accounts from multiple sources.
 
 ## [1.1.9] - 2020-09-16
 * Ignore duplicate certificate authentication challenge in system webview.

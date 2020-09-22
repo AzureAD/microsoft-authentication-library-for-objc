@@ -26,8 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <WebKit/WebKit.h>
-#import "MSIDWorkPlaceJoinConstants.h"
+#import "MSIDWebviewUIController.h"
 
 #if TARGET_OS_IPHONE
 typedef UIViewController    MSALViewController;
@@ -98,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #if !MSID_EXCLUDE_WEBKIT
 
-+ (WKWebViewConfiguration *)createWebViewConfigWithPKeyAuthUserAgent;
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration;
 
 #endif
 

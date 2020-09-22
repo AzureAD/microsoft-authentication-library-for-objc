@@ -86,27 +86,9 @@
     return item;
 }
 
-#if !MSID_EXCLUDE_WEBKIT
-
-+ (WKWebViewConfiguration *)createWebViewConfigWithPKeyAuthUserAgent
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
 {
-    WKWebViewConfiguration *webConfig = [WKWebViewConfiguration new];
-    webConfig.applicationNameForUserAgent = kMSIDPKeyAuthKeyWordForUserAgent;
-
-#if TARGET_OS_IPHONE
-    if (@available(iOS 13.0, *))
-    {
-        webConfig.defaultWebpagePreferences.preferredContentMode = WKContentModeMobile;
-    }
-#else
-    if (@available(macOS 10.15, *))
-    {
-        webConfig.defaultWebpagePreferences.preferredContentMode = WKContentModeDesktop;
-    }
-#endif
-    return webConfig;
+    return [MSIDWebviewUIController defaultWKWebviewConfiguration];
 }
-
-#endif
 
 @end
