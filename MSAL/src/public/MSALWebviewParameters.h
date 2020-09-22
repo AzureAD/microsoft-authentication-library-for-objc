@@ -95,11 +95,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
 
 
-#if !MSID_EXCLUDE_WEBKIT
-
 + (WKWebViewConfiguration *)defaultWKWebviewConfiguration;
 
-#endif
 
 #if TARGET_OS_IPHONE
 
