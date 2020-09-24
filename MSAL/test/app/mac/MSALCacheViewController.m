@@ -42,7 +42,7 @@
 #import "MSIDAccessTokenWithAuthScheme.h"
 #import "MSIDConstants.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
-#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSALTestAppAsymmetricKey.h"
 #import "MSIDDevicePopManager.h"
 #import "MSIDCacheConfig.h"
@@ -81,7 +81,6 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
-    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     
     _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
     _keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:_keychainSharingGroup error:nil];
@@ -166,9 +165,8 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
         MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:_keyPairAttributes error:nil];
         if (keyPair)
         {
-            MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:keyPair.kid];
             MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:keyPair.kid];
-            _tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+            _tokenKeys = [[NSMutableArray alloc] initWithObjects:privateKey, nil];
             [self.cacheDict setObject:_tokenKeys forKey:s_pop_token_keys];
         }
     }
@@ -261,14 +259,7 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
 
 - (void)deleteKey:(MSALTestAppAsymmetricKey *)key
 {
-    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
-                                  [key.name dataUsingEncoding:NSUTF8StringEncoding], (__bridge id)kSecAttrApplicationTag,
-                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
-                                  nil];
-    
-    [self.keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
-    
+    [self.keyGenerator deleteKeyWithAttributes:self.keyPairAttributes error:nil];
     [self.tokenKeys removeObject:key];
     [self loadCache];
 }

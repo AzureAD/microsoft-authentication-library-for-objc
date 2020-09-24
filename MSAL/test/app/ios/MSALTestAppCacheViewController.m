@@ -51,7 +51,7 @@
 #import "MSIDAccessTokenWithAuthScheme.h"
 #import "MSIDConstants.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
-#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSALTestAppAsymmetricKey.h"
 #import "MSIDDevicePopManager.h"
 #import "MSIDCacheConfig.h"
@@ -115,7 +115,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
-    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
 
     _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
@@ -147,14 +146,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)deleteKey:(MSALTestAppAsymmetricKey *)key
 {
-    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
-                                  [key.name dataUsingEncoding:NSUTF8StringEncoding], (__bridge id)kSecAttrApplicationTag,
-                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
-                                  nil];
-    
-    [self.keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
-    
+    [self.keyGenerator deleteKeyWithAttributes:self.keyPairAttributes error:nil];
     [self.tokenKeys removeObject:key];
     [self loadCache];
 }
@@ -349,9 +341,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:self.keyPairAttributes error:nil];
             if (keyPair)
             {
-                MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:keyPair.kid];
                 MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:keyPair.kid];
-                self.tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+                self.tokenKeys = [[NSMutableArray alloc] initWithObjects:privateKey, nil];
                 [self.cacheSections setObject:self.tokenKeys forKey:POP_TOKEN_KEYS];
                 [self.cacheSectionTitles addObject:POP_TOKEN_KEYS];
             }
