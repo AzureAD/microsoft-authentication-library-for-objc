@@ -1,6 +1,8 @@
 ## TBD
 * Enabled PKeyAuth via UserAgent String on MacOS 
-* Added a public API for both iOS and MacOS that returns a custom WKWebviewConfig object with PKeyAuth UserAgent String within MSALWebviewParameters;
+* Added a public API for both iOS and MacOS that returns a default recommended WKWebview configuration settings. 
+  This API additionally appends "PKeyAuth/1.0" keyword to the UserAgent String to request PKeyAuth Challenge to the server on iOS.
+This API can be found in MSALWebviewParameters.h, and an example of usage has been provided in the MSAL definition header.
 
 ## [1.1.10] - 2020-09-21
 * Fixed account filtering logic by accountId or username where accounts are queried from multiple sources.
