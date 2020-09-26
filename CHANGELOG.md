@@ -1,3 +1,5 @@
+* Add public interface for asymmetric key/factory for cpp djinni interface
+
 ## [1.1.10] - 2020-09-21
 * Fixed account filtering logic by accountId or username where accounts are queried from multiple sources.
 * Fixed isSSOAccount flag on the MSALAccount when MSAL reads accounts from multiple sources.
