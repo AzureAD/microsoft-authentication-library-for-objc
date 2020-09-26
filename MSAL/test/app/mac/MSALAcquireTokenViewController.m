@@ -74,7 +74,8 @@ static NSString * const defaultScope = @"User.Read";
     [super viewDidLoad];
     //TODO: MSAL MacOS test app doesn't support embedded webview mode
     //Also, webView is initialized from the storyboard.
-    //Need to create it programmatically in order to be able to initialize it with a default config setting.
+    //Need to create it programmatically in order to be able to initialize it with a default recommended config setting,
+    //which can be created by using WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
