@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDWebviewUIController.h"
+#import <WebKit/WebKit.h>
 
 #if TARGET_OS_IPHONE
 typedef UIViewController    MSALViewController;
@@ -95,7 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
 
 
-@property (nonatomic, readonly) WKWebViewConfiguration *defaultWKWebviewConfiguration;
+@property (class, nonatomic, readonly) WKWebViewConfiguration *defaultWKWebviewConfiguration;
 
 
 #if TARGET_OS_IPHONE

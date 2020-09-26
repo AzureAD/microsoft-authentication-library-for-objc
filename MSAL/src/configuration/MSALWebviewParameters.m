@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALWebviewParameters.h"
+#import "MSIDWebviewUIController.h"
 
 @implementation MSALWebviewParameters
 
@@ -86,7 +87,7 @@
     return item;
 }
 
-- (WKWebViewConfiguration *)defaultWKWebviewConfiguration
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
 {
     return [MSIDWebviewUIController defaultWKWebviewConfiguration];
 }

@@ -83,7 +83,12 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeSafariViewController,
     
 #endif
-    /** Use WKWebView */
+    /** Use WKWebView
+     It is recommended to use the default webview configuration setting provided by a public MSAL API.
+     ex:
+     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+     WKWebView *embeddedWebview = [[WKWebView alloc] initWithFrame:yourWebview.frame configuration:defaultWKWebConfig];
+    */
     MSALWebviewTypeWKWebView,
 };
 
