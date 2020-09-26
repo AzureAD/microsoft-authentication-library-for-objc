@@ -504,9 +504,8 @@
 - (BOOL)clearAllTokenKeysForAccessGroup:(NSString *)accessGroup
 {
     MSIDAssymetricKeyKeychainGenerator *keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:accessGroup error:nil];
-    MSIDAssymetricKeyLookupAttributes *query = [MSIDAssymetricKeyLookupAttributes new];
-    query.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
-    return [keyGenerator deleteKeyWithAttributes:query error:nil];
+    NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
+    return [keyGenerator deleteItemWithAttributes:query error:nil];
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender

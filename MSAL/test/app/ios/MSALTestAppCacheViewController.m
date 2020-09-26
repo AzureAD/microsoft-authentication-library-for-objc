@@ -146,7 +146,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)deleteKey:(MSALTestAppAsymmetricKey *)key
 {
-    [self.keyGenerator deleteKeyWithAttributes:self.keyPairAttributes error:nil];
+    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  (__bridge id)kSecClassKey, (__bridge id)kSecClass,
+                                  [key.name dataUsingEncoding:NSUTF8StringEncoding], (__bridge id)kSecAttrApplicationTag,
+                                  (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
+                                  nil];
+    
+    [self.keyGenerator deleteItemWithAttributes:query error:nil];
     [self.tokenKeys removeObject:key];
     [self loadCache];
 }
