@@ -107,7 +107,9 @@
 {
     [super viewDidLoad];
     
-    self.customWebview = [WKWebView new];
+    WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    self.customWebview = [[WKWebView alloc] initWithFrame:self.wkWebViewContainer.frame configuration:defaultWKWebConfig];
+
     [self.wkWebViewContainer addSubview:self.customWebview];
     self.customWebview.translatesAutoresizingMaskIntoConstraints = NO;
     [self.customWebview.leftAnchor constraintEqualToAnchor:self.wkWebViewContainer.leftAnchor].active = YES;

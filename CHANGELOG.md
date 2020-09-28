@@ -1,4 +1,10 @@
+* Update RSA signing code and add conditional check for supported iOS/osx platforms.
+## TBD
+* Enabled PKeyAuth via UserAgent String on MacOS 
+* Added a public API for both iOS and MacOS that returns a default recommended WKWebview configuration settings. 
+This API can be found in MSALWebviewParameters.h, and an example of usage has been provided in the MSAL definition header.
 * Add public interface for asymmetric key/factory for cpp djinni interface
+
 
 ## [1.1.10] - 2020-09-21
 * Fixed account filtering logic by accountId or username where accounts are queried from multiple sources.
