@@ -78,7 +78,6 @@ static NSString * const defaultScope = @"User.Read";
     CGFloat wkWebViewOffsetY = self.acquireTokenView.frame.size.height*0.15;
     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
     
-//    self.webView = [[WKWebView alloc] initWithFrame:self.acquireTokenView.frame configuration:defaultWKWebConfig];
     self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(wkWebViewOffsetX,wkWebViewOffsetY,wkWebViewWidth,wkWebViewHeight)
                                       configuration:defaultWKWebConfig];
 
