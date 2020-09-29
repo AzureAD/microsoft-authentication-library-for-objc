@@ -1,3 +1,4 @@
+* Bring in latest from dev branch for iOS 14 build
 * Update RSA signing code and add conditional check for supported iOS/osx platforms.
 ## TBD
 * Enabled PKeyAuth via UserAgent String on MacOS 
