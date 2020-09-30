@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALWebviewParameters.h"
+#import "MSIDWebviewUIController.h"
 
 @implementation MSALWebviewParameters
 
@@ -84,6 +85,11 @@
     item.customWebview = _customWebview;
     
     return item;
+}
+
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
+{
+    return [MSIDWebviewUIController defaultWKWebviewConfiguration];
 }
 
 @end

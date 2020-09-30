@@ -1,4 +1,20 @@
-##TBD 
+* Bring in latest from dev branch for iOS 14 build
+* Update RSA signing code and add conditional check for supported iOS/osx platforms.
+## TBD
+* Enabled PKeyAuth via UserAgent String on MacOS 
+* Added a public API for both iOS and MacOS that returns a default recommended WKWebview configuration settings. 
+This API can be found in MSALWebviewParameters.h, and an example of usage has been provided in the MSAL definition header.
+* Add public interface for asymmetric key/factory for cpp djinni interface
+
+
+## [1.1.10] - 2020-09-21
+* Fixed account filtering logic by accountId or username where accounts are queried from multiple sources.
+* Fixed isSSOAccount flag on the MSALAccount when MSAL reads accounts from multiple sources.
+
+## [1.1.9] - 2020-09-16
+* Ignore duplicate certificate authentication challenge in system webview.
+* Make webview parameters optional in MSALSignoutParameters #1086
+* Support wiping external account #1085
 * Normalize account ID for cache lookups (#1084)
 * Add documentation for Proof-of-Possession for Access tokens.
 * Support forgetting cached account (#1077)
@@ -11,6 +27,7 @@
 * Add swift static lib target to common core to support AES GCM.
 * Enabled XCODE 11.4 recommended settings by default per customer request.
 * Append 'PkeyAuth/1.0' keyword to the User Agent String to reliably advertise PkeyAuth capability to ADFS.
+* Add a flag to disable logger queue.
 
 ## [1.1.8] - 2020-08-24
 * Disabling check for validating result Account.
@@ -47,12 +64,12 @@
 
 ## [1.1.6] - 2020-07-24
 
-### Added	
-* Support proof of possession for access tokens (#926)	
+### Added    
+* Support proof of possession for access tokens (#926)    
 
-### Fixed	
-* Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)		
+### Fixed    
+* Clean up account metadata on account removal (#999)    
+* Silent token lookup for guest accounts with different UPNs (#986)        
 
 ## [1.1.5] - 2020-06-19
  
