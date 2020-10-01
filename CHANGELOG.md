@@ -1,3 +1,4 @@
+* Return private key attributes on key pair generation.
 * Update RSA signing code and add conditional check for supported iOS/osx platforms.
 ## TBD
 * Enabled PKeyAuth via UserAgent String on MacOS 
