@@ -6,6 +6,9 @@ example of usage.
 * Updated MSAL iOS/MacOS test apps to use aforementioned API to generate a default WKWebview object with recommended default settings for the PassedIn mode.
 * Add public interface for asymmetric key/factory for cpp djinni interface
 * Update RSA signing code and add conditional check for supported iOS/osx platforms.
+* Update repo pipelines running on Xcode 12
+* Return private key attributes on key pair generation.
+* Bring in latest from dev branch for iOS 14 build
 
 
 ## [1.1.10] - 2020-09-21
@@ -65,12 +68,12 @@ example of usage.
 
 ## [1.1.6] - 2020-07-24
 
-### Added	
-* Support proof of possession for access tokens (#926)	
+### Added    
+* Support proof of possession for access tokens (#926)    
 
-### Fixed	
-* Clean up account metadata on account removal (#999)	
-* Silent token lookup for guest accounts with different UPNs (#986)		
+### Fixed    
+* Clean up account metadata on account removal (#999)    
+* Silent token lookup for guest accounts with different UPNs (#986)        
 
 ## [1.1.5] - 2020-06-19
  

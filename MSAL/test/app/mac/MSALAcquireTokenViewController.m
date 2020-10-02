@@ -59,7 +59,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSPopUpButton *userPopup;
 @property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
-@property (nonatomic) WKWebView *webView;
+@property WKWebView *webView;
 @property MSALTestAppSettings *settings;
 @property NSArray *selectedScopes;
 @property NSArray<MSALAccount *> *accounts;
