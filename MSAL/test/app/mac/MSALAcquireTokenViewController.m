@@ -56,11 +56,10 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSSegmentedControl *webViewSegment;
 @property (weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
 @property (weak) IBOutlet NSStackView *acquireTokenView;
-@property (weak) IBOutlet WKWebView *webView;
 @property (weak) IBOutlet NSPopUpButton *userPopup;
 @property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
-
+@property WKWebView *webView;
 @property MSALTestAppSettings *settings;
 @property NSArray *selectedScopes;
 @property NSArray<MSALAccount *> *accounts;
@@ -72,10 +71,18 @@ static NSString * const defaultScope = @"User.Read";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    //TODO: MSAL MacOS test app doesn't support embedded webview mode
-    //Also, webView is initialized from the storyboard.
-    //Need to create it programmatically in order to be able to initialize it with a default recommended config setting,
-    //which can be created by using WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    
+    CGFloat wkWebViewWidth = self.acquireTokenView.frame.size.width*0.5;
+    CGFloat wkWebViewHeight = self.acquireTokenView.frame.size.height*0.75;
+    CGFloat wkWebViewOffsetX = 0;
+    CGFloat wkWebViewOffsetY = self.acquireTokenView.frame.size.height*0.15;
+    WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(wkWebViewOffsetX,wkWebViewOffsetY,wkWebViewWidth,wkWebViewHeight)
+                                      configuration:defaultWKWebConfig];
+
+    [self.webView setHidden:YES];
+    [self.acquireTokenView addSubview:self.webView];
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
@@ -360,7 +367,6 @@ static NSString * const defaultScope = @"User.Read";
             }
             
             [self.webView setHidden:YES];
-            [self.acquireTokenView setHidden:NO];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -371,7 +377,6 @@ static NSString * const defaultScope = @"User.Read";
     {
         webviewParameters.customWebview = self.webView;
         webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-        [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     
@@ -415,7 +420,6 @@ static NSString * const defaultScope = @"User.Read";
                 [self updateResultViewError:error];
             }
             [self.webView setHidden:YES];
-            [self.acquireTokenView setHidden:NO];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -561,7 +565,6 @@ static NSString * const defaultScope = @"User.Read";
     {
         webviewParameters.customWebview = self.webView;
         webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-        [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     return webviewParameters;

@@ -1,12 +1,14 @@
+## TBD
+* Enabled PKeyAuth via UserAgent String on MacOS 
+* Added a public API for both iOS and MacOS that returns a default recommended WKWebview
+configuration settings. This API can be found in MSALWebviewParameters.h, along with an
+example of usage. 
+* Updated MSAL iOS/MacOS test apps to use aforementioned API to generate a default WKWebview object with recommended default settings for the PassedIn mode.
+* Add public interface for asymmetric key/factory for cpp djinni interface
+* Update RSA signing code and add conditional check for supported iOS/osx platforms.
 * Update repo pipelines running on Xcode 12
 * Return private key attributes on key pair generation.
 * Bring in latest from dev branch for iOS 14 build
-* Update RSA signing code and add conditional check for supported iOS/osx platforms.
-## TBD
-* Enabled PKeyAuth via UserAgent String on MacOS 
-* Added a public API for both iOS and MacOS that returns a default recommended WKWebview configuration settings. 
-This API can be found in MSALWebviewParameters.h, and an example of usage has been provided in the MSAL definition header.
-* Add public interface for asymmetric key/factory for cpp djinni interface
 
 
 ## [1.1.10] - 2020-09-21
