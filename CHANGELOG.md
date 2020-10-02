@@ -1,3 +1,4 @@
+* Return private key attributes on key pair generation.
 * Bring in latest from dev branch for iOS 14 build
 * Update RSA signing code and add conditional check for supported iOS/osx platforms.
 ## TBD
