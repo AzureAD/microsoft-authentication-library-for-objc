@@ -106,7 +106,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    
     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
     self.customWebview = [[WKWebView alloc] initWithFrame:self.wkWebViewContainer.frame configuration:defaultWKWebConfig];
 
