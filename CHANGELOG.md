@@ -1,4 +1,4 @@
-## TBD  
+## [1.1.11] - 2020-10-16
 * Enabled PKeyAuth via UserAgent String on MacOS 
 * Added a public API for both iOS and MacOS that returns a default recommended WKWebview
 configuration settings. This API can be found in MSALWebviewParameters.h, along with an
