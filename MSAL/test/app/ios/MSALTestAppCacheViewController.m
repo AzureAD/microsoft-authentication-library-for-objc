@@ -51,7 +51,7 @@
 #import "MSIDAccessTokenWithAuthScheme.h"
 #import "MSIDConstants.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
-#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSALTestAppAsymmetricKey.h"
 #import "MSIDDevicePopManager.h"
 #import "MSIDCacheConfig.h"
@@ -115,7 +115,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
-    _keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
 
     _keychainSharingGroup = [MSIDKeychainTokenCache defaultKeychainGroup];
@@ -153,8 +152,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                   (__bridge id)kSecAttrKeyTypeRSA, (__bridge id)kSecAttrKeyType,
                                   nil];
     
-    [self.keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
-    
+    [self.keyGenerator deleteItemWithAttributes:query error:nil];
     [self.tokenKeys removeObject:key];
     [self loadCache];
 }
@@ -349,9 +347,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             MSIDAssymetricKeyPair *keyPair = [self.keyGenerator readKeyPairForAttributes:self.keyPairAttributes error:nil];
             if (keyPair)
             {
-                MSALTestAppAsymmetricKey *publicKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.publicKeyIdentifier kid:keyPair.kid];
                 MSALTestAppAsymmetricKey *privateKey = [[MSALTestAppAsymmetricKey alloc] initWithName:self.keyPairAttributes.privateKeyIdentifier kid:keyPair.kid];
-                self.tokenKeys = [[NSMutableArray alloc] initWithObjects:publicKey, privateKey, nil];
+                self.tokenKeys = [[NSMutableArray alloc] initWithObjects:privateKey, nil];
                 [self.cacheSections setObject:self.tokenKeys forKey:POP_TOKEN_KEYS];
                 [self.cacheSectionTitles addObject:POP_TOKEN_KEYS];
             }
@@ -641,128 +638,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     return nil;
 }
-
-#if !TARGET_OS_MACCATALYST
-- (nullable NSArray<UITableViewRowAction *> *)tableView:(__unused UITableView *)tableView
-                           editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
-    NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
-    id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
-    if ([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
-    {
-        MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)cacheEntry;
-        UITableViewRowAction *deleteTokenAction =
-        [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
-                                           title:@"Delete"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-         {
-             [self deleteAppMetadata:appMetadata];
-         }];
-        
-        return @[deleteTokenAction];
-    }
-    else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
-    {
-        MSIDBaseToken *token = (MSIDBaseToken *)cacheEntry;
-        UITableViewRowAction *deleteTokenAction =
-        [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
-                                           title:@"Delete"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-         {
-             [self deleteToken:token];
-         }];
-        
-        UITableViewRowAction* invalidateAction =
-        [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
-                                           title:@"Invalidate"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-         {
-             [self invalidateRefreshToken:(MSIDRefreshToken *)token];
-         }];
-        
-        [invalidateAction setBackgroundColor:[UIColor orangeColor]];
-        
-        UITableViewRowAction* expireTokenAction =
-        [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
-                                           title:@"Expire"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-         {
-             [self expireAccessToken:(MSIDAccessToken *)token];
-         }];
-        [expireTokenAction setBackgroundColor:[UIColor orangeColor]];
-        
-        switch (token.credentialType)
-        {
-            case MSIDRefreshTokenType:
-            {
-                if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
-                {
-                    return @[deleteTokenAction];
-                }
-                
-                return @[deleteTokenAction, invalidateAction];
-            }
-            case MSIDAccessTokenType:
-            {
-                return @[deleteTokenAction, expireTokenAction];
-            }
-            case MSIDIDTokenType:
-            {
-                return @[deleteTokenAction];
-            }
-            case MSIDAccessTokenWithAuthSchemeType:
-            {
-               return @[deleteTokenAction, expireTokenAction];
-            }
-            default:
-                return nil;
-        }
-    }
-    else if ([cacheEntry isKindOfClass:[MSIDAccount class]])
-    {
-        MSIDAccount *account = (MSIDAccount *)cacheEntry;
-        return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
-                                                    title:@"Delete All"
-                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-                  {
-                      [self deleteAllEntriesForAccount:account];
-                  }]];
-    }
-    else if ([cacheEntry isKindOfClass:[MSALTestAppAsymmetricKey class]])
-    {
-        MSALTestAppAsymmetricKey *key = (MSALTestAppAsymmetricKey *)cacheEntry;
-        return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
-                                                    title:@"Delete"
-                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-                  {
-                      [self deleteKey:key];
-                  }]];
-    }
-    
-    else if ([cacheEntry isKindOfClass:[MSIDAccountMetadataCacheItem class]])
-    {
-        MSIDAccountMetadataCacheItem *accountMetadata = (MSIDAccountMetadataCacheItem *)cacheEntry;
-        return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
-                                                    title:@"Delete"
-                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
-                  {
-                      [self deleteAccountMetadata:accountMetadata];
-                  }]];
-    }
-    
-    return nil;
-}
-#endif
-
-- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath
-{
-    // All tasks are handled by blocks defined in editActionsForRowAtIndexPath, however iOS8 requires this method to enable editing
-    (void)tableView;
-    (void)editingStyle;
-    (void)indexPath;
-}
-
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {

@@ -48,7 +48,9 @@
 #import "MSALWebviewParameters.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALAuthenticationSchemeBearer.h"
-#import "MSIDAssymetricKeyKeychainGenerator+Internal.h"
+#import "MSIDAssymetricKeyKeychainGenerator.h"
+#import "MSIDAssymetricKeyLookupAttributes.h"
+#import "MSIDConstants.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -104,8 +106,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    self.customWebview = [WKWebView new];
+
+    WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    self.customWebview = [[WKWebView alloc] initWithFrame:self.wkWebViewContainer.frame configuration:defaultWKWebConfig];
+
     [self.wkWebViewContainer addSubview:self.customWebview];
     self.customWebview.translatesAutoresizingMaskIntoConstraints = NO;
     [self.customWebview.leftAnchor constraintEqualToAnchor:self.wkWebViewContainer.leftAnchor].active = YES;
@@ -502,10 +506,8 @@
 - (BOOL)clearAllTokenKeysForAccessGroup:(NSString *)accessGroup
 {
     MSIDAssymetricKeyKeychainGenerator *keyGenerator = [[MSIDAssymetricKeyKeychainGenerator alloc] initWithGroup:accessGroup error:nil];
-    
     NSDictionary *query = @{(__bridge id)kSecClass: (__bridge id)kSecClassKey};
-    return [keyGenerator deleteItemWithAttributes:query itemTitle:nil error:nil];
-    
+    return [keyGenerator deleteItemWithAttributes:query error:nil];
 }
 
 - (IBAction)onShowTelemetryButtonTapped:(id)sender

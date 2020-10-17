@@ -74,7 +74,6 @@
     }
 #endif
     keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
-    keyPairAttributes.publicKeyIdentifier = MSID_POP_TOKEN_PUBLIC_KEY;
     keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
     
     manager = [[MSIDDevicePopManager alloc] initWithCacheConfig:msidCacheConfig keyPairAttributes:keyPairAttributes];

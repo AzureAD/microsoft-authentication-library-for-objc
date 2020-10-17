@@ -143,7 +143,7 @@
 
     NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", accountTitle];
 
-    XCUIElement *element = [[self.testApp.webViews.otherElements matchingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCUIElement *element = [[self.testApp.webViews.buttons matchingPredicate:accountPredicate] elementBoundByIndex:0];
     XCTAssertNotNil(element);
     
     [element msidTap];

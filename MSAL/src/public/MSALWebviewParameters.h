@@ -94,6 +94,17 @@ NS_ASSUME_NONNULL_BEGIN
 */
 - (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
 
+
+/**
+ It is recommended to use the default webview configuration setting provided by a public MSAL API.
+ ex:
+ WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+ WKWebView *embeddedWebview = [[WKWebView alloc] initWithFrame:yourWebview.frame configuration:defaultWKWebConfig];
+ */
+
+@property (class, nonatomic, readonly) WKWebViewConfiguration *defaultWKWebviewConfiguration;
+
+
 #if TARGET_OS_IPHONE
 
 #pragma mark - Unavailable initializers

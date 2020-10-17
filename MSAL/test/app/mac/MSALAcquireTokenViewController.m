@@ -56,11 +56,10 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSSegmentedControl *webViewSegment;
 @property (weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
 @property (weak) IBOutlet NSStackView *acquireTokenView;
-@property (weak) IBOutlet WKWebView *webView;
 @property (weak) IBOutlet NSPopUpButton *userPopup;
 @property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
-
+@property WKWebView *webView;
 @property MSALTestAppSettings *settings;
 @property NSArray *selectedScopes;
 @property NSArray<MSALAccount *> *accounts;
@@ -72,6 +71,18 @@ static NSString * const defaultScope = @"User.Read";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    CGFloat wkWebViewWidth = self.acquireTokenView.frame.size.width*0.5;
+    CGFloat wkWebViewHeight = self.acquireTokenView.frame.size.height*0.75;
+    CGFloat wkWebViewOffsetX = 0;
+    CGFloat wkWebViewOffsetY = self.acquireTokenView.frame.size.height*0.15;
+    WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(wkWebViewOffsetX,wkWebViewOffsetY,wkWebViewWidth,wkWebViewHeight)
+                                      configuration:defaultWKWebConfig];
+
+    [self.webView setHidden:YES];
+    [self.acquireTokenView addSubview:self.webView];
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
@@ -271,10 +282,14 @@ static NSString * const defaultScope = @"User.Read";
 {
     // Clear WKWebView cookies
     if (@available(macOS 10.11, *)) {
-        NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
-        [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
-                                                   modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
-                                               completionHandler:^{}];
+        WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
+        
+        [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes]
+                         completionHandler:^(NSArray<WKWebsiteDataRecord *> *records) {
+            for (WKWebsiteDataRecord *record in records) {
+                [dateStore removeDataOfTypes:record.dataTypes forDataRecords:@[record] completionHandler:^{}];
+            }
+        }];
         
         [_resultTextView setString:[NSString stringWithFormat:@"Successfully Cleared cookies."]];
     }
@@ -356,7 +371,6 @@ static NSString * const defaultScope = @"User.Read";
             }
             
             [self.webView setHidden:YES];
-            [self.acquireTokenView setHidden:NO];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -367,7 +381,6 @@ static NSString * const defaultScope = @"User.Read";
     {
         webviewParameters.customWebview = self.webView;
         webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-        [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     
@@ -411,7 +424,6 @@ static NSString * const defaultScope = @"User.Read";
                 [self updateResultViewError:error];
             }
             [self.webView setHidden:YES];
-            [self.acquireTokenView setHidden:NO];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -557,7 +569,6 @@ static NSString * const defaultScope = @"User.Read";
     {
         webviewParameters.customWebview = self.webView;
         webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-        [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     return webviewParameters;

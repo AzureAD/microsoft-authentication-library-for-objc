@@ -83,7 +83,7 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeSafariViewController,
     
 #endif
-    /** Use WKWebView */
+    /** Use WKWebView */    
     MSALWebviewTypeWKWebView,
 };
 
