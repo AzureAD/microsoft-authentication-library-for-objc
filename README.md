@@ -379,6 +379,72 @@ parameters.completionBlockQueue = dispatch_get_main_queue();
 }];
 ```
 
+### Multiple Account Mode
+
+MSAL also provides a public API to query multiple accounts, granted that they exist in the MSAL cache. 
+1) First import MSALSilentTokenParameters.h in addition to the other core public libraries that are required to use the public APIs.
+2) Create config, then use it to initialize an application object.
+3) Also initialize MSALAccountEnumerationParameters object.
+4) Then invoke the API "accountsFromDeviceForParameters" from the application object using the enumeration parameter
+If you have multiple accounts in MSAL cache, you will be able to retrieve them. each MSALAccount object has a parameter called "identifier" which represents the unique account identifier associated with each MSAL account instance. We recommend using it as the primary criterion to query the MSAL account you are looking for.
+5) Once the MSAL account is retrieved, invoke acquire token silent operation.
+
+#### Swift 
+
+Coming soon
+
+#### Objective-C
+```
+//import other key libraries  
+#import "MSALSilentTokenParameters.h" //Additionally, import this library 
+
+
+MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                               redirectUri:redirectUri
+                                                                                                 authority:authority];
+
+MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];   
+MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+parameters.returnOnlySignedInAccounts = YES;
+
+NSArray<NSString *> *scopeArr = [[NSArray alloc] initWithObjects: @"https://graph.microsoft.com/.default",nil];
+//Now that you have an instance of MSALPublicClientApplication object, you can do the following:
+
+if (@available(iOS 13.0, *)) //Currently, this public API requires iOS version 13 or greater.   
+{
+    [application accountsFromDeviceForParameters:parameters
+                                 completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
+    {
+        if (accounts)
+        {
+            for (MSALAccount *object in accounts)
+            {
+                if ([object.identifier isEqualToString:@"61cd1446-f9b4-403b-b137-1ffc975e0319.d34a1bb7-3481-4d5f-8b94-f3cc27bf8eac"])
+                {
+                    MSALSilentTokenParameters *tokenParameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopeArr account:object];
+
+                    [application acquireTokenSilentWithParameters:tokenParameters
+                                    completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+                     {
+                        if (error)
+                        {
+                            //Log Error
+                        }
+                        if (result)
+                        {
+                                //process result
+                        }
+                    }
+                     ];
+                }
+            }
+        }
+ 
+    }];
+}
+
+```
+
 ### Detect shared device mode
 
 Use following code to read current device configuration, including whether device is configured as shared:
