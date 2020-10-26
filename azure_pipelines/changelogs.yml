@@ -1,0 +1,84 @@
+trigger: none # Non-PR branches
+pr:
+  branches:
+    include:
+    - '*'
+
+# This pipeline is not tagged as production, but the auto-injected Codesign Validation task takes ~3 minutes to
+# configure itself, download all dependencies, and query for the classification tag of the pipeline before it determines
+# it has nothing to do. Save this time by skipping that task.
+variables:
+  runCodesignValidationInjection: false
+
+jobs:
+- job: CheckChangelog
+  displayName: Comment on the PR if the changelog is not updated
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  pool:
+    vmImage: ubuntu-latest
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 1
+  workspace:
+    clean: all
+
+  steps:
+  - checkout: self
+    clean: true
+    fetchDepth: 1
+    persistCredentials: true
+
+  - task: UsePythonVersion@0
+    displayName: Use Python 3.x
+  - bash: python3 -m pip install github3.py==1.3.0
+    displayName: Install the github3.py REST API client for Python
+
+  - task: PythonScript@0
+    displayName: Comment on the PR if the changelog is not updated
+    inputs:
+      scriptSource: inline
+      script: |
+        import github3
+        import requests
+        import textwrap
+        from pprint import pprint
+        from subprocess import run, PIPE
+
+        auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
+        class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
+            def __call__(self, r):
+                r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
+                return r
+
+        github = github3.GitHub()
+        github.session.auth = HTTPHardcodedHeaderAuth()
+
+        github_org, repo = "$(Build.Repository.Name)".split("/")
+        pr = github.pull_request(github_org, repo, $(System.PullRequest.PullRequestNumber))
+
+        changelog_comment = next((comment for comment in pr.review_comments() if "<!-- changelog-comment -->" in comment.body), None)
+        changelog_modified = "CHANGELOG.md" in (pullfile.filename for pullfile in pr.files())
+
+        if changelog_comment and changelog_modified:
+            changelog_comment.delete()
+        elif not changelog_comment and not changelog_modified:
+            message = textwrap.dedent("""\
+                This pull request does not update CHANGELOG.md.
+
+                Please consider if this change would be noticeable to a partner or user and either update CHANGELOG.md or resolve this conversation.
+                <!-- changelog-comment -->""")
+            # Only comments on files have the nice "Resolve conversation" button, so we'll just comment on position 0
+            # of the first non-deleted file
+            try:
+                comment_file = next(f for f in pr.files() if f.status != "removed")
+                pr.create_review_comment(message, "$(System.PullRequest.SourceCommitId)", comment_file.filename, position=1)
+            except StopIteration:
+                # No added files in this PR
+                pass
+            except github3.exceptions.UnprocessableEntity as e:
+                print("Exception:")
+                pprint(e.__dict__)
+                print("\n\nOriginal Request:")
+                pprint(e.response.request.__dict__)
+                print("\n\nResponse:")
+                pprint(e.response.__dict__)
+                raise
