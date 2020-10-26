@@ -396,8 +396,7 @@ MSAL also provides a public API to query multiple accounts, granted that they ex
 #### Swift
 
 ```swift
-//import other key libraries  
-#import "MSAL.h" //Additionally, import this library 
+#import MSAL //Make sure to import MSAL  
 
 let config = MSALPublicClientApplicationConfig(clientId:clientId
                                            	redirectUri:redirectUri
@@ -444,8 +443,8 @@ if #available(iOS 13.0, *)
 #import "MSAL-umbrella.h" //Make sure to import umbrella file 
 
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                             redirectUri:redirectUri
-                                                                                                  authority:authority];
+     redirectUri:redirectUri
+       authority:authority];
 
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca"]; //init with account identifier
