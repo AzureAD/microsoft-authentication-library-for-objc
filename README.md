@@ -383,7 +383,7 @@ parameters.completionBlockQueue = dispatch_get_main_queue();
 
 MSAL also provides a public API to query multiple accounts, granted that they exist in the MSAL cache.
 
-1) Make sure the umbrella header MSAL/MSAL.h is imported 
+1) Make sure the umbrella header MSAL-umbrella.h is imported (just MSAL for Swift)
 
 2) Create config, then use it to initialize an application object 
 
@@ -426,7 +426,7 @@ if #available(iOS 13.0, macOS 10.15, *)
                          //handle error
                      }
                                        
-                     guard let resp = result else {return}
+                     guard let resp = result else {return} //process result
                                                                                              
          })                                                               
                                                                                                                                                              
