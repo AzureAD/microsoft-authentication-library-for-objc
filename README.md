@@ -379,6 +379,112 @@ parameters.completionBlockQueue = dispatch_get_main_queue();
 }];
 ```
 
+### Multiple Accounts Mode
+
+MSAL also provides a public API to query multiple accounts, granted that they exist in the MSAL cache.
+
+1) Make sure the umbrella header MSAL-umbrella.h is imported (just MSAL for Swift)
+
+2) Create config, then use it to initialize an application object 
+
+3) Also initialize MSALAccountEnumerationParameters object with the account identifier. Each MSALAccount object has a parameter called "identifier", which represents the unique account identifier associated with the given MSALAccount object. We recommend using it as the primary search criterion. 
+
+4) Then invoke the API "accountsFromDeviceForParameters" from the application object using the enumeration parameter. If you have multiple accounts in MSAL cache, it will return an array containg MSALAccounts that have the account identifier you specified in the previous step. 
+
+5) Once the MSAL account is retrieved, invoke acquire token silent operation
+
+#### Swift
+
+```swift
+#import MSAL //Make sure to import MSAL  
+
+let config = MSALPublicClientApplicationConfig(clientId:clientId
+                                           	redirectUri:redirectUri
+                                            	authority:authority)
+guard let application = MSALPublicClientApplication(configuration: config) else { return }
+
+let accountIdentifier = "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca"
+let parameters = MSALAccountEnumerationParameters(identifier:accountIdentifier)
+
+var scopeArr = ["https://graph.microsoft.com/.default"]
+
+if #available(iOS 13.0, macOS 10.15, *)
+{
+	 application.accountsFromDeviceForParameters(with: parameters, completionBlock:{(accounts, error) in
+         if let error = error 
+         {
+            //Handle error
+         }
+         
+         guard let accountObjs = accounts else {return}
+         
+         let tokenParameters = MSALSilentTokenParameters(scopes:scopeArr, account: accountObjs[0]);
+                                                                                                   
+         application.acquireTokenSilentWithParameters(with: tokenParameters, completionBlock:{(result, error) in 
+                     if let error = error
+                     {
+                         //handle error
+                     }
+                                       
+                     guard let resp = result else {return} //process result
+                                                                                             
+         })                                                               
+                                                                                                                                                             
+   })
+  
+}
+```
+
+
+#### Objective-C
+
+```objective-c
+//import other key libraries  
+#import "MSAL-umbrella.h" //Make sure to import umbrella file 
+
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+     redirectUri:redirectUri
+       authority:authority];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca"]; //init with account identifier
+
+    NSArray<NSString *> *scopeArr = [[NSArray alloc] initWithObjects: @"https://graph.microsoft.com/.default",nil]; //define scope
+
+    if (@available(iOS 13.0, macOS 10.15, *)) //Currently, this public API requires iOS version 13 or greater.
+    {
+        [application accountsFromDeviceForParameters:parameters
+                                     completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
+        {
+            if (error)
+            {
+              //Log error & return 
+            }
+          
+            if (accounts)
+            {
+                NSLog(@"hi there");
+                MSALSilentTokenParameters *tokenParameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopeArr account:accounts[0]];
+
+                [application acquireTokenSilentWithParameters:tokenParameters
+                                completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+                 {
+                    if (error)
+                    {
+                        //Log Error & return 
+                    }
+                    if (result)
+                    {
+                        //process result
+                    }
+                }
+                 ];
+            }
+     
+        }];
+    }
+```
+
 ### Detect shared device mode
 
 Use following code to read current device configuration, including whether device is configured as shared:
