@@ -1,3 +1,6 @@
+## TBD 
+* Updated user guide to provide a sample Swift & ObjC code for querying a specific account and return token silently when multiple accounts are present in the cache. 
+
 ## [1.1.11] - 2020-10-16
 * Enabled PKeyAuth via UserAgent String on MacOS 
 * Added a public API for both iOS and MacOS that returns a default recommended WKWebview
