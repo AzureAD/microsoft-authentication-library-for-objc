@@ -1,5 +1,6 @@
 ## TBD 
 * Updated user guide to provide a sample Swift & ObjC code for querying a specific account and return token silently when multiple accounts are present in the cache. 
+* Added client-side fix for the known ADFS PKeyAuth issue. (#890)
 
 ## [1.1.11] - 2020-10-16
 * Enabled PKeyAuth via UserAgent String on MacOS 
