@@ -143,7 +143,7 @@ Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and 
 	<string>msauthv3</string>
 </array>
 ```
-See more info about [configuring redirect uri for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/redirect-uris)
+See more info about [configuring redirect uri for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/reply-url)
 
 3. To handle a callback, add the following to `appDelegate`:
 
