@@ -161,7 +161,7 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    // Equality of MSALAccount is depending on either one of homeAccountId or username
+    // Equality of MSALAccount is depending on equality of homeAccountId or username
     // So we are not able to calculate a precise hash
     return hash;
 }
