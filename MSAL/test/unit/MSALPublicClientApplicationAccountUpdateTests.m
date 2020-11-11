@@ -220,6 +220,8 @@
     
     NSError *error = nil;
     BOOL result = [MSALTestCacheTokenResponse msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"
+                                                                                     uid:@"myuid"
+                                                                                    utid:@"utid"
                                                                       tokenCacheAccessor:self.tokenCacheAccessor
                                                                                    error:&error];
     XCTAssertTrue(result);
