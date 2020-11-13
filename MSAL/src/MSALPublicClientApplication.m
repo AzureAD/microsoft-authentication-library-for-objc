@@ -440,6 +440,12 @@
                               error:(NSError * __autoreleasing *)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
+    if ([NSString msidIsStringNilOrBlank:username])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"username is nil or empty which is unexpected");
+        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"No username is provided", nil, nil, nil, nil, nil, YES);;
+        return nil;
+    }
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                 accountMetadataCache:self.accountMetadataCache
