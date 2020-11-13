@@ -442,7 +442,8 @@
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
     if ([NSString msidIsStringNilOrBlank:username])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"username is nil or empty which is unexpected");
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"username is nil or empty which is unexpected");
+        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No username is provided", nil, nil, nil, nil, nil, YES);;
         return nil;
     }
     
