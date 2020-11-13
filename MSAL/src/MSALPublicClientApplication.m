@@ -443,7 +443,7 @@
     if ([NSString msidIsStringNilOrBlank:username])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"username is nil or empty which is unexpected");
-        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No username is provided", nil, nil, nil, nil, nil, YES);;
+        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"No username is provided", nil, nil, nil, nil, nil, YES);;
         return nil;
     }
     
