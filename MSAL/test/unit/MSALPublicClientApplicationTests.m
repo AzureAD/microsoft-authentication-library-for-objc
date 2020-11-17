@@ -2948,6 +2948,37 @@
     XCTAssertNotNil(account);
 }
 
+- (void)testFetchAccountWithEmptyUsername_shouldReturnError
+{
+    [self msalStoreTokenResponseInCache];
+    
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+    
+    NSError *error;
+    __auto_type account = [application accountForUsername:@"" error:&error];
+    XCTAssertNotNil(error);
+    XCTAssertNil(account);
+}
+
+- (void)testFetchAccountWithNilUsername_shouldReturnError
+{
+    [self msalStoreTokenResponseInCache];
+    
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+    
+    NSString *username = nil;
+    
+    NSError *error;
+    __auto_type account = [application accountForUsername:username error:&error];
+    XCTAssertNotNil(error);
+    XCTAssertNil(account);
+}
+
+
 #pragma mark - removeAccount
 
 - (void)testRemoveAccount_whenAccountExists_shouldRemoveAccount
