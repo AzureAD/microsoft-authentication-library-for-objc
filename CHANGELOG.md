@@ -1,4 +1,5 @@
 ## TBD 
+* Added cross-cloud B2B support.
 * Fixed logic to handle links that open in new tab for embedded webview.
 * Updated user guide to provide a sample Swift & ObjC code for querying a specific account and return token silently when multiple accounts are present in the cache. 
 
