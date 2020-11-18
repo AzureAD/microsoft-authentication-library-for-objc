@@ -2054,8 +2054,10 @@
 
 - (void)testAllAccounts_when2AccountExists_shouldReturn2Accounts
 {
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common" uid:@"myuid"
+                                                utid:@"utid"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common" uid:@"myuid2"
+                                                utid:@"utid2"];
     
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     application.tokenCache = self.tokenCacheAccessor;
@@ -2087,9 +2089,9 @@
     
     XCTAssertEqualObjects(account2.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account2.environment, @"example.com");
-    XCTAssertEqualObjects(account2.homeAccountId.identifier, @"myuid.utid");
-    XCTAssertEqualObjects(account2.homeAccountId.objectId, @"myuid");
-    XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"utid");
+    XCTAssertEqualObjects(account2.homeAccountId.identifier, @"myuid2.utid2");
+    XCTAssertEqualObjects(account2.homeAccountId.objectId, @"myuid2");
+    XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"utid2");
 }
 
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
@@ -2544,8 +2546,10 @@
 
 - (void)testCurrentAccount_whenBrokerDisabled_andMultipleAccounts_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"uid:@"myuid"
+                                                utid:@"utid"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"uid:@"myuid2"
+                                                utid:@"utid2"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -2730,8 +2734,10 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
 {
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common" uid:@"myuid"
+                                                utid:@"utid"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common" uid:@"myuid2"
+                                                utid:@"utid2"];
     [self msalAddDiscoveryResponse];
     
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
@@ -2759,8 +2765,10 @@
 
 - (void)testAllAccountsFilteredByAuthority_whenAccountWithAliasAuthorityExists_shouldReturnThatAccount
 {
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.windows.net/common"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.windows.net/common" uid:@"myuid"
+                                                utid:@"utid"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common" uid:@"myuid2"
+                                                utid:@"utid2"];
     [self msalAddDiscoveryResponse];
     
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
@@ -3563,9 +3571,13 @@
 }
 
 - (void)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
+                                               uid:(NSString *)uid
+                                              utid:(NSString *)utid
 {
     NSError *error = nil;
     BOOL result = [MSALTestCacheTokenResponse msalStoreTokenResponseInCacheWithAuthority:authorityString
+                                                                                     uid:uid
+                                                                                    utid:utid
                                                                       tokenCacheAccessor:self.tokenCacheAccessor
                                                                                    error:&error];
     XCTAssertTrue(result);
@@ -3574,7 +3586,7 @@
 
 - (void)msalStoreTokenResponseInCache
 {
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
+    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common" uid:@"myuid" utid:@"utid"];
 }
 
 - (void)msalStoreSecondAppTokenResponseInCache
