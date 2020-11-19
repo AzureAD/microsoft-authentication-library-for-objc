@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,27 +16,33 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDTokenResult;
-@protocol MSALAuthenticationSchemeProtocol;
-@protocol MSALAuthenticationSchemeProtocolInternal;
+NS_ASSUME_NONNULL_BEGIN
+
 @class MSIDDevicePopManager;
+@class MSIDAccessToken;
+@class MSIDAuthenticationScheme;
 
-@interface MSALResult (Internal)
+@protocol MSALAuthenticationSchemeProtocolInternal <NSObject>
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                               authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
-                               popManager:(MSIDDevicePopManager *)popManager
-                                    error:(NSError **)error;
+- (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
+
+- (nullable NSDictionary *)getSchemeParameters:(nonnull MSIDDevicePopManager *)popManager;
+
+- (nullable NSString *)getAuthorizationHeader:(nonnull NSString *)accessToken;
+
+- (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken
+                                 popManager:(nullable MSIDDevicePopManager *)popManager
+                                      error:(NSError **)error;
+
 
 @end
+
+NS_ASSUME_NONNULL_END

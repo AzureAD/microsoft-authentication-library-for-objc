@@ -147,6 +147,12 @@
 		1EF395FF246DFAD200647FDB /* MSALAuthScheme.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EF395FC246DFAD200647FDB /* MSALAuthScheme.m */; };
 		1EF39600246DFAD200647FDB /* MSALAuthScheme.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EF395FC246DFAD200647FDB /* MSALAuthScheme.m */; };
 		1EFD703424AC3E86007265FF /* MSALTestAppAsymmetricKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */; };
+		23014D192567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */; };
+		23014D1A2567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */; };
+		23014D4525672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */; };
+		23014D4625672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */; };
+		23014D5025672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */; };
+		23014D5125672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -1103,6 +1109,9 @@
 		1EF395FC246DFAD200647FDB /* MSALAuthScheme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthScheme.m; sourceTree = "<group>"; };
 		1EFD703224AC3E86007265FF /* MSALTestAppAsymmetricKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAsymmetricKey.h; sourceTree = "<group>"; };
 		1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAsymmetricKey.m; sourceTree = "<group>"; };
+		23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemeProtocolInternal.h; sourceTree = "<group>"; };
+		23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAuthenticationSchemePop+Internal.h"; sourceTree = "<group>"; };
+		23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAuthenticationSchemeBearer+Internal.h"; sourceTree = "<group>"; };
 		231CE9DD1FEC684C00E95D3E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "unit-test-host.entitlements"; sourceTree = "<group>"; };
 		232D61482248484C00260C42 /* MSALClaimsRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALClaimsRequest.h; sourceTree = "<group>"; };
@@ -2095,6 +2104,7 @@
 				96D9A5461E4AB21400674A85 /* telemetry */,
 				D673F06E1E4411960018BA91 /* util */,
 				D65A6F731E3FF3D900C69FBA /* MSAL_Internal.h */,
+				23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */,
 				1EE776BD246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.m */,
 				1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */,
 				23576D3F2252C07700D6F7BA /* MSALClaimsRequest+Internal.h */,
@@ -2142,6 +2152,8 @@
 				B2E2A9402393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.h */,
 				B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */,
 				B2C0E79C23AC7996006C9CAD /* MSALParameters.m */,
+				23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */,
+				23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -2655,6 +2667,7 @@
 				96CF951C2268FD0400D97374 /* MSAL.h in Headers */,
 				B28BDA8E217E9EAB003E5670 /* MSALOauth2ProviderFactory.h in Headers */,
 				6077D4A022498BFF001798A2 /* MSALTenantProfile.h in Headers */,
+				23014D4525672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h in Headers */,
 				96CF952F2268FD0500D97374 /* MSALIndividualClaimRequest.h in Headers */,
 				23576D402252C07700D6F7BA /* MSALClaimsRequest+Internal.h in Headers */,
 				96CF952B2268FD0500D97374 /* MSALTokenParameters.h in Headers */,
@@ -2672,6 +2685,7 @@
 				B273D0E2226E85F1005A7BB4 /* MSALPromptType_Internal.h in Headers */,
 				1EE776BE246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h in Headers */,
 				B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
+				23014D5025672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */,
 				B273D0D3226E85D0005A7BB4 /* MSALTelemetryConfig+Internal.h in Headers */,
 				96CF951E2268FD0400D97374 /* MSALError.h in Headers */,
 				B2C0E79D23AC7996006C9CAD /* MSALParameters.h in Headers */,
@@ -2725,6 +2739,7 @@
 				96CF95162268FD0400D97374 /* MSALGlobalConfig.h in Headers */,
 				96CF951F2268FD0400D97374 /* MSALPublicClientApplication.h in Headers */,
 				B2E2A9422393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.h in Headers */,
+				23014D192567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h in Headers */,
 				B27CCDE0229F65D700CAD565 /* MSALAccount+MultiTenantAccount.h in Headers */,
 				B203459D21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */,
 				B253151923DD607600432133 /* MSALDeviceInformation.h in Headers */,
@@ -2743,6 +2758,7 @@
 				B273D0E7226E85FA005A7BB4 /* MSALResult+Internal.h in Headers */,
 				96B5E6ED2256D180002232F9 /* MSALSliceConfig.h in Headers */,
 				2338295522D7DC9E001B8AD6 /* MSALWebviewParameters.h in Headers */,
+				23014D5125672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */,
 				96B5E6CF2256D152002232F9 /* MSALCacheConfig.h in Headers */,
 				B29A56A6228262770023F5E6 /* MSALExternalAccountProviding.h in Headers */,
 				1E72193A24773D1B00AB9B67 /* MSALHttpMethod.h in Headers */,
@@ -2756,6 +2772,7 @@
 				B26756CB22921C5B000F01D7 /* MSALB2COauth2Provider.h in Headers */,
 				9682A630218290FE00E37E63 /* MSALDefinitions.h in Headers */,
 				D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */,
+				23014D1A2567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h in Headers */,
 				D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */,
 				D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */,
 				B2D478C1230E3EBB005AE186 /* MSALTenantProfile+Internal.h in Headers */,
@@ -2819,6 +2836,7 @@
 				B26756DA22922375000F01D7 /* MSALOauth2Authority.h in Headers */,
 				23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */,
 				1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */,
+				23014D4625672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h in Headers */,
 				B273D0C0226E85A7005A7BB4 /* MSALGlobalConfig+Internal.h in Headers */,
 				963377C0211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
 				B203459E21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */,

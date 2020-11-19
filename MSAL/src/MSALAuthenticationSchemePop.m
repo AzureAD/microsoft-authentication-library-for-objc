@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemePop+Internal.h"
 #import "MSIDAuthenticationSchemePop.h"
 #import "MSALHttpMethod.h"
 #import "MSIDDevicePopManager.h"
@@ -64,6 +64,13 @@ static NSString *keyDelimiter = @" ";
 
     return self;
 }
+
+- (NSString *)authenticationScheme
+{
+    return MSALParameterStringForAuthScheme(self.scheme);
+}
+
+#pragma mark - MSALAuthenticationSchemeProtocolInternal
 
 - (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
@@ -116,11 +123,6 @@ static NSString *keyDelimiter = @" ";
     }
     
     return signedAccessToken;
-}
-
-- (NSString *)authenticationScheme
-{
-    return MSALParameterStringForAuthScheme(self.scheme);
 }
 
 - (NSString *)getAuthorizationHeader:(NSString *)accessToken

@@ -24,16 +24,16 @@
 
 
 #import <XCTest/XCTest.h>
-#import "MSALAuthenticationSchemePop.h"
-#import "MSALAuthenticationSchemeBearer.h"
+#import "MSALAuthenticationSchemePop+Internal.h"
+#import "MSALAuthenticationSchemeBearer+Internal.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSALAuthenticationSchemeProtocolInternal.h"
 #import "MSALDefinitions.h"
 #import "MSIDAccessToken.h"
 #import "MSIDDevicePopManager.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccessTokenWithAuthScheme.h"
 #import "MSIDAuthenticationScheme.h"
-#import "MSALAuthenticationSchemeBearer.h"
 #import "MSIDAuthenticationSchemePop.h"
 #import "MSIDOAuth2Constants.h"
 #import "MSIDDevicePopManager.h"

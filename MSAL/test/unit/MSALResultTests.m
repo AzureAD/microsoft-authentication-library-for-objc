@@ -41,8 +41,8 @@
 #import "MSALAuthority_Internal.h"
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDAccessToken.h"
-#import "MSALAuthenticationSchemeBearer.h"
-#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemeBearer+Internal.h"
+#import "MSALAuthenticationSchemePop+Internal.h"
 #import "MSALDevicePopManagerUtil.h"
 
 @interface MSALResultTests : MSALTestCase
