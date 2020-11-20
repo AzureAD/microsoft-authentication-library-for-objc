@@ -38,21 +38,28 @@
 @implementation MSALTestCacheTokenResponse
 
 + (BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
+                                               uid:(NSString *)uid
+                                              utid:(NSString *)utid
                                tokenCacheAccessor:(MSIDDefaultTokenCacheAccessor *)tokenCacheAccessor
                                             error:(NSError **)error
 {
     //store at & rt in cache
-    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil];
+    MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:nil uid:uid utid:utid];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:authorityString];
     
     return [tokenCacheAccessor saveTokensWithConfiguration:configuration
-                                                              response:msidResponse
-                                                               factory:[MSIDAADV2Oauth2Factory new]
-                                                               context:nil
-                                                                 error:error];
+                                                  response:msidResponse
+                                                   factory:[MSIDAADV2Oauth2Factory new]
+                                                   context:nil
+                                                     error:error];
 }
 
 + (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithFamilyId:(NSString *)familyId
+{
+    return [self msalDefaultTokenResponseWithFamilyId:familyId uid:@"myuid" utid:@"utid"];
+}
+
++ (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithFamilyId:(NSString *)familyId uid:(NSString *)uid utid:(NSString *)utid
 {
     NSDictionary *idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com", @"tid": @"utid"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -62,8 +69,8 @@
                                                      RT:@"fakeRefreshToken"
                                                  scopes:[[NSOrderedSet alloc] initWithArray:@[@"fakescope1 fakescope2"]]
                                                 idToken:rawIdToken
-                                                    uid:@"myuid"
-                                                   utid:@"utid"
+                                                    uid:uid
+                                                   utid:utid
                                                familyId:familyId];
 }
 
