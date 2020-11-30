@@ -1,3 +1,5 @@
+// swift-tools-version:5.3
+
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -22,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-
 import PackageDescription
 
 let package = Package(
@@ -35,8 +36,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "MSAL",
-            url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/kaisong1990/test-spm/MSAL/MSAL.xcframework.zip",
-            checksum: "9d459f75a800cc607a408dc41ca88a10b6ae932cbce96d116b2083c70c9a8642"
+            url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/kaisong1990/test-spm/MSAL.xcframework.zip",
+            checksum: "5f8ef19064c0aeab8d9120df38bddfae6b03c2b4e598d10160c219a2064fe9a3"
             )
     ]
 )
