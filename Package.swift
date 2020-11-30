@@ -37,7 +37,7 @@ let package = Package(
         .binaryTarget(
             name: "MSAL",
             url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/kaisong1990/test-spm/MSAL.xcframework.zip",
-            checksum: "9d459f75a800cc607a408dc41ca88a10b6ae932cbce96d116b2083c70c9a8642"
+            checksum: "4dab34779871a8db991daa2883822cf2ae45a49b1f72d8010fbfec241f0cffde"
             )
     ]
 )
