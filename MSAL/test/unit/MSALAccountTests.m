@@ -408,4 +408,20 @@
     XCTAssertNotEqualObjects(account1, account2);
 }
 
+- (void)testEquals_whenIdentifiersEqual_environmentDifferent_shouldConsiderEqual
+{
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
+    MSALAccount *account1 = [[MSALAccount alloc] initWithUsername:@"displayableID"
+                                                    homeAccountId:accountId
+                                                      environment:@"login.microsoftonline.com"
+                                                   tenantProfiles:nil];
+    
+    XCTAssertNotNil(account1);
+    MSALAccount *account2 = [account1 copy];
+    account2.environment = @"login.microsoftonline.de";
+    
+    XCTAssertNotNil(account2);
+    XCTAssertEqualObjects(account1, account2);
+}
+
 @end

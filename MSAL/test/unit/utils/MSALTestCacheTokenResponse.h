@@ -34,6 +34,8 @@
 @interface MSALTestCacheTokenResponse : NSObject
 
 + (BOOL)msalStoreTokenResponseInCacheWithAuthority:(NSString *)authorityString
+                                               uid:(NSString *)uid
+                                              utid:(NSString *)utid
                                tokenCacheAccessor:(MSIDDefaultTokenCacheAccessor *)tokenCacheAccessor
                                             error:(NSError **)error;
 

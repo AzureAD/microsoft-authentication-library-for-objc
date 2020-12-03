@@ -161,7 +161,8 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    hash = hash * 31 + self.environment.hash;
+    // Equality of MSALAccount is depending on equality of homeAccountId or username
+    // So we are not able to calculate a precise hash
     return hash;
 }
 
@@ -180,7 +181,6 @@
         result &= [self.username.lowercaseString isEqualToString:user.username.lowercaseString];
     }
     
-    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
     return result;
 }
 
