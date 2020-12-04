@@ -1,3 +1,6 @@
+## [1.1.13] - 2020-12-04
+* Fix on checking error pointer before assigning to prevent crashes
+
 ## [1.1.12] - 2020-12-02
 * Added cross-cloud B2B support.
 * Fixed logic to handle links that open in new tab for embedded webview.
