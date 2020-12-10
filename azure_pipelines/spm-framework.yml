@@ -37,6 +37,7 @@ jobs:
     displayName: Build archive for iOS device
     inputs:
       actions: 'archive'
+      sdk: 'iphoneos'
       xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (iOS Framework)'
       packageApp: false
@@ -48,6 +49,7 @@ jobs:
     displayName: Build archive for macOS
     inputs:
       actions: 'archive'
+      sdk: 'macosx'
       xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (Mac Framework)'
       packageApp: false
