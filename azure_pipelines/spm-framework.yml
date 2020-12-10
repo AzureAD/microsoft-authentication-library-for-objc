@@ -54,7 +54,7 @@ jobs:
       scheme: 'MSAL (Mac Framework)'
       packageApp: false
       args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES'
-      archivePath: $(Build.binariesDirectory)/macOs
+      archivePath: $(Build.binariesDirectory)/macOS
 
   - task: Bash@3
     displayName: Build xcframework from archives
@@ -64,6 +64,9 @@ jobs:
         # Building xcframework
         cd $(Build.BinariesDirectory)
         
+        echo 'Build dir : $(Build.binariesDirectory)'
+        echo '$(ls)'
+
         xcodebuild -create-xcframework \
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
