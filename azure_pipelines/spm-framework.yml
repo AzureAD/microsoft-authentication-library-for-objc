@@ -25,7 +25,7 @@ jobs:
     inputs:
       actions: 'archive'
       sdk: 'iphonesimulator'
-      xcWorkspacePath: '**/*.xcodeproj/MSAL.xcworkspace'
+      xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (iOS Framework)'
       packageApp: false
       destinationPlatformOption: 'iOS'
@@ -35,7 +35,7 @@ jobs:
   - task: Xcode@5
     inputs:
       actions: 'archive'
-      xcWorkspacePath: '**/*.xcodeproj/MSAL.xcworkspace'
+      xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (iOS Framework)'
       packageApp: false
       destinationPlatformOption: 'iOS'
@@ -46,7 +46,7 @@ jobs:
   - task: Xcode@5
     inputs:
       actions: 'archive'
-      xcWorkspacePath: '**/*.xcodeproj/MSAL.xcworkspace'
+      xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (Mac Framework)'
       packageApp: false
       destinationPlatformOption: 'macOS'
