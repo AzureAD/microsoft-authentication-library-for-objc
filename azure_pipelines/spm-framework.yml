@@ -18,10 +18,12 @@ jobs:
   steps:
   - checkout: self
     clean: true
+    submodules: true
     fetchDepth: 1
     persistCredentials: true
 
   - task: Xcode@5
+    displayName: Build archive for iOS Simulator
     inputs:
       actions: 'archive'
       sdk: 'iphonesimulator'
@@ -32,6 +34,7 @@ jobs:
       archivePath: $(Build.binariesDirectory)/iOS-Sim
 
   - task: Xcode@5
+    displayName: Build archive for iOS device
     inputs:
       actions: 'archive'
       xcWorkspacePath: 'MSAL.xcworkspace'
@@ -42,6 +45,7 @@ jobs:
       archivePath: $(Build.binariesDirectory)/iOS
 
   - task: Xcode@5
+    displayName: Build archive for macOS
     inputs:
       actions: 'archive'
       xcWorkspacePath: 'MSAL.xcworkspace'
@@ -51,6 +55,7 @@ jobs:
       archivePath: $(Build.binariesDirectory)/macOs
 
   - task: Bash@3
+    displayName: Build xcframework from archives
     inputs:
       targetType: 'inline'
       script: |
