@@ -207,6 +207,8 @@
 		2396EFDD2582D8A600ADA9EB /* MSALSSOExtensionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B253152F23DD684E00432133 /* MSALSSOExtensionRequestHandler.m */; };
 		2396EFDE2582D8B000ADA9EB /* MSALDeviceInfoProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = B253152923DD66A300432133 /* MSALDeviceInfoProvider.m */; };
 		2396EFE72582D8B100ADA9EB /* MSALDeviceInfoProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = B253152923DD66A300432133 /* MSALDeviceInfoProvider.m */; };
+		2396EFE82582DEFC00ADA9EB /* MSALDeviceInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = B253151823DD607600432133 /* MSALDeviceInformation.m */; };
+		2396EFF12582DEFE00ADA9EB /* MSALDeviceInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = B253151823DD607600432133 /* MSALDeviceInformation.m */; };
 		23A169B52073325500B051F3 /* MSALPublicClientApplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F07C1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m */; };
 		23A68A7520F5386A0071E435 /* MSALAADAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A7220F5386A0071E435 /* MSALAADAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		23A68A7620F5386A0071E435 /* MSALAADAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 23A68A7320F5386A0071E435 /* MSALAADAuthority.m */; };
@@ -3519,6 +3521,7 @@
 				04A6B6162269383F0035C7C2 /* MSALOauth2ProviderFactory.m in Sources */,
 				1E5319C424A51E51007BCF30 /* MSALAuthScheme.m in Sources */,
 				04A6B5C92269376A0035C7C2 /* MSALErrorConverter.m in Sources */,
+				2396EFE82582DEFC00ADA9EB /* MSALDeviceInformation.m in Sources */,
 				B2D478BB230E3E94005AE186 /* MSALExternalAccountHandler.m in Sources */,
 				B273D0DC226E85DD005A7BB4 /* MSALSliceConfig.m in Sources */,
 				04A6B60B2269382E0035C7C2 /* MSALAADAuthority.m in Sources */,
@@ -3567,6 +3570,7 @@
 				04A6B60E226938330035C7C2 /* MSALADFSAuthority.m in Sources */,
 				B273D0EF226E8609005A7BB4 /* MSALTokenParameters.m in Sources */,
 				B273D0F2226E860B005A7BB4 /* MSALInteractiveTokenParameters.m in Sources */,
+				2396EFF12582DEFE00ADA9EB /* MSALDeviceInformation.m in Sources */,
 				B2D478BC230E3EA8005AE186 /* MSALWebviewParameters.m in Sources */,
 				04A6B5B3226937070035C7C2 /* MSALWebviewType.m in Sources */,
 				B2D47895230E3DEC005AE186 /* MSALOauth2Authority.m in Sources */,
