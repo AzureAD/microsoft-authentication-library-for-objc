@@ -30,7 +30,7 @@ jobs:
       xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (iOS Framework)'
       packageApp: false
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES'
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS-Sim'
       exportPath: $(Build.binariesDirectory)/iOS-Sim
 
   - task: Xcode@5
@@ -42,7 +42,7 @@ jobs:
       scheme: 'MSAL (iOS Framework)'
       packageApp: false
       destinationTypeOption: 'devices'
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES'
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS'
       exportPath: $(Build.binariesDirectory)/iOS
 
   - task: Xcode@5
@@ -53,7 +53,7 @@ jobs:
       xcWorkspacePath: 'MSAL.xcworkspace'
       scheme: 'MSAL (Mac Framework)'
       packageApp: false
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES'
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/macOS'
       exportPath: $(Build.binariesDirectory)/macOS
 
   - task: Bash@3
