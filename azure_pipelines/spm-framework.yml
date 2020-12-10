@@ -59,12 +59,13 @@ jobs:
   - task: Bash@3
     displayName: Build xcframework from archives
     inputs:
+      workingDirectory: $(Build.binariesDirectory)
       targetType: 'inline'
       script: |
         # Building xcframework
         cd $(Build.BinariesDirectory)
         
-        echo 'Build dir : $pwd'
+        echo "Build Dir = $(pwd)"
         echo "$(ls)"
 
         xcodebuild -create-xcframework \
