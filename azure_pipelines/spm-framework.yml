@@ -111,3 +111,12 @@ jobs:
       SessionTimeout: '60'
       MaxConcurrency: '50'
       MaxRetryAttempts: '5'
+      
+  - task: ArchiveFiles@2
+    displayName: Zip xcframework
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)/MSAL.xcframework'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
