@@ -101,7 +101,7 @@ jobs:
       targetType: 'inline'
       script: |
         for file in $(System.ArtifactsDirectory)/*; do       
-          f=$(echo "${file##*/}");
+          f=$(echo "${file}");
           filename=$(echo $f| cut  -d'.zip' -f 1);
           echo "##vso[task.setvariable variable=releaseVersion]$filename"
         done
