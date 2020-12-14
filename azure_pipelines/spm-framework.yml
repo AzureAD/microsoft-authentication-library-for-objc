@@ -113,8 +113,8 @@ jobs:
       action: 'create'
       target: '$(Build.SourceVersion)'
       tagSource: 'gitTag'
-      tagPattern: 'releaseVersion'
-      title: 'GetReleaseVersion.releaseVersion'
+      tagPattern: '$(releaseVersion)'
+      title: '$(GetReleaseVersion.releaseVersion)'
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'commitBased'
   
