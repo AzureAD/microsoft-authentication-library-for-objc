@@ -89,28 +89,15 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
   
-  # Download existing assests in the latest release & determine release version
-  - task: DownloadGitHubRelease@0
-    inputs:
-      connection: 'ameyapat'
-      userRepository: 'ameyapat/microsoft-authentication-library-for-objc'
-      defaultVersionType: 'latest'
-      downloadPath: '$(System.ArtifactsDirectory)'
- 
+  # GET latest release version
   - task: Bash@3
-    displayName: Get Release Version
-    name: GetReleaseVersionTask
     inputs:
       targetType: 'inline'
       script: |
-        for file in $(System.ArtifactsDirectory)/assets/*; do       
-          f=$(echo "${file}");
-          echo "f = ${f}"
-          filename=$(echo "$FILE" | cut -d'.' -f1);
-          echo "##vso[task.setvariable variable=releaseVersion]$filename"
-          echo filename
-        done
-      
+        rv=curl https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])"
+        
+        echo "##vso[task.setvariable variable=releaseVersion]rv"
+
   
   - task: GitHubRelease@1
     inputs:
@@ -119,9 +106,4 @@ jobs:
       action: 'edit'
       target: '$(releaseVersion)'
       tag: '$(releaseVersion)'
-      title: '$(releaseVersion)'
-      releaseNotesSource: 'inline'
-      releaseNotesInline: 'ADO test release'
-      assetUploadMode: 'replace'
       addChangeLog: false
-  
