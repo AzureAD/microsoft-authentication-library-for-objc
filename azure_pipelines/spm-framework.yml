@@ -97,6 +97,9 @@ jobs:
         rv=curl https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])"
         
         echo "##vso[task.setvariable variable=releaseVersion]rv"
+      failOnStderr: true
+      noProfile: false
+      noRc: false
 
   
   - task: GitHubRelease@1
