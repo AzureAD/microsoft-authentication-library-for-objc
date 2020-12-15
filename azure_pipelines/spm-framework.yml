@@ -107,8 +107,8 @@ jobs:
           f=$(echo "${file}");
           filename=$(echo "$FILE" | cut -d'.' -f1);
           echo "##vso[task.setvariable variable=releaseVersion]$filename"
-          echo "Filename in release = $(filename)"
-          echo "Filename in release = $(releaseVersion)"
+          echo $(filename)
+          echo $(releaseVersion)
         done
       
   
