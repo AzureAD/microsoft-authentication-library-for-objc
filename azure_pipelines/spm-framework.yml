@@ -94,9 +94,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        rv=curl "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | python3 -c "import sys, json; print(json.load(sys.stdin)['tag_name'])"
-        
-        echo "##vso[task.setvariable variable=releaseVersion]rv"
+        req=curl "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq '.tag_name'        
+        echo "##vso[task.setvariable variable=releaseVersion]req"
       failOnStderr: true
       noProfile: false
       noRc: false
