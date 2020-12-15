@@ -66,7 +66,6 @@ jobs:
         cd $(Build.BinariesDirectory)
         
         echo "Build Dir = $(pwd)"
-        echo "$(ls)"
 
         xcodebuild -create-xcframework \
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
@@ -104,6 +103,8 @@ jobs:
           f=$(echo "${file}");
           filename=$(echo "$FILE" | cut -d'.' -f1);
           echo "##vso[task.setvariable variable=releaseVersion]$filename"
+          echo "Filename in release = $(filename)"
+          echo "Filename in release = $(GetReleaseVersion.releaseVersion)"
         done
   
   - task: GitHubRelease@1
@@ -114,7 +115,8 @@ jobs:
       target: '$(GetReleaseVersion.releaseVersion)'
       tag: '$(GetReleaseVersion.releaseVersion)'
       title: '$(GetReleaseVersion.releaseVersion)'
+      releaseNotesSource: 'inline'
+      releaseNotesInline: 'ADO test release'
       assetUploadMode: 'replace'
-      changeLogCompareToRelease: 'lastFullRelease'
-      changeLogType: 'commitBased'
+      addChangeLog: false
   
