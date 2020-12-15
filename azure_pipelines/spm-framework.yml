@@ -110,11 +110,11 @@ jobs:
     inputs:
       gitHubConnection: 'ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
-      action: 'create'
-      target: '$(Build.SourceVersion)'
-      tagSource: 'gitTag'
-      tagPattern: '$(releaseVersion)'
+      action: 'edit'
+      target: '$(GetReleaseVersion.releaseVersion)'
+      tag: '$(GetReleaseVersion.releaseVersion)'
       title: '$(GetReleaseVersion.releaseVersion)'
+      assetUploadMode: 'replace'
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'commitBased'
   
