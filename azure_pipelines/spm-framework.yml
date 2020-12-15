@@ -94,7 +94,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        req=curl "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq '.tag_name'        
+        req=$(curl -sS "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq '.tag_name')        
         echo "##vso[task.setvariable variable=releaseVersion]req"
       failOnStderr: true
       noProfile: false
