@@ -105,10 +105,10 @@ jobs:
       script: |
         for file in $(System.ArtifactsDirectory)/*; do       
           f=$(echo "${file}");
+          echo "f = ${f}"
           filename=$(echo "$FILE" | cut -d'.' -f1);
           echo "##vso[task.setvariable variable=releaseVersion]$filename"
-          echo $(filename)
-          echo $(releaseVersion)
+          echo filename
         done
       
   
