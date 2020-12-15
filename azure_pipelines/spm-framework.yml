@@ -103,7 +103,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        for file in $(System.ArtifactsDirectory)/*; do       
+        for file in $(System.ArtifactsDirectory)/assets/*; do       
           f=$(echo "${file}");
           echo "f = ${f}"
           filename=$(echo "$FILE" | cut -d'.' -f1);
