@@ -106,6 +106,6 @@ jobs:
       gitHubConnection: 'ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
       action: 'edit'
-      target: 'Field is ignored in Edit mode'
+      target: '$(releaseVersion)'
       tag: '$(releaseVersion)'
       addChangeLog: false
