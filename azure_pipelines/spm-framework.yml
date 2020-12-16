@@ -106,6 +106,5 @@ jobs:
       gitHubConnection: 'ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
       action: 'edit'
-      target: '$(releaseVersion)'
       tag: '$(releaseVersion)'
       addChangeLog: false
