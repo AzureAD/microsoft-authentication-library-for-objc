@@ -84,6 +84,9 @@ jobs:
       FolderPath: '$(Build.binariesDirectory)'
       Pattern: 'MSAL.xcframework'
       signConfigType: 'inlineSignParams'
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
       inlineOperation: |
         [
                 {
@@ -108,10 +111,6 @@ jobs:
                     "ToolVersion" : "1.0"
                 }
         ]​
-      SessionTimeout: '60'
-      MaxConcurrency: '50'
-      MaxRetryAttempts: '5'
-      
   - task: ArchiveFiles@2
     displayName: Zip xcframework
     inputs:
