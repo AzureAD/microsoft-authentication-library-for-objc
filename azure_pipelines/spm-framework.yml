@@ -81,7 +81,7 @@ jobs:
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-      FolderPath: '$(Build.BinariesDirectory)/'
+      FolderPath: '/Users/runner/work/1/a/'
       Pattern: '*'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
