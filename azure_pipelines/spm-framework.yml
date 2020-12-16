@@ -77,13 +77,11 @@ jobs:
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.binariesDirectory)/MSAL.xcframework
       failOnStderr: true
-  
   - task: EsrpCodeSigning@1
-    displayName: ESRP CodeSigning
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.binariesDirectory)'
-      Pattern: '*.xcframework'
+      Pattern: 'MSAL.xcframework'
       signConfigType: 'inlineSignParams'
       inlineOperation: |
         ​​​​​​​​​"SigningInfo" : {
