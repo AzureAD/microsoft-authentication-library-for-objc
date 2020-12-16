@@ -83,7 +83,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.binariesDirectory)'
-      Pattern: 'MSAL.xcframework'
+      Pattern: '*.xcframework'
       signConfigType: 'inlineSignParams'
       inlineOperation: |
         ​​​​​​​​​"SigningInfo" : {
