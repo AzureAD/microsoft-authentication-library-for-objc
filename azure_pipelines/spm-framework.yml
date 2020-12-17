@@ -75,23 +75,14 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/MSAL.xcframework
+        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
   
-  - task: ArchiveFiles@2
-    displayName: Zip xcframework
-    inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)/MSAL.xcframework'
-      includeRootFolder: true
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-      replaceExistingArchive: true
-
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.ArtifactStagingDirectory)'
-      Pattern: 'MSAL.zip'
+      Pattern: 'MSAL.xcframework'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
@@ -121,6 +112,15 @@ jobs:
              "ToolVersion" : "1.0"
           }
         ]
+  
+  - task: ArchiveFiles@2
+    displayName: Zip xcframework
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)/MSAL.xcframework'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
+      replaceExistingArchive: true
   
   # GET latest release version tag
   - task: Bash@3
