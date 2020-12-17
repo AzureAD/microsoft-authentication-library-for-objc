@@ -90,8 +90,8 @@ jobs:
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-      FolderPath: '$(Build.binariesDirectory)'
-      Pattern: '**'
+      FolderPath: '$(Build.ArtifactStagingDirectory)'
+      Pattern: 'MSAL.zip'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
