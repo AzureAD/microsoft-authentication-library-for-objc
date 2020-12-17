@@ -96,12 +96,12 @@ jobs:
       SessionTimeout: '60'
       MaxConcurrency: '50'
       MaxRetryAttempts: '5'
-      UseMinimatch: True
+      UseMinimatch: false
       inlineOperation: |
         [
           {
             "keyCode": "CP-231522",
-            "operationSetCode": "SigntoolSign",
+            "operationSetCode": "iOSSdkSign",
             "parameters": {
               "OpusName" : "Microsoft",
               "OpusInfo" : "http://www.microsoft.com",
