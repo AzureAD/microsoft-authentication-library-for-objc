@@ -91,7 +91,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.binariesDirectory)'
-      Pattern: '**.xcframework'
+      Pattern: '*.xcframework'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
@@ -100,7 +100,7 @@ jobs:
       inlineOperation: |
         [
           {
-            "keyCode": "CP-231522",
+            "keyCode": "CP-233039-Apple",
             "operationSetCode": "iOSSdkSign",
             "parameters": {
               "OpusName" : "Microsoft",
@@ -114,7 +114,7 @@ jobs:
             "toolVersion": "1.0"
           },
           {
-            "KeyCode" : "CP-231522",
+            "KeyCode" : "CP-233039-Apple",
              "OperationCode" : "SigntoolVerify",
              "Parameters" : {},
              "ToolName" : "sign",
