@@ -122,7 +122,7 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
   
-  # GET latest release version
+  # GET latest release version tag
   - task: Bash@3
     displayName: GET latest release tag
     inputs:
