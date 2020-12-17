@@ -82,7 +82,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.binariesDirectory)/MSAL.xcframework'
-      Pattern: '*'
+      Pattern: '**'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
