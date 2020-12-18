@@ -128,11 +128,11 @@ jobs:
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
 
 #TODO : Replace forked repo with actual MSAL repo
-  - task: GitHubRelease@1
-    displayName: Update tagged release with signed framework
-    inputs:
-      gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc' #'$(Build.Repository.Name)'
-      action: 'edit'
-      tag: '$(releaseVersion)'
-      addChangeLog: false
+#  - task: GitHubRelease@1
+#    displayName: Update tagged release with signed framework
+#    inputs:
+#      gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+#      repositoryName: '$(Build.Repository.Name)'
+#      action: 'edit'
+#      tag: '$(releaseVersion)'
+#      addChangeLog: false
