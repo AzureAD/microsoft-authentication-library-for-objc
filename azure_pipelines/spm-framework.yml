@@ -108,39 +108,31 @@ jobs:
   #        }
   #     ]
   
-  # GET latest release version tag
- # - task: Bash@3
- #   displayName: GET latest release tag
- #   inputs:
- #     targetType: 'inline'
- #     script: |
- #       req=$(curl -sS "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq -r '.tag_name')        
- #       echo "##vso[task.setvariable variable=releaseVersion]$req"
- #     failOnStderr: true
- #     noProfile: false
- #     noRc: false
+# GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
+  - task: Bash@3
+    displayName: GET latest release tag
+    inputs:
+      targetType: 'inline'
+      script: |
+        req=$(curl -sS "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq -r '.tag_name')        
+        echo "##vso[task.setvariable variable=releaseVersion]$req"
+      failOnStderr: true
+      noProfile: false
+      noRc: false
 
-#  - task: Shellpp@0
-#    displayName: Generating release archive zips
-#    inputs:
-#      type: 'FilePath'
-#      scriptPath: 'ReleaseArchive.sh'
-#      args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
+  - task: Shellpp@0
+    displayName: Generating release archive zips
+    inputs:
+      type: 'FilePath'
+      scriptPath: 'ReleaseArchive.sh'
+      args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
 
-  #TODO : Replace forked repo with actual MSAL repo
-#  - task: GitHubRelease@1
-#    displayName: Update tagged release with signed framework
-#    inputs:
-#      gitHubConnection: 'ameyapat'
-#      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
-#      action: 'edit'
-#      tag: '$(releaseVersion)'
-#      addChangeLog: false
-      
+#TODO : Replace forked repo with actual MSAL repo
   - task: GitHubRelease@1
+    displayName: Update tagged release with signed framework
     inputs:
       gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-      repositoryName: '$(Build.Repository.Name)'
+      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc' #'$(Build.Repository.Name)'
       action: 'edit'
-      tag: '0.1'
+      tag: '$(releaseVersion)'
       addChangeLog: false
