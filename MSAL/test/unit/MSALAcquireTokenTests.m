@@ -2538,7 +2538,7 @@
     [self waitForExpectations:@[expectation] timeout:5];
 }
 
-- (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsInvalidGrant_ShouldUseMRRTToRefreshAccessToken
+- (void)testAcquireTokenSilent_whenMRRTUsedAndServerReturnsInvalidGrant_ShouldUseFRTToRefreshAccessToken
 {
     [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -2571,14 +2571,14 @@
                                                          error:nil];
     XCTAssertTrue(result);
 
-    MSIDRefreshToken *frt = [self.tokenCache getRefreshTokenWithAccount:account.lookupAccountIdentifier
-                                                               familyId:@"1"
+    MSIDRefreshToken *rt = [self.tokenCache getRefreshTokenWithAccount:account.lookupAccountIdentifier
+                                                               familyId:nil
                                                           configuration:configuration
                                                                 context:nil
                                                                   error:nil];
     // Update FRT entry so that MRRT and FRT are not the same, otherwise it will skip MRRT
-    frt.refreshToken = @"updated frt token";
-    [self.accountCache saveCredential:frt.tokenCacheItem context:nil error:nil];
+    rt.refreshToken = @"updated rt token";
+    [self.accountCache saveCredential:rt.tokenCacheItem context:nil error:nil];
     
     // Set up the network responses for OIDC discovery
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
@@ -2603,7 +2603,7 @@
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"client_mismatch"
                                                                                 claims:nil
-                                                                          refreshToken:@"updated frt token"];
+                                                                          refreshToken:@"updated rt token"];
     
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, errorResponse, tokenResponse]];
     

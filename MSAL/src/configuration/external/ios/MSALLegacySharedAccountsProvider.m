@@ -60,7 +60,7 @@
         self.applicationIdentifier = applicationIdentifier;
         
         NSString *queueName = [NSString stringWithFormat:@"com.microsoft.legacysharedaccountsprovider-%@", [NSUUID UUID].UUIDString];
-        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
     }
     
     return self;
