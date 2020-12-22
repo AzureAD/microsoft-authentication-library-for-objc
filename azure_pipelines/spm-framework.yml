@@ -147,6 +147,20 @@ jobs:
     displayName: Use Python 3.x & install PyGithub
   - bash: python3 -m pip install PyGithub
 
+  - task: PowerShell@2
+    displayName: Set Access Token
+    inputs:
+      targetType: 'inline'
+      script: |
+        $url = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$env:SYSTEM_TEAMPROJECTID/_apis/build/definitions/$($env:SYSTEM_DEFINITIONID)?api-version=5.0"
+                Write-Host "URL: $url"
+                $pipeline = Invoke-RestMethod -Uri $url -Headers @{
+                    Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"
+                }
+                Write-Host "Pipeline = $($pipeline | ConvertTo-Json -Depth 100)"
+    env:
+       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
   - task: PythonScript@0
     displayName: Update checksum and url in package.swift
     inputs:
