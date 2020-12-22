@@ -8,6 +8,7 @@ trigger:
     - azure_pipelines/spm-framework.yml
     exclude:
     - azure_pipelines
+    - Package.swift
 
 variables:
   - name: 'releaseVersion'
@@ -136,7 +137,7 @@ jobs:
     displayName: Update tagged release with signed framework
     inputs:
       gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-      repositoryName: '$(Build.Repository.Name)'
+      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
       action: 'edit'
       tag: '$(releaseVersion)'
       addChangeLog: false
@@ -162,7 +163,7 @@ jobs:
             f = re.sub(regex, subst, f, 0, re.MULTILINE)
         
             regex = r"releases\/download\/[0-9a-zA-Z\.].+\/"
-            subst = "releases/download/" + os.environ['releaseVersion'] +/"
+            subst = "releases/download/" + os.environ['releaseVersion'] +"/"
             f = re.sub(regex, subst, f, 0 , re.MULTILINE)
         
             print(f)
