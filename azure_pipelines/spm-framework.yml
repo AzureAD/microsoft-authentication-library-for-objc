@@ -148,6 +148,7 @@ jobs:
   - bash: python3 -m pip install PyGithub
 
   - task: PythonScript@0
+    displayName: Update checksum and url in package.swift
     inputs:
       scriptSource: 'inline'
       script: |
@@ -169,7 +170,7 @@ jobs:
         
             print(f)
             return f
-      
+        print(os.environ['SYSTEM_ACCESSTOKEN'])
         g = Github(os.environ['SYSTEM_ACCESSTOKEN'])
         repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
