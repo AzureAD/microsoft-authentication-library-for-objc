@@ -10,8 +10,10 @@ trigger:
     - azure_pipelines
 
 variables:
-  name: 'releaseVersion'
-  value: null
+  - name: 'releaseVersion'
+    value: null
+  - name: 'frameworkChecksum'
+    value: null
 
 jobs:
 - job: BuildXcFrameworks
@@ -87,28 +89,28 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
 
-  #- task: EsrpCodeSigning@1
-  #  inputs:
-  #    ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-  #    FolderPath: '$(Build.ArtifactStagingDirectory)'
-  #    Pattern: 'MSAL.zip'
-  #    signConfigType: 'inlineSignParams'
-  #    SessionTimeout: '60'
-  #    MaxConcurrency: '50'
-  #    MaxRetryAttempts: '5'
-  #    UseMinimatch: false
-  #    inlineOperation: |
-  #      [
-  #        {
-  #          "keyCode": "CP-233039-Apple",
-  #          "operationCode": "iOSSdkSign",
-  #          "parameters": {},
-  #          "toolName": "sign",
-  #          "toolVersion": "1.0"
-  #        }
-  #     ]
-  
-# GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
+  - task: EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
+      FolderPath: '$(Build.ArtifactStagingDirectory)'
+      Pattern: 'MSAL.zip'
+      signConfigType: 'inlineSignParams'
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
+      UseMinimatch: false
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-233039-Apple",
+            "operationCode": "iOSSdkSign",
+            "parameters": {},
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+
+  #GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
   - task: Bash@3
     displayName: GET latest release tag
     inputs:
@@ -116,6 +118,8 @@ jobs:
       script: |
         req=$(curl -sS "https://api.github.com/repos/ameyapat/microsoft-authentication-library-for-objc/releases/latest" | jq -r '.tag_name')        
         echo "##vso[task.setvariable variable=releaseVersion]$req"
+        chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip)
+        echo "##vso[task.setvariable variable=frameworkChecksum]chksm"
       failOnStderr: true
       noProfile: false
       noRc: false
@@ -128,11 +132,47 @@ jobs:
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
 
 #TODO : Replace forked repo with actual MSAL repo
-#  - task: GitHubRelease@1
-#    displayName: Update tagged release with signed framework
-#    inputs:
-#      gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-#      repositoryName: '$(Build.Repository.Name)'
-#      action: 'edit'
-#      tag: '$(releaseVersion)'
-#      addChangeLog: false
+  - task: GitHubRelease@1
+    displayName: Update tagged release with signed framework
+    inputs:
+      gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+      repositoryName: '$(Build.Repository.Name)'
+      action: 'edit'
+      tag: '$(releaseVersion)'
+      addChangeLog: false
+
+  - task: UsePythonVersion@0
+    displayName: Use Python 3.x & install PyGithub
+  - bash: python3 -m pip install PyGithub
+
+  - task: PythonScript@0
+    inputs:
+      scriptSource: 'inline'
+      script: |
+        from github import Github
+        import re
+        import os
+        
+        def update_file_contents (f) :
+            if f is None:
+                raise "File is not defined. Can't update file"
+            f = "".join(chr(x) for x in f)
+            regex = r"checksum:\s+\"[\da-fA-F]{64}\""
+            subst = "checksum: {os.environ['frameworkChecksum']}"
+            f = re.sub(regex, subst, f, 0, re.MULTILINE)
+        
+            regex = r"releases\/download\/[0-9a-zA-Z\.].+\/"
+            subst = "releases/download/" + os.environ['releaseVersion'] +/"
+            f = re.sub(regex, subst, f, 0 , re.MULTILINE)
+        
+            print(f)
+            return f
+      
+        g = Github(os.environ['System.AccessToken'])
+        repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
+        swift_package_file = repo.get_contents(path="Package.swift", ref="master")
+        
+        print(swift_package_file.path)
+        #Replace existing checksum with new checksum
+        repo.update_file(path=swift_package_file.path+"/", message="Updating release package.swift with latest release data", content=update_file_contents(swift_package_file.decoded_content), sha=swift_package_file.sha, branch="master")
+      failOnStderr: true
