@@ -136,7 +136,7 @@ jobs:
   - task: GitHubRelease@1
     displayName: Update tagged release with signed framework
     inputs:
-      gitHubConnection: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+      gitHubConnection: 'ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
       action: 'edit'
       tag: '$(releaseVersion)'
