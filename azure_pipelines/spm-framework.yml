@@ -181,7 +181,7 @@ jobs:
             return f
         
         at = HTTPHardcodedHeaderAuth() 
-        g = github3.Github()
+        g = github3.GitHub()
         g.session.auth = at
 
         repo = g.repository("ameyapat","microsoft-authentication-library-for-objc")
