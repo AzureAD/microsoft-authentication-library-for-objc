@@ -158,18 +158,19 @@ jobs:
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'commitBased'
 
-
-  - task: Shellpp@0
-    displayName: Push Package.swift to master
+  - task: Bash@3
+    displayName: Update package.swift with url & checksum & git push 
     inputs:
-      type: 'InlineScript'
-      cwd: '$(Build.SourcesDirectory)'
-      failOnStandardError: true
+      targetType: 'inline'
       script: |
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
-        perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/downlaod\/$(releaseVersion)\//' Package.swift
-
-        git add Package.swift
-        git status
-        git commit -m "Testing commiting from pipeline [skip ci]"
-        git push origin HEAD:master
+                perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
+        
+                git add Package.swift
+                git status
+                git commit -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]"
+                git push origin HEAD:master
+      workingDirectory: '$(Build.SourcesDirectory)'
+      failOnStderr: true
+      noProfile: false
+      noRc: false
