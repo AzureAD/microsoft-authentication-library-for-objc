@@ -191,7 +191,13 @@ jobs:
         import re
         import os
         import requests
+        import argparse
         from subprocess import run, PIPE
+
+        parse = argparse.ArgumentParser(description="Updating chksm and url")
+        parse.add_argument("-chksm")
+        parse.add_argument("-releaseVersion")
+        args = parser.parse_args()
 
         auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
@@ -205,15 +211,14 @@ jobs:
             f = "".join(chr(x) for x in f)
 
             regex = r"releases\/download\/[0-9a-zA-Z\.].+\/"
-            subst = "releases/download/{os.environ['releaseVersion']}/"
+            subst = "releases/download/{}/".format(args.releaseVersion)
             f = re.sub(regex, subst, f, 0 , re.MULTILINE)
-            
+
             regex = r"checksum:\s+\"[\da-fA-F]{64}\""
-            subst = "checksum: {os.environ['frameworkChecksum']}"
+            subst = "checksum: {}".format(args.chksm)
             f = re.sub(regex, subst, f, 0, re.MULTILINE)
 
-            print(f)
-            return f
+            return f.encode('utf-8')
         
         at = HTTPHardcodedHeaderAuth() 
         g = github3.GitHub()
@@ -225,3 +230,4 @@ jobs:
         # Update checksum and url in Package.swift
         swift_package_file.update(message="Updating relese package.swift with latest release data", branch="master", content=update_file_contents(swift_package_file.decoded))
       failOnStderr: true
+      arguments: '-chksm $(frameworkChecksum) -releaseVersion $(releaseVersion)'
