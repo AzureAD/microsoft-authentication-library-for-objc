@@ -192,6 +192,7 @@ jobs:
         import os
         import requests
         import argparse
+        import base64
         from pprint import pprint
         from subprocess import run, PIPE
 
@@ -204,6 +205,7 @@ jobs:
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
+                print(base64.b64encode(auth_header).decode('ascii'))
                 return r
         
         def update_file_contents (f) :
