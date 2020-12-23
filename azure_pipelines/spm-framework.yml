@@ -118,7 +118,7 @@ jobs:
       targetType: 'inline'
       script: |        
         chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip)
-        echo "##vso[task.setvariable variable=frameworkChecksum]chksm"
+        echo "##vso[task.setvariable variable=frameworkChecksum]$(chksm)"
       failOnStderr: true
       noProfile: false
       noRc: false
@@ -226,6 +226,7 @@ jobs:
 
         repo = g.repository("ameyapat","microsoft-authentication-library-for-objc")
         swift_package_file = repo.file_contents(path="/Package.swift", ref="master")
+        swift_package_file.session.auth = at
         
         # Update checksum and url in Package.swift
         swift_package_file.update(message="Updating relese package.swift with latest release data", branch="master", content=update_file_contents(swift_package_file.decoded))
