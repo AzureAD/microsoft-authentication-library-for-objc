@@ -53,4 +53,4 @@ jobs:
         git add Package.swift
         git status
         git commit -m "Testing commiting from pipeline [skip ci]"
-        git push origin master
+        git push origin HEAD:master
