@@ -165,16 +165,6 @@ jobs:
       scriptPath: 'ReleaseArchive.sh'
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
 
-#TODO : Replace forked repo with actual MSAL repo
-#  - task: GitHubRelease@1
-#    displayName: Update tagged release with signed framework
-#    inputs:
-#      gitHubConnection: 'github.com_ameyapat'
-#      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
-#      action: 'edit'
-#      tag: '$(releaseVersion)'
-#      addChangeLog: false
-
   - task: GitHubRelease@1
     displayName: Create Release
     inputs:
@@ -213,14 +203,15 @@ jobs:
             if f is None:
                 raise "File is not defined. Can't update file"
             f = "".join(chr(x) for x in f)
+
+            regex = r"releases\/download\/[0-9a-zA-Z\.].+\/"
+            subst = "releases/download/{os.environ['releaseVersion']}/"
+            f = re.sub(regex, subst, f, 0 , re.MULTILINE)
+            
             regex = r"checksum:\s+\"[\da-fA-F]{64}\""
             subst = "checksum: {os.environ['frameworkChecksum']}"
             f = re.sub(regex, subst, f, 0, re.MULTILINE)
-        
-            regex = r"releases\/download\/[0-9a-zA-Z\.].+\/"
-            subst = "releases/download/" + os.environ['releaseVersion'] +"/"
-            f = re.sub(regex, subst, f, 0 , re.MULTILINE)
-        
+
             print(f)
             return f
         
