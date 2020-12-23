@@ -198,10 +198,7 @@ jobs:
         parse = argparse.ArgumentParser(description="Updating chksm and url")
         parse.add_argument("-chksm")
         parse.add_argument("-releaseVersion")
-        args = parse.parse_args()
-
-        print($(Build.Repository.URI))
-        
+        args = parse.parse_args()        
         auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
         print(auth_header)
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
