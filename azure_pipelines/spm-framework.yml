@@ -44,7 +44,13 @@ jobs:
       script: |
         perl -i -pe's/checksum/CHECKSUM/' Package.swift
         
+        while read -r line
+        do
+          echo "$line"
+        done <"Package.swift"
+        
         git status
         git add Package.swift
+        git status
         git commit -m "Testing commiting from pipeline [skip ci]"
         git push origin master
