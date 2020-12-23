@@ -200,7 +200,10 @@ jobs:
         parse.add_argument("-releaseVersion")
         args = parse.parse_args()
 
+        print($(Build.Repository.URI))
+        
         auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
+        print(auth_header)
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
