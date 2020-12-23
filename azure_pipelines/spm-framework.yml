@@ -171,7 +171,8 @@ jobs:
         import os
         import requests
         import base64
-
+        from subprocess import run, PIPE
+        
         auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
