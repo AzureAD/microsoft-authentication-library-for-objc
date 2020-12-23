@@ -186,9 +186,9 @@ jobs:
             return f
         try:
           g = Github(os.environ['SYSTEM_ACCESSTOKEN'])
+          repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         except GithubException as e:
           print(e)
-        repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
         
         print(swift_package_file.path)
