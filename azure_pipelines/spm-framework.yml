@@ -172,6 +172,7 @@ jobs:
         import requests
         import base64
 
+        auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
@@ -191,10 +192,10 @@ jobs:
         
             print(f)
             return f
-        at = base64.b64encode(os.environ['SYSTEM_ACCESSTOKEN'].encode('ascii'))
-        print(base64.b64decode(at))
+        at = HTTPHardcodedHeaderAuth()
+        print(at)
   
-        g = Github(''+os.environ['SYSTEM_ACCESSTOKEN'])
+        g = Github(at)
         repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
         
@@ -202,5 +203,3 @@ jobs:
         #Replace existing checksum with new checksum
         repo.update_file(path=swift_package_file.path+"/", message="Updating release package.swift with latest release data", content=update_file_contents(swift_package_file.decoded_content), sha=swift_package_file.sha, branch="master")
       failOnStderr: true
-    env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
