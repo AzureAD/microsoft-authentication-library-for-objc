@@ -45,7 +45,7 @@ jobs:
       script: |
         perl -i -pe's/checksum/CHECKSUM/' Package.swift
         
-        git remote add origin https://$SYSTEM_ACCESSTOKEN:$SYSTEM_ACCESSTOKEN@$(Build.Repository.URI)
+        git remote add origin https://ameyapat:$SYSTEM_ACCESSTOKEN@$(Build.Repository.URI)
         git status
         git add Package.swift
         git status
