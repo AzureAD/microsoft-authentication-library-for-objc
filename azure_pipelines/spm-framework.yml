@@ -164,12 +164,14 @@ jobs:
       targetType: 'inline'
       script: |
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
-                perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
+        perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
         
-                git add Package.swift
-                git status
-                git commit -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]"
-                git push origin HEAD:master
+        git add Package.swift
+        git status
+        git commit -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]"
+        git push origin HEAD:master
+        2> >(while read line; do (>&2 echo "STDERROR: $line"); done)
+        
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
