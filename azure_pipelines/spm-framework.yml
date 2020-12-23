@@ -170,7 +170,7 @@ jobs:
         import re
         import os
         import requests
-        
+
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
@@ -190,11 +190,9 @@ jobs:
         
             print(f)
             return f
-        try:
-          g = Github(HTTPHardcodedHeaderAuth())
-          repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
-        except Exception as e:
-          print(e)
+        print("".join(map(chr,os.environ['SYSTEM_ACCESSTOKEN'])))
+        g = Github(HTTPHardcodedHeaderAuth())
+        repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
         
         print(swift_package_file.path)
