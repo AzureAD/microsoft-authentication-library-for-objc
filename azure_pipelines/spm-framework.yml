@@ -151,7 +151,7 @@ jobs:
         repo = g.repository("ameyapat","microsoft-authentication-library-for-objc")
         swift_package_file = repo.file_contents(path="/CHANGELOG.md", ref="master")
         regex = r"\[([0-9a-zA-Z\.\-]+)\]"
-        log_text = "".join(chr(x) for x in f.decoded)
+        log_text = "".join(chr(x) for x in swift_package_file.decoded)
         matches = re.search(regex, log_text, re.MULTILINE)
         rv = matches.group(1)
         print("##vso[task.setvariable variable=releaseVersion]" + rv)
