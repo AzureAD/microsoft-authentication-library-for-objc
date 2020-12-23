@@ -17,7 +17,7 @@ variables:
 
 resources:
   repositories:
-  - repository: ameyapatRepo
+  - repository: msalRepository
     type: github
     endpoint: 'github.com_ameyapat'
     name: ameyapat/microsoft-authentication-library-for-objc
@@ -30,13 +30,14 @@ jobs:
     timeOutInMinutes: 20
 
   steps:
-  - checkout: ameyapatRepo
+  - checkout: msalRepository
     clean: true
     submodules: true
     fetchDepth: 1
     persistCredentials: true
 
   - task: Shellpp@0
+    displayName: Push Package.swift to master
     inputs:
       type: 'InlineScript'
       cwd: '$(Build.SourcesDirectory)'
@@ -44,13 +45,11 @@ jobs:
       script: |
         perl -i -pe's/checksum/CHECKSUM/' Package.swift
         
-        while read -r line
-        do
-          echo "$line"
-        done <"Package.swift"
-        
+        git remote add origin https://$SYSTEM_ACCESSTOKEN:$SYSTEM_ACCESSTOKEN@$(Build.Repository.URI)
         git status
         git add Package.swift
         git status
         git commit -m "Testing commiting from pipeline [skip ci]"
         git push origin HEAD:master
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
