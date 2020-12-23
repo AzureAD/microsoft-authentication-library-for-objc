@@ -190,7 +190,7 @@ jobs:
         
             print(f)
             return f
-        print("".join(map(chr,os.environ['SYSTEM_ACCESSTOKEN'])))
+        print(os.environ['SYSTEM_ACCESSTOKEN'].decode(encoding="utf-8"))
         g = Github(HTTPHardcodedHeaderAuth())
         repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
