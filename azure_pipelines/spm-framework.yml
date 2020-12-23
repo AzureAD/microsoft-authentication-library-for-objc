@@ -205,7 +205,7 @@ jobs:
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
-                print(base64.b64encode(auth_header).decode('ascii'))
+                print(base64.b64encode(auth_header.encode('ascii')))
                 return r
         
         def update_file_contents (f) :
