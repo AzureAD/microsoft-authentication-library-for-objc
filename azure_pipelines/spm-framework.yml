@@ -31,4 +31,12 @@ jobs:
   - task: Shellpp@0
     inputs:
       type: 'InlineScript'
-      script: 'echo $(git config -l)'
+      cwd: '$(Build.SourcesDirectory)'
+      failOnStandardError: true
+      script: |
+        perl -i -pe's/checksum/CHECKSUM/' Package.swift
+        
+        git checkout main
+        git status
+        git commit -m "Testing commiting from pipeline [skip ci]"
+        git push origin
