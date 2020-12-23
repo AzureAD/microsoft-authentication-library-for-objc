@@ -192,7 +192,7 @@ jobs:
         import os
         import requests
         import argparse
-        import pprint
+        from pprint import pprint
         from subprocess import run, PIPE
 
         parse = argparse.ArgumentParser(description="Updating chksm and url")
