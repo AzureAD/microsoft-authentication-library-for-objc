@@ -144,29 +144,15 @@ jobs:
 #     addChangeLog: false
 
   - task: UsePythonVersion@0
-    displayName: Use Python 3.x & install PyGithub
-  - bash: python3 -m pip install PyGithub
-
-  - task: PowerShell@2
-    displayName: Set Access Token
-    inputs:
-      targetType: 'inline'
-      script: |
-        $url = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$env:SYSTEM_TEAMPROJECTID/_apis/build/definitions/$($env:SYSTEM_DEFINITIONID)?api-version=5.0"
-                Write-Host "URL: $url"
-                $pipeline = Invoke-RestMethod -Uri $url -Headers @{
-                    Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"
-                }
-                Write-Host "Pipeline = $($pipeline | ConvertTo-Json -Depth 100)"
-    env:
-       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    displayName: Use Python 3.x & install github3
+  - bash: python3 -m pip install github3.py==1.3.0
 
   - task: PythonScript@0
     displayName: Update checksum and url in package.swift
     inputs:
       scriptSource: 'inline'
       script: |
-        from github import Github
+        import github3
         import re
         import os
         import requests
@@ -176,7 +162,6 @@ jobs:
         auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
-                print('AUTH Header ' + auth_header)
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
                 return r
         
@@ -194,14 +179,15 @@ jobs:
         
             print(f)
             return f
-        at = HTTPHardcodedHeaderAuth()
-        print(at)
-  
-        g = Github(at)
-        repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
-        swift_package_file = repo.get_contents(path="Package.swift", ref="master")
         
-        print(swift_package_file.path)
+        at = HTTPHardcodedHeaderAuth() 
+        g = github3.Github()
+        g.session.auth = at
+
+        repo = g.repository("ameyapat","microsoft-authentication-library-for-objc")
+        swift_package_file = repo.file_contents(path="/Package.swift", ref="master")
+        
+        print(swift_package_file.decoded)
         #Replace existing checksum with new checksum
-        repo.update_file(path=swift_package_file.path+"/", message="Updating release package.swift with latest release data", content=update_file_contents(swift_package_file.decoded_content), sha=swift_package_file.sha, branch="master")
+        #repo.update_file(path=swift_package_file.path+"/", message="Updating release package.swift with latest release data", content=update_file_contents(swift_package_file.decoded_content), sha=swift_package_file.sha, branch="master")
       failOnStderr: true
