@@ -171,7 +171,7 @@ jobs:
         import os
         import requests
         import base64
-        
+
         class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
             def __call__(self, r):
                 r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
@@ -191,7 +191,7 @@ jobs:
         
             print(f)
             return f
-        print(base64.b64encode(os.environ['SYSTEM_ACCESSTOKEN']))
+        print(base64.b64encode(os.environ['SYSTEM_ACCESSTOKEN'].encode('ascii')))
         g = Github(HTTPHardcodedHeaderAuth())
         repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
