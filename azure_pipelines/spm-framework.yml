@@ -132,6 +132,7 @@ jobs:
     inputs:
       scriptSource: 'inline'
       script: |
+        #!/usr/bin/python3
         import github3
         import re
         import os
@@ -154,7 +155,8 @@ jobs:
         log_text = "".join(chr(x) for x in swift_package_file.decoded)
         matches = re.search(regex, log_text, re.MULTILINE)
         rv = matches.group(1)
-        print("##vso[task.setvariable variable=releaseVersion]" + rv)
+        print("Release Version " + rv)
+        print(f'##vso[task.setvariable variable=releaseVersion]{rv}')
       failOnStderr: true
   - task: Shellpp@0
     displayName: Generating release archive zips
@@ -174,12 +176,14 @@ jobs:
 #      addChangeLog: false
 
   - task: GitHubRelease@1
+    displayName: Create Release
     inputs:
       gitHubConnection: 'github.com_ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
       action: 'create'
-      target: '$(Build.SourceVersion)'
-      tagSource: 'gitTag'
+      target: 'master'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(releaseVersion)'
       title: '$(releaseVersion)'
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
