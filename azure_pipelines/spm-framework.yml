@@ -15,6 +15,14 @@ variables:
   - name: 'frameworkChecksum'
     value: null
 
+resources:
+  repositories:
+  - repository: ameyapatRepo
+    type: github
+    endpoint: 'github.com_ameyapat'
+    name: ameyapat/microsoft-authentication-library-for-objc
+    ref: master
+
 jobs:
 - job: BuildXcFrameworks
   pool:
@@ -22,7 +30,7 @@ jobs:
     timeOutInMinutes: 20
 
   steps:
-  - checkout: self
+  - checkout: ameyapatRepo
     clean: true
     submodules: true
     fetchDepth: 1
@@ -36,7 +44,6 @@ jobs:
       script: |
         perl -i -pe's/checksum/CHECKSUM/' Package.swift
         
-        git checkout main
         git status
         git commit -m "Testing commiting from pipeline [skip ci]"
         git push origin
