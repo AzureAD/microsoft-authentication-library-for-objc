@@ -45,5 +45,6 @@ jobs:
         perl -i -pe's/checksum/CHECKSUM/' Package.swift
         
         git status
+        git add Package.swift
         git commit -m "Testing commiting from pipeline [skip ci]"
-        git push origin
+        git push origin master
