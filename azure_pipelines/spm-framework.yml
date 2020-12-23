@@ -192,9 +192,9 @@ jobs:
             print(f)
             return f
         at = base64.b64encode(os.environ['SYSTEM_ACCESSTOKEN'].encode('ascii'))
-        print(at.decode('ascii'))
+        print(base64.b64decode(at))
   
-        g = Github(base64.b64decode(at.decode('ascii')))
+        g = Github(''+os.environ['SYSTEM_ACCESSTOKEN'])
         repo = g.get_repo("ameyapat/microsoft-authentication-library-for-objc")
         swift_package_file = repo.get_contents(path="Package.swift", ref="master")
         
