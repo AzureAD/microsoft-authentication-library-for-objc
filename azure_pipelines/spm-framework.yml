@@ -41,13 +41,13 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        git branch --show-current
+        git fetch --all -q
         git checkout -b update-package-for-$(releaseVersion)
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
         perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
         git add Package.swift
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]"
-        git checkout --track origin/master
+        git checkout master -q
         git merge update-package-for-$(releaseVersion)
         git branch -d update-package-for-$(releaseVersion)
       workingDirectory: '$(Build.SourcesDirectory)'
