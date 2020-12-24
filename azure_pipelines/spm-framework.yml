@@ -80,6 +80,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         
         echo "Build Dir = $(pwd)"
+        mkdir -p $(Build.binariesDirectory)/xcframework
         mv $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/1.framework
         mv $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/2.framework
         mv $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/3.framework
