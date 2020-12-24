@@ -80,12 +80,15 @@ jobs:
         cd $(Build.BinariesDirectory)
         
         echo "Build Dir = $(pwd)"
+        mv $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/1.framework
+        mv $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/2.framework
+        mv $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework $(Build.binariesDirectory)/xcframework/3.framework
 
-        xcodebuild -create-xcframework \
-        -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/xcframework/MSAL.zip
+        #xcodebuild -create-xcframework \
+        #-framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        #-framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        #-framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        #-output $(Build.binariesDirectory)/xcframework/MSAL.xcframework
       failOnStderr: true
     
   - task: ArchiveFiles@2
