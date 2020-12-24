@@ -85,11 +85,17 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/MSAL.xcframework
-        
-        mv $(Build.binariesDirectory)/MSAL.xcframework $(Build.ArtifactStagingDirectory)/MSAL.zip
+        -output $(Build.binariesDirectory)/xcframework/MSAL.xcframework
       failOnStderr: true
-  
+    
+  - task: ArchiveFiles@2
+    displayName: Zip xcframework
+    inputs:
+      rootFolderOrFile: '$(Build.binariesDirectory)/xcframework'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
+      replaceExistingArchive: true
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
@@ -110,15 +116,6 @@ jobs:
             "toolVersion": "1.0"
           }
         ]
-
-  - task: ArchiveFiles@2
-    displayName: Zip xcframework
-    inputs:
-      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
-      includeRootFolder: true
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-      replaceExistingArchive: true
 
   #GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
   - task: Bash@3
