@@ -85,9 +85,9 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
+        -output $(Build.binariesDirectory)/MSAL.xcframework
         
-        mv $(Build.ArtifactStagingDirectory)/MSAL.xcframework $(Build.ArtifactStagingDirectory)/MSAL.zip
+        mv $(Build.binariesDirectory)/MSAL.xcframework $(Build.ArtifactStagingDirectory)/MSAL.zip
       failOnStderr: true
   
   - task: EsrpCodeSigning@1
