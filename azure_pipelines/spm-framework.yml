@@ -124,6 +124,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        mkdir -p $(Build.ArtifactStagingDirectory)/MSAL.xcframework
         unzip -d $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework
         zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework
         chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip | cut -d ' ' -f 1)
