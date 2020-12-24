@@ -91,7 +91,7 @@ jobs:
   - task: ArchiveFiles@2
     displayName: Zip xcframework
     inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)/MSAL.xcframework'
+      rootFolderOrFile: '$(Build.BinariesDirectory)'
       includeRootFolder: true
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
