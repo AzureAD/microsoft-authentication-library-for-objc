@@ -97,26 +97,26 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
 
-#  - task: EsrpCodeSigning@1
-#    inputs:
-#      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-#      FolderPath: '$(Build.ArtifactStagingDirectory)'
-#      Pattern: 'MSAL.zip'
-#      signConfigType: 'inlineSignParams'
-#      SessionTimeout: '60'
-#      MaxConcurrency: '50'
-#      MaxRetryAttempts: '5'
-#      UseMinimatch: false
-#      inlineOperation: |
-#        [
-#          {
-#            "keyCode": "CP-233039-Apple",
-#            "operationCode": "iOSSdkSign",
-#            "parameters": {},
-#           "toolName": "sign",
-#            "toolVersion": "1.0"
-#          }
-#        ]
+  - task: EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
+      FolderPath: '$(Build.ArtifactStagingDirectory)'
+      Pattern: 'MSAL.zip'
+      signConfigType: 'inlineSignParams'
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
+      UseMinimatch: false
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-233039-Apple",
+            "operationCode": "iOSSdkSign",
+            "parameters": {},
+           "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
 
   - task: Bash@3
     displayName: Zip and unzip
