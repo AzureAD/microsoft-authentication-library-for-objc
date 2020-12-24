@@ -85,7 +85,7 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/xcframework/MSAL.xcframework
+        -output $(Build.binariesDirectory)/xcframework/MSAL.zip
       failOnStderr: true
     
   - task: ArchiveFiles@2
