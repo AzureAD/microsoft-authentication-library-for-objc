@@ -97,26 +97,26 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
 
-#  - task: EsrpCodeSigning@1
-#    inputs:
-#      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-#      FolderPath: '$(Build.ArtifactStagingDirectory)'
-#      Pattern: 'MSAL.zip'
-#      signConfigType: 'inlineSignParams'
-#      SessionTimeout: '60'
-#      MaxConcurrency: '50'
-#      MaxRetryAttempts: '5'
-#      UseMinimatch: false
-#      inlineOperation: |
-#        [
-#          {
-#            "keyCode": "CP-233039-Apple",
-#            "operationCode": "iOSSdkSign",
-#            "parameters": {},
-#            "toolName": "sign",
-#            "toolVersion": "1.0"
-#          }
-#        ]
+  - task: EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
+      FolderPath: '$(Build.ArtifactStagingDirectory)'
+      Pattern: 'MSAL.zip'
+      signConfigType: 'inlineSignParams'
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
+      UseMinimatch: false
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-233039-Apple",
+            "operationCode": "iOSSdkSign",
+            "parameters": {},
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
 
   #GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
   - task: Bash@3
@@ -142,7 +142,6 @@ jobs:
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
 
   - task: GitHubRelease@1
-    displayName: Create Release
     inputs:
       gitHubConnection: 'github.com_ameyapat'
       repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
@@ -151,12 +150,14 @@ jobs:
       tagSource: 'userSpecifiedTag'
       tag: '$(releaseVersion)'
       title: '$(releaseVersion)'
+      releaseNotesSource: 'inline'
+      releaseNotesInline: 'MSAL Release version $(releaseVersion)'
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
         $(Build.ArtifactStagingDirectory)/*.tar.gz
-      isDraft: true
       changeLogCompareToRelease: 'lastFullRelease'
-      changeLogType: 'commitBased'
+      changeLogType: 'issueBased'
+      changeLogLabels: 
 
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
