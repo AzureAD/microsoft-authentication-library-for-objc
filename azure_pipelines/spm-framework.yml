@@ -41,7 +41,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        git checkout master --track origin/master
+        git checkout -b master --track origin/master
         git checkout -b update-package-for-$(releaseVersion)
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
         perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
