@@ -86,13 +86,15 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
+        
+        mv $(Build.ArtifactStagingDirectory)/MSAL.xcframework $(Build.ArtifactStagingDirectory)/MSAL.zip
       failOnStderr: true
   
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.ArtifactStagingDirectory)'
-      Pattern: 'MSAL.xcframework'
+      Pattern: 'MSAL.zip'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
