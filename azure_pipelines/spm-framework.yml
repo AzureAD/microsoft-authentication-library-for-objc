@@ -92,14 +92,15 @@ jobs:
         #-output $(Build.binariesDirectory)/xcframework/MSAL.xcframework
       failOnStderr: true
     
-#  - task: ArchiveFiles@2
-#    displayName: Zip xcframework
-#    inputs:
-#      rootFolderOrFile: '$(Build.binariesDirectory)/xcframework'
-#      includeRootFolder: true
-#      archiveType: 'zip'
-#      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-#      replaceExistingArchive: true
+  - task: ArchiveFiles@2
+    displayName: Zip xcframework
+    inputs:
+      rootFolderOrFile: '$(Build.binariesDirectory)/xcframework'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
+      replaceExistingArchive: true
+
 #  - task: EsrpCodeSigning@1
 #    inputs:
 #      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
