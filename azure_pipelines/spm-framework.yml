@@ -107,7 +107,6 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
-
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
