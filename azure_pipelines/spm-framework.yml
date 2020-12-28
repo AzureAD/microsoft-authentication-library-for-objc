@@ -1,7 +1,17 @@
+variables:
+  - name: 'releaseVersion'
+    value: null
+  - name: 'frameworkChecksum'
+    value: null
+  - name: 'repositoryName'
+    value: 'ameyapat/microsoft-authentication-library-for-objc'
+  - name: 'repositoryBranch'
+    value: 'ameyapat/spm-framework-build'
+
 trigger:
   branches:
     include:
-    - ameyapat/spm-framework-build
+    - $(repositoryBranch)
   paths:
     include:
     - azure_pipelines/spm-framework.yml
@@ -9,19 +19,13 @@ trigger:
     - azure_pipelines
     - Package.swift
 
-variables:
-  - name: 'releaseVersion'
-    value: null
-  - name: 'frameworkChecksum'
-    value: null
-
 resources:
   repositories:
   - repository: msalRepository
     type: github
     endpoint: 'github.com_ameyapat'
-    name: ameyapat/microsoft-authentication-library-for-objc
-    ref: master
+    name: $(repositoryName)
+    ref: $(repositoryBranch)
 
 jobs:
 - job: BuildXcFrameworks
@@ -35,6 +39,13 @@ jobs:
     submodules: true
     fetchDepth: 1
     persistCredentials: true
+
+  - task: PythonScript@0
+    displayName: Check if build is successful
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: 'build.py'
+      failOnStderr: true
 
   - task: Xcode@5
     displayName: Build archive for iOS Simulator
@@ -155,9 +166,9 @@ jobs:
   - task: GitHubRelease@1
     inputs:
       gitHubConnection: 'github.com_ameyapat'
-      repositoryName: 'ameyapat/microsoft-authentication-library-for-objc'
+      repositoryName: $(repositoryName)
       action: 'create'
-      target: 'master'
+      target: $(repositoryBranch)
       tagSource: 'userSpecifiedTag'
       tag: '$(releaseVersion)'
       title: '$(releaseVersion)'
@@ -175,16 +186,36 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        git fetch origin master -q
+        git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
+        if [ ! -e Package.swift ]; then
+            cat > Package.swift << EOF
+            import PackageDescription
+
+            let package = Package(
+            name: "MSAL",
+            platforms: [
+                .macOS(.v10_12),.iOS(.v11)
+            ],
+            products: [
+                .library(
+                    name: "MSAL",
+                    targets: ["MSAL"]),
+            ],
+            targets: [
+                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "checksumhash123")
+            ]
+            )
+        EOF
+        fi
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
         perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
         git add Package.swift
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q
-        git checkout master -q
+        git checkout $(repositoryBranch) -q
         git merge update-package-for-$(releaseVersion) -q
-        git push origin master -q
+        git push origin $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
