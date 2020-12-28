@@ -204,7 +204,7 @@ jobs:
                     targets: ["MSAL"]),
             ],
             targets: [
-                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "12345678901231234331231231312312312312312312311233randomchecksum")
+                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "abcdefabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234")
             ]
             )
         EOF
