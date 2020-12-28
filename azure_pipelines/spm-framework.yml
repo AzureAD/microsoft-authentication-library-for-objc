@@ -11,7 +11,7 @@ variables:
 trigger:
   branches:
     include:
-    - $(repositoryBranch)
+    - 'ameyapat/spm-framework-build'
   paths:
     include:
     - azure_pipelines/spm-framework.yml
@@ -204,7 +204,7 @@ jobs:
                     targets: ["MSAL"]),
             ],
             targets: [
-                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "checksumhash123")
+                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "12345678901231234331231231312312312312312312311233randomchecksum")
             ]
             )
         EOF
