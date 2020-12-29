@@ -284,8 +284,7 @@ class BuildTarget:
 				last_line = line
 		
 		sys.stdout.write(output[0])
-		if(output[1] is not None and len(output[1]) > 0) :
-			sys.stderr.write(output[1])
+		sys.stderr.write(output[1])
 		
 		last_line = last_line.split()
 		# Remove everything but 
