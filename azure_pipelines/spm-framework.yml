@@ -42,12 +42,6 @@ jobs:
     submodules: true
     fetchDepth: 1
     persistCredentials: true
-  - task: PythonScript@0
-    displayName: Check if build is successful
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: 'build.py'
-      failOnStderr: true
   - task: Xcode@5
     displayName: Build archive for iOS Simulator
     inputs:
