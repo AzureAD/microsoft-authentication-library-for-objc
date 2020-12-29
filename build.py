@@ -284,7 +284,8 @@ class BuildTarget:
 				last_line = line
 		
 		sys.stdout.write(output[0])
-		sys.stderr.write(output[1])
+		if(output[1] is not None and len(output[1]) > 0) :
+			sys.stderr.write(output[1])
 		
 		last_line = last_line.split()
 		# Remove everything but 
@@ -429,5 +430,4 @@ if code_coverage :
 script_end_time = timer()
 
 print "Total running time: " + "{0:.2f}".format(script_end_time - script_start_time) + " seconds"
-
 sys.exit(final_status)
