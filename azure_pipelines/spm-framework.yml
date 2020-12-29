@@ -168,6 +168,7 @@ jobs:
         done <CHANGELOG.md
         fi
         echo "##vso[task.setvariable variable=releaseNotes]${chlg}"
+        
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
