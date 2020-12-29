@@ -25,7 +25,7 @@ resources:
   repositories:
   - repository: msalRepository
     type: github
-    endpoint: $(GithubServiceConnection)
+    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
     name: $(repositoryName)
     ref: $(repositoryBranch)
 
