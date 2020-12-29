@@ -135,12 +135,6 @@ jobs:
         zip -r MSAL.zip MSAL.xcframework
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
-  - task: Shellpp@0
-    displayName: Generating release archive zips
-    inputs:
-      type: 'FilePath'
-      scriptPath: 'ReleaseArchive.sh'
-      args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
   - task: Bash@3
     displayName: Calculate checksum | extract release version from changelog | Build release notes
     inputs:
@@ -152,7 +146,7 @@ jobs:
         ver=$(egrep -om1 '\[([0-9a-zA-Z\.\-]+)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
         echo "##vso[task.setvariable variable=releaseVersion]${ver}"
 
-        chlg="## Release Notes"'\n'
+        chlg="## Release Notes"$'\n'
         if [ ! -e CHANGELOG.md ]; then
           echo "CHANGELOG NOT FOUND!"
         else
@@ -178,6 +172,12 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
+  - task: Shellpp@0
+    displayName: Generating release archive zips
+    inputs:
+      type: 'FilePath'
+      scriptPath: 'ReleaseArchive.sh'
+      args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
   - task: GitHubRelease@1
     inputs:
       gitHubConnection: '$(GithubServiceConnection)'
