@@ -8,7 +8,7 @@ variables:
   - name: 'repositoryBranch'
     value: 'ameyapat/spm-framework-build'
   - name: 'GithubServiceConnection'
-    value: 'AzureAD (8)'
+    value: 'github.com_ameyapat'
 
 trigger:
   branches:
