@@ -9,8 +9,6 @@ variables:
     value: 'ameyapat/spm-framework-build'
   - name: 'GithubServiceConnection'
     value: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-  - name: 'rnotes'
-    value: null
 
 trigger:
   branches:
@@ -137,43 +135,22 @@ jobs:
         zip -r MSAL.zip MSAL.xcframework
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
-  - task: Bash@3
-    displayName: Calculate checksum | extract release version from changelog | Build release notes
+  - task: GitHubRelease@1
     inputs:
-      targetType: 'inline'
-      script: |
-        chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip | cut -d ' ' -f 1)
-        echo "##vso[task.setvariable variable=frameworkChecksum]${chksm}"
-        
-        ver=$(egrep -om1 '\[([0-9a-zA-Z\.\-]+)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
-        echo "##vso[task.setvariable variable=releaseVersion]${ver}"
-
-        chlg=""
-        if [ ! -e CHANGELOG.md ]; then
-          echo "CHANGELOG NOT FOUND!"
-        else
-          fl=0
-        while read p; do
-            if [[ $p =~ ^\#\#.*$ ]]; then
-                fl=$((fl + 1))
-                if [ $fl -gt 1 ]
-                then
-                    break
-                fi
-            fi
-
-            if [[ ($fl -eq 1)  && !($p =~ ^\#\#) ]]; then
-                chlg="$chlg"$'\n'"$p"
-            fi
-        done <CHANGELOG.md
-        fi
-        echo "chlg = ${chlg}"
-        echo "##vso[task.setvariable variable=rnotes]${chlg}"
-
-      workingDirectory: '$(Build.SourcesDirectory)'
-      failOnStderr: true
-      noProfile: false
-      noRc: false
+      gitHubConnection: '$(GithubServiceConnection)'
+      repositoryName: '$(repositoryName)'
+      action: 'create'
+      target: '$(repositoryBranch)'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(releaseVersion)'
+      title: '$(releaseVersion)'
+      releaseNotesFilePath: 'release-notes.md'
+      assets: |
+        $(Build.ArtifactStagingDirectory)/*.zip
+        $(Build.ArtifactStagingDirectory)/*.tar.gz
+      isDraft: true
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'issueBased'
   - task: Shellpp@0
     displayName: Generating release archive zips
     inputs:
@@ -202,7 +179,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        echo "Releaase notes : $(rnotes)"
+        rm -rf release-notes.md
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
