@@ -4,9 +4,11 @@ variables:
   - name: 'frameworkChecksum'
     value: null
   - name: 'repositoryName'
-    value: 'ameyapat/microsoft-authentication-library-for-objc'
+    value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: 'repositoryBranch'
     value: 'ameyapat/spm-framework-build'
+  - name: 'GithubServiceConnection'
+    value: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
 
 trigger:
   branches:
@@ -23,7 +25,7 @@ resources:
   repositories:
   - repository: msalRepository
     type: github
-    endpoint: 'github.com_ameyapat'
+    endpoint: $(GithubServiceConnection)
     name: $(repositoryName)
     ref: $(repositoryBranch)
 
@@ -46,7 +48,6 @@ jobs:
 #      scriptSource: 'filePath'
 #      scriptPath: 'build.py'
 #      failOnStderr: true
-
   - task: Xcode@5
     displayName: Build archive for iOS Simulator
     inputs:
@@ -57,7 +58,6 @@ jobs:
       packageApp: false
       args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS-Sim'
       exportPath: $(Build.binariesDirectory)/iOS-Sim
-
   - task: Xcode@5
     displayName: Build archive for iOS device
     inputs:
@@ -69,7 +69,6 @@ jobs:
       destinationTypeOption: 'devices'
       args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS'
       exportPath: $(Build.binariesDirectory)/iOS
-
   - task: Xcode@5
     displayName: Build archive for macOS
     inputs:
@@ -80,7 +79,6 @@ jobs:
       packageApp: false
       args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/macOS'
       exportPath: $(Build.binariesDirectory)/macOS
-
   - task: Bash@3
     displayName: Build xcframework from archives
     inputs:
@@ -98,7 +96,6 @@ jobs:
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.binariesDirectory)/MSAL.xcframework
       failOnStderr: true
-    
   - task: ArchiveFiles@2
     displayName: Zip xcframework
     inputs:
@@ -127,7 +124,6 @@ jobs:
             "toolVersion": "1.0"
           }
         ]
-
   - task: Bash@3
     displayName: Zip and unzip
     inputs:
@@ -138,8 +134,6 @@ jobs:
         zip -r MSAL.zip MSAL.xcframework
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
-
-  #GET latest release version tag TODO: Replace ameyapat/microsoft-authentication-lib with $(Build.Repository.Name)
   - task: Bash@3
     displayName: Calculate checksum & extract release version from changelog
     inputs:
@@ -154,20 +148,18 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
-
   - task: Shellpp@0
     displayName: Generating release archive zips
     inputs:
       type: 'FilePath'
       scriptPath: 'ReleaseArchive.sh'
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
-
   - task: GitHubRelease@1
     inputs:
-      gitHubConnection: 'github.com_ameyapat'
-      repositoryName: $(repositoryName)
+      gitHubConnection: $(GithubServiceConnection)
+      repositoryName: '$(repositoryName)'
       action: 'create'
-      target: $(repositoryBranch)
+      target: '$(repositoryBranch)'
       tagSource: 'userSpecifiedTag'
       tag: '$(releaseVersion)'
       title: '$(releaseVersion)'
@@ -178,8 +170,7 @@ jobs:
         $(Build.ArtifactStagingDirectory)/*.tar.gz
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
-      changeLogLabels: 
-
+      changeLogLabels: '[{ "label" : "pr", "displayName" : "PRs", "state" : "closed" }]'
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
