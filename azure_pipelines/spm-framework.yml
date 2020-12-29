@@ -42,7 +42,6 @@ jobs:
     submodules: true
     fetchDepth: 1
     persistCredentials: true
-
   - task: PythonScript@0
     displayName: Check if build is successful
     inputs:
