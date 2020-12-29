@@ -167,7 +167,7 @@ jobs:
             fi
         done <CHANGELOG.md
         fi
-        
+        echo "chlg = ${chlg}"
         echo "##vso[task.setvariable variable=releaseNotes]${chlg}"
 
       workingDirectory: '$(Build.SourcesDirectory)'
@@ -191,19 +191,19 @@ jobs:
       title: '$(releaseVersion)'
       releaseNotesSource: 'inline'
       releaseNotesInline: |
-        ## Release Notes [$(releaseVersion)]: 
         $(releaseNotes)
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
         $(Build.ArtifactStagingDirectory)/*.tar.gz
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
-      changeLogLabels: '[{ "label" : "pr", "displayName" : "PRs", "state" : "closed" }]'
+      changeLogLabels: #'[{ "label" : "pr", "displayName" : "PRs", "state" : "closed" }]'
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
       targetType: 'inline'
       script: |
+        echo $(releaseNotes)
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
