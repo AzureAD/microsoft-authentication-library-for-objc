@@ -9,11 +9,14 @@ variables:
     value: 'ameyapat/spm-framework-build'
   - name: 'GithubServiceConnection'
     value: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+  - name: 'releaseNotes'
+    value: ''
 
 trigger:
   branches:
     include:
     - 'ameyapat/spm-framework-build'
+# TODO : remove paths after testing is done/ maybe add CHANGELOG.md so that release is only done when changelog changes on master
   paths:
     include:
     - azure_pipelines/spm-framework.yml
@@ -135,7 +138,7 @@ jobs:
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
   - task: Bash@3
-    displayName: Calculate checksum & extract release version from changelog
+    displayName: Calculate checksum | extract release version from changelog | Build release notes
     inputs:
       targetType: 'inline'
       script: |
@@ -144,6 +147,27 @@ jobs:
         
         ver=$(egrep -om1 '\[([0-9a-zA-Z\.\-]+)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
         echo "##vso[task.setvariable variable=releaseVersion]${ver}"
+
+        chlg=""
+        if [ ! -e CHANGELOG.md ]; then
+          echo "CHANGELOG NOT FOUND!"
+        else
+          fl=0
+        while read p; do
+            if [[ $p =~ ^\#\#.*$ ]]; then
+                fl=$((fl + 1))
+                if [ $fl -gt 1 ]
+                then
+                    break
+                fi
+            fi
+
+            if [[ ($fl -eq 1)  && !($p =~ ^\#\#) ]]; then
+                chlg="$chlg"$'\n'"$p"
+            fi
+        done <CHANGELOG.md
+        fi
+        echo "##vso[task.setvariable variable=releaseNotes]${chlg}"
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
@@ -156,7 +180,7 @@ jobs:
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
   - task: GitHubRelease@1
     inputs:
-      gitHubConnection: $(GithubServiceConnection)
+      gitHubConnection: '$(GithubServiceConnection)'
       repositoryName: '$(repositoryName)'
       action: 'create'
       target: '$(repositoryBranch)'
@@ -164,7 +188,9 @@ jobs:
       tag: '$(releaseVersion)'
       title: '$(releaseVersion)'
       releaseNotesSource: 'inline'
-      releaseNotesInline: 'MSAL Release version $(releaseVersion)'
+      releaseNotesInline: |
+        MSAL Release version $(releaseVersion)
+        $(releaseNotes)
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
         $(Build.ArtifactStagingDirectory)/*.tar.gz
