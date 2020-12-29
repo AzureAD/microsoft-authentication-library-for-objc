@@ -10,7 +10,7 @@ variables:
   - name: 'GithubServiceConnection'
     value: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
   - name: 'releaseNotes'
-    value: ''
+    value: null
 
 trigger:
   branches:
@@ -167,8 +167,9 @@ jobs:
             fi
         done <CHANGELOG.md
         fi
-        echo "##vso[task.setvariable variable=releaseNotes]${chlg}"
         
+        echo "##vso[task.setvariable variable=releaseNotes]${chlg}"
+
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
@@ -190,7 +191,7 @@ jobs:
       title: '$(releaseVersion)'
       releaseNotesSource: 'inline'
       releaseNotesInline: |
-        MSAL Release version $(releaseVersion)
+        ## Release Notes [$(releaseVersion)]: 
         $(releaseNotes)
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
