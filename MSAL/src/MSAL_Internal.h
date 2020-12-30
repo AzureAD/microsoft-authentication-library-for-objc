@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_LOW       #define MSAL_VER_LOW        1
-#define MSAL_VER_PATCH      13
+#define MSAL_VER_LOW        1
+#define MSAL_VER_PATCH      14-SPMTest
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
