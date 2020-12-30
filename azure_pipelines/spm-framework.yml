@@ -198,6 +198,8 @@ jobs:
         git checkout -b update-package-for-$(releaseVersion) -q
         if [ ! -e Package.swift ]; then
             cat > Package.swift << EOF
+            // swift-tools-version:5.3
+            // The swift-tools-version declares the minimum version of Swift required to build this package.
             import PackageDescription
 
             let package = Package(
@@ -233,6 +235,8 @@ jobs:
         git add MSAL.podspec
         git add MSAL/resources/ios/Info.plist
         git add MSAL/resources/mac/Info.plist
+        git add MSAL/src/MSAL_Internal.h
+
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q
         git checkout $(repositoryBranch) -q
         git merge update-package-for-$(releaseVersion) -q
