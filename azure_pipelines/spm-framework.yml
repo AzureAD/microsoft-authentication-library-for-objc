@@ -225,9 +225,9 @@ jobs:
         minorVer = $(echo $(releaseVersion) | cut -d"." -f2)
         patchVer = $(echo $(releaseVersion) | cut -d"." -f3)
 
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_HIGH       ${majorVer}/' MSAL_Internal.h
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_LOW       ${minorVer}/' MSAL_Internal.h
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_PATCH       ${patchVer}/' MSAL_Internal.h
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_HIGH       ${majorVer}/' MSAL/src/MSAL_Internal.h
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_LOW       ${minorVer}/' MSAL/src/MSAL_Internal.h
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_PATCH       ${patchVer}/' MSAL/src/MSAL_Internal.h
 
         git add Package.swift
         git add MSAL.podspec
