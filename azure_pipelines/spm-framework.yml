@@ -197,25 +197,24 @@ jobs:
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
         if [ ! -e Package.swift ]; then
+            echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat > Package.swift << EOF
-            // swift-tools-version:5.3
-            // The swift-tools-version declares the minimum version of Swift required to build this package.
-            import PackageDescription
+        import PackageDescription
 
-            let package = Package(
-            name: "MSAL",
-            platforms: [
+        let package = Package(
+          name: "MSAL",
+          platforms: [
                 .macOS(.v10_12),.iOS(.v11)
-            ],
-            products: [
-                .library(
-                    name: "MSAL",
-                    targets: ["MSAL"]),
-            ],
-            targets: [
-                .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "abcdefabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234")
-            ]
-            )
+          ],
+          products: [
+              .library(
+                  name: "MSAL",
+                  targets: ["MSAL"]),
+          ],
+          targets: [
+              .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "abcdefabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234")
+          ]
+        )
         EOF
         fi
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
