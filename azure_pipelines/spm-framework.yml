@@ -136,7 +136,7 @@ jobs:
         chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip | cut -d ' ' -f 1)
         echo "##vso[task.setvariable variable=frameworkChecksum]${chksm}"
        
-        ver=$(egrep -om1 '\[([0-9a-zA-Z\.\-]+)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
+        ver=$(egrep -om1 '\[((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
         echo "##vso[task.setvariable variable=releaseVersion]${ver}"
 
         chlg="## Release Notes"$'\n'
@@ -221,6 +221,13 @@ jobs:
         perl -i -pe's/s\.version\s+=\s+".*"/s.version      = \"$(releaseVersion)\"/' MSAL.podspec
         plutil -replace CFBundleShortVersionString -string $(releaseVersion) MSAL/resources/ios/Info.plist
         plutil -replace CFBundleShortVersionString -string $(releaseVersion) MSAL/resources/mac/Info.plist
+        majorVer = $(echo $(releaseVersion) | cut -d"." -f1)
+        minorVer = $(echo $(releaseVersion) | cut -d"." -f2)
+        patchVer = $(echo $(releaseVersion) | cut -d"." -f3)
+
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_HIGH       ${majorVer}/' MSAL_Internal.h
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_LOW       ${minorVer}/' MSAL_Internal.h
+        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_PATCH       ${patchVer}/' MSAL_Internal.h
 
         git add Package.swift
         git add MSAL.podspec
