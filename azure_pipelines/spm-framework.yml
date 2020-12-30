@@ -218,6 +218,8 @@ jobs:
         fi
         perl -i -pe's/checksum:\s+\"[\da-fA-F]{64}\"/checksum: \"$(frameworkChecksum)\"/' Package.swift
         perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(releaseVersion)\//' Package.swift
+        #perl -i -pe's/s\.version\s+=\s+".*"/s.version      = \"$(releaseVersion)\"/' MSAL.podspec
+
         git add Package.swift
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q
         git checkout $(repositoryBranch) -q
@@ -229,3 +231,14 @@ jobs:
       noProfile: false
       noRc: false
 
+  - task: Bash@3
+    displayName: Push pod to Cocoapods
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Release to CocoaPods
+        #pod trunk push --use-libraries MSAL.podspec
+        pod trunk me
+      workingDirectory: '$(Build.SourcesDirectory)'
+    env:
+      COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
