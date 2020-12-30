@@ -198,7 +198,7 @@ jobs:
         git checkout -b update-package-for-$(releaseVersion) -q
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
-            cat > Package.swift << EOF
+            cat >> Package.swift << EOF
         import PackageDescription
 
         let package = Package(
