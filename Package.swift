@@ -11,6 +11,6 @@
             targets: ["MSAL"]),
     ],
     targets: [
-        .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/1.1.14-SPMTest/MSAL.zip", checksum: "0375373bc190138f1cc7572a7580b4cf7e1f28790e3928d70daa619af8042e1d")
+        .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/1.1.14-SPMTest/MSAL.zip", checksum: "78132553abb229c73eb170936ccd9b7ceb147d515a1a6a01cd330c66b387d0cf")
     ]
     )
