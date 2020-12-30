@@ -221,13 +221,13 @@ jobs:
         perl -i -pe's/s\.version\s+=\s+".*"/s.version      = \"$(releaseVersion)\"/' MSAL.podspec
         plutil -replace CFBundleShortVersionString -string $(releaseVersion) MSAL/resources/ios/Info.plist
         plutil -replace CFBundleShortVersionString -string $(releaseVersion) MSAL/resources/mac/Info.plist
-        majorVer = $(echo $(releaseVersion) | cut -d"." -f1)
-        minorVer = $(echo $(releaseVersion) | cut -d"." -f2)
-        patchVer = $(echo $(releaseVersion) | cut -d"." -f3)
+        majorVer=$(echo $(releaseVersion) | cut -d"." -f1)
+        minorVer=$(echo $(releaseVersion) | cut -d"." -f2)
+        patchVer=$(echo $(releaseVersion) | cut -d"." -f3)
 
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_HIGH       $majorVer/' MSAL/src/MSAL_Internal.h
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_LOW       $minorVer/' MSAL/src/MSAL_Internal.h
-        perl -i -pe's/MSAL_VER_HIGH\s+.*$/MSAL_VER_PATCH       $patchVer/' MSAL/src/MSAL_Internal.h
+        perl -i -pe"s/MSAL_VER_HIGH\s+.*$/MSAL_VER_HIGH       $majorVer/" MSAL/src/MSAL_Internal.h
+        perl -i -pe"s/MSAL_VER_LOW\s+.*$/MSAL_VER_LOW        $minorVer/" MSAL/src/MSAL_Internal.h
+        perl -i -pe"s/MSAL_VER_PATCH\s+.*$/MSAL_VER_PATCH      $patchVer/" MSAL/src/MSAL_Internal.h
 
         git add Package.swift
         git add MSAL.podspec
