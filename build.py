@@ -429,4 +429,5 @@ if code_coverage :
 script_end_time = timer()
 
 print "Total running time: " + "{0:.2f}".format(script_end_time - script_start_time) + " seconds"
+
 sys.exit(final_status)
