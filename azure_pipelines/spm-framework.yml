@@ -182,7 +182,6 @@ jobs:
       assets: |
         $(Build.ArtifactStagingDirectory)/*.zip
         $(Build.ArtifactStagingDirectory)/*.tar.gz
-      isDraft: true
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
   - task: Bash@3
