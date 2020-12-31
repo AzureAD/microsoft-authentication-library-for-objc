@@ -106,8 +106,8 @@ For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Sw
 2. Choose project to add dependency in
 3. Enter : https://github.com/AzureAD/microsoft-authentication-library-for-objc as the package repository URL
 4. Choose package options with :
-    a. Rules -> Branch : master (For latest MSAL release)
-    b. Rules -> Version -> Exact : [release version >= 1.1.14] (For a particular release version)
+    1. Rules -> Branch : master (For latest MSAL release)
+    2. Rules -> Version -> Exact : [release version >= 1.1.14] (For a particular release version)
 
 ### Manually
 
