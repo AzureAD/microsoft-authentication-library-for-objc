@@ -20,6 +20,7 @@ trigger:
   paths:
     include:
     - CHANGELOG.md
+    - azure_pipelines/spm-framework.yml
 
 resources:
   repositories:
