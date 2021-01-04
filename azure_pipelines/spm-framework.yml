@@ -1,19 +1,21 @@
 variables:
   - name: 'releaseVersion'
     value: null
+  - name: 'commonCoreReleaseVersion'
+    value: null
   - name: 'frameworkChecksum'
     value: null
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
-    value: 'master'
+    value: 'ameyapat/spm-framework-build'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
 trigger:
   branches:
     include:
-    - 'master'
+    - 'ameyapat/spm-framework-build'
 # Pipeline will be triggered when CHANGELOG is changed on the master branch
   paths:
     include:
@@ -169,7 +171,57 @@ jobs:
       type: 'FilePath'
       scriptPath: 'ReleaseArchive.sh'
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
+  - task: Bash@3
+    displayName: Common Core - extract release version from changelog | Build release notes
+    inputs:
+      targetType: 'inline'
+      script: |
+       
+        cc_ver=$(egrep -om1 '((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)' MSAL/IdentityCore/changelog.txt)
+        echo "##vso[task.setvariable variable=commonCoreReleaseVersion]${cc_ver}"
+
+        chlg="## Release Notes"$'\n'
+        if [ ! -e changelog.txt ]; then
+          echo "CHANGELOG NOT FOUND!"
+        else
+          fl=0
+          while read p; do
+            if [[ "$p" =~ 'Version' ]]; then
+              fl=$((fl + 1))
+              if [ $fl -gt 1 ]
+              then
+                  break
+              fi
+            fi
+
+            if [[ ($fl -eq 1)  && !("$p" =~ ^\*\s+) ]]; then
+              chlg="$chlg"$'\n'"$p"
+            fi
+          done < "MSAL/IdentityCore/changelog.txt"
+        fi
+        echo "chlg = ${chlg}"
+        echo "${chlg}" > cc-release-notes.md
+
+      workingDirectory: '$(Build.SourcesDirectory)'
+      failOnStderr: true
+      noProfile: false
+      noRc: false
   - task: GitHubRelease@1
+    displayName: Generate Common Core Github Release
+    inputs:
+      gitHubConnection: '$(GithubServiceConnection)'
+      repositoryName: 'AzureAD/microsoft-authentication-library-common-for-objc'
+      action: 'create'
+      target: 'master'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(commonCoreReleaseVersion)'
+      title: '$(commonCoreReleaseVersion)'
+      releaseNotesFilePath: 'cc-release-notes.md'
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'issueBased'
+      isDraft: true
+  - task: GitHubRelease@1
+    displayName: Generate MSAL Github Release
     inputs:
       gitHubConnection: '$(GithubServiceConnection)'
       repositoryName: '$(repositoryName)'
@@ -190,6 +242,7 @@ jobs:
       targetType: 'inline'
       script: |
         rm -rf release-notes.md
+        rm -rf cc-release-notes.md
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
@@ -249,7 +302,8 @@ jobs:
       targetType: 'inline'
       script: |
         # Release to CocoaPods
-        pod trunk push --use-libraries MSAL.podspec
+        #pod trunk push --use-libraries MSAL.podspec
+        pod trunk me
       workingDirectory: '$(Build.SourcesDirectory)'
     env:
       COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
