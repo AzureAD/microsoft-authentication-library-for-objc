@@ -1,4 +1,4 @@
-##TBD
+## [1.1.14-SPMTest] - 2021-01-05
 * Fixed possible deadlock caused by thread explosion
 * Added pipeline configuration to generate framework for SPM & automate MSAL release
 
