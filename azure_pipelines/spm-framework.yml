@@ -8,19 +8,18 @@ variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
-    value: 'ameyapat/spm-framework-build'
+    value: 'master'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
 trigger:
   branches:
     include:
-    - 'ameyapat/spm-framework-build'
+    - 'master'
 # Pipeline will be triggered when CHANGELOG is changed on the master branch
   paths:
     include:
     - CHANGELOG.md
-    - azure_pipelines/spm-framework.yml
 
 resources:
   repositories:
@@ -220,7 +219,6 @@ jobs:
       releaseNotesFilePath: 'cc-release-notes.md'
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
-      isDraft: true
       assets: |
         *.abcd
   - task: GitHubRelease@1
@@ -239,7 +237,6 @@ jobs:
         $(Build.ArtifactStagingDirectory)/*.tar.gz
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
-      isDraft: true
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
