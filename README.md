@@ -99,7 +99,7 @@ github "AzureAD/microsoft-authentication-library-for-objc" "master"
 ```
 ### Using Swift Packages
 
-You can add `MSAL` as a swift package dependency.
+You can add `MSAL` as a [swift package dependency](https://developer.apple.com/documentation/swift_packages/distributing_binary_frameworks_as_swift_packages).
 For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Swift package is available.
 
 1. For your project in Xcode, click File -> Swift Packages -> Add Package Dependency...
