@@ -12,8 +12,6 @@ variables:
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
-pr: none
-
 trigger:
   branches:
     include:
@@ -22,6 +20,8 @@ trigger:
   paths:
     include:
     - CHANGELOG.md
+
+pr: none
 
 resources:
   repositories:
