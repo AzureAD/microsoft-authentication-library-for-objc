@@ -12,6 +12,11 @@ variables:
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
+pr:
+  branches:
+    include:
+    - master
+
 trigger:
   branches:
     include:
