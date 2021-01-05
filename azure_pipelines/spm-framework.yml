@@ -237,6 +237,7 @@ jobs:
         $(Build.ArtifactStagingDirectory)/*.tar.gz
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
+      isDraft: true
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
