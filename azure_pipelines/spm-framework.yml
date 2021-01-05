@@ -182,7 +182,7 @@ jobs:
         echo "##vso[task.setvariable variable=commonCoreReleaseVersion]${cc_ver}"
 
         chlg="## Release Notes"$'\n'
-        if [ ! -e changelog.txt ]; then
+        if [ ! -e "MSAL/IdentityCore/changelog.txt" ]; then
           echo "CHANGELOG NOT FOUND!"
         else
           fl=0
@@ -221,6 +221,8 @@ jobs:
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
       isDraft: true
+      assets: |
+        *.abcd
   - task: GitHubRelease@1
     displayName: Generate MSAL Github Release
     inputs:
