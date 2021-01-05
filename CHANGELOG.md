@@ -1,5 +1,8 @@
-##TBD
+## [1.1.14-SPMTest] - 2021-01-05
 * Fixed possible deadlock caused by thread explosion
+* Added pipeline configuration to generate framework for SPM & automate MSAL release.
+* Adding change for testing.
+
 
 ## [1.1.13] - 2020-12-04
 * Adding nil check before assigning error when developers try to get account by username from MSALPublicClientApplication, this will help to prevent a crash when passing in nil as error ponter from the API
