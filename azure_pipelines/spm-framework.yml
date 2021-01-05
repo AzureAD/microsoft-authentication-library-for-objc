@@ -15,7 +15,7 @@ variables:
 trigger:
   branches:
     include:
-    - 'master'
+    - master
 # Pipeline will be triggered when CHANGELOG is changed on the master branch
   paths:
     include:
