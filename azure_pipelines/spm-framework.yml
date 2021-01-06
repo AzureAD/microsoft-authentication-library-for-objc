@@ -16,10 +16,10 @@ trigger:
   branches:
     include:
     - ameyapat/spm-master-test
-# Pipeline will be triggered when CHANGELOG is changed on the master branch
   paths:
     include:
     - CHANGELOG.md
+
 pr: none
 
 resources:
