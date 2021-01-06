@@ -38,7 +38,7 @@
 #pragma mark - Public
 
 - (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                           authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
                            popManager:(MSIDDevicePopManager *)popManager
                                 error:(NSError **)error
 {

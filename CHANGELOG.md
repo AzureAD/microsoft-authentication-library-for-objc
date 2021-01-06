@@ -1,4 +1,5 @@
-## TBD
+## TBD 
+* Removed identity core classes from public api (#1158).
 * Fixed possible deadlock caused by thread explosion
 * Added pipeline configuration to generate framework for SPM & automate MSAL release.
 
