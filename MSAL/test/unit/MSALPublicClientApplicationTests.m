@@ -2978,6 +2978,20 @@
     XCTAssertNil(account);
 }
 
+- (void)testFetchAccountWithNilUsernameAndNilErrorPointer_shouldNotCrash
+{
+    [self msalStoreTokenResponseInCache];
+    
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+    
+    NSString *username = nil;
+    
+    __auto_type account = [application accountForUsername:username error:nil];
+    XCTAssertNil(account);
+}
+
 
 #pragma mark - removeAccount
 
