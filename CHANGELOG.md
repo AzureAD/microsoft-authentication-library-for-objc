@@ -1,4 +1,5 @@
 ## TBD 
+* Removed identity core classes from public api (#1158).
 * Added cross-cloud B2B support.
 * Fixed logic to handle links that open in new tab for embedded webview.
 * accountForUsername from MSALPublicClientApplication will return nil back when username is nil or empty
