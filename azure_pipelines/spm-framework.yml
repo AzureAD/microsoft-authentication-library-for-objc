@@ -84,7 +84,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         
         echo "Build Dir = $(pwd)"
-
+        echo "Build For = $(Build.RequestedFor) <$(Build.RequestedForEmail)>"
         xcodebuild -create-xcframework \
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
