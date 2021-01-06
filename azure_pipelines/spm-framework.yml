@@ -8,14 +8,14 @@ variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
-    value: 'ameyapat/spm-master-test'
+    value: 'master'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
 trigger:
   branches:
     include:
-    - ameyapat/spm-master-test
+    - master
   paths:
     include:
     - CHANGELOG.md
@@ -84,7 +84,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         
         echo "Build Dir = $(pwd)"
-        echo "Build For = $(Build.RequestedFor) <$(Build.RequestedForEmail)>"
+        
         xcodebuild -create-xcframework \
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
@@ -222,7 +222,6 @@ jobs:
       changeLogType: 'issueBased'
       assets: |
         *.abcd
-      isDraft: true
   - task: GitHubRelease@1
     displayName: Generate MSAL Github Release
     inputs:
@@ -239,7 +238,6 @@ jobs:
         $(Build.ArtifactStagingDirectory)/*.tar.gz
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
-      isDraft: true
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
@@ -306,8 +304,8 @@ jobs:
       targetType: 'inline'
       script: |
         # Release to CocoaPods
-        #pod trunk push --use-libraries MSAL.podspec
-        pod trunk me
+        pod trunk push --use-libraries MSAL.podspec
+        #pod trunk me
       workingDirectory: '$(Build.SourcesDirectory)'
     env:
       COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
