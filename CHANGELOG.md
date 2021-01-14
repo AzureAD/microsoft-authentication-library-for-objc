@@ -1,7 +1,8 @@
-## TBD 
+## [1.1.14] - 2020-01-19
 * Removed identity core classes from public api (#1158).
-* Fixed possible deadlock caused by thread explosion
-* Added pipeline configuration to generate framework for SPM & automate MSAL release.
+* Fixed possible deadlock caused by thread explosion (#1175)
+* Added pipeline configuration to generate framework for SPM & automate MSAL release (#1194)
+* Extend iOS background tasks to silent and interactive requests.
 
 
 ## [1.1.13] - 2020-12-04
