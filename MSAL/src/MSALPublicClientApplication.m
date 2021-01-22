@@ -103,6 +103,7 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSALAuthenticationSchemeProtocolInternal.h"
 #import "MSIDCurrentRequestTelemetry.h"
 #import "MSIDCacheConfig.h"
 #import "MSIDDevicePopManager.h"
@@ -817,8 +818,16 @@
     
     MSIDRequestType requestType = [self requestType];
     
-    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
-    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>authenticationScheme = [self getInternalAuthenticationSchemeProtocolForScheme:parameters.authenticationScheme withError:&msidError];
+    
+    if (msidError)
+    {
+        block(nil, msidError, nil);
+        return;
+    }
+    
+    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
@@ -1104,8 +1113,16 @@
 
 #endif
     
-    NSDictionary *schemeParams = [parameters.authenticationScheme getSchemeParameters:self.popManager];
-    MSIDAuthenticationScheme *msidAuthScheme = [parameters.authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
+    id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>authenticationScheme = [self getInternalAuthenticationSchemeProtocolForScheme:parameters.authenticationScheme withError:&msidError];
+    
+    if (msidError)
+    {
+        block(nil, msidError, nil);
+        return;
+    }
+    
+    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:self.popManager];
+    MSIDAuthenticationScheme *msidAuthScheme = [authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     MSIDInteractiveTokenRequestParameters *msidParams =
     [[MSIDInteractiveTokenRequestParameters alloc] initWithAuthority:requestAuthority
@@ -1549,6 +1566,20 @@
 
 
 #pragma mark - Private
+
+- (id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)getInternalAuthenticationSchemeProtocolForScheme:(id<MSALAuthenticationSchemeProtocol>)authenticationScheme
+                                                                                                                         withError:(NSError **)error
+{
+    if (![authenticationScheme conformsToProtocol:@protocol(MSALAuthenticationSchemeProtocolInternal)])
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"authenticationScheme doesn't support MSALAuthenticationSchemeProtocolInternal protocol.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        
+        return nil;
+    }
+    
+    return (id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authenticationScheme;
+}
 
 - (MSIDRequestType)requestType
 {

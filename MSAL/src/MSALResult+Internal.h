@@ -29,13 +29,14 @@
 
 @class MSIDTokenResult;
 @protocol MSALAuthenticationSchemeProtocol;
+@protocol MSALAuthenticationSchemeProtocolInternal;
 @class MSIDDevicePopManager;
 
 @interface MSALResult (Internal)
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
-                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
                                popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error;
 

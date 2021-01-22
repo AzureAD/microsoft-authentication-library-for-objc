@@ -43,10 +43,11 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDDevicePopManager.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSALAuthenticationSchemeProtocolInternal.h"
 
 @interface MSALResult()
 
-@property id<MSALAuthenticationSchemeProtocol> authScheme;
+@property id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal> authScheme;
 
 @end
 
@@ -77,7 +78,7 @@
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
                         correlationId:(NSUUID *)correlationId
-                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                           authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
 {
     MSALResult *result = [MSALResult new];
     result->_accessToken = accessToken;
@@ -97,7 +98,7 @@
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
-                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
                                popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error
 {

@@ -27,8 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol MSIDRequestContext;
-
 /**
     MSALAuthority represents an identity provider instance that MSAL can use to obtain tokens. For AAD it is of the form https://aad_instance/aad_tenant, where aad_instance is the
     directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
