@@ -47,6 +47,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (atomic) BOOL piiEnabled;
 
+/**
+ MSAL provides logging callbacks that assist in diagnostics. By default the library will not return any messages with any user or organizational information. However, this might make diagnosing issues difficult.
+ When both piiEnabled is set to YES, and maskEUII is set to YES, MSAL logs will still include OII (organization identifiable information), and EUPI (end user pseudonymous identifiers), but MSAL will try to exclude and/or mask any EUII (end user identifiable information) like UPN, username, email from its logs.
+ This flag has no effect when piiEnabled is set to NO.
+ Default value is NO.
+*/
+@property (atomic) BOOL maskEUII;
+
 #pragma mark - Setting up the logging callback
 
 /**

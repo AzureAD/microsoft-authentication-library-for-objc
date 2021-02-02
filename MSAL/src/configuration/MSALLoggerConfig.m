@@ -87,4 +87,14 @@
     return [MSIDLogger sharedLogger].piiLoggingEnabled;
 }
 
+- (void)setMaskEUII:(BOOL)maskEUII
+{
+    [MSIDLogger sharedLogger].euiiMaskingEnabled = maskEUII;
+}
+
+- (BOOL)maskEUII
+{
+    return [MSIDLogger sharedLogger].euiiMaskingEnabled;
+}
+
 @end
