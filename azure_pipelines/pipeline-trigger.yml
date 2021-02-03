@@ -48,8 +48,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        authorName=$(git log -1 --pretty=format:'%an <%ae>')
-        authorEmail=$(git log -1 --pretty=format:'%an <%ae>')
+        authorName=$(git log -1 --pretty=format:'%an')
+        authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
         git config --global user.name "${authorName}"
         git config --list
