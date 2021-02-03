@@ -1,0 +1,88 @@
+variables:
+  - name: 'releaseVersion'
+    value: 'testVersion'
+  - name: 'commonCoreReleaseVersion'
+    value: null
+  - name: 'frameworkChecksum'
+    value: null
+  - name: 'repositoryName' # Name of the repository
+    value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
+    value: 'ameya-master'
+  - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
+    value: 'MSAL ObjC Service Connection'
+
+trigger:
+  branches:
+    include:
+    - ameya-master
+  paths:
+    include:
+    - azure_pipelines/changes.txt
+
+pr: none
+
+resources:
+  repositories:
+  - repository: msalRepository
+    type: github
+    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+    name: $(repositoryName)
+    ref: $(repositoryBranch)
+
+jobs:
+- job: BuildXcFrameworks
+  displayName: Build MSAL framework and release
+  pool:
+    vmImage: 'macOS-latest'
+    timeOutInMinutes: 20
+
+  steps:
+  - checkout: msalRepository
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+  - task: Bash@3
+    displayName: git push test
+    inputs:
+      targetType: 'inline'
+      script: |
+        git fetch origin $(repositoryBranch) -q
+        git checkout FETCH_HEAD -q
+        git checkout -b update-package-for-$(releaseVersion) -q
+        if [ ! -e Package.swift ]; then
+            echo -e "// swift-tools-version:5.3\n" >> Package.swift
+            cat >> Package.swift << EOF
+        import PackageDescription
+
+        let package = Package(
+          name: "MSAL",
+          platforms: [
+                .macOS(.v10_12),.iOS(.v11)
+          ],
+          products: [
+              .library(
+                  name: "MSAL",
+                  targets: ["MSAL"]),
+          ],
+          targets: [
+              .binaryTarget(name: "MSAL", url: "https://github.com/$(repositoryName)/releases/download/releaseTag1.2.3/MSAL.zip", checksum: "abcdefabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234")
+          ]
+        )
+        EOF
+        fi
+        
+        perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(Build.BuildId)\//' Package.swift
+        
+        git add Package.swift
+        author=$(git log -1 --pretty=format:'%an <%ae>')
+        git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
+        git checkout $(repositoryBranch) -q
+        git merge update-package-for-$(releaseVersion) -q
+        git push origin $(repositoryBranch) -q
+        git branch -d update-package-for-$(releaseVersion) -q
+      workingDirectory: '$(Build.SourcesDirectory)'
+      failOnStderr: true
+      noProfile: false
+      noRc: false
