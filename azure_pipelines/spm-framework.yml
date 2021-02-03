@@ -222,22 +222,6 @@ jobs:
       changeLogType: 'issueBased'
       assets: |
         *.abcd
-  - task: GitHubRelease@1
-    displayName: Generate MSAL Github Release
-    inputs:
-      gitHubConnection: '$(GithubServiceConnection)'
-      repositoryName: '$(repositoryName)'
-      action: 'create'
-      target: '$(repositoryBranch)'
-      tagSource: 'userSpecifiedTag'
-      tag: '$(releaseVersion)'
-      title: '$(releaseVersion)'
-      releaseNotesFilePath: 'release-notes.md'
-      assets: |
-        $(Build.ArtifactStagingDirectory)/*.zip
-        $(Build.ArtifactStagingDirectory)/*.tar.gz
-      changeLogCompareToRelease: 'lastFullRelease'
-      changeLogType: 'issueBased'
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
@@ -297,7 +281,22 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
-
+  - task: GitHubRelease@1
+    displayName: Generate MSAL Github Release
+    inputs:
+      gitHubConnection: '$(GithubServiceConnection)'
+      repositoryName: '$(repositoryName)'
+      action: 'create'
+      target: '$(repositoryBranch)'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(releaseVersion)'
+      title: '$(releaseVersion)'
+      releaseNotesFilePath: 'release-notes.md'
+      assets: |
+        $(Build.ArtifactStagingDirectory)/*.zip
+        $(Build.ArtifactStagingDirectory)/*.tar.gz
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'issueBased'
   - task: Bash@3
     displayName: Push pod to Cocoapods
     inputs:
