@@ -92,4 +92,4 @@ jobs:
       noProfile: false
       noRc: false
     env:
-      TKN:$(RELTKN)
+      TKN: $(RELTKN)
