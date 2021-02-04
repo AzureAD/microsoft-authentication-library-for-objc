@@ -48,11 +48,14 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        git remote remove origin
+        git remote add origin https://ameyapat:$TKN@github.com/AzureAD/microsoft-authentication-library-for-objc
+        git remote -v
         authorName=$(git log -1 --pretty=format:'%an')
         authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
         git config --global user.name "${authorName}"
-        git remote set-url origin https://ameyapat:$TKN@github.com/AzureAD/microsoft-authentication-library-for-objc
+
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         #git checkout -b update-package-for-$(releaseVersion) -q
