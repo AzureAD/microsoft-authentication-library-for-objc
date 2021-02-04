@@ -49,16 +49,15 @@ jobs:
       targetType: 'inline'
       script: |
         git remote remove origin
-        git remote add origin https://ameyapat:$TKN@github.com/AzureAD/microsoft-authentication-library-for-objc
-        git remote -v
+        git remote add origin https://ameyapat:$TKN@github.com/$(repositoryName)
         authorName=$(git log -1 --pretty=format:'%an')
         authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
         git config --global user.name "${authorName}"
 
-        git fetch origin $(repositoryBranch)
-        git checkout FETCH_HEAD
-        git checkout -b update-package-for-$(releaseVersion)
+        git fetch origin $(repositoryBranch) -q
+        git checkout FETCH_HEAD -q
+        git checkout -b update-package-for-$(releaseVersion) -q
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
@@ -86,9 +85,9 @@ jobs:
         
         git add Package.swift
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
-        git checkout $(repositoryBranch)
-        git merge update-package-for-$(releaseVersion)
-        git push https://ameyapat:$TKN@github.com/AzureAD/microsoft-authentication-library-for-objc.git $(repositoryBranch)
+        git checkout $(repositoryBranch) -q
+        git merge update-package-for-$(releaseVersion) -q
+        git push https://ameyapat:$TKN@github.com/$(repositoryName).git $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
