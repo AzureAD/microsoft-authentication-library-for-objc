@@ -1,1 +1,2 @@
 1
+Added git config default user. Adding azure pipelines to apps allowed to push
