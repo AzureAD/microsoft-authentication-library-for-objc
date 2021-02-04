@@ -1,4 +1,4 @@
 1
 Added git config default user. Adding azure pipelines to apps allowed to push
 Allow verbose push
-Testing with AT - 4
+Testing with AT - 5
