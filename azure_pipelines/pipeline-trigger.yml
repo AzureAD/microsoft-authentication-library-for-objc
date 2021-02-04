@@ -57,8 +57,8 @@ jobs:
         git config --global user.name "${authorName}"
 
         git fetch origin $(repositoryBranch)
-        git checkout FETCH_HEAD -q
-        #git checkout -b update-package-for-$(releaseVersion) -q
+        git checkout FETCH_HEAD
+        git checkout -b update-package-for-$(releaseVersion)
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
@@ -83,13 +83,13 @@ jobs:
         
         perl -i -pe's/releases\/download\/[0-9a-zA-Z\.].+\//releases\/download\/$(Build.BuildId)\//' Package.swift
         author=$(git log -1 --pretty=format:'%an <%ae>')
-        git show-ref
+        
         git add Package.swift
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
-        #git checkout $(repositoryBranch) -q
-        #git merge update-package-for-$(releaseVersion) -q
-        git push https://ameyapat:$TKN@github.com/AzureAD/microsoft-authentication-library-for-objc origin HEAD:$(repositoryBranch)
-        #git branch -d update-package-for-$(releaseVersion) -q
+        git checkout $(repositoryBranch)
+        git merge update-package-for-$(releaseVersion)
+        git push origin HEAD:$(repositoryBranch)
+        git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
