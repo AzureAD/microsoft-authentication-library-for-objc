@@ -85,7 +85,9 @@ jobs:
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
         #git checkout $(repositoryBranch) -q
         #git merge update-package-for-$(releaseVersion) -q
-        git push origin HEAD:$(repositoryBranch) -c http.extraheader="AUTHORIZATION: basic $(SYSTEM_ACCESSTOKEN)" -v
+        git remote remove origin
+        git remote add origin https://$(SYSTEM_ACCESSTOKEN)@$(Build.Repository.Uri)
+        git push origin HEAD:$(repositoryBranch) -v
         #git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
