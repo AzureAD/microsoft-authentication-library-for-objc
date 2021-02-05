@@ -1,8 +1,6 @@
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
-  - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
-    value: 'dev'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
 
@@ -12,15 +10,16 @@ schedules:
   displayName: Daily 8 pm build
   branches:
     include:
-    - $(repositoryBranch)
+    - dev
 - cron: "0 4 * * 0"
   displayName: Weekly Sunday build
   branches:
     include:
-    - $(repositoryBranch)
+    - dev
   always: true
 
-trigger: none
+trigger:
+- releases/*
 
 pr: none
 
@@ -33,7 +32,7 @@ resources:
     type: github
     endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
     name: $(repositoryName)
-    ref: $(repositoryBranch)
+    ref: $(Build.SourceBranchName)
 
 jobs:
 - job: ui_automation
@@ -83,14 +82,14 @@ jobs:
         CI=true bundle exec fastlane ui_test --verbose
         # Uncomment out the following if want to check test results
         # git status     
-        # git fetch origin $(repositoryBranch) -q
+        # git fetch origin $(Build.SourceBranchName) -q
         # git checkout FETCH_HEAD -q
-        # git checkout -b $(repositoryBranch) -q
+        # git checkout -b $(Build.SourceBranchName) -q
         # author=$(git log -1 --pretty=format:'%an <%ae>')
         # git status     
         # git add .
         # git commit -a -m "Output file" -q --author="${author}"
-        # git push origin $(repositoryBranch)
+        # git push origin $(Build.SourceBranchName)
         
         
         
