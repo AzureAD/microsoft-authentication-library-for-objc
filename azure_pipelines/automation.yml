@@ -1,8 +1,6 @@
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
-  - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
-    value: 'MSAL ObjC Service Connection'
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
@@ -19,7 +17,9 @@ schedules:
   always: true
 
 trigger:
-- release/*
+  branches:
+      include:
+      - release/*
 
 pr: none
 
