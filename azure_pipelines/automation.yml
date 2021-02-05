@@ -1,7 +1,7 @@
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
-  - name: 'dev' # Name of the branch where version number will be updated for files that contain version number.
+  - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
     value: 'dev'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
