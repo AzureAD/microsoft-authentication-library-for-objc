@@ -234,6 +234,7 @@
 		583BFD1624DDF9B10035B901 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 583BFD1524DDF9B10035B901 /* Launch Screen.storyboard */; };
 		58B81F7124AC5D7200E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
 		58B81F7224AC5D7300E8799E /* MSALTestCacheTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */; };
+		58BBA11E25C1406F007B3EF6 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		6077D4A022498BFF001798A2 /* MSALTenantProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 6077D49F22498BFF001798A2 /* MSALTenantProfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6077D4A122498BFF001798A2 /* MSALTenantProfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 6077D49F22498BFF001798A2 /* MSALTenantProfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6077D4A922498D87001798A2 /* MSALTenantProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 6077D4A822498D87001798A2 /* MSALTenantProfile.m */; };
@@ -736,7 +737,6 @@
 		B2E2A94C2393192700BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */; };
 		B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */; };
 		B2F45738211D376F00818910 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
-		B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		B2FE601B20E5BB5800502BA6 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D61A64941E5AA7D60086D120 /* MSALTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64801E5AA7C60086D120 /* MSALTestAppDelegate.m */; };
 		D61A64951E5AA7D60086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64811E5AA7C60086D120 /* main.m */; };
@@ -772,7 +772,6 @@
 		D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F851E3FF3D900C69FBA /* MSALResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D65A6FAD1E3FF3D900C69FBA /* MSALAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F861E3FF3D900C69FBA /* MSALAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D65A6FD51E3FF49C00C69FBA /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
-		D67227931EBD100D00F3422A /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		D67227961EBD10B500F3422A /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		D67227971EBD10B500F3422A /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D67227A31EBD111900F3422A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D67227A21EBD111900F3422A /* main.m */; };
@@ -842,6 +841,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = D626FFDF1FBD1F5700EE4487;
 			remoteInfo = "IdentityTest Mac";
+		};
+		58BBA13225C141CA007B3EF6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		58BBA13B25C141D1007B3EF6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
 		};
 		B21FA9BB2204DC5700806B68 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1512,12 +1525,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				58BBA11E25C1406F007B3EF6 /* MSAL.framework in Frameworks */,
 				B25A438A21C358D3000B3DD4 /* libIdentityAutomationAppLib iOS.a in Frameworks */,
 				B2F45738211D376F00818910 /* WebKit.framework in Frameworks */,
 				B2BB739D2112C82E000EA4C5 /* Security.framework in Frameworks */,
-				B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */,
 				D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */,
-				D67227931EBD100D00F3422A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2962,6 +2974,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				58BBA13C25C141D1007B3EF6 /* PBXTargetDependency */,
 				B21FA9C32204DCB200806B68 /* PBXTargetDependency */,
 				B29E2AD421238F5200B170ED /* PBXTargetDependency */,
 			);
@@ -2984,6 +2997,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				58BBA13325C141CA007B3EF6 /* PBXTargetDependency */,
 				B21FA9C12204DC6F00806B68 /* PBXTargetDependency */,
 				B2BB73762112C32C000EA4C5 /* PBXTargetDependency */,
 			);
@@ -3970,6 +3984,16 @@
 			isa = PBXTargetDependency;
 			name = "IdentityTest Mac";
 			targetProxy = 231CE9DA1FEC678400E95D3E /* PBXContainerItemProxy */;
+		};
+		58BBA13325C141CA007B3EF6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */;
+			targetProxy = 58BBA13225C141CA007B3EF6 /* PBXContainerItemProxy */;
+		};
+		58BBA13C25C141D1007B3EF6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */;
+			targetProxy = 58BBA13B25C141D1007B3EF6 /* PBXContainerItemProxy */;
 		};
 		B21FA9C12204DC6F00806B68 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
