@@ -47,13 +47,11 @@ jobs:
   - task: InstallSSHKey@0
     inputs:
       knownHostsEntry: '$(sshKnownHosts)'
-      sshPublicKey: '$PUBLIC_KEY'
+      sshPublicKey: '$(sshPublicKey)'
       sshKeySecureFile: 'msal_objc_private_key'
       addEntryToConfig: true
       configHostAlias: 'ADO Release Pipeline Public Key'
       configHostname: 'github.com'
-    env:
-      PUBLIC_KEY:$(sshPublicKey)
 
   - task: Bash@3
     displayName: git push test
