@@ -69,7 +69,7 @@ jobs:
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
-        
+
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
@@ -102,6 +102,6 @@ jobs:
         git push origin $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
-      failOnStderr: true
+      failOnStderr: false
       noProfile: false
       noRc: false
