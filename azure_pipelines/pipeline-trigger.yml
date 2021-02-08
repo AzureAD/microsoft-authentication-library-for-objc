@@ -59,9 +59,8 @@ jobs:
       targetType: 'inline'
       script: |
         ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
-        ssh -T git@github.com
-        git remote set-url origin git@github.com:AzureAD/microsoft-authentication-library-for-objc.git
-        git remote -v
+        git remote set-url origin git@github.com:$(repositoryName).git
+        
         authorName=$(git log -1 --pretty=format:'%an')
         authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
@@ -70,6 +69,7 @@ jobs:
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
+        
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
