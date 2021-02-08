@@ -42,14 +42,28 @@ jobs:
     clean: true
     submodules: true
     fetchDepth: 1
-    persistCredentials: true
+    persistCredentials: false
+
+  - task: InstallSSHKey@0
+    inputs:
+      knownHostsEntry: '$(sshKnownHosts)'
+      sshPublicKey: '$PUBLIC_KEY'
+      sshKeySecureFile: 'msal_objc_private_key'
+      addEntryToConfig: true
+      configHostAlias: 'ADO Release Pipeline Public Key'
+      configHostname: 'github.com'
+    env:
+      PUBLIC_KEY:$(sshPublicKey)
+
   - task: Bash@3
     displayName: git push test
     inputs:
       targetType: 'inline'
       script: |
-        git remote remove origin
-        git remote add origin https://ameyapat:$TKN@github.com/$(repositoryName)
+        ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
+        ssh -T git@github.com
+        git remote set-url origin git@github.com:AzureAD/microsoft-authentication-library-for-objc.git
+        git remote -v
         authorName=$(git log -1 --pretty=format:'%an')
         authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
@@ -87,11 +101,9 @@ jobs:
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
         git checkout $(repositoryBranch) -q
         git merge update-package-for-$(releaseVersion) -q
-        git push https://ameyapat:$TKN@github.com/$(repositoryName).git $(repositoryBranch) -q
+        git push $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
       noProfile: false
       noRc: false
-    env:
-      TKN: $(RELTKN)
