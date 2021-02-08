@@ -11,8 +11,6 @@ variables:
     value: 'master'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
-  - name: 'tokenUserName'
-    value: 'ameyapat'
 
 trigger:
   branches:
@@ -44,7 +42,7 @@ jobs:
     clean: true
     submodules: true
     fetchDepth: 1
-    persistCredentials: true
+    persistCredentials: false
   - task: Xcode@5
     displayName: Build archive for iOS Simulator
     inputs:
@@ -138,7 +136,8 @@ jobs:
       script: |
         chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip | cut -d ' ' -f 1)
         echo "##vso[task.setvariable variable=frameworkChecksum]${chksm}"
-       
+        
+        #Regex for semver versioning
         ver=$(egrep -om1 '\[((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
         echo "##vso[task.setvariable variable=releaseVersion]${ver}"
       workingDirectory: '$(Build.SourcesDirectory)'
@@ -156,7 +155,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-       
+        #Regex for semver versioning
         cc_ver=$(egrep -om1 '((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)' MSAL/IdentityCore/changelog.txt)
         echo "##vso[task.setvariable variable=commonCoreReleaseVersion]${cc_ver}"
 
@@ -201,15 +200,24 @@ jobs:
       changeLogType: 'issueBased'
       assets: |
         *.abcd
+  - task: InstallSSHKey@0
+    displayName: Install SSH Key for MSAL Github Repo
+    inputs:
+      knownHostsEntry: '$(sshKnownHosts)'
+      sshPublicKey: '$(sshPublicKey)'
+      sshKeySecureFile: 'msal_objc_private_key'
+      addEntryToConfig: true
+      configHostAlias: 'ADO Release Pipeline Public Key'
+      configHostname: 'github.com'
   - task: Bash@3
     displayName: Update package.swift with url & checksum & git push 
     inputs:
       targetType: 'inline'
       script: |
         rm -rf cc-release-notes.md
+        ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
+        git remote set-url origin git@github.com:$(repositoryName).git
 
-        git remote remove origin
-        git remote add origin https://$(tokenUserName):$TKN@github.com/$(repositoryName)
         authorName=$(git log -1 --pretty=format:'%an')
         authorEmail=$(git log -1 --pretty=format:'%ae')
         git config --global user.email "${authorEmail}"
@@ -218,6 +226,7 @@ jobs:
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
+        
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
@@ -257,11 +266,13 @@ jobs:
         git add MSAL/resources/ios/Info.plist
         git add MSAL/resources/mac/Info.plist
         git add MSAL/src/MSAL_Internal.h
+        
         author=$(git log -1 --pretty=format:'%an <%ae>')
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
+        
         git checkout $(repositoryBranch) -q
         git merge update-package-for-$(releaseVersion) -q
-        git push https://$(tokenUserName):$TKN@github.com/$(repositoryName).git $(repositoryBranch) -q
+        git push origin $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: true
