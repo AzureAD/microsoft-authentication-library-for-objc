@@ -8,12 +8,12 @@ schedules:
   displayName: Daily 8 pm build
   branches:
     include:
-    - dev
-- cron: "0 4 * * 0"
+    - kaisong1990/msal-ui-automation
+- cron: "0 20 * * 0"
   displayName: Weekly Sunday build
   branches:
     include:
-    - dev
+    - kaisong1990/msal-ui-automation
   always: true
 
 trigger:
