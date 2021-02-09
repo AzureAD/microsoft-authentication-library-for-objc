@@ -90,8 +90,8 @@ jobs:
         # git add .
         # git commit -a -m "Output file" -q --author="${author}"
         # git push origin $(Build.SourceBranchName)
-        
-        
-        
-        
-        
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/report.junit'
