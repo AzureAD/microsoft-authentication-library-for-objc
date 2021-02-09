@@ -24,7 +24,7 @@ lane :ui_test do
     batch = testrun_info[:batch]
 
     # UI.abort_with_message!('You could conditionally abort')
-    UI.message("\ὠA everything is fine, let's continue try #{try_attempt + 1} for batch #{batch}")
+    UI.message("everything is fine, let's continue try #{try_attempt + 1} for batch #{batch}")
   end
   
   result = multi_scan(
