@@ -1,3 +1,6 @@
+## [1.1.15-Test] - 2020-02-08
+* Release Pipeline Test
+
 ## [1.1.14] - 2020-01-19
 * Removed identity core classes from public api (#1158).
 * Fixed possible deadlock caused by thread explosion (#1175)
