@@ -37,7 +37,7 @@ resources:
 jobs:
 - job: ui_automation
   displayName: Run MSAL UI automation
-  timeoutInMinutes: 180
+  timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
