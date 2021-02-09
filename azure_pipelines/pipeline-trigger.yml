@@ -275,7 +275,7 @@ jobs:
         git push origin $(repositoryBranch) -q
         git branch -d update-package-for-$(releaseVersion) -q
       workingDirectory: '$(Build.SourcesDirectory)'
-      failOnStderr: true
+      failOnStderr: false
       noProfile: false
       noRc: false
   - task: Bash@3
