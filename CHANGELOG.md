@@ -1,3 +1,6 @@
+## [1.1.15-SNAPSHOT] - TBD
+* Fixes to ADO release pipeline. (#1236)
+
 ## [1.1.14] - 2020-01-19
 * Removed identity core classes from public api (#1158).
 * Fixed possible deadlock caused by thread explosion (#1175)
