@@ -79,22 +79,28 @@
 
 - (void)setPiiEnabled:(BOOL)piiEnabled
 {
-    [MSIDLogger sharedLogger].piiLoggingEnabled = piiEnabled;
+    [MSIDLogger sharedLogger].logMaskingLevel = piiEnabled ? MSIDLogMaskingSettingsMaskSecretsOnly : MSIDLogMaskingSettingsMaskAllPII;
 }
 
 - (BOOL)piiEnabled
 {
-    return [MSIDLogger sharedLogger].piiLoggingEnabled;
+    switch ([MSIDLogger sharedLogger].logMaskingLevel) {
+        case MSIDLogMaskingSettingsMaskAllPII:
+            return NO;
+            
+        default:
+            return YES;
+    }
 }
 
-- (void)setMaskEUII:(BOOL)maskEUII
+- (MSALLogMaskingLevel)logMaskingLevel
 {
-    [MSIDLogger sharedLogger].euiiMaskingEnabled = maskEUII;
+    return (MSALLogMaskingLevel)[MSIDLogger sharedLogger].logMaskingLevel;
 }
 
-- (BOOL)maskEUII
+- (void)setLogMaskingLevel:(MSALLogMaskingLevel)logMaskingLevel
 {
-    return [MSIDLogger sharedLogger].euiiMaskingEnabled;
+    [MSIDLogger sharedLogger].logMaskingLevel = (MSIDLogMaskingLevel)logMaskingLevel;
 }
 
 @end

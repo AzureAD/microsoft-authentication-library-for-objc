@@ -28,6 +28,20 @@
 #import <Foundation/Foundation.h>
 #import "MSALDefinitions.h"
 
+/*! Levels of log masking */
+typedef NS_ENUM(NSInteger, MSALLogMaskingLevel)
+{
+    /** MSAL will not return any messages with any user or organizational information. This includes EUII and EUPI. This is the default level. */
+    MSALLogMaskingSettingsMaskAllPII,
+    
+    /** MSAL logs will still include OII (organization identifiable information), and EUPI (end user pseudonymous identifiers), but MSAL will try to exclude and/or mask any EUII (end user identifiable information) like UPN, username, email from its logs. */
+    
+    MSALLogMaskingSettingsMaskEUIIOnly, //
+    
+    /** MSAL logs will still include OII (organization identifiable information),  EUPI (end user pseudonymous identifiers), and EUII (end user identifiable information) like UPN, username, email from its logs. MSAL will still hide all secrets like tokens from its logs */
+    MSALLogMaskingSettingsMaskSecretsOnly
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -45,15 +59,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If piiEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
-@property (atomic) BOOL piiEnabled;
+@property (atomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("Use logMaskingLevel instead");
 
 /**
  MSAL provides logging callbacks that assist in diagnostics. By default the library will not return any messages with any user or organizational information. However, this might make diagnosing issues difficult.
+ logMaskingLevel property can be used to adjust level of MSAL masking.
  When both piiEnabled is set to YES, and maskEUII is set to YES, MSAL logs will still include OII (organization identifiable information), and EUPI (end user pseudonymous identifiers), but MSAL will try to exclude and/or mask any EUII (end user identifiable information) like UPN, username, email from its logs.
  This flag has no effect when piiEnabled is set to NO.
  Default value is NO.
 */
-@property (atomic) BOOL maskEUII;
+@property (atomic) MSALLogMaskingLevel logMaskingLevel;
 
 #pragma mark - Setting up the logging callback
 
