@@ -80,18 +80,11 @@ jobs:
         CI=true fastlane install_plugins
         CI=true fastlane ui_test
         CI=true bundle exec fastlane ui_test --verbose
-        # Uncomment out the following if want to check test results
-        # git status     
-        # git fetch origin $(Build.SourceBranchName) -q
-        # git checkout FETCH_HEAD -q
-        # git checkout -b $(Build.SourceBranchName) -q
-        # author=$(git log -1 --pretty=format:'%an <%ae>')
-        # git status     
-        # git add .
-        # git commit -a -m "Output file" -q --author="${author}"
-        # git push origin $(Build.SourceBranchName)
+    
   - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/fastlane/test_output/'
       artifact: 'TestOutputs'
       publishLocation: 'pipeline'
+  
