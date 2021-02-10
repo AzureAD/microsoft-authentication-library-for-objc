@@ -1,4 +1,5 @@
-## [1.1.15-SNAPSHOT] - TBD
+## TBD
+* Mask EUII in logs (#1206)
 * Fixes to ADO release pipeline. (#1236)
 
 ## [1.1.14] - 2020-01-19

@@ -109,6 +109,12 @@ For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Sw
     1. Rules -> Branch : master (For latest MSAL release)
     2. Rules -> Version -> Exact : [release version >= 1.1.14] (For a particular release version)
 
+For any issues, please check if there is an outstanding SPM/Xcode bug.
+Workarounds for some bugs we encountered :
+* If you have a plugin in your project you might encouter [CFBundleIdentifier collision. Each bundle must have a unique bundle identifier](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767311138) error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
+* While archiving, error : "IPA processing failed" UserInfo={NSLocalizedDescription=IPA processing failed}. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
+* For a macOS app, "Command CodeSign failed with a nonzero exit code" error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-770056675)
+
 ### Manually
 
 You can also use Git Submodule or check out the latest release and use as framework in your application.
