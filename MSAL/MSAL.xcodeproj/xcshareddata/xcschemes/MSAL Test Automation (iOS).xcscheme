@@ -27,6 +27,15 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "962E37A61E720C5D00DE71FE"
+            BuildableName = "MSAL Test Automation (iOS).app"
+            BlueprintName = "MSAL Test Automation (iOS)"
+            ReferencedContainer = "container:MSAL.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -47,19 +56,19 @@
                BlueprintName = "MultiAppiOSTests"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MSALNonUnifiedADALCoexistenceCacheTests">
+               </Test>
+               <Test
+                  Identifier = "MSALNonUnifiedADALCoexistenceCacheTests/testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_andDoAuthorityMigration_andDoTokenRefresh">
+               </Test>
+               <Test
+                  Identifier = "MSALNonUnifiedADALCoexistenceCacheTests/testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_withAADAccount_andDoTokenRefresh">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "962E37A61E720C5D00DE71FE"
-            BuildableName = "MSAL Test Automation (iOS).app"
-            BlueprintName = "MSAL Test Automation (iOS)"
-            ReferencedContainer = "container:MSAL.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -88,8 +97,6 @@
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

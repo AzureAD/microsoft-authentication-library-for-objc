@@ -1,0 +1,90 @@
+variables:
+  - name: 'repositoryName' # Name of the repository
+    value: 'AzureAD/microsoft-authentication-library-for-objc'
+
+schedules:
+# daily build will only be triggered if there is any change between the build and last successful build
+- cron: "0 4 * * *"
+  displayName: Daily 8 pm build
+  branches:
+    include:
+    - dev
+- cron: "0 20 * * 0"
+  displayName: Weekly Sunday build
+  branches:
+    include:
+    - dev
+  always: true
+
+trigger:
+  branches:
+      include:
+      - release/*
+
+pr: none
+
+pool:
+  vmImage: 'macOS-latest'
+
+resources:
+  repositories:
+  - repository: msalRepository
+    type: github
+    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+    name: $(repositoryName)
+    ref: $(Build.SourceBranch)
+
+jobs:
+- job: ui_automation
+  displayName: Run MSAL UI automation
+  timeoutInMinutes: 360
+  cancelTimeoutInMinutes: 5
+  workspace:
+    clean: all
+  
+  steps:
+
+  - checkout: msalRepository
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
+
+  - script: |
+     /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.7.app"
+    displayName: 'Switch to use Xcode 11.7'
+  
+  - task: Bash@3
+    displayName: Go to project folder
+    inputs:
+      targetType: 'inline'
+      script: |        
+        cd $(Agent.BuildDirectory)/s
+  
+  - script: 'gem install bundler:1.17.2'
+    displayName: 'Install bundler'
+  
+  - script: 'sudo gem install fastlane -NV'
+    displayName: 'Install fastlane'
+  
+  - task: Bash@3
+    displayName: Run UI automation
+    inputs:
+      targetType: 'inline'
+      script: |        
+        bundle install
+        echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
+        base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
+        ruby TestRubyFile.rb
+        CI=true fastlane install_plugins
+        CI=true fastlane ui_test
+        CI=true bundle exec fastlane ui_test --verbose
+    
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
+    inputs:
+      targetPath: '$(Agent.BuildDirectory)/s/fastlane/test_output/'
+      artifact: 'TestOutputs'
+      publishLocation: 'pipeline'
+  
