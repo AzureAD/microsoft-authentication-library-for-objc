@@ -59,14 +59,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If piiEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
-@property (atomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("Use logMaskingLevel instead");
+@property (nonatomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("Use logMaskingLevel instead");
 
 /**
  MSAL provides logging callbacks that assist in diagnostics. By default the library will not return any messages with any user or organizational information. However, this might make diagnosing issues difficult.
  logMaskingLevel property can be used to adjust level of MSAL masking.
  Default value is MSALLogMaskingSettingsMaskAllPII.
 */
-@property (atomic) MSALLogMaskingLevel logMaskingLevel;
+@property (nonatomic) MSALLogMaskingLevel logMaskingLevel;
 
 #pragma mark - Setting up the logging callback
 
