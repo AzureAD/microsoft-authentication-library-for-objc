@@ -421,7 +421,7 @@
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError **)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_TRACKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                 accountMetadataCache:self.accountMetadataCache
@@ -1206,7 +1206,7 @@
                           "                                            claimsRequest:%@]",
                           parameters.scopes,
                           parameters.extraScopesToConsent,
-                          MSID_PII_LOG_MASKABLE(parameters.account.homeAccountId),
+                          MSID_PII_LOG_TRACKABLE(parameters.account.homeAccountId),
                           MSID_PII_LOG_EMAIL(parameters.loginHint),
                           MSALStringForPromptType(parameters.promptType),
                           parameters.extraQueryParameters,
