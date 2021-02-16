@@ -80,7 +80,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |        
-        bundle install
+        # bundle install
         echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
         base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
