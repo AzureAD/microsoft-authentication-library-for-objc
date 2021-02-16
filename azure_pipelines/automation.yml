@@ -54,13 +54,20 @@ jobs:
   - script: |
      /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.7.app"
     displayName: 'Switch to use Xcode 11.7'
-  
+
   - task: Bash@3
-    displayName: Go to project folder
+    displayName: Install HomeBrew
     inputs:
       targetType: 'inline'
       script: |        
-        cd $(Agent.BuildDirectory)/s
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  
+  - task: Bash@3
+    displayName: Install Bluepills
+    inputs:
+      targetType: 'inline'
+      script: |        
+        brew install bluepill
   
   - script: 'gem install bundler:1.17.2'
     displayName: 'Install bundler'
