@@ -3,8 +3,8 @@
    "output-dir": "./test_outputs/",
    "only-retry-failed": true,
    "failure-tolerance": 3,
-   "only-retry-failed": true,
    "device": "iPhone 8",
    "runtime": "iOS 13.7",
+   "num-sims": 1,
    "unsafe-skip-xcode-version-check": true
 }
