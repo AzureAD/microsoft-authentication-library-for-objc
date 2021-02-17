@@ -86,6 +86,7 @@
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
+
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
 #endif
