@@ -152,7 +152,7 @@
     [self runSharedAADLoginWithTestRequest:request];
 
     request.promptBehavior = @"select_account";
-    request.loginHint = nil;
+    request.loginHint = self.primaryAccount.upn;
     request.testAccount = nil;
 
     NSDictionary *config = [self configWithTestRequest:request];

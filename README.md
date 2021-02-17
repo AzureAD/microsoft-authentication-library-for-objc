@@ -1,8 +1,8 @@
 Microsoft Authentication Library for iOS and macOS
 =====================================
 
-| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/index.html) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) 
-| --- | --- | --- | --- | --- |
+| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [<u>B2C Sample Code</u>](https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/index.html) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) 
+| --- | --- | --- | --- | --- | --- |
 
 The MSAL library for iOS and macOS gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
