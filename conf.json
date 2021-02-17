@@ -1,9 +1,11 @@
 {
    "xctestrun-path": "build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator13.7-x86_64.xctestrun",
    "output-dir": "./test_outputs/",
+   "screenshots-directory": "./test_outputs/",
    "only-retry-failed": true,
    "failure-tolerance": 3,
    "device": "iPhone 8",
    "runtime": "iOS 13.7",
+   "num-sims": 1,
    "unsafe-skip-xcode-version-check": true
 }
