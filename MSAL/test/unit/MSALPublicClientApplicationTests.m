@@ -135,7 +135,6 @@
 - (void)tearDown
 {
     [super tearDown];
-    //[[MSIDLRUCache sharedInstance] removeAllObjects:nil];
 }
 
 #pragma mark - Init
