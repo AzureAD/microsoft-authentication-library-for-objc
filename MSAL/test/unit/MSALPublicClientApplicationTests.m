@@ -88,6 +88,7 @@
 #import "MSALAuthenticationSchemePop.h"
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
+#import "MSIDLRUCache.h"
 #endif
 
 #pragma clang diagnostic push
@@ -134,6 +135,7 @@
 - (void)tearDown
 {
     [super tearDown];
+    [[MSIDLRUCache sharedInstance] removeAllObjects:nil];
 }
 
 #pragma mark - Init
