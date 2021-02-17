@@ -69,13 +69,6 @@ jobs:
       script: |        
         brew install bluepill
   
-  - task: Bash@3
-    displayName: Build for test
-    inputs:
-      targetType: 'inline'
-      script: |        
-        xcodebuild build-for-testing -workspace "MSAL.xcworkspace" -scheme "MSAL Test Automation (iOS)" -destination "platform=iOS Simulator,name=iPhone 8,OS=13.7" -derivedDataPath "build"
-  
   # - script: 'gem install bundler:1.17.2'
   #   displayName: 'Install bundler'
   
@@ -83,7 +76,7 @@ jobs:
   #   displayName: 'Install fastlane'
   
   - task: Bash@3
-    displayName: Run UI automation
+    displayName: Install testing account configuration file
     inputs:
       targetType: 'inline'
       script: |        
@@ -95,6 +88,20 @@ jobs:
         # CI=true fastlane install_plugins
         # CI=true fastlane ui_test
         # CI=true bundle exec fastlane ui_test --verbose
+    
+  - task: Bash@3
+    displayName: Build for test
+    inputs:
+      targetType: 'inline'
+      script: |        
+        xcodebuild build-for-testing -workspace "MSAL.xcworkspace" -scheme "MSAL Test Automation (iOS)" -destination "platform=iOS Simulator,name=iPhone 8,OS=13.7" -derivedDataPath "build"
+  
+  - task: Bash@3
+    displayName: Run UI tests
+    inputs:
+      targetType: 'inline'
+      script: |        
+        bluepill -c conf.json
     
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
