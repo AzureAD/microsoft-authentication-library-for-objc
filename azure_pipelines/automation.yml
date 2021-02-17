@@ -84,7 +84,6 @@ jobs:
         echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
         base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
-        bluepill -c conf.json
         # CI=true fastlane install_plugins
         # CI=true fastlane ui_test
         # CI=true bundle exec fastlane ui_test --verbose
