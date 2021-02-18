@@ -69,14 +69,27 @@ jobs:
     displayName: 'Install fastlane'
   
   - task: Bash@3
+    displayName: Install testing account configuration file
+    inputs:
+      targetType: 'inline'
+      script: |        
+        echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
+        base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
+        ruby TestRubyFile.rb
+
+  - task: Bash@3
+    displayName: Build for test
+    inputs:
+      targetType: 'inline'
+      script: |        
+        xcodebuild build-for-testing -workspace "MSAL.xcworkspace" -scheme "MSAL Test Automation (iOS)" -destination "platform=iOS Simulator,name=iPhone 8,OS=13.7" -derivedDataPath "build"
+
+  - task: Bash@3
     displayName: Run UI automation
     inputs:
       targetType: 'inline'
       script: |        
         bundle install
-        echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
-        base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
-        ruby TestRubyFile.rb
         CI=true fastlane install_plugins
         CI=true fastlane ui_test
         CI=true bundle exec fastlane ui_test --verbose

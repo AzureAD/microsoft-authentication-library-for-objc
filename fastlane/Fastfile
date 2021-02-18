@@ -26,10 +26,8 @@ lane :ui_test do
     # UI.abort_with_message!('You could conditionally abort')
     UI.message("everything is fine, let's continue try #{try_attempt + 1} for batch #{batch}")
   end
-  
   result = multi_scan(
-    workspace: File.absolute_path('../MSAL.xcworkspace'),
-    scheme: "MSAL Test Automation (iOS)",
+    xctestrun: "../build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator13.7-x86_64.xctestrun"
     try_count: 3,
     fail_build: false,
     reset_simulator: true,
