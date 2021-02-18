@@ -78,7 +78,6 @@ jobs:
         base64 --decode MSAL/test/automation/conf_encoded.json > MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         CI=true fastlane install_plugins
-        CI=true fastlane ui_test
         CI=true bundle exec fastlane ui_test --verbose
     
   - task: PublishPipelineArtifact@1
