@@ -91,7 +91,6 @@ jobs:
       script: |        
         bundle install
         CI=true fastlane install_plugins
-        CI=true fastlane ui_test
         CI=true bundle exec fastlane ui_test --verbose
     
   - task: PublishPipelineArtifact@1

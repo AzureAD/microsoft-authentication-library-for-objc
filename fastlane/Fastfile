@@ -27,6 +27,8 @@ lane :ui_test do
     UI.message("everything is fine, let's continue try #{try_attempt + 1} for batch #{batch}")
   end
   result = multi_scan(
+    build_for_testing: false,
+    
     xctestrun: "../build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator13.7-x86_64.xctestrun",
     try_count: 3,
     fail_build: false,
