@@ -83,6 +83,7 @@
 #import "MSALWebviewParameters.h"
 #import "MSALSilentTokenParameters.h"
 #import "XCTestCase+HelperMethods.h"
+#import "MSIDLRUCache.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -117,6 +118,7 @@
 - (void)tearDown
 {
     [super tearDown];
+    [[MSIDLRUCache sharedInstance] removeAllObjects:nil];
 }
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens

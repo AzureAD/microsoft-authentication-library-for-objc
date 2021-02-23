@@ -60,7 +60,7 @@ static NSAttributedString* s_attrNewLine = nil;
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     
-    MSALGlobalConfig.loggerConfig.piiEnabled = YES;
+    MSALGlobalConfig.loggerConfig.logMaskingLevel = MSALLogMaskingSettingsMaskEUIIOnly;
     [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, __unused BOOL containsPII)
     {
         (void)level;

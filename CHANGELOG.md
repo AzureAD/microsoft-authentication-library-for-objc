@@ -1,4 +1,8 @@
-## [1.1.14] - 2020-01-19
+## [1.1.15] - 2021-02-19
+* Mask EUII in logs (#1206)
+* Fixes to ADO release pipeline (#1236)
+
+## [1.1.14] - 2021-01-19
 * Removed identity core classes from public api (#1158).
 * Fixed possible deadlock caused by thread explosion (#1175)
 * Added pipeline configuration to generate framework for SPM & automate MSAL release (#1194)

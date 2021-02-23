@@ -182,7 +182,7 @@
 
 - (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
     [self updateAccountAsync:account
                idTokenClaims:idTokenClaims
@@ -248,7 +248,7 @@
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
     __block BOOL result = YES;
     __block NSError *removeError;
@@ -416,7 +416,7 @@
             return NO;
         }
         
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_EUII_ONLY_LOG_MASKABLE(accounts));
         
         NSError *saveError = nil;
         BOOL saveResult = [self saveUpdatedAccount:account
@@ -450,7 +450,7 @@
     NSString *versionIdentifier = [self accountVersionIdentifier:version];
     NSMutableDictionary *resultDictionary = jsonObject ? [[jsonObject jsonDictionary] mutableCopy] : [NSMutableDictionary new];
     
-    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_EUII_ONLY_LOG_MASKABLE(accounts));
     
     for (MSALLegacySharedAccount *sharedAccount in accounts)
     {

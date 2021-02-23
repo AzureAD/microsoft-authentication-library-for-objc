@@ -94,7 +94,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, return only signed in accounts %d", self.identifier, self.username, self.tenantProfileIdentifier, self.returnOnlySignedInAccounts];
+    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, return only signed in accounts %d", self.identifier, MSID_PII_LOG_EMAIL(self.username), self.tenantProfileIdentifier, self.returnOnlySignedInAccounts];
 }
 
 @end

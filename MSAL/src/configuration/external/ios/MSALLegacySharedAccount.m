@@ -64,7 +64,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         }
         
         _signinStatusDictionary = [jsonDictionary msidObjectForKey:@"signInStatus" ofClass:[NSDictionary class]];
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created sign in status dictionary %@", MSID_PII_LOG_MASKABLE(_signinStatusDictionary));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created sign in status dictionary %@", MSID_EUII_ONLY_LOG_MASKABLE(_signinStatusDictionary));
     }
     
     return self;
