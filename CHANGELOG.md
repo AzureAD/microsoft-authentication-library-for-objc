@@ -1,6 +1,6 @@
 ## [1.1.15] - 2021-02-19
-* Mask EUII in logs (#1206)
-* Fixes to ADO release pipeline (#1236)
+* Mask EUII in logs. (#1206)
+* Fixes to ADO release pipeline. (#1236)
 
 ## [1.1.14] - 2021-01-19
 * Removed identity core classes from public api (#1158).
