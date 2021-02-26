@@ -135,10 +135,6 @@
     }
     
     NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
-    if (!accessToken)
-    {
-        return nil;
-    }
     
     return [self resultWithAccessToken:accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
