@@ -40,13 +40,13 @@
 #pragma mark - Token response
 
 /** The Access Token requested. */
-@property (readonly, nonnull) NSString *accessToken;
+@property (readonly, nullable) NSString *accessToken;
 
 /**
     The time that the access token returned in the Token property ceases to be valid.
     This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
  */
-@property (readonly, nonnull) NSDate *expiresOn;
+@property (readonly, nullable) NSDate *expiresOn;
 
 /**
     Some access tokens have extended lifetime when server is in an unavailable state.
@@ -67,7 +67,7 @@
 /**
     The scope values returned from the service.
  */
-@property (readonly, nonnull) NSArray<NSString *> *scopes;
+@property (readonly, nullable) NSArray<NSString *> *scopes;
 
 #pragma mark - Account information
 
