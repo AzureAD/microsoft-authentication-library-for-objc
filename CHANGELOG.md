@@ -1,5 +1,6 @@
 ##TBD
 * Fixed possible deadlock caused by thread explosion
+* Throttling feature
 
 ## [1.1.13] - 2020-12-04
 * Adding nil check before assigning error when developers try to get account by username from MSALPublicClientApplication, this will help to prevent a crash when passing in nil as error ponter from the API
