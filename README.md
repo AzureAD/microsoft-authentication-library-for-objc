@@ -545,7 +545,7 @@ To signout account from your app, call MSAL's signout API. You can also optional
 ```swift
 let account = .... /* account retrieved above */
 
-let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!)
+let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParameters!)
 signoutParameters.signoutFromBrowser = false
             
 application.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
