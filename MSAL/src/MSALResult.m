@@ -134,9 +134,19 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+    NSString *resultAccessToken = nil;
     
-    return [self resultWithAccessToken:accessToken
+    if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
+        resultAccessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Access token missing in token result. Continuing without it");
+    }
+        
+    return [self resultWithAccessToken:resultAccessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
