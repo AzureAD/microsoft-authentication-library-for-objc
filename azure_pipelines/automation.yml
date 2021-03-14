@@ -20,6 +20,7 @@ trigger:
   branches:
       include:
       - release/*
+      - hotfix/*
 
 pr: none
 
