@@ -1,3 +1,5 @@
+## [1.1.16] - 2021-03-19
+
 ## [1.1.15] - 2021-02-19
 * Mask EUII in logs (#1206)
 * Fixes to ADO release pipeline (#1236)
