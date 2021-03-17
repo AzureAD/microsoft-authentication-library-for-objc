@@ -192,6 +192,18 @@
     XCTAssertEqualObjects(result.account.identifier, @"uid.tenant_id");
     XCTAssertNil(result.account.tenantProfiles);
     XCTAssertEqualObjects(tokenResult.correlationId.UUIDString, @"00000000-0000-0000-0000-000000000001");
+    XCTAssertEqualObjects(result.accessToken, @"access_token");
+    XCTAssertEqualObjects(result.authorizationHeader, @"Bearer access_token");
+    
+    MSIDAccessToken *emptyAccessToken = nil;
+    tokenResult.accessToken = emptyAccessToken;
+    error = nil;
+    result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority authScheme:[MSALAuthenticationSchemeBearer new] popManager:nil error:&error];
+    
+    XCTAssertEqualObjects(result.accessToken, @"");
+    XCTAssertEqualObjects(result.authorizationHeader, @"");
+    XCTAssertNotNil(result);
+    XCTAssertNil(error);
 }
 
 - (void)testMSALResultWithTokenResult_whenValidTokenResult_shouldReturnCorrectAttributes_PopFlow
@@ -218,6 +230,7 @@
     MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority authScheme:[self generateAuthSchemePopInstance] popManager:[MSALDevicePopManagerUtil test_initWithValidCacheConfig] error:&error];
     
     XCTAssertNotNil(result);
+    XCTAssertNil(error);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     XCTAssertEqualObjects(result.tenantId, claims.realm);
@@ -232,7 +245,19 @@
     XCTAssertNotNil(result.account);
     XCTAssertEqualObjects(result.account.identifier, @"uid.tenant_id");
     XCTAssertNil(result.account.tenantProfiles);
+    XCTAssertNotNil(result.accessToken);
+    XCTAssertTrue([result.authorizationHeader hasPrefix:@"Pop "]);
     XCTAssertEqualObjects(tokenResult.correlationId.UUIDString, @"00000000-0000-0000-0000-000000000001");
+    
+    MSIDAccessToken *emptyAccessToken = nil;
+    tokenResult.accessToken = emptyAccessToken;
+    error = nil;
+    result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority authScheme:[self generateAuthSchemePopInstance] popManager:[MSALDevicePopManagerUtil test_initWithValidCacheConfig] error:&error];
+    
+    XCTAssertEqualObjects(result.accessToken, @"");
+    XCTAssertEqualObjects(result.authorizationHeader, @"");
+    XCTAssertNotNil(result);
+    XCTAssertNil(error);
 }
 
 - (MSALAuthenticationSchemePop *) generateAuthSchemePopInstance
