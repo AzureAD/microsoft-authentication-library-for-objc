@@ -134,12 +134,14 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *resultAccessToken = nil;
+    NSString *resultAccessToken = @"";
+    NSArray *resultScopes = @[];
     
     if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
         resultAccessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+        resultScopes = [tokenResult.accessToken.scopes array];
     }
     else
     {
@@ -154,7 +156,7 @@
                                account:account
                                idToken:tokenResult.rawIdToken
                               uniqueId:tenantProfile.identifier
-                                scopes:[tokenResult.accessToken.scopes array]
+                                scopes:resultScopes
                              authority:authority
                          correlationId:tokenResult.correlationId
                             authScheme:authScheme];

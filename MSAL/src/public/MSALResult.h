@@ -39,8 +39,11 @@
 
 #pragma mark - Token response
 
-/** The Access Token requested. */
-@property (readonly, nullable) NSString *accessToken;
+/**
+ The Access Token requested.
+ Note that if access token is not returned in token response, this property will be returned as an empty string.
+ */
+@property (readonly, nonnull) NSString *accessToken;
 
 /**
     The time that the access token returned in the Token property ceases to be valid.
@@ -67,7 +70,7 @@
 /**
     The scope values returned from the service.
  */
-@property (readonly, nullable) NSArray<NSString *> *scopes;
+@property (readonly, nonnull) NSArray<NSString *> *scopes;
 
 #pragma mark - Account information
 
