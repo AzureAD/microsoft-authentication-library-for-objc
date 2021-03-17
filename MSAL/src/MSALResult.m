@@ -55,6 +55,11 @@
 
 - (NSString *)authorizationHeader
 {
+    if ([NSString msidIsStringNilOrBlank:self.accessToken])
+    {
+        return @"";
+    }
+    
     return [self.authScheme getAuthorizationHeader:self.accessToken];
 }
 
