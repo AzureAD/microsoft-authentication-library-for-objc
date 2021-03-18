@@ -1,3 +1,6 @@
+## TBD
+* Support empty or nil access token in MSAL token response (#1256)
+
 ## [1.1.15] - 2021-02-19
 * Mask EUII in logs (#1206)
 * Fixes to ADO release pipeline. (#1236)
