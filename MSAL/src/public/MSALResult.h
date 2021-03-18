@@ -39,14 +39,17 @@
 
 #pragma mark - Token response
 
-/** The Access Token requested. */
+/**
+ The Access Token requested.
+ Note that if access token is not returned in token response, this property will be returned as an empty string.
+ */
 @property (readonly, nonnull) NSString *accessToken;
 
 /**
     The time that the access token returned in the Token property ceases to be valid.
     This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
  */
-@property (readonly, nonnull) NSDate *expiresOn;
+@property (readonly, nullable) NSDate *expiresOn;
 
 /**
     Some access tokens have extended lifetime when server is in an unavailable state.

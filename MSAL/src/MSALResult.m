@@ -55,6 +55,11 @@
 
 - (NSString *)authorizationHeader
 {
+    if ([NSString msidIsStringNilOrBlank:self.accessToken])
+    {
+        return @"";
+    }
+    
     return [self.authScheme getAuthorizationHeader:self.accessToken];
 }
 
@@ -134,13 +139,21 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
-    if (!accessToken)
-    {
-        return nil;
-    }
+    NSString *resultAccessToken = @"";
+    NSArray *resultScopes = @[];
     
-    return [self resultWithAccessToken:accessToken
+    if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
+        resultAccessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+        resultScopes = [tokenResult.accessToken.scopes array];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Access token missing in token result. Continuing without it");
+    }
+        
+    return [self resultWithAccessToken:resultAccessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
@@ -148,7 +161,7 @@
                                account:account
                                idToken:tokenResult.rawIdToken
                               uniqueId:tenantProfile.identifier
-                                scopes:[tokenResult.accessToken.scopes array]
+                                scopes:resultScopes
                              authority:authority
                          correlationId:tokenResult.correlationId
                             authScheme:authScheme];
