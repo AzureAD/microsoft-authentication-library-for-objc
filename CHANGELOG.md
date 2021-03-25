@@ -1,5 +1,6 @@
-## TBD
+## [1.1.16] - 2021-03-19
 * Support empty or nil access token in MSAL token response (#1256)
+* Implement throttling. 
 
 ## [1.1.15] - 2021-02-19
 * Mask EUII in logs (#1206)
