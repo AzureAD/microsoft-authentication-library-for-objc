@@ -1,3 +1,6 @@
+## [1.1.17] - 2021-04-06
+* Revert back the logic of checking requestedClaims. (#1285)
+
 ## [1.1.16] - 2021-03-19
 * Support empty or nil access token in MSAL token response (#1256)
 * Implement throttling. 
