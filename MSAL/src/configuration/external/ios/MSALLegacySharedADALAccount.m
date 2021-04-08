@@ -159,7 +159,7 @@ static NSString *kADALAccountType = @"ADAL";
         matchResult &= (self.objectId && [self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
     }
     
-    return matchResult &= [super matchesParameters:parameters];
+    return matchResult & [super matchesParameters:parameters];
 }
 
 #pragma mark - Updates
