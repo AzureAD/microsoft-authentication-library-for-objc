@@ -861,9 +861,10 @@
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
-    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.schemaVersion = 4;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
-    msidParams.currentRequestTelemetry.forceRefresh = parameters.forceRefresh; 
+    msidParams.currentRequestTelemetry.tokenCacheRefresh = parameters.forceRefresh ? ForceRefresh : NoCacheLookupInvolved;
+     
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1182,7 +1183,7 @@
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 2;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
-    msidParams.currentRequestTelemetry.forceRefresh = NO;
+    msidParams.currentRequestTelemetry.tokenCacheRefresh = NoCacheLookupInvolved;
     
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
