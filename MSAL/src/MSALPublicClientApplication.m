@@ -863,7 +863,7 @@
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 4;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
-    msidParams.currentRequestTelemetry.tokenCacheRefresh = parameters.forceRefresh ? ForceRefresh : NoCacheLookupInvolved;
+    msidParams.currentRequestTelemetry.tokenCacheRefresh = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
      
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -1183,7 +1183,7 @@
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
     msidParams.currentRequestTelemetry.schemaVersion = 2;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
-    msidParams.currentRequestTelemetry.tokenCacheRefresh = NoCacheLookupInvolved;
+    msidParams.currentRequestTelemetry.tokenCacheRefresh = TokenCacheRefreshTypeNoCacheLookupInvolved;
     
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
