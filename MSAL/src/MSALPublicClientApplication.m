@@ -1181,7 +1181,7 @@
     msidParams.providedAuthority = requestAuthority;
     msidParams.shouldValidateResultAccount = NO;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
-    msidParams.currentRequestTelemetry.schemaVersion = 2;
+    msidParams.currentRequestTelemetry.schemaVersion = 4;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
     
