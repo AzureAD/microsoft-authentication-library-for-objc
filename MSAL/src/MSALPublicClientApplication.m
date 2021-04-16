@@ -108,6 +108,7 @@
 #import "MSIDCacheConfig.h"
 #import "MSIDDevicePopManager.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
+#import "MSIDRequestTelemetryConstants.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -861,7 +862,7 @@
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
-    msidParams.currentRequestTelemetry.schemaVersion = 4;
+    msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
      
@@ -1181,7 +1182,7 @@
     msidParams.providedAuthority = requestAuthority;
     msidParams.shouldValidateResultAccount = NO;
     msidParams.currentRequestTelemetry = [MSIDCurrentRequestTelemetry new];
-    msidParams.currentRequestTelemetry.schemaVersion = 4;
+    msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
     
