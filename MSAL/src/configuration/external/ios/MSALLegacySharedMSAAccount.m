@@ -123,7 +123,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         return NO;
     }
     
-    return matchResult &= [super matchesParameters:parameters];
+    return matchResult & [super matchesParameters:parameters];
 }
 
 #pragma mark - Updates
