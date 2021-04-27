@@ -1,3 +1,6 @@
+## [1.1.17] - 2021-04-19
+* Added telemetry for different token refresh timing
+
 ## [1.1.16] - 2021-03-19
 * Support empty or nil access token in MSAL token response (#1256)
 * Implement throttling. 
