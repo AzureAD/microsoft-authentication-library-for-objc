@@ -1,3 +1,6 @@
+## TBD: 
+* Minimum Xcode version bumped to 12.2
+
 ## [1.1.17] - 2021-04-19
 * Added telemetry for different token refresh timing
 
