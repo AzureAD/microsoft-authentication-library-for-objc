@@ -1062,7 +1062,8 @@
             @"code_challenge_method" : @"S256",
             @"haschrome" : @"1",
             @"eqpKey" : @"eqpValue",
-            @"login_hint": @"upn@test.com"
+            @"login_hint": @"upn@test.com",
+            @"X-AnchorMailbox": [MSIDTestIgnoreSentinel new]
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
