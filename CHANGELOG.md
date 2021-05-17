@@ -1,4 +1,4 @@
-## TBD: 
+## [1.1.18] - 2021-05-17: 
 * Minimum Xcode version bumped to 12.2
 * Add CCS hint header (#1300)
 
