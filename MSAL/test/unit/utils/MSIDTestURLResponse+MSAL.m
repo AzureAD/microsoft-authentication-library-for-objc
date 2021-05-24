@@ -51,6 +51,7 @@
         headers[@"x-app-name"] = @"MSIDTestsHostApp";
         headers[@"x-app-ver"] = @"1.0";
         headers[@"x-ms-PkeyAuth"] = @"1.0";
+        headers[@"X-AnchorMailbox"] = [MSIDTestIgnoreSentinel new];
 
         s_msalHeaders = [headers copy];
     });
