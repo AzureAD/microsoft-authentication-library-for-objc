@@ -1,4 +1,5 @@
 ## TBD: 
+* Changed some of the logging levels from info to verbose per customer request
 * Minimum Xcode version bumped to 12.2
 * Add CCS hint header (#1300)
 
