@@ -382,7 +382,7 @@
     [self acceptAuthSessionDialog];
     [self aadEnterPassword];
 
-    XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
+    XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:enrollButton];
     sleep(0.5f);
     [enrollButton msidTap];
@@ -414,7 +414,7 @@
     [self acquireToken:config];
     [self aadEnterPassword];
 
-    XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
+    XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:enrollButton];
     [enrollButton msidTap];
 
