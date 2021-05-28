@@ -305,10 +305,7 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    NSString *authorityString = @"https://login.microsoftonline.com/msidlab6.onmicrosoft.com";
-    NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-    __auto_type authorityTemp = [MSALAuthority authorityWithURL:authorityUrl error:nil];
-    MSALAuthority *authority = authorityTemp; //[self.settings authority];
+    MSALAuthority *authority = [self.settings authority];
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
