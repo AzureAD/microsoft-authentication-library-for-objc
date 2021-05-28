@@ -118,7 +118,7 @@
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
+    request.webViewType = MSIDWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
@@ -152,7 +152,7 @@
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
+    request.webViewType = MSIDWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
