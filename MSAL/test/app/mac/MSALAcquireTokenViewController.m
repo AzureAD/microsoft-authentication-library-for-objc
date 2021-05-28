@@ -164,8 +164,8 @@ static NSString * const defaultScope = @"User.Read";
 
 - (void)updateResultView:(MSALResult *)result
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId];
     
     [self.resultTextView setString:resultText];
     
@@ -305,7 +305,10 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    MSALAuthority *authority = [self.settings authority];
+    NSString *authorityString = @"https://login.microsoftonline.com/msidlab6.onmicrosoft.com";
+    NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
+    __auto_type authorityTemp = [MSALAuthority authorityWithURL:authorityUrl error:nil];
+    MSALAuthority *authority = authorityTemp; //[self.settings authority];
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
