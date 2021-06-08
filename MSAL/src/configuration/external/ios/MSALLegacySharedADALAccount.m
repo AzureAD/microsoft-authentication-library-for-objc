@@ -132,7 +132,7 @@ static NSString *kADALAccountType = @"ADAL";
         _username = [jsonDictionary msidStringObjectForKey:@"username"];
         _accountClaims = claims;
         
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_TRACKABLE(_objectId), _tenantId, MSID_EUII_ONLY_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_EUII_ONLY_LOG_MASKABLE(_accountClaims));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_TRACKABLE(_objectId), _tenantId, MSID_EUII_ONLY_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_EUII_ONLY_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
