@@ -38,12 +38,12 @@
     
     if ([accountType isEqualToString:@"ADAL"])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing ADAL account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Initializing ADAL account type");
         return [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     else if ([accountType isEqualToString:@"MSA"])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Initializing MSA account type");
         return [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     
@@ -52,7 +52,7 @@
         *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type found", nil, nil, nil, nil, nil, NO);
     }
     
-    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);
+    MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Unknown account type found %@", accountType);
     return nil;
 }
 
@@ -64,7 +64,7 @@
 {
     if ([self isMSAAccount:account])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Initializing MSA account type");
         return [[MSALLegacySharedMSAAccount alloc] initWithMSALAccount:account
                                                          accountClaims:claims
                                                        applicationName:applicationName
@@ -73,7 +73,7 @@
     }
     else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing AAD account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Initializing AAD account type");
         return [[MSALLegacySharedADALAccount alloc] initWithMSALAccount:account
                                                           accountClaims:claims
                                                         applicationName:applicationName
