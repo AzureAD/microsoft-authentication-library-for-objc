@@ -50,7 +50,7 @@
         self.currentRequest = request;
         return YES;
     }
-    return @"";
+    
     return NO;
 }
 
