@@ -9,7 +9,7 @@ pr:
 # Not triggering for CI since it is triggered for PRs
 trigger: none
 
-# Define 5 parallel jobs that run build script for specified targets
+# Define parallel jobs that run build script for specified targets
 jobs:
 - job: 'Validate_Pull_Request'
   strategy:
