@@ -214,7 +214,6 @@
                              }];
     
     [self waitForExpectations:@[silentExpectation] timeout:1];
-    XCTAssertTrue(NO);
 }
 
 - (void)testAcquireTokenInteractive_whenB2CAuthority_shouldCacheTokens
