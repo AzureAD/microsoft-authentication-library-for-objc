@@ -1,8 +1,6 @@
 ## TBD: 
-* Changed some of the logging levels from info to verbose per customer request
-* Minimum Xcode version bumped to 12.2
-* Add CCS hint header (#1300)
-=======
+* Migrated PR validation pipeline from Travis to Azure DevOps
+
 ## [1.1.18] - 2021-05-17: 
 * Minimum Xcode version bumped to 12.2
 * Add CCS hint header (#1300)
