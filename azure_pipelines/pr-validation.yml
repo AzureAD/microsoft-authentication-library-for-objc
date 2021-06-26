@@ -17,12 +17,6 @@ jobs:
     matrix:
       IOS_FRAMEWORK: 
         target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
-#      IOS_TEST_APP: 
-#        target: "iosTestApp"
-#      SAMPLE_IOS_APP: 
-#        target: "sampleIosApp"
-#      SAMPLE_IOS_APP_SWIFT: 
-#        target: "sampleIosAppSwift"
       MAC_FRAMEWORK: 
         target: "macFramework"
   displayName: Validate Pull Request
