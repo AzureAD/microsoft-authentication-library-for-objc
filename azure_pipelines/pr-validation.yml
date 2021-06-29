@@ -48,7 +48,7 @@ jobs:
       targetType: 'inline'
       script: |
         { output=$(./build.py --target $(target) 2>&1 1>&3-) ;} 3>&1
-        final_status=$(<status.txt)
+        final_status=$(<./build/status.txt)
         echo "FINAL STATUS  = ${final_status}"
         echo "POSSIBLE ERRORS: ${output}"
         
@@ -62,6 +62,14 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        rm -rf status.txt
+        rm -rf ./build/status.txt
+  - task: PublishTestResults@2
+    condition: always()
+    displayName: Publish Test Report
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Test Run - $(target)'
   
   
