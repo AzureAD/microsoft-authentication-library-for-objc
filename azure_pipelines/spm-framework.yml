@@ -326,6 +326,10 @@ jobs:
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
   - task: Bash@3
+    displayName: Build MSAL docs via Jazzy
+    inputs:
+      filePath: 'build_docs.sh'
+  - task: Bash@3
     displayName: Push pod to Cocoapods
     inputs:
       targetType: 'inline'
