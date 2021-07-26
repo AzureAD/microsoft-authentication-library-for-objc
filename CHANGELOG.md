@@ -1,5 +1,5 @@
 ## [1.1.20] - 2021-07-19
-* Migrated PR validation pipeline from Travis to Azure DevOps
+* Migrated PR validation pipeline from Travis to Azure DevOps.
 
 ## [1.1.19] - 2021-06-14: 
 * Changed some of the logging levels from info to verbose per customer request
