@@ -12,7 +12,7 @@ trigger:
     include:
     - master
     - release/*
-  exclude: '*'
+    exclude: '*'
 
 # Define parallel jobs that run build script for specified targets
 jobs:
