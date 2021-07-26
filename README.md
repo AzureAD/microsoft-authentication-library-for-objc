@@ -126,7 +126,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 1. Register your app in the [Azure portal](https://aka.ms/MobileAppReg)
 2. Make sure you register a redirect URI for your application. It should be in the following format: 
 
- `msauth.[BUNDLE_ID]://auth`
+ `msauth.$(PRODUCT_BUNDLE_IDENTIFIER)://auth`
 
 3. Add a new keychain group to your project Capabilities. Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
 
@@ -136,7 +136,7 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
 
 #### iOS only steps:
 
-1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+1. Add your application's redirect URI scheme to your `Info.plist` file
 
 ```xml
 <key>CFBundleURLTypes</key>
@@ -144,7 +144,7 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
     <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-            <string>msauth.[BUNDLE_ID]</string>
+            <string>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
         </array>
     </dict>
 </array>
