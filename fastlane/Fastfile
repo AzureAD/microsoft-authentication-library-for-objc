@@ -35,7 +35,7 @@ lane :ui_test do
     reset_simulator: true,
     device: 'iPhone 8',
     sdk: 'iphonesimulator',
-    deployment_target_version: '13.7',
+    deployment_target_version: '14.4',
     testrun_completed_block: test_run_block,
     result_bundle: true
   )

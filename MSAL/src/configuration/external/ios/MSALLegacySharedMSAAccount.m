@@ -87,7 +87,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         _accountClaims = @{@"tid": MSID_DEFAULT_MSA_TENANTID,
                            @"oid": uid};
         
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external MSA account with identifier %@, object Id %@, tenant Id %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_TRACKABLE(cid), MSID_DEFAULT_MSA_TENANTID, MSID_PII_LOG_EMAIL(_username), MSID_EUII_ONLY_LOG_MASKABLE(_accountClaims));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"Created external MSA account with identifier %@, object Id %@, tenant Id %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_TRACKABLE(cid), MSID_DEFAULT_MSA_TENANTID, MSID_PII_LOG_EMAIL(_username), MSID_EUII_ONLY_LOG_MASKABLE(_accountClaims));
     }
     
     return self;

@@ -64,7 +64,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         }
         
         _signinStatusDictionary = [jsonDictionary msidObjectForKey:@"signInStatus" ofClass:[NSDictionary class]];
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created sign in status dictionary %@", MSID_EUII_ONLY_LOG_MASKABLE(_signinStatusDictionary));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"Created sign in status dictionary %@", MSID_EUII_ONLY_LOG_MASKABLE(_signinStatusDictionary));
     }
     
     return self;
@@ -122,7 +122,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *signinStatus = [self.signinStatusDictionary msidStringObjectForKey:appIdentifier];
         
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Requested to only returned signed in accounts. Current sign in status for the app is %@", signinStatus);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"Requested to only returned signed in accounts. Current sign in status for the app is %@", signinStatus);
         return [signinStatus isEqualToString:@"SignedIn"];
     }
     else if (![self.signinStatusDictionary count])

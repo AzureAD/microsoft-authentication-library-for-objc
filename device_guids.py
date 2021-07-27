@@ -24,7 +24,7 @@ def get_guid_i(device) :
 	version_regex = re.compile("([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?")
 	
 	command = "instruments -s devices"
-	print "travis_fold:start:Devices"
+	print "##[group]Devices"
 	p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 	
 	# Sometimes the hostname comes back with the proper casing, sometimes not. Using a
@@ -58,7 +58,7 @@ def get_guid_i(device) :
 			latest_os_device = match.group(2)
 			latest_os_version = version_tuple
 	
-	print "travis_fold:end:Devices"
+	print "##[endgroup]Devices"
 	
 	return latest_os_device
 

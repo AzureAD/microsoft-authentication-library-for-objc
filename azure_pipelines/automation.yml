@@ -51,10 +51,6 @@ jobs:
     fetchDepth: 1
     persistCredentials: true
     path: s
-
-  - script: |
-     /bin/bash -c "sudo xcode-select -s /Applications/Xcode_11.7.app"
-    displayName: 'Switch to use Xcode 11.7'
   
   - task: Bash@3
     displayName: Go to project folder
