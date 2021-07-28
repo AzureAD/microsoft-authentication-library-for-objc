@@ -6,8 +6,14 @@ pr:
     - '*'
   drafts: true
 
-# Not triggering for CI since it is triggered for PRs
-trigger: none
+# Trigger CI for only master/release branches
+trigger:
+  branches:
+    include:
+    - master
+    - release/*
+    exclude:
+    - '*'
 
 # Define parallel jobs that run build script for specified targets
 jobs:
