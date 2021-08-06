@@ -1,0 +1,75 @@
+variables:
+  - name: 'releaseVersion'
+    value: '1.1.20'
+  - name: 'repositoryName' # Name of the repository
+    value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
+    value: 'dev'
+  - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
+    value: 'MSAL ObjC Service Connection'
+  - name: 'docsRepositoryBranch' # Name of the branch where public reference docs will be pushed for github page
+    value: 'gh-pages-test'
+
+pr: none
+
+resources:
+  repositories:
+  - repository: msalRepository
+    type: github
+    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+    name: $(repositoryName)
+    ref: $(repositoryBranch)
+
+jobs:
+- job: BuildXcFrameworks
+  displayName: Build MSAL framework and release
+  pool:
+    vmImage: 'macOS-latest'
+    timeOutInMinutes: 20
+
+  steps:
+  - checkout: msalRepository
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: false
+  
+  - task: Bash@3
+    displayName: Build MSAL docs via Jazzy
+    inputs:
+      filePath: 'build_docs.sh'
+  - task: Bash@3
+    displayName: Push docs to github page for repository 
+    inputs:
+      targetType: 'inline'
+      script: |
+        if [ ! -d "docs.temp" ]; then
+            echo "Docs were not generated in previous step!"
+        else
+            author=$(git log -1 --pretty=format:'%an <%ae>')
+            # Create a temp branch to cherry pick doc changes
+            git checkout -b update-docs-for-release-$(releaseVersion) -q
+            git add docs.temp/docs/* -q
+            git commit -m 'adding docs for release' -q --author="${author}"
+            
+            # Cleanup
+            rm -rf docs.temp
+            git checkout $(docsRepositoryBranch) -q
+            git clean -fd
+            
+            # Get previously commited changes for docs
+            git cherry-pick update-docs-for-release-$(releaseVersion) -q
+            
+            # Copy files in docs.temp folder to root
+            \cp -r docs.temp/docs/* .
+
+            # Push changes to docsRepositoryBranch branch
+            git commit -m 'Update docs for release $(releaseVersion)' -q
+            git push origin $(docsRepositoryBranch) -q
+
+            git branch -d update-docs-for-$(releaseVersion) -q
+        fi
+      workingDirectory: '$(Build.SourcesDirectory)'
+      failOnStderr: false
+      noProfile: false
+      noRc: false
