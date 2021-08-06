@@ -1,0 +1,7 @@
+xcuserdata
+MSAL.xcscmblueprint
+.DS_Store
+*.pyc
+## Build generated
+build/
+DerivedData/
