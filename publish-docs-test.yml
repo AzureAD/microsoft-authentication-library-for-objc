@@ -65,7 +65,8 @@ jobs:
             \cp -r docs.temp/docs/* .
         
             # Push changes to docsRepositoryBranch branch
-            git commit -m 'Update docs for release $(releaseVersion)'
+            git add -A
+            git commit -m 'Update docs for release $(releaseVersion)' --status
             git push origin $(docsRepositoryBranch)
         
             git branch -d "update-docs-for-$(releaseVersion)"
