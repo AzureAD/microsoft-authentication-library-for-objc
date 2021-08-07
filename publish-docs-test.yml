@@ -38,6 +38,15 @@ jobs:
     displayName: Build MSAL docs via Jazzy
     inputs:
       filePath: 'build_docs.sh'
+  - task: InstallSSHKey@0
+    displayName: Install SSH Key for MSAL Github Repo
+    inputs:
+      knownHostsEntry: '$(sshKnownHosts)'
+      sshPublicKey: '$(sshPublicKey)'
+      sshKeySecureFile: 'msal_objc_private_key'
+      addEntryToConfig: true
+      configHostAlias: 'ADO Release Pipeline Public Key'
+      configHostname: 'github.com'
   - task: Bash@3
     inputs:
       targetType: 'inline'
@@ -45,6 +54,14 @@ jobs:
         if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
+            ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
+            git remote set-url origin git@github.com:$(repositoryName).git
+
+            authorName=$(git log -1 --pretty=format:'%an')
+            authorEmail=$(git log -1 --pretty=format:'%ae')
+            git config --global user.email "${authorEmail}"
+            git config --global user.name "${authorName}"
+
             author=$(git log -1 --pretty=format:'%an <%ae>')
             # Create a temp branch to cherry pick doc changes
             git checkout -b 'update-docs-for-release-$(releaseVersion)'
@@ -66,7 +83,7 @@ jobs:
         
             # Push changes to docsRepositoryBranch branch
             git add -A
-            git commit -m 'Update docs for release $(releaseVersion)' --status
+            git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
             git push origin $(docsRepositoryBranch)
         
             git branch -d "update-docs-for-$(releaseVersion)"
