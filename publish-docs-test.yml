@@ -85,8 +85,6 @@ jobs:
             git add -A
             git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
             git push origin $(docsRepositoryBranch)
-        
-            git branch -d "update-docs-for-$(releaseVersion)"
         fi
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: false
