@@ -39,7 +39,6 @@ jobs:
     inputs:
       filePath: 'build_docs.sh'
   - task: Bash@3
-    displayName: Push docs to github page for repository 
     inputs:
       targetType: 'inline'
       script: |
@@ -50,10 +49,12 @@ jobs:
             # Create a temp branch to cherry pick doc changes
             git checkout -b 'update-docs-for-release-$(releaseVersion)'
             git add docs.temp/docs/*
-            git commit -m 'adding docs for release' --author="${author}"
+            git commit -m 'adding docs for release' --author="${author}" --status
             
             # Cleanup
             rm -rf docs.temp
+            git fetch origin $(docsRepositoryBranch)
+            git checkout FETCH_HEAD
             git checkout $(docsRepositoryBranch)
             git clean -fd
             
@@ -62,11 +63,11 @@ jobs:
             
             # Copy files in docs.temp folder to root
             \cp -r docs.temp/docs/* .
-
+        
             # Push changes to docsRepositoryBranch branch
             git commit -m 'Update docs for release $(releaseVersion)'
             git push origin $(docsRepositoryBranch)
-
+        
             git branch -d "update-docs-for-$(releaseVersion)"
         fi
       workingDirectory: '$(Build.SourcesDirectory)'
