@@ -48,7 +48,7 @@ jobs:
         else
             author=$(git log -1 --pretty=format:'%an <%ae>')
             # Create a temp branch to cherry pick doc changes
-            git checkout -b "update-docs-for-release-$(releaseVersion)""
+            git checkout -b 'update-docs-for-release-$(releaseVersion)'
             git add docs.temp/docs/*
             git commit -m 'adding docs for release' --author="${author}"
             
