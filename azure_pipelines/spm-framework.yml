@@ -339,28 +339,34 @@ jobs:
         if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
+            authorName=$(git log -1 --pretty=format:'%an')
+            authorEmail=$(git log -1 --pretty=format:'%ae')
+            git config --global user.email "${authorEmail}"
+            git config --global user.name "${authorName}"
+
             author=$(git log -1 --pretty=format:'%an <%ae>')
             # Create a temp branch to cherry pick doc changes
-            git checkout -b update-docs-for-release-$(releaseVersion) -q
-            git add docs.temp/docs/* -q
-            git commit -m 'adding docs for release' -q --author="${author}"
+            git checkout -b 'update-docs-for-release-$(releaseVersion)'
+            git add docs.temp/docs/*
+            git commit -m 'adding docs for release' --author="${author}" --status
             
             # Cleanup
             rm -rf docs.temp
-            git checkout $(docsRepositoryBranch) -q
+            git fetch origin $(docsRepositoryBranch)
+            git checkout FETCH_HEAD
+            git checkout $(docsRepositoryBranch)
             git clean -fd
             
             # Get previously commited changes for docs
-            git cherry-pick update-docs-for-release-$(releaseVersion) -q
+            git cherry-pick "update-docs-for-release-$(releaseVersion)"
             
             # Copy files in docs.temp folder to root
             \cp -r docs.temp/docs/* .
-
+        
             # Push changes to docsRepositoryBranch branch
-            git commit -m 'Update docs for release $(releaseVersion)' -q
-            git push origin $(docsRepositoryBranch) -q
-
-            git branch -d update-docs-for-$(releaseVersion) -q
+            git add -A
+            git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
+            git push origin $(docsRepositoryBranch)
         fi
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: false
