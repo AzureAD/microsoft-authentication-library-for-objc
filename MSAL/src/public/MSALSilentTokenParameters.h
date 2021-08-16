@@ -64,6 +64,13 @@ Initialize a MSALSilentTokenParameters with scopes and account.
 */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
 
+/**
+ Key-value pairs to pass to the authentication server during
+ the silent authentication flow. This should not be url-encoded value.
+ */
+@property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
+
+
 @end
 
 NS_ASSUME_NONNULL_END

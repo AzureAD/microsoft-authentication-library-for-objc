@@ -854,7 +854,9 @@
     msidParams.validateAuthority = shouldValidate;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
-    msidParams.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
+    NSMutableDictionary *extraURLQueryParameters = [self.internalConfig.extraQueryParameters.extraURLQueryParameters mutableCopy];
+    [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
+    msidParams.extraURLQueryParameters = extraURLQueryParameters;
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
