@@ -51,7 +51,7 @@
 
 + (NSString *)aadApiVersion
 {
-    return @"v2.0";
+    return @"";
 }
 
 @end
