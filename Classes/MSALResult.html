@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
            Docs
         </a>
-         (97% documented)
+         (90% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -67,6 +67,12 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthenticationSchemePop.html">MSALAuthenticationSchemePop</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALAuthority.html">MSALAuthority</a>
@@ -229,6 +235,9 @@
                 <a class="nav-group-task-link" href="../Enums/MSALAudienceType.html">MSALAudienceType</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALAuthScheme.html">MSALAuthScheme</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/MSALAzureCloudInstance.html">MSALAzureCloudInstance</a>
               </li>
               <li class="nav-group-task">
@@ -244,6 +253,9 @@
                 <a class="nav-group-task-link" href="../Enums/MSALError.html">MSALError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALHttpMethod.html">MSALHttpMethod</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/MSALInternalError.html">MSALInternalError</a>
               </li>
               <li class="nav-group-task">
@@ -251,6 +263,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/MSALLogLevel.html">MSALLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALLogMaskingLevel.html">MSALLogMaskingLevel</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/MSALPromptType.html">MSALPromptType</a>
@@ -265,6 +280,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/MSALAccount.html">MSALAccount</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/MSALExternalAccountProviding.html">MSALExternalAccountProviding</a>
@@ -309,6 +327,14 @@
               </li>
             </ul>
           </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/c:@F@MSALParameterStringForHttpMethod">MSALParameterStringForHttpMethod</a>
+              </li>
+            </ul>
+          </li>
         </ul>
       </nav>
       <article class="main-content">
@@ -318,7 +344,13 @@
             <h1>MSALResult</h1>
               <div class="declaration">
                 <div class="language">
+                  <p class="aside-title">Objective-C</p>
                   <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALResult</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
+
+                </div>
+                <div class="language">
+                  <p class="aside-title">Swift</p>
+                  <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
@@ -354,7 +386,8 @@ It contains information requested by the application (e.g. access_token and id_t
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The Access Token requested.</p>
+                        <p>The Access Token requested.
+Note that if access token is not returned in token response, this property will be returned as an empty string.</p>
 
                       </div>
                       <div class="declaration">
@@ -394,12 +427,12 @@ This value is calculated based on current UTC time measured locally and the valu
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nonnull</span><span class="p">)</span> <span class="n">NSDate</span> <span class="o">*</span><span class="n">expiresOn</span><span class="p">;</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nullable</span><span class="p">)</span> <span class="n">NSDate</span> <span class="o">*</span><span class="n">expiresOn</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">expiresOn</span><span class="p">:</span> <span class="kt">Date</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">expiresOn</span><span class="p">:</span> <span class="kt">Date</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -733,6 +766,70 @@ It might be different from the authority provided by developer (e.g. for soverei
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALResult(py)authorizationHeader"></a>
+                    <a name="//apple_ref/objc/Property/authorizationHeader" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALResult(py)authorizationHeader">authorizationHeader</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The authorization header for the specific authentication scheme . For instance &ldquo;Bearer &hellip;&rdquo; or &ldquo;Pop &hellip;&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nonnull</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">authorizationHeader</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">authorizationHeader</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALResult(py)authenticationScheme"></a>
+                    <a name="//apple_ref/objc/Property/authenticationScheme" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALResult(py)authenticationScheme">authenticationScheme</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The authentication scheme for the tokens issued. For instance &ldquo;Bearer &rdquo; or &ldquo;Pop&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nonnull</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">authenticationScheme</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">authenticationScheme</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -741,8 +838,8 @@ It might be different from the authority provided by developer (e.g. for soverei
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2020 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2020-05-22)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="noopener" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2021-08-23)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

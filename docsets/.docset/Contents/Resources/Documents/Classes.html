@@ -23,7 +23,7 @@
         <a class="header-link" href="index.html">
            Docs
         </a>
-         (97% documented)
+         (90% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -67,6 +67,12 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemePop.html">MSALAuthenticationSchemePop</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAuthority.html">MSALAuthority</a>
@@ -229,6 +235,9 @@
                 <a class="nav-group-task-link" href="Enums/MSALAudienceType.html">MSALAudienceType</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALAuthScheme.html">MSALAuthScheme</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALAzureCloudInstance.html">MSALAzureCloudInstance</a>
               </li>
               <li class="nav-group-task">
@@ -244,6 +253,9 @@
                 <a class="nav-group-task-link" href="Enums/MSALError.html">MSALError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALHttpMethod.html">MSALHttpMethod</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALInternalError.html">MSALInternalError</a>
               </li>
               <li class="nav-group-task">
@@ -251,6 +263,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALLogLevel.html">MSALLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALLogMaskingLevel.html">MSALLogMaskingLevel</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALPromptType.html">MSALPromptType</a>
@@ -265,6 +280,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALAccount.html">MSALAccount</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALExternalAccountProviding.html">MSALExternalAccountProviding</a>
@@ -306,6 +324,14 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Type%20Definitions.html#/c:MSALWebviewParameters.h@T@MSALViewController">MSALViewController</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Functions.html#/c:@F@MSALParameterStringForHttpMethod">MSALParameterStringForHttpMethod</a>
               </li>
             </ul>
           </li>
@@ -498,6 +524,88 @@ Instead, it is returned by MSAL as a result of getting a token interactively or 
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALAccountId</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">NSCopying</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALAuthenticationSchemeBearer"></a>
+                    <a name="//apple_ref/objc/Class/MSALAuthenticationSchemeBearer" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALAuthenticationSchemeBearer">MSALAuthenticationSchemeBearer</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/MSALAuthenticationSchemeBearer.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALAuthenticationSchemeBearer</span> <span class="p">:</span> <span class="nc">NSObject</span> <span class="o">&lt;</span><span class="n"><a href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a></span><span class="o">&gt;</span>
+
+<span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">,</span> <span class="n">readonly</span><span class="p">)</span> <span class="n"><a href="Enums/MSALAuthScheme.html">MSALAuthScheme</a></span> <span class="n">scheme</span><span class="p">;</span>
+
+<span class="k">@end</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALAuthenticationSchemeBearer</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALAuthenticationSchemePop"></a>
+                    <a name="//apple_ref/objc/Class/MSALAuthenticationSchemePop" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALAuthenticationSchemePop">MSALAuthenticationSchemePop</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/MSALAuthenticationSchemePop.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALAuthenticationSchemePop</span> <span class="p">:</span> <span class="nc">NSObject</span><span class="o">&lt;</span><span class="n"><a href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a></span><span class="o">&gt;</span>
+
+<span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">,</span> <span class="n">readonly</span><span class="p">)</span> <span class="n"><a href="Enums/MSALAuthScheme.html">MSALAuthScheme</a></span> <span class="n">scheme</span><span class="p">;</span>
+
+<span class="k">-</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithHttpMethod</span><span class="p">:(</span><span class="n"><a href="Enums/MSALHttpMethod.html">MSALHttpMethod</a></span><span class="p">)</span><span class="nv">httpMethod</span>
+                        <span class="nf">requestUrl</span><span class="p">:(</span><span class="n">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">requestUrl</span>
+                             <span class="nf">nonce</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">nonce</span>
+              <span class="nf">additionalParameters</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSDictionary</span> <span class="o">*</span><span class="p">)</span><span class="nv">additionalParameters</span><span class="p">;</span>
+
+<span class="k">-</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="n">init</span> <span class="n">NS_UNAVAILABLE</span><span class="p">;</span>
+<span class="k">+</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="n">new</span> <span class="n">NS_UNAVAILABLE</span><span class="p">;</span>
+
+<span class="k">@end</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALAuthenticationSchemePop</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt"><a href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1289,24 +1397,23 @@ Use it to achieve SSO or migration scenarios between ADAL Objective-C for macOS 
  */</span>
 <span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">BOOL</span> <span class="n">signoutFromBrowser</span><span class="p">;</span>
 
+<span class="cm">/*
+  Removes account from the keychain with either com.microsoft.adalcache shared group by default or the one provided when configuring MSALPublicClientApplication.
+
+  This is a destructive action and will remove the SSO state from all apps sharing the same cache!
+  It's intended to be used only as a way to achieve GDPR compliance and make sure all user artifacts are cleaned on user sign out.
+  It's not intended to be used as a way to reset or fix token cache.
+  Please make sure end user is shown UI and/or warning before this flag gets set to YES.
+  NO by default.
+*/</span>
+<span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">BOOL</span> <span class="n">wipeAccount</span><span class="p">;</span>
+
 <span class="cm">/**
  Initialize MSALSignoutParameters with web parameters.
  
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */</span>
-<span class="k">-</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithWebviewParameters</span><span class="p">:(</span><span class="n"><a href="Classes/MSALWebviewParameters.html">MSALWebviewParameters</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">webviewParameters</span> <span class="n">NS_DESIGNATED_INITIALIZER</span><span class="p">;</span>
-
-<span class="cp">#pragma mark - Unavailable initializers
-</span>
-<span class="cm">/**
-    Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
- */</span>
-<span class="k">+</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="n">new</span> <span class="n">NS_UNAVAILABLE</span><span class="p">;</span>
-
-<span class="cm">/**
-   Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
-*/</span>
-<span class="k">-</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="n">init</span> <span class="n">NS_UNAVAILABLE</span><span class="p">;</span>
+<span class="k">-</span> <span class="p">(</span><span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithWebviewParameters</span><span class="p">:(</span><span class="n"><a href="Classes/MSALWebviewParameters.html">MSALWebviewParameters</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">webviewParameters</span><span class="p">;</span>
 
 <span class="k">@end</span></code></pre>
 
@@ -1572,8 +1679,8 @@ MSALTenantProfile represents information about the account record in a particula
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2020 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2020-05-22)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="noopener" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2021-08-23)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

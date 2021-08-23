@@ -23,7 +23,7 @@
         <a class="header-link" href="index.html">
            Docs
         </a>
-         (97% documented)
+         (90% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -67,6 +67,12 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemePop.html">MSALAuthenticationSchemePop</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAuthority.html">MSALAuthority</a>
@@ -229,6 +235,9 @@
                 <a class="nav-group-task-link" href="Enums/MSALAudienceType.html">MSALAudienceType</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALAuthScheme.html">MSALAuthScheme</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALAzureCloudInstance.html">MSALAzureCloudInstance</a>
               </li>
               <li class="nav-group-task">
@@ -244,6 +253,9 @@
                 <a class="nav-group-task-link" href="Enums/MSALError.html">MSALError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALHttpMethod.html">MSALHttpMethod</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALInternalError.html">MSALInternalError</a>
               </li>
               <li class="nav-group-task">
@@ -251,6 +263,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALLogLevel.html">MSALLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/MSALLogMaskingLevel.html">MSALLogMaskingLevel</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALPromptType.html">MSALPromptType</a>
@@ -265,6 +280,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALAccount.html">MSALAccount</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALExternalAccountProviding.html">MSALExternalAccountProviding</a>
@@ -306,6 +324,14 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Type%20Definitions.html#/c:MSALWebviewParameters.h@T@MSALViewController">MSALViewController</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Functions.html#/c:@F@MSALParameterStringForHttpMethod">MSALParameterStringForHttpMethod</a>
               </li>
             </ul>
           </li>
@@ -582,6 +608,88 @@ To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailability
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@E@MSALAuthScheme"></a>
+                    <a name="//apple_ref/objc/Enum/MSALAuthScheme" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALAuthScheme">MSALAuthScheme</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Enums/MSALAuthScheme.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">NS_ENUM</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">,</span> <span class="n">MSALAuthScheme</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/*
+        Bearer is the default authentication scheme
+    */</span>
+    <span class="n">MSALAuthSchemeBearer</span><span class="p">,</span>
+    
+    <span class="cm">/*
+        To access pop protected resources, set scheme to Pop
+     */</span>
+    <span class="n">MSALAuthSchemePop</span>
+<span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALHttpMethod"></a>
+                    <a name="//apple_ref/objc/Enum/MSALHttpMethod" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALHttpMethod">MSALHttpMethod</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Enums/MSALHttpMethod.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">NS_ENUM</span><span class="p">(</span><span class="n">NSUInteger</span><span class="p">,</span> <span class="n">MSALHttpMethod</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/*
+        Http Method for the pop resource
+    */</span>
+    <span class="n">MSALHttpMethodGET</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodHEAD</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodPOST</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodPUT</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodDELETE</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodCONNECT</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodOPTIONS</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodTRACE</span><span class="p">,</span>
+    <span class="n">MSALHttpMethodPATCH</span>
+    
+<span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@E@MSALError"></a>
                     <a name="//apple_ref/objc/Enum/MSALError" class="dashAnchor"></a>
                     <a class="token" href="#/c:@E@MSALError">MSALError</a>
@@ -679,6 +787,39 @@ This enum exists only for the debugging and error information purposes, you shou
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALLogMaskingLevel"></a>
+                    <a name="//apple_ref/objc/Enum/MSALLogMaskingLevel" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALLogMaskingLevel">MSALLogMaskingLevel</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Enums/MSALLogMaskingLevel.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALLogMaskingLevel</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MSALLogMaskingLevel</span> <span class="p">:</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -687,8 +828,8 @@ This enum exists only for the debugging and error information purposes, you shou
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2020 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2020-05-22)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2021 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="noopener" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2021-08-23)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="noopener" rel="external">jazzy ♪♫ v0.14.0</a>, a <a class="link" href="https://realm.io" target="_blank" rel="noopener" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
