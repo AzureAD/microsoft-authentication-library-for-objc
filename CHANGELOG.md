@@ -1,3 +1,7 @@
+## [1.1.21] - 2021-08-20
+* Update release pipeline to publish public docs (#1359)
+
+
 ## [1.1.20] - 2021-07-19
 * Migrated PR validation pipeline from Travis to Azure DevOps.(#1333)
 
