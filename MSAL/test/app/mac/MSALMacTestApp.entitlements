@@ -13,6 +13,7 @@
 		<string>$(AppIdentifierPrefix)com.microsoft.MSALMacTestApp</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.identity.universalstorage</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.ssoseeding</string>
+		<string>$(AppIdentifierPrefix)com.microsoft.ecctest</string>
 	</array>
 </dict>
 </plist>
