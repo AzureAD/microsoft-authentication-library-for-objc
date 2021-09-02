@@ -1,3 +1,6 @@
+TBD
+* Add helper for cross cloud B2B support in broker (#1370)
+
 ## [1.1.21] - 2021-08-20
 * Update release pipeline to publish public docs (#1359)
 
