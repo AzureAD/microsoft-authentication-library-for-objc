@@ -24,7 +24,7 @@ def get_guid_i(device) :
 	version_regex = re.compile("([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?")
 	
 	command = "instruments -s devices"
-	print "##[group]Devices"
+	print("##[group]Devices")
 	p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 	
 	# Sometimes the hostname comes back with the proper casing, sometimes not. Using a
@@ -35,11 +35,13 @@ def get_guid_i(device) :
 	latest_os_version = None
 	
 	for line in p.stdout :
-		sys.stdout.write(line)
-		if (dev_name_regex.match(line) == None) :
+		sys.stdout.buffer.write(line)
+		strLine = line.decode(sys.stdout.encoding)
+		
+		if (dev_name_regex.match(strLine) == None) :
 			continue
 		
-		match = device_regex.match(line)
+		match = device_regex.match(strLine)
 		
 		# Regex won't match simulators with apple watches...
 		if (match == None) : 
@@ -58,7 +60,7 @@ def get_guid_i(device) :
 			latest_os_device = match.group(2)
 			latest_os_version = version_tuple
 	
-	print "##[endgroup]Devices"
+	print("##[endgroup]Devices")
 	
 	return latest_os_device
 
@@ -69,7 +71,7 @@ def get_guid(device) :
 	return guid
 
 def print_failure(device) :
-	print "Failed to find GUID for device : " + device
+	print("Failed to find GUID for device : " + device)
 	subprocess.call("instruments -s devices", shell=True)
 	raise Exception("Failed to get device GUID")
 
