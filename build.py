@@ -251,7 +251,7 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device).decode(sys.stdout.encoding)
+			return device_guids.get_ios(ios_sim_device)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
