@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) Microsoft Corporation.
 # All rights reserved.
@@ -35,7 +35,7 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device = "iPhone 8"
+ios_sim_device = "iPhone 11"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=latest'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
@@ -68,7 +68,7 @@ target_specifiers = [
 		"operations" : [ "build" ],
 		"platform" : "iOS",
         "target" : "iosTestApp"
-        
+
 	},
 	{
 		"name" : "Sample iOS App",
@@ -97,18 +97,18 @@ target_specifiers = [
 ]
 
 def print_operation_start(name, operation) :
-	print ColorValues.HDR + "Beginning " + name + " [" + operation + "]" + ColorValues.END
-	print "##[group]" + (name + "_" + operation).replace(" ", "_")
+	print(ColorValues.HDR + "Beginning " + name + " [" + operation + "]" + ColorValues.END)
+	print("##[group]" + (name + "_" + operation).replace(" ", "_"))
 
 def print_operation_end(name, operation, exit_code, start_time) :
-	print "##[endgroup]" + (name + "_" + operation).replace(" ", "_")
+	print("##[endgroup]" + (name + "_" + operation).replace(" ", "_"))
 	
 	end_time = timer()
 
 	if (exit_code == 0) :
-		print ColorValues.OK + name + " [" + operation + "] Succeeded" + ColorValues.END + " (" + "{0:.2f}".format(end_time - start_time) + " seconds)"
+		print(ColorValues.OK + name + " [" + operation + "] Succeeded" + ColorValues.END + " (" + "{0:.2f}".format(end_time - start_time) + " seconds)")
 	else :
-		print ColorValues.FAIL + name + " [" + operation + "] Failed" + ColorValues.END + " (" + "{0:.2f}".format(end_time - start_time) + " seconds)"
+		print(ColorValues.FAIL + name + " [" + operation + "] Failed" + ColorValues.END + " (" + "{0:.2f}".format(end_time - start_time) + " seconds)")
 
 class BuildTarget:
 	def __init__(self, target):
@@ -180,20 +180,20 @@ class BuildTarget:
 		if (self.build_settings != None) :
 			return self.build_settings
 		
-		print "Retrieving Build Settings for " + self.name
+		print("Retrieving Build Settings for " + self.name)
 		if (show_build_settings) :
-			print "##[group]" + (self.name + "_settings").replace(" ", "_")
+			print("##[group]" + (self.name + "_settings").replace(" ", "_"))
 				
 		command = self.xcodebuild_command(None, False)
 		command += " -showBuildSettings"
-		print command
+		print(command)
 		
 		start = timer()
         
 		settings_blob = subprocess.check_output(command, shell=True)
 		if (show_build_settings) :
-			print settings_blob
-			print "##[endgroup]" + (self.name + "_settings").replace(" ", "_")
+			print(settings_blob)
+			print("##[endgroup]" + (self.name + "_settings").replace(" ", "_"))
 		
 		settings_blob = settings_blob.decode("utf-8")
 		settings_blob = settings_blob.split("\n")
@@ -213,7 +213,7 @@ class BuildTarget:
 		
 		end = timer()
 		
-		print "Retrieved Build Settings (" + "{0:.2f}".format(end - start) + " sec)"
+		print("Retrieved Build Settings (" + "{0:.2f}".format(end - start) + " sec)")
 		
 		return settings
 		
@@ -254,7 +254,7 @@ class BuildTarget:
 			return device_guids.get_ios(ios_sim_device)
 		
 		if (self.platform == "Mac") :
-			return device_guids.get_mac()
+			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
 		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
 	
@@ -270,29 +270,29 @@ class BuildTarget:
 		
 		profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
 		if not os.path.isfile(profile_data_path) :
-			print ColorValues.FAIL + "Coverage data file missing! : " + profile_data_path + ColorValues.END
+			print(ColorValues.FAIL + "Coverage data file missing! : " + profile_data_path + ColorValues.END)
 			return -1
 		
 		configuration_build_dir = build_settings["CONFIGURATION_BUILD_DIR"]
 		executable_path = build_settings["EXECUTABLE_PATH"]
 		executable_file_path = configuration_build_dir + "/" + executable_path
 		if not os.path.isfile(executable_file_path) :
-			print ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END
+			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
 		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
-		print command
+		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
 		output = p.communicate()
 		
 		last_line = None
-		for line in output[0].split("\n") :
+		for line in output[0].decode(sys.stdout.encoding).split("\n") :
 			if (len(line.strip()) > 0) :
 				last_line = line
 		
-		sys.stdout.write(output[0])
-		sys.stderr.write(output[1])
+		sys.stdout.write(output[0].decode(sys.stdout.encoding))
+		sys.stderr.write(output[1].decode(sys.stdout.encoding))
 		
 		last_line = last_line.split()
 		# Remove everything but 
@@ -313,16 +313,16 @@ class BuildTarget:
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
 					subprocess.call("rm -rf .sonar; rm -rf build-wrapper-output", shell = True)
 					command = "build-wrapper-macosx-x86 --out-dir build-wrapper-output " + command
-				print command
+				print(command)
 				exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
 			
 			if (exit_code != 0) :
 				self.failed = True
 		except Exception as inst:
 			self.failed = True
-			print "Failed due to exception in build script"
+			print("Failed due to exception in build script")
 			tb = traceback.format_exc()
-			print tb
+			print(tb)
 
 		print_operation_end(self.name, operation, exit_code, start_time)
 		
@@ -330,7 +330,7 @@ class BuildTarget:
 		return exit_code
 	
 	def requires_simulator(self) :
-		if self.platform is not "iOS" :
+		if self.platform != "iOS" :
 			return False
 		if "test" in self.operations :
 			return True
@@ -343,9 +343,9 @@ def requires_simulator(targets) :
 	return False
 
 def launch_simulator() :
-	print "Booting simulator..."
+	print("Booting simulator...")
 	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device)
-	print command
+	print(command)
 	
 	# This spawns a new process without us having to wait for it
 	subprocess.Popen(command, shell = True)
@@ -364,7 +364,7 @@ use_xcpretty = args.no_xcpretty
 show_build_settings = args.show_build_settings
 
 if (args.targets != None) :
-	print "Targets specified: " + str(args.targets)
+	print("Targets specified: " + str(args.targets))
 
 targets = []
 
@@ -382,10 +382,10 @@ if (clean) :
 		build_dir = target.get_build_settings()["BUILD_DIR"]
 		derived_dir = os.path.normpath(build_dir + "/../..")
 		derived_folders.add(derived_dir)
-		print derived_dir
+		print(derived_dir)
 	
 	for dir in derived_folders :
-		print "Deleting " + dir
+		print("Deleting " + dir)
 		subprocess.call("rm -rf " + dir, shell=True)
 
 for target in targets:
@@ -408,35 +408,35 @@ for target in targets:
 
 	# Add success/failure state to the build status dictionary
 	if (exit_code == 0) :
-		print ColorValues.OK + target.name + " Succeeded" + ColorValues.END
+		print(ColorValues.OK + target.name + " Succeeded" + ColorValues.END)
 	else :
-		print ColorValues.FAIL + target.name + " Failed" + ColorValues.END
+		print(ColorValues.FAIL + target.name + " Failed" + ColorValues.END)
 
 final_status = 0
 
-print "\n"
+print("\n")
 
 code_coverage = False
 
 # Print out the final result of each operation.
 for target in targets :
 	if (target.failed) :
-		print ColorValues.FAIL + target.name + " failed." + ColorValues.END + " (" + "{0:.2f}".format(target.end_time - target.start_time) + " seconds)"
+		print(ColorValues.FAIL + target.name + " failed." + ColorValues.END + " (" + "{0:.2f}".format(target.end_time - target.start_time) + " seconds)" )
 		final_status = 1
 	else :
 		if ("codecov" in target.operations) :
 			code_coverage = True
-		print ColorValues.OK + '\033[92m' + target.name + " succeeded." + ColorValues.END + " (" + "{0:.2f}".format(target.end_time - target.start_time) + " seconds)"
+		print(ColorValues.OK + '\033[92m' + target.name + " succeeded." + ColorValues.END + " (" + "{0:.2f}".format(target.end_time - target.start_time) + " seconds)")
 
 if code_coverage :
-	print "\nCode Coverage Results:"
+	print("\nCode Coverage Results:")
 	for target in targets :
 		if (target.coverage != None) :
 			target.print_coverage(True)
 
 script_end_time = timer()
 
-print "Total running time: " + "{0:.2f}".format(script_end_time - script_start_time) + " seconds"
+print(" Total running time: " + "{0:.2f}".format(script_end_time - script_start_time) + " seconds")
 # xcodebuild seems to log in stderr instead of stdout. Catching final_status in text file to capture exit code and determine if build failed
 # Similar issue : (see https://developer.apple.com/forums/thread/663959)
 if (not os.path.exists("./build")) :
