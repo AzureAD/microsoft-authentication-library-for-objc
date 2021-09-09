@@ -68,7 +68,7 @@ target_specifiers = [
 		"operations" : [ "build" ],
 		"platform" : "iOS",
         "target" : "iosTestApp"
-        
+
 	},
 	{
 		"name" : "Sample iOS App",
@@ -251,10 +251,10 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device)
+			return device_guids.get_ios(ios_sim_device).decode(sys.stdout.encoding)
 		
 		if (self.platform == "Mac") :
-			return device_guids.get_mac()
+			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
 		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
 	
@@ -287,12 +287,12 @@ class BuildTarget:
 		output = p.communicate()
 		
 		last_line = None
-		for line in output[0].split("\n") :
+		for line in output[0].decode(sys.stdout.encoding).split("\n") :
 			if (len(line.strip()) > 0) :
 				last_line = line
 		
-		sys.stdout.write(output[0])
-		sys.stderr.write(output[1])
+		sys.stdout.write(output[0].decode(sys.stdout.encoding))
+		sys.stderr.write(output[1].decode(sys.stdout.encoding))
 		
 		last_line = last_line.split()
 		# Remove everything but 
