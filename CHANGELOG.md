@@ -1,3 +1,6 @@
+## [TBD]
+* Added more logging within common core throttling logic
+
 ## [1.1.21] - 2021-08-20
 * Update release pipeline to publish public docs (#1359)
 
