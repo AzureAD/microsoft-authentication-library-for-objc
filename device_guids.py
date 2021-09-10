@@ -23,7 +23,7 @@ def get_guid_i(device) :
 	device_regex = re.compile("[A-Za-z0-9 ]+ ?(?:\\(([0-9.]+)\\))? \\[([A-F0-9-]+)\\]")
 	version_regex = re.compile("([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?")
 	
-	command = "instruments -s devices"
+	command = "xcrun xctrace list devices"
 	print("##[group]Devices")
 	p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 	
@@ -72,7 +72,7 @@ def get_guid(device) :
 
 def print_failure(device) :
 	print("Failed to find GUID for device : " + device)
-	subprocess.call("instruments -s devices", shell=True)
+	subprocess.call("xcrun xctrace list devices", shell=True)
 	raise Exception("Failed to get device GUID")
 
 def get_ios(device) :
