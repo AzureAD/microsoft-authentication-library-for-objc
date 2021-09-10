@@ -29,7 +29,7 @@ def get_guid_i(device) :
     
     # Sometimes the hostname comes back with the proper casing, sometimes not. Using a
     # case insensitive regex ensures we work either way
-    dev_name_regex = re.compile("^" + device + " \\(", re.I)
+    dev_name_regex = re.compile("^" + device + "( Simulator)?" " \\(", re.I)
     
     latest_os_device = None
     latest_os_version = None
