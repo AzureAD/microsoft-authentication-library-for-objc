@@ -1,4 +1,4 @@
-## [TBD]
+## [1.1.22]
 * Added more logging within common core throttling logic
 * Updated release pipeline to publish public docs as last step (#1366)
 
