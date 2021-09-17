@@ -1,3 +1,7 @@
+## [1.1.22]
+* Added more logging within common core throttling logic
+* Updated release pipeline to publish public docs as last step (#1366)
+
 ## [1.1.21] - 2021-08-20
 * Update release pipeline to publish public docs (#1359)
 

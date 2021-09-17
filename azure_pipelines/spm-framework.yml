@@ -328,6 +328,17 @@ jobs:
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
   - task: Bash@3
+    displayName: Push pod to Cocoapods
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Release to CocoaPods
+        pod trunk push --use-libraries --allow-warnings MSAL.podspec
+        #pod trunk me
+      workingDirectory: '$(Build.SourcesDirectory)'
+    env:
+      COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
+  - task: Bash@3
     displayName: Build MSAL docs via Jazzy
     inputs:
       filePath: 'build_docs.sh'
@@ -336,6 +347,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        # NOTE : This should be the last step since it changes branch from master to $(docsRepositoryBranch)
         if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
@@ -372,14 +384,3 @@ jobs:
       failOnStderr: false
       noProfile: false
       noRc: false
-  - task: Bash@3
-    displayName: Push pod to Cocoapods
-    inputs:
-      targetType: 'inline'
-      script: |
-        # Release to CocoaPods
-        pod trunk push --use-libraries --allow-warnings MSAL.podspec
-        #pod trunk me
-      workingDirectory: '$(Build.SourcesDirectory)'
-    env:
-      COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
