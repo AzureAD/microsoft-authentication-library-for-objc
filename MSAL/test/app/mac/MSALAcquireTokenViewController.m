@@ -189,6 +189,8 @@ static NSString * const defaultScope = @"User.Read";
         return MSALPromptTypeLogin;
     if ([promptType isEqualToString:@"Consent"])
         return MSALPromptTypeConsent;
+    if ([promptType isEqualToString:@"Create"])
+        return MSALPromptTypeCreate;
     
     @throw @"Do not recognize prompt behavior";
 }

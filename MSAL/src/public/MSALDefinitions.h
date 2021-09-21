@@ -128,6 +128,10 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
      */
     MSALPromptTypeConsent,
     /**
+     Create a new account rather than authenticate an existing identity.
+     */
+    MSALPromptTypeCreate,
+    /**
      The SSO experience will be determined by the presence of cookies in the webview and account type.
      User won't be prompted unless necessary.
      If multiple users are signed in, select account experience will be presented.

@@ -113,6 +113,10 @@
     {
         promptType = MSALPromptTypeConsent;
     }
+    else if ([testRequest.promptBehavior isEqualToString:@"create"])
+    {
+        promptType = MSALPromptTypeCreate;
+    }
     else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
         promptType = MSALPromptTypePromptIfNecessary;
