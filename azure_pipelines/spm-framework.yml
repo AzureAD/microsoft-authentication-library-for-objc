@@ -36,7 +36,7 @@ jobs:
 - job: BuildXcFrameworks
   displayName: Build MSAL framework and release
   pool:
-    vmImage: 'macOS-latest'
+    vmImage: 'macOS-11'
     timeOutInMinutes: 20
 
   steps:
