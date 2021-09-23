@@ -191,6 +191,7 @@ static NSDictionary *s_currentProfile = nil;
     if (currentProfile)
     {
         s_currentProfileIdx = [s_profileTitles indexOfObject:currentProfile];
+        if (s_currentProfileIdx == NSNotFound) s_currentProfileIdx = 0;
         s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     }
     
