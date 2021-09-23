@@ -307,7 +307,9 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    MSALAuthority *authority = [self.settings authority];
+    NSString *authorityString = currentProfile[@"authority"] ?: @"https://login.microsoftonline.com/common";
+    __auto_type authorityUrl =  [NSURL URLWithString:authorityString];
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
