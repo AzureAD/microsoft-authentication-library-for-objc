@@ -35,6 +35,7 @@ NSString *MSALStringForPromptType(MSALPromptType promptType)
             STRING_CASE(MSALPromptTypeSelectAccount);
             STRING_CASE(MSALPromptTypeLogin);
             STRING_CASE(MSALPromptTypeConsent);
+            STRING_CASE(MSALPromptTypeCreate);
             STRING_CASE(MSALPromptTypePromptIfNecessary);
     }
     
@@ -47,6 +48,7 @@ MSIDPromptType MSIDPromptTypeForPromptType(MSALPromptType promptType)
     {
         case MSALPromptTypeLogin : return MSIDPromptTypeLogin;
         case MSALPromptTypeConsent : return MSIDPromptTypeConsent;
+        case MSALPromptTypeCreate : return MSIDPromptTypeCreate;
         case MSALPromptTypeSelectAccount : return MSIDPromptTypeSelectAccount;
         case MSALPromptTypePromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
         default : return MSIDPromptTypeDefault;
@@ -59,6 +61,7 @@ NSString *MSALParameterStringForPromptType(MSALPromptType promptType)
     {
         case MSALPromptTypeLogin : return @"login";
         case MSALPromptTypeConsent : return @"consent";
+        case MSALPromptTypeCreate : return @"create";
         case MSALPromptTypeSelectAccount : return @"select_account";
         case MSALPromptTypePromptIfNecessary : return @"";
     }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -25,7 +25,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gmv-e1-pk9">
                                         <rect key="frame" x="0.0" y="802" width="414" height="60"/>
                                         <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWB-9H-0ne">
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWB-9H-0ne">
                                                 <rect key="frame" x="0.0" y="0.0" width="414" height="60"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                                 <state key="normal" title="Cancel"/>
@@ -86,7 +86,7 @@
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WcD-VP-hFc">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WcD-VP-hFc">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
                                                                         <state key="normal" title="Test App"/>
                                                                         <connections>
@@ -107,7 +107,7 @@
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VO4-Cz-Zs9">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VO4-Cz-Zs9">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
                                                                         <state key="normal" title="Default"/>
                                                                         <connections>
@@ -192,7 +192,7 @@
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVb-Iy-zgo">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVb-Iy-zgo">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
                                                                         <state key="normal" title="User"/>
                                                                         <connections>
@@ -213,7 +213,7 @@
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2YX-cm-swG">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2YX-cm-swG">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
                                                                         <state key="normal" title="Select Scopes"/>
                                                                         <connections>
@@ -226,20 +226,21 @@
                                                                 <rect key="frame" x="0.0" y="319" width="374" height="34"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="prompt" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JjR-Mj-tmv">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="50" height="34"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="width" constant="112" id="RfX-65-ezK"/>
+                                                                            <constraint firstAttribute="width" constant="50" id="RfX-65-ezK"/>
                                                                         </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="bos-37-rqi">
-                                                                        <rect key="frame" x="124" y="0.0" width="250" height="35"/>
+                                                                        <rect key="frame" x="62" y="0.0" width="312" height="35"/>
                                                                         <segments>
                                                                             <segment title="Select"/>
                                                                             <segment title="Login"/>
                                                                             <segment title="Consent"/>
+                                                                            <segment title="Create"/>
                                                                             <segment title="Default"/>
                                                                         </segments>
                                                                     </segmentedControl>
@@ -357,21 +358,21 @@
                                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="euI-bP-fOW">
                                                                 <rect key="frame" x="0.0" y="589" width="374" height="34"/>
                                                                 <subviews>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tSH-Rx-X2s">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tSH-Rx-X2s">
                                                                         <rect key="frame" x="0.0" y="0.0" width="116.5" height="34"/>
                                                                         <state key="normal" title="Clear Cache"/>
                                                                         <connections>
                                                                             <action selector="onClearCacheButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="Htu-hg-9xe"/>
                                                                         </connections>
                                                                     </button>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="elD-WW-Ybv">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="elD-WW-Ybv">
                                                                         <rect key="frame" x="128.5" y="0.0" width="117" height="34"/>
                                                                         <state key="normal" title="Show Telemetry"/>
                                                                         <connections>
                                                                             <action selector="onShowTelemetryButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="WAc-6y-HaG"/>
                                                                         </connections>
                                                                     </button>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DSb-xO-SFA">
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DSb-xO-SFA">
                                                                         <rect key="frame" x="257.5" y="0.0" width="116.5" height="34"/>
                                                                         <state key="normal" title="Stress Test"/>
                                                                         <connections>
@@ -424,21 +425,21 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="tWi-d4-WNB">
                                                 <rect key="frame" x="13.5" y="0.0" width="387" height="30"/>
                                                 <subviews>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ToY-db-bYT">
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ToY-db-bYT">
                                                         <rect key="frame" x="0.0" y="0.0" width="129" height="30"/>
                                                         <state key="normal" title="acquireToken"/>
                                                         <connections>
                                                             <action selector="onAcquireTokenInteractiveButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="VYI-Tf-St4"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B1a-QA-wzK">
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B1a-QA-wzK">
                                                         <rect key="frame" x="129" y="0.0" width="129" height="30"/>
                                                         <state key="normal" title="acquireTokenSilent"/>
                                                         <connections>
                                                             <action selector="onAcquireTokenSilentButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="0I8-uv-sYn"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uxy-eI-Fvx">
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uxy-eI-Fvx">
                                                         <rect key="frame" x="258" y="0.0" width="129" height="30"/>
                                                         <state key="normal" title="signout"/>
                                                         <connections>
@@ -468,6 +469,7 @@
                                 </constraints>
                             </view>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="hsz-fr-yKw"/>
                         <constraints>
                             <constraint firstItem="hsz-fr-yKw" firstAttribute="bottom" secondItem="dqB-h4-utQ" secondAttribute="bottom" id="7vD-hX-5UK"/>
                             <constraint firstItem="Md9-M0-FKl" firstAttribute="top" secondItem="XyL-1I-ufW" secondAttribute="top" id="I4L-VF-K0o"/>
@@ -479,7 +481,6 @@
                             <constraint firstItem="dqB-h4-utQ" firstAttribute="top" secondItem="XyL-1I-ufW" secondAttribute="topMargin" id="mZu-ef-uKJ"/>
                             <constraint firstItem="dqB-h4-utQ" firstAttribute="leading" secondItem="hsz-fr-yKw" secondAttribute="leading" id="nHn-R9-YgU"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="hsz-fr-yKw"/>
                     </view>
                     <size key="freeformSize" width="414" height="896"/>
                     <connections>

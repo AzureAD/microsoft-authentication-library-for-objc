@@ -1,5 +1,6 @@
 TBD
 * Add helper for cross cloud B2B support in broker (#1370)
+* Add support of "create" prompt (#1384)
 
 ## [1.1.22]
 * Added more logging within common core throttling logic
