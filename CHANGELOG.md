@@ -1,7 +1,7 @@
 TBD
 * Add helper for cross cloud B2B support in broker (#1370)
 * Add support of "create" prompt (#1384)
-* Fixed bug where background task was prematurely ended. (#)
+* Fixed bug where background task was prematurely ended. (#1388)
 
 ## [1.1.22]
 * Added more logging within common core throttling logic
