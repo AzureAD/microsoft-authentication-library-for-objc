@@ -78,8 +78,6 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 - task: ComponentGovernanceComponentDetection@0
-    inputs:
-      scanType: 'Submit'
-      verbosity: 'Verbose'
-      alertWarningLevel: 'High'
+  inputs:
+    alertWarningLevel: Low
   
