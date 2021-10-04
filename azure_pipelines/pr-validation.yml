@@ -79,7 +79,7 @@ jobs:
       testRunTitle: 'Test Run - $(target)'
 - task: ComponentGovernanceComponentDetection@0
     inputs:
-      scanType: 'Register'
+      scanType: 'Submit'
       verbosity: 'Verbose'
       alertWarningLevel: 'High'
   
