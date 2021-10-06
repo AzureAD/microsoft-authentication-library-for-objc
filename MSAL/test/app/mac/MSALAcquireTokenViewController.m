@@ -396,7 +396,8 @@ static NSString * const defaultScope = @"User.Read";
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
-    
+    parameters.authority = [MSALAuthority authorityWithURL:[[NSURL alloc] initWithString:@"https://zurich.test.dnsdemo1.test:8478/common"] error:nil];
+    parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:@"{\"access_token\":{\"deviceid\":{\"essential\":true}}}" error:nil];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
