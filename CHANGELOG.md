@@ -1,4 +1,4 @@
-TBD
+## [1.1.23]
 * Add helper for cross cloud B2B support in broker (#1370)
 * Add support of "create" prompt (#1384)
 * Fixed bug where background task was prematurely ended. (#1388)
