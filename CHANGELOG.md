@@ -1,10 +1,14 @@
+## [1.1.23]
+* Add helper for cross cloud B2B support in broker (#1370)
+* Add support of "create" prompt (#1384)
+* Fixed bug where background task was prematurely ended. (#1388)
+
 ## [1.1.22]
 * Added more logging within common core throttling logic
 * Updated release pipeline to publish public docs as last step (#1366)
 
 ## [1.1.21] - 2021-08-20
 * Update release pipeline to publish public docs (#1359)
-
 
 ## [1.1.20] - 2021-07-19
 * Migrated PR validation pipeline from Travis to Azure DevOps.(#1333)

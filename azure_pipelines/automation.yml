@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-latest'
+  vmImage: 'macOS-11'
 
 resources:
   repositories:

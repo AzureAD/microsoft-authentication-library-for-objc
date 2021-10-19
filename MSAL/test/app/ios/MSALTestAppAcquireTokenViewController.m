@@ -678,6 +678,7 @@
     if ([label isEqualToString:@"Select"]) return MSALPromptTypeSelectAccount;
     if ([label isEqualToString:@"Login"]) return MSALPromptTypeLogin;
     if ([label isEqualToString:@"Consent"]) return MSALPromptTypeConsent;
+    if ([label isEqualToString:@"Create"]) return MSALPromptTypeCreate;
     if ([label isEqualToString:@"Default"]) return MSALPromptTypeDefault;
     
     @throw @"Do not recognize prompt behavior";
