@@ -76,7 +76,7 @@ jobs:
             git clean -fd
             
             # Get previously commited changes for docs
-            git cherry-pick --strategy-option=ours "update-docs-for-release-$(releaseVersion)"
+            git cherry-pick --strategy-option theirs "update-docs-for-release-$(releaseVersion)"
             
             # Copy files in docs.temp folder to root
             \cp -r docs.temp/docs/* .
