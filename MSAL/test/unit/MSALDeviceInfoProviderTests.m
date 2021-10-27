@@ -39,7 +39,7 @@
 
 #pragma mark - Get device info
 
-- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnNilAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnDefaultDeviceInfoAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -77,7 +77,7 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNil(deviceInformation);
+        XCTAssertNotNil(deviceInformation);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
         XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);
@@ -204,6 +204,17 @@
         callback(nil, error);
     }];
     
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+    
     XCTestExpectation *failExpectation = [self expectationWithDescription:@"Get device info"];
     
     MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
@@ -212,9 +223,13 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNil(deviceInformation);
+        XCTAssertNotNil(deviceInformation);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
-        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorUnsupportedFunctionality);
