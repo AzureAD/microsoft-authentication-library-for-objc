@@ -96,8 +96,8 @@
 
 @interface MSALFakeInteractiveRequest : NSObject
 
-@property NSString *state;
-@property MSIDRequestParameters *parameters;
+@property (atomic) NSString *state;
+@property (atomic) MSIDRequestParameters *parameters;
 
 @end
 
@@ -1523,7 +1523,6 @@
     
 }
 
-#pragma
 #pragma mark - acquireTokenSilent
 
 - (void)testAcquireSilentScopesUser
