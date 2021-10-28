@@ -47,7 +47,7 @@
 
 @interface MSALResult()
 
-@property id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal> authScheme;
+@property (atomic) id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal> authScheme;
 
 @end
 

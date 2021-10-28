@@ -44,13 +44,13 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Configuration options
 
 /** The client ID of the application, this should come from the app developer portal. */
-@property NSString *clientId;
+@property (atomic) NSString *clientId;
 
 /** The redirect URI of the application */
-@property (nullable) NSString *redirectUri;
+@property (atomic, nullable) NSString *redirectUri;
 
 /** The authority the application will use to obtain tokens */
-@property MSALAuthority *authority;
+@property (atomic) MSALAuthority *authority;
 
 /** List of known authorities that application should trust.
     Note that authorities listed here will bypass authority validation logic.
@@ -59,10 +59,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSArray<MSALAuthority *> *knownAuthorities;
 
 /** Enable to return access token with extended lifetime during server outage. */
-@property BOOL extendedLifetimeEnabled;
+@property (atomic) BOOL extendedLifetimeEnabled;
 
 /** List of additional STS features that client handles. */
-@property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
+@property (atomic, nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
 /** Time in seconds controlling how long before token expiry MSAL refreshes access tokens.
  When checking an access token for expiration we check if time to expiration
@@ -99,7 +99,7 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  For client that wants to bypass redirectURI check in MSAL, set this to YES. NO by default.
  If set to YES, MSAL will skip the verification of redirectURI. Brokered authentication will be disabled in this case.
  */
-@property BOOL bypassRedirectURIValidation;
+@property (atomic) BOOL bypassRedirectURIValidation;
 
 /**
  Initialize a MSALPublicClientApplicationConfig with a given clientId

@@ -38,17 +38,19 @@
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
+    __typeof__(webParameters.parentViewController) parentViewController = webParameters.parentViewController;
+    
 #if TARGET_OS_IPHONE
     if (@available(iOS 13.0, *))
     {
-        if (webParameters.parentViewController == nil)
+        if (parentViewController == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
             if (error) *error = msidError;
             return NO;
         }
         
-        if (webParameters.parentViewController.view.window == nil)
+        if (parentViewController.view.window == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
             if (error) *error = msidError;
@@ -59,7 +61,7 @@
     self.presentationType = webParameters.presentationStyle;
 #endif
         
-    self.parentViewController = webParameters.parentViewController;
+    self.parentViewController = parentViewController;
         
     if (@available(iOS 13.0, macOS 10.15, *))
     {
