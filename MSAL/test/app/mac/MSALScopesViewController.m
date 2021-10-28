@@ -29,9 +29,9 @@
 #import "MSALTestAppSettings.h"
 
 @interface MSALScopesViewController ()
-@property NSMutableArray *scopesList;
-@property (weak) IBOutlet NSTableView *scopesView;
-@property (weak) IBOutlet NSTextField *scopesText;
+@property (atomic) NSMutableArray *scopesList;
+@property (atomic, weak) IBOutlet NSTableView *scopesView;
+@property (atomic, weak) IBOutlet NSTextField *scopesText;
 
 @end
 

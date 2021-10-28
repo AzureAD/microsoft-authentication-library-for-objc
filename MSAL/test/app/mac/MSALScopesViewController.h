@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
 
-@property (weak) id<MSALScopesDelegate> delegate;
+@property (atomic, weak) id<MSALScopesDelegate> delegate;
 
 @end
 
