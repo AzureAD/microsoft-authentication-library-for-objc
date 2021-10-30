@@ -1,3 +1,6 @@
+## [1.1.24]
+* Use base64URLEncoding for RSA modules (#1399)
+
 ## [1.1.23]
 * Add helper for cross cloud B2B support in broker (#1370)
 * Add support of "create" prompt (#1384)
