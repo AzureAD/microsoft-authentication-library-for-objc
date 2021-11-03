@@ -45,24 +45,24 @@ static NSString * const defaultScope = @"User.Read";
 
 @interface MSALAcquireTokenViewController ()
 
-@property (weak) IBOutlet NSPopUpButton *profilesPopUp;
-@property (weak) IBOutlet NSTextField *clientIdTextField;
-@property (weak) IBOutlet NSTextField *redirectUriTextField;
-@property (weak) IBOutlet NSTextField *scopesTextField;
-@property (weak) IBOutlet NSSegmentedControl *promptSegment;
-@property (weak) IBOutlet NSTextField *loginHintTextField;
-@property (weak) IBOutlet NSTextView *resultTextView;
-@property (weak) IBOutlet NSTextField *extraQueryParamsTextField;
-@property (weak) IBOutlet NSSegmentedControl *webViewSegment;
-@property (weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
-@property (weak) IBOutlet NSStackView *acquireTokenView;
-@property (weak) IBOutlet NSPopUpButton *userPopup;
-@property (weak) IBOutlet NSSegmentedControl *authSchemeSegment;
+@property (atomic, weak) IBOutlet NSPopUpButton *profilesPopUp;
+@property (atomic, weak) IBOutlet NSTextField *clientIdTextField;
+@property (atomic, weak) IBOutlet NSTextField *redirectUriTextField;
+@property (atomic, weak) IBOutlet NSTextField *scopesTextField;
+@property (atomic, weak) IBOutlet NSSegmentedControl *promptSegment;
+@property (atomic, weak) IBOutlet NSTextField *loginHintTextField;
+@property (atomic, weak) IBOutlet NSTextView *resultTextView;
+@property (atomic, weak) IBOutlet NSTextField *extraQueryParamsTextField;
+@property (atomic, weak) IBOutlet NSSegmentedControl *webViewSegment;
+@property (atomic, weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
+@property (atomic, weak) IBOutlet NSStackView *acquireTokenView;
+@property (atomic, weak) IBOutlet NSPopUpButton *userPopup;
+@property (atomic, weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
-@property WKWebView *webView;
-@property MSALTestAppSettings *settings;
-@property NSArray *selectedScopes;
-@property NSArray<MSALAccount *> *accounts;
+@property (atomic) WKWebView *webView;
+@property (atomic) MSALTestAppSettings *settings;
+@property (atomic) NSArray *selectedScopes;
+@property (atomic) NSArray<MSALAccount *> *accounts;
 
 @end
 

@@ -32,9 +32,9 @@
 
 @interface MSALTestURLSessionDataTask()
 
-@property MSALTestHttpCompletionBlock completionHandler;
-@property MSIDTestURLSession *session;
-@property NSURLRequest *request;
+@property (atomic) MSALTestHttpCompletionBlock completionHandler;
+@property (atomic) MSIDTestURLSession *session;
+@property (atomic) NSURLRequest *request;
 
 @end
 

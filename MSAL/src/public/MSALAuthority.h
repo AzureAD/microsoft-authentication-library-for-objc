@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
     Normalized authority URL.
  */
-@property (readonly, nonnull) NSURL *url;
+@property (atomic, readonly, nonnull) NSURL *url;
 
 #pragma mark - Unavailable initializers
 

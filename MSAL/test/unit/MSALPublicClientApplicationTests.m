@@ -96,8 +96,8 @@
 
 @interface MSALFakeInteractiveRequest : NSObject
 
-@property NSString *state;
-@property MSIDRequestParameters *parameters;
+@property (atomic) NSString *state;
+@property (atomic) MSIDRequestParameters *parameters;
 
 @end
 
@@ -710,7 +710,7 @@
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     params.parentViewController = controller;
-    params.parentViewController.view = nil;
+    controller.view = nil;
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
@@ -1523,7 +1523,6 @@
     
 }
 
-#pragma
 #pragma mark - acquireTokenSilent
 
 - (void)testAcquireSilentScopesUser

@@ -73,9 +73,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) MSIDAccountCredentialCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
-@property (strong) NSArray *accounts;
-@property (strong) NSArray *appMetadataEntries;
-@property (strong) NSMutableArray *accountMetadataEntries;
+@property (atomic, strong) NSArray *accounts;
+@property (atomic,strong) NSArray *appMetadataEntries;
+@property (atomic, strong) NSMutableArray *accountMetadataEntries;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 @property (nonatomic) MSIDAssymetricKeyKeychainGenerator *keyGenerator;
 @property (nonatomic) NSMutableArray *tokenKeys;

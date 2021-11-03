@@ -32,8 +32,8 @@
 
 @interface MSALPublicClientApplicationConfig ()
 
-@property (readwrite) MSALExtraQueryParameters *extraQueryParameters;
-@property (readwrite) MSALRedirectUri *verifiedRedirectUri;
-@property (readwrite) MSALCacheConfig *cacheConfig;
+@property (atomic, readwrite) MSALExtraQueryParameters *extraQueryParameters;
+@property (atomic, readwrite) MSALRedirectUri *verifiedRedirectUri;
+@property (atomic, readwrite) MSALCacheConfig *cacheConfig;
 
 @end
