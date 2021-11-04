@@ -854,8 +854,14 @@
     msidParams.validateAuthority = shouldValidate;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
-    msidParams.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
+        
+    // Extra parameters to be added to the /token endpoint.
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
+    
+    NSMutableDictionary *extraURLQueryParameters = [self.internalConfig.extraQueryParameters.extraURLQueryParameters mutableCopy];
+    [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
+    msidParams.extraURLQueryParameters = extraURLQueryParameters;
+
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = providedAuthority;
@@ -1163,13 +1169,17 @@
     
     msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
-    msidParams.extraAuthorizeURLQueryParameters = parameters.extraQueryParameters;
-    msidParams.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
     
-    NSMutableDictionary *extraAuthorizeURLQueryParameters = [self.internalConfig.extraQueryParameters.extraAuthorizeURLQueryParameters mutableCopy];
-    [extraAuthorizeURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
-    msidParams.extraAuthorizeURLQueryParameters = extraAuthorizeURLQueryParameters;
+    // Extra parameters to be added to the /authorize endpoint.
+    msidParams.extraAuthorizeURLQueryParameters = self.internalConfig.extraQueryParameters.extraAuthorizeURLQueryParameters;
+    
+    // Extra parameters to be added to the /token endpoint.
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
+    
+    // Extra parameters to be added to both: /authorize and /token endpoints.
+    NSMutableDictionary *extraURLQueryParameters = [self.internalConfig.extraQueryParameters.extraURLQueryParameters mutableCopy];
+    [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
+    msidParams.extraURLQueryParameters = extraURLQueryParameters;
     
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
