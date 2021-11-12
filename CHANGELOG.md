@@ -1,3 +1,6 @@
+TBD:
+* Added public API to pass EQP to the /token endpoint (#1406) 
+
 ## [1.1.24]
 * Use base64URLEncoding for RSA modules (#1399)
 

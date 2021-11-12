@@ -1200,9 +1200,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc", @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNotNil(params.correlationId);
-         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{}));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypeLogin);
@@ -1268,9 +1268,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc", @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.correlationId, correlationId);
-         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{}));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          XCTAssertEqualObjects(params.extraScopesToConsent, @"fakescope3");
          XCTAssertEqual(params.promptType, MSIDPromptTypeConsent);
@@ -1408,9 +1408,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc", @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNotNil(params.correlationId);
-         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{}));
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
@@ -1484,9 +1484,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc", @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.correlationId, correlationId);
-         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{}));
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.accountIdentifier, account.lookupAccountIdentifier);
          XCTAssertEqualObjects(params.extraScopesToConsent, @"fakescope3");

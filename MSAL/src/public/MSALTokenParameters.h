@@ -73,6 +73,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) MSALClaimsRequest *claimsRequest;
 
 /**
+ Key-value pairs to pass to the /authorize and /token endpoints. This should not be url-encoded value.
+ */
+@property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
+
+/**
  UUID to correlate this request with the server.
  */
 @property (nonatomic, nullable) NSUUID *correlationId;
