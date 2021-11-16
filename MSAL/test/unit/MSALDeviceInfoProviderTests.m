@@ -39,7 +39,7 @@
 
 #pragma mark - Get device info
 
-- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnDefaultDeviceInfoAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnNilAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -77,7 +77,7 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(deviceInformation);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
         XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         XCTAssertNotNil(error);

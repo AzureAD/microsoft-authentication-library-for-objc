@@ -41,12 +41,11 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    void (^deviceInfoCompletion)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
+    void (^deviceInfoCompletionHandler)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
     {
         if (!msalDeviceInfo)
         {
             msalDeviceInfo = [MSALDeviceInformation new];
-            msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
         }
 
         NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
@@ -61,7 +60,7 @@
     if (![requestParameters shouldUseBroker])
     {
         NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
-        deviceInfoCompletion(nil, error);
+        completionBlock(nil, error);
         return;
     }
 
@@ -75,7 +74,7 @@
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
 
-        deviceInfoCompletion(nil, nil);
+        deviceInfoCompletionHandler(nil, nil);
         return;
     }
     
@@ -88,14 +87,14 @@
 
         if (!ssoExtensionRequest)
         {
-            deviceInfoCompletion(nil, requestError);
+            deviceInfoCompletionHandler(nil, requestError);
             return;
         }
 
         if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
         {
             NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
-            deviceInfoCompletion(nil, error);
+            completionBlock(nil, error);
             return;
         }
 
@@ -105,12 +104,14 @@
 
             if (!deviceInfo)
             {
-                deviceInfoCompletion(nil, error);
+                // We are returing registration details irrespective of failures due to SSO extension request as registration details must have for few clients
+                // Once we identify and fix the intermittent SSO extension issue then we should return either deviceInfo or error
+                deviceInfoCompletionHandler(nil, error);
                 return;
             }
 
             MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
-            deviceInfoCompletion(msalDeviceInfo, nil);
+            deviceInfoCompletionHandler(msalDeviceInfo, nil);
             return;
         }];
     }
