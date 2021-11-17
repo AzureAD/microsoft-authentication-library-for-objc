@@ -1,3 +1,6 @@
+## [TBD]
+* Return device join status regardless of SSO extension error(#1403)
+
 ## [1.1.23]
 * Add helper for cross cloud B2B support in broker (#1370)
 * Add support of "create" prompt (#1384)
