@@ -41,7 +41,7 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    void (^deviceInfoCompletionHandler)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
+    void (^fillDeviceInfoCompletionBlock)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
     {
         if (!msalDeviceInfo)
         {
@@ -74,7 +74,7 @@
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
 
-        deviceInfoCompletionHandler(nil, nil);
+        fillDeviceInfoCompletionBlock(nil, nil);
         return;
     }
     
@@ -87,7 +87,7 @@
 
         if (!ssoExtensionRequest)
         {
-            deviceInfoCompletionHandler(nil, requestError);
+            completionBlock(nil, requestError);
             return;
         }
 
@@ -106,12 +106,12 @@
             {
                 // We are returing registration details irrespective of failures due to SSO extension request as registration details must have for few clients
                 // Once we identify and fix the intermittent SSO extension issue then we should return either deviceInfo or error
-                deviceInfoCompletionHandler(nil, error);
+                fillDeviceInfoCompletionBlock(nil, error);
                 return;
             }
 
             MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
-            deviceInfoCompletionHandler(msalDeviceInfo, nil);
+            fillDeviceInfoCompletionBlock(msalDeviceInfo, nil);
             return;
         }];
     }
