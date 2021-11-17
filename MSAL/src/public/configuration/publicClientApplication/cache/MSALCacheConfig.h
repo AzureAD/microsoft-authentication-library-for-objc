@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
     See more https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps?language=objc
     @note To disable keychain sharing, set this to your bundleIdentifier using [[NSBundle mainBundle] bundleIdentifier]. MSAL will then use your private keychain group, which is available only to your application.
  */
-@property NSString *keychainSharingGroup;
+@property (atomic) NSString *keychainSharingGroup;
 
 /**
     Retrieve default MSAL keychain access group.

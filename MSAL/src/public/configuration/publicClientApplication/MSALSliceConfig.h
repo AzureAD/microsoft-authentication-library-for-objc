@@ -39,12 +39,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
    Specific test slice
  */
-@property NSString *slice;
+@property (atomic) NSString *slice;
 
 /**
   Specific data center
 */
-@property NSString *dc;
+@property (atomic) NSString *dc;
 
 /**
   Current slice and flight configuration

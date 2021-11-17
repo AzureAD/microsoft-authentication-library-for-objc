@@ -59,7 +59,7 @@ static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, 
     }
     return (SFSafariViewController *)fakeController;
 }
-#pragma pop
+#pragma clang diagnostic pop
 
 
 @end
