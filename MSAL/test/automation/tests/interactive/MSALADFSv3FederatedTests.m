@@ -44,8 +44,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
 
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     
@@ -67,7 +67,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
 
     // 1. Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
@@ -86,7 +86,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.upn;
 
@@ -102,7 +102,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.upn;
 

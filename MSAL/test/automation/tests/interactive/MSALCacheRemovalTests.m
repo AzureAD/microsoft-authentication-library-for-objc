@@ -43,8 +43,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     
@@ -62,7 +62,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
 
     // 1. Run interactive login
@@ -85,11 +85,11 @@
 {
     MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     firstRequest.promptBehavior = @"force";
-    firstRequest.testAccount = self.primaryAccount;
+    firstRequest.uiTestAccount = self.primaryAccount;
     firstRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     firstRequest.expectedResultScopes = firstRequest.requestScopes;
     firstRequest.loginHint = self.primaryAccount.upn;
-    firstRequest.testAccount = self.primaryAccount;
+    firstRequest.uiTestAccount = self.primaryAccount;
     firstRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     firstRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
@@ -101,11 +101,11 @@
 
     MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     secondRequest.promptBehavior = @"force";
-    secondRequest.testAccount = self.primaryAccount;
+    secondRequest.uiTestAccount = self.primaryAccount;
     secondRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     secondRequest.expectedResultScopes = secondRequest.requestScopes;
     secondRequest.loginHint = self.primaryAccount.upn;
-    secondRequest.testAccount = self.primaryAccount;
+    secondRequest.uiTestAccount = self.primaryAccount;
     secondRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     secondRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 

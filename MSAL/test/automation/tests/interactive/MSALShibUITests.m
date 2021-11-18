@@ -45,8 +45,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     
@@ -122,7 +122,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
     request.loginHint = self.primaryAccount.upn;
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedShibbolethInteractiveLoginWithRequest:request];
@@ -137,7 +137,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
     request.loginHint = self.primaryAccount.upn;
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.usePassedWebView = YES;
 
     // 1. Run interactive

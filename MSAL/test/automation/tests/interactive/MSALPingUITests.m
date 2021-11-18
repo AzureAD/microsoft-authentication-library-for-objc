@@ -45,8 +45,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     

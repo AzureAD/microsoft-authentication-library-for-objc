@@ -45,8 +45,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     
@@ -63,7 +63,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -99,7 +99,7 @@
     homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
     homeRequest.cacheAuthority = homeRequest.configurationAuthority;
     homeRequest.webViewType = MSIDWebviewTypeWKWebView;
-    homeRequest.testAccount = self.primaryAccount;
+    homeRequest.uiTestAccount = self.primaryAccount;
     homeRequest.targetTenantId = self.primaryAccount.homeTenantId;
 
     // 1. Run interactive in the home tenant
@@ -117,7 +117,7 @@
     // 3. Run silent for the guest tenant
     MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     guestRequest.promptBehavior = @"force";
-    guestRequest.testAccount = self.primaryAccount;
+    guestRequest.uiTestAccount = self.primaryAccount;
     guestRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     guestRequest.expectedResultScopes = [NSString msidCombinedScopes:guestRequest.requestScopes withScopes:self.class.confProvider.oidcScopes];
     guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -149,7 +149,7 @@
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.homeTenantId];
     homeRequest.promptBehavior = @"force";
     homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
-    homeRequest.testAccount = self.primaryAccount;
+    homeRequest.uiTestAccount = self.primaryAccount;
     homeRequest.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:YES];
 

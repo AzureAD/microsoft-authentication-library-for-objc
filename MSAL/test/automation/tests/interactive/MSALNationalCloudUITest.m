@@ -37,7 +37,7 @@
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.nationalCloudEnvironment type:@"ms_graph_userread"];
     request.expectedResultScopes = request.requestScopes;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -75,7 +75,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.nationalCloudEnvironment type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.instanceAware = YES;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:self.primaryAccount.targetTenantId];
@@ -111,7 +111,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.nationalCloudEnvironment type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.domainUsername;
@@ -133,7 +133,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.nationalCloudEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
 

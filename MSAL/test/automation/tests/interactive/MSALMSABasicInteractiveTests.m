@@ -47,8 +47,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgsAndPersonalAccounts;
-    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgsAndPersonalAccounts;
+    appConfigurationRequest.uiTestAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
     
@@ -66,7 +66,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.expectedResultAuthority = request.cacheAuthority;
 
     // 1. Do interactive login
@@ -86,7 +86,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"consumers"];
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.upn;
@@ -106,7 +106,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"consumers"];
     request.loginHint = self.primaryAccount.upn;
 
@@ -124,7 +124,7 @@
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"consumers"];
     request.loginHint = self.primaryAccount.upn;
     request.webViewType = MSIDWebviewTypeWKWebView;
@@ -144,7 +144,7 @@
     // 1. Sign in first time to ensure account will be there
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.testAccount = self.primaryAccount;
+    request.uiTestAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_prefixed"];
     request.expectedResultScopes = request.requestScopes;
@@ -153,7 +153,7 @@
 
     request.promptBehavior = @"select_account";
     request.loginHint = self.primaryAccount.upn;
-    request.testAccount = nil;
+    request.uiTestAccount = nil;
 
     NSDictionary *config = [self configWithTestRequest:request];
     // 2. Now call acquire token with select account

@@ -42,8 +42,8 @@
     [super setUp];
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
-    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
-    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentChinaCloud;
+    appConfigurationRequest.uiTestAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.uiTestAppEnvironment = MSIDTestAppEnvironmentChinaCloud;
     
     [self loadTestApp:appConfigurationRequest];
     
