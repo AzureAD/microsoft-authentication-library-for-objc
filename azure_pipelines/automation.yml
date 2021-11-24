@@ -90,7 +90,7 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 12,OS=15.0' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/'
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
             
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
