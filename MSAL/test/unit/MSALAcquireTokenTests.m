@@ -548,7 +548,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
-                                    query:nil
+                                    query:@"eqpKey=eqpValue"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
                                    claims:claims];
     
@@ -841,7 +841,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
-                                    query:nil
+                                    query:@"eqpKey=eqpValue"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
                                    claims:expectedClaims];
     
@@ -937,7 +937,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
-                                    query:nil
+                                    query:@"eqpKey=eqpValue"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
                                    claims:expectedClaims];
     
@@ -1032,7 +1032,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"iamanauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
-                                    query:nil
+                                    query:@"eqpKey=eqpValue"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
                                    claims:claims];
     
@@ -1125,7 +1125,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:@"https://login.microsoftonline.de/common"
-                                    query:nil
+                                    query:@"instance_aware=true"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
                                    claims:nil];
     
