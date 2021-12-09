@@ -33,8 +33,8 @@
 + (MSALFakeViewController *)currentController;
 + (void)reset;
 
-@property BOOL wasPresented;
-@property BOOL wasDismissed;
-@property id delegate;
+@property (atomic) BOOL wasPresented;
+@property (atomic) BOOL wasDismissed;
+@property (atomic) id delegate;
 
 @end

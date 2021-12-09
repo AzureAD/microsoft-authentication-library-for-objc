@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALCacheItemDetailViewController : UIViewController
 
-@property id cacheItem;
+@property (atomic) id cacheItem;
 
 @end
 

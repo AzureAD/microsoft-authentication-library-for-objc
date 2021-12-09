@@ -31,9 +31,9 @@
 
 + (instancetype)sharedInstance;
 
-@property MSALHTTPConfig *httpConfig;
-@property MSALTelemetryConfig *telemetryConfig;
-@property MSALLoggerConfig *loggerConfig;
-@property MSALCacheConfig *cacheConfig;
+@property (atomic) MSALHTTPConfig *httpConfig;
+@property (atomic) MSALTelemetryConfig *telemetryConfig;
+@property (atomic) MSALLoggerConfig *loggerConfig;
+@property (atomic) MSALCacheConfig *cacheConfig;
 
 @end

@@ -1,3 +1,7 @@
+## [1.1.25]
+* Added public API to pass EQP to the /token endpoint (#1406) 
+* Return device join status regardless of SSO extension error(#1403)
+
 ## [1.1.24]
 * Use base64URLEncoding for RSA modules (#1399)
 
