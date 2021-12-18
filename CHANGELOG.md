@@ -1,3 +1,6 @@
+[TBD]
+* Added more string utils in common core (#1417)
+
 ## [1.1.25]
 * Added public API to pass EQP to the /token endpoint (#1406) 
 * Return device join status regardless of SSO extension error(#1403)
