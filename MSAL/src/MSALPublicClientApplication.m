@@ -1434,12 +1434,27 @@
         block(NO, localError, nil);
         return;
     }
+
+    if(signoutParameters.wipeCacheForAllAccounts)
+    {
+        BOOL result = YES;
+        NSError *localError;
+        
+        result = [self.tokenCache clearCacheForAllAccountsWithContext:nil error:&localError];
+        
+        if(!result)
+        {
+            block(NO, localError, nil);
+            return;
+        }
+    }
     
     NSError *controllerError;
     MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
                                                                                         oauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                             shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
                                                                                    shouldWipeAccount:signoutParameters.wipeAccount
+                                                                       shouldWipeCacheForAllAccounts:signoutParameters.wipeCacheForAllAccounts
                                                                                                error:&controllerError];
     
     if (!controller)
