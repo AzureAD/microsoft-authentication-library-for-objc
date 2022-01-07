@@ -36,6 +36,6 @@ done
 cd $destination
 tar -zcf ./$releaseFolder.tar.gz ./$releaseFolder
 zip -r -q -X ./$releaseFolder.zip ./$releaseFolder
-rm -R ./$releaseFolder
+#rm -R ./$releaseFolder
 
 echo -e "\r\nDone!\r\n\r\n$releaseFolder.tar.gz\r\nand\r\n$releaseFolder.zip\r\nhave been created at $destination.\r\n"
