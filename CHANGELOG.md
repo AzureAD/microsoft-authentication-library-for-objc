@@ -1,4 +1,4 @@
-[TBD]
+## [1.1.26]
 * Added more string utils in common core (#1417)
 * Fixed links in iframe to open in themselves instead of browser for embedded web views (#1424)
 
