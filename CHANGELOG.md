@@ -1,3 +1,7 @@
+## [1.1.26]
+* Added more string utils in common core (#1417)
+* Fixed links in iframe to open in themselves instead of browser for embedded web views (#1424)
+
 ## [1.1.25]
 * Added public API to pass EQP to the /token endpoint (#1406) 
 * Return device join status regardless of SSO extension error(#1403)
