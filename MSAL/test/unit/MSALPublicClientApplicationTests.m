@@ -3468,6 +3468,70 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testSignoutWithAccount_whenNonNilAccount_andWipeAllAccountsTrue_andBrokerDisabled_shouldWipeAllAccounts
+{
+    // Save default response
+    [self msalStoreTokenResponseInCache];
+    
+    // Save tokens for the same account for a different client
+    [self msalStoreSecondAppTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALPublicClientApplication *secondApplication = [self createSecondTestAppWithAuthority:authority];
+    XCTAssertNotNil(secondApplication);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.wipeCacheForAllAccounts = YES;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    XCTAssertEqual([secondApplication allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        // All accounts from all clients were wiped
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        XCTAssertEqual([secondApplication allAccounts:nil].count, 0);
+        
+        MSALAccountEnumerationParameters *accountEnumerationOptions = [MSALAccountEnumerationParameters new];
+        accountEnumerationOptions.returnOnlySignedInAccounts = NO;
+        
+        // All accounts from all clients were wiped
+        NSArray *firstAppSignedOutAccounts = [application accountsForParameters:accountEnumerationOptions error:nil];
+        XCTAssertEqual([firstAppSignedOutAccounts count], 0);
+        
+        // All accounts from all clients were wiped
+        NSArray *secondAppSignedOutAccounts = [application accountsForParameters:accountEnumerationOptions error:nil];
+        XCTAssertEqual([secondAppSignedOutAccounts count], 0);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 #endif
 
 - (void)testInitWithConfiguration_WhenBypassRedirectURIIsDefault_ShouldBlockInvalidURI
