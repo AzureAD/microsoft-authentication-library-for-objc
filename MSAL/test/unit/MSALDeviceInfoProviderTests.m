@@ -262,6 +262,7 @@
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
         deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
+        deviceInfo.mdmId = @"mdmId";
         
         callback(deviceInfo, nil);
     }];
@@ -278,6 +279,7 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"mdm_id"], @"mdmId");
         [successExpectation fulfill];
     }];
     
