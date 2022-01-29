@@ -279,7 +279,7 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
-        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"mdm_id"], @"mdmId");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
         [successExpectation fulfill];
     }];
     
