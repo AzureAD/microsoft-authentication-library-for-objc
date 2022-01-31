@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDCacheKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -41,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
     The key is "display identifier" of the location (e.g. Teams cache)
     The value is the precise identifiers like kSecAttrAccount, kSecAttrService etc.
  */
-+ (NSDictionary<NSString *, MSIDCacheKey *> *) additionalPartnerLocations;
++ (NSDictionary<NSString *, NSDictionary *> *) additionalPartnerLocations;
 
 @end
 

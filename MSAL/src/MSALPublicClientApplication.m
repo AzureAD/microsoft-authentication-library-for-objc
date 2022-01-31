@@ -110,7 +110,6 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDRequestTelemetryConstants.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
-#import "MSIDCacheKey.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -123,7 +122,6 @@
 @property (nonatomic) MSIDCacheConfig *msidCacheConfig;
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
-@property (nonatomic) MSIDKeychainTokenCache *tokenCacheDataSource;
 
 @end
 
@@ -311,7 +309,6 @@
     self.tokenCache = defaultAccessor;
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
     self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
-    self.tokenCacheDataSource = dataSource;
     return YES;
 }
 #else
@@ -376,7 +373,6 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
     self.tokenCache = defaultAccessor;
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    self.tokenCacheDataSource = dataSource;
     return YES;
 }
 #endif
@@ -1456,21 +1452,32 @@
         // Clear additional cache locations
         if (MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations && MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations.count > 0)
         {
+            NSMutableArray <NSString *> *locationErrors = nil;
+            MSIDMacACLKeychainAccessor *keychainAccessor = [[MSIDMacACLKeychainAccessor alloc] initWithTrustedApplications:nil accessLabel:@"Microsoft Credentials" error:nil];
             for (NSString* key in MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations)
             {
-                MSIDCacheKey *cacheValue = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations[key];
+                NSDictionary *cacheLocation = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations[key];
                 
-                // TODO: Juan Confirm if it's ok to use the default keychainGroup
-                result = [self.tokenCacheDataSource removeAccountsWithKey:cacheValue
-                                                               context:nil
-                                                                 error:&localError];
+                BOOL removeResult = [keychainAccessor removeItemWithAttributes:cacheLocation
+                                                            context:nil
+                                                              error:&localError];
 
-                if (!result)
+                if (!removeResult)
                 {
-                    NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing item location: %@ with account: %@ service: %@  type: %@", key, cacheValue.account, cacheValue.service, cacheValue.type], nil, nil, localError, nil, nil, YES);
-                    block(NO, additionalLocationError, nil);
-                    return;
+                    result = NO;
+                    if (!locationErrors)
+                    {
+                        locationErrors = [[NSMutableArray alloc] init];
+                    }
+                    [locationErrors addObject:[NSString stringWithFormat:@"'%@'", key]];
                 }
+            }
+            
+            if (!result && locationErrors)
+            {
+                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@", [locationErrors componentsJoinedByString:@", "]], nil, nil, localError, nil, nil, YES);
+                block(NO, additionalLocationError, nil);
+                return;
             }
         }
     }

@@ -26,27 +26,40 @@
 //------------------------------------------------------------------------------
 
 #import "MSALWipeCacheForAllAccountsConfig.h"
-#import "MSIDCacheKey.h"
-
 
 @implementation MSALWipeCacheForAllAccountsConfig
 
-+ (NSDictionary<NSString *, MSIDCacheKey *> *) additionalPartnerLocations
++ (NSDictionary<NSString *, NSDictionary *> *) additionalPartnerLocations
 {
+#if TARGET_OS_IPHONE
+    return @{};
+#else
     return @{
-        @"ADAL cache"                 : [[MSIDCacheKey alloc] initWithAccount:@"adalcache"
-                                                                      service:nil
-                                                                      generic:nil
-                                                                         type:nil],
-        @"Teams cache"                : [[MSIDCacheKey alloc] initWithAccount:@"Microsoft Teams Identities Cache"
-                                                                      service:nil
-                                                                      generic:nil
-                                                                         type:nil],
-        @"Visual Studio Code cache"   : [[MSIDCacheKey alloc] initWithAccount:@"microsoft.login"
-                                                                      service:nil
-                                                                      generic:nil
-                                                                         type:nil]
+        @"ADAL cache" : @{(id)kSecAttrAccount : @"adalcache",
+                            (id)kSecAttrLabel : @"com.microsoft.adalcache",
+                          (id)kSecAttrService : @"AdalCache"},
+
+        @"Microsoft Teams" : @{(id)kSecAttrAccount : @"Microsoft Teams Identities Cache",
+                                 (id)kSecAttrLabel : @"Microsoft Teams Identities Cache",
+                               (id)kSecAttrService : @"Microsoft Teams Identities Cache"},
+        
+        @"Visual Studio for Mac, Azure CLI & PowerShell" : @{(id)kSecAttrAccount : @"MSALCache",
+                                                               (id)kSecAttrLabel : @"Microsoft.Developer.IdentityService",
+                                                             (id)kSecAttrService : @"Microsoft.Developer.IdentityService"},
+        
+        @"Visual Studio Code" : @{(id)kSecAttrAccount : @"microsoft.login",
+                                    (id)kSecAttrLabel : @"vscodevscode.microsoft-authentication",
+                                  (id)kSecAttrService : @"vscodevscode.microsoft-authentication"},
+        
+        @"Microsoft To-Do AAD" : @{(id)kSecAttrAccount : @"com.microsoft.projectcheshire.keychain",
+                                    (id)kSecAttrLabel : @"com.microsoft.to-do-mac.AADTokenCache",
+                                  (id)kSecAttrService : @"com.microsoft.to-do-mac.AADTokenCache"},
+
+        @"Microsoft To-Do MSA" : @{(id)kSecAttrAccount : @"com.microsoft.projectcheshire.keychain",
+                                    (id)kSecAttrLabel : @"com.microsoft.todo.MSAUserKeychain",
+                                  (id)kSecAttrService : @"com.microsoft.todo.MSAUserKeychain"}
     };
+#endif
 }
 
 @end
