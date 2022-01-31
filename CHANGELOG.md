@@ -1,5 +1,7 @@
+## [1.2.0]
+* Multi-tenant PkeyAuth support in MSAL (#1438)
+
 ## [1.1.26]
-* Multitenant PkeyAuth support in MSAL (#1438)
 * Added more string utils in common core (#1417)
 * Fixed links in iframe to open in themselves instead of browser for embedded web views (#1424)
 
