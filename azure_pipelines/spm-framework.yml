@@ -146,12 +146,24 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
+      
   - task: Shellpp@0
     displayName: Generating release archive zips
     inputs:
       type: 'FilePath'
       scriptPath: 'ReleaseArchive.sh'
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
+      
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'Generate SBOM file'
+    inputs:
+      BuildDropPath: '$(Build.ArtifactStagingDirectory)'
+      
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)
+      artifactName: Artifact
+      
   - task: Bash@3
     displayName: Common Core - extract release version from changelog | Build release notes
     inputs:
@@ -212,7 +224,7 @@ jobs:
       configHostAlias: 'ADO Release Pipeline Public Key'
       configHostname: 'github.com'
   - task: Bash@3
-    displayName: Update package.swift with url & checksum & git push 
+    displayName: Update package.swift with url & checksum & git push
     inputs:
       targetType: 'inline'
       script: |
@@ -228,7 +240,7 @@ jobs:
         git fetch origin $(repositoryBranch) -q
         git checkout FETCH_HEAD -q
         git checkout -b update-package-for-$(releaseVersion) -q
-        
+
         if [ ! -e Package.swift ]; then
             echo -e "// swift-tools-version:5.3\n" >> Package.swift
             cat >> Package.swift << EOF
@@ -268,10 +280,10 @@ jobs:
         git add MSAL/resources/ios/Info.plist
         git add MSAL/resources/mac/Info.plist
         git add MSAL/src/MSAL_Internal.h
-        
+
         author=$(git log -1 --pretty=format:'%an <%ae>')
         git commit -a -m "Updating MSAL framework checksum & url for $(releaseVersion) [skip ci]" -q --author="${author}"
-        
+
         git checkout $(repositoryBranch) -q
         git merge update-package-for-$(releaseVersion) -q
         git push origin $(repositoryBranch) -q
@@ -343,7 +355,7 @@ jobs:
     inputs:
       filePath: 'build_docs.sh'
   - task: Bash@3
-    displayName: Push docs to github page for repository 
+    displayName: Push docs to github page for repository
     inputs:
       targetType: 'inline'
       script: |
@@ -361,20 +373,20 @@ jobs:
             git checkout -b 'update-docs-for-release-$(releaseVersion)'
             git add docs.temp/docs/*
             git commit -m 'adding docs for release' --author="${author}" --status
-            
+
             # Cleanup
             rm -rf docs.temp
             git fetch origin $(docsRepositoryBranch)
             git checkout FETCH_HEAD
             git checkout $(docsRepositoryBranch)
             git clean -fd
-            
+
             # Get previously commited changes for docs
             git cherry-pick --strategy-option theirs "update-docs-for-release-$(releaseVersion)"
-            
+
             # Copy files in docs.temp folder to root
             \cp -r docs.temp/docs/* .
-        
+
             # Push changes to docsRepositoryBranch branch
             git add -A
             git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
