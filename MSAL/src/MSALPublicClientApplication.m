@@ -1471,7 +1471,7 @@
         }
         else
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", deviceInformation);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
         }
         
         [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
