@@ -1449,6 +1449,7 @@
             return;
         }
         
+#if !TARGET_OS_IPHONE
         // Clear additional cache locations
         if (MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations && MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations.count > 0)
         {
@@ -1480,6 +1481,7 @@
                 return;
             }
         }
+#endif
     }
     
     NSError *controllerError;
