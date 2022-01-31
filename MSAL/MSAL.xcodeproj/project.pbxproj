@@ -657,7 +657,6 @@
 		B2D0A38321C708CF0071E0DA /* MSALADFSv4FederatedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DE72120E85100B1B40C /* MSALADFSv4FederatedTests.m */; };
 		B2D0A38821C709C30071E0DA /* MSALShibUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEE2120F0E800B1B40C /* MSALShibUITests.m */; };
 		B2D0A38A21C70AF50071E0DA /* MSALPingUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */; };
-		B2D0A38B21C70D800071E0DA /* MSALBlackforestUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */; };
 		B2D0A38E21C71B8C0071E0DA /* MSALGuestUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */; };
 		B2D0A38F21C71D900071E0DA /* MSALCacheRemovalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */; };
 		B2D0A39221C72C740071E0DA /* MSALMSABasicInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */; };
@@ -1388,7 +1387,6 @@
 		B2C0E79C23AC7996006C9CAD /* MSALParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALParameters.m; sourceTree = "<group>"; };
 		B2C0E80723AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALLegacySharedAccountsProvider+Internal.h"; sourceTree = "<group>"; };
 		B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSIDVersion.m; sourceTree = "<group>"; };
-		B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALBlackforestUITests.m; sourceTree = "<group>"; };
 		B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCacheRemovalTests.m; sourceTree = "<group>"; };
 		B2E2A9402393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSIDInteractiveRequestParameters+MSALRequest.h"; sourceTree = "<group>"; };
 		B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "MSIDInteractiveRequestParameters+MSALRequest.m"; sourceTree = "<group>"; };
@@ -1986,7 +1984,6 @@
 				B21F9DEE2120F0E800B1B40C /* MSALShibUITests.m */,
 				B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */,
 				B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */,
-				B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */,
 				B282256023EF9BFF0007DFE4 /* MSALChinaCloudUITests.m */,
 				B282256123EF9BFF0007DFE4 /* MSALUSGovUITests.m */,
 				B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */,
@@ -3696,7 +3693,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2BB73922112C3F3000EA4C5 /* XCUIElement+CrossPlat.m in Sources */,
-				B2D0A38B21C70D800071E0DA /* MSALBlackforestUITests.m in Sources */,
 				B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */,
 				B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */,
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,

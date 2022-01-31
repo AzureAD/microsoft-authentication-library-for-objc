@@ -33,11 +33,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile ()
 
-@property (readwrite, nullable) NSString *identifier;
-@property (readwrite, nullable) NSString *environment;
-@property (readwrite, nullable) NSString *tenantId;
-@property (readwrite) BOOL isHomeTenantProfile;
-@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
+@property (atomic, readwrite, nullable) NSString *identifier;
+@property (atomic, readwrite, nullable) NSString *environment;
+@property (atomic, readwrite, nullable) NSString *tenantId;
+@property (atomic, readwrite) BOOL isHomeTenantProfile;
+@property (atomic, readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 
 - (instancetype)initWithIdentifier:(nonnull NSString *)identifier
                           tenantId:(nonnull NSString *)tenantId

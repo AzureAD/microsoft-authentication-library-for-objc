@@ -55,13 +55,13 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
 
 @interface MSALCacheViewController ()
 
-@property (weak) IBOutlet NSOutlineView *outLineView;
+@property (atomic, weak) IBOutlet NSOutlineView *outLineView;
 @property (nonatomic) MSIDAccountCredentialCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *legacyAccessor;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
-@property (strong) NSArray *accounts;
-@property (strong) NSArray *appMetadataEntries;
-@property (strong) NSMutableDictionary *cacheDict;
+@property (atomic, strong) NSArray *accounts;
+@property (atomic, strong) NSArray *appMetadataEntries;
+@property (atomic, strong) NSMutableDictionary *cacheDict;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 @property (nonatomic) MSIDAssymetricKeyKeychainGenerator *keyGenerator;
 @property (nonatomic) NSMutableArray *tokenKeys;

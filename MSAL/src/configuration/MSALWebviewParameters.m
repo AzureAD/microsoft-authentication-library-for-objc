@@ -44,13 +44,7 @@
 
 - (instancetype)initWithParentViewController:(MSALViewController *)parentViewController
 {
-    self = [super init];
-    if (self)
-    {
-        _parentViewController = parentViewController;
-    }
-    
-    return self;
+    return [self initWithAuthPresentationViewController:parentViewController];
 }
 
 - (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController
@@ -68,9 +62,7 @@
 
 - (id)copyWithZone:(__unused NSZone *)zone
 {
-    MSALWebviewParameters *item;
-    item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
-    item.parentViewController = _parentViewController;
+    MSALWebviewParameters *item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
 
 #if TARGET_OS_IPHONE
     item.presentationStyle = _presentationStyle;

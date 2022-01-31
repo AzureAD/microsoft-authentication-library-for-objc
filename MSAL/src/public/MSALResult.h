@@ -43,51 +43,51 @@
  The Access Token requested.
  Note that if access token is not returned in token response, this property will be returned as an empty string.
  */
-@property (readonly, nonnull) NSString *accessToken;
+@property (atomic, readonly, nonnull) NSString *accessToken;
 
 /**
     The time that the access token returned in the Token property ceases to be valid.
     This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
  */
-@property (readonly, nullable) NSDate *expiresOn;
+@property (atomic, readonly, nullable) NSDate *expiresOn;
 
 /**
     Some access tokens have extended lifetime when server is in an unavailable state.
     This property indicates whether the access token is returned in such a state.
  */
-@property (readonly) BOOL extendedLifeTimeToken;
+@property (atomic, readonly) BOOL extendedLifeTimeToken;
 
 /**
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
  */
-@property (readonly, nullable) NSString *tenantId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantId instead");
+@property (atomic, readonly, nullable) NSString *tenantId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantId instead");
 
 /**
  The raw id token if it's returned by the service or nil if no id token is returned.
  */
-@property (readonly, nullable) NSString *idToken;
+@property (atomic, readonly, nullable) NSString *idToken;
 
 /**
     The scope values returned from the service.
  */
-@property (readonly, nonnull) NSArray<NSString *> *scopes;
+@property (atomic, readonly, nonnull) NSArray<NSString *> *scopes;
 
 #pragma mark - Account information
 
 /**
  A tenant profile object that contains all the tenant-specific information, including tenant id, user object id, etc. It also contains all the id token claims as a dictionary.
  */
-@property (readonly, nonnull) MSALTenantProfile *tenantProfile;
+@property (atomic, readonly, nonnull) MSALTenantProfile *tenantProfile;
 
 /**
     The account object that holds account information.
  */
-@property (readonly, nonnull) MSALAccount *account;
+@property (atomic, readonly, nonnull) MSALAccount *account;
 
 /**
     The unique id of the account.
  */
-@property (readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
+@property (atomic, readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
 
 #pragma mark - Request information
 
@@ -96,21 +96,21 @@
  This authority should be used for subsequent silent requests.
  It might be different from the authority provided by developer (e.g. for sovereign cloud scenarios).
  */
-@property (readonly, nonnull) MSALAuthority *authority;
+@property (atomic, readonly, nonnull) MSALAuthority *authority;
 
 /**
  The correlation ID of the request.
  */
-@property (readonly, nonnull) NSUUID *correlationId;
+@property (atomic, readonly, nonnull) NSUUID *correlationId;
 
 /**
  The authorization header for the specific authentication scheme . For instance "Bearer ..." or "Pop ...".
  */
-@property (readonly, nonnull) NSString *authorizationHeader;
+@property (atomic, readonly, nonnull) NSString *authorizationHeader;
 
 /**
  The authentication scheme for the tokens issued. For instance "Bearer " or "Pop".
  */
-@property (readonly, nonnull) NSString *authenticationScheme;
+@property (atomic, readonly, nonnull) NSString *authenticationScheme;
 
 @end

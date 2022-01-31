@@ -52,12 +52,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSString *loginHint;
 
 /**
- Key-value pairs to pass to the authentication server during
- the interactive authentication flow. This should not be url-encoded value.
- */
-@property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
-
-/**
  Permissions you want the account to consent to in the same
  authentication flow, but won't be included in the returned
  access token.

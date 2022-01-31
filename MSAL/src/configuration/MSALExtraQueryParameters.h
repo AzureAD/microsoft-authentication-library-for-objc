@@ -31,9 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALExtraQueryParameters : NSObject <NSCopying>
 
-@property NSMutableDictionary<NSString *, NSString *> *extraURLQueryParameters;
-@property NSMutableDictionary<NSString *, NSString *> *extraTokenURLParameters;
-@property NSMutableDictionary<NSString *, NSString *> *extraAuthorizeURLQueryParameters;
+@property (atomic) NSMutableDictionary<NSString *, NSString *> *extraURLQueryParameters;
+@property (atomic) NSMutableDictionary<NSString *, NSString *> *extraTokenURLParameters;
+@property (atomic) NSMutableDictionary<NSString *, NSString *> *extraAuthorizeURLQueryParameters;
 
 @end
 
