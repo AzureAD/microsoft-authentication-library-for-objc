@@ -8,6 +8,7 @@
 		<string>$(AppIdentifierPrefix)com.microsoft.adalcache</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.workplacejoin</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.ssoseeding</string>
+		<string>$(AppIdentifierPrefix)com.microsoft.workplacejoin.v2</string>
 	</array>
 </dict>
 </plist>
