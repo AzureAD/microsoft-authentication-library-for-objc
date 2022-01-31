@@ -53,12 +53,14 @@
         {
             [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
         }
-    
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"GetDeviceInfo: Completing filling device info: %@, error: %@", msalDeviceInfo, error);
         completionBlock(msalDeviceInfo, error);
     };
     
     if (![requestParameters shouldUseBroker])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should use broker decision: %i", NO);
         NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
         completionBlock(nil, error);
         return;
@@ -69,7 +71,8 @@
     {
         canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
     }
-
+    
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
     if (!canCallSSOExtension)
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
@@ -81,31 +84,37 @@
     if (@available(iOS 13.0, macOS 10.15, *))
     {
         // We are here means canCallSSOExtension is TRUE
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Creating Sso Extension request");
         NSError *requestError;
         MSIDSSOExtensionGetDeviceInfoRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetDeviceInfoRequest alloc] initWithRequestParameters:requestParameters
                                                                                                                                       error:&requestError];
 
         if (!ssoExtensionRequest)
         {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"GetDeviceInfo: Error when creating ssoExtensionRequest: %@", requestError);
             completionBlock(nil, requestError);
             return;
         }
 
         if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, requestParameters, @"GetDeviceInfo: Cannot start Sso Extension as one is in progress");
             NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
             completionBlock(nil, error);
             return;
         }
 
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Start querying Sso Extension request with request params");
         [ssoExtensionRequest executeRequestWithCompletion:^(MSIDDeviceInfo * _Nullable deviceInfo, NSError * _Nullable error)
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Receiving results from Sso Extension with device info: %@, error: %@", deviceInfo, error);
             [self copyAndClearCurrentSSOExtensionRequest];
 
             if (!deviceInfo)
             {
                 // We are returing registration details irrespective of failures due to SSO extension request as registration details must have for few clients
                 // Once we identify and fix the intermittent SSO extension issue then we should return either deviceInfo or error
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"GetDeviceInfo: Error getting device info: %@", error);
                 fillDeviceInfoCompletionBlock(nil, error);
                 return;
             }
