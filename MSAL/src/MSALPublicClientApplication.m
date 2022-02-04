@@ -1455,13 +1455,25 @@
         {
             NSMutableArray <NSString *> *locationErrors = nil;
             MSIDMacACLKeychainAccessor *keychainAccessor = [[MSIDMacACLKeychainAccessor alloc] initWithTrustedApplications:nil accessLabel:@"Microsoft Credentials" error:nil];
-            for (NSString* key in MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations)
+            for (NSString* locationName in MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations)
             {
-                NSDictionary *cacheLocation = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations[key];
+                NSDictionary *cacheLocation = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations[locationName];
+                
+                // Try to read the keychain data in order to trigger the prompt asking for login password, user HAS TO click 'Always Allow' to then be able to delete it.
+                [keychainAccessor getDataWithAttributes:cacheLocation
+                                                context:nil
+                                                  error:&localError];
+                
+                if (localError)
+                {
+                    NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when reading cache for the item: %@.", locationName], nil, nil, localError, nil, nil, YES);
+                    block(NO, additionalLocationError, nil);
+                    return;
+                }
                 
                 BOOL removeResult = [keychainAccessor removeItemWithAttributes:cacheLocation
-                                                            context:nil
-                                                              error:&localError];
+                                                                       context:nil
+                                                                         error:&localError];
 
                 if (!removeResult)
                 {
@@ -1470,13 +1482,13 @@
                     {
                         locationErrors = [[NSMutableArray alloc] init];
                     }
-                    [locationErrors addObject:[NSString stringWithFormat:@"'%@'", key]];
+                    [locationErrors addObject:[NSString stringWithFormat:@"'%@'", locationName]];
                 }
             }
             
             if (!result && locationErrors)
             {
-                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@", [locationErrors componentsJoinedByString:@", "]], nil, nil, localError, nil, nil, YES);
+                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@. User might need to select 'Always Allow' when prompted the login password to access keychain.", [locationErrors componentsJoinedByString:@", "]], nil, nil, localError, nil, nil, YES);
                 block(NO, additionalLocationError, nil);
                 return;
             }

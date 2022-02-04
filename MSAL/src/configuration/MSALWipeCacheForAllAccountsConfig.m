@@ -35,9 +35,9 @@
     return @{};
 #else
     return @{
-        @"ADAL cache" : @{(id)kSecAttrAccount : @"adalcache",
-                            (id)kSecAttrLabel : @"com.microsoft.adalcache",
-                          (id)kSecAttrService : @"AdalCache"},
+        @"Microsoft Office" : @{(id)kSecAttrAccount : @"adalcache",
+                                  (id)kSecAttrLabel : @"com.microsoft.adalcache",
+                                (id)kSecAttrService : @"AdalCache"},
 
         @"Microsoft Teams" : @{(id)kSecAttrAccount : @"Microsoft Teams Identities Cache",
                                  (id)kSecAttrLabel : @"Microsoft Teams Identities Cache",
