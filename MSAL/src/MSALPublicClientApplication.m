@@ -1451,13 +1451,14 @@
         
 #if !TARGET_OS_IPHONE
         // Clear additional cache locations
-        if (MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations && MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations.count > 0)
+        NSDictionary<NSString *, NSDictionary *> *additionalPartnerLocations = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations;
+        if (additionalPartnerLocations && additionalPartnerLocations.count > 0)
         {
             NSMutableArray <NSString *> *locationErrors = nil;
             MSIDMacACLKeychainAccessor *keychainAccessor = [[MSIDMacACLKeychainAccessor alloc] initWithTrustedApplications:nil accessLabel:@"Microsoft Credentials" error:nil];
-            for (NSString* locationName in MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations)
+            for (NSString* locationName in additionalPartnerLocations)
             {
-                NSDictionary *cacheLocation = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations[locationName];
+                NSDictionary *cacheLocation = additionalPartnerLocations[locationName];
                 
                 // Try to read the keychain data in order to trigger the prompt asking for login password, user HAS TO click 'Always Allow' to then be able to delete it.
                 [keychainAccessor getDataWithAttributes:cacheLocation
@@ -1488,7 +1489,7 @@
             
             if (!result && locationErrors)
             {
-                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@. User might need to select 'Always Allow' when prompted the login password to access keychain.", [locationErrors componentsJoinedByString:@", "]], nil, nil, localError, nil, nil, YES);
+                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@. User might need to select 'Always Allow' when prompted the login password to access keychain.", [locationErrors componentsJoinedByString:@", "]], nil, nil, localError, nil, @{@"locationErrors":locationErrors}, YES);
                 block(NO, additionalLocationError, nil);
                 return;
             }
