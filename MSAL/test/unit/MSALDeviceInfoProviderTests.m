@@ -262,6 +262,7 @@
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
         deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
+        deviceInfo.mdmId = @"mdmId";
         
         callback(deviceInfo, nil);
     }];
@@ -278,6 +279,7 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
         [successExpectation fulfill];
     }];
     
@@ -337,6 +339,7 @@
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY]);
         [successExpectation fulfill];
     }];
 
