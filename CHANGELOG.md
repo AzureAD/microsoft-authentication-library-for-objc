@@ -1,4 +1,5 @@
-## [TBD]
+## [1.2.0]
+* Multi-tenant PkeyAuth support in MSAL (#1438)
 * Add support to wipe cache for all accounts (#1426)
 
 ## [1.1.26]
