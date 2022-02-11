@@ -1109,6 +1109,16 @@
                                                     <action selector="clearCache:" target="TI1-y4-O1V" id="OvT-OZ-a0K"/>
                                                 </connections>
                                             </button>
+                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kWE-wz-4ay">
+                                                <rect key="frame" x="704" y="-1" width="144" height="32"/>
+                                                <buttonCell key="cell" type="push" title="Wipe All Accounts" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XcT-IM-0g5">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" metaFont="system"/>
+                                                    <connections>
+                                                        <action selector="wipeAllAccounts:" target="TI1-y4-O1V" id="eXE-p6-LEK"/>
+                                                    </connections>
+                                                </buttonCell>
+                                            </button>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="AM7-Ng-B3h">
                                                 <rect key="frame" x="883" y="-1" width="118" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Clear Cookies" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3mm-32-CnU">
@@ -1134,8 +1144,10 @@
                                             <integer value="1000"/>
                                             <integer value="1000"/>
                                             <integer value="1000"/>
+                                            <integer value="1000"/>
                                         </visibilityPriorities>
                                         <customSpacing>
+                                            <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
