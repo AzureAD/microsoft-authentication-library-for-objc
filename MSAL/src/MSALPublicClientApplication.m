@@ -1459,7 +1459,7 @@
 - (void)getDeviceInformationWithParameters:(MSALParameters *)parameters
                            completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying device info");
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
     
     __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
     {
@@ -1471,7 +1471,7 @@
         }
         else
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", deviceInformation);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
         }
         
         [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
@@ -1495,6 +1495,7 @@
     
     if (!requestParams)
     {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"GetDeviceInfo: Error when creating requestParams: %@", requestParamsError);
         block(nil, requestParamsError);
         return;
     }
