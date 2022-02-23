@@ -297,6 +297,47 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
+- (IBAction)wipeAllAccounts:(__unused id)sender
+{
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
+    if (!application || error)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultTextView setString:resultText];
+        return;
+    }
+    
+    MSALAccount *currentAccount = [self selectedAccount];
+    
+    if (!currentAccount)
+    {
+        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+        return;
+    }
+    
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webviewParameters];
+    signoutParameters.signoutFromBrowser = YES;
+    signoutParameters.wipeCacheForAllAccounts = YES;
+    signoutParameters.completionBlockQueue = dispatch_get_main_queue();
+    
+    [application signoutWithAccount:currentAccount
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error)
+    {
+        if (!success)
+        {
+            [self updateResultViewError:error];
+        }
+        else
+        {
+            [self.resultTextView setString:@"Signout succeeded"];
+            [self populateUsers];
+        }
+    }];
+}
+
 - (MSALPublicClientApplication *)createPublicClientApplication:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     return [self createPublicClientApplication:error SSOSeeding:NO];

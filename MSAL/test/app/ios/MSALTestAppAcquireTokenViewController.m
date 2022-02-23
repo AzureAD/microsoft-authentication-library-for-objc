@@ -57,6 +57,8 @@
 #define TEST_EMBEDDED_WEBVIEW_MSAL 0
 #define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
 
+static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
+
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
@@ -72,6 +74,7 @@
 @property (nonatomic) IBOutlet UISegmentedControl *webviewTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *customWebviewTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *systemWebviewSSOSegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *claimsSegmentedControl;
 @property (nonatomic) IBOutlet UITextView *resultTextView;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *acquireButtonsViewBottomConstraint;
 @property (nonatomic) IBOutlet UIView *customWebviewContainer;
@@ -219,7 +222,12 @@
     parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptTypeValue];
     
     parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
-
+    
+    if (self.claimsSegmentedControl.selectedSegmentIndex == 1)
+    {
+        parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
+    }
+    
     return parameters;
 }
 
@@ -423,6 +431,11 @@
     {
         NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
         parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
+    if (self.claimsSegmentedControl.selectedSegmentIndex == 1)
+    {
+        parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
     }
     
     parameters.authority = settings.authority;
