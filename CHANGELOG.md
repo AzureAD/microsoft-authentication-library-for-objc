@@ -1,3 +1,7 @@
+## [1.2.0]
+* Multi-tenant PkeyAuth support in MSAL (#1438)
+* Add support to wipe cache for all accounts (#1426)
+
 ## [1.1.26]
 * Added more string utils in common core (#1417)
 * Fixed links in iframe to open in themselves instead of browser for embedded web views (#1424)

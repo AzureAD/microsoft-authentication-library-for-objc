@@ -109,6 +109,7 @@
 #import "MSIDDevicePopManager.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDRequestTelemetryConstants.h"
+#import "MSALWipeCacheForAllAccountsConfig.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -1434,12 +1435,84 @@
         block(NO, localError, nil);
         return;
     }
+
+    if (signoutParameters.wipeCacheForAllAccounts)
+    {
+        BOOL result = YES;
+        NSError *localError;
+        
+        result = [self.tokenCache clearCacheForAllAccountsWithContext:nil error:&localError];
+        
+        if (!result)
+        {
+            block(NO, localError, nil);
+            return;
+        }
+        
+        
+#if !TARGET_OS_IPHONE
+        // Clear additional cache locations
+        NSDictionary<NSString *, NSDictionary *> *additionalPartnerLocations = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations;
+        if (additionalPartnerLocations && additionalPartnerLocations.count > 0)
+        {
+            NSError *removePartnerLocationError = nil;
+            NSMutableArray <NSString *> *locationErrors = nil;
+            MSIDMacACLKeychainAccessor *keychainAccessor = [[MSIDMacACLKeychainAccessor alloc] initWithTrustedApplications:nil accessLabel:@"Microsoft Credentials" error:nil];
+            for (NSString* locationName in additionalPartnerLocations)
+            {
+                localError = nil;
+                NSDictionary *cacheLocation = additionalPartnerLocations[locationName];
+                
+                // Try to read the keychain data in order to trigger the prompt asking for login password, user HAS TO click 'Always Allow' to then be able to delete it.
+                [keychainAccessor getDataWithAttributes:cacheLocation
+                                                context:nil
+                                                  error:&localError];
+                
+                if (localError)
+                {
+                    result = NO;
+                    if (!locationErrors)
+                    {
+                        locationErrors = [[NSMutableArray alloc] init];
+                    }
+                    [locationErrors addObject:[NSString stringWithFormat:@"'%@'", locationName]];
+                    NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when reading cache for the item: %@.", locationName], nil, nil, localError, nil, nil, YES);
+                    removePartnerLocationError = additionalLocationError;
+                    continue;
+                }
+                
+                BOOL removeResult = [keychainAccessor removeItemWithAttributes:cacheLocation
+                                                                       context:nil
+                                                                         error:&localError];
+
+                if (!removeResult)
+                {
+                    result = NO;
+                    if (!locationErrors)
+                    {
+                        locationErrors = [[NSMutableArray alloc] init];
+                    }
+                    [locationErrors addObject:[NSString stringWithFormat:@"'%@'", locationName]];
+                    removePartnerLocationError = localError;
+                }
+            }
+            
+            if (!result && locationErrors)
+            {
+                NSError *additionalLocationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, [NSString stringWithFormat:@"WipeCacheForAllAccounts - error when removing cache for the item(s): %@. User might need to select 'Always Allow' when prompted the login password to access keychain.", [locationErrors componentsJoinedByString:@", "]], nil, nil, removePartnerLocationError, nil, @{@"locationErrors":locationErrors}, YES);
+                block(NO, additionalLocationError, nil);
+                return;
+            }
+        }
+#endif
+    }
     
     NSError *controllerError;
     MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
                                                                                         oauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                             shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
                                                                                    shouldWipeAccount:signoutParameters.wipeAccount
+                                                                       shouldWipeCacheForAllAccounts:signoutParameters.wipeCacheForAllAccounts
                                                                                                error:&controllerError];
     
     if (!controller)
@@ -1459,7 +1532,7 @@
 - (void)getDeviceInformationWithParameters:(MSALParameters *)parameters
                            completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying device info");
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
     
     __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
     {
@@ -1471,7 +1544,7 @@
         }
         else
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", deviceInformation);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
         }
         
         [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
@@ -1495,6 +1568,7 @@
     
     if (!requestParams)
     {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"GetDeviceInfo: Error when creating requestParams: %@", requestParamsError);
         block(nil, requestParamsError);
         return;
     }
