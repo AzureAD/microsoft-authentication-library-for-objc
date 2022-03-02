@@ -1,0 +1,120 @@
+variables:
+  - name: 'releaseVersion'
+    value: null
+  - name: 'commonCoreReleaseVersion'
+    value: null
+  - name: 'frameworkChecksum'
+    value: null
+  - name: 'repositoryName' # Name of the repository
+    value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
+    value: 'master'
+  - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
+    value: 'MSAL ObjC Service Connection'
+  - name: 'docsRepositoryBranch' # Name of the branch where public reference docs will be pushed for github page
+    value: 'gh-pages'
+
+trigger:
+  branches:
+    include:
+    - ameyapat/test-esrp-dotnet-ver
+
+pr: none
+
+resources:
+  repositories:
+  - repository: msalRepository
+    type: github
+    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
+    name: $(repositoryName)
+    ref: $(repositoryBranch)
+
+jobs:
+- job: BuildXcFrameworks
+  displayName: Build MSAL framework and release
+  pool:
+    vmImage: 'macOS-10.15'
+    timeOutInMinutes: 20
+
+  steps:
+  - checkout: msalRepository
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: false
+  - task: Xcode@5
+    displayName: Build archive for iOS Simulator
+    inputs:
+      actions: 'archive'
+      sdk: 'iphonesimulator'
+      xcWorkspacePath: 'MSAL.xcworkspace'
+      scheme: 'MSAL (iOS Framework)'
+      packageApp: false
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS-Sim'
+      exportPath: $(Build.binariesDirectory)/iOS-Sim
+  - task: Xcode@5
+    displayName: Build archive for iOS device
+    inputs:
+      actions: 'archive'
+      sdk: 'iphoneos'
+      xcWorkspacePath: 'MSAL.xcworkspace'
+      scheme: 'MSAL (iOS Framework)'
+      packageApp: false
+      destinationTypeOption: 'devices'
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS'
+      exportPath: $(Build.binariesDirectory)/iOS
+  - task: Xcode@5
+    displayName: Build archive for macOS
+    inputs:
+      actions: 'archive'
+      sdk: 'macosx'
+      xcWorkspacePath: 'MSAL.xcworkspace'
+      scheme: 'MSAL (Mac Framework)'
+      packageApp: false
+      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/macOS'
+      exportPath: $(Build.binariesDirectory)/macOS
+  - task: Bash@3
+    displayName: Build xcframework from archives
+    inputs:
+      workingDirectory: $(Build.binariesDirectory)
+      targetType: 'inline'
+      script: |
+        # Building xcframework
+        cd $(Build.BinariesDirectory)
+        
+        echo "Build Dir = $(pwd)"
+        
+        xcodebuild -create-xcframework \
+        -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+        -output $(Build.binariesDirectory)/MSAL.xcframework
+      failOnStderr: true
+  - task: ArchiveFiles@2
+    displayName: Zip xcframework
+    inputs:
+      rootFolderOrFile: '$(Build.binariesDirectory)/MSAL.xcframework'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
+      replaceExistingArchive: true
+  - task: EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
+      FolderPath: '$(Build.ArtifactStagingDirectory)'
+      Pattern: 'MSAL.zip'
+      signConfigType: 'inlineSignParams'
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
+      UseMinimatch: false
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-233039-Apple",
+            "operationCode": "iOSSdkSign",
+            "parameters": {},
+           "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
