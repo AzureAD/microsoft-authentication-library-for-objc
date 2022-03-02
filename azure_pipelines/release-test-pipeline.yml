@@ -99,10 +99,10 @@ jobs:
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
   - task: UseDotNet@2
-    displayName: 'Install .net core 2.1.0'
+    displayName: 'Install .NET Core sdk for signing'
     inputs:
       packageType: sdk
-      version: '2.1.0'
+      version: 2.1.x
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - task: EsrpCodeSigning@1
     inputs:
