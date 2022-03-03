@@ -1,0 +1,3 @@
+[submodule "MSAL/IdentityCore"]
+	path = MSAL/IdentityCore
+	url = https://github.com/AzureAD/microsoft-authentication-library-common-for-objc
