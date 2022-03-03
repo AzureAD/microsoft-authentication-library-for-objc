@@ -101,6 +101,12 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
       replaceExistingArchive: true
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core sdk for signing'
+    inputs:
+      packageType: sdk
+      version: 2.1.x
+      installationPath: $(Agent.ToolsDirectory)/dotnet
   - task: EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'

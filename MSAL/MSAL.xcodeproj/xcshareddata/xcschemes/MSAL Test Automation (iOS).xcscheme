@@ -46,6 +46,17 @@
                BlueprintName = "InteractiveiOSTests"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MSALPingUITests/testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView">
+               </Test>
+               <Test
+                  Identifier = "MSALPingUITests/testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andSystemWebView">
+               </Test>
+               <Test
+                  Identifier = "MSALPingUITests/testInteractivePingLogin_withNonConvergedApp_withPromptAlways_noLoginHint_andEmbeddedWebView">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
