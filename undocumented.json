@@ -239,6 +239,13 @@
       "warning": "undocumented"
     },
     {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALSignoutParameters.h",
+      "line": 69,
+      "symbol": "MSALSignoutParameters.wipeCacheForAllAccounts",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
       "line": 32,
       "symbol": "MSALViewController",
