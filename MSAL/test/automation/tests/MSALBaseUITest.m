@@ -374,7 +374,16 @@ static MSIDTestConfigurationProvider *s_confProvider;
         buttonTitle = @"Done";
     }
 
-    [self.testApp.buttons[buttonTitle] msidTap];
+    XCUIElementQuery *elementQuery = [self.testApp.buttons matchingIdentifier:buttonTitle];
+    if(elementQuery.count > 1)
+    {
+        // We take the second one and tap it
+        XCUIElement *secondButton = [elementQuery elementBoundByIndex:1];
+        [secondButton msidTap];
+    } else
+    {
+        [self.testApp.buttons[buttonTitle] msidTap];
+    }
 }
 
 - (void)closeResultView
