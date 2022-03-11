@@ -88,7 +88,7 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/MSAL.xcframework
+        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
