@@ -89,9 +89,6 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
-
-        cd $(Build.ArtifactStagingDirectory)
-        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
   - task: Bash@3
     displayName: Zip xcframework for codesigning
@@ -101,7 +98,7 @@ jobs:
       script: |
         # Zipping
         cd $(Build.ArtifactStagingDirectory)
-        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework -y -v
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
