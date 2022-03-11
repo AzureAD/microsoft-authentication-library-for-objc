@@ -89,6 +89,9 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
+
+        cd $(Build.ArtifactStagingDirectory)
+        mv MSAL.xcframework MSAL.zip
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
@@ -100,7 +103,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.ArtifactStagingDirectory)'
-      Pattern: '*.xcframework'
+      Pattern: 'MSAL.zip'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
