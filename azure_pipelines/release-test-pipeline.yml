@@ -93,12 +93,11 @@ jobs:
   - task: Bash@3
     displayName: Zip xcframework for codesigning
     inputs:
-      workingDirectory: $(Build.binariesDirectory)
+      workingDirectory: $(Build.ArtifactStagingDirectory)
       targetType: 'inline'
       script: |
         # Zipping
-        cd $(Build.ArtifactStagingDirectory)
-        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v -m
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
@@ -126,6 +125,14 @@ jobs:
             "toolVersion": "1.0"
           }
         ]
+  - task: Bash@3
+    displayName: Renaming .zip to .xcframework
+    inputs:
+      workingDirectory: $(Build.ArtifactStagingDirectory)
+      targetType: 'inline'
+      script: |
+        # Renaming zip to xcframework
+        mv MSAL.zip MSAL.xcframework
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
