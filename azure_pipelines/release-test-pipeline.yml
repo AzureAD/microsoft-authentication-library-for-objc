@@ -93,6 +93,16 @@ jobs:
         cd $(Build.ArtifactStagingDirectory)
         zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
+  - task: Bash@3
+    displayName: Zip xcframework for codesigning
+    inputs:
+      workingDirectory: $(Build.binariesDirectory)
+      targetType: 'inline'
+      script: |
+        # Zipping
+        cd $(Build.ArtifactStagingDirectory)
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework -y -v
+      failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
     inputs:
