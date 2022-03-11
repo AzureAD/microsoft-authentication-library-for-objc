@@ -91,7 +91,7 @@ jobs:
         -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
 
         cd $(Build.ArtifactStagingDirectory)
-        mv MSAL.xcframework MSAL.zip
+        zip -r -y $(Build.ArtifactStagingDirectory)/MSAL.zip $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
