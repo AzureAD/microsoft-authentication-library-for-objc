@@ -124,3 +124,8 @@ jobs:
             "toolVersion": "1.0"
           }
         ]
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
