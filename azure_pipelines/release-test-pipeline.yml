@@ -90,14 +90,6 @@ jobs:
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.binariesDirectory)/MSAL.xcframework
       failOnStderr: true
-  - task: ArchiveFiles@2
-    displayName: Zip xcframework
-    inputs:
-      rootFolderOrFile: '$(Build.binariesDirectory)/MSAL.xcframework'
-      includeRootFolder: true
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-      replaceExistingArchive: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
     inputs:
@@ -108,7 +100,7 @@ jobs:
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.ArtifactStagingDirectory)'
-      Pattern: 'MSAL.zip'
+      Pattern: 'MSAL.xcframework'
       signConfigType: 'inlineSignParams'
       SessionTimeout: '60'
       MaxConcurrency: '50'
