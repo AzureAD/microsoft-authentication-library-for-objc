@@ -88,7 +88,7 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework/MSAL.xcframework
+        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
   - task: Bash@3
     displayName: Zip xcframework for codesigning
@@ -125,6 +125,16 @@ jobs:
             "toolVersion": "1.0"
           }
         ]
+  - task: Bash@3
+    displayName: Zip and unzip # Task to unzip signed contents and repackage it into MSAL.xcframework
+    inputs:
+      targetType: 'inline'
+      script: |
+        unzip MSAL.zip -d MSAL.xcframework
+        rm MSAL.zip
+        zip -y MSAL.zip MSAL.xcframework
+      workingDirectory: '$(Build.ArtifactStagingDirectory)'
+      failOnStderr: true
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
