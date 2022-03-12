@@ -130,8 +130,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        unzip MSAL.zip -d MSAL.xcframework
-        zip -r MSAL1.zip MSAL.xcframework -y
+        unzip MSAL.zip _CodeSignature\* -d MSAL.xcframework
+        rm MSAL.zip
+        zip -r MSAL.zip MSAL.xcframework -y
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
   - task: PublishBuildArtifacts@1
