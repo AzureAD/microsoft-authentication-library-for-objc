@@ -97,7 +97,7 @@ jobs:
       targetType: 'inline'
       script: |
         # Zipping
-        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v -m
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
       failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
