@@ -131,8 +131,7 @@ jobs:
       targetType: 'inline'
       script: |
         unzip MSAL.zip -d MSAL.xcframework
-        rm MSAL.zip
-        zip -m MSAL.zip MSAL.xcframework
+        zip MSAL1.zip MSAL.xcframework
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
   - task: PublishBuildArtifacts@1
