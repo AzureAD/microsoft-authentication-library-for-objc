@@ -91,16 +91,17 @@ jobs:
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.binariesDirectory)/MSAL.xcframework
+        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
-  - task: ArchiveFiles@2
-    displayName: Zip xcframework
+  - task: Bash@3
+    displayName: Zip xcframework for codesigning
     inputs:
-      rootFolderOrFile: '$(Build.binariesDirectory)/MSAL.xcframework'
-      includeRootFolder: true
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-      replaceExistingArchive: true
+      workingDirectory: $(Build.ArtifactStagingDirectory)
+      targetType: 'inline'
+      script: |
+        # Zipping xcframework. -y : including symlinks (Need to preserve symlinks in xcframework so that codesign validation doesn't fail) -v : verbose logging
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
+      failOnStderr: true
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
     inputs:
@@ -132,9 +133,15 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        unzip MSAL.zip -d MSAL.xcframework
+        # Codesigning service explodes xcframework in output zip. Need to re-package contents into xcframework
+        # Extract code signature and add it into built xcframework
+        unzip MSAL.zip _CodeSignature\* -d MSAL.xcframework
+        # Delete zip file
         rm MSAL.zip
-        zip -r MSAL.zip MSAL.xcframework
+        # Delete md file created by codesigning service
+        rm *.md
+        # Zip xcframework into zip file with symlinks preserved and delete xcframework
+        zip -r MSAL.zip MSAL.xcframework -y -m
       workingDirectory: '$(Build.ArtifactStagingDirectory)'
       failOnStderr: true
   - task: Bash@3
