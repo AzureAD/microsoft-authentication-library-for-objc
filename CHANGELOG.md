@@ -1,4 +1,4 @@
-## TBD
+## [1.2.1]
 * Fixed zipping in release pipeline to preserve symlinks in xcframework
  
 ## [1.2.0]
