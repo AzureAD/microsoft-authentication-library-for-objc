@@ -1448,7 +1448,7 @@
             block(NO, localError, nil);
             return;
         }
-        
+ 
 #if !TARGET_OS_IPHONE
         // Clear additional cache locations
         NSDictionary<NSString *, NSDictionary *> *additionalPartnerLocations = MSALWipeCacheForAllAccountsConfig.additionalPartnerLocations;
