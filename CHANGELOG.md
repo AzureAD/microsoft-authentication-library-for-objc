@@ -1,6 +1,6 @@
 ## [1.2.1]
 * Fixed zipping in release pipeline to preserve symlinks in xcframework
- 
+
 ## [1.2.0]
 * Multi-tenant PkeyAuth support in MSAL (#1438)
 * Add support to wipe cache for all accounts (#1426)
