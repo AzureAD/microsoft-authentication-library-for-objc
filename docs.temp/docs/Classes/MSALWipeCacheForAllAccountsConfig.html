@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MSALSerializedADALCacheProviderDelegate Protocol Reference</title>
+    <title>MSALWipeCacheForAllAccountsConfig Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/objc/Protocol/MSALSerializedADALCacheProviderDelegate" class="dashAnchor"></a>
+    <a name="//apple_ref/objc/Class/MSALWipeCacheForAllAccountsConfig" class="dashAnchor"></a>
 
-    <a title="MSALSerializedADALCacheProviderDelegate Protocol Reference"></a>
+    <a title="MSALWipeCacheForAllAccountsConfig Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html"> Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      MSALSerializedADALCacheProviderDelegate Protocol Reference
+      MSALWipeCacheForAllAccountsConfig Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -344,20 +344,20 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>MSALSerializedADALCacheProviderDelegate</h1>
+            <h1>MSALWipeCacheForAllAccountsConfig</h1>
               <div class="declaration">
                 <div class="language">
                   <p class="aside-title">Objective-C</p>
-                  <pre class="highlight objective_c"><code><span class="k">@protocol</span> <span class="nc">MSALSerializedADALCacheProviderDelegate</span> <span class="o">&lt;</span><span class="n">NSObject</span><span class="o">&gt;</span></code></pre>
+                  <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALWipeCacheForAllAccountsConfig</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
 
                 </div>
                 <div class="language">
                   <p class="aside-title">Swift</p>
-                  <pre class="highlight swift"><code><span class="kd">protocol</span> <span class="kt">MSALSerializedADALCacheProviderDelegate</span> <span class="p">:</span> <span class="kt">NSObjectProtocol</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALWipeCacheForAllAccountsConfig</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
-            <p>Class implementing MSALSerializedADALCacheProviderDelegate is responsible for persistence and management of ADAL cache on macOS</p>
+            <p>MSAL configuration interface responsible for keeping a list of additional cache locations for partner caches to be wiped.</p>
 
           </div>
         </section>
@@ -369,9 +369,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)willAccessCache:"></a>
-                    <a name="//apple_ref/objc/Method/-willAccessCache:" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)willAccessCache:">-willAccessCache:<wbr></a>
+                    <a name="/c:objc(cs)MSALWipeCacheForAllAccountsConfig(cm)additionalPartnerLocations"></a>
+                    <a name="//apple_ref/objc/Method/+additionalPartnerLocations" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALWipeCacheForAllAccountsConfig(cm)additionalPartnerLocations">+additionalPartnerLocations</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -379,118 +379,22 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>This delegate method will be called before performing a cache lookup operation.
-The delegate implementation should ensure that latest cache is loaded from disk to the in-memory representation of ADAL cache (MSALSerializedADALCacheProvider) at this point</p>
+                        <p>List of additional locations for partner caches to be wiped (e.g. Teams, VisualStudio etc). Wipe operation should wipe out all those additional locations.
+The key is &ldquo;display identifier&rdquo; of the location (e.g. Teams cache)
+The value is the precise identifiers like kSecAttrAccount, kSecAttrService etc.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">willAccessCache</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">cache</span><span class="p">;</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">+</span> <span class="p">(</span><span class="n">nonnull</span> <span class="n">NSDictionary</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*</span><span class="p">,</span> <span class="n">NSDictionary</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span>
+    <span class="n">additionalPartnerLocations</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">willAccessCache</span><span class="p">(</span><span class="n">_</span> <span class="nv">cache</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)didAccessCache:"></a>
-                    <a name="//apple_ref/objc/Method/-didAccessCache:" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)didAccessCache:">-didAccessCache:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>This delegate method will be called after performing a cache lookup operation.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">didAccessCache</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">cache</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">didAccessCache</span><span class="p">(</span><span class="n">_</span> <span class="nv">cache</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)willWriteCache:"></a>
-                    <a name="//apple_ref/objc/Method/-willWriteCache:" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)willWriteCache:">-willWriteCache:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>This delegate method will be called before performing a cache write operation.
-The delegate implementation should ensure that latest cache is loaded from disk to the in-memory representation of ADAL cache (MSALSerializedADALCacheProvider) at this point.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">willWriteCache</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">cache</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">willWriteCache</span><span class="p">(</span><span class="n">_</span> <span class="nv">cache</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)didWriteCache:"></a>
-                    <a name="//apple_ref/objc/Method/-didWriteCache:" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(pl)MSALSerializedADALCacheProviderDelegate(im)didWriteCache:">-didWriteCache:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>This delegate method will be called after performing a cache update operation.
-The delegate implementation should serialize and write the latest in-memory representation of ADAL cache to disk at this point.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">didWriteCache</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">cache</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">didWriteCache</span><span class="p">(</span><span class="n">_</span> <span class="nv">cache</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kd">func</span> <span class="nf">additionalPartnerLocations</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]]</span></code></pre>
 
                         </div>
                       </div>

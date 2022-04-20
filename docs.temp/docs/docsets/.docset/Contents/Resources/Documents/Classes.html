@@ -26,15 +26,15 @@
          (90% documented)
       </p>
     
-      <p class="header-col--secondary">
+      <div class="header-col--secondary">
         <form role="search" action="search.json">
           <input type="text" placeholder="Search documentation" data-typeahead>
         </form>
-      </p>
+      </div>
     
         <p class="header-col header-col--secondary">
           <a class="header-link" href="https://github.com/AzureAD/microsoft-authentication-library-for-objc">
-            <img class="header-icon" src="img/gh.png"/>
+            <img class="header-icon" src="img/gh.png" alt="GitHub"/>
             View on GitHub
           </a>
         </p>
@@ -43,7 +43,7 @@
 
     <p class="breadcrumbs">
       <a class="breadcrumb" href="index.html"> Reference</a>
-      <img class="carat" src="img/carat.png" />
+      <img class="carat" src="img/carat.png" alt=""/>
       Classes  Reference
     </p>
 
@@ -154,6 +154,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALWebviewParameters.html">MSALWebviewParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALWipeCacheForAllAccountsConfig.html">MSALWipeCacheForAllAccountsConfig</a>
               </li>
             </ul>
           </li>
@@ -1408,6 +1411,18 @@ Use it to achieve SSO or migration scenarios between ADAL Objective-C for macOS 
 */</span>
 <span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">BOOL</span> <span class="n">wipeAccount</span><span class="p">;</span>
 
+<span class="cm">/*
+  When flag is set, following should happen:
+    - Wipe all known universal cache locations regardless of the clientId, account etc. Should include all tokens and metadata for any cloud.
+    - Wipe all known legacy ADAL cache locations regardless of the clientId, account etc.
+    - MSALWipeCacheForAllAccountsConfig contains a list of additional locations for partner caches to be wiped (e.g. Teams, VisualStudio etc). Wipe operation should wipe out all those additional locations. This file includes "display identifier" of the location (e.g. Teams cache), and precise identifiers like kSecAttrAccount, kSecAttrService etc.
+    - If SSO extension is present, call SSO extension wipe operation. Wipe operation should only be allowed to the privileged applications like Intune CP on macOS or Authenticator on iOS.
+    - Failing any of the steps should return error back to the app including exact locations and apps that failed to be cleared.
+  NO by default.
+  This is a dangerous operation.
+*/</span>
+<span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">BOOL</span> <span class="n">wipeCacheForAllAccounts</span><span class="p">;</span>
+
 <span class="cm">/**
  Initialize MSALSignoutParameters with web parameters.
  
@@ -1671,6 +1686,39 @@ MSALTenantProfile represents information about the account record in a particula
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALWipeCacheForAllAccountsConfig"></a>
+                    <a name="//apple_ref/objc/Class/MSALWipeCacheForAllAccountsConfig" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALWipeCacheForAllAccountsConfig">MSALWipeCacheForAllAccountsConfig</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>MSAL configuration interface responsible for keeping a list of additional cache locations for partner caches to be wiped.</p>
+
+                        <a href="Classes/MSALWipeCacheForAllAccountsConfig.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALWipeCacheForAllAccountsConfig</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALWipeCacheForAllAccountsConfig</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -1679,9 +1727,8 @@ MSALTenantProfile represents information about the account record in a particula
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2021 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external">Microsoft Corporation</a>. All rights reserved. (Last updated: 2021-07-27)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.7</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2022 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2022-04-20)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
-</div>
 </html>
