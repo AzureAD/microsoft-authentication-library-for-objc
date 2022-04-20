@@ -80,7 +80,8 @@ static NSDictionary *s_currentProfile = nil;
     
     for (NSString *host in trustedHosts)
     {
-        __auto_type tenants = @[@"common", @"organizations", @"consumers"];
+        __auto_type tenants = @[@"common", @"organizations", @"consumers", @"f645ad92-e38d-4d1a-b510-d1b09a74a8ca"];
+
         
         for (NSString *tenant in tenants)
         {
@@ -91,7 +92,8 @@ static NSDictionary *s_currentProfile = nil;
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default"];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default", @"https://microsoftgraph.chinacloudapi.cn/.default"];
+
     
     __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
     __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
