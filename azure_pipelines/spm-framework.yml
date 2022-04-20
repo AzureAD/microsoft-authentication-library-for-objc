@@ -105,14 +105,6 @@ jobs:
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk for signing'
     inputs:
-      rootFolderOrFile: '$(Build.binariesDirectory)/MSAL.xcframework'
-      includeRootFolder: true
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/MSAL.zip'
-      replaceExistingArchive: true
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core sdk for signing'
-    inputs:
       packageType: sdk
       version: 2.1.x
       installationPath: $(Agent.ToolsDirectory)/dotnet
