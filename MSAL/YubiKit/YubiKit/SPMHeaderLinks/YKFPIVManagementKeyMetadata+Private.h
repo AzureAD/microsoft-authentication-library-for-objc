@@ -1,0 +1,1 @@
+../Connections/Shared/Sessions/PIV/YKFPIVManagementKeyMetadata+Private.h

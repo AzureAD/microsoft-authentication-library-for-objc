@@ -1,0 +1,1 @@
+../Connections/NFCConnection/YKFNFCTagDescription.h

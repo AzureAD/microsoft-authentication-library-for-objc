@@ -1,0 +1,1 @@
+../Connections/SmartCardInterface/YKFSmartCardInterface.h

@@ -1,0 +1,1 @@
+../Connections/AccessoryConnection/YKFAccessoryConnection.h
