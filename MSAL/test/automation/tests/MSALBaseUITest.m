@@ -56,12 +56,14 @@ static MSIDTestConfigurationProvider *s_confProvider;
     
     self.testApp = [XCUIApplication new];
     [self.testApp launch];
+    
+    [self cleanPipelines];
 
     [self clearKeychain];
-    [self closeResultView];
+    [self closeResultPipeline];
     
     [self clearCookies];
-    [self closeResultView];
+    [self closeResultPipeline];
 }
 
 - (void)tearDown
@@ -296,9 +298,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     // Enter password
     XCUIElement *passwordTextField = app.secureTextFields.firstMatch;
     [self waitForElement:passwordTextField];
-    sleep(0.1f);
     [passwordTextField msidTap];
-    sleep(0.1f);
     [passwordTextField typeText:password];
 }
 
@@ -389,19 +389,56 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }
 }
 
-- (void)closeResultView
+- (void)cleanPipelines
 {
-    // TODO:
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_result_pipeline.txt"];
+    static NSArray *pipelinesPaths = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        pipelinesPaths = @[
+            [MSIDAutomationActionConstants requestPipelinePath],
+            [MSIDAutomationActionConstants resultPipelinePath],
+            [MSIDAutomationActionConstants logsPipelinePath]
+        ];
+
+    });
     
-    if (![NSFileManager.defaultManager fileExistsAtPath:fileUrl.path]) return;
+    for (NSString *path in pipelinesPaths)
+    {
+        if (![NSFileManager.defaultManager fileExistsAtPath:path]) continue;;
+        
+        // Delete file.
+        NSError *error;
+        BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:path error:&error];
+        XCTAssertNil(error);
+        XCTAssertTrue(fileRemoved);
+    }
+}
+
+- (void)closeResultPipeline
+{
+    int count = 10;
+    double interval = 1;
+    __auto_type resultPipelineExpectation = [[XCTestExpectation alloc] initWithDescription:@"Wait for result pipeline."];
+    
+    // Wait till file appears.
+    int i = 0;
+    while (i < count)
+    {
+        if ([NSFileManager.defaultManager fileExistsAtPath:[MSIDAutomationActionConstants resultPipelinePath]])
+        {
+            [resultPipelineExpectation fulfill];
+            break;
+        }
+        
+        [NSThread sleepForTimeInterval:0.5f];
+        i++;
+    }
+    
+    [self waitForExpectations:@[resultPipelineExpectation] timeout:count * interval];
     
     // Delete file.
     NSError *error;
-    BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:fileUrl.path error:&error];
+    BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:[MSIDAutomationActionConstants resultPipelinePath] error:&error];
     XCTAssertNil(error);
     XCTAssertTrue(fileRemoved);
 }
@@ -456,14 +493,9 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)performAction:(NSString *)action
            withConfig:(NSDictionary *)config
 {
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_request_pipeline.txt"];
-
     NSString *jsonString = [config toJsonString];
     
-    [jsonString writeToFile:fileUrl.path atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [jsonString writeToFile:[MSIDAutomationActionConstants requestPipelinePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
     
     sleep(1);
     
@@ -496,19 +528,14 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (NSDictionary *)automationResultDictionary
 {
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_result_pipeline.txt"];
-    
-    int timeout = 1000;
+    int timeout = 10;
     __auto_type resultPipelineExpectation = [[XCTestExpectation alloc] initWithDescription:@"Wait for result pipeline."];
     
     // Wait till file appears.
     int i = 0;
     while (i < timeout)
     {
-        if ([NSFileManager.defaultManager fileExistsAtPath:fileUrl.path])
+        if ([NSFileManager.defaultManager fileExistsAtPath:[MSIDAutomationActionConstants resultPipelinePath]])
         {
             [resultPipelineExpectation fulfill];
             break;
@@ -521,10 +548,11 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [self waitForExpectations:@[resultPipelineExpectation] timeout:timeout];
 
     // Read json from file.
-    NSString *jsonString = [NSString stringWithContentsOfFile:fileUrl.path encoding:NSUTF8StringEncoding error:nil];
+    NSString *jsonString = [NSString stringWithContentsOfFile:[MSIDAutomationActionConstants resultPipelinePath] encoding:NSUTF8StringEncoding error:nil];
 
     NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    
     return result;
 }
 

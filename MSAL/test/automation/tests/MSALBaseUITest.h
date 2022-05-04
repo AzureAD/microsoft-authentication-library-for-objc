@@ -57,7 +57,8 @@
 - (void)assertAuthorityReturned:(NSString *)expectedAuthority;
 - (NSDictionary *)resultIDTokenClaims;
 
-- (void)closeResultView;
+- (void)cleanPipelines;
+- (void)closeResultPipeline;
 - (void)invalidateRefreshToken:(NSDictionary *)config;
 - (void)expireAccessToken:(NSDictionary *)config;
 - (void)acquireToken:(NSDictionary *)config;

@@ -57,7 +57,7 @@
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
-    [self closeResultView];
+    [self closeResultPipeline];
     return homeAccountId;
 }
 
@@ -67,12 +67,12 @@
     // Acquire token silently
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // Now expire access token
     [self expireAccessToken:config];
     [self assertAccessTokenExpired];
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // Now do access token refresh
     [self acquireTokenSilent:config];
@@ -80,7 +80,7 @@
 
     [self runSharedResultAssertionWithTestRequest:request];
 
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // Now lookup access token without authority
     request.acquireTokenAuthority = nil;
@@ -88,7 +88,7 @@
 
     [self acquireTokenSilent:config];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
+    [self closeResultPipeline];
 }
 
 - (void)runSharedAuthUIAppearsStepWithTestRequest:(MSIDAutomationTestRequest *)request
@@ -102,7 +102,7 @@
     [self closeAuthUIUsingWebViewType:request.webViewType passedInWebView:request.usePassedWebView];
     
     [self assertErrorCode:MSALErrorUserCanceled];
-    [self closeResultView];
+    [self closeResultPipeline];
 }
 
 - (NSString *)runSharedResultAssertionWithTestRequest:(MSIDAutomationTestRequest *)request

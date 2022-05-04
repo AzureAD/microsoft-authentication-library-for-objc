@@ -73,6 +73,7 @@
     }
 
     [self shibEnterUsername];
+    [self hideKeyboard];
     [self shibEnterPassword];
 
     [self acceptMSSTSConsentIfNecessary:@"Accept"
@@ -84,7 +85,7 @@
     }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
+    [self closeResultPipeline];
     return homeAccountId;
 }
 
@@ -165,5 +166,9 @@
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
 
-
+- (void)hideKeyboard
+{
+    XCUIElement *doneButton = self.testApp.toolbars.buttons[@"Done"];
+    [doneButton msidTap];
+}
 @end
