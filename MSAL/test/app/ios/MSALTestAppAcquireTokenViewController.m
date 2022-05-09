@@ -59,6 +59,9 @@
 
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
+static NSString *const kGlobalSignoutDarwinNotificationKey = @"FLWSignoutOccured";
+static NSString *const kGlobalSignoutOccuredNotificationKey = @"GlobalSignoutOccured";
+
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
@@ -131,6 +134,15 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
                                              selector:@selector(onKeyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receivedGlobalSignoutDarwinNotification:)
+                                                 name:kGlobalSignoutOccuredNotificationKey
+                                               object:nil];
+    
+    //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
+    CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
+    CFNotificationCenterAddObserver(center, nil, globalSignoutCallback, (CFStringRef)kGlobalSignoutDarwinNotificationKey, nil, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -761,6 +773,20 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
        [self.customWebview loadHTMLString:@"<html><head></head></html>" baseURL:nil];
        self.customWebviewContainer.hidden = YES;
     }
+}
+
+- (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
+{
+    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating a global sigout has occurred.";
+}
+
+void globalSignoutCallback(__unused CFNotificationCenterRef center,
+                           __unused void * observer,
+                           __unused CFStringRef name,
+                           __unused void const * object,
+                           __unused CFDictionaryRef userInfo)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kGlobalSignoutOccuredNotificationKey object:nil];
 }
 
 @end
