@@ -78,7 +78,7 @@ jobs:
         pprint(random_member)
         lucky_member = members[random_member]
         pprint(lucky_member.login)
-        pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=log"
+        pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
         git_commit = '$(Build.SourceVersionMessage) [$(Build.SourceVersion)] '
         issue_title = "Automation tests failure"
         issue_body = ''' 
@@ -86,4 +86,4 @@ jobs:
               Pipeline URL : {2} 
         '''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         pprint(issue_body)
-        #github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
+        github.create_issue(github_org, repo, issue_title, issue_body, assignee=lucky_member.login, labels=['automation failure'])
