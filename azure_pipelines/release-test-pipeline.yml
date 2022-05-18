@@ -68,6 +68,7 @@ jobs:
 
         github = github3.GitHub()
         github.session.auth = HTTPHardcodedHeaderAuth()
+        pprint(auth_header)
         github_org, repo = "$(Build.Repository.Name)".split("/")
         teams = github.organization('AzureAd').teams()
         for team in teams:
