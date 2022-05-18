@@ -81,9 +81,8 @@ jobs:
         pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
         git_commit = '$(Build.SourceVersionMessage) [$(Build.SourceVersion)] '
         issue_title = "Automation tests failure"
-        issue_body = ''' 
-              Automation failed for {0} ran against {1} branch 
-              Pipeline URL : {2} 
+        issue_body = '''Automation failed for [$(repositoryName)]({0}) ran against {1} branch \n
+              Pipeline URL : [{2}]({2}) 
         '''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         pprint(issue_body)
         github.create_issue(github_org, repo, issue_title, issue_body, assignee=lucky_member.login, labels=['automation failure'])
