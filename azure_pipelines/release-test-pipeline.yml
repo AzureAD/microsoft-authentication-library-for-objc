@@ -31,7 +31,7 @@ resources:
 
 jobs:
 - job: BuildXcFrameworks
-  displayName: Build MSAL framework and release
+  displayName: Git Issue creation test
   pool:
     vmImage: 'macOS-10.15'
     timeOutInMinutes: 20
@@ -42,102 +42,32 @@ jobs:
     submodules: true
     fetchDepth: 1
     persistCredentials: false
-  - task: Xcode@5
-    displayName: Build archive for iOS Simulator
+  - task: UsePythonVersion@0
+    displayName: Use Python 3.x
+  - bash: python3 -m pip install github3.py==2.0.0
+    displayName: Install the github3.py REST API client for Python
+  - task: PythonScript@0
+    displayName: Create Issue if Pipeline fails
     inputs:
-      actions: 'archive'
-      sdk: 'iphonesimulator'
-      xcWorkspacePath: 'MSAL.xcworkspace'
-      scheme: 'MSAL (iOS Framework)'
-      packageApp: false
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS-Sim'
-      exportPath: $(Build.binariesDirectory)/iOS-Sim
-  - task: Xcode@5
-    displayName: Build archive for iOS device
-    inputs:
-      actions: 'archive'
-      sdk: 'iphoneos'
-      xcWorkspacePath: 'MSAL.xcworkspace'
-      scheme: 'MSAL (iOS Framework)'
-      packageApp: false
-      destinationTypeOption: 'devices'
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS'
-      exportPath: $(Build.binariesDirectory)/iOS
-  - task: Xcode@5
-    displayName: Build archive for macOS
-    inputs:
-      actions: 'archive'
-      sdk: 'macosx'
-      xcWorkspacePath: 'MSAL.xcworkspace'
-      scheme: 'MSAL (Mac Framework)'
-      packageApp: false
-      args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/macOS'
-      exportPath: $(Build.binariesDirectory)/macOS
-  - task: Bash@3
-    displayName: Build xcframework from archives
-    inputs:
-      workingDirectory: $(Build.binariesDirectory)
-      targetType: 'inline'
+      scriptSource: inline
       script: |
-        # Building xcframework
-        cd $(Build.BinariesDirectory)
-        
-        echo "Build Dir = $(pwd)"
-        
-        xcodebuild -create-xcframework \
-        -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
-        -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
-      failOnStderr: true
-  - task: Bash@3
-    displayName: Zip xcframework for codesigning
-    inputs:
-      workingDirectory: $(Build.ArtifactStagingDirectory)
-      targetType: 'inline'
-      script: |
-        # Zipping
-        zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
-      failOnStderr: true
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core sdk for signing'
-    inputs:
-      packageType: sdk
-      version: 2.1.x
-      installationPath: $(Agent.ToolsDirectory)/dotnet
-  - task: EsrpCodeSigning@1
-    inputs:
-      ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
-      FolderPath: '$(Build.ArtifactStagingDirectory)'
-      Pattern: 'MSAL.zip'
-      signConfigType: 'inlineSignParams'
-      SessionTimeout: '60'
-      MaxConcurrency: '50'
-      MaxRetryAttempts: '5'
-      UseMinimatch: false
-      inlineOperation: |
-        [
-          {
-            "keyCode": "CP-233039-Apple",
-            "operationCode": "iOSSdkSign",
-            "parameters": {},
-           "toolName": "sign",
-            "toolVersion": "1.0"
-          }
-        ]
-  - task: Bash@3
-    displayName: Zip and unzip # Task to unzip signed contents and repackage it into MSAL.xcframework
-    inputs:
-      targetType: 'inline'
-      script: |
-        unzip MSAL.zip _CodeSignature\* -d MSAL.xcframework
-        rm MSAL.zip
-        rm *.md
-        zip -r MSAL.zip MSAL.xcframework -y -m
-      workingDirectory: '$(Build.ArtifactStagingDirectory)'
-      failOnStderr: true
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'drop'
-      publishLocation: 'Container'
+        import github3
+        import requests
+        import textwrap
+        from pprint import pprint
+        from subprocess import run, PIPE
+        auth_header = ""
+        try:
+            auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
+        except Exception as e:
+          pprint(e)
+        class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
+            def __call__(self, r):
+                r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
+                return r
+
+        github = github3.GitHub()
+        github.session.auth = HTTPHardcodedHeaderAuth()
+        pprint(github.me().email)
+        github_org, repo = "$(Build.Repository.Name)".split("/")
+        github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=github.me().email, labels=['automation failure'])
