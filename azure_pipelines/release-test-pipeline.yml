@@ -56,6 +56,8 @@ jobs:
         import textwrap
         from pprint import pprint
         from subprocess import run, PIPE
+        import random
+
         auth_header = ""
         try:
             auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
@@ -68,9 +70,8 @@ jobs:
 
         github = github3.GitHub()
         github.session.auth = HTTPHardcodedHeaderAuth()
-        pprint(auth_header)
         github_org, repo = "$(Build.Repository.Name)".split("/")
-        teams = github.organization('AzureAd').teams()
-        for team in teams:
-          pprint(team.name)
-        #github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=appleidentityteam, labels=['automation failure'])
+        members = github.organization('AzureAd').team(3752064).members(role="all")
+        random_member = random.randint(0, len(members))
+        lucky_member = member[random_member]
+        github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
