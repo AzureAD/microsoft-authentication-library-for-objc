@@ -66,6 +66,6 @@ jobs:
 
         github = github3.GitHub()
         github.session.auth = HTTPHardcodedHeaderAuth()
-        
+        pprint(github.me().email)
         github_org, repo = "$(Build.Repository.Name)".split("/")
         github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=github.me().email, labels=['automation failure'])
