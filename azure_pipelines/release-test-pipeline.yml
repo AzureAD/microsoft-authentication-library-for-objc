@@ -48,6 +48,7 @@ jobs:
     displayName: Install the github3.py REST API client for Python
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
+    condition: failed()
     inputs:
       scriptSource: inline
       script: |
@@ -77,4 +78,5 @@ jobs:
         pprint(random_member)
         lucky_member = members[random_member]
         pprint(lucky_member.login)
+        pprint($(Build.BuildUri))
         #github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
