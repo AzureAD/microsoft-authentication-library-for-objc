@@ -21,8 +21,8 @@ resources:
     ref: $(repositoryBranch)
 
 jobs:
-- job: BuildXcFrameworks
-  displayName: Build MSAL framework and release
+- job: TryIssueCreation
+  displayName: Github Issue Creation Test
   pool:
     vmImage: 'macOS-latest'
     timeOutInMinutes: 20
@@ -34,10 +34,6 @@ jobs:
     fetchDepth: 1
     persistCredentials: false
   
-  - task: Bash@3
-    displayName: Build MSAL docs via Jazzy
-    inputs:
-      filePath: 'build_docs.sh'
   - task: InstallSSHKey@0
     displayName: Install SSH Key for MSAL Github Repo
     inputs:
@@ -51,9 +47,6 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        if [ ! -d "docs.temp" ]; then
-            echo "Docs were not generated in previous step!"
-        else
             ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
             git remote set-url origin git@github.com:$(repositoryName).git
 
@@ -62,31 +55,20 @@ jobs:
             git config --global user.email "${authorEmail}"
             git config --global user.name "${authorName}"
 
-            author=$(git log -1 --pretty=format:'%an <%ae>')
-            # Create a temp branch to cherry pick doc changes
-            git checkout -b 'update-docs-for-release-$(releaseVersion)'
-            git add docs.temp/docs/*
-            git commit -m 'adding docs for release' --author="${author}" --status
-            
-            # Cleanup
-            rm -rf docs.temp
-            git fetch origin $(docsRepositoryBranch)
-            git checkout FETCH_HEAD
-            git checkout $(docsRepositoryBranch)
-            git clean -fd
-            
-            # Get previously commited changes for docs
-            git cherry-pick --strategy-option theirs "update-docs-for-release-$(releaseVersion)"
-            
-            # Copy files in docs.temp folder to root
-            \cp -r docs.temp/docs/* .
-        
-            # Push changes to docsRepositoryBranch branch
-            git add -A
-            git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
-            git push origin $(docsRepositoryBranch)
-        fi
+            author=$(git log -1 --pretty=format:'%an <%ae>') 
+            curl -X "POST" "https://api.github.com/repos/AzureAD/microsoft-authentication-library-for-objc/issues?state=all" \
+              -H "Cookie: logged_in=no" \
+              #-H "Authorization: token THEd13GITHUBfb87TOKENa4FROM5eSETTINGS" \
+              -H "Content-Type: text/plain; charset=utf-8" \
+              -d $'{
+                      "title": "Creating a test issue",
+                      "body": "TBD",
+                      "assignees": [
+                        "${author}"
+                      ],
+                      "labels": [
+                        "automation failure"
+                      ]
+                  }'
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: false
-      noProfile: false
-      noRc: false
