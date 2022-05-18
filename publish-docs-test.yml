@@ -43,35 +43,6 @@ jobs:
       addEntryToConfig: true
       configHostAlias: 'ADO Release Pipeline Public Key'
       configHostname: 'github.com'
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: |
-            ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
-            git remote set-url origin git@github.com:$(repositoryName).git
-
-            authorName=$(git log -1 --pretty=format:'%an')
-            authorEmail=$(git log -1 --pretty=format:'%ae')
-            git config --global user.email "${authorEmail}"
-            git config --global user.name "${authorName}"
-
-            author=$(git log -1 --pretty=format:'%an <%ae>') 
-            curl -X "POST" "https://api.github.com/repos/AzureAD/microsoft-authentication-library-for-objc/issues" \
-              -H "Accept: application/vnd.github.v3+json" \
-              #-H "Authorization: token THEd13GITHUBfb87TOKENa4FROM5eSETTINGS" \
-              -H "Content-Type: text/plain; charset=utf-8" \
-              -d $'{
-                      "title": "Creating a test issue",
-                      "body": "TBD",
-                      "assignees": [
-                        "${author}"
-                      ],
-                      "labels": [
-                        "automation failure"
-                      ]
-                  }'
-      workingDirectory: '$(Build.SourcesDirectory)'
-      failOnStderr: false
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
     inputs:
