@@ -78,5 +78,11 @@ jobs:
         pprint(random_member)
         lucky_member = members[random_member]
         pprint(lucky_member.login)
-        pprint($(Build.Repository.Uri))
+        pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=log"
+        git_commit = '$(Build.SourceVersionMessage) [$(Build.SourceVersion)]'
+        issue_body = ''' 
+              Automation failed for {0} ran against {1} branch
+              Pipeline URL : {2}
+        '''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
+        pprint(issue_body)
         #github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
