@@ -41,7 +41,7 @@ jobs:
     clean: true
     submodules: true
     fetchDepth: 1
-    persistCredentials: false
+    persistCredentials: true
   - task: UsePythonVersion@0
     displayName: Use Python 3.x
   - bash: python3 -m pip install github3.py==2.0.0
