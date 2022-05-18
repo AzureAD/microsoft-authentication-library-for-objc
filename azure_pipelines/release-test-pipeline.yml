@@ -73,5 +73,5 @@ jobs:
         github_org, repo = "$(Build.Repository.Name)".split("/")
         members = list(github.organization('AzureAd').team(3752064).members(role="all"))
         random_member = random.randint(0, len(members))
-        lucky_member = member[random_member]
+        lucky_member = members[random_member]
         github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
