@@ -74,7 +74,7 @@ jobs:
         apple_id_team = github.organization('AzureAd').team(3752064)
         members = list(apple_id_team.members(role="all"))
         random_member = random.randint(0, apple_id_team.members_count)
-        pprint(random_number)
+        pprint(random_member)
         lucky_member = members[random_member]
         pprint(lucky_member.login)
         #github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=lucky_member.login, labels=['automation failure'])
