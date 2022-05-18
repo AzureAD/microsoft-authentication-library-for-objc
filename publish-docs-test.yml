@@ -56,8 +56,8 @@ jobs:
             git config --global user.name "${authorName}"
 
             author=$(git log -1 --pretty=format:'%an <%ae>') 
-            curl -X "POST" "https://api.github.com/repos/AzureAD/microsoft-authentication-library-for-objc/issues?state=all" \
-              -H "Cookie: logged_in=no" \
+            curl -X "POST" "https://api.github.com/repos/AzureAD/microsoft-authentication-library-for-objc/issues" \
+              -H "Accept: application/vnd.github.v3+json" \
               #-H "Authorization: token THEd13GITHUBfb87TOKENa4FROM5eSETTINGS" \
               -H "Content-Type: text/plain; charset=utf-8" \
               -d $'{
@@ -72,3 +72,25 @@ jobs:
                   }'
       workingDirectory: '$(Build.SourcesDirectory)'
       failOnStderr: false
+  - task: PythonScript@0
+    displayName: Create Issue if Pipeline fails
+    inputs:
+      scriptSource: inline
+      script: |
+        import github3
+        import requests
+        import textwrap
+        from pprint import pprint
+        from subprocess import run, PIPE
+
+        auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
+        class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
+            def __call__(self, r):
+                r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
+                return r
+
+        github = github3.GitHub()
+        github.session.auth = HTTPHardcodedHeaderAuth()
+        
+        github_org, repo = "$(Build.Repository.Name)".split("/")
+        github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=github.me().email, labels=['automation failure'])
