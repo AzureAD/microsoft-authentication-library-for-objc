@@ -48,7 +48,7 @@ jobs:
     displayName: Install the github3.py REST API client for Python
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
-    condition: failed()
+#    condition: failed()
     inputs:
       scriptSource: inline
       script: |
