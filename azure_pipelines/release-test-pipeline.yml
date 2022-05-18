@@ -69,5 +69,6 @@ jobs:
         github = github3.GitHub()
         github.session.auth = HTTPHardcodedHeaderAuth()
         github_org, repo = "$(Build.Repository.Name)".split("/")
-        pprint(github.organization('AzureAd').name)
+        team = github.organization('AzureAd').Team(3752064).as_json()
+        pprint(team)
         github.create_issue(github_org, repo, "Title for the Issue", "Body of the issue", assignee=appleidentityteam, labels=['automation failure'])
