@@ -43,6 +43,10 @@ jobs:
       addEntryToConfig: true
       configHostAlias: 'ADO Release Pipeline Public Key'
       configHostname: 'github.com'
+  - task: UsePythonVersion@0
+    displayName: Use Python 3.x
+  - bash: python3 -m pip install github3.py==2.0.0
+    displayName: Install the github3.py REST API client for Python
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
     inputs:
