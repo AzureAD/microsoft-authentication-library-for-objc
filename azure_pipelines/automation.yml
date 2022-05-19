@@ -132,7 +132,7 @@ jobs:
         
         # Prepare content for github issue
         pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
-        git_commit = '$(Build.SourceVersionMessage) [$(Build.SourceVersion)] '
+        git_commit = "$(Build.SourceVersionMessage) [$(Build.SourceVersion)] "
         issue_title = "Automation tests failure"
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against {1} branch \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
