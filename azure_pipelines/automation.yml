@@ -129,19 +129,10 @@ jobs:
         github.session.auth = HTTPHardcodedHeaderAuth()
         github_org, repo = "$(Build.Repository.Name)".split("/")
         
-        # Get the members of AppleIdentityTeam in AzureAD organization 
-        apple_id_team = github.organization('AzureAd').team(3752064)
-        members = list(apple_id_team.members(role="all"))
-        
-        # Pick random member from team to assign issue to
-        random_member = random.randint(0, apple_id_team.members_count)
-        lucky_member = members[random_member]
-        
         # Prepare content for github issue
         pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
         git_commit = '$(Build.SourceVersionMessage) [$(Build.SourceVersion)] '
         issue_title = "Automation tests failure"
-        issue_body = '''Automation failed for [$(repositoryName)]({0}) ran against {1} branch \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
-        pprint(issue_body)
-        github.create_issue(github_org, repo, issue_title, issue_body, assignee=lucky_member.login, labels=['automation failure'])
+        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against {1} branch \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
+        github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
   
