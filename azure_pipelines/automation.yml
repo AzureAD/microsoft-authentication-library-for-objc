@@ -27,14 +27,6 @@ pr: none
 pool:
   vmImage: 'macOS-11'
 
-resources:
-  repositories:
-  - repository: msalRepository
-    type: github
-    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-    name: $(repositoryName)
-    ref: $(Build.SourceBranch)
-
 jobs:
 - job: ui_automation
   displayName: Run MSAL UI automation
@@ -45,7 +37,7 @@ jobs:
   
   steps:
 
-  - checkout: msalRepository
+  - checkout: self
     clean: true
     submodules: true
     fetchDepth: 1
