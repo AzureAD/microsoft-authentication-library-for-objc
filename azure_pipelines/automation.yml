@@ -99,8 +99,10 @@ jobs:
       artifact: 'TestOutputs'
       publishLocation: 'pipeline'
   - task: UsePythonVersion@0
+    condition: failed()
     displayName: Use Python 3.x
   - bash: python3 -m pip install github3.py==2.0.0
+    condition: failed()
     displayName: Install the github3.py REST API client for Python
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
@@ -113,7 +115,6 @@ jobs:
         import textwrap
         from pprint import pprint
         from subprocess import run, PIPE
-        import random
 
         auth_header = ""
         try:
