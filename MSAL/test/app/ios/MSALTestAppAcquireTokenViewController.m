@@ -60,7 +60,7 @@
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
 static NSString *const kGlobalSignoutDarwinNotificationKey = @"FLWSignoutOccured";
-static NSString *const kGlobalSignoutOccuredNotificationKey = @"GlobalSignoutOccured";
+static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -137,7 +137,7 @@ static NSString *const kGlobalSignoutOccuredNotificationKey = @"GlobalSignoutOcc
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(receivedGlobalSignoutDarwinNotification:)
-                                                 name:kGlobalSignoutOccuredNotificationKey
+                                                 name:kDarwinNotificationReceivedKey
                                                object:nil];
     
     //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
@@ -786,7 +786,7 @@ void globalSignoutCallback(__unused CFNotificationCenterRef center,
                            __unused void const * object,
                            __unused CFDictionaryRef userInfo)
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kGlobalSignoutOccuredNotificationKey object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
 }
 
 @end
