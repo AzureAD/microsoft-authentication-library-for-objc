@@ -777,7 +777,7 @@ static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationRece
 
 - (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
 {
-    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating a global sigout has occurred.";
+    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating a global signout has occurred.";
 }
 
 void globalSignoutCallback(__unused CFNotificationCenterRef center,
