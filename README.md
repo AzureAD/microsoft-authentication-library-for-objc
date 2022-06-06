@@ -1,12 +1,10 @@
 Microsoft Authentication Library for iOS and macOS
 =====================================
 
-| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [<u>B2C Sample Code</u>](https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/index.html) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/xuBV0CzEih)
+| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [<u>B2C Sample Code</u>](https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/xuBV0CzEih)
 | --- | --- | --- | --- | --- | --- | --- | 
 
 The MSAL library for iOS and macOS gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
-
-[![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
 ## Quick sample
 
@@ -102,18 +100,18 @@ github "AzureAD/microsoft-authentication-library-for-objc" "master"
 You can add `MSAL` as a [swift package dependency](https://developer.apple.com/documentation/swift_packages/distributing_binary_frameworks_as_swift_packages).
 For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Swift package is available.
 
-1. For your project in Xcode, click File -> Swift Packages -> Add Package Dependency...
+1. For your project in Xcode, click File → Swift Packages → Add Package Dependency...
 2. Choose project to add dependency in
 3. Enter : https://github.com/AzureAD/microsoft-authentication-library-for-objc as the package repository URL
 4. Choose package options with :
-    1. Rules -> Branch : master (For latest MSAL release)
-    2. Rules -> Version -> Exact : [release version >= 1.1.14] (For a particular release version)
+    1. Rules → Branch : master (For latest MSAL release)
+    2. Rules → Version → Exact : [release version >= 1.1.14] (For a particular release version)
 
 For any issues, please check if there is an outstanding SPM/Xcode bug.
 Workarounds for some bugs we encountered :
-* If you have a plugin in your project you might encouter [CFBundleIdentifier collision. Each bundle must have a unique bundle identifier](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767311138) error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
-* While archiving, error : "IPA processing failed" UserInfo={NSLocalizedDescription=IPA processing failed}. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
-* For a macOS app, "Command CodeSign failed with a nonzero exit code" error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-770056675)
+* If you have a plugin in your project you might encounter [CFBundleIdentifier collision. Each bundle must have a unique bundle identifier](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767311138) error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
+* While archiving, error : “IPA processing failed” UserInfo={NSLocalizedDescription=IPA processing failed}. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771)
+* For a macOS app, “Command CodeSign failed with a nonzero exit code” error. [Workaround](https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-770056675)
 
 ### Manually
 
@@ -128,7 +126,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
  `msauth.$(PRODUCT_BUNDLE_IDENTIFIER)://auth`
 
-3. Add a new keychain group to your project Capabilities. Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
+3. Add a new keychain group to your project Capabilities. Keychain group should be `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
 
 ![](Images/keychain_example.png)
 
@@ -151,7 +149,7 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
 ```
 2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
-Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
+Note that “msauthv3” scheme is needed when compiling your app with Xcode 11 and later. 
 
 ```xml
 <key>LSApplicationQueriesSchemes</key>
@@ -404,9 +402,9 @@ MSAL also provides a public API to query multiple accounts, granted that they ex
 
 2) Create config, then use it to initialize an application object 
 
-3) Also initialize MSALAccountEnumerationParameters object with the account identifier. Each MSALAccount object has a parameter called "identifier", which represents the unique account identifier associated with the given MSALAccount object. We recommend using it as the primary search criterion. 
+3) Also initialize MSALAccountEnumerationParameters object with the account identifier. Each MSALAccount object has a parameter called “identifier”, which represents the unique account identifier associated with the given MSALAccount object. We recommend using it as the primary search criterion. 
 
-4) Then invoke the API "accountsFromDeviceForParameters" from the application object using the enumeration parameter. If you have multiple accounts in MSAL cache, it will return an array containg MSALAccounts that have the account identifier you specified in the previous step. 
+4) Then invoke the API "accountsFromDeviceForParameters" from the application object using the enumeration parameter. If you have multiple accounts in MSAL cache, it will return an array containing MSALAccounts that have the account identifier you specified in the previous step. 
 
 5) Once the MSAL account is retrieved, invoke acquire token silent operation
 
@@ -613,7 +611,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Security Library
 
-This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org) so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.x) ensures you get the latest security and feature enhanements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
+This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org), so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.x) ensures you get the latest security and feature enhancements, but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
 
 ### Security Reporting
 
@@ -622,4 +620,4 @@ If you find a security issue with our libraries or services please report it to 
 
 ## License
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License").
+Copyright © Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the “License”).
