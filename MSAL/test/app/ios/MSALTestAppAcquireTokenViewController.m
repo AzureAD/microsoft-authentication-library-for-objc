@@ -61,11 +61,11 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
 
 static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
 
-void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
-                           __unused void * observer,
-                           __unused CFStringRef name,
-                           __unused void const * object,
-                           __unused CFDictionaryRef userInfo)
+static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
+                                             __unused void * observer,
+                                             __unused CFStringRef name,
+                                             __unused void const * object,
+                                             __unused CFDictionaryRef userInfo)
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
 }
