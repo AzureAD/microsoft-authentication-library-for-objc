@@ -61,6 +61,15 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
 
 static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
 
+void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
+                           __unused void * observer,
+                           __unused CFStringRef name,
+                           __unused void const * object,
+                           __unused CFDictionaryRef userInfo)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
+}
+
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
@@ -141,7 +150,7 @@ static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationRece
     
     //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
     CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
-    CFNotificationCenterAddObserver(center, nil, globalSignoutCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
+    CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
                                     nil, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
@@ -778,15 +787,6 @@ static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationRece
 - (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
 {
     self.resultTextView.text = @"Darwin notification received from the broker SDK indicating a global signout has occurred.";
-}
-
-void globalSignoutCallback(__unused CFNotificationCenterRef center,
-                           __unused void * observer,
-                           __unused CFStringRef name,
-                           __unused void const * object,
-                           __unused CFDictionaryRef userInfo)
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
 }
 
 @end
