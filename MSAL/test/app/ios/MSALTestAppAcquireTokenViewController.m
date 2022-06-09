@@ -786,7 +786,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 
 - (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
 {
-    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating a global signout has occurred.";
+    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
 }
 
 @end
