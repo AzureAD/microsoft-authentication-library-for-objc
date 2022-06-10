@@ -35,6 +35,7 @@
 #import "MSIDVersion.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSALAccount.h"
+#import "MSIDWorkPlaceJoinConstants.h"
 
 @implementation MSIDTestURLResponse (MSAL)
 
@@ -50,7 +51,7 @@
         headers[@"Accept"] = @"application/json";
         headers[@"x-app-name"] = @"MSIDTestsHostApp";
         headers[@"x-app-ver"] = @"1.0";
-        headers[@"x-ms-PkeyAuth"] = @"1.0";
+        headers[kMSIDPKeyAuthHeader] = @"1.0";
         headers[@"X-AnchorMailbox"] = [MSIDTestIgnoreSentinel new];
 
         s_msalHeaders = [headers copy];
