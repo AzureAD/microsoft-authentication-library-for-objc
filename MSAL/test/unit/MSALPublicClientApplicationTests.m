@@ -87,6 +87,7 @@
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
+#import "MSIDWorkPlaceJoinConstants.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -3813,7 +3814,7 @@
     }
     
     headers[@"Accept"] = @"application/json";
-    headers[@"x-ms-PkeyAuth"] = @"1.0";
+    headers[kMSIDPKeyAuthHeader] = @"1.0";
     response->_requestHeaders = headers;
     
     NSString *endpoint = [NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority];
