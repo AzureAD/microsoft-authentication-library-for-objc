@@ -352,7 +352,7 @@
 <th><a href="https://github.com/Azure-Samples/active-directory-ios-swift-native-v2">iOS Sample Code</a></th>
 <th><a href="https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2">macOS Sample Code</a></th>
 <th><a href="https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal"><u>B2C Sample Code</u></a></th>
-<th><a href="https://azuread.github.io/microsoft-authentication-library-for-objc/index.html">Library reference</a></th>
+<th><a href="https://azuread.github.io/microsoft-authentication-library-for-objc/">Library reference</a></th>
 <th><a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support">Support</a></th>
 <th><a href="https://forms.office.com/r/xuBV0CzEih">Feedback</a></th>
 </tr>
@@ -360,8 +360,6 @@
 </tbody></table>
 
 <p>The MSAL library for iOS and macOS gives your app the ability to begin using the <a href="https://aka.ms/aaddev">Microsoft Identity platform</a> by supporting <a href="https://azure.microsoft.com/en-us/services/active-directory/">Azure Active Directory</a> and <a href="https://account.microsoft.com">Microsoft Accounts</a> in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports <a href="https://azure.microsoft.com/services/active-directory-b2c/">Azure AD B2C</a> for those using our hosted identity management service.</p>
-
-<p><a href="https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc"><img src="https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev" alt="Build Status"></a></p>
 <h2 id='quick-sample' class='heading'>Quick sample</h2>
 <h4 id='swift' class='heading'>Swift</h4>
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">MSALPublicClientApplicationConfig</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="s">"&lt;your-client-id-here&gt;"</span><span class="p">)</span>
@@ -447,14 +445,14 @@ end
 For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Swift package is available.</p>
 
 <ol>
-<li>For your project in Xcode, click File -&gt; Swift Packages -&gt; Add Package Dependency&hellip;</li>
+<li>For your project in Xcode, click File → Swift Packages → Add Package Dependency&hellip;</li>
 <li>Choose project to add dependency in</li>
 <li>Enter : <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc">https://github.com/AzureAD/microsoft-authentication-library-for-objc</a> as the package repository URL</li>
 <li>Choose package options with :
 
 <ol>
-<li>Rules -&gt; Branch : master (For latest MSAL release)</li>
-<li>Rules -&gt; Version -&gt; Exact : <a href="For%20a%20particular%20release%20version">release version &gt;= 1.1.14</a></li>
+<li>Rules → Branch : master (For latest MSAL release)</li>
+<li>Rules → Version → Exact : <a href="For%20a%20particular%20release%20version">release version &gt;= 1.1.14</a></li>
 </ol></li>
 </ol>
 
@@ -462,9 +460,9 @@ For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Sw
 Workarounds for some bugs we encountered :</p>
 
 <ul>
-<li>If you have a plugin in your project you might encouter <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767311138">CFBundleIdentifier collision. Each bundle must have a unique bundle identifier</a> error. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771">Workaround</a></li>
-<li>While archiving, error : &ldquo;IPA processing failed&rdquo; UserInfo={NSLocalizedDescription=IPA processing failed}. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771">Workaround</a></li>
-<li>For a macOS app, &ldquo;Command CodeSign failed with a nonzero exit code&rdquo; error. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-770056675">Workaround</a></li>
+<li>If you have a plugin in your project you might encounter <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767311138">CFBundleIdentifier collision. Each bundle must have a unique bundle identifier</a> error. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771">Workaround</a></li>
+<li>While archiving, error : “IPA processing failed” UserInfo={NSLocalizedDescription=IPA processing failed}. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-767990771">Workaround</a></li>
+<li>For a macOS app, “Command CodeSign failed with a nonzero exit code” error. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-objc/issues/737#issuecomment-770056675">Workaround</a></li>
 </ul>
 <h3 id='manually' class='heading'>Manually</h3>
 
@@ -480,7 +478,7 @@ Workarounds for some bugs we encountered :</p>
 <p><code>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)://auth</code></p>
 
 <ol>
-<li>Add a new keychain group to your project Capabilities. Keychain group should be  <code>com.microsoft.adalcache</code> on iOS and <code>com.microsoft.identity.universalstorage</code> on macOS.</li>
+<li>Add a new keychain group to your project Capabilities. Keychain group should be <code>com.microsoft.adalcache</code> on iOS and <code>com.microsoft.identity.universalstorage</code> on macOS.</li>
 </ol>
 
 <p><img src="Images/keychain_example.png" alt=""></p>
@@ -506,7 +504,7 @@ Workarounds for some bugs we encountered :</p>
 <li>Add <code>LSApplicationQueriesSchemes</code> to allow making call to Microsoft Authenticator if installed.</li>
 </ol>
 
-<p>Note that &ldquo;msauthv3&rdquo; scheme is needed when compiling your app with Xcode 11 and later. </p>
+<p>Note that “msauthv3” scheme is needed when compiling your app with Xcode 11 and later. </p>
 <pre class="highlight xml"><code><span class="nt">&lt;key&gt;</span>LSApplicationQueriesSchemes<span class="nt">&lt;/key&gt;</span>
 <span class="nt">&lt;array&gt;</span>
     <span class="nt">&lt;string&gt;</span>msauthv2<span class="nt">&lt;/string&gt;</span>
@@ -732,9 +730,9 @@ parameters.completionBlockQueue = dispatch_get_main_queue();
 
 <p>2) Create config, then use it to initialize an application object </p>
 
-<p>3) Also initialize MSALAccountEnumerationParameters object with the account identifier. Each MSALAccount object has a parameter called &ldquo;identifier&rdquo;, which represents the unique account identifier associated with the given MSALAccount object. We recommend using it as the primary search criterion. </p>
+<p>3) Also initialize MSALAccountEnumerationParameters object with the account identifier. Each MSALAccount object has a parameter called “identifier”, which represents the unique account identifier associated with the given MSALAccount object. We recommend using it as the primary search criterion. </p>
 
-<p>4) Then invoke the API &ldquo;accountsFromDeviceForParameters&rdquo; from the application object using the enumeration parameter. If you have multiple accounts in MSAL cache, it will return an array containg MSALAccounts that have the account identifier you specified in the previous step. </p>
+<p>4) Then invoke the API &ldquo;accountsFromDeviceForParameters&rdquo; from the application object using the enumeration parameter. If you have multiple accounts in MSAL cache, it will return an array containing MSALAccounts that have the account identifier you specified in the previous step. </p>
 
 <p>5) Once the MSAL account is retrieved, invoke acquire token silent operation</p>
 <h4 id='swift' class='heading'>Swift</h4>
@@ -914,13 +912,13 @@ You can find it <a href="https://github.com/AzureAD/microsoft-authentication-lib
 <p>This project has adopted the <a href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>. For more information see the <a href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or contact <a href="mailto:opencode@microsoft.com">opencode@microsoft.com</a> with any additional questions or comments.</p>
 <h2 id='security-library' class='heading'>Security Library</h2>
 
-<p>This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use <a href="http://semver.org">semantic versioning</a> so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.<em>y</em>.x) ensures you get the latest security and feature enhanements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.</p>
+<p>This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use <a href="http://semver.org">semantic versioning</a>, so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.<em>y</em>.x) ensures you get the latest security and feature enhancements, but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.</p>
 <h3 id='security-reporting' class='heading'>Security Reporting</h3>
 
 <p>If you find a security issue with our libraries or services please report it to <a href="mailto:secure@microsoft.com">secure@microsoft.com</a> with as much detail as possible. Your submission may be eligible for a bounty through the <a href="http://aka.ms/bugbounty">Microsoft Bounty</a> program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly upon receiving the information. We encourage you to get notifications of when security incidents occur by visiting <a href="https://technet.microsoft.com/en-us/security/dd252948">this page</a> and subscribing to Security Advisory Alerts.</p>
 <h2 id='license' class='heading'>License</h2>
 
-<p>Copyright &copy; Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the &ldquo;License&rdquo;).</p>
+<p>Copyright © Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the “License”).</p>
 
           </div>
         </section>
@@ -929,7 +927,7 @@ You can find it <a href="https://github.com/AzureAD/microsoft-authentication-lib
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2022 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2022-04-20)</p>
+      <p>&copy; 2022 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2022-06-20)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
