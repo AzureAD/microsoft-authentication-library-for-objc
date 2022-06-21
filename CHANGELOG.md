@@ -1,3 +1,6 @@
+## [1.2.2]
+* Minor fixes & CI changes.
+
 ## [1.2.1]
 * Fixed zipping in release pipeline to preserve symlinks in xcframework
 
