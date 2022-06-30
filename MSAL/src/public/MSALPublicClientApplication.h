@@ -477,4 +477,11 @@
 */
 @property (nullable, class, readonly) NSString *sdkVersion;
 
+#pragma mark - Shared Device Mode
+
+/**
+   Creates a listener for a Darwin notification broadcast when an account change occurs in Shared Device Mode.
+*/
+- (void)createSharedDeviceModeAccountChangeListener:(nonnull MSALSimpleCallback)completionBlock;
+
 @end

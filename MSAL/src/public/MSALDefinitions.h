@@ -203,6 +203,11 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message
  */
 typedef void(^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
 
+/**
+ Simple callback style containing just error information if the requested operation resulted in an error.
+ */
+typedef void(^MSALSimpleCallback)(NSError * _Nullable error);
+
 #endif /* MSALConstants_h */
 
 typedef NS_ENUM(NSUInteger, MSALAuthScheme)

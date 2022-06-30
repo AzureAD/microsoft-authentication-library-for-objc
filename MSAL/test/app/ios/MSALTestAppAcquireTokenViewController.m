@@ -50,7 +50,7 @@
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
-#import "MSIDConstants.h"
+#import "MSIDDarwinNotificationListener.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -58,17 +58,6 @@
 #define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
 
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
-
-static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
-
-static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
-                                             __unused void * observer,
-                                             __unused CFStringRef name,
-                                             __unused void const * object,
-                                             __unused CFDictionaryRef userInfo)
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
-}
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -93,6 +82,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 @property (nonatomic) WKWebView *customWebview;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
 @property (nonatomic) NSString *accountIdentifier;
+@property (nonatomic) MSIDDarwinNotificationListener *darwinListener;
 @end
 
 @implementation MSALTestAppAcquireTokenViewController
@@ -143,15 +133,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(receivedGlobalSignoutDarwinNotification:)
-                                                 name:kDarwinNotificationReceivedKey
-                                               object:nil];
-    
-    //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
-    CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
-    CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
-                                    nil, CFNotificationSuspensionBehaviorDeliverImmediately);
+    [self createSharedDeviceDarwinNotificationListener];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -784,9 +766,19 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     }
 }
 
-- (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
+- (void)createSharedDeviceDarwinNotificationListener
 {
-    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
+    self.darwinListener = [[MSIDDarwinNotificationListener alloc] initWithCallback:^(NSError *error)
+    {
+        if (error)
+        {
+            self.resultTextView.text = @"A Darwin notification was received, but an error occurred.";
+        }
+
+        self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
+    }];
+    
+    [self.darwinListener createSharedDeviceAccountChangeListener];
 }
 
 @end

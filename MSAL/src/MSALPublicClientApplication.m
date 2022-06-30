@@ -110,6 +110,7 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDRequestTelemetryConstants.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
+#import "MSIDDarwinNotificationListener.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -122,6 +123,7 @@
 @property (nonatomic) MSIDCacheConfig *msidCacheConfig;
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
+@property (nonatomic) MSIDDarwinNotificationListener *darwinListener;
 
 @end
 
@@ -1649,6 +1651,22 @@
     return @MSAL_VERSION_STRING;
 }
 
+#pragma mark - Shared Device Mode
+
+- (void)createSharedDeviceModeAccountChangeListener:(MSALSimpleCallback)completionBlock
+{
+    self.darwinListener = [[MSIDDarwinNotificationListener alloc] initWithCallback:completionBlock];
+    
+    if (self.darwinListener)
+    {
+        [self.darwinListener createSharedDeviceAccountChangeListener];
+    }
+    else
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Failed to create Shared Device Mode account change listener", nil, nil, nil, nil, nil, YES);
+        completionBlock(error);
+    }
+}
 
 #pragma mark - Private
 
