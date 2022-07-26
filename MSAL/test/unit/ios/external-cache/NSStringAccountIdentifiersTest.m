@@ -56,17 +56,23 @@
 - (void)testMsalStringAsGUID_when8CharsString_shouldReturnGUIDData
 {
     NSString *mylongString = @"188d01d1";
+    NSString *expectedUUID = @"00000000-0000-0000-0000-0000188d01d1";
     
     NSString *actualUUID = [mylongString msalStringAsGUID];
-    XCTAssertNil(actualUUID);
+    
+    XCTAssertNotNil(actualUUID);
+    XCTAssertEqualObjects(expectedUUID, actualUUID);
 }
 
 - (void)testMsalStringAsGUID_whenOddCharsString_shouldReturnGUIDData
 {
     NSString *mylongString = @"188d01d";
+    NSString *expectedUUID = @"00000000-0000-0000-0000-00000188d01d";
     
     NSString *actualUUID = [mylongString msalStringAsGUID];
-    XCTAssertNil(actualUUID);
+    
+    XCTAssertNotNil(actualUUID);
+    XCTAssertEqualObjects(expectedUUID, actualUUID);
 }
 
 - (void)testMsalStringAsGUID_whenEmptyCharsString_shouldReturnGUIDDataFilledWithZeroes
@@ -121,15 +127,13 @@
     XCTAssertEqualObjects(expectedUUID, actualUUID.UUIDString);
 }
 
-- (void)testMSALStringAsGUIDData_whenEmptyCharsString_shouldReturnGUIDDataFilledWithZeroes
+- (void)testMSALStringAsGUIDData_whenEmptyCharsString_shouldReturnNil
 {
     NSString *myEmptyString = @"";
-    NSString *expectedUUID = @"00000000-0000-0000-0000-000000000000";
+    
     NSData *guidData = [myEmptyString msalStringAsGUIDData];
-    XCTAssertNotNil(guidData);
-    NSUUID *actualUUID = [[NSUUID alloc] initWithUUIDBytes:[guidData bytes]];
-    XCTAssertNotNil(actualUUID);
-    XCTAssertEqualObjects(expectedUUID, actualUUID.UUIDString);
+    
+    XCTAssertNil(guidData);
 }
 
 #pragma mark - msalGUIDAsShortString
