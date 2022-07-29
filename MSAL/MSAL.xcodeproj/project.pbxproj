@@ -161,6 +161,8 @@
 		23014D4625672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */; };
 		23014D5025672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */; };
 		23014D5125672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */; };
+		230967412711156A001B42D9 /* MSALTestsConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 230967402711156A001B42D9 /* MSALTestsConfig.m */; };
+		230967422711156A001B42D9 /* MSALTestsConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 230967402711156A001B42D9 /* MSALTestsConfig.m */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -1144,6 +1146,8 @@
 		23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemeProtocolInternal.h; sourceTree = "<group>"; };
 		23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAuthenticationSchemePop+Internal.h"; sourceTree = "<group>"; };
 		23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAuthenticationSchemeBearer+Internal.h"; sourceTree = "<group>"; };
+		2309673F2711156A001B42D9 /* MSALTestsConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestsConfig.h; sourceTree = "<group>"; };
+		230967402711156A001B42D9 /* MSALTestsConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestsConfig.m; sourceTree = "<group>"; };
 		231CE9DD1FEC684C00E95D3E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "unit-test-host.entitlements"; sourceTree = "<group>"; };
 		232D61482248484C00260C42 /* MSALClaimsRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALClaimsRequest.h; sourceTree = "<group>"; };
@@ -1979,6 +1983,8 @@
 				B2BB738C2112C3F3000EA4C5 /* XCUIElement+CrossPlat.m */,
 				B2C232B02122A733008092C1 /* multiapp */,
 				B2BB73802112C3AC000EA4C5 /* interactive */,
+				2309673F2711156A001B42D9 /* MSALTestsConfig.h */,
+				230967402711156A001B42D9 /* MSALTestsConfig.m */,
 			);
 			path = tests;
 			sourceTree = "<group>";
@@ -3694,6 +3700,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B29E2ADF21238FBE00B170ED /* MSALBaseiOSUITest.m in Sources */,
+				230967422711156A001B42D9 /* MSALTestsConfig.m in Sources */,
 				B29E2AE221238FBE00B170ED /* MSALBaseUITest.m in Sources */,
 				B29E2ADE21238FB800B170ED /* MSALUITests.swift in Sources */,
 				B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */,
@@ -3711,6 +3718,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2BB73922112C3F3000EA4C5 /* XCUIElement+CrossPlat.m in Sources */,
+				B2D0A38B21C70D800071E0DA /* MSALBlackforestUITests.m in Sources */,
+				230967412711156A001B42D9 /* MSALTestsConfig.m in Sources */,
 				B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */,
 				B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */,
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,

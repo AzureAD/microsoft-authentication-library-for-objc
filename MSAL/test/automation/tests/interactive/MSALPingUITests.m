@@ -87,7 +87,7 @@
     [self assertScopesReturned:[request.expectedResultScopes msidScopeSet].array];
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
+    [self closeResultPipeline];
     return homeAccountId;
 }
 

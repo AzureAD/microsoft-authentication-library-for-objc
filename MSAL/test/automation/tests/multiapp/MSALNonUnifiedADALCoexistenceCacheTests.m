@@ -48,7 +48,7 @@ static BOOL adalAppInstalled = NO;
         adalAppInstalled = YES;
         [self installAppWithId:@"adal_n_minus_1_ver"];
         [self.testApp activate];
-        [self closeResultView];
+        [self closeResultPipeline];
     }
 
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
@@ -80,7 +80,7 @@ static BOOL adalAppInstalled = NO;
 
     NSDictionary *olderAppResult = [self automationResultDictionary];
     XCTAssertNotNil(olderAppResult[@"access_token"]);
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // 2. Switch to MSAL and acquire token silently with organizations authority
     self.testApp = [XCUIApplication new];
@@ -101,7 +101,7 @@ static BOOL adalAppInstalled = NO;
     XCTAssertEqual(legacyAccountsResult.accounts.count, 1);
     MSIDAutomationUserInformation *firstAccount = legacyAccountsResult.accounts[0];
     XCTAssertEqualObjects(firstAccount.username, self.primaryAccount.upn);
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // 4. Run silent tests
     [self runSharedSilentAADLoginWithTestRequest:msalRequest];
@@ -114,7 +114,7 @@ static BOOL adalAppInstalled = NO;
     MSIDAutomationUserInformation *firstMSALAccount = msalAccountsResult.accounts[0];
     XCTAssertEqualObjects(firstMSALAccount.username, self.primaryAccount.upn);
     XCTAssertEqualObjects(firstMSALAccount.homeAccountId, self.primaryAccount.homeAccountId);
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // 6. Switch back to ADAL and make sure ADAL still works
     adalRequest.legacyAccountIdentifier = self.primaryAccount.upn;
@@ -122,14 +122,14 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [self olderADALApp];
     [self acquireTokenSilent:adalSilentConfig];
     XCTAssertNotNil([self automationResultDictionary][@"access_token"]);
-    [self closeResultView];
+    [self closeResultPipeline];
 
     [self performAction:@"expireAccessToken" withConfig:adalSilentConfig];
-    [self closeResultView];
+    [self closeResultPipeline];
 
     [self acquireTokenSilent:adalSilentConfig];
     XCTAssertNotNil([self automationResultDictionary][@"access_token"]);
-    [self closeResultView];
+    [self closeResultPipeline];
 }
 
 - (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_andDoAuthorityMigration_andDoTokenRefresh
@@ -149,7 +149,7 @@ static BOOL adalAppInstalled = NO;
 
     NSDictionary *olderAppResult = [self automationResultDictionary];
     XCTAssertNotNil(olderAppResult[@"access_token"]);
-    [self closeResultView];
+    [self closeResultPipeline];
 
     // 2. Switch to MSAL and acquire token silently with organizations authority
     self.testApp = [XCUIApplication new];

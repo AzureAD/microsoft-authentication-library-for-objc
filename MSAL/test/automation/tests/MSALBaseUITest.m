@@ -44,7 +44,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super setUp];
         
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
-    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
+    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath testsConfig:self.testsConfig];
 }
 
 - (void)setUp
@@ -56,9 +56,14 @@ static MSIDTestConfigurationProvider *s_confProvider;
     
     self.testApp = [XCUIApplication new];
     [self.testApp launch];
+    
+    [self cleanPipelines];
 
     [self clearKeychain];
+    [self closeResultPipeline];
+    
     [self clearCookies];
+    [self closeResultPipeline];
 }
 
 - (void)tearDown
@@ -293,9 +298,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     // Enter password
     XCUIElement *passwordTextField = app.secureTextFields.firstMatch;
     [self waitForElement:passwordTextField];
-    sleep(0.1f);
     [passwordTextField msidTap];
-    sleep(0.1f);
     [passwordTextField typeText:password];
 }
 
@@ -386,9 +389,67 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }
 }
 
-- (void)closeResultView
+- (void)cleanPipelines
 {
-    [self.testApp.buttons[@"Done"] msidTap];
+#if TARGET_OS_SIMULATOR
+    static NSArray *pipelinesPaths = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        pipelinesPaths = @[
+            [MSIDAutomationActionConstants requestPipelinePath],
+            [MSIDAutomationActionConstants resultPipelinePath],
+            [MSIDAutomationActionConstants logsPipelinePath]
+        ];
+
+    });
+    
+    for (NSString *path in pipelinesPaths)
+    {
+        if (![NSFileManager.defaultManager fileExistsAtPath:path]) continue;;
+        
+        // Delete file.
+        NSError *error;
+        BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:path error:&error];
+        XCTAssertNil(error);
+        XCTAssertTrue(fileRemoved);
+    }
+#endif
+}
+
+- (void)closeResultPipeline
+{
+#if TARGET_OS_SIMULATOR
+    int count = 10;
+    double interval = 1;
+    __auto_type resultPipelineExpectation = [[XCTestExpectation alloc] initWithDescription:@"Wait for result pipeline."];
+    
+    // Wait till file appears.
+    int i = 0;
+    while (i < count)
+    {
+        if ([NSFileManager.defaultManager fileExistsAtPath:[MSIDAutomationActionConstants resultPipelinePath]])
+        {
+            [resultPipelineExpectation fulfill];
+            break;
+        }
+        
+        [NSThread sleepForTimeInterval:0.5f];
+        i++;
+    }
+    
+    [self waitForExpectations:@[resultPipelineExpectation] timeout:count * interval];
+    
+    // Delete file.
+    NSError *error;
+    BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:[MSIDAutomationActionConstants resultPipelinePath] error:&error];
+    XCTAssertNil(error);
+    XCTAssertTrue(fileRemoved);
+#else
+    if ([self.testApp.buttons[@"Done"] exists])
+    {
+        [self.testApp.buttons[@"Done"] msidTap];
+    }
+#endif
 }
 
 - (void)invalidateRefreshToken:(NSDictionary *)config
@@ -414,15 +475,11 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)clearKeychain
 {
     [self.testApp.buttons[MSID_AUTO_CLEAR_CACHE_ACTION_IDENTIFIER] msidTap];
-    [self waitForElement:self.testApp.buttons[@"Done"]];
-    [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)clearCookies
 {
     [self.testApp.buttons[MSID_AUTO_CLEAR_COOKIES_ACTION_IDENTIFIER] msidTap];
-    [self waitForElement:self.testApp.buttons[@"Done"]];
-    [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)openURL:(NSDictionary *)config
@@ -446,11 +503,18 @@ static MSIDTestConfigurationProvider *s_confProvider;
            withConfig:(NSDictionary *)config
 {
     NSString *jsonString = [config toJsonString];
+    
+#if TARGET_OS_SIMULATOR
+    [jsonString writeToFile:[MSIDAutomationActionConstants requestPipelinePath] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    sleep(1);
+    [self.testApp.buttons[action] msidTap];
+#else
     [self.testApp.buttons[action] msidTap];
     [self.testApp.textViews[@"requestInfo"] msidTap];
     [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
     sleep(1);
     [self.testApp.buttons[@"Go"] msidTap];
+#endif
 }
 
 - (MSIDAutomationErrorResult *)automationErrorResult
@@ -479,12 +543,41 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (NSDictionary *)automationResultDictionary
 {
+    NSDictionary *result;
+#if TARGET_OS_SIMULATOR
+    int timeout = 10;
+    __auto_type resultPipelineExpectation = [[XCTestExpectation alloc] initWithDescription:@"Wait for result pipeline."];
+    
+    // Wait till file appears.
+    int i = 0;
+    while (i < timeout)
+    {
+        if ([NSFileManager.defaultManager fileExistsAtPath:[MSIDAutomationActionConstants resultPipelinePath]])
+        {
+            [resultPipelineExpectation fulfill];
+            break;
+        }
+        
+        sleep(1);
+        i++;
+    }
+    
+    [self waitForExpectations:@[resultPipelineExpectation] timeout:timeout];
+
+    // Read json from file.
+    NSString *jsonString = [NSString stringWithContentsOfFile:[MSIDAutomationActionConstants resultPipelinePath] encoding:NSUTF8StringEncoding error:nil];
+
+    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    result = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+#else
     XCUIElement *resultTextView = self.testApp.textViews[@"resultInfo"];
     [self waitForElement:resultTextView];
-
+    
     NSError *error = nil;
     NSData *data = [resultTextView.value dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+#endif
+    
     return result;
 }
 
@@ -501,6 +594,15 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request appConfig:self.testApplication];
     return updatedRequest.jsonDictionary;
+}
+
++ (MSIDTestsConfig *)testsConfig
+{
+    __auto_type config = [MSIDTestsConfig new];
+    config.scopesSupported = YES;
+    config.tenantSpecificResultAuthoritySupported = YES;
+    
+    return config;
 }
 
 @end
