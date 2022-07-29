@@ -44,7 +44,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super setUp];
         
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
-    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath testsConfig:self.testsConfig];
+    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
 }
 
 - (void)setUp
@@ -58,10 +58,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [self.testApp launch];
 
     [self clearKeychain];
-    [self closeResultView];
-    
     [self clearCookies];
-    [self closeResultView];
 }
 
 - (void)tearDown
@@ -391,19 +388,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)closeResultView
 {
-    // TODO:
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_result_pipeline.txt"];
-    
-    if (![NSFileManager.defaultManager fileExistsAtPath:fileUrl.path]) return;
-    
-    // Delete file.
-    NSError *error;
-    BOOL fileRemoved = [NSFileManager.defaultManager removeItemAtPath:fileUrl.path error:&error];
-    XCTAssertNil(error);
-    XCTAssertTrue(fileRemoved);
+    [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)invalidateRefreshToken:(NSDictionary *)config
@@ -429,11 +414,15 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)clearKeychain
 {
     [self.testApp.buttons[MSID_AUTO_CLEAR_CACHE_ACTION_IDENTIFIER] msidTap];
+    [self waitForElement:self.testApp.buttons[@"Done"]];
+    [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)clearCookies
 {
     [self.testApp.buttons[MSID_AUTO_CLEAR_COOKIES_ACTION_IDENTIFIER] msidTap];
+    [self waitForElement:self.testApp.buttons[@"Done"]];
+    [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)openURL:(NSDictionary *)config
@@ -456,18 +445,12 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)performAction:(NSString *)action
            withConfig:(NSDictionary *)config
 {
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_request_pipeline.txt"];
-
     NSString *jsonString = [config toJsonString];
-    
-    [jsonString writeToFile:fileUrl.path atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    
-    sleep(1);
-    
     [self.testApp.buttons[action] msidTap];
+    [self.testApp.textViews[@"requestInfo"] msidTap];
+    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
+    sleep(1);
+    [self.testApp.buttons[@"Go"] msidTap];
 }
 
 - (MSIDAutomationErrorResult *)automationErrorResult
@@ -496,35 +479,12 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (NSDictionary *)automationResultDictionary
 {
-    NSString *simulatorSharedDir = [NSProcessInfo processInfo].environment[@"SIMULATOR_SHARED_RESOURCES_DIRECTORY"];
-    NSURL *simulatorHomeDirUrl = [[NSURL alloc] initFileURLWithPath:simulatorSharedDir];
-    NSURL *cachesDirUrl = [simulatorHomeDirUrl URLByAppendingPathComponent:@"Library/Caches"];
-    NSURL *fileUrl = [cachesDirUrl URLByAppendingPathComponent:@"ui_atomation_result_pipeline.txt"];
-    
-    int timeout = 1000;
-    __auto_type resultPipelineExpectation = [[XCTestExpectation alloc] initWithDescription:@"Wait for result pipeline."];
-    
-    // Wait till file appears.
-    int i = 0;
-    while (i < timeout)
-    {
-        if ([NSFileManager.defaultManager fileExistsAtPath:fileUrl.path])
-        {
-            [resultPipelineExpectation fulfill];
-            break;
-        }
-        
-        sleep(1);
-        i++;
-    }
-    
-    [self waitForExpectations:@[resultPipelineExpectation] timeout:timeout];
+    XCUIElement *resultTextView = self.testApp.textViews[@"resultInfo"];
+    [self waitForElement:resultTextView];
 
-    // Read json from file.
-    NSString *jsonString = [NSString stringWithContentsOfFile:fileUrl.path encoding:NSUTF8StringEncoding error:nil];
-
-    NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSError *error = nil;
+    NSData *data = [resultTextView.value dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
     return result;
 }
 
@@ -541,15 +501,6 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request appConfig:self.testApplication];
     return updatedRequest.jsonDictionary;
-}
-
-+ (MSIDTestsConfig *)testsConfig
-{
-    __auto_type config = [MSIDTestsConfig new];
-    config.scopesSupported = YES;
-    config.tenantSpecificResultAuthoritySupported = YES;
-    
-    return config;
 }
 
 @end

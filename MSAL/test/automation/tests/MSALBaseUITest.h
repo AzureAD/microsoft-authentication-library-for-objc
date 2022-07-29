@@ -32,7 +32,6 @@
 #import "MSIDTestAutomationApplication.h"
 #import "MSIDTestAutomationAccountConfigurationRequest.h"
 #import "MSIDTestAutomationAccount.h"
-#import "MSIDTestsConfig.h"
 
 @interface MSALBaseUITest : XCTestCase
 
@@ -42,7 +41,6 @@
 @property (nonatomic) MSIDTestAutomationAccount *primaryAccount;
 @property (nonatomic) MSIDTestAutomationApplication *testApplication;
 @property (nonatomic) NSString *redirectUriPrefix;
-@property (nonatomic, class, readonly) MSIDTestsConfig *testsConfig;
 
 // Common checks/assertions
 - (void)assertRefreshTokenInvalidated;
