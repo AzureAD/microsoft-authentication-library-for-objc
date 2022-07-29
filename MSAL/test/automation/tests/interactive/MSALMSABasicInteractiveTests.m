@@ -164,7 +164,7 @@
     [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];
 
     [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self closeResultView];
 }
 
 @end

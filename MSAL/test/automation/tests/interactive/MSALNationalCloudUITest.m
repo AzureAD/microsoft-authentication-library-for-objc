@@ -59,7 +59,7 @@
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 4. Run silent with correct authority
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment];
@@ -94,7 +94,7 @@
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 4. Run silent with correct authority
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment];

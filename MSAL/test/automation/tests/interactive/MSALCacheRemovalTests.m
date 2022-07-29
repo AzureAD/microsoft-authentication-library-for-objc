@@ -74,7 +74,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self signout:config];
     XCTAssertNotNil([self automationSuccessResult]);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 3. Try silent and expect failure
     [self acquireTokenSilent:config];
@@ -119,12 +119,12 @@
     NSDictionary *config = [self configWithTestRequest:firstRequest];
     [self signout:config];
     XCTAssertNotNil([self automationSuccessResult]);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 4. Try silent and expect failure for the first account
     [self acquireTokenSilent:config];
     [self assertErrorCode:MSALErrorInteractionRequired];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 5. Expect silent to still work for the second account
     self.primaryAccount = self.testAccounts[1];

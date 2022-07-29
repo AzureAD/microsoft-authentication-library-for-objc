@@ -74,7 +74,7 @@
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 2. Run silent for the guest tenant
     request.homeAccountIdentifier = homeAccountId;
@@ -108,7 +108,7 @@
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.homeTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 2. Run silent for the home tenant
     homeRequest.homeAccountIdentifier = homeAccountId;
@@ -143,7 +143,7 @@
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 2. Run interactive in the home tenant
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.homeTenantId];
@@ -188,7 +188,7 @@
 
     if (closeResultView)
     {
-        [self closeResultPipeline];
+        [self closeResultView];
     }
 
     return homeAccountId;

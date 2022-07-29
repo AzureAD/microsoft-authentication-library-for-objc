@@ -109,7 +109,7 @@
     [self acceptAuthSessionDialogIfNecessary:request];
     [self aadEnterPassword];
     [self assertInternalErrorCode:MSALInternalErrorInvalidClient];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 6. Run silent with not consented scopes
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"not_consented"];
@@ -117,18 +117,18 @@
     [self acquireTokenSilent:config];
     [self assertErrorCode:MSALErrorInteractionRequired];
     [self assertErrorSubcode:@"consent_required"];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 7. Invalidate refresh token and expire access token
     request.requestScopes = firstScope;
     config = [self configWithTestRequest:request];
     [self invalidateRefreshToken:config];
     [self assertRefreshTokenInvalidated];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     [self expireAccessToken:config];
     [self assertAccessTokenExpired];
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 8. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
@@ -157,7 +157,7 @@
     NSArray *accounts = result.accounts;
     MSIDAutomationUserInformation *firstAccount = accounts[0];
     XCTAssertEqualObjects(firstAccount.homeAccountId, homeAccountId);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 2. Run silent with a different authority alias
     request.homeAccountIdentifier = homeAccountId;
@@ -279,7 +279,7 @@
     NSOrderedSet *expectedGrantedScopes = [NSOrderedSet msidOrderedSetFromString:supportedScope normalize:YES];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // Now run silent with insufficient scopes
     request.homeAccountIdentifier = self.primaryAccount.homeAccountId;
@@ -295,7 +295,7 @@
     grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // Now run silent with correct scopes
     request.requestScopes = supportedScope;
@@ -329,7 +329,7 @@
     [self acceptSpeedBump];
 
     [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self closeResultView];
 }
 
 #pragma mark - Errors
@@ -384,6 +384,7 @@
 
     XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:enrollButton];
+    sleep(0.5f);
     [enrollButton msidTap];
     
     XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
@@ -515,7 +516,7 @@
     [self selectAccountWithTitle:self.primaryAccount.upn];
 
     [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self closeResultView];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andPassedInEmbeddedWebView_andForceLogin
@@ -577,7 +578,7 @@
     [acceptButton msidTap];
 
     [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self closeResultView];
 }
 
 - (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview

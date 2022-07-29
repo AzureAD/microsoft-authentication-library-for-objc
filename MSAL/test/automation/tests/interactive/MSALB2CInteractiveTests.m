@@ -106,7 +106,7 @@
 
     if (closeResultView)
     {
-        [self closeResultPipeline];
+        [self closeResultView];
     }
     return homeAccountId;
 }
@@ -134,7 +134,7 @@
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 3. Run UI appeared step
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
@@ -168,7 +168,7 @@
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultView];
     [self clearCookies];
 
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
@@ -199,7 +199,7 @@
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultView];
 
     request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
@@ -233,7 +233,7 @@
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 3. Start profile policy
     MSIDAutomationTestRequest *profileRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
@@ -259,7 +259,7 @@
     result = [self automationSuccessResult];
     NSString *profileHomeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(profileHomeAccountId);
-    [self closeResultPipeline];
+    [self closeResultView];
 
     // 5. Get token silently for the first request
     request.homeAccountIdentifier = homeAccountId;
