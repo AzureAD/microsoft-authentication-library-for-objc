@@ -37,10 +37,13 @@
 - (void)msidPasteText:(NSString *)text application:(__unused XCUIApplication *)app
 {
 #if TARGET_OS_IPHONE
-    [UIPasteboard generalPasteboard].string = text;
-    sleep(1.0f);
-    [self pressForDuration:1.0f];
-    [app.menuItems[@"Paste"] tap];
+//    [UIPasteboard generalPasteboard].string = text;
+//    sleep(1.0f);
+//    [self pressForDuration:1.0f];
+//    sleep(1.0f);
+//    [app.menuItems[@"Paste"] tap];
+    
+    [self typeText:text];
 #else
     [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];

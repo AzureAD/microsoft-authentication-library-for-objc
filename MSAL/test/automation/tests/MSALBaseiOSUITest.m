@@ -23,6 +23,7 @@
 
 #import "MSALBaseiOSUITest.h"
 #import "XCTestCase+TextFieldTap.h"
+#import "XCUIElement+CrossPlat.h"
 
 @implementation MSALBaseiOSUITest
 
@@ -159,10 +160,10 @@
     if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11.0f)
     {
         XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
-        __auto_type allowButton = springBoardApp.alerts.buttons[@"Continue"];
+        XCUIElement *allowButton = springBoardApp.alerts.buttons[@"Continue"];
         [self waitForElement:allowButton];
         sleep(1);
-        [allowButton tap];
+        [allowButton msidTap];
     }
 }
 

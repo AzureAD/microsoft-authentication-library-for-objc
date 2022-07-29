@@ -115,7 +115,7 @@
 
     MSIDAutomationAccountsResult *result = [self automationAccountsResult];
     XCTAssertEqual([result.accounts count], 2);
-    [self closeResultView];
+    [self closeResultPipeline];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned

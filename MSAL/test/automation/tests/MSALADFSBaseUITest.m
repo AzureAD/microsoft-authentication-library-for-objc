@@ -58,7 +58,7 @@
 
     if (closeResultView)
     {
-        [self closeResultView];
+        [self closeResultPipeline];
     }
 
     return homeAccountId;
