@@ -283,18 +283,16 @@ static NSString * const defaultScope = @"User.Read";
 - (IBAction)clearCookies:(__unused id)sender
 {
     // Clear WKWebView cookies
-    if (@available(macOS 10.11, *)) {
-        WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
-        
-        [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes]
-                         completionHandler:^(NSArray<WKWebsiteDataRecord *> *records) {
-            for (WKWebsiteDataRecord *record in records) {
-                [dateStore removeDataOfTypes:record.dataTypes forDataRecords:@[record] completionHandler:^{}];
-            }
-        }];
-        
-        [_resultTextView setString:[NSString stringWithFormat:@"Successfully Cleared cookies."]];
-    }
+    WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
+    
+    [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes]
+                     completionHandler:^(NSArray<WKWebsiteDataRecord *> *records) {
+        for (WKWebsiteDataRecord *record in records) {
+            [dateStore removeDataOfTypes:record.dataTypes forDataRecords:@[record] completionHandler:^{}];
+        }
+    }];
+    
+    [_resultTextView setString:[NSString stringWithFormat:@"Successfully Cleared cookies."]];
 }
 
 - (IBAction)wipeAllAccounts:(__unused id)sender
