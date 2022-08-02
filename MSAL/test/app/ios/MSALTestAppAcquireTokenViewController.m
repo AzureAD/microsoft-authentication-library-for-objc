@@ -59,6 +59,17 @@
 
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
+static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
+
+static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
+                                             __unused void * observer,
+                                             __unused CFStringRef name,
+                                             __unused void const * object,
+                                             __unused CFDictionaryRef userInfo)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
+}
+
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
@@ -131,6 +142,16 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
                                              selector:@selector(onKeyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receivedGlobalSignoutDarwinNotification:)
+                                                 name:kDarwinNotificationReceivedKey
+                                               object:nil];
+    
+    //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
+    CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
+    CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
+                                    nil, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -761,6 +782,11 @@ static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":
        [self.customWebview loadHTMLString:@"<html><head></head></html>" baseURL:nil];
        self.customWebviewContainer.hidden = YES;
     }
+}
+
+- (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
+{
+    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
 }
 
 @end
