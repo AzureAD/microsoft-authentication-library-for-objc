@@ -2496,8 +2496,10 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
-        msidDeviceInfo.extraDeviceInfo[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
-        msidDeviceInfo.extraDeviceInfo[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        msidDeviceInfo.extraDeviceInfo = [extraDeviceInfoDict mutableCopy];
         MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
         
         callback(deviceInfo, nil);

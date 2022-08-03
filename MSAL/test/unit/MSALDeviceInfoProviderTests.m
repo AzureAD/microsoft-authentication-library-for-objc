@@ -262,8 +262,10 @@
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
         deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
-        deviceInfo.extraDeviceInfo[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
-        deviceInfo.extraDeviceInfo[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        deviceInfo.extraDeviceInfo = [extraDeviceInfoDict mutableCopy];
         
         callback(deviceInfo, nil);
     }];
