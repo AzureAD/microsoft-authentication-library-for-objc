@@ -2496,8 +2496,10 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
-        msidDeviceInfo.mdmId = @"mdmId";
+        msidDeviceInfo.extraDeviceInfo[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        msidDeviceInfo.extraDeviceInfo[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
         MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        
         callback(deviceInfo, nil);
     }];
     
@@ -2510,6 +2512,7 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
         [deviceInfoExpectation fulfill];
     }];
     
