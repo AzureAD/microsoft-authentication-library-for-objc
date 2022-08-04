@@ -73,8 +73,8 @@
     request.homeAccountIdentifier = homeAccountId;
     NSDictionary *config = [self configWithTestRequest:request];
     [self signout:config];
-    XCTAssertNotNil([self automationSuccessResult]);
-    [self closeResultPipeline];
+    XCTAssertNotNil([self automationSuccessResult:self.testApp]);
+    [self closeResultPipeline:self.testApp];
 
     // 3. Try silent and expect failure
     [self acquireTokenSilent:config];
@@ -118,13 +118,13 @@
     firstRequest.homeAccountIdentifier = firstHomeAccountId;
     NSDictionary *config = [self configWithTestRequest:firstRequest];
     [self signout:config];
-    XCTAssertNotNil([self automationSuccessResult]);
-    [self closeResultPipeline];
+    XCTAssertNotNil([self automationSuccessResult:self.testApp]);
+    [self closeResultPipeline:self.testApp];
 
     // 4. Try silent and expect failure for the first account
     [self acquireTokenSilent:config];
     [self assertErrorCode:MSALErrorInteractionRequired];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 5. Expect silent to still work for the second account
     self.primaryAccount = self.testAccounts[1];

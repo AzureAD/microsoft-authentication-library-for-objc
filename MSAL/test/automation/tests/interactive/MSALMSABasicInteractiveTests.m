@@ -163,8 +163,8 @@
     [self selectAccountWithTitle:self.primaryAccount.upn];
     [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];
 
-    [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self assertAccessTokenNotNil:self.testApp];
+    [self closeResultPipeline:self.testApp];
 }
 
 @end

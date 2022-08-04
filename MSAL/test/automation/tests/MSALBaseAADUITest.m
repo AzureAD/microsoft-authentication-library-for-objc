@@ -44,10 +44,10 @@
 
     if (!request.loginHint && !request.homeAccountIdentifier)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
     
     if (!request.usesEmbeddedWebView)
@@ -56,8 +56,8 @@
     }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
+    
     return homeAccountId;
 }
 
@@ -66,21 +66,20 @@
     NSDictionary *config = [self configWithTestRequest:request];
     // Acquire token silently
     [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultPipeline];
+    [self assertAccessTokenNotNil:self.testApp];
+    [self closeResultPipeline:self.testApp];
 
     // Now expire access token
     [self expireAccessToken:config];
     [self assertAccessTokenExpired];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // Now do access token refresh
     [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
 
     [self runSharedResultAssertionWithTestRequest:request];
-
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // Now lookup access token without authority
     request.acquireTokenAuthority = nil;
@@ -88,7 +87,7 @@
 
     [self acquireTokenSilent:config];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 }
 
 - (void)runSharedAuthUIAppearsStepWithTestRequest:(MSIDAutomationTestRequest *)request
@@ -102,16 +101,16 @@
     [self closeAuthUIUsingWebViewType:request.webViewType passedInWebView:request.usePassedWebView];
     
     [self assertErrorCode:MSALErrorUserCanceled];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 }
 
 - (NSString *)runSharedResultAssertionWithTestRequest:(MSIDAutomationTestRequest *)request
 {
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self assertScopesReturned:[[request.expectedResultScopes msidScopeSet] array]];
     [self assertAuthorityReturned:request.expectedResultAuthority];
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(homeAccountId);
 

@@ -22,7 +22,6 @@
 // THE SOFTWARE.
 
 #import "MSALBaseiOSUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
 
 @implementation MSALBaseiOSUITest

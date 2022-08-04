@@ -57,9 +57,9 @@
     request.acquireTokenAuthority = request.configurationAuthority;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 4. Run silent with correct authority
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment];
@@ -92,9 +92,9 @@
     request.homeAccountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 4. Run silent with correct authority
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment];
@@ -120,8 +120,8 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self nationalCloudWaitForNextButton:self.testApp];
-    [self aadEnterPassword];
-    [self assertAccessTokenNotNil];
+    [self aadEnterPassword:self.testApp];
+    [self assertAccessTokenNotNil:self.testApp];
 }
 
 // The following test needs slice parameter to be sent to instance discovery endpoint to work.
