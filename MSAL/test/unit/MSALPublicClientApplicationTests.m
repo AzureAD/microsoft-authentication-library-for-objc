@@ -2499,7 +2499,7 @@
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
-        msidDeviceInfo.extraDeviceInfo = [extraDeviceInfoDict mutableCopy];
+        msidDeviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
         
         callback(deviceInfo, nil);

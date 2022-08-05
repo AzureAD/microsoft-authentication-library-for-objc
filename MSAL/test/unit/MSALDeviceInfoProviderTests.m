@@ -226,7 +226,6 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
         XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
-        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 3);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
@@ -265,7 +264,7 @@
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
-        deviceInfo.extraDeviceInfo = [extraDeviceInfoDict mutableCopy];
+        deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         
         callback(deviceInfo, nil);
     }];
@@ -393,6 +392,7 @@
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
         XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY]);
+        XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY]);
         [successExpectation fulfill];
     }];
 
