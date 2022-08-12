@@ -90,6 +90,13 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorBrokerApplicationTokenReadFailed): @(MSALInternalErrorBrokerApplicationTokenReadFailed),
                                    @(MSIDErrorBrokerApplicationTokenWriteFailed): @(MSALInternalErrorBrokerApplicationTokenWriteFailed),
                                    @(MSIDErrorBrokerNotAvailable) : @(MSALInternalBrokerNotAvailable),
+                                   @(MSIDErrorJITLinkServerConfirmationError) : @(MSALInternalErrorJITLinkServerConfirmationError),
+                                   @(MSIDErrorJITLinkAcquireTokenError) : @(MSALInternalErrorJITLinkAcquireTokenError),
+                                   @(MSIDErrorJITLinkTokenAcquiredWrongTenant) : @(MSALInternalErrorJITLinkTokenAcquiredWrongTenant),
+                                   @(MSIDErrorJITLinkError) : @(MSALInternalErrorJITLinkError),
+                                   @(MSIDErrorJITComplianceCheckResultNotCompliant) : @(MSALInternalErrorJITComplianceCheckResultNotCompliant),
+                                   @(MSIDErrorJITComplianceCheckResultTimeout) : @(MSALInternalErrorJITComplianceCheckResultTimeout),
+                                   @(MSIDErrorJITComplianceCheckResultUnknown) : @(MSALInternalErrorJITComplianceCheckResultUnknown),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
