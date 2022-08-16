@@ -1,3 +1,6 @@
+##[TBD]
+* Expose extra deviceInfo
+
 ## [1.2.3]
 * Stop extra background tasks in the system webview case.
 * Minor fixes.
