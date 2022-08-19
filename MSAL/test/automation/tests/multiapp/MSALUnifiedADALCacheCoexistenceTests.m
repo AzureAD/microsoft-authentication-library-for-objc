@@ -78,9 +78,9 @@ static BOOL adalAppInstalled = NO;
 
     [self acquireToken:adalConfig];
     [self aadEnterEmail];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
 
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 2. Switch to MSAL and acquire token silently with organizations authority
@@ -95,7 +95,7 @@ static BOOL adalAppInstalled = NO;
     
     // 3. Check accounts are correctly returned
     [self readAccounts:[self configWithTestRequest:msalRequest]];
-    MSIDAutomationAccountsResult *legacyAccountsResult = [self automationAccountsResult];
+    MSIDAutomationAccountsResult *legacyAccountsResult = [self automationAccountsResult:self.testApp];
     XCTAssertNotNil(legacyAccountsResult);
     XCTAssertEqual(legacyAccountsResult.accounts.count, 1);
     MSIDAutomationUserInformation *firstAccount = legacyAccountsResult.accounts[0];
@@ -107,7 +107,7 @@ static BOOL adalAppInstalled = NO;
 
     // 5. Check accounts are correctly updated
     [self readAccounts:[self configWithTestRequest:msalRequest]];
-    MSIDAutomationAccountsResult *msalAccountsResult = [self automationAccountsResult];
+    MSIDAutomationAccountsResult *msalAccountsResult = [self automationAccountsResult:self.testApp];
     XCTAssertNotNil(msalAccountsResult);
     XCTAssertEqual(msalAccountsResult.accounts.count, 1);
     MSIDAutomationUserInformation *firstMSALAccount = msalAccountsResult.accounts[0];
@@ -121,7 +121,7 @@ static BOOL adalAppInstalled = NO;
     NSDictionary *adalSilentConfig = [self configWithTestRequest:adalRequest];
     self.testApp = [self adalUnifiedApp];
     [self acquireTokenSilent:adalSilentConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
     
     [self expireAccessToken:adalSilentConfig];
@@ -129,7 +129,7 @@ static BOOL adalAppInstalled = NO;
     [self closeResultView];
     
     [self acquireTokenSilent:adalSilentConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 }
 
@@ -159,7 +159,7 @@ static BOOL adalAppInstalled = NO;
     
     NSDictionary *adalConfig = [self configWithTestRequest:adalRequest];
     [self acquireTokenSilent:adalConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 3. Now expire token in non-unified ADAL
@@ -169,7 +169,7 @@ static BOOL adalAppInstalled = NO;
 
     // 4. Now acquire token silently
     [self acquireTokenSilent:adalConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 5. Run token refresh in MSAL again
@@ -205,7 +205,7 @@ static BOOL adalAppInstalled = NO;
     
     NSDictionary *adalConfig = [self configWithTestRequest:secondAppRequest];
     [self acquireTokenSilent:adalConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 3. Now expire token in non-unified ADAL
@@ -215,7 +215,7 @@ static BOOL adalAppInstalled = NO;
 
     // 4. Now acquire token silently
     [self acquireTokenSilent:adalConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 5. Run token refresh in MSAL again
@@ -246,9 +246,9 @@ static BOOL adalAppInstalled = NO;
     
     [self acquireToken:adalConfig];
     [self aadEnterEmail];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
     
     // 5. Run token refresh using FRT in MSAL
@@ -265,7 +265,7 @@ static BOOL adalAppInstalled = NO;
     
     //It should refresh access token using family refresh token saved by office app using Adal
     [self acquireTokenSilent:msalConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 }
 

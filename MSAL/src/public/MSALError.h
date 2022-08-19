@@ -378,5 +378,46 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      Broker is either not found on device or not available for this configuration.
     */
-    MSALInternalBrokerNotAvailable                      = -42714
+    MSALInternalBrokerNotAvailable                      = -42714,
+    
+    /**
+     JIT - Link - Timeout while waiting for server confirmation.
+    */
+    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42714,
+    
+    /**
+     JIT - Link - Error while waiting for server confirmation
+     */
+    MSALInternalErrorJITLinkServerConfirmationError     =   -42715,
+    
+    /**
+     JIT - Link - Error while acquiring intune token
+     */
+    MSALInternalErrorJITLinkAcquireTokenError           =   -42716,
+    
+    /**
+     JIT - Link - Token acquired for wrong tenant
+     */
+    MSALInternalErrorJITLinkTokenAcquiredWrongTenant    =   -42717,
+    
+    /**
+     JIT - Link - Error during linking
+     */
+    MSALInternalErrorJITLinkError                       =   -42718,
+    
+    /**
+     JIT - Compliance Check - Device not compliant
+     */
+    MSALInternalErrorJITComplianceCheckResultNotCompliant =   -42719,
+    
+    /**
+     JIT - Compliance Check - CP timeout
+     */
+    MSALInternalErrorJITComplianceCheckResultTimeout    =   -42720,
+    
+    /**
+     JIT - Compliance Check - Device unknown
+     */
+    MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
+    
 };

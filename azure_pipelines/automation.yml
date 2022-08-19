@@ -27,14 +27,6 @@ pr: none
 pool:
   vmImage: 'macOS-11'
 
-resources:
-  repositories:
-  - repository: msalRepository
-    type: github
-    endpoint: 'GitHub for AzureAD and Azure-Samples (as aadidgit service)'
-    name: $(repositoryName)
-    ref: $(Build.SourceBranch)
-
 jobs:
 - job: ui_automation
   displayName: Run MSAL UI automation
@@ -45,7 +37,7 @@ jobs:
   
   steps:
 
-  - checkout: msalRepository
+  - checkout: self
     clean: true
     submodules: true
     fetchDepth: 1
@@ -98,4 +90,42 @@ jobs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifact: 'TestOutputs'
       publishLocation: 'pipeline'
+  - task: UsePythonVersion@0
+    condition: failed()
+    displayName: Use Python 3.x
+  - bash: python3 -m pip install github3.py==2.0.0
+    condition: failed()
+    displayName: Install the github3.py REST API client for Python
+  - task: PythonScript@0
+    displayName: Create Issue if Pipeline fails
+    condition: failed()
+    inputs:
+      scriptSource: inline
+      script: |
+        import github3
+        import requests
+        import textwrap
+        from pprint import pprint
+        from subprocess import run, PIPE
+
+        auth_header = ""
+        try:
+            auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
+        except Exception as e:
+          pprint(e)
+        class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
+            def __call__(self, r):
+                r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
+                return r
+
+        github = github3.GitHub()
+        github.session.auth = HTTPHardcodedHeaderAuth()
+        github_org, repo = "$(Build.Repository.Name)".split("/")
+        
+        # Prepare content for github issue
+        pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
+        git_commit = "$(Build.SourceVersionMessage) [$(Build.SourceVersion)] "
+        issue_title = "Automation tests failure"
+        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
+        github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
   

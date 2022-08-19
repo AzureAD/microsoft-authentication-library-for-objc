@@ -89,24 +89,24 @@
 {
     if (!request.loginHint && !request.homeAccountIdentifier)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
-    if (shouldEnterPassword) [self aadEnterPassword];
+    if (shouldEnterPassword) [self aadEnterPassword:self.testApp];;
 
     // Consent
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self assertScopesReturned:[request.expectedResultScopes msidScopeSet].array];
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(homeAccountId);
 
     if (closeResultView)
     {
-        [self closeResultPipeline];
+        [self closeResultPipeline:self.testApp];
     }
     return homeAccountId;
 }
@@ -131,10 +131,10 @@
     NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 3. Run UI appeared step
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
@@ -165,11 +165,11 @@
     NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeTenantId = result.userInformation.tenantId;
-
-    [self closeResultPipeline];
-    [self clearCookies];
+    [self closeResultPipeline:self.testApp];
+    
+    [self clearCookies:self.testApp];
 
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     request.usePassedWebView = YES;
@@ -196,10 +196,10 @@
     NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
@@ -230,10 +230,10 @@
     NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request closeResultView:NO shouldEnterPassword:YES];
     XCTAssertNotNil(homeAccountId);
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *homeTenantId = result.userInformation.tenantId;
 
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 3. Start profile policy
     MSIDAutomationTestRequest *profileRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
@@ -254,12 +254,12 @@
     XCUIElement *profileEditButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:profileEditButton];
     [profileEditButton msidTap];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
 
-    result = [self automationSuccessResult];
+    result = [self automationSuccessResult:self.testApp];
     NSString *profileHomeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(profileHomeAccountId);
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
 
     // 5. Get token silently for the first request
     request.homeAccountIdentifier = homeAccountId;

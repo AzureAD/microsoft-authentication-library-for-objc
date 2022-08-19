@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseAADUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
 #import "NSString+MSIDAutomationUtils.h"
 
@@ -69,7 +68,7 @@
 
     if (!request.loginHint)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
     [self shibEnterUsername];
@@ -85,7 +84,7 @@
     }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultPipeline];
+    [self closeResultPipeline:self.testApp];
     return homeAccountId;
 }
 

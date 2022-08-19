@@ -83,9 +83,9 @@ static BOOL msalAppInstalled = NO;
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
     [self aadEnterEmail];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
 
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 2. Switch to current MSAL and acquire token silently with organizations authority
@@ -120,7 +120,7 @@ static BOOL msalAppInstalled = NO;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:@"organizations"];
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 3. Now expire token in other MSAL app
@@ -131,7 +131,7 @@ static BOOL msalAppInstalled = NO;
 
     // 4. Now acquire token silently
     [self acquireTokenSilent:silentConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 
     // 5. Run token refresh in current MSAL again
@@ -176,7 +176,7 @@ static BOOL msalAppInstalled = NO;
     
     //It should refresh access token using family refresh token saved by onedrive app
     [self acquireTokenSilent:secondSilentConfig];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self closeResultView];
 }
 @end
