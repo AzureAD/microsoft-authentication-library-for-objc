@@ -1,5 +1,6 @@
 ##[TBD]
-* Expose extra deviceInfo
+* Expose extra deviceInfo.
+* Allow adding additional query string parameters when opening the browser. (#1539)
 
 ## [1.2.3]
 * Stop extra background tasks in the system webview case.
