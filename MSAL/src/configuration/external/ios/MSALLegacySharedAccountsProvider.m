@@ -28,7 +28,7 @@
 #import "MSALLegacySharedAccountFactory.h"
 #import "MSIDJsonObject.h"
 #import "MSALLegacySharedAccount.h"
-#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccountEnumerationParameters+Private.h"
 #import "MSIDConstants.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccount.h"
@@ -300,6 +300,7 @@
     {
         MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
                                                                                     tenantProfileIdentifier:account.accountClaims[@"oid"]];
+        parameters.ignoreSignedInStatus = YES;
         
         if (!parameters)
         {
@@ -317,6 +318,7 @@
     {
         MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
                                                                                     tenantProfileIdentifier:tenantProfile.identifier];
+        parameters.ignoreSignedInStatus = YES;
         
         if (!parameters)
         {
