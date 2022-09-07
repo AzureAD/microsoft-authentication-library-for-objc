@@ -116,10 +116,12 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
 - (void) initExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo
 {
     [_extraDeviceInformation setValue:deviceInfo.ssoExtensionMode == MSIDSSOExtensionModeFull ? @"Yes" : @"No" forKey:MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY];
-    if (![NSString msidIsStringNilOrBlank:deviceInfo.mdmId])
+    
+    if (deviceInfo.extraDeviceInfo)
     {
-        [_extraDeviceInformation setValue:deviceInfo.mdmId forKey:MSID_BROKER_MDM_ID_KEY];
+        [_extraDeviceInformation addEntriesFromDictionary:deviceInfo.extraDeviceInfo];
     }
+    
 }
 
 - (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
