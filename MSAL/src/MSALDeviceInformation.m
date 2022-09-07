@@ -36,7 +36,8 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
 
 @implementation MSALDeviceInformation
 {
-    NSMutableDictionary *_extraDeviceInformation;
+    // For readability, both keys and values in the output dictionary are NSString
+    NSMutableDictionary<NSString *,NSString *> *_extraDeviceInformation;
 }
 
 - (instancetype)init
