@@ -27,7 +27,7 @@
 
 #import <XCTest/XCTest.h>
 #import "MSALLegacySharedAccount.h"
-#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccountEnumerationParameters+Private.h"
 #import "MSALTestConstants.h"
 #import "MSIDTestBundle.h"
 #import "MSALAccount+Internal.h"
@@ -159,6 +159,21 @@
     params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
+}
+
+- (void)testMatchesParameters_whenIgnoreSignedInStatus_andAppSignedOut_shouldReturnYes
+{
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
+    
+    NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut"};
+    jsonDictionary[@"signInStatus"] = signinStatusDict;
+    
+    MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    params.ignoreSignedInStatus = YES;
+    BOOL result = [account matchesParameters:params];
+    XCTAssertTrue(result);
 }
 
 #pragma mark - updateAccountWithMSALAccount

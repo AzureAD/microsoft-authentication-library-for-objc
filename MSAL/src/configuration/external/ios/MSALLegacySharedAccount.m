@@ -24,7 +24,7 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
-#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccountEnumerationParameters+Private.h"
 #import <MSAL/MSAL.h>
 
 @interface MSALLegacySharedAccount()
@@ -117,6 +117,8 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
 {
+    if (parameters.ignoreSignedInStatus) return YES;
+    
     if (parameters.returnOnlySignedInAccounts)
     {
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
