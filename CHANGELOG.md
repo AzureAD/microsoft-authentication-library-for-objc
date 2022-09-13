@@ -1,6 +1,7 @@
 ##[TBD]
 * Expose extra deviceInfo
 * Ignore sign in status on account removal from ODSP cache #1541
+* Disable bitcode #1549
 
 ## [1.2.3]
 * Stop extra background tasks in the system webview case.
