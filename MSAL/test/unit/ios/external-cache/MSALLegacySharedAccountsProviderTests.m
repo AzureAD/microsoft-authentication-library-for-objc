@@ -449,6 +449,33 @@
     XCTAssertNil(v3Blob[accountId]);
 }
 
+- (void)testRemoveAccount_whenWipeAccountYES_whenAccountIsSignedOut_shouldRemoveEntireAccountBlob
+{
+    self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
+    
+    NSString *accountId = [NSUUID UUID].UUIDString;
+    NSMutableDictionary *singleAccountBlob = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"] mutableCopy];
+    singleAccountBlob[@"signInStatus"] = @{@"com.test.app": @"SignedOut"};
+    NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
+    [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
+    
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
+    NSError *error = nil;
+    BOOL result = [self.accountsProvider removeAccount:testAccount wipeAccount:YES tenantProfiles:nil error:&error];
+    
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+    
+    [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:1];
+    
+    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
+    XCTAssertNil(v2Blob[accountId]);
+    
+    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
+    XCTAssertNil(v3Blob[accountId]);
+}
+
 - (void)testRemoveAccount_whenWipeAccountNO_whenTenantProfilesPassed_andMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
 {
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
