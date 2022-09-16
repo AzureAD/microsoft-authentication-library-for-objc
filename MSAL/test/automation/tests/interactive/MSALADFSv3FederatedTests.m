@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALADFSBaseUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALADFSv3FederatedTests : MSALADFSBaseUITest

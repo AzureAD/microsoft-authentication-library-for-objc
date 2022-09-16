@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -19,13 +20,53 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-#import <XCTest/XCTest.h>
 
-@interface XCTestCase (TextFieldTap)
+#import "MSALTestsConfig.h"
 
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element;
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element app:(XCUIApplication *)application;
+@implementation MSALTestsConfig
+
++ (BOOL)supportsScopes
+{
+    return YES;
+}
+
++ (BOOL)supportsRTInHeders
+{
+    return NO;
+}
+
++ (BOOL)supportsSystemBrowser
+{
+    return YES;
+}
+
++ (BOOL)supportsTenantSpecificResultAuthority
+{
+    return YES;
+}
+
++ (BOOL)supportsSelectAccountPrompt
+{
+    return YES;
+}
+
++ (BOOL)supportsConsentPrompt
+{
+    return YES;
+}
+
+#pragma mark - Error codes
+
++ (NSInteger)userCanceledErrorCode
+{
+    return -50005; //MSALErrorUserCanceled
+}
+
++ (NSInteger)applicationCanceledErrorCode
+{
+    return -50005; //MSALErrorUserCanceled
+}
 
 @end
