@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -19,37 +20,24 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-#import "XCTestCase+TextFieldTap.h"
 
-@implementation XCTestCase (TextFieldTap)
+#import <Foundation/Foundation.h>
 
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element
-{
-    [self tapElementAndWaitForKeyboardToAppear:element app:[XCUIApplication new]];
-}
+NS_ASSUME_NONNULL_BEGIN
 
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element app:(XCUIApplication *)application
-{
-#if TARGET_OS_IPHONE
-    XCUIElement *keyboard = [[application keyboards] element];
+@interface MSALTestsConfig : NSObject
 
-    while (true)
-    {
-        [element pressForDuration:0.2f];
-
-        if (keyboard.exists
-            && keyboard.hittable)
-        {
-            sleep(0.2f);
-            break;
-        }
-
-        sleep(0.2f);
-    }
-#else
-#endif
-}
+@property (class, readonly) BOOL supportsScopes;
+@property (class, readonly) BOOL supportsRTInHeders;
+@property (class, readonly) BOOL supportsSystemBrowser;
+@property (class, readonly) BOOL supportsTenantSpecificResultAuthority;
+@property (class, readonly) BOOL supportsSelectAccountPrompt;
+@property (class, readonly) BOOL supportsConsentPrompt;
+@property (class, readonly) NSInteger userCanceledErrorCode;
+@property (class, readonly) NSInteger applicationCanceledErrorCode;
 
 @end
+
+NS_ASSUME_NONNULL_END

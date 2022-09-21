@@ -113,9 +113,9 @@
     NSDictionary *configuration = [self configWithTestRequest:request];
     [self readAccounts:configuration];
 
-    MSIDAutomationAccountsResult *result = [self automationAccountsResult];
+    MSIDAutomationAccountsResult *result = [self automationAccountsResult:self.testApp];
     XCTAssertEqual([result.accounts count], 2);
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
@@ -144,10 +144,10 @@
     [self selectAccountWithTitle:@"Use another account"];
 
     self.primaryAccount = self.testAccounts[1];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
+    [self aadEnterEmail:self.testApp];
+    [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
 }
 
 @end
