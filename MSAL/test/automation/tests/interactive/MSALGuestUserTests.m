@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALADFSBaseUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "NSString+MSIDAutomationUtils.h"
 #import "XCUIElement+CrossPlat.h"
 
@@ -70,11 +69,11 @@
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:request closeResultView:NO];
-    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
+    NSString *resultTenantId = [self automationSuccessResult:self.testApp].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 2. Run silent for the guest tenant
     request.homeAccountIdentifier = homeAccountId;
@@ -104,11 +103,11 @@
 
     // 1. Run interactive in the home tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:NO];
-    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
+    NSString *resultTenantId = [self automationSuccessResult:self.testApp].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.homeTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 2. Run silent for the home tenant
     homeRequest.homeAccountIdentifier = homeAccountId;
@@ -139,11 +138,11 @@
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:guestRequest closeResultView:NO];
-    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
+    NSString *resultTenantId = [self automationSuccessResult:self.testApp].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 2. Run interactive in the home tenant
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.homeTenantId];
@@ -173,7 +172,7 @@
 
     if (!request.loginHint)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
     [self enterGuestPassword];
@@ -188,7 +187,7 @@
 
     if (closeResultView)
     {
-        [self closeResultView];
+        [self closeResultPipeline:self.testApp];
     }
 
     return homeAccountId;

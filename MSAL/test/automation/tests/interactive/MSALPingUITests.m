@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseAADUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
 #import "NSString+MSIDAutomationUtils.h"
 
@@ -69,7 +68,7 @@
 
     if (!request.loginHint)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
     [self pingEnterUsername];
@@ -83,11 +82,11 @@
         [self acceptSpeedBump];
     }
 
-    [self assertAccessTokenNotNil];
+    [self assertAccessTokenNotNil:self.testApp];
     [self assertScopesReturned:[request.expectedResultScopes msidScopeSet].array];
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
     return homeAccountId;
 }
 
