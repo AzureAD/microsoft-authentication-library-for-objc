@@ -24,7 +24,6 @@
 #import "MSALBaseUITest.h"
 #import "NSDictionary+MSALiOSUITests.h"
 #import "MSIDTestConfigurationProvider.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "NSDictionary+MSALiOSUITests.h"
 #import "MSIDAADV1IdTokenClaims.h"
 #import "XCUIElement+CrossPlat.h"
@@ -44,7 +43,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super setUp];
         
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
-    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
+    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath testsConfig:self.testsConfig];
 }
 
 - (void)setUp
@@ -56,9 +55,10 @@ static MSIDTestConfigurationProvider *s_confProvider;
     
     self.testApp = [XCUIApplication new];
     [self.testApp launch];
-
-    [self clearKeychain];
-    [self clearCookies];
+    
+    [self cleanPipelines];
+    [self clearCache:self.testApp];
+    [self clearCookies:self.testApp];
 }
 
 - (void)tearDown
@@ -67,27 +67,17 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super tearDown];
 }
 
-+ (MSIDTestConfigurationProvider *)confProvider
-{
-    return s_confProvider;
-}
-
-+ (void)setConfProvider:(MSIDTestConfigurationProvider *)accountsProvider
-{
-    s_confProvider = accountsProvider;
-}
-
 #pragma mark - Asserts
 
 - (void)assertRefreshTokenInvalidated
 {
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     XCTAssertTrue(result.success);
 }
 
 - (void)assertAccessTokenExpired
 {
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     XCTAssertTrue(result.success);
     XCTAssertEqual(result.actionCount, 1);
 }
@@ -108,19 +98,19 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)assertErrorCode:(NSInteger)expectedErrorCode
 {
-    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    MSIDAutomationErrorResult *result = [self automationErrorResult:self.testApp];
     XCTAssertEqual(expectedErrorCode, result.errorCode);
 }
 
 - (void)assertInternalErrorCode:(NSInteger)internalErrorCode
 {
-    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    MSIDAutomationErrorResult *result = [self automationErrorResult:self.testApp];
     XCTAssertEqual(internalErrorCode, [result.errorUserInfo[MSALInternalErrorCodeKey] integerValue]);
 }
 
 - (void)assertErrorDescription:(NSString *)errorDescription
 {
-    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    MSIDAutomationErrorResult *result = [self automationErrorResult:self.testApp];
     NSString *actualContent = result.errorDescription;
     XCTAssertNotEqual([actualContent length], 0);
     XCTAssertTrue([actualContent containsString:errorDescription]);
@@ -128,22 +118,14 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)assertErrorSubcode:(NSString *)errorSubcode
 {
-    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    MSIDAutomationErrorResult *result = [self automationErrorResult:self.testApp];
     NSString *actualSubCode = result.errorUserInfo[@"MSALOAuthSubErrorKey"];
     XCTAssertEqualObjects(errorSubcode, actualSubCode);
 }
 
-- (void)assertAccessTokenNotNil
-{
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
-
-    XCTAssertTrue([result.accessToken length] > 0);
-    XCTAssertTrue(result.success);
-}
-
 - (void)assertScopesReturned:(NSArray *)expectedScopes
 {
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSOrderedSet *resultScopes = [NSOrderedSet msidOrderedSetFromString:result.target normalize:YES];
 
     for (NSString *expectedScope in expectedScopes)
@@ -156,148 +138,13 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     if (!expectedAuthority) return;
 
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult:self.testApp];
     NSString *resultAuthority = result.authority;
     
     XCTAssertEqualObjects(expectedAuthority, resultAuthority);
 }
 
-- (NSDictionary *)resultIDTokenClaims
-{
-    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
-
-    NSString *idToken = result.idToken;
-    XCTAssertTrue([idToken length] > 0);
-
-    MSIDIdTokenClaims *idTokenClaims = [MSIDAADIdTokenClaimsFactory claimsFromRawIdToken:idToken error:nil];
-    return [idTokenClaims jsonDictionary];
-}
-
-#pragma mark - API fetch
-
-- (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest
-{
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Get configuration"];
-    
-    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationApplication.class];
-    
-    [self.class.confProvider.operationAPIRequestHandler executeAPIRequest:appRequest
-                                                          responseHandler:responseHandler
-                                                        completionHandler:^(id result, __unused NSError *error)
-    {
-        XCTAssertNotNil(result);
-        XCTAssertTrue([result isKindOfClass:[NSArray class]]);
-        
-        NSArray *results = (NSArray *)result;
-        XCTAssertTrue(results.count >= 1);
-        self.testApplication = results[0];
-        self.testApplication.redirectUriPrefix = self.redirectUriPrefix;
-        [expectation fulfill];
-    }];
-
-    [self waitForExpectationsWithTimeout:60 handler:nil];
-}
-
-- (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
-{
-    NSArray *accounts = [self loadTestAccountRequest:accountRequest];
-    self.primaryAccount = accounts[0];
-    self.testAccounts = accounts;
-}
-
-- (NSArray *)loadTestAccountRequest:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
-{
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Get account"];
-    
-    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
-    
-    __block NSArray *results = nil;
-    
-    [self.class.confProvider.operationAPIRequestHandler executeAPIRequest:accountRequest
-                                                          responseHandler:responseHandler
-                                                        completionHandler:^(id result, __unused NSError *error)
-    {
-        XCTAssertNotNil(result);
-        XCTAssertTrue([result isKindOfClass:[NSArray class]]);
-        
-        results = (NSArray *)result;
-        XCTAssertTrue(results.count >= 1);
-        
-        XCTestExpectation *passwordLoadExpecation = [self expectationWithDescription:@"Get password"];
-        passwordLoadExpecation.expectedFulfillmentCount = results.count;
-        
-        for (MSIDTestAutomationAccount *account in results)
-        {
-            [self.class.confProvider.passwordRequestHandler loadPasswordForTestAccount:account
-                                                                     completionHandler:^(NSString *password, __unused NSError *error)
-            {
-                XCTAssertNotNil(password);
-                [passwordLoadExpecation fulfill];
-            }];
-        }
-        
-        [self waitForExpectations:@[passwordLoadExpecation] timeout:60];
-        [expectation fulfill];
-    }];
-
-    [self waitForExpectations:@[expectation] timeout:120];
-    return results;
-}
-
-- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests
-{
-    NSMutableArray *allAccounts = [NSMutableArray new];
-    
-    for (MSIDTestAutomationAccountConfigurationRequest *request in accountRequests)
-    {
-        NSArray *accounts = [self loadTestAccountRequest:request];
-        if (accounts)
-        {
-            [allAccounts addObjectsFromArray:accounts];
-        }
-    }
-    
-    XCTAssertTrue(allAccounts.count >= 1);
-    
-    self.primaryAccount = allAccounts[0];
-    self.testAccounts = allAccounts;
-}
-
 #pragma mark - Actions
-
-- (void)aadEnterEmail
-{
-    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn] app:self.testApp];
-}
-
-- (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app
-{
-    XCUIElement *emailTextField = [app.textFields elementBoundByIndex:0];
-    [self waitForElement:emailTextField];
-    if ([email isEqualToString:emailTextField.value])
-    {
-        return;
-    }
-
-    [emailTextField msidTap];
-    [emailTextField typeText:email];
-}
-
-- (void)aadEnterPassword
-{
-    [self aadEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] app:self.testApp];
-}
-
-- (void)aadEnterPassword:(NSString *)password app:(XCUIApplication *)app
-{
-    // Enter password
-    XCUIElement *passwordTextField = app.secureTextFields.firstMatch;
-    [self waitForElement:passwordTextField];
-    sleep(0.1f);
-    [passwordTextField msidTap];
-    sleep(0.1f);
-    [passwordTextField typeText:password];
-}
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView
 {
@@ -348,19 +195,6 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }
 }
 
-- (void)adfsEnterPassword
-{
-    [self adfsEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] app:self.testApp];
-}
-
-- (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app
-{
-    XCUIElement *passwordTextField = app.secureTextFields[@"Password"];
-    [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:app];
-    [passwordTextField typeText:password];
-}
-
 - (void)closeAuthUIUsingWebViewType:(MSIDWebviewType)webViewType
                     passedInWebView:(BOOL)usesPassedInWebView
 {
@@ -386,113 +220,39 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }
 }
 
-- (void)closeResultView
-{
-    [self.testApp.buttons[@"Done"] msidTap];
-}
-
 - (void)invalidateRefreshToken:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_INVALIDATE_RT_ACTION_IDENTIFIER withConfig:config];
+    [self performAction:MSID_AUTO_INVALIDATE_RT_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)expireAccessToken:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_EXPIRE_AT_ACTION_IDENTIFIER withConfig:config];
+    [self performAction:MSID_AUTO_EXPIRE_AT_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)acquireToken:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_ACTION_IDENTIFIER withConfig:config];
+    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)acquireTokenSilent:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_SILENT_ACTION_IDENTIFIER withConfig:config];
-}
-
-- (void)clearKeychain
-{
-    [self.testApp.buttons[MSID_AUTO_CLEAR_CACHE_ACTION_IDENTIFIER] msidTap];
-    [self waitForElement:self.testApp.buttons[@"Done"]];
-    [self.testApp.buttons[@"Done"] msidTap];
-}
-
-- (void)clearCookies
-{
-    [self.testApp.buttons[MSID_AUTO_CLEAR_COOKIES_ACTION_IDENTIFIER] msidTap];
-    [self waitForElement:self.testApp.buttons[@"Done"]];
-    [self.testApp.buttons[@"Done"] msidTap];
+    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_SILENT_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)openURL:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_OPEN_URL_ACTION_IDENTIFIER withConfig:config];
+    [self performAction:MSID_AUTO_OPEN_URL_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)signout:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_REMOVE_ACCOUNT_ACTION_IDENTIFIER withConfig:config];
+    [self performAction:MSID_AUTO_REMOVE_ACCOUNT_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 - (void)readAccounts:(NSDictionary *)config
 {
-    [self performAction:MSID_AUTO_READ_ACCOUNTS_ACTION_IDENTIFIER withConfig:config];
-}
-
-#pragma mark - Helpers
-
-- (void)performAction:(NSString *)action
-           withConfig:(NSDictionary *)config
-{
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[action] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
-}
-
-- (MSIDAutomationErrorResult *)automationErrorResult
-{
-    MSIDAutomationErrorResult *result = [[MSIDAutomationErrorResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
-    XCTAssertNotNil(result);
-    XCTAssertFalse(result.success);
-    return result;
-}
-
-- (MSIDAutomationSuccessResult *)automationSuccessResult
-{
-    MSIDAutomationSuccessResult *result = [[MSIDAutomationSuccessResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
-    XCTAssertNotNil(result);
-    XCTAssertTrue(result.success);
-    return result;
-}
-
-- (MSIDAutomationAccountsResult *)automationAccountsResult
-{
-    MSIDAutomationAccountsResult *result = [[MSIDAutomationAccountsResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
-    XCTAssertNotNil(result);
-    XCTAssertTrue(result.success);
-    return result;
-}
-
-- (NSDictionary *)automationResultDictionary
-{
-    XCUIElement *resultTextView = self.testApp.textViews[@"resultInfo"];
-    [self waitForElement:resultTextView];
-
-    NSError *error = nil;
-    NSData *data = [resultTextView.value dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-    return result;
-}
-
-- (void)waitForElement:(id)object
-{
-    NSPredicate *existsPredicate = [NSPredicate predicateWithFormat:@"exists == 1"];
-    [self expectationForPredicate:existsPredicate evaluatedWithObject:object handler:nil];
-    [self waitForExpectationsWithTimeout:60.0f handler:nil];
+    [self performAction:MSID_AUTO_READ_ACCOUNTS_ACTION_IDENTIFIER config:config application:self.testApp];
 }
 
 #pragma mark - Config
@@ -501,6 +261,15 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request appConfig:self.testApplication];
     return updatedRequest.jsonDictionary;
+}
+
++ (MSIDTestsConfig *)testsConfig
+{
+    __auto_type config = [MSIDTestsConfig new];
+    config.scopesSupported = YES;
+    config.tenantSpecificResultAuthoritySupported = YES;
+    
+    return config;
 }
 
 @end

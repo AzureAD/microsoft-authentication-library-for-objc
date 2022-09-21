@@ -1,7 +1,9 @@
-##[TBD]
-* Expose extra deviceInfo.
-* Ignore sign in status on account removal from ODSP cache #1541
+## [TBD]
 * Allow adding additional query string parameters when opening the browser. (#1539)
+
+## [1.2.4]
+* Expose extra deviceInfo
+* Ignore sign in status on account removal from ODSP cache #1541
 
 ## [1.2.3]
 * Stop extra background tasks in the system webview case.
