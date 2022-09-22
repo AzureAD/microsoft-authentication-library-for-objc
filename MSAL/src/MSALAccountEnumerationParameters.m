@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccountEnumerationParameters+Private.h"
 
 @interface MSALAccountEnumerationParameters()
 
