@@ -1576,6 +1576,54 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
 }
 
+- (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
+                                  forTenantID: (nullable NSString *)tenantID
+                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock {
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
+    
+    __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(deviceInformation, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(deviceInformation, msalError);
+        }
+    };
+        
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"GetDeviceInfo: Error when creating requestParams: %@", requestParamsError);
+        block(nil, requestParamsError);
+        return;
+    }
+    
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams tenantID:tenantID completionBlock:block];
+}
+
 - (BOOL)isCompatibleAADBrokerAvailable
 {
 #if TARGET_OS_IPHONE

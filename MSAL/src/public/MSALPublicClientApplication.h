@@ -468,6 +468,13 @@
                            completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
 
 /**
+   Reads device information from the authentication broker if present on the device for a specific tenantID
+*/
+- (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
+                                  forTenantID: (nullable NSString *)tenantID
+                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
+
+/**
    A boolean indicates if a compatible broker is present in device for AAD requests.
 */
 @property (readonly) BOOL isCompatibleAADBrokerAvailable;
