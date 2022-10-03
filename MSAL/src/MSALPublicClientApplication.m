@@ -1536,9 +1536,9 @@
                              completionBlock:completionBlock];
 }
 
-- (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
-                                  forTenantID: (nullable NSString *)tenantID
-                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock {
+- (void)getMetaDataDeviceInformationWithParameters:(nullable MSALParameters *)parameters
+                                       forTenantID: (nullable NSString *)tenantID
+                                   completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
     
     __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
@@ -1582,7 +1582,7 @@
     
     MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
     if (tenantID) {
-        [deviceInfoProvider deviceInfoWithRequestParameters:requestParams tenantID:tenantID completionBlock:block];
+        [deviceInfoProvider metaDataDeviceInfoWithRequestParameters:requestParams tenantID:tenantID completionBlock:block];
     } else {
         [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
     }

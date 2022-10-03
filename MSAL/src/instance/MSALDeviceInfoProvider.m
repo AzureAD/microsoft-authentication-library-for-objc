@@ -41,14 +41,14 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    [self deviceInfoWithRequestParameters:requestParameters
-                                 tenantID:nil
-                          completionBlock:completionBlock];
+    [self metaDataDeviceInfoWithRequestParameters:requestParameters
+                                         tenantID:nil
+                                  completionBlock:completionBlock];
 }
 
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                               tenantID: (nullable NSString *)tenantID
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
+- (void)metaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                                       tenantID: (nullable NSString *)tenantID
+                                completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
     void (^fillDeviceInfoCompletionBlock)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
     {
@@ -78,13 +78,12 @@
         completionBlock(nil, error);
         return;
     }
-
     BOOL canCallSSOExtension = NO;
     if (@available(iOS 13.0, macOS 10.15, *))
     {
-        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
+        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest] && !tenantID;
     }
-    
+
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
     if (!canCallSSOExtension)
     {

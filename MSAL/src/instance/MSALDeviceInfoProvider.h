@@ -37,9 +37,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
 
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                               tenantID: (nullable NSString *)tenantID
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
+- (void)metaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                                       tenantID: (nullable NSString *)tenantID
+                                completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
 
 @end
 
