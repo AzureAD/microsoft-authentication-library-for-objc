@@ -83,7 +83,13 @@ jobs:
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
-            
+  - task: Bash@3
+    displayName: Delete previous run results
+    inputs:
+      targetType: 'inline'
+      script: |
+        # If failed job is asked to re-run, it runs in the same pipeline and previous failed result might be present. Need to delete it to publish new results.
+        rm -f $(Agent.BuildDirectory)/s/test_output/*        
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
     inputs:
