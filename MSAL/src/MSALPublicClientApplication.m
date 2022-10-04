@@ -1531,14 +1531,6 @@
 - (void)getDeviceInformationWithParameters:(MSALParameters *)parameters
                            completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    [self getDeviceInformationWithParameters: parameters
-                                 forTenantID: nil
-                             completionBlock:completionBlock];
-}
-
-- (void)getMetaDataDeviceInformationWithParameters:(nullable MSALParameters *)parameters
-                                       forTenantID: (nullable NSString *)tenantID
-                                   completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
     
     __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
@@ -1581,11 +1573,55 @@
     }
     
     MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
-    if (tenantID) {
-        [deviceInfoProvider metaDataDeviceInfoWithRequestParameters:requestParams tenantID:tenantID completionBlock:block];
-    } else {
-        [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
+}
+
+- (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
+                               forTenantId: (nullable NSString *)tenantId
+                           completionBlock:(nonnull WPJMetaDataCompletionBlock)completionBlock {
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying WPJ MetaData");
+    
+    __auto_type block = ^(WPJMetaData * _Nullable wpjMetaData, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved metadata device info %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getWPJMetaDataDeviceWithParameters" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(wpjMetaData, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(wpjMetaData, msalError);
+        }
+    };
+        
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"getWPJMetaDataDeviceWithParameters: Error when creating requestParams: %@", requestParamsError);
+        block(nil, requestParamsError);
+        return;
     }
+    
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams tenantId:tenantId completionBlock:block];
 }
 
 - (BOOL)isCompatibleAADBrokerAvailable

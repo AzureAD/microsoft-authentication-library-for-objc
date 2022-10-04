@@ -334,6 +334,8 @@
 		96CFA00B1E6E3460003BFCDC /* MSALTestAppScopesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96CFA0091E6E3454003BFCDC /* MSALTestAppScopesViewController.m */; };
 		96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */ = {isa = PBXBuildFile; fileRef = 96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96D9A54A1E4AB23100674A85 /* MSALTelemetry.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5471E4AB22900674A85 /* MSALTelemetry.m */; };
+		9DA6473E28EC303D0014F44F /* WPJMetaData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DA6473D28EC303D0014F44F /* WPJMetaData.m */; };
+		9DA6473F28EC303D0014F44F /* WPJMetaData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DA6473D28EC303D0014F44F /* WPJMetaData.m */; };
 		A0274CBE24B432B100BD198D /* MSALAuthSchemeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A0274CBD24B432B100BD198D /* MSALAuthSchemeTests.m */; };
 		A0274CBF24B432B100BD198D /* MSALAuthSchemeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A0274CBD24B432B100BD198D /* MSALAuthSchemeTests.m */; };
 		A0274CD824B54A4E00BD198D /* MSALDevicePopManagerUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = A0274CD724B54A4E00BD198D /* MSALDevicePopManagerUtil.m */; };
@@ -1249,6 +1251,8 @@
 		96CFA0091E6E3454003BFCDC /* MSALTestAppScopesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppScopesViewController.m; sourceTree = "<group>"; };
 		96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetry.h; sourceTree = "<group>"; };
 		96D9A5471E4AB22900674A85 /* MSALTelemetry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetry.m; sourceTree = "<group>"; };
+		9DA6473528EC2FF10014F44F /* WPJMetaData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WPJMetaData.h; sourceTree = "<group>"; };
+		9DA6473D28EC303D0014F44F /* WPJMetaData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WPJMetaData.m; sourceTree = "<group>"; };
 		A0274CBD24B432B100BD198D /* MSALAuthSchemeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthSchemeTests.m; sourceTree = "<group>"; };
 		A0274CD724B54A4E00BD198D /* MSALDevicePopManagerUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDevicePopManagerUtil.m; sourceTree = "<group>"; };
 		A0274CDA24B54A7000BD198D /* MSALDevicePopManagerUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALDevicePopManagerUtil.h; sourceTree = "<group>"; };
@@ -2153,6 +2157,7 @@
 				D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */,
 				D62746D11E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h */,
 				B253151823DD607600432133 /* MSALDeviceInformation.m */,
+				9DA6473D28EC303D0014F44F /* WPJMetaData.m */,
 				B253153423DD692600432133 /* MSALDeviceInformation+Internal.h */,
 				9626D153225835D50019417B /* configuration */,
 				D65A6F791E3FF3D900C69FBA /* MSALResult.m */,
@@ -2227,6 +2232,7 @@
 				B27CCDF0229F9F4700CAD565 /* MSALAccountEnumerationParameters.h */,
 				B2968C4122F24259005AFC33 /* ios */,
 				B253151723DD607600432133 /* MSALDeviceInformation.h */,
+				9DA6473528EC2FF10014F44F /* WPJMetaData.h */,
 				1EE776BC246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h */,
 				1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */,
 			);
@@ -3822,6 +3828,7 @@
 				D61BD2B31EBD09F90007E484 /* MSALPromptType.m in Sources */,
 				B28BBD352211DC7D00F51723 /* MSALPublicClientStatusNotifications.m in Sources */,
 				23A68A8220F538DE0071E435 /* MSALADFSAuthority.m in Sources */,
+				9DA6473E28EC303D0014F44F /* WPJMetaData.m in Sources */,
 				B29A56C222826EE20023F5E6 /* MSALSerializedADALCacheProvider.m in Sources */,
 				B2C0E79F23AC7996006C9CAD /* MSALParameters.m in Sources */,
 				B21E07B3210E542C007E3A3C /* MSALRedirectUriVerifier.m in Sources */,
@@ -3879,6 +3886,7 @@
 				B26756C122921A71000F01D7 /* MSALOauth2Provider.m in Sources */,
 				D673F0921E4CE6D70018BA91 /* MSALPublicClientApplication.m in Sources */,
 				B253153323DD684E00432133 /* MSALSSOExtensionRequestHandler.m in Sources */,
+				9DA6473F28EC303D0014F44F /* WPJMetaData.m in Sources */,
 				B2C17B0B1FC8DB2E0070A514 /* MSIDVersion.m in Sources */,
 				1E72193C24773D1B00AB9B67 /* MSALHttpMethod.m in Sources */,
 				96B5E6D12256D152002232F9 /* MSALCacheConfig.m in Sources */,

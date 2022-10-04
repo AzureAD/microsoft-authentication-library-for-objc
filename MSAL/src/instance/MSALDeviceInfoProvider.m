@@ -41,15 +41,6 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
 {
-    [self metaDataDeviceInfoWithRequestParameters:requestParameters
-                                         tenantID:nil
-                                  completionBlock:completionBlock];
-}
-
-- (void)metaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                                       tenantID: (nullable NSString *)tenantID
-                                completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
-{
     void (^fillDeviceInfoCompletionBlock)(MSALDeviceInformation *, NSError *) = ^void(MSALDeviceInformation *msalDeviceInfo, NSError *error)
     {
         if (!msalDeviceInfo)
@@ -57,12 +48,8 @@
             msalDeviceInfo = [MSALDeviceInformation new];
         }
         
-        if (tenantID) {
-            NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil tenantID:tenantID];
-        } else {
-            NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
-        }
-          if (deviceRegMetaDataInfo)
+        NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+        if (deviceRegMetaDataInfo)
         {
             [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
         }
@@ -81,7 +68,7 @@
     BOOL canCallSSOExtension = NO;
     if (@available(iOS 13.0, macOS 10.15, *))
     {
-        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest] && !tenantID;
+        canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
     }
 
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
@@ -135,6 +122,41 @@
             return;
         }];
     }
+}
+
+- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                                          tenantId:(nullable NSString *)tenantId
+                                   completionBlock:(WPJMetaDataCompletionBlock)completionBlock
+{
+    void (^fillDeviceInfoCompletionBlock)(WPJMetaData *, NSError *) = ^void(WPJMetaData *wpjMetaData, NSError *error)
+    {
+        if (!wpjMetaData)
+        {
+            wpjMetaData = [WPJMetaData new];
+        }
+        
+        NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil tenantId:tenantId];
+        if (deviceRegMetaDataInfo)
+        {
+            [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
+        }
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"wpjMetaDataDeviceInfo: Completing filling device info: %@, error: %@", MSID_PII_LOG_MASKABLE(wpjMetaData), MSID_PII_LOG_MASKABLE(error));
+        completionBlock(wpjMetaData, error);
+    };
+    
+    if (![requestParameters shouldUseBroker])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Should use broker decision: %i", NO);
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
+        completionBlock(nil, error);
+        return;
+    }
+    BOOL canCallSSOExtension = NO;
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
+
+    fillDeviceInfoCompletionBlock(nil, nil);
+    return;
 }
 
 @end

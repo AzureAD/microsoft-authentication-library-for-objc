@@ -25,22 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALSSOExtensionRequestHandler.h"
+#import "WPJMetaData.h"
+#import "MSALDeviceInformation+Internal.h"
+#import "MSIDDeviceInfo.h"
+#import <AuthenticationServices/AuthenticationServices.h>
+#import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
+#import "MSIDBrokerConstants.h"
 
-@class MSIDRequestParameters;
+@implementation WPJMetaData
+{
+    // For readability, both keys and values in the output dictionary are NSString
+    NSMutableDictionary<NSString *,NSString *> *_extraDeviceInformation;
+}
 
-NS_ASSUME_NONNULL_BEGIN
+- (instancetype)init
+{
+    self = [super init];
 
-@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
+    if (self)
+    {
+        _extraDeviceInformation = [NSMutableDictionary new];
+    }
 
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
+    return self;
+}
 
-- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                                          tenantId:(nullable NSString *)tenantId
-                                   completionBlock:(WPJMetaDataCompletionBlock)completionBlock;
+- (NSDictionary *)extraDeviceInformation
+{
+    return _extraDeviceInformation;
+}
+
+- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+{
+    [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

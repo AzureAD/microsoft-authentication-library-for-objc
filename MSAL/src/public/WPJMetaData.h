@@ -26,21 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALSSOExtensionRequestHandler.h"
-
-@class MSIDRequestParameters;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
-
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
-
-- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                                          tenantId:(nullable NSString *)tenantId
-                                   completionBlock:(WPJMetaDataCompletionBlock)completionBlock;
-
+/**
+ Metadata about the WPJ user that is applicable to MSAL scenarios.
+*/
+@interface WPJMetaData : NSObject
 @end
 
 NS_ASSUME_NONNULL_END

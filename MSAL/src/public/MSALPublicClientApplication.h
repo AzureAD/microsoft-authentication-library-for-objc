@@ -468,11 +468,11 @@
                            completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
 
 /**
-   Reads metadata device information (UPN, tenant ID, devcie ID) from the authentication broker if present on the device for a specific tenantID
+   Reads WPJ metadata  (UPN, tenant ID, deviCe ID) from the authentication broker if present on the device for a specific tenantId
 */
-- (void)getMetaDataDeviceInformationWithParameters:(nullable MSALParameters *)parameters
-                                       forTenantID: (nullable NSString *)tenantID
-                                   completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
+- (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
+                               forTenantId:(nullable NSString *)tenantId
+                           completionBlock:(nonnull WPJMetaDataCompletionBlock)completionBlock;
 
 /**
    A boolean indicates if a compatible broker is present in device for AAD requests.
