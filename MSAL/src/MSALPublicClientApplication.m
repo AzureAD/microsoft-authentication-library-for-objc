@@ -1577,11 +1577,12 @@
 }
 
 - (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
-                               forTenantId: (nullable NSString *)tenantId
-                           completionBlock:(nonnull WPJMetaDataCompletionBlock)completionBlock {
+                               forTenantId:(nullable NSString *)tenantId
+                           completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock
+{
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying WPJ MetaData");
     
-    __auto_type block = ^(WPJMetaData * _Nullable wpjMetaData, NSError * _Nullable msidError)
+    __auto_type block = ^(MSALWPJMetaData * _Nullable wpjMetaData, NSError * _Nullable msidError)
     {
         NSError *msalError = nil;
         

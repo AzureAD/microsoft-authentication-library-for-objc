@@ -472,7 +472,7 @@
 */
 - (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
                                forTenantId:(nullable NSString *)tenantId
-                           completionBlock:(nonnull WPJMetaDataCompletionBlock)completionBlock;
+                           completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock;
 
 /**
    A boolean indicates if a compatible broker is present in device for AAD requests.

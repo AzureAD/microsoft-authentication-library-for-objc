@@ -31,6 +31,7 @@
 #import "MSIDSSOExtensionGetDeviceInfoRequest.h"
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALDeviceInformation+Internal.h"
+#import "MSALWPJMetaData.h"
 
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtil.h"
@@ -47,7 +48,6 @@
         {
             msalDeviceInfo = [MSALDeviceInformation new];
         }
-        
         NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
         if (deviceRegMetaDataInfo)
         {
@@ -126,13 +126,13 @@
 
 - (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                                           tenantId:(nullable NSString *)tenantId
-                                   completionBlock:(WPJMetaDataCompletionBlock)completionBlock
+                                   completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock
 {
-    void (^fillDeviceInfoCompletionBlock)(WPJMetaData *, NSError *) = ^void(WPJMetaData *wpjMetaData, NSError *error)
+    void (^fillDeviceInfoCompletionBlock)(MSALWPJMetaData *, NSError *) = ^void(MSALWPJMetaData *wpjMetaData, NSError *error)
     {
         if (!wpjMetaData)
         {
-            wpjMetaData = [WPJMetaData new];
+            wpjMetaData = [MSALWPJMetaData new];
         }
         
         NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil tenantId:tenantId];

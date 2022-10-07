@@ -25,39 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import "WPJMetaData.h"
-#import "MSALDeviceInformation+Internal.h"
-#import "MSIDDeviceInfo.h"
-#import <AuthenticationServices/AuthenticationServices.h>
-#import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
-#import "MSIDBrokerConstants.h"
+#import <Foundation/Foundation.h>
 
-@implementation WPJMetaData
-{
-    // For readability, both keys and values in the output dictionary are NSString
-    NSMutableDictionary<NSString *,NSString *> *_extraDeviceInformation;
-}
+NS_ASSUME_NONNULL_BEGIN
 
-- (instancetype)init
-{
-    self = [super init];
+/**
+ Metadata about the WPJ user that is applicable to MSAL scenarios.
+*/
+@interface MSALWPJMetaData : NSObject
 
-    if (self)
-    {
-        _extraDeviceInformation = [NSMutableDictionary new];
-    }
+/**
+ Additional device information
+*/
+@property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
 
-    return self;
-}
+- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
 
-- (NSDictionary *)extraDeviceInformation
-{
-    return _extraDeviceInformation;
-}
-
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
-{
-    [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
-}
 
 @end
+
+NS_ASSUME_NONNULL_END

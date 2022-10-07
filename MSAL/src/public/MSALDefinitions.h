@@ -31,7 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALDeviceInformation;
-@class WPJMetaData;
+@class MSALWPJMetaData;
 
 /**
  Levels of logging. Defines the priority of the logged message
@@ -187,7 +187,7 @@ typedef void (^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nu
 /**
    The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
 */
-typedef void (^WPJMetaDataCompletionBlock)(WPJMetaData * _Nullable WPJMetaDataInformation, NSError * _Nullable error);
+typedef void (^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error);
 
 /**
  The block that returns a MSAL log message.
