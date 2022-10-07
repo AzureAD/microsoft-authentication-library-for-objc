@@ -26,11 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALWPJMetaData.h"
-#import "MSALDeviceInformation+Internal.h"
-#import "MSIDDeviceInfo.h"
-#import <AuthenticationServices/AuthenticationServices.h>
-#import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
-#import "MSIDBrokerConstants.h"
 
 @implementation MSALWPJMetaData
 {
