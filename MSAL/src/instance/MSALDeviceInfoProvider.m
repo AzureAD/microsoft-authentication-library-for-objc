@@ -48,6 +48,7 @@
         {
             msalDeviceInfo = [MSALDeviceInformation new];
         }
+
         NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
         if (deviceRegMetaDataInfo)
         {
@@ -65,12 +66,12 @@
         completionBlock(nil, error);
         return;
     }
+
     BOOL canCallSSOExtension = NO;
     if (@available(iOS 13.0, macOS 10.15, *))
     {
         canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
     }
-
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
     if (!canCallSSOExtension)
     {
