@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 */
 @property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
 
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
 
 
 @end

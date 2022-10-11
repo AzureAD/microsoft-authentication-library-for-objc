@@ -1567,7 +1567,7 @@
     
     if (!requestParams)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"GetDeviceInfo: Error when creating requestParams: %@", requestParamsError);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"GetDeviceInfo: Error when creating requestParams: %@", requestParamsError);
         block(nil, requestParamsError);
         return;
     }
@@ -1616,7 +1616,7 @@
     
     if (!requestParams)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"getWPJMetaDataDeviceWithParameters: Error when creating requestParams: %@", requestParamsError);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"getWPJMetaDataDeviceWithParameters: Error when creating requestParams: %@", requestParamsError);
         block(nil, requestParamsError);
         return;
     }

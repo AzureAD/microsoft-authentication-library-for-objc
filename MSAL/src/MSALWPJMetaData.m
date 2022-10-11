@@ -50,7 +50,7 @@
     return _extraDeviceInformation;
 }
 
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
 {
     [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
 }

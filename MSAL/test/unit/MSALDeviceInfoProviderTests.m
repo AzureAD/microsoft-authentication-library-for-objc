@@ -30,6 +30,7 @@
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALDeviceInformation.h"
 #import "MSIDWorkPlaceJoinUtil.h"
+#import "MSALWPJMetaData.h"
 
 @interface MSALDeviceInfoProviderTests : XCTestCase
 
@@ -88,6 +89,56 @@
     }];
     
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
+}
+
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device info"];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams
+                                                          tenantId:nil
+                                                   completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        [expectation fulfill];
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        [msalPJMetaDataInformation addRegisteredDeviceMetadataInformation:extraDeviceInfoDict];
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device info"];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams
+                                                          tenantId:@"tenantId"
+                                                   completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        [expectation fulfill];
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        [msalPJMetaDataInformation addRegisteredDeviceMetadataInformation:extraDeviceInfoDict];
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
 }
 
 - (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo API_AVAILABLE(ios(13.0), macos(10.15))

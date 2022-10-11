@@ -83,11 +83,13 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALDeviceInformation+Internal.h"
+#import "MSALWPJMetaData.h"
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
 #import "MSIDWorkPlaceJoinConstants.h"
+#import "MSIDWorkPlaceJoinUtilBase.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -2519,6 +2521,72 @@
     }];
     
     [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:nil
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        [msalPJMetaDataInformation addRegisteredDeviceMetadataInformation:extraDeviceInfoDict];
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:@"tenantId"
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        [msalPJMetaDataInformation addRegisteredDeviceMetadataInformation:extraDeviceInfoDict];
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
 }
 
 #pragma mark - Get current account

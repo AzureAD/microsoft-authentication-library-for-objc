@@ -147,16 +147,6 @@
         completionBlock(wpjMetaData, error);
     };
     
-    if (![requestParameters shouldUseBroker])
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Should use broker decision: %i", NO);
-        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
-        completionBlock(nil, error);
-        return;
-    }
-    BOOL canCallSSOExtension = NO;
-    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
-
     fillDeviceInfoCompletionBlock(nil, nil);
     return;
 }
