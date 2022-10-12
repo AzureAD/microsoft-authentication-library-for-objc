@@ -750,6 +750,8 @@
 		B2E2A94C2393192700BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2E2A9412393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m */; };
 		B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */; };
 		B2F45738211D376F00818910 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
+		B2FBB3DA28F72A5700A3591C /* MSALWPJMetaData+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2FBB3D228F72A5700A3591C /* MSALWPJMetaData+Internal.h */; };
+		B2FBB3DB28F72A5700A3591C /* MSALWPJMetaData+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2FBB3D228F72A5700A3591C /* MSALWPJMetaData+Internal.h */; };
 		B2FE601B20E5BB5800502BA6 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D61A64941E5AA7D60086D120 /* MSALTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64801E5AA7C60086D120 /* MSALTestAppDelegate.m */; };
 		D61A64951E5AA7D60086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64811E5AA7C60086D120 /* main.m */; };
@@ -1412,6 +1414,7 @@
 		B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALBaseAADUITest.m; sourceTree = "<group>"; };
 		B2F4572F211C0B5C00818910 /* MSALBaseAADUITest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALBaseAADUITest.h; sourceTree = "<group>"; };
 		B2F45744211E41C100818910 /* MSALB2CInteractiveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALB2CInteractiveTests.m; sourceTree = "<group>"; };
+		B2FBB3D228F72A5700A3591C /* MSALWPJMetaData+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALWPJMetaData+Internal.h"; sourceTree = "<group>"; };
 		D61A63F11E5979200086D120 /* MSALResult+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALResult+Internal.h"; sourceTree = "<group>"; };
 		D61A64331E5A29580086D120 /* MSAL Test App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__test_app__ios.xcconfig; sourceTree = "<group>"; };
@@ -2158,6 +2161,7 @@
 				D65A6F771E3FF3D900C69FBA /* MSALLogger.m */,
 				D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */,
 				D62746D11E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h */,
+				B2FBB3D228F72A5700A3591C /* MSALWPJMetaData+Internal.h */,
 				9D292B0F28F05696007FE93C /* MSALWPJMetaData.m */,
 				B253151823DD607600432133 /* MSALDeviceInformation.m */,
 				B253153423DD692600432133 /* MSALDeviceInformation+Internal.h */,
@@ -2776,6 +2780,7 @@
 				96CF95232268FD0500D97374 /* MSALAuthority.h in Headers */,
 				B27CCDF2229F9F4700CAD565 /* MSALAccountEnumerationParameters.h in Headers */,
 				963377BF211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
+				B2FBB3DA28F72A5700A3591C /* MSALWPJMetaData+Internal.h in Headers */,
 				9D02FCAF28EF33F8003F791C /* MSALWPJMetaData.h in Headers */,
 				B223B0C522AE215D00FB8713 /* MSALLegacySharedAccountFactory.h in Headers */,
 				B273D0B7226E8597005A7BB4 /* MSALPublicClientApplication+Internal.h in Headers */,
@@ -2849,6 +2854,7 @@
 				B28BBD342211DC7D00F51723 /* MSALPublicClientStatusNotifications.h in Headers */,
 				232D68DD223DBA0700594BBD /* MSALInteractiveTokenParameters.h in Headers */,
 				B26756C522921C42000F01D7 /* MSALAADOauth2Provider.h in Headers */,
+				B2FBB3DB28F72A5700A3591C /* MSALWPJMetaData+Internal.h in Headers */,
 				B27CCDE1229F65D700CAD565 /* MSALAccount+MultiTenantAccount.h in Headers */,
 				232D614B2248484C00260C42 /* MSALClaimsRequest.h in Headers */,
 				B253153123DD684E00432133 /* MSALSSOExtensionRequestHandler.h in Headers */,
