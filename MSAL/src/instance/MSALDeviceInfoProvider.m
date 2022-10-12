@@ -138,7 +138,7 @@
         [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
     }
     
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info: %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(wpjMetaData),  MSID_PII_LOG_MASKABLE(tenantId));
     completionBlock(wpjMetaData, nil);
 }
 

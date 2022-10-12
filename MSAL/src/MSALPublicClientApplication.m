@@ -1579,11 +1579,12 @@
 - (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
                                forTenantId:(nullable NSString *)tenantId
                            completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock
-{
-    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying WPJ MetaData");
+{;
 
     NSError *requestParamsError;
     MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParams, @"Querying WPJ MetaData for tenantId: %@", MSID_PII_LOG_MASKABLE(tenantId));
 
     __auto_type block = ^(MSALWPJMetaData * _Nullable wpjMetaData, NSError * _Nullable msidError)
     {
@@ -1598,7 +1599,7 @@
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParams, @"Retrieved metadata device info %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
         }
         
-        [MSALPublicClientApplication logOperation:@"getWPJMetaDataDeviceWithParameters" result:nil error:msalError context:nil];
+        [MSALPublicClientApplication logOperation:@"getWPJMetaDataDeviceWithParameters" result:nil error:msalError context:requestParams];
         
         if (!completionBlock) return;
         
