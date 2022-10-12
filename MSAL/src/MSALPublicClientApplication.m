@@ -1533,6 +1533,9 @@
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying device info");
     
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+
     __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
     {
         NSError *msalError = nil;
@@ -1543,7 +1546,7 @@
         }
         else
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParams, @"Retrieved device info %@", MSID_PII_LOG_MASKABLE(deviceInformation));
         }
         
         [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
@@ -1561,9 +1564,6 @@
             completionBlock(deviceInformation, msalError);
         }
     };
-        
-    NSError *requestParamsError;
-    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
     
     if (!requestParams)
     {
@@ -1581,7 +1581,10 @@
                            completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Querying WPJ MetaData");
-    
+
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+
     __auto_type block = ^(MSALWPJMetaData * _Nullable wpjMetaData, NSError * _Nullable msidError)
     {
         NSError *msalError = nil;
@@ -1592,7 +1595,7 @@
         }
         else
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved metadata device info %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParams, @"Retrieved metadata device info %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
         }
         
         [MSALPublicClientApplication logOperation:@"getWPJMetaDataDeviceWithParameters" result:nil error:msalError context:nil];
@@ -1610,10 +1613,7 @@
             completionBlock(wpjMetaData, msalError);
         }
     };
-        
-    NSError *requestParamsError;
-    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
-    
+            
     if (!requestParams)
     {
         MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"getWPJMetaDataDeviceWithParameters: Error when creating requestParams: %@", requestParamsError);

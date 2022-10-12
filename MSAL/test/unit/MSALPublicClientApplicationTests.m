@@ -83,7 +83,7 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALDeviceInformation+Internal.h"
-#import "MSALWPJMetaData.h"
+#import "MSALWPJMetaData+Internal.h"
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"

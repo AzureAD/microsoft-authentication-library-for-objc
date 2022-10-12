@@ -31,7 +31,7 @@
 #import "MSIDSSOExtensionGetDeviceInfoRequest.h"
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALDeviceInformation+Internal.h"
-#import "MSALWPJMetaData.h"
+#import "MSALWPJMetaData+Internal.h"
 
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtil.h"
@@ -130,25 +130,16 @@
                                           tenantId:(nullable NSString *)tenantId
                                    completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock
 {
-    void (^fillDeviceInfoCompletionBlock)(MSALWPJMetaData *, NSError *) = ^void(MSALWPJMetaData *wpjMetaData, NSError *error)
-    {
-        if (!wpjMetaData)
-        {
-            wpjMetaData = [MSALWPJMetaData new];
-        }
-        
-        NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters tenantId:tenantId];
-        if (deviceRegMetaDataInfo)
-        {
-            [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
-        }
-        
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info: %@, error: %@", MSID_PII_LOG_MASKABLE(wpjMetaData), MSID_PII_LOG_MASKABLE(error));
-        completionBlock(wpjMetaData, error);
-    };
+    MSALWPJMetaData *wpjMetaData = [MSALWPJMetaData new];
     
-    fillDeviceInfoCompletionBlock(nil, nil);
-    return;
+    NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters tenantId:tenantId];
+    if (deviceRegMetaDataInfo)
+    {
+        [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
+    }
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info: %@", MSID_PII_LOG_MASKABLE(wpjMetaData));
+    completionBlock(wpjMetaData, nil);
 }
 
 @end

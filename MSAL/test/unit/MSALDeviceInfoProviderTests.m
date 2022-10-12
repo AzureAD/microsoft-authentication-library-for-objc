@@ -30,7 +30,7 @@
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALDeviceInformation.h"
 #import "MSIDWorkPlaceJoinUtil.h"
-#import "MSALWPJMetaData.h"
+#import "MSALWPJMetaData+Internal.h"
 
 @interface MSALDeviceInfoProviderTests : XCTestCase
 
