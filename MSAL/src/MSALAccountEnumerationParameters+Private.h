@@ -23,6 +23,20 @@
 // THE SOFTWARE.  
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD:MSAL/src/MSALWPJMetaData+Internal.h
+#import "MSALWPJMetaData.h"
+
+@class MSALWPJMetaData;
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALWPJMetaData()
+
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
+=======
+>>>>>>> origin/master
 #import "MSALAccountEnumerationParameters.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -30,6 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALAccountEnumerationParameters ()
 
 @property (nonatomic, readwrite) BOOL ignoreSignedInStatus;
+<<<<<<< HEAD
+=======
+>>>>>>> origin/master:MSAL/src/MSALAccountEnumerationParameters+Private.h
+>>>>>>> origin/master
 
 @end
 

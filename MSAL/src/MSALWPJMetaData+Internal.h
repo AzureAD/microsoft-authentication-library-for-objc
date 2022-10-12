@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -19,8 +20,10 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
+
+<<<<<<< HEAD:MSAL/src/MSALWPJMetaData+Internal.h
 #import "MSALWPJMetaData.h"
 
 @class MSALWPJMetaData;
@@ -30,6 +33,15 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALWPJMetaData()
 
 - (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
+=======
+#import "MSALAccountEnumerationParameters.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALAccountEnumerationParameters ()
+
+@property (nonatomic, readwrite) BOOL ignoreSignedInStatus;
+>>>>>>> origin/master:MSAL/src/MSALAccountEnumerationParameters+Private.h
 
 @end
 

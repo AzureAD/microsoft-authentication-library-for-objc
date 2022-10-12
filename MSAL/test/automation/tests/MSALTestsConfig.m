@@ -21,6 +21,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
+<<<<<<< HEAD
+<<<<<<< HEAD:MSAL/test/automation/tests/MSALTestsConfig.m
+=======
+>>>>>>> origin/master
 
 
 #import "MSALTestsConfig.h"
@@ -68,5 +72,30 @@
 {
     return -50005; //MSALErrorUserCanceled
 }
+<<<<<<< HEAD
+=======
+
+
+#import <Foundation/Foundation.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALTestsConfig : NSObject
+
+@property (class, readonly) BOOL supportsScopes;
+@property (class, readonly) BOOL supportsRTInHeders;
+@property (class, readonly) BOOL supportsSystemBrowser;
+@property (class, readonly) BOOL supportsTenantSpecificResultAuthority;
+@property (class, readonly) BOOL supportsSelectAccountPrompt;
+@property (class, readonly) BOOL supportsConsentPrompt;
+@property (class, readonly) NSInteger userCanceledErrorCode;
+@property (class, readonly) NSInteger applicationCanceledErrorCode;
+>>>>>>> origin/master:MSAL/test/automation/tests/MSALTestsConfig.h
 
 @end
+
+NS_ASSUME_NONNULL_END
+=======
+
+@end
+>>>>>>> origin/master
