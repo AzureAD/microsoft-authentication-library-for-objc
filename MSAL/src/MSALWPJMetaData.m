@@ -25,22 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALSSOExtensionRequestHandler.h"
+#import "MSALWPJMetaData.h"
 
-@class MSIDRequestParameters;
+@implementation MSALWPJMetaData
+{
+    // For readability, both keys and values in the output dictionary are NSString
+    NSMutableDictionary<NSString *,NSString *> *_extraDeviceInformation;
+}
 
-NS_ASSUME_NONNULL_BEGIN
+- (instancetype)init
+{
+    self = [super init];
 
-@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
+    if (self)
+    {
+        _extraDeviceInformation = [NSMutableDictionary new];
+    }
 
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
+    return self;
+}
 
-- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                                          tenantId:(nullable NSString *)tenantId
-                                   completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock;
+- (NSDictionary *)extraDeviceInformation
+{
+    return _extraDeviceInformation;
+}
+
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+{
+    [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

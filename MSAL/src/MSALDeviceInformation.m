@@ -125,7 +125,7 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
     
 }
 
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
 {
     [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
 }
