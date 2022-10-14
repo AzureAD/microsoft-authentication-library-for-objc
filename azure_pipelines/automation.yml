@@ -82,13 +82,13 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 12,OS=15.2' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
-            
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifact: 'TestOutputs'
+      artifactName: '$(system.JobId) - TestOutputs'
       publishLocation: 'pipeline'
   - task: UsePythonVersion@0
     condition: failed()

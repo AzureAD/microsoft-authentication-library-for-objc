@@ -31,6 +31,7 @@
 #import "MSIDSSOExtensionGetDeviceInfoRequest.h"
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALDeviceInformation+Internal.h"
+#import "MSALWPJMetaData+Internal.h"
 
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtil.h"
@@ -48,7 +49,7 @@
             msalDeviceInfo = [MSALDeviceInformation new];
         }
 
-        NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil];
+        NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters];
         if (deviceRegMetaDataInfo)
         {
             [msalDeviceInfo addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
@@ -71,7 +72,7 @@
     {
         canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
     }
-    
+
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"GetDeviceInfo: Should call Sso Extension decision: %i", canCallSSOExtension);
     if (!canCallSSOExtension)
     {
@@ -123,6 +124,22 @@
             return;
         }];
     }
+}
+
+- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                                          tenantId:(nullable NSString *)tenantId
+                                   completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock
+{
+    MSALWPJMetaData *wpjMetaData = [MSALWPJMetaData new];
+    
+    NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters tenantId:tenantId];
+    if (deviceRegMetaDataInfo)
+    {
+        [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
+    }
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(wpjMetaData),  MSID_PII_LOG_MASKABLE(tenantId));
+    completionBlock(wpjMetaData, nil);
 }
 
 @end

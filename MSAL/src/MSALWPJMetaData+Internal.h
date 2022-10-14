@@ -20,22 +20,18 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-#import <Foundation/Foundation.h>
+
+#import "MSALWPJMetaData.h"
+
+@class MSALWPJMetaData;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALTestsConfig : NSObject
+@interface MSALWPJMetaData()
 
-@property (class, readonly) BOOL supportsScopes;
-@property (class, readonly) BOOL supportsRTInHeders;
-@property (class, readonly) BOOL supportsSystemBrowser;
-@property (class, readonly) BOOL supportsTenantSpecificResultAuthority;
-@property (class, readonly) BOOL supportsSelectAccountPrompt;
-@property (class, readonly) BOOL supportsConsentPrompt;
-@property (class, readonly) NSInteger userCanceledErrorCode;
-@property (class, readonly) NSInteger applicationCanceledErrorCode;
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata;
 
 @end
 

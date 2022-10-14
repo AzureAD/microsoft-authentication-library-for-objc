@@ -30,6 +30,7 @@
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALDeviceInformation.h"
 #import "MSIDWorkPlaceJoinUtil.h"
+#import "MSALWPJMetaData+Internal.h"
 
 @interface MSALDeviceInfoProviderTests : XCTestCase
 
@@ -88,6 +89,107 @@
     }];
     
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
+}
+
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device info"];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams
+                                                          tenantId:nil
+                                                   completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        [expectation fulfill];
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        [msalPJMetaDataInformation addRegisteredDeviceMetadataInformation:extraDeviceInfoDict];
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil_noRegisterationInformation API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        return nil;
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get WPJMetaDataDeviceInfo"];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams
+                                                          tenantId:nil
+                                                   completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        [expectation fulfill];
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 0);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"]);
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get WPJMetaDataDeviceInfo"];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
+    [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams
+                                                          tenantId:@"TestTenantID"
+                                                   completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        [expectation fulfill];
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
 }
 
 - (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo API_AVAILABLE(ios(13.0), macos(10.15))
@@ -335,8 +437,6 @@
     
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
-
-
 
 - (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
 {

@@ -83,11 +83,14 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALDeviceInformation+Internal.h"
+#import "MSALWPJMetaData+Internal.h"
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
 #import "MSIDWorkPlaceJoinConstants.h"
+#import "MSIDWorkPlaceJoinUtilBase.h"
+#import "MSIDWorkPlaceJoinUtil.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -2519,6 +2522,128 @@
     }];
     
     [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:nil
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:@"TestTenantID"
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil_wpjMetaDatanil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        return nil;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:@"tenantId"
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 0);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"]);
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
 }
 
 #pragma mark - Get current account

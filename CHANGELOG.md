@@ -1,3 +1,6 @@
+## [1.2.5]
+* Expose additional device information by tenantId
+
 ## [1.2.4]
 * Expose extra deviceInfo
 * Ignore sign in status on account removal from ODSP cache #1541

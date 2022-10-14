@@ -37,6 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
 
+- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                                          tenantId:(nullable NSString *)tenantId
+                                   completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END
