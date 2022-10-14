@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MSALDeviceMode Enumeration Reference</title>
+    <title>MSALWPJMetaData Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/objc/Enum/MSALDeviceMode" class="dashAnchor"></a>
+    <a name="//apple_ref/objc/Class/MSALWPJMetaData" class="dashAnchor"></a>
 
-    <a title="MSALDeviceMode Enumeration Reference"></a>
+    <a title="MSALWPJMetaData Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html"> Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      MSALDeviceMode Enumeration Reference
+      MSALWPJMetaData Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -350,15 +350,20 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>MSALDeviceMode</h1>
+            <h1>MSALWPJMetaData</h1>
               <div class="declaration">
                 <div class="language">
-                  
-                  <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALDeviceMode</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+                  <p class="aside-title">Objective-C</p>
+                  <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALWPJMetaData</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
+
+                </div>
+                <div class="language">
+                  <p class="aside-title">Swift</p>
+                  <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALWPJMetaData</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
-            <p>Device mode configured by the administrator</p>
+            <p>Metadata about the WPJ user that is applicable to MSAL scenarios.</p>
 
           </div>
         </section>
@@ -370,9 +375,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@E@MSALDeviceMode@MSALDeviceModeDefault"></a>
-                    <a name="//apple_ref/objc/Case/MSALDeviceModeDefault" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALDeviceMode@MSALDeviceModeDefault">MSALDeviceModeDefault</a>
+                    <a name="/c:objc(cs)MSALWPJMetaData(py)extraDeviceInformation"></a>
+                    <a name="//apple_ref/objc/Property/extraDeviceInformation" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALWPJMetaData(py)extraDeviceInformation">extraDeviceInformation</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -380,41 +385,19 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Additional device information</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALDeviceModeDefault</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">,</span> <span class="n">readonly</span><span class="p">)</span> <span class="n">NSDictionary</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">extraDeviceInformation</span><span class="p">;</span></code></pre>
 
                         </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@E@MSALDeviceMode@MSALDeviceModeShared"></a>
-                    <a name="//apple_ref/objc/Case/MSALDeviceModeShared" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALDeviceMode@MSALDeviceModeShared">MSALDeviceModeShared</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
                         <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALDeviceModeShared</span></code></pre>
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">extraDeviceInformation</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
