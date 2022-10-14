@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
            Docs
         </a>
-         (90% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -151,6 +151,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALTokenParameters.html">MSALTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALWPJMetaData.html">MSALWPJMetaData</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALWebviewParameters.html">MSALWebviewParameters</a>
@@ -327,6 +330,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALWebviewParameters.h@T@MSALViewController">MSALViewController</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALWPJMetaDataCompletionBlock">MSALWPJMetaDataCompletionBlock</a>
               </li>
             </ul>
           </li>
@@ -2613,6 +2619,42 @@ However, this will not sign out from other signed in apps on the device, unless 
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:objc(cs)MSALPublicClientApplication(im)getWPJMetaDataDeviceWithParameters:forTenantId:completionBlock:"></a>
+                    <a name="//apple_ref/objc/Method/-getWPJMetaDataDeviceWithParameters:forTenantId:completionBlock:" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALPublicClientApplication(im)getWPJMetaDataDeviceWithParameters:forTenantId:completionBlock:">-getWPJMetaDataDeviceWithParameters:<wbr>forTenantId:<wbr>completionBlock:<wbr></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Reads WPJ metadata  (UPN, tenant ID, deviCe ID) from the authentication broker if present on the device for a specific tenantId</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">getWPJMetaDataDeviceWithParameters</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALParameters.html">MSALParameters</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">parameters</span>
+                               <span class="nf">forTenantId</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">tenantId</span>
+                           <span class="nf">completionBlock</span><span class="p">:</span>
+                               <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALWPJMetaDataCompletionBlock">MSALWPJMetaDataCompletionBlock</a></span><span class="p">)</span>
+                                   <span class="n">completionBlock</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">wpjMetaDataDevice</span><span class="p">(</span><span class="n">with</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALParameters.html">MSALParameters</a></span><span class="p">?,</span> <span class="n">forTenantId</span> <span class="nv">tenantId</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span> <span class="n">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALWPJMetaData.html">MSALWPJMetaData</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:objc(cs)MSALPublicClientApplication(py)isCompatibleAADBrokerAvailable"></a>
                     <a name="//apple_ref/objc/Property/isCompatibleAADBrokerAvailable" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALPublicClientApplication(py)isCompatibleAADBrokerAvailable">isCompatibleAADBrokerAvailable</a>
@@ -2733,7 +2775,7 @@ This method must be called whenever the application is resumed or prior to runni
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2022 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2022-09-21)</p>
+      <p>&copy; 2022 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2022-10-14)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

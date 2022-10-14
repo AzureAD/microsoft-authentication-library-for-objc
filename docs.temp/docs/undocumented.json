@@ -1,0 +1,271 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAccount+MultiTenantAccount.h",
+      "line": 33,
+      "symbol": "MSALAccount(MultiTenantAccount)",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.category",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeBearer.h",
+      "line": 33,
+      "symbol": "MSALAuthenticationSchemeBearer",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeBearer.h",
+      "line": 35,
+      "symbol": "MSALAuthenticationSchemeBearer.scheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemePop.h",
+      "line": 32,
+      "symbol": "MSALAuthenticationSchemePop",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemePop.h",
+      "line": 34,
+      "symbol": "MSALAuthenticationSchemePop.scheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemePop.h",
+      "line": 36,
+      "symbol": "MSALAuthenticationSchemePop.-initWithHttpMethod:requestUrl:nonce:additionalParameters:",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemePop.h",
+      "line": 41,
+      "symbol": "MSALAuthenticationSchemePop.-init",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemePop.h",
+      "line": 42,
+      "symbol": "MSALAuthenticationSchemePop.+new",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
+      "line": 32,
+      "symbol": "MSALAuthenticationSchemeProtocol",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
+      "line": 34,
+      "symbol": "MSALAuthenticationSchemeProtocol.scheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
+      "line": 36,
+      "symbol": "MSALAuthenticationSchemeProtocol.authenticationScheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 152,
+      "symbol": "MSALDeviceMode.MSALDeviceModeDefault",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 157,
+      "symbol": "MSALDeviceMode.MSALDeviceModeShared",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 214,
+      "symbol": "MSALAuthScheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 214,
+      "symbol": "MSALAuthScheme",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 219,
+      "symbol": "MSALAuthScheme.MSALAuthSchemeBearer",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 224,
+      "symbol": "MSALAuthScheme.MSALAuthSchemePop",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 227,
+      "symbol": "MSALHttpMethod",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 227,
+      "symbol": "MSALHttpMethod",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 232,
+      "symbol": "MSALHttpMethod.MSALHttpMethodGET",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 233,
+      "symbol": "MSALHttpMethod.MSALHttpMethodHEAD",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 234,
+      "symbol": "MSALHttpMethod.MSALHttpMethodPOST",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 235,
+      "symbol": "MSALHttpMethod.MSALHttpMethodPUT",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 236,
+      "symbol": "MSALHttpMethod.MSALHttpMethodDELETE",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 237,
+      "symbol": "MSALHttpMethod.MSALHttpMethodCONNECT",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 238,
+      "symbol": "MSALHttpMethod.MSALHttpMethodOPTIONS",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 239,
+      "symbol": "MSALHttpMethod.MSALHttpMethodTRACE",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 240,
+      "symbol": "MSALHttpMethod.MSALHttpMethodPATCH",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALHttpMethod.h",
+      "line": 28,
+      "symbol": "MSALParameterStringForHttpMethod",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.function",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALLoggerConfig.h",
+      "line": 32,
+      "symbol": "MSALLogMaskingLevel",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALLoggerConfig.h",
+      "line": 32,
+      "symbol": "MSALLogMaskingLevel",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALParameters.h",
+      "line": 32,
+      "symbol": "MSALParameters",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALSignoutParameters.h",
+      "line": 35,
+      "symbol": "MSALSignoutParameters",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALSignoutParameters.h",
+      "line": 57,
+      "symbol": "MSALSignoutParameters.wipeAccount",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALSignoutParameters.h",
+      "line": 69,
+      "symbol": "MSALSignoutParameters.wipeCacheForAllAccounts",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 32,
+      "symbol": "MSALViewController",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 112,
+      "symbol": "MSALWebviewParameters.-init",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
+      "line": 114,
+      "symbol": "MSALWebviewParameters.+new",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.class",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/runner/work/1/s/docs.temp"
+}
