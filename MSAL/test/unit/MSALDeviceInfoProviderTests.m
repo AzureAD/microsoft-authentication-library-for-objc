@@ -438,8 +438,6 @@
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
 
-
-
 - (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
