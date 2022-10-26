@@ -872,6 +872,7 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
+    msidParams.allowGettingAccessTokenWithRefreshToken = parameters.allowGettingAccessTokenWithRefreshToken;
      
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
