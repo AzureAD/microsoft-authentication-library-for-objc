@@ -43,10 +43,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL forceRefresh;
 
 /**
- 1. When broker is presenting on the device
-    Default is false. when broker failed to return a (new) access token, ignores existing refresh token in local cache, and return broker error.
-    If set to true, when broker failed to return a (new) access token, tries with existing refresh token in the cache, and return results.
- 2. When broker is not presenting on the device
+ 1. When Sso Extension is presenting on the device
+    Default is false. when Sso Extension failed to return a (new) access token, ignores existing refresh token in local cahce, and return Sso Extension error.
+    If set to true, when Sso Extension failed to return a (new) access token, tries with existing refresh token in the cache, and return results.
+ 2. When Sso Extension is not presenting on the device
     This parameter is ignored, and tries with existing refresh token in the cache.
  */
 @property (nonatomic) BOOL allowGettingAccessTokenWithRefreshToken;
