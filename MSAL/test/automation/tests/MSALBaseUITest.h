@@ -22,25 +22,20 @@
 // THE SOFTWARE.
 
 #import <XCTest/XCTest.h>
-#import "MSIDTestConfigurationProvider.h"
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSIDAutomationSuccessResult.h"
 #import "MSIDAutomationAccountsResult.h"
 #import "MSIDTestAutomationAppConfigurationRequest.h"
-#import "MSIDTestAutomationApplication.h"
 #import "MSIDTestAutomationAccountConfigurationRequest.h"
 #import "MSIDTestAutomationAccount.h"
+#import "MSIDTestsConfig.h"
+#import "MSIDBaseUITest.h"
 
-@interface MSALBaseUITest : XCTestCase
+@interface MSALBaseUITest : MSIDBaseUITest
 
 @property (nonatomic) XCUIApplication *testApp;
-@property (nonatomic, class) MSIDTestConfigurationProvider *confProvider;
-@property (nonatomic) NSArray *testAccounts;
-@property (nonatomic) MSIDTestAutomationAccount *primaryAccount;
-@property (nonatomic) MSIDTestAutomationApplication *testApplication;
-@property (nonatomic) NSString *redirectUriPrefix;
 
 // Common checks/assertions
 - (void)assertRefreshTokenInvalidated;
@@ -50,27 +45,13 @@
 - (void)assertInternalErrorCode:(NSInteger)internalErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
-- (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
 - (void)assertAuthorityReturned:(NSString *)expectedAuthority;
-- (NSDictionary *)resultIDTokenClaims;
 
-- (void)closeResultView;
 - (void)invalidateRefreshToken:(NSDictionary *)config;
 - (void)expireAccessToken:(NSDictionary *)config;
 - (void)acquireToken:(NSDictionary *)config;
 - (void)acquireTokenSilent:(NSDictionary *)config;
-- (void)clearKeychain;
-- (void)clearCookies;
-
-- (void)aadEnterEmail;
-- (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app;
-
-- (void)aadEnterPassword;
-- (void)aadEnterPassword:(NSString *)password app:(XCUIApplication *)app;
-
-- (void)adfsEnterPassword;
-- (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
 - (void)acceptSpeedBump;
@@ -80,21 +61,6 @@
 - (void)signout:(NSDictionary *)config;
 - (void)readAccounts:(NSDictionary *)config;
 
-- (void)waitForElement:(id)object;
-
-- (MSIDAutomationErrorResult *)automationErrorResult;
-- (MSIDAutomationSuccessResult *)automationSuccessResult;
-- (MSIDAutomationAccountsResult *)automationAccountsResult;
-
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
-- (NSDictionary *)automationResultDictionary;
-- (void)performAction:(NSString *)action
-           withConfig:(NSDictionary *)config;
-
-
-// New lab APIs
-- (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest;
-- (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest;
-- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests;
 
 @end

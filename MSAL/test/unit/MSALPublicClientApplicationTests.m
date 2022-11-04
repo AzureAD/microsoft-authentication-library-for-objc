@@ -83,12 +83,20 @@
 #import "MSALPublicClientApplication+SingleAccount.h"
 #import "MSALDeviceInfoProvider.h"
 #import "MSALDeviceInformation+Internal.h"
+#import "MSALWPJMetaData+Internal.h"
 #import "MSIDDeviceInfo.h"
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALAuthenticationSchemePop.h"
+#import "MSALWipeCacheForAllAccountsConfig.h"
+#import "MSIDWorkPlaceJoinConstants.h"
+#import "MSIDWorkPlaceJoinUtilBase.h"
+#import "MSIDWorkPlaceJoinUtil.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
+#else
+#import "MSALAccountsProvider.h"
+#import "MSIDMacACLKeychainAccessor.h"
 #endif
 
 #pragma clang diagnostic push
@@ -2491,7 +2499,12 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        msidDeviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        
         callback(deviceInfo, nil);
     }];
     
@@ -2503,10 +2516,134 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
         [deviceInfoExpectation fulfill];
     }];
     
     [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:nil
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        NSMutableDictionary *deviceMetadata = [NSMutableDictionary new];
+        [deviceMetadata setValue:@"TestDevID" forKey:@"aadDeviceIdentifier"];
+        [deviceMetadata setValue:@"TestUPN" forKey:@"userPrincipalName"];
+        [deviceMetadata setValue:@"TestTenantID" forKey:@"aadTenantIdentifier"];
+        return deviceMetadata;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:@"TestTenantID"
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 3);
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"], @"TestDevID");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"], @"TestUPN");
+        XCTAssertEqualObjects(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"], @"TestTenantID");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
+}
+
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil_wpjMetaDatanil API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
+    {
+        return nil;
+    }];
+
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get WPJMetaDataDevice info"];
+    
+    [application getWPJMetaDataDeviceWithParameters:nil
+                                        forTenantId:@"tenantId"
+                                    completionBlock:^(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(msalPJMetaDataInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(msalPJMetaDataInformation.extraDeviceInformation.count, 0);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadDeviceIdentifier"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"userPrincipalName"]);
+        XCTAssertNil(msalPJMetaDataInformation.extraDeviceInformation[@"aadTenantIdentifier"]);
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
 }
 
 #pragma mark - Get current account
@@ -3468,7 +3605,177 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testSignoutWithAccount_whenNonNilAccount_andWipeAllAccountsTrue_andBrokerDisabled_shouldWipeAllAccounts
+{
+    // Save default response
+    [self msalStoreTokenResponseInCache];
+    
+    // Save tokens for the same account for a different client
+    [self msalStoreSecondAppTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALPublicClientApplication *secondApplication = [self createSecondTestAppWithAuthority:authority];
+    XCTAssertNotNil(secondApplication);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.wipeCacheForAllAccounts = YES;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    XCTAssertEqual([secondApplication allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        // All accounts from all clients were wiped
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        XCTAssertEqual([secondApplication allAccounts:nil].count, 0);
+        
+        MSALAccountEnumerationParameters *accountEnumerationOptions = [MSALAccountEnumerationParameters new];
+        accountEnumerationOptions.returnOnlySignedInAccounts = NO;
+        
+        // All accounts from all clients were wiped
+        NSArray *firstAppSignedOutAccounts = [application accountsForParameters:accountEnumerationOptions error:nil];
+        XCTAssertEqual([firstAppSignedOutAccounts count], 0);
+        
+        // All accounts from all clients were wiped
+        NSArray *secondAppSignedOutAccounts = [application accountsForParameters:accountEnumerationOptions error:nil];
+        XCTAssertEqual([secondAppSignedOutAccounts count], 0);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 #endif
+
+- (void)testSignoutWithAccount_whenNonNilaccount_andWipeAllAccountsTrue_andBrokerDisabled_shouldWipeAllAdditionalPartnerLocations
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle classMethod:@selector(additionalPartnerLocations)
+                              class:[MSALWipeCacheForAllAccountsConfig class]
+                              block:(id)^(void)
+     {
+        return @{
+            @"Microsoft Office Test" : @{(id)kSecAttrAccount : @"test-account-office",
+                                      (id)kSecAttrLabel : @"test-label-office",
+                                    (id)kSecAttrService : @"test-service-office"},
+
+            @"Microsoft Teams Test" : @{(id)kSecAttrAccount : @"test-account-teams",
+                                     (id)kSecAttrLabel : @"test-label-teams",
+                                   (id)kSecAttrService : @"test-service-teams"}
+        };
+     }];
+    
+#if !TARGET_OS_IPHONE
+    NSMutableArray<MSALAccount *> *accounts = [[NSMutableArray alloc] initWithArray:@[msalAccount]];
+    //swizzle interactive method - MacOS test app doesn't have entitlements that support keychain access group.
+    //adding a host app that has valid entitlements would also require enabling code-signing, which could break CI/CD check
+    //So at the moment, the best approach is to swizzle keychain access APIs
+    [MSIDTestSwizzle instanceMethod:@selector(allAccounts:)
+                              class:[MSALAccountsProvider class]
+                              block:(id)^(void)
+     {
+        return accounts;
+     }];
+    [MSIDTestSwizzle instanceMethod:@selector(removeCredentialsWithQuery:context:error:)
+                              class:[MSIDAccountCredentialCache class]
+                              block:(id)^(void)
+     {
+        [accounts removeAllObjects];
+        return YES;
+     }];
+    [MSIDTestSwizzle instanceMethod:@selector(updateSignInStateForHomeAccountId:clientId:state:context:error:)
+                              class:[MSIDAccountMetadataCacheAccessor class]
+                              block:(id)^(void)
+     {
+        return YES;
+     }];
+    [MSIDTestSwizzle instanceMethod:@selector(clearWithContext:error:)
+                              class:[MSIDKeychainTokenCache class]
+                              block:(id)^(void)
+     {
+        return YES;
+     }];
+    [MSIDTestSwizzle instanceMethod:@selector(getDataWithAttributes:context:error:)
+                              class:[MSIDMacACLKeychainAccessor class]
+                              block:(id)^(void)
+     {
+        // Returned data is not important in this case
+        return nil;
+     }];
+    [MSIDTestSwizzle instanceMethod:@selector(removeItemWithAttributes:context:error:)
+                              class:[MSIDMacACLKeychainAccessor class]
+                              block:(id)^(void)
+     {
+        return YES;
+     }];
+#endif
+    
+#if TARGET_OS_IPHONE
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+#else
+    MSALWebviewParameters *webParams = [MSALWebviewParameters new];
+#endif
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.wipeCacheForAllAccounts = YES;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
 
 - (void)testInitWithConfiguration_WhenBypassRedirectURIIsDefault_ShouldBlockInvalidURI
 {
@@ -3637,7 +3944,7 @@
     }
     
     headers[@"Accept"] = @"application/json";
-    headers[@"x-ms-PkeyAuth"] = @"1.0";
+    headers[kMSIDPKeyAuthHeader] = @"1.0";
     response->_requestHeaders = headers;
     
     NSString *endpoint = [NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority];

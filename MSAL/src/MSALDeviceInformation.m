@@ -30,12 +30,14 @@
 #import "MSIDDeviceInfo.h"
 #import <AuthenticationServices/AuthenticationServices.h>
 #import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
+#import "MSIDBrokerConstants.h"
 
 NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
 
 @implementation MSALDeviceInformation
 {
-    NSMutableDictionary *_extraDeviceInformation;
+    // For readability, both keys and values in the output dictionary are NSString
+    NSMutableDictionary<NSString *,NSString *> *_extraDeviceInformation;
 }
 
 - (instancetype)init
@@ -115,9 +117,15 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
 - (void) initExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo
 {
     [_extraDeviceInformation setValue:deviceInfo.ssoExtensionMode == MSIDSSOExtensionModeFull ? @"Yes" : @"No" forKey:MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY];
+    
+    if (deviceInfo.extraDeviceInfo)
+    {
+        [_extraDeviceInformation addEntriesFromDictionary:deviceInfo.extraDeviceInfo];
+    }
+    
 }
 
-- (void) addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
+- (void)addRegisteredDeviceMetadataInformation:(NSDictionary *)deviceInfoMetadata
 {
     [_extraDeviceInformation addEntriesFromDictionary:deviceInfoMetadata];
 }

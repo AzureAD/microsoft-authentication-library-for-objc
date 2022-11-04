@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseAADUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
 #import "NSString+MSIDAutomationUtils.h"
 
@@ -69,10 +68,11 @@
 
     if (!request.loginHint)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
     [self shibEnterUsername];
+    [self hideKeyboard];
     [self shibEnterPassword];
 
     [self acceptMSSTSConsentIfNecessary:@"Accept"
@@ -84,7 +84,7 @@
     }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
     return homeAccountId;
 }
 
@@ -165,5 +165,9 @@
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
 
-
+- (void)hideKeyboard
+{
+    XCUIElement *doneButton = self.testApp.toolbars.buttons[@"Done"];
+    [doneButton msidTap];
+}
 @end

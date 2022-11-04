@@ -57,6 +57,19 @@
 #define TEST_EMBEDDED_WEBVIEW_MSAL 0
 #define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
 
+static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
+
+static NSString *const kDarwinNotificationReceivedKey = @"DarwinNotificationReceived";
+
+static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef center,
+                                             __unused void * observer,
+                                             __unused CFStringRef name,
+                                             __unused void const * object,
+                                             __unused CFDictionaryRef userInfo)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
+}
+
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
@@ -72,6 +85,7 @@
 @property (nonatomic) IBOutlet UISegmentedControl *webviewTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *customWebviewTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *systemWebviewSSOSegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *claimsSegmentedControl;
 @property (nonatomic) IBOutlet UITextView *resultTextView;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *acquireButtonsViewBottomConstraint;
 @property (nonatomic) IBOutlet UIView *customWebviewContainer;
@@ -128,6 +142,16 @@
                                              selector:@selector(onKeyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receivedGlobalSignoutDarwinNotification:)
+                                                 name:kDarwinNotificationReceivedKey
+                                               object:nil];
+    
+    //Listens for Darwin notifcations coming from broker in the FLW global signout scenario
+    CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
+    CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
+                                    nil, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -219,7 +243,12 @@
     parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptTypeValue];
     
     parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
-
+    
+    if (self.claimsSegmentedControl.selectedSegmentIndex == 1)
+    {
+        parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
+    }
+    
     return parameters;
 }
 
@@ -423,6 +452,11 @@
     {
         NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
         parameters.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
+    }
+    
+    if (self.claimsSegmentedControl.selectedSegmentIndex == 1)
+    {
+        parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
     }
     
     parameters.authority = settings.authority;
@@ -748,6 +782,11 @@
        [self.customWebview loadHTMLString:@"<html><head></head></html>" baseURL:nil];
        self.customWebviewContainer.hidden = YES;
     }
+}
+
+- (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
+{
+    self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
 }
 
 @end

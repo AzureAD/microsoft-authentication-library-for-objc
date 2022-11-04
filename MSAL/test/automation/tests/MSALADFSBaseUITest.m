@@ -22,7 +22,6 @@
 // THE SOFTWARE.
 
 #import "MSALADFSBaseUITest.h"
-#import "XCTestCase+TextFieldTap.h"
 
 @implementation MSALADFSBaseUITest
 
@@ -42,11 +41,11 @@
 
     if (!request.loginHint)
     {
-        [self aadEnterEmail];
+        [self aadEnterEmail:self.testApp];
     }
 
     sleep(1);
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
     
     if (!request.usesEmbeddedWebView)
@@ -58,7 +57,7 @@
 
     if (closeResultView)
     {
-        [self closeResultView];
+        [self closeResultPipeline:self.testApp];
     }
 
     return homeAccountId;

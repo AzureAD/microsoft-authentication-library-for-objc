@@ -28,12 +28,6 @@
 
 - (NSString *)msalStringAsGUID
 {
-    if (self.length != 16)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Unexpected string lenght");
-        return nil;
-    }
-    
     NSData *guidData = [self msalStringAsGUIDData];
     
     if (!guidData)
@@ -51,33 +45,19 @@
     
     if (stringLen > 16)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to parse unsigned long long from a string, length: %d", stringLen);
         return nil;
     }
     
-    NSUInteger zeroFillLen = (16 - (stringLen + 1) / 2);
-    NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
-    
-    char chars[3] = {'\0','\0','\0'};
-    
-    for (int i = stringLen-1; i >= 0; i-=2)
+    NSScanner *scanner = [NSScanner scannerWithString:self];
+    unsigned long long ull;
+    if (![scanner scanHexLongLong:&ull])
     {
-        unsigned char firstChar = '0';
-        
-        if (i - 1 >= 0)
-        {
-            firstChar = [self characterAtIndex:i-1];
-        }
-        
-        unsigned char secondChar = [self characterAtIndex:i];
-        
-        chars[0] = firstChar;
-        chars[1] = secondChar;
-        unsigned char resultChar = strtol(chars, NULL, 16);
-        
-        [result replaceBytesInRange:NSMakeRange(zeroFillLen+i/2, 1) withBytes:&resultChar];
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to parse unsigned long long from a string.");
+        return nil;
     }
     
-    return result;
+    return [self dataFromUInt64:ull];
 }
 
 - (NSString *)msalGUIDAsShortString
@@ -111,6 +91,30 @@
     }
     
     return result;
+}
+
+#pragma mark - Private
+
+- (NSData *)dataFromUInt64:(NSUInteger)value
+{
+    const int length = 16;
+    const int lastIndex = length - 1;
+    const int bitsInByte = 8;
+    char buffer[length];
+    
+    for (int idx = 0; idx < length; ++idx)
+    {
+        buffer[idx] = '\0';
+    }
+    
+    for (int idx = 0; idx < length; ++idx)
+    {
+        buffer[lastIndex - idx] = (value & 0xff);
+        // Shift to next byte.
+        value = value >> bitsInByte;
+    }
+    
+    return [[NSMutableData alloc] initWithBytes:buffer length:length];
 }
 
 @end

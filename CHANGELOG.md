@@ -1,3 +1,24 @@
+## [1.2.5]
+* Expose additional device information by tenantId
+
+## [1.2.4]
+* Expose extra deviceInfo
+* Ignore sign in status on account removal from ODSP cache #1541
+
+## [1.2.3]
+* Stop extra background tasks in the system webview case.
+* Minor fixes.
+
+## [1.2.2]
+* Minor fixes & CI changes.
+
+## [1.2.1]
+* Fixed zipping in release pipeline to preserve symlinks in xcframework
+
+## [1.2.0]
+* Multi-tenant PkeyAuth support in MSAL (#1438)
+* Add support to wipe cache for all accounts (#1426)
+
 ## [1.1.26]
 * Added more string utils in common core (#1417)
 * Fixed links in iframe to open in themselves instead of browser for embedded web views (#1424)

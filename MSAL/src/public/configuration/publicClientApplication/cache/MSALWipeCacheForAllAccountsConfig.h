@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -26,20 +26,21 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALSSOExtensionRequestHandler.h"
-
-@class MSIDRequestParameters;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
 
-- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock;
+/**
+ MSAL configuration interface responsible for keeping a list of additional cache locations for partner caches to be wiped.
+ */
+@interface MSALWipeCacheForAllAccountsConfig : NSObject
 
-- (void)wpjMetaDataDeviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
-                                          tenantId:(nullable NSString *)tenantId
-                                   completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock;
+/**
+    List of additional locations for partner caches to be wiped (e.g. Teams, VisualStudio etc). Wipe operation should wipe out all those additional locations.
+    The key is "display identifier" of the location (e.g. Teams cache)
+    The value is the precise identifiers like kSecAttrAccount, kSecAttrService etc.
+ */
++ (NSDictionary<NSString *, NSDictionary *> *) additionalPartnerLocations;
 
 @end
 

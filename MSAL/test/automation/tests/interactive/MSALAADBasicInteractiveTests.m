@@ -107,9 +107,9 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self acceptAuthSessionDialogIfNecessary:request];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     [self assertInternalErrorCode:MSALInternalErrorInvalidClient];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 6. Run silent with not consented scopes
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"not_consented"];
@@ -117,18 +117,18 @@
     [self acquireTokenSilent:config];
     [self assertErrorCode:MSALErrorInteractionRequired];
     [self assertErrorSubcode:@"consent_required"];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 7. Invalidate refresh token and expire access token
     request.requestScopes = firstScope;
     config = [self configWithTestRequest:request];
     [self invalidateRefreshToken:config];
     [self assertRefreshTokenInvalidated];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     [self expireAccessToken:config];
     [self assertAccessTokenExpired];
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 8. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
@@ -152,12 +152,12 @@
     NSDictionary *configuration = [self configWithTestRequest:request];
     [self readAccounts:configuration];
 
-    MSIDAutomationAccountsResult *result = [self automationAccountsResult];
+    MSIDAutomationAccountsResult *result = [self automationAccountsResult:self.testApp];
     XCTAssertEqual([result.accounts count], 1);
     NSArray *accounts = result.accounts;
     MSIDAutomationUserInformation *firstAccount = accounts[0];
     XCTAssertEqualObjects(firstAccount.homeAccountId, homeAccountId);
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // 2. Run silent with a different authority alias
     request.homeAccountIdentifier = homeAccountId;
@@ -266,12 +266,12 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:MSALErrorServerDeclinedScopes];
-    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    MSIDAutomationErrorResult *result = [self automationErrorResult:self.testApp];
     NSArray *declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
@@ -279,7 +279,7 @@
     NSOrderedSet *expectedGrantedScopes = [NSOrderedSet msidOrderedSetFromString:supportedScope normalize:YES];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // Now run silent with insufficient scopes
     request.homeAccountIdentifier = self.primaryAccount.homeAccountId;
@@ -288,14 +288,14 @@
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:MSALErrorServerDeclinedScopes];
-    result = [self automationErrorResult];
+    result = [self automationErrorResult:self.testApp];
     declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
     grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
-    [self closeResultView];
+    [self closeResultPipeline:self.testApp];
 
     // Now run silent with correct scopes
     request.requestScopes = supportedScope;
@@ -328,8 +328,8 @@
     
     [self acceptSpeedBump];
 
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
+    [self assertAccessTokenNotNil:self.testApp];
+    [self closeResultPipeline:self.testApp];
 }
 
 #pragma mark - Errors
@@ -345,7 +345,7 @@
     // 1. Sign in interactively
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
 
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
     [self waitForElement:permissionText];
@@ -380,11 +380,10 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
 
     XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:enrollButton];
-    sleep(0.5f);
     [enrollButton msidTap];
     
     XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
@@ -412,7 +411,7 @@
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
 
     XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
     [self waitForElement:enrollButton];
@@ -515,8 +514,8 @@
 
     [self selectAccountWithTitle:self.primaryAccount.upn];
 
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
+    [self assertAccessTokenNotNil:self.testApp];
+    [self closeResultPipeline:self.testApp];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andPassedInEmbeddedWebView_andForceLogin
@@ -577,8 +576,8 @@
     XCUIElement *acceptButton = self.testApp.buttons[@"Accept"];
     [acceptButton msidTap];
 
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
+    [self assertAccessTokenNotNil:self.testApp];
+    [self closeResultPipeline:self.testApp];
 }
 
 - (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview
@@ -599,7 +598,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     
     XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
     [self waitForElement:registerButton];
@@ -627,7 +626,7 @@
     [self acquireToken:config];
     [self acceptAuthSessionDialogIfNecessary:request];
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
-    [self aadEnterPassword];
+    [self aadEnterPassword:self.testApp];
     
     XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
     [self waitForElement:registerButton];

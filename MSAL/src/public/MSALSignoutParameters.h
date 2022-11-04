@@ -56,6 +56,18 @@ NS_ASSUME_NONNULL_BEGIN
 */
 @property (nonatomic) BOOL wipeAccount;
 
+/*
+  When flag is set, following should happen:
+    - Wipe all known universal cache locations regardless of the clientId, account etc. Should include all tokens and metadata for any cloud.
+    - Wipe all known legacy ADAL cache locations regardless of the clientId, account etc.
+    - MSALWipeCacheForAllAccountsConfig contains a list of additional locations for partner caches to be wiped (e.g. Teams, VisualStudio etc). Wipe operation should wipe out all those additional locations. This file includes "display identifier" of the location (e.g. Teams cache), and precise identifiers like kSecAttrAccount, kSecAttrService etc.
+    - If SSO extension is present, call SSO extension wipe operation. Wipe operation should only be allowed to the privileged applications like Intune CP on macOS or Authenticator on iOS.
+    - Failing any of the steps should return error back to the app including exact locations and apps that failed to be cleared.
+  NO by default.
+  This is a dangerous operation.
+*/
+@property (nonatomic) BOOL wipeCacheForAllAccounts;
+
 /**
  Initialize MSALSignoutParameters with web parameters.
  

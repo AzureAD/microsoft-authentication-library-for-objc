@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -21,11 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <XCTest/XCTest.h>
+#import <Foundation/Foundation.h>
 
-@interface XCTestCase (TextFieldTap)
+NS_ASSUME_NONNULL_BEGIN
 
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element;
-- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element app:(XCUIApplication *)application;
+@interface MSALTestsConfig : NSObject
+
+@property (class, readonly) BOOL supportsScopes;
+@property (class, readonly) BOOL supportsRTInHeders;
+@property (class, readonly) BOOL supportsSystemBrowser;
+@property (class, readonly) BOOL supportsTenantSpecificResultAuthority;
+@property (class, readonly) BOOL supportsSelectAccountPrompt;
+@property (class, readonly) BOOL supportsConsentPrompt;
+@property (class, readonly) NSInteger userCanceledErrorCode;
+@property (class, readonly) NSInteger applicationCanceledErrorCode;
 
 @end
+
+NS_ASSUME_NONNULL_END
