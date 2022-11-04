@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
  2. When Sso Extension is not presenting on the device
     This parameter is ignored, and tries with existing refresh token in the cache.
  */
-@property (nonatomic) BOOL allowGettingAccessTokenWithRefreshToken;
+@property (nonatomic) BOOL allowUsingLocalCachedRtWhenSsoExtFailed;
 
 #pragma mark - Constructing MSALSilentTokenParameters
 
