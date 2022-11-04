@@ -4928,6 +4928,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 			};
 			name = Debug;
 		};
@@ -4937,6 +4938,7 @@
 			buildSettings = {
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = NO;
 				ENABLE_BITCODE = NO;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 			};
 			name = Release;
 		};
