@@ -49,7 +49,7 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
         _deviceMode = MSALDeviceModeDefault;
         _extraDeviceInformation = [NSMutableDictionary new];
         
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }
@@ -70,7 +70,7 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
 
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }
