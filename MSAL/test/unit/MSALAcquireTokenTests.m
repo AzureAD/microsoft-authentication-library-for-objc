@@ -993,7 +993,7 @@
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
+    NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
     [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -1087,7 +1087,7 @@
 
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedAndLoginHintNotNil_shouldSendClaimsAndLoginHintToServer
 {
-    NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    NSString *claims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -1888,7 +1888,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Add mock response for refresh token grant, claims should be in the request body
-    NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    NSString *claims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
@@ -2208,7 +2208,7 @@
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
+    NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
@@ -2295,7 +2295,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Add mock error response for refresh token grant
-    NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    NSString *claims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID objectId:DEFAULT_TEST_UID tenantId:DEFAULT_TEST_UTID];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
