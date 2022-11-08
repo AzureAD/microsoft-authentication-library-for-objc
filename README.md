@@ -423,7 +423,7 @@ let parameters = MSALAccountEnumerationParameters(identifier:accountIdentifier)
 
 var scopeArr = ["https://graph.microsoft.com/.default"]
 
-if #available(iOS 13.0, macOS 10.15, *)
+if #available(macOS 10.15, *)
 {
 	 application.accountsFromDeviceForParameters(with: parameters, completionBlock:{(accounts, error) in
          if let error = error 
@@ -466,7 +466,7 @@ if #available(iOS 13.0, macOS 10.15, *)
 
     NSArray<NSString *> *scopeArr = [[NSArray alloc] initWithObjects: @"https://graph.microsoft.com/.default",nil]; //define scope
 
-    if (@available(iOS 13.0, macOS 10.15, *)) //Currently, this public API requires iOS version 13 or greater.
+    if (@available(macOS 10.15, *)) //Currently, this public API requires macOs version 10.15 or greater.
     {
         [application accountsFromDeviceForParameters:parameters
                                      completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
