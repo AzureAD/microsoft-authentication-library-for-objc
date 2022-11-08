@@ -579,9 +579,9 @@ signoutParameters.signoutFromBrowser = NO;
 
 ## Supported Versions
 
-**iOS** - MSAL supports iOS 11 and above.
+**iOS** - MSAL supports iOS 14 and above.
 
-**macOS** - MSAL supports macOS (OSX) 10.12 and above.
+**macOS** - MSAL supports macOS (OSX) 10.13 and above.
 
 ## Migrating from ADAL Objective-C
 MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/migrate-objc-adal-msal)
