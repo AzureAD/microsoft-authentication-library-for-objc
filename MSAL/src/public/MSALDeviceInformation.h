@@ -27,6 +27,30 @@
 
 #import <Foundation/Foundation.h>
 
+/*
+ Key to read the UPN of the registeredOwner of the AAD device from the extraDeviceInformation property
+ If device has multiple registrations, this will be the primary registration.
+ */
+extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_UPN;
+
+/*
+ Key to read the identifier of the AAD device from the extraDeviceInformation property
+ If device has multiple registrations, this will be the primary registration.
+ */
+extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_DEVICE_ID;
+
+/*
+ Key to read the tenant identifier of the AAD device from the extraDeviceInformation property
+ If device has multiple registrations, this will be the primary registration.
+ */
+extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_TENANT_ID;
+
+/*
+ Key to read the host of the AAD cloud for the AAD device from the extraDeviceInformation property
+ If device has multiple registrations, this will be the primary registration.
+ */
+extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_CLOUD;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**

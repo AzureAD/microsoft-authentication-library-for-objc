@@ -33,6 +33,10 @@
 #import "MSIDBrokerConstants.h"
 
 NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
+NSString *const MSAL_PRIMARY_REGISTRATION_UPN = @"primary_registration_metadata_upn";
+NSString *const MSAL_PRIMARY_REGISTRATION_DEVICE_ID = @"primary_registration_metadata_device_id";
+NSString *const MSAL_PRIMARY_REGISTRATION_TENANT_ID = @"primary_registration_metadata_tenant_id";
+NSString *const MSAL_PRIMARY_REGISTRATION_CLOUD = @"primary_registration_metadata_cloud_host";
 
 @implementation MSALDeviceInformation
 {
