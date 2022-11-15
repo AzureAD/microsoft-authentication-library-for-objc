@@ -37,6 +37,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_UPN = @"primary_registration_metadata_
 NSString *const MSAL_PRIMARY_REGISTRATION_DEVICE_ID = @"primary_registration_metadata_device_id";
 NSString *const MSAL_PRIMARY_REGISTRATION_TENANT_ID = @"primary_registration_metadata_tenant_id";
 NSString *const MSAL_PRIMARY_REGISTRATION_CLOUD = @"primary_registration_metadata_cloud_host";
+NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_registration_metadata_certificate_thumbprint";
 
 @implementation MSALDeviceInformation
 {

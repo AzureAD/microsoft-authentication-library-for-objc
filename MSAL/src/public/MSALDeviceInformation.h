@@ -51,6 +51,12 @@ extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_TENANT_ID;
  */
 extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_CLOUD;
 
+/*
+ Key to read the thumbprint of the AAD device registration certificate from the extraDeviceInformation property
+ If device has multiple registrations, this will be the primary registration.
+ */
+extern NSString * _Nonnull const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
