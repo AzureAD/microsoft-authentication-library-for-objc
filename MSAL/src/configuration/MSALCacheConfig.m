@@ -102,7 +102,10 @@
     NSMutableArray *trustedApps = [NSMutableArray new];
     OSStatus status;
     SecTrustedApplicationRef myself = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     status = SecTrustedApplicationCreateFromPath(nil, &myself);
+#pragma clang diagnostic pop
     if (status != errSecSuccess)
     {
         NSError *msidError;
@@ -122,7 +125,10 @@
     for (NSString *appPath in appPaths)
     {
         SecTrustedApplicationRef app = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         status = SecTrustedApplicationCreateFromPath([appPath UTF8String], &app);
+#pragma clang diagnostic pop
         if (status != errSecSuccess)
         {
             NSError *msidError;
