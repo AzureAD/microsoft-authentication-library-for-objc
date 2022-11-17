@@ -90,28 +90,21 @@
     MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
     parameters.returnOnlySignedInAccounts = YES;
     
-    if (@available(iOS 13.0, *))
+    [application accountsFromDeviceForParameters:parameters
+                                 completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
     {
-        [application accountsFromDeviceForParameters:parameters
-                                     completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
-        {
-            [self refreshWithAccounts:accounts];
-        }];
+        [self refreshWithAccounts:accounts];
+    }];
+    
+    [application getCurrentAccountWithParameters:parameters
+                                 completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
+    {
+        self.currentAccount = account;
         
-        [application getCurrentAccountWithParameters:parameters
-                                     completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
-        {
-            self.currentAccount = account;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [super refresh];
-            });
-        }];
-    }
-    else
-    {
-        [self refreshWithAccounts:[application accountsForParameters:parameters error:nil]];
-    }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [super refresh];
+        });
+    }];
 }
 
 - (void)refreshWithAccounts:(NSArray *)accounts

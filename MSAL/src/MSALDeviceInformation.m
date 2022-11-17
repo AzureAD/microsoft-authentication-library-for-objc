@@ -54,7 +54,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
         _deviceMode = MSALDeviceModeDefault;
         _extraDeviceInformation = [NSMutableDictionary new];
         
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }
@@ -75,7 +75,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
 
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }

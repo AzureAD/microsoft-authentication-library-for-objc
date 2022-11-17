@@ -1,3 +1,6 @@
+## [TBD]
+* Update minimum OS version to iOS14 and macOS 10.13
+
 ## [1.2.5]
 * Expose additional device information by tenantId
 
