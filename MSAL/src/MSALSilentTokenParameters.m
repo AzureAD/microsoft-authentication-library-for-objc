@@ -40,6 +40,7 @@
     {
         self.account = account;
         self.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithTokenParameters;
+        self.allowUsingLocalCachedRtWhenSsoExtFailed = YES;
     }
     return self;
 }

@@ -68,7 +68,7 @@
     }
 
     BOOL canCallSSOExtension = NO;
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         canCallSSOExtension = [MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest];
     }
@@ -82,7 +82,7 @@
         return;
     }
     
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         // We are here means canCallSSOExtension is TRUE
         MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, requestParameters, @"GetDeviceInfo: Creating Sso Extension request");

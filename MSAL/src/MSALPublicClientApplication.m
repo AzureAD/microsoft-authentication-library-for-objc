@@ -872,6 +872,7 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
+    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
      
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -1104,16 +1105,12 @@
     MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
-    if (@available(iOS 13.0, *))
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
-    }
+    requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
     
     if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
     {
         brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
     }
     
     brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
@@ -1631,15 +1628,7 @@
 #if TARGET_OS_IPHONE
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
-    if (@available(iOS 13.0, *))
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-    }
-    
-    if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-    }
+    requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
     
     // Parameter protocolType does not matter here
     MSIDBrokerInvocationOptions *brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType

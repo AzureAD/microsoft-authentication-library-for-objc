@@ -41,21 +41,18 @@
     __typeof__(webParameters.parentViewController) parentViewController = webParameters.parentViewController;
     
 #if TARGET_OS_IPHONE
-    if (@available(iOS 13.0, *))
+    if (parentViewController == nil)
     {
-        if (parentViewController == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
-            if (error) *error = msidError;
-            return NO;
-        }
-        
-        if (parentViewController.view.window == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
-            if (error) *error = msidError;
-            return NO;
-        }
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
+    }
+    
+    if (parentViewController.view.window == nil)
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
     }
     
     self.presentationType = webParameters.presentationStyle;
@@ -63,7 +60,7 @@
         
     self.parentViewController = parentViewController;
         
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
     }

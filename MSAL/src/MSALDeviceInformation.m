@@ -33,6 +33,11 @@
 #import "MSIDBrokerConstants.h"
 
 NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
+NSString *const MSAL_PRIMARY_REGISTRATION_UPN = @"primary_registration_metadata_upn";
+NSString *const MSAL_PRIMARY_REGISTRATION_DEVICE_ID = @"primary_registration_metadata_device_id";
+NSString *const MSAL_PRIMARY_REGISTRATION_TENANT_ID = @"primary_registration_metadata_tenant_id";
+NSString *const MSAL_PRIMARY_REGISTRATION_CLOUD = @"primary_registration_metadata_cloud_host";
+NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_registration_metadata_certificate_thumbprint";
 
 @implementation MSALDeviceInformation
 {
@@ -49,7 +54,7 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
         _deviceMode = MSALDeviceModeDefault;
         _extraDeviceInformation = [NSMutableDictionary new];
         
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }
@@ -70,7 +75,7 @@ NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExt
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
 
-        if (@available(iOS 13.0, macOS 10.15, *))
+        if (@available(macOS 10.15, *))
         {
             _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         }

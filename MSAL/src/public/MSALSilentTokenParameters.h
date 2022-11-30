@@ -42,6 +42,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL forceRefresh;
 
+/**
+ 1. When Sso Extension is presenting on the device
+    Default is YES. when Sso Extension failed to return a (new) access token, tries with existing refresh token in the cache, and return results.
+    If set to NO, when Sso Extension failed to return a (new) access token, ignores existing refresh token in local cahce, and return Sso Extension error.
+ 2. When Sso Extension is not presenting on the device
+    This parameter is ignored, and tries with existing refresh token in the cache.
+ */
+@property (nonatomic) BOOL allowUsingLocalCachedRtWhenSsoExtFailed;
+
 #pragma mark - Constructing MSALSilentTokenParameters
 
 /**
