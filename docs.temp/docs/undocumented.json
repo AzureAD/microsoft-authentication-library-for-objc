@@ -197,6 +197,41 @@
       "warning": "undocumented"
     },
     {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDeviceInformation.h",
+      "line": 34,
+      "symbol": "MSAL_PRIMARY_REGISTRATION_UPN",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDeviceInformation.h",
+      "line": 40,
+      "symbol": "MSAL_PRIMARY_REGISTRATION_DEVICE_ID",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDeviceInformation.h",
+      "line": 46,
+      "symbol": "MSAL_PRIMARY_REGISTRATION_TENANT_ID",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDeviceInformation.h",
+      "line": 52,
+      "symbol": "MSAL_PRIMARY_REGISTRATION_CLOUD",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDeviceInformation.h",
+      "line": 58,
+      "symbol": "MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
+      "warning": "undocumented"
+    },
+    {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALHttpMethod.h",
       "line": 28,
       "symbol": "MSALParameterStringForHttpMethod",
