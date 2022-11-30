@@ -63,6 +63,8 @@
 
 - (void)runSharedB2CLoginStartWithTestRequest:(MSIDAutomationTestRequest *)request
 {
+    request.validateAuthority = NO;
+    
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 

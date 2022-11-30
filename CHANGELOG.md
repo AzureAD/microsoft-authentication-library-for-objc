@@ -1,4 +1,4 @@
-## [TBD]
+## [1.2.6]
 * Update minimum OS version to iOS14 and macOS 10.13
 
 ## [1.2.5]
