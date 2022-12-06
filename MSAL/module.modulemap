@@ -1,0 +1,14 @@
+//
+//  module.modulemap
+//  MSAL
+//
+
+//Absolute paths need to be present rather than the ones observed in directory structure
+//Ex: MSIDRequestParameters.h is in directory
+//IdentityCore/IdentityCore/src/parameters
+//and not in
+//IdentityCore/IdentityCore/src/requests/parameters
+
+module MSAL_Private {
+    export *
+}
