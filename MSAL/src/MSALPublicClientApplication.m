@@ -919,7 +919,11 @@
 #endif
     
     NSError *requestError = nil;
-    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams
+                                                                                                  forceRefresh:parameters.forceRefresh
+                                                                                                   skipLocalRt:MSIDSilentControllerUndefinedLocalRtUsage
+                                                                                          tokenRequestProvider:tokenRequestProvider
+                                                                                                         error:&requestError];
     
     if (!requestController)
     {
