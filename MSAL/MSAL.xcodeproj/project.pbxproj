@@ -2464,7 +2464,6 @@
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
-				DE53C7DC293F9F8A00E5B2BB /* CIAM */,
 				DE53C7D4293F9F5A00E5B2BB /* module.modulemap */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
 				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
@@ -2496,13 +2495,6 @@
 				B295A16422D0348400FFB313 /* unit-test-host-mac.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		DE53C7DC293F9F8A00E5B2BB /* CIAM */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = CIAM;
 			sourceTree = "<group>";
 		};
 		E02396F51E7AFFF7004D6278 /* telemetry */ = {
