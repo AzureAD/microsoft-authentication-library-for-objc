@@ -68,7 +68,7 @@
     item.presentationStyle = _presentationStyle;
 #endif
     
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
     }

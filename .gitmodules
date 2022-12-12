@@ -1,3 +1,4 @@
 [submodule "MSAL/IdentityCore"]
 	path = MSAL/IdentityCore
-	url = https://github.com/AzureAD/microsoft-authentication-library-common-for-objc
+	url = https://identitydivision.visualstudio.com/DefaultCollection/Engineering/_git/devexdub-microsoft-authentication-library-common-for-objc
+    branch = ciam-master
