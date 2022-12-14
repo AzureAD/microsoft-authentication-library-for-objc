@@ -551,7 +551,7 @@
 				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -567,7 +567,7 @@
 				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
