@@ -49,6 +49,12 @@ NS_ASSUME_NONNULL_BEGIN
 /** The redirect URI of the application */
 @property (atomic, nullable) NSString *redirectUri;
 
+/** The client ID of the nested application. */
+@property (atomic) NSString *nestedClientId;
+
+/** The redirect URI of the nested application */
+@property (atomic, nullable) NSString *nestedRedirectUri;
+
 /** The authority the application will use to obtain tokens */
 @property (atomic) MSALAuthority *authority;
 
@@ -110,7 +116,22 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
+                               authority:(nullable MSALAuthority *)authority DEPRECATED_MSG_ATTRIBUTE("Use initWithClientId:redirectUri:authority:nestedClientId:nestedRedirectUri instead");
+
+/**
+ Initialize a MSALPublicClientApplicationConfig with a given clientId and a nested clientid
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  redirectUri    The redirect URI of the application
+ @param  authority      The target authority
+ @param  nestedClientId     The clientID of your child application
+ @param  nestedRedirectUri    The redirect URI of the child application
+ */
+- (nonnull instancetype)initWithClientId:(NSString *)clientId
+                             redirectUri:(nullable NSString *)redirectUri
+                               authority:(nullable MSALAuthority *)authority
+                          nestedClientId:(nullable NSString *)nestedClientId
+                       nestedRedirectUri:(nullable NSString *)nestedRedirectUri NS_DESIGNATED_INITIALIZER;
 
 #pragma mark - Unavailable initializers
 

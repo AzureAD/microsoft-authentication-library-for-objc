@@ -42,16 +42,22 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
-    return [self initWithClientId:clientId redirectUri:nil authority:nil];
+    return [self initWithClientId:clientId redirectUri:nil authority:nil nestedClientId:nil nestedRedirectUri:nil];
 }
 
-- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+- (instancetype)initWithClientId:(NSString *)clientId
+                     redirectUri:(nullable NSString *)redirectUri
+                       authority:(nullable MSALAuthority *)authority
+                  nestedClientId:(nullable NSString *)nestedClientId
+               nestedRedirectUri:(nullable NSString *)nestedRedirectUri
 {
     self = [super init];
     if (self)
     {
         _clientId = clientId;
         _redirectUri = redirectUri;
+        _nestedClientId = nestedClientId;
+        _nestedRedirectUri = nestedRedirectUri;
         
         NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
@@ -63,6 +69,15 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     }
     
     return self;
+}
+
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+{
+    return [self initWithClientId:clientId
+                      redirectUri:redirectUri
+                        authority:authority
+                   nestedClientId:nil
+                nestedRedirectUri:nil];
 }
 
 - (void)setSliceConfig:(MSALSliceConfig *)sliceConfig
@@ -94,6 +109,8 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:[clientId copy]];
     item->_redirectUri = [_redirectUri copyWithZone:zone];
     item->_authority = [_authority copyWithZone:zone];
+    item->_nestedClientId = [_nestedClientId copyWithZone:zone];
+    item->_nestedRedirectUri = [_nestedRedirectUri copyWithZone:zone];
     
     if (_knownAuthorities)
     {

@@ -66,7 +66,7 @@
 {
     MSALAADAuthority *testAuthority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/mytesttenant"] error:nil];
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id" redirectUri:@"testredirect" authority:testAuthority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id" redirectUri:@"testredirect" authority:testAuthority nestedClientId:nil nestedRedirectUri:nil];
     XCTAssertNotNil(config);
     XCTAssertEqualObjects(config.clientId, @"test_client_id");
     XCTAssertEqualObjects(config.redirectUri, @"testredirect");
@@ -117,7 +117,7 @@
     MSALAADAuthority *testAuthority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/mytesttenant"] error:nil];
     MSALAADAuthority *knownAuthority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/myknowntenant"] error:nil];
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id" redirectUri:@"testredirect" authority:testAuthority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id" redirectUri:@"testredirect" authority:testAuthority nestedClientId:nil nestedRedirectUri:nil];
     config.knownAuthorities = @[knownAuthority];
     config.clientApplicationCapabilities = @[@"cp1", @"cp2"];
     config.tokenExpirationBuffer = 333;

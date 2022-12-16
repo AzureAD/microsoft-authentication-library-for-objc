@@ -874,6 +874,9 @@
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
     msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
      
+    // Nested auth protocol
+    msidParams.nestedClientId = self.internalConfig.nestedClientId;
+    msidParams.nestedRedirectUri = self.internalConfig.nestedRedirectUri;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1023,7 +1026,7 @@
     {
         return nil;
     }
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority nestedClientId:nil nestedRedirectUri:nil];
     
 #if TARGET_OS_IPHONE
     config.cacheConfig.keychainSharingGroup = keychainGroup;
@@ -1154,6 +1157,10 @@
         block(nil, msidError, nil);
         return;
     }
+    
+    // Nested auth protocol
+    msidParams.nestedClientId = self.internalConfig.nestedClientId;
+    msidParams.nestedRedirectUri = self.internalConfig.nestedRedirectUri;
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters

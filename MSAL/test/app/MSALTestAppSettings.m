@@ -162,12 +162,16 @@ static NSDictionary *s_currentProfile = nil;
     NSDictionary *currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    NSString *nestedClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     
     NSError *error = nil;
 
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:_authority];
+                                                                                                     authority:_authority
+                                                                                                nestedClientId:nestedClientId
+                                                                                             nestedRedirectUri:nestedRedirectUri];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
 
