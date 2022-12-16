@@ -34,6 +34,8 @@
 #else
 #import "MSIDMacKeychainTokenCache.h"
 #endif
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 @interface MSALCacheConfig()
 
@@ -102,7 +104,9 @@
     NSMutableArray *trustedApps = [NSMutableArray new];
     OSStatus status;
     SecTrustedApplicationRef myself = nil;
+
     status = SecTrustedApplicationCreateFromPath(nil, &myself);
+
     if (status != errSecSuccess)
     {
         NSError *msidError;
@@ -146,3 +150,5 @@
 #endif
 
 @end
+
+#pragma clang diagnostic pop
