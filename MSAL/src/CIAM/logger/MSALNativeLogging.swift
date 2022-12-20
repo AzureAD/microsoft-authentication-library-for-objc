@@ -25,16 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-module MSAL_Private {
-    header "IdentityCore/IdentityCore/src/network/MSIDHttpRequest.h"
-    header "IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
-    header "IdentityCore/IdentityCore/src/cache/accessor/MSIDDefaultTokenCacheAccessor.h"
-    header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDHttpRequestServerTelemetryHandling.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
+@_implementationOnly import MSAL_Private
 
-    export *
+protocol MSALNativeLogging {
+
+    static func log(
+        level: MSIDLogLevel,
+        context: MSIDRequestContext,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...
+    )
+
+    static func log(
+        level: MSIDLogLevel,
+        correlationId: UUID,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...
+    )
+
+    static func logPII(
+        level: MSIDLogLevel,
+        context: MSIDRequestContext,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...
+    )
+
+    static func logPII(
+        level: MSIDLogLevel,
+        correlationId: UUID,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...
+    )
 }

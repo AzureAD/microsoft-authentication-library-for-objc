@@ -25,16 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-module MSAL_Private {
-    header "IdentityCore/IdentityCore/src/network/MSIDHttpRequest.h"
-    header "IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
-    header "IdentityCore/IdentityCore/src/cache/accessor/MSIDDefaultTokenCacheAccessor.h"
-    header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDHttpRequestServerTelemetryHandling.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
+@_implementationOnly import MSAL_Private
 
-    export *
+class MSALCiamServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling {
+
+    func handleError(_ error: Error, context: MSIDRequestContext) {
+    }
+
+    func handleError(_ error: Error, errorString: String, context: MSIDRequestContext) {
+    }
+
+    func setTelemetryToRequest(_ request: MSIDHttpRequestProtocol) {
+
+        // Take a look at the class MSIDAADTokenRequestServerTelemetry to see how it sets the telemetry
+        // That class has two properties of type MSIDCurrentRequestTelemetry (lastRequestTelemetry and currentRequestTelemetry)
+        // The class `MSIDAADAuthorizationCodeGrantRequest` has a property `serverTelemetry: MSIDHttpRequestServerTelemetryHandling` equivalent to this class (that is set in `MSIDAADV2Oauth2Factory`)
+        // This serverTelemetry is used during sendWithBlock() in MSIDHttpRequest
+        // We should set this class in httpRequest.serverTelemetry during the creation of our ciamRequests.
+
+        request.urlRequest.setValue(nil, forHTTPHeaderField: "x-client-current-telemetry")
+        request.urlRequest.setValue(nil, forHTTPHeaderField: "x-client-last-telemetry")
+    }
 }
