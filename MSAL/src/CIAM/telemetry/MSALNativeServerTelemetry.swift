@@ -27,6 +27,9 @@
 
 @_implementationOnly import MSAL_Private
 
+// TODO: This class is not currently used (`MSIDAADTokenRequestServerTelemetry` is being used).
+// Once we reach a decision about telemetry, decide whether we remove it completely or extend it to our custom solution.
+
 class MSALCiamServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling {
 
     func handleError(_ error: Error, context: MSIDRequestContext) {
