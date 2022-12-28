@@ -96,7 +96,9 @@
     
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:parameters.clientId
                                                                                                 redirectUri:parameters.redirectUri
-                                                                                                  authority:authority];
+                                                                                                  authority:authority
+                                                                                             nestedClientId:nil
+                                                                                          nestedRedirectUri:nil];
     
     if (!validateAuthority)
     {
