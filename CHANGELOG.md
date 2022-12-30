@@ -1,3 +1,6 @@
+## [TBD]
+* Add support for nested auth protocol (#1631)
+
 ## [1.2.6]
 * Update minimum OS version to iOS14 and macOS 10.13
 
