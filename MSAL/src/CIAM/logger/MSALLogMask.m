@@ -25,20 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-module MSAL_Private {
-    header "IdentityCore/IdentityCore/src/network/MSIDHttpRequest.h"
-    header "IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDLogger+Internal.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
-    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
-    header "IdentityCore/IdentityCore/src/cache/accessor/MSIDDefaultTokenCacheAccessor.h"
-    header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDHttpRequestServerTelemetryHandling.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"
-    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
-    header "IdentityCore/IdentityCore/src/MSIDBasicContext.h"
-    
-    header "src/CIAM/logger/MSALLogMask.h"
-    
-    export *
+#import "MSALLogMask.h"
+
+@implementation MSALLogMask
+
++ (MSIDMaskedLogParameter*) maskPII:(nullable id) parameter {
+    return MSID_PII_LOG_MASKABLE(parameter);
 }
+
++ (MSIDMaskedLogParameter*) maskEUII:(nullable id) parameter {
+    return MSID_EUII_ONLY_LOG_MASKABLE(parameter);
+}
+
++ (MSIDMaskedHashableLogParameter*) maskTrackablePII:(nullable id) parameter {
+    return MSID_PII_LOG_TRACKABLE(parameter);
+}
+
++ (MSIDMaskedUsernameLogParameter*) maskUsername:(nullable id) parameter {
+    return MSID_PII_LOG_EMAIL(parameter);
+}
+
+@end
