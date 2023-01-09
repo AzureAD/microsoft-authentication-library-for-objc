@@ -40,6 +40,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		9B12613D2951F79B009AA58B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B8F0FB129415F6C00F005EC /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
 		9B8F0FEC29415FC900F005EC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9B8F0FB129415F6C00F005EC /* MSAL.xcodeproj */;
@@ -410,6 +417,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				9B12613E2951F79B009AA58B /* PBXTargetDependency */,
 			);
 			name = SDKSampleApp;
 			productName = SDKSampleAppPOC;
@@ -643,7 +651,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if [[ ! -z \"$TF_BUILD\" ]]; then\n    echo \"Skipping linting for CI build.: {$TF_BUILD}.\"\n    exit\nfi\n\nexport PATH=\"$PATH:/opt/homebrew/bin\"\n\nif which swiftlint > /dev/null; then\n  swiftlint lint --strict\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -693,6 +701,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		9B12613E2951F79B009AA58B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = 9B12613D2951F79B009AA58B /* PBXContainerItemProxy */;
+		};
 		F145559828A13DC20074807C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F145557F28A13DC00074807C /* SDKSampleApp */;

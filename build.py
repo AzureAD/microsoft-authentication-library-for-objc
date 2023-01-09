@@ -87,6 +87,16 @@ target_specifiers = [
         "target" : "sampleIosAppSwift"
     },
 	{
+		"name" : "Sample NativeAuth iOS App",
+		"scheme" : "SDKSampleApp",
+		"project" : "Samples/ios-native-auth/SDKSampleApp.xcodeproj",
+		"directory" : "Samples/ios-native-auth",
+		"linter" : "swiftlint",
+		"operations" : [ "build", "lint", "test" ],
+		"platform" : "iOS",
+        "target" : "sampleNativeAuthIosApp"
+	},
+	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
 		"operations" : [ "build", "test", "codecov" ],
@@ -126,6 +136,8 @@ class BuildTarget:
 		self.min_codecov = target.get("min_codecov")
 		self.min_warn_codecov = target.get("min_warn_codecov")
 		self.use_sonarcube = target.get("use_sonarcube")
+		self.directory = target.get("directory")
+		self.linter = target.get("linter")
 		self.coverage = None
 		self.failed = False
 		self.skipped = False
@@ -257,6 +269,19 @@ class BuildTarget:
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
 		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
+
+	def do_lint(self) :
+		if (self.linter != "swiftlint") :
+			sys.stdout.write("Unknown linter '" + self.linter + "'\n")
+			return
+
+		command = "swiftlint lint --strict " + self.directory
+
+		result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+
+		sys.stdout.write(result.stdout.decode(sys.stdout.encoding))
+
+		return result.returncode
 	
 	def do_codecov(self) :
 		"""
@@ -280,7 +305,7 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
@@ -308,6 +333,8 @@ class BuildTarget:
 		try :
 			if (operation == "codecov") :
 				exit_code = self.do_codecov()
+			elif (operation == "lint") :
+				exit_code = self.do_lint()
 			else :
 				command = self.xcodebuild_command(operation, use_xcpretty)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
