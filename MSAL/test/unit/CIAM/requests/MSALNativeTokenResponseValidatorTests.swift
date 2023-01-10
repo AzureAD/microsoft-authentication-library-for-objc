@@ -77,12 +77,12 @@ final class MSALNativeTokenResponseValidatorTests: XCTestCase {
 
     // MARK: - ValidateAccount tests
 
-    func test_validateAccount_successfully() {
+    func test_validateAccount_successfully() throws {
         defaultValidatorMock.shouldReturnValidAccount = true
         XCTAssertTrue(sut.validateAccount(with: MSIDTokenResult()))
     }
 
-    func test_validateAccount_error() {
+    func test_validateAccount_error() throws {
         defaultValidatorMock.shouldReturnValidAccount = false
         XCTAssertFalse(sut.validateAccount(with: MSIDTokenResult()))
     }
