@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,35 +16,30 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// THE SOFTWARE. 
 
-import Foundation
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeTokenResponseHandling {
 
-    var tokenResponseValidator: MSIDTokenResponseValidator { get }
-    var factory: MSIDAADOauth2Factory { get }
+    var tokenResponseValidator: MSALNativeTokenResponseValidating { get }
     var tokenCache: MSALNativeAuthCacheInterface { get }
     var accountIdentifier: MSIDAccountIdentifier { get }
     var context: MSIDRequestContext { get }
     var configuration: MSIDConfiguration { get }
 
-    func handle(tokenResponse: MSIDTokenResponse, homeAccountId: String?, validateAccount: Bool) throws -> MSIDTokenResult
+    func handle(tokenResponse: MSIDTokenResponse, validateAccount: Bool) throws -> MSIDTokenResult
 }
 
 class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
 
     // MARK: - Variables
 
-    let tokenResponseValidator: MSIDTokenResponseValidator
-    let factory: MSIDAADOauth2Factory
+    let tokenResponseValidator: MSALNativeTokenResponseValidating
     let tokenCache: MSALNativeAuthCacheInterface
     let accountIdentifier: MSIDAccountIdentifier
     let context: MSIDRequestContext
@@ -54,15 +48,13 @@ class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
     // MARK: - Init
 
     init(
-        tokenResponseValidator: MSIDTokenResponseValidator,
-        factory: MSIDAADOauth2Factory,
+        tokenResponseValidator: MSALNativeTokenResponseValidating,
         tokenCache: MSALNativeAuthCacheInterface,
         accountIdentifier: MSIDAccountIdentifier,
         context: MSIDRequestContext,
         configuration: MSIDConfiguration
     ) {
         self.tokenResponseValidator = tokenResponseValidator
-        self.factory = factory
         self.tokenCache = tokenCache
         self.accountIdentifier = accountIdentifier
         self.context = context
@@ -74,9 +66,15 @@ class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
         context: MSIDRequestContext,
         configuration: MSIDConfiguration
     ) {
-        self.init(
-            tokenResponseValidator: MSIDTokenResponseValidator(),
+        let tokenResponseValidator = MSALNativeTokenResponseValidator(
             factory: MSIDAADOauth2Factory(),
+            context: context,
+            configuration: configuration,
+            accountIdentifier: accountIdentifier
+        )
+
+        self.init(
+            tokenResponseValidator: tokenResponseValidator,
             tokenCache: MSALNativeAuthCacheGateway(),
             accountIdentifier: accountIdentifier,
             context: context,
@@ -86,74 +84,34 @@ class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
 
     // MARK: - Public
 
-    func handle(
-        tokenResponse: MSIDTokenResponse,
-        homeAccountId: String? = nil,
-        validateAccount: Bool
-    ) throws -> MSIDTokenResult {
+    func handle(tokenResponse: MSIDTokenResponse, validateAccount: Bool) throws -> MSIDTokenResult {
         MSALLogger.log(level: .info, context: context, format: "Validate and save token response...")
 
-        var validationError: NSError?
+        do {
+            let tokenResult = try tokenResponseValidator.validateResponse(tokenResponse)
 
-        guard let tokenResult = tokenResponseValidator.validate(
-            tokenResponse,
-            oauthFactory: factory,
-            configuration: configuration,
-            requestAccount: accountIdentifier,
-            correlationID: context.correlationId(),
-            error: &validationError
-        ) else {
-            throw MSALNativeError.validationError
-        }
-
-        // Special case - need to return homeAccountId in case of Intune policies required.
-
-        try checkIntunePoliciesRequired(error: validationError, homeAccountId: homeAccountId)
-
-        if validateAccount {
-            performAccountValidation(tokenResult)
-        }
-
-        try tokenCache.saveTokensAndAccount(
-            tokenResult: tokenResponse,
-            configuration: configuration,
-            context: context
-        )
-
-        return tokenResult
-    }
-
-    private func checkIntunePoliciesRequired(error: NSError?, homeAccountId: String?) throws {
-        if var error = error, error.code == MSIDErrorCode.serverProtectionPoliciesRequired.rawValue {
-
-            MSALLogger.log(level: .info, context: context, format: "Received Protection Policy Required error.")
-            var updatedUserInfo = error.userInfo
-
-            if let homeAccountId = homeAccountId {
-                updatedUserInfo[MSIDHomeAccountIdkey] = homeAccountId
+            if validateAccount {
+                performAccountValidation(tokenResult)
             }
 
-            error = MSIDCreateError(
-                error.domain,
-                error.code,
-                nil, nil, nil, nil, nil,
-                updatedUserInfo,
-                true
-            ) as NSError
+            try tokenCache.saveTokensAndAccount(
+                tokenResult: tokenResponse,
+                configuration: configuration,
+                context: context
+            )
 
-            throw error
+            return tokenResult
+
+        } catch MSALNativeError.serverProtectionPoliciesRequired(let homeAccountId) {
+            MSALLogger.log(level: .info, context: context, format: "Received Protection Policy Required error.")
+            throw MSALNativeError.serverProtectionPoliciesRequired(homeAccountId: homeAccountId)
+        } catch {
+            throw MSALNativeError.validationError
         }
     }
 
     private func performAccountValidation(_ tokenResult: MSIDTokenResult) {
-        var tokenResponseValidatorError: NSError?
-
-        let accountChecked = tokenResponseValidator.validateAccount(
-            accountIdentifier,
-            tokenResult: tokenResult,
-            correlationID: context.correlationId(),
-            error: &tokenResponseValidatorError
-        )
+        let accountChecked = tokenResponseValidator.validateAccount(with: tokenResult)
 
         MSALLogger.logPII(
             level: .info,

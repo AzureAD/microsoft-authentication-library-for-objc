@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-enum MSALNativeError: Error {
+enum MSALNativeError: Error, Equatable {
     case validationError
+    case serverProtectionPoliciesRequired(homeAccountId: String?)
 }
