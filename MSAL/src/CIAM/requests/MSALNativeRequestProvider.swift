@@ -28,8 +28,6 @@ protocol MSALNativeRequestProviding {
 
     var clientId: String { get }
     var tenant: URL { get }
-
-    func signInRequest(email: String, password: String, scope: [String]) -> MSALNativeSignInPasswordRequest
 }
 
 final class MSALNativeRequestProvider: MSALNativeRequestProviding {
@@ -44,20 +42,5 @@ final class MSALNativeRequestProvider: MSALNativeRequestProviding {
     init(clientId: String, tenant: URL) {
         self.clientId = clientId
         self.tenant = tenant
-    }
-
-    // MARK: - Sign In with Password
-
-    func signInRequest(email: String, password: String, scope: [String]) -> MSALNativeSignInPasswordRequest {
-
-        let params = MSALNativeSignInPasswordRequestParameters(
-            tenant: tenant,
-            clientId: clientId,
-            email: email,
-            password: password,
-            scope: scope.joined(separator: ",")
-        )
-
-        return MSALNativeSignInPasswordRequest(params: params)
     }
 }
