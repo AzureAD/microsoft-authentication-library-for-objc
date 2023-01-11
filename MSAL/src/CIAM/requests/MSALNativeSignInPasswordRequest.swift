@@ -49,7 +49,7 @@ final class MSALNativeSignInPasswordRequest: MSIDHttpRequest {
 
         requestConfigurator.configure(self)
 
-        serverTelemetry = MSIDAADTokenRequestServerTelemetry() //MSALCiamServerTelemetry()
+        serverTelemetry = MSIDAADTokenRequestServerTelemetry()
 
         if let deserializer = MSIDAADTokenResponseSerializer(oauth2Factory: MSIDAADOauth2Factory()) {
             responseSerializer = deserializer
