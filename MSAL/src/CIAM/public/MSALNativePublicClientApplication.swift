@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,7 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 import Foundation
 
@@ -34,7 +34,8 @@ public final class MSALNativePublicClientApplication: NSObject {
      Initializes a new application.
 
      - Parameters:
-        - configuration: `MSALCiamPublicClientApplicationConfig` . CIAM's sdk configuration, which contains authority, tenant and clientId.
+        - configuration: `MSALCiamPublicClientApplicationConfig` . CIAM's sdk configuration,
+            which contains authority, tenant and clientId.
      */
     @objc
     public init(configuration: MSALNativePublicClientApplicationConfig) {
@@ -43,7 +44,11 @@ public final class MSALNativePublicClientApplication: NSObject {
 
     // MARK: - Async/Await
 
-    public func signUp(email: String, password: String, attributes: [String: Any]? = nil, scopes: [String]? = nil) async -> AuthResult {
+    public func signUp(
+        email: String,
+        password: String,
+        attributes: [String: Any]? = nil,
+        scopes: [String]? = nil) async -> AuthResult {
         .success(.init(stage: .completed, sessionToken: nil, authentication: nil))
     }
 
@@ -74,32 +79,51 @@ public final class MSALNativePublicClientApplication: NSObject {
     // MARK: - Closures
 
     @objc
-    public func signUp(email: String, password: String, attributes: [String: Any]? = nil, scopes: [String]? = nil, completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void) {
+    public func signUp(
+        email: String,
+        password: String,
+        attributes: [String: Any]? = nil,
+        scopes: [String]? = nil,
+        completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void) {
 
     }
 
     @objc
-    public func signUp(email: String, attributes: [String: Any]? = nil, scopes: [String]? = nil, completion: @escaping (_ response: MSALNativeAuthResponse, _ error: Error) -> Void) {
+    public func signUp(
+        email: String,
+        attributes: [String: Any]? = nil,
+        scopes: [String]? = nil,
+        completion: @escaping (_ response: MSALNativeAuthResponse, _ error: Error) -> Void) {
 
     }
 
     @objc
-    public func signIn(email: String, password: String, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
+    public func signIn(
+        email: String,
+        password: String,
+        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
 
     }
 
     @objc
-    public func signIn(email: String, completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
+    public func signIn(
+        email: String,
+        completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
 
     }
 
     @objc
-    public func verifyCode(sessionToken: String, otp: String, completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
+    public func verifyCode(
+        sessionToken: String,
+        otp: String,
+        completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
 
     }
 
     @objc
-    public func resendCode(sessionToken: String, completion: @escaping (_ sessionToken: String, Error) -> Void) {
+    public func resendCode(
+        sessionToken: String,
+        completion: @escaping (_ sessionToken: String, Error) -> Void) {
 
     }
 

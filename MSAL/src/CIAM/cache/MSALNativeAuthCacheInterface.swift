@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,20 +23,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 import Foundation
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthCacheInterface {
-    func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSALNativeAuthTokens
-    
-    func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount?
-    
-    func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws
-    
-    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws
+    func getTokens(
+        accountIdentifier: MSIDAccountIdentifier,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext) throws -> MSALNativeAuthTokens
 
-    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws
+    func getAccount(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        context: MSIDRequestContext) throws -> MSIDAccount?
+
+    func saveTokensAndAccount(
+        tokenResult: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext) throws
+
+    func removeTokens(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        clientId: String,
+        context: MSIDRequestContext) throws
+
+    func clearCache(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        clientId: String,
+        context: MSIDRequestContext) throws
 
 }

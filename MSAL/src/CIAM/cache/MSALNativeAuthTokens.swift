@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,7 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 @_implementationOnly import MSAL_Private
 
@@ -31,7 +31,7 @@ class MSALNativeAuthTokens {
     let idToken: MSIDIdToken?
     let accessToken: MSIDAccessToken?
     let refreshToken: MSIDRefreshToken?
-    
+
     init(idToken: MSIDIdToken?, accessToken: MSIDAccessToken?, refreshToken: MSIDRefreshToken?) {
         self.idToken = idToken
         self.accessToken = accessToken

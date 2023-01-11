@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,7 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 import Foundation
 @_implementationOnly import MSAL_Private
@@ -32,15 +32,15 @@ class MSALNativeAuthRequestParameters: MSIDRequestContext {
     var msidConfiguration: MSIDConfiguration = MSIDConfiguration()
     var providedAuthority: MSIDAuthority?
     var accountIdentifier: MSIDAccountIdentifier = MSIDAccountIdentifier()
-    var currentAppRequestMetadata = [AnyHashable : Any]()
+    var currentAppRequestMetadata = [AnyHashable: Any]()
     var internalCorrelationId = UUID()
     var telemetryId = UUID()
     var clientId: String = ""
     var instanceAware: Bool = false
     var authority: MSIDAuthority?
     var oidcScope: String = ""
-    let authenticationScheme : MSALAuthenticationSchemeProtocol = MSALAuthenticationSchemeBearer()
-    
+    let authenticationScheme: MSALAuthenticationSchemeProtocol = MSALAuthenticationSchemeBearer()
+
     init() {
         guard let metadata = Bundle.main.infoDictionary else { return }
         let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
@@ -49,28 +49,32 @@ class MSALNativeAuthRequestParameters: MSIDRequestContext {
         currentAppRequestMetadata[MSID_APP_NAME_KEY] = appName
         currentAppRequestMetadata[MSID_APP_VER_KEY] = appVer
     }
-    
+
     func correlationId() -> UUID {
         return internalCorrelationId
     }
-    
+
     func logComponent() -> String! {
         return MSIDVersion.sdkName()
     }
-    
+
     func telemetryRequestId() -> String {
         return telemetryId.uuidString
     }
-    
-    func appRequestMetadata() -> [AnyHashable : Any] {
+
+    func appRequestMetadata() -> [AnyHashable: Any] {
         return currentAppRequestMetadata
     }
 
-    func updateMSIDConfiguration(){
-        guard let config = MSIDConfiguration(authority: authority, redirectUri: nil, clientId: clientId, target: "") else {
+    func updateMSIDConfiguration() {
+        guard let config = MSIDConfiguration(
+            authority: authority,
+            redirectUri: nil,
+            clientId: clientId,
+            target: "") else {
             return
         }
         config.authScheme = MSIDAuthenticationScheme()
-        msidConfiguration = config;
+        msidConfiguration = config
     }
 }
