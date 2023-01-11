@@ -26,6 +26,12 @@
 
 final class MSALNativeUrlRequestSerializer: NSObject, MSIDRequestSerialization {
 
+    private let context: MSALNativeRequestContext
+
+    init(context: MSALNativeRequestContext) {
+        self.context = context
+    }
+
     func serialize(with request: URLRequest, parameters: [AnyHashable: Any], headers: [AnyHashable: Any]) -> URLRequest {
 
         var request = request
@@ -36,11 +42,16 @@ final class MSALNativeUrlRequestSerializer: NSObject, MSIDRequestSerialization {
         headers.forEach {
             if let key = $0.key as? String, let value = $0.value as? String {
                 requestHeaders[key] = value
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "Header serialization failed")
             }
         }
 
-        if let jsonData = try? JSONSerialization.data(withJSONObject: parameters) {
+        if JSONSerialization.isValidJSONObject(parameters) {
+            let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
             request.httpBody = jsonData
+        } else {
+            MSALLogger.log(level: .error, context: context, format: "http body request serialization failed")
         }
 
         requestHeaders["Content-Type"] = "application/json"

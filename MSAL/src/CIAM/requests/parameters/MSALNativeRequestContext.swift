@@ -22,13 +22,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeEndpoint: String {
-    case signUp = "/signup"
-    case signIn = "/signin"
-    case refreshToken = "/refreshtoken"
-    case resetPasswordStart = "/resetpassword/start"
-    case resetPasswordComplete = "/resetpassword/complete"
-    case resendCode = "/resendcode"
-    case verifyCode = "/verifycode"
-    case signOut = "/signout"
+@_implementationOnly import MSAL_Private
+
+final class MSALNativeRequestContext: MSIDRequestContext {
+
+    private let _correlationId = UUID()
+    private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
+
+    func correlationId() -> UUID {
+        _correlationId
+    }
+
+    func logComponent() -> String {
+        MSIDVersion.sdkName()
+    }
+
+    func telemetryRequestId() -> String {
+        _telemetryRequestId
+    }
+
+    func appRequestMetadata() -> [AnyHashable: Any] {
+        guard let metadata = Bundle.main.infoDictionary else {
+            return [:]
+        }
+
+        let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
+        let appVersion = metadata["CFBundleShortVersionString"] ?? ""
+
+        return [
+            MSID_VERSION_KEY: MSIDVersion.sdkVersion() ?? "",
+            MSID_APP_NAME_KEY: appName,
+            MSID_APP_VER_KEY: appVersion
+        ]
+    }
 }

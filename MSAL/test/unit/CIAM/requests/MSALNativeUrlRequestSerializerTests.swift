@@ -28,10 +28,18 @@ import XCTest
 
 final class MSALNativeUrlRequestSerializerTests: XCTestCase {
 
-    func test_serialize() throws {
-        let url = URL(string: DEFAULT_TEST_RESOURCE)!
-        let request = URLRequest(url: url)
+    private var sut: MSALNativeUrlRequestSerializer!
+    private var request: URLRequest!
+    private static let loggerSpy = NativeAuthTestLoggerSpy()
 
+    override func setUp() {
+        let url = URL(string: DEFAULT_TEST_RESOURCE)!
+        request = URLRequest(url: url)
+
+        sut = MSALNativeUrlRequestSerializer(context: MSALNativeRequestContext())
+    }
+
+    func test_serialize_successfully() throws {
         let parameters = [
             "clientId": DEFAULT_TEST_CLIENT_ID,
             "grantType": "passwordless_otp",
@@ -44,7 +52,6 @@ final class MSALNativeUrlRequestSerializerTests: XCTestCase {
             "custom-header": "value"
         ]
 
-        let sut = MSALNativeUrlRequestSerializer()
         let result = sut.serialize(with: request, parameters: parameters, headers: headers)
 
         let bodyParametersResult = try JSONDecoder().decode([String: String].self, from: result.httpBody!)
@@ -61,5 +68,59 @@ final class MSALNativeUrlRequestSerializerTests: XCTestCase {
         XCTAssertEqual(httpHeadersResult.count, 2)
         XCTAssertEqual(httpHeadersResult["Content-Type"], "application/json")
         XCTAssertEqual(httpHeadersResult["custom-header"], "value")
+    }
+
+    func test_serialize_with_dict_in_body() throws {
+        let customAttributes: [String: Codable] = [
+            "name": "John",
+            "surname": "Smith",
+            "age": "37"
+        ]
+
+        let parameters = [
+            "customAttributes": customAttributes
+        ]
+
+        let result = sut.serialize(with: request, parameters: parameters, headers: [:])
+
+        let bodyParametersResult = try JSONDecoder().decode([String: [String: String]].self, from: result.httpBody!)
+
+        XCTAssertEqual(bodyParametersResult.count, 1)
+        let resultCustomAttributes = bodyParametersResult["customAttributes"]!
+
+        XCTAssertEqual(resultCustomAttributes["name"], "John")
+        XCTAssertEqual(resultCustomAttributes["surname"], "Smith")
+        XCTAssertEqual(resultCustomAttributes["age"], "37")
+
+        let httpHeadersResult = result.allHTTPHeaderFields!
+
+        XCTAssertEqual(httpHeadersResult.count, 1)
+        XCTAssertEqual(httpHeadersResult["Content-Type"], "application/json")
+    }
+
+    func test_when_error_happens_in_headerSerialization_it_logs_it() {
+        let expectation = expectation(description: "header_serialization_expectation")
+
+        Self.loggerSpy.expectation = expectation
+        Self.loggerSpy.expectedMessage = "Header serialization failed"
+
+        _ = sut.serialize(with: request, parameters: [:], headers: ["header": 1])
+
+        wait(for: [expectation], timeout: 1)
+    }
+
+    func test_when_error_happens_in_bodySerialization_it_logs_it() {
+        let expectation = expectation(description: "body_serialization_expectation")
+
+        Self.loggerSpy.expectation = expectation
+        Self.loggerSpy.expectedMessage = "http body request serialization failed"
+
+        let impossibleToEncode = [
+            "param": UIView()
+        ]
+
+        _ = sut.serialize(with: request, parameters: impossibleToEncode, headers: [:])
+
+        wait(for: [expectation], timeout: 1)
     }
 }

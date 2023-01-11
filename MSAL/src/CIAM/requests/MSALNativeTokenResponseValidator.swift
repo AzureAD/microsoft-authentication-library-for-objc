@@ -33,7 +33,7 @@ protocol MSALNativeTokenResponseValidating {
     var accountIdentifier: MSIDAccountIdentifier { get }
 
     func validateResponse(_ tokenResponse: MSIDTokenResponse) throws -> MSIDTokenResult
-    func validateAccount(with tokenResult: MSIDTokenResult) -> Bool
+    func validateAccount(with tokenResult: MSIDTokenResult, error: inout NSError?) -> Bool
 }
 
 final class MSALNativeTokenResponseValidator: MSALNativeTokenResponseValidating {
@@ -62,7 +62,7 @@ final class MSALNativeTokenResponseValidator: MSALNativeTokenResponseValidating 
         self.accountIdentifier = accountIdentifier
     }
 
-    // MARK: - Public
+    // MARK: - Internal
 
     func validateResponse(_ tokenResponse: MSIDTokenResponse) throws -> MSIDTokenResult {
         var validationError: NSError?
@@ -79,24 +79,24 @@ final class MSALNativeTokenResponseValidator: MSALNativeTokenResponseValidating 
         // Special case - need to return homeAccountId in case of Intune policies required.
 
         if let error = validationError, error.code == MSIDErrorCode.serverProtectionPoliciesRequired.rawValue {
+            MSALLogger.log(level: .warning, context: context, format: "Received Protection Policy Required error.")
             throw MSALNativeError.serverProtectionPoliciesRequired(homeAccountId: accountIdentifier.homeAccountId)
         }
 
         guard let tokenResult = tokenResult else {
+            MSALLogger.log(level: .error, context: context, format: "TokenResult is nil after validation.")
             throw MSALNativeError.validationError
         }
 
         return tokenResult
     }
 
-    func validateAccount(with tokenResult: MSIDTokenResult) -> Bool {
-        var tokenResponseValidatorError: NSError?
-
+    func validateAccount(with tokenResult: MSIDTokenResult, error: inout NSError?) -> Bool {
         return defaultValidator.validateAccount(
             accountIdentifier,
             tokenResult: tokenResult,
             correlationID: context.correlationId(),
-            error: &tokenResponseValidatorError
+            error: &error
         )
     }
 }

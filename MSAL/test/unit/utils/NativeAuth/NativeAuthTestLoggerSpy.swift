@@ -22,36 +22,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
+@testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeContext: MSIDRequestContext {
+class NativeAuthTestLoggerSpy {
 
-    private let _correlationId = UUID()
+    // Use `counter` along with `expectation.expectedFulfillmentCount` to spy a function that has several logs
+    var counter = 0
+    var expectation: XCTestExpectation?
+    var expectedMessage: String!
 
-    func correlationId() -> UUID {
-        _correlationId
+    init() {
+        MSALGlobalConfig.loggerConfig.setLogCallback(callback)
     }
 
-    func logComponent() -> String {
-        MSIDVersion.sdkName()
+    func reset() {
+        counter = 0
+        expectation = nil
+        expectedMessage = nil
     }
 
-    func telemetryRequestId() -> String {
-        MSIDTelemetry.sharedInstance().generateRequestId()
-    }
+    func callback(_ logLevel: MSALLogLevel, _ message: String?, _ containsPII: Bool) {
+        guard let expectation = expectation else { return }
 
-    func appRequestMetadata() -> [AnyHashable: Any] {
-        guard let metadata = Bundle.main.infoDictionary else {
-            return [:]
+        expectation.fulfill()
+
+        counter += 1
+
+        if counter == expectation.expectedFulfillmentCount {
+            let result = message!.contains(expectedMessage)
+            XCTAssertTrue(result)
         }
-
-        let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
-        let appVersion = metadata["CFBundleShortVersionString"] ?? ""
-
-        return [
-            MSID_VERSION_KEY: MSIDVersion.sdkVersion() ?? "",
-            MSID_APP_NAME_KEY: appName,
-            MSID_APP_VER_KEY: appVersion
-        ]
     }
 }

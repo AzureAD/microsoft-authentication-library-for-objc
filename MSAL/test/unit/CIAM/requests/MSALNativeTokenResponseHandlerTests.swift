@@ -32,7 +32,7 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
 
     private var sut: MSALNativeTokenResponseHandler!
 
-    private static let loggerSpy = LoggerSpy()
+    private static let loggerSpy = NativeAuthTestLoggerSpy()
     private var tokenResponseValidatorMock: NativeTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
     private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
@@ -44,7 +44,6 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
 
         sut = MSALNativeTokenResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock,
-            tokenCache: NativeCacheStub(),
             accountIdentifier: accountIdentifier,
             context: context,
             configuration: .init()
@@ -75,25 +74,9 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
         expectation.expectedFulfillmentCount = 2
 
         Self.loggerSpy.expectation = expectation
-        Self.loggerSpy.expectedMessage = "Validated result account with result 1, old account Masked(null), new account Masked(null)"
+        Self.loggerSpy.expectedMessage = "Validated account with result 1, old account Masked(null), new account Masked(null)"
 
         _ = try? sut.handle(tokenResponse: .init(), validateAccount: true)
-
-        wait(for: [expectation], timeout: 1)
-    }
-
-    func test_handleTokenResponse_returns_intune_error_logs_data() throws {
-        let expectation = expectation(description: "test_handleTokenResponse_returns_intune_error_logs_data_expectation")
-        expectation.expectedFulfillmentCount = 2
-
-        Self.loggerSpy.expectation = expectation
-        Self.loggerSpy.expectedMessage = "Received Protection Policy Required error."
-
-        tokenResponseValidatorMock.shouldThrowIntuneError = true
-
-        XCTAssertThrowsError(try sut.handle(tokenResponse: .init(), validateAccount: false)) {
-            XCTAssertEqual($0 as? MSALNativeError, .serverProtectionPoliciesRequired(homeAccountId: nil))
-        }
 
         wait(for: [expectation], timeout: 1)
     }
@@ -141,58 +124,7 @@ private class NativeTokenResponseValidatorMock: MSALNativeTokenResponseValidatin
         return tokenResult
     }
 
-    func validateAccount(with tokenResult: MSIDTokenResult) -> Bool {
+    func validateAccount(with tokenResult: MSIDTokenResult, error: inout NSError?) -> Bool {
         true
-    }
-}
-
-private class LoggerSpy {
-
-    var counter = 0
-    var expectation: XCTestExpectation?
-    var expectedMessage: String!
-
-    init() {
-        MSALGlobalConfig.loggerConfig.setLogCallback(callback)
-    }
-
-    func reset() {
-        counter = 0
-        expectation = nil
-        expectedMessage = nil
-    }
-
-    private func callback(_ logLevel: MSALLogLevel, _ message: String?, _ containsPII: Bool) {
-        guard let expectation = expectation else { return }
-
-        expectation.fulfill()
-
-        counter += 1
-
-        // We want to check the 2nd log inside MSALNativeTokenResponseHandler.handle() - the 1st one is just an info log
-        if counter == 2 {
-            let result = message!.contains(expectedMessage)
-            XCTAssertTrue(result)
-        }
-    }
-}
-
-private class NativeCacheStub: MSALNativeAuthCacheInterface {
-
-    func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
-        .init(idToken: nil, accessToken: nil, refreshToken: nil)
-    }
-
-    func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount? {
-        .init()
-    }
-
-    func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
-    }
-
-    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
-    }
-
-    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
     }
 }

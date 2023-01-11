@@ -25,5 +25,7 @@
 
 enum MSALNativeError: Error, Equatable {
     case validationError
+    case tokenResultNotPresent
     case serverProtectionPoliciesRequired(homeAccountId: String?)
+    case headerNotSerialized
 }

@@ -27,7 +27,6 @@
 protocol MSALNativeTokenResponseHandling {
 
     var tokenResponseValidator: MSALNativeTokenResponseValidating { get }
-    var tokenCache: MSALNativeAuthCacheInterface { get }
     var accountIdentifier: MSIDAccountIdentifier { get }
     var context: MSIDRequestContext { get }
     var configuration: MSIDConfiguration { get }
@@ -40,7 +39,6 @@ final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
     // MARK: - Variables
 
     let tokenResponseValidator: MSALNativeTokenResponseValidating
-    let tokenCache: MSALNativeAuthCacheInterface
     let accountIdentifier: MSIDAccountIdentifier
     let context: MSIDRequestContext
     let configuration: MSIDConfiguration
@@ -49,13 +47,11 @@ final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
 
     init(
         tokenResponseValidator: MSALNativeTokenResponseValidating,
-        tokenCache: MSALNativeAuthCacheInterface,
         accountIdentifier: MSIDAccountIdentifier,
         context: MSIDRequestContext,
         configuration: MSIDConfiguration
     ) {
         self.tokenResponseValidator = tokenResponseValidator
-        self.tokenCache = tokenCache
         self.accountIdentifier = accountIdentifier
         self.context = context
         self.configuration = configuration
@@ -75,48 +71,35 @@ final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
 
         self.init(
             tokenResponseValidator: tokenResponseValidator,
-            tokenCache: MSALNativeAuthCacheGateway(),
             accountIdentifier: accountIdentifier,
             context: context,
             configuration: configuration
         )
     }
 
-    // MARK: - Public
+    // MARK: - Internal
 
     func handle(tokenResponse: MSIDTokenResponse, validateAccount: Bool) throws -> MSIDTokenResult {
         MSALLogger.log(level: .info, context: context, format: "Validate and save token response...")
 
-        do {
-            let tokenResult = try tokenResponseValidator.validateResponse(tokenResponse)
+        let tokenResult = try tokenResponseValidator.validateResponse(tokenResponse)
 
-            if validateAccount {
-                performAccountValidation(tokenResult)
-            }
-
-            try tokenCache.saveTokensAndAccount(
-                tokenResult: tokenResponse,
-                configuration: configuration,
-                context: context
-            )
-
-            return tokenResult
-
-        } catch MSALNativeError.serverProtectionPoliciesRequired(let homeAccountId) {
-            MSALLogger.log(level: .info, context: context, format: "Received Protection Policy Required error.")
-            throw MSALNativeError.serverProtectionPoliciesRequired(homeAccountId: homeAccountId)
-        } catch {
-            throw MSALNativeError.validationError
+        if validateAccount {
+            performAccountValidation(tokenResult)
         }
+
+        return tokenResult
     }
 
     private func performAccountValidation(_ tokenResult: MSIDTokenResult) {
-        let accountChecked = tokenResponseValidator.validateAccount(with: tokenResult)
+        var error: NSError?
+
+        let accountChecked = tokenResponseValidator.validateAccount(with: tokenResult, error: &error)
 
         MSALLogger.logPII(
-            level: .info,
+            level: error == nil ? .info : .error,
             context: context,
-            format: "Validated result account with result %d, old account %@, new account %@",
+            format: "Validated account with result %d, old account %@, new account %@",
             accountChecked,
             MSALLogMask.maskTrackablePII(accountIdentifier.uid),
             MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier.uid)
