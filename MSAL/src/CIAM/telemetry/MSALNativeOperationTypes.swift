@@ -22,14 +22,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeRequestable {
-    var tenant: URL { get }
-    var clientId: String { get }
-    var endpoint: MSALNativeEndpoint { get }
-    var context: MSIDRequestContext { get }
-    var telemetry : MSALNativeCurrentRequestTelemetry { get }
-    var correlationId: UUID { get }
-    var url: URL { get }
+// TODO: Add or remove cases as needed to handle all possible cases needed by our logic
+
+typealias MSALNativeOperationType = Int
+
+enum MSALNativeSignUpType: MSALNativeOperationType {
+    case MSALNativeSignUpWithPassword = 0
+    case MSALNativeSignUpWithOTP = 1
+    case MSALNativeSignUpWithMFA = 2
 }
+
+enum MSALNativeSignInType: MSALNativeOperationType {
+    case MSALNativeSignInithPassword = 0
+    case MSALNativeSignInWithOTP = 1
+    case MSALNativeSignInWithMFA = 2
+}
+
+typealias MSALNativeTokenRefreshType = TokenCacheRefreshType
+
+enum MSALNativeResetPasswordStartType: MSALNativeOperationType {
+    case MSALNativeResetPasswordStart = 0
+}
+
+enum MSALNativeResetPasswordCompleteType: MSALNativeOperationType {
+    case MSALNativeTelemetryResetPasswordComplete = 0
+}
+
+enum MSALNativeResendCodeType: MSALNativeOperationType {
+    case MSALNativeTelemetryResendCode = 0
+}
+
+enum MSALNativeVerifyCodeType: MSALNativeOperationType {
+    case MSALNativeTelemetryVerifyCode = 0
+}
+
+enum MSALNativeSignOutType: MSALNativeOperationType {
+    case MSALNativeTelemetrySignOutAction = 0
+    case MSALNativeTelemetrySignOutForced = 1
+}
+

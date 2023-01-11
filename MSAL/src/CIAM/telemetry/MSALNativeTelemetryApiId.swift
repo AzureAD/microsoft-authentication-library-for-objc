@@ -22,14 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-protocol MSALNativeRequestable {
-    var tenant: URL { get }
-    var clientId: String { get }
-    var endpoint: MSALNativeEndpoint { get }
-    var context: MSIDRequestContext { get }
-    var telemetry : MSALNativeCurrentRequestTelemetry { get }
-    var correlationId: UUID { get }
-    var url: URL { get }
+enum MSALNativeTelemetryApiId: Int {
+    // TODO: Untill we know exactly how to define them, to prevent any clashes with existing id's
+    // I've added a number that is unlikely to be used
+    case MSALNativeTelemetrySignUp = 75001
+    case MSALNativeTelemetrySignIn = 75002
+    case MSALNativeTelemetryRefreshToken = 75003
+    case MSALNativeTelemetryResetPasswordStart = 75004
+    case MSALNativeTelemetryResetPasswordComplete = 75005
+    case MSALNativeTelemetryResendCode = 75006
+    case MSALNativeTelemetryVerifyCode = 75007
+    case MSALNativeTelemetrySignOut = 75008
 }
