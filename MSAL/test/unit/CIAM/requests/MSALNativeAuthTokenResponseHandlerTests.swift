@@ -26,11 +26,11 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeTokenResponseHandlerTests: XCTestCase {
+final class MSALNativeAuthTokenResponseHandlerTests: XCTestCase {
 
     // MARK: - Variables
 
-    private var sut: MSALNativeTokenResponseHandler!
+    private var sut: MSALNativeAuthTokenResponseHandler!
 
     private static let loggerSpy = NativeAuthTestLoggerSpy()
     private var tokenResponseValidatorMock: NativeTokenResponseValidatorMock!
@@ -42,7 +42,7 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
     override func setUpWithError() throws {
         tokenResponseValidatorMock = NativeTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
 
-        sut = MSALNativeTokenResponseHandler(
+        sut = MSALNativeAuthTokenResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock,
             accountIdentifier: accountIdentifier,
             context: context,
@@ -65,7 +65,7 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
         tokenResponseValidatorMock.shouldThrowGenericError = true
 
         XCTAssertThrowsError(try sut.handle(tokenResponse: .init(), validateAccount: false)) {
-            XCTAssertEqual($0 as? MSALNativeError, .validationError)
+            XCTAssertEqual($0 as? MSALNativeAuthError, .validationError)
         }
     }
 
@@ -82,7 +82,7 @@ final class MSALNativeTokenResponseHandlerTests: XCTestCase {
     }
 }
 
-private class NativeTokenResponseValidatorMock: MSALNativeTokenResponseValidating {
+private class NativeTokenResponseValidatorMock: MSALNativeAuthTokenResponseValidating {
 
     var shouldThrowGenericError = false
     var shouldThrowIntuneError = false
@@ -101,11 +101,11 @@ private class NativeTokenResponseValidatorMock: MSALNativeTokenResponseValidatin
     func validateResponse(_ tokenResponse: MSIDTokenResponse) throws -> MSIDTokenResult {
 
         if shouldThrowGenericError {
-            throw MSALNativeError.validationError
+            throw MSALNativeAuthError.validationError
         }
 
         if shouldThrowIntuneError {
-            throw MSALNativeError.serverProtectionPoliciesRequired(homeAccountId: nil)
+            throw MSALNativeAuthError.serverProtectionPoliciesRequired(homeAccountId: nil)
         }
 
         let account = MSIDAccount()

@@ -24,23 +24,35 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeRequestProviding {
+final class MSALNativeAuthRequestContext: MSIDRequestContext {
 
-    var clientId: String { get }
-    var tenant: URL { get }
-}
+    private let _correlationId = UUID()
+    private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
 
-final class MSALNativeRequestProvider: MSALNativeRequestProviding {
+    func correlationId() -> UUID {
+        _correlationId
+    }
 
-    // MARK: - Variables
+    func logComponent() -> String {
+        MSIDVersion.sdkName()
+    }
 
-    let clientId: String
-    let tenant: URL
+    func telemetryRequestId() -> String {
+        _telemetryRequestId
+    }
 
-    // MARK: - Init
+    func appRequestMetadata() -> [AnyHashable: Any] {
+        guard let metadata = Bundle.main.infoDictionary else {
+            return [:]
+        }
 
-    init(clientId: String, tenant: URL) {
-        self.clientId = clientId
-        self.tenant = tenant
+        let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
+        let appVersion = metadata["CFBundleShortVersionString"] ?? ""
+
+        return [
+            MSID_VERSION_KEY: MSIDVersion.sdkVersion() ?? "",
+            MSID_APP_NAME_KEY: appName,
+            MSID_APP_VER_KEY: appVersion
+        ]
     }
 }

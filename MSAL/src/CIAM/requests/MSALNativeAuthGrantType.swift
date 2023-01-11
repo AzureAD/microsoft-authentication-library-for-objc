@@ -22,13 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
-
-protocol MSALNativeRequestable {
-    var tenant: URL { get }
-    var clientId: String { get }
-    var endpoint: MSALNativeEndpoint { get }
-    var context: MSIDRequestContext { get }
-    var correlationId: UUID { get }
-    var url: URL { get }
+enum MSALNativeAuthGrantType: String {
+    case password
+    case otp = "passwordless_otp"
 }

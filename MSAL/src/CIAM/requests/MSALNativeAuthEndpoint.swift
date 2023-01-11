@@ -22,7 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeGrantType: String {
-    case password
-    case otp = "passwordless_otp"
+enum MSALNativeAuthEndpoint: String {
+    case signUp = "/signup"
+    case signIn = "/signin"
+    case refreshToken = "/refreshtoken"
+    case resetPasswordStart = "/resetpassword/start"
+    case resetPasswordComplete = "/resetpassword/complete"
+    case resendCode = "/resendcode"
+    case verifyCode = "/verifycode"
+    case signOut = "/signout"
 }

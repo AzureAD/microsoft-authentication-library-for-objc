@@ -24,35 +24,39 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeRequestContext: MSIDRequestContext {
+final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerialization {
 
-    private let _correlationId = UUID()
-    private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
+    private let context: MSALNativeAuthRequestContext
 
-    func correlationId() -> UUID {
-        _correlationId
+    init(context: MSALNativeAuthRequestContext) {
+        self.context = context
     }
 
-    func logComponent() -> String {
-        MSIDVersion.sdkName()
-    }
+    func serialize(with request: URLRequest, parameters: [AnyHashable: Any], headers: [AnyHashable: Any]) -> URLRequest {
 
-    func telemetryRequestId() -> String {
-        _telemetryRequestId
-    }
+        var request = request
+        var requestHeaders: [String: String] = [:]
 
-    func appRequestMetadata() -> [AnyHashable: Any] {
-        guard let metadata = Bundle.main.infoDictionary else {
-            return [:]
+        // Convert entries from `headers` to a dictionary [String: String] 
+
+        headers.forEach {
+            if let key = $0.key as? String, let value = $0.value as? String {
+                requestHeaders[key] = value
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "Header serialization failed")
+            }
         }
 
-        let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
-        let appVersion = metadata["CFBundleShortVersionString"] ?? ""
+        if JSONSerialization.isValidJSONObject(parameters) {
+            let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
+            request.httpBody = jsonData
+        } else {
+            MSALLogger.log(level: .error, context: context, format: "http body request serialization failed")
+        }
 
-        return [
-            MSID_VERSION_KEY: MSIDVersion.sdkVersion() ?? "",
-            MSID_APP_NAME_KEY: appName,
-            MSID_APP_VER_KEY: appVersion
-        ]
+        requestHeaders["Content-Type"] = "application/json"
+        request.allHTTPHeaderFields = requestHeaders
+
+        return request
     }
 }

@@ -24,39 +24,23 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeUrlRequestSerializer: NSObject, MSIDRequestSerialization {
+protocol MSALNativeAuthRequestProviding {
 
-    private let context: MSALNativeRequestContext
+    var clientId: String { get }
+    var tenant: URL { get }
+}
 
-    init(context: MSALNativeRequestContext) {
-        self.context = context
-    }
+final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
-    func serialize(with request: URLRequest, parameters: [AnyHashable: Any], headers: [AnyHashable: Any]) -> URLRequest {
+    // MARK: - Variables
 
-        var request = request
-        var requestHeaders: [String: String] = [:]
+    let clientId: String
+    let tenant: URL
 
-        // Convert entries from `headers` to a dictionary [String: String] 
+    // MARK: - Init
 
-        headers.forEach {
-            if let key = $0.key as? String, let value = $0.value as? String {
-                requestHeaders[key] = value
-            } else {
-                MSALLogger.log(level: .error, context: context, format: "Header serialization failed")
-            }
-        }
-
-        if JSONSerialization.isValidJSONObject(parameters) {
-            let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
-            request.httpBody = jsonData
-        } else {
-            MSALLogger.log(level: .error, context: context, format: "http body request serialization failed")
-        }
-
-        requestHeaders["Content-Type"] = "application/json"
-        request.allHTTPHeaderFields = requestHeaders
-
-        return request
+    init(clientId: String, tenant: URL) {
+        self.clientId = clientId
+        self.tenant = tenant
     }
 }

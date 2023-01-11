@@ -24,9 +24,9 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeTokenResponseHandling {
+protocol MSALNativeAuthTokenResponseHandling {
 
-    var tokenResponseValidator: MSALNativeTokenResponseValidating { get }
+    var tokenResponseValidator: MSALNativeAuthTokenResponseValidating { get }
     var accountIdentifier: MSIDAccountIdentifier { get }
     var context: MSIDRequestContext { get }
     var configuration: MSIDConfiguration { get }
@@ -34,11 +34,11 @@ protocol MSALNativeTokenResponseHandling {
     func handle(tokenResponse: MSIDTokenResponse, validateAccount: Bool) throws -> MSIDTokenResult
 }
 
-final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
+final class MSALNativeAuthTokenResponseHandler: MSALNativeAuthTokenResponseHandling {
 
     // MARK: - Variables
 
-    let tokenResponseValidator: MSALNativeTokenResponseValidating
+    let tokenResponseValidator: MSALNativeAuthTokenResponseValidating
     let accountIdentifier: MSIDAccountIdentifier
     let context: MSIDRequestContext
     let configuration: MSIDConfiguration
@@ -46,7 +46,7 @@ final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
     // MARK: - Init
 
     init(
-        tokenResponseValidator: MSALNativeTokenResponseValidating,
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
         accountIdentifier: MSIDAccountIdentifier,
         context: MSIDRequestContext,
         configuration: MSIDConfiguration
@@ -62,7 +62,7 @@ final class MSALNativeTokenResponseHandler: MSALNativeTokenResponseHandling {
         context: MSIDRequestContext,
         configuration: MSIDConfiguration
     ) {
-        let tokenResponseValidator = MSALNativeTokenResponseValidator(
+        let tokenResponseValidator = MSALNativeAuthTokenResponseValidator(
             factory: MSIDAADOauth2Factory(),
             context: context,
             configuration: configuration,

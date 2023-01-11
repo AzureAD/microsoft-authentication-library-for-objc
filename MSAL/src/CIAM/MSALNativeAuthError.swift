@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 
-enum MSALNativeError: Error, Equatable {
+enum MSALNativeAuthError: Error, Equatable {
     case validationError
     case tokenResultNotPresent
     case serverProtectionPoliciesRequired(homeAccountId: String?)

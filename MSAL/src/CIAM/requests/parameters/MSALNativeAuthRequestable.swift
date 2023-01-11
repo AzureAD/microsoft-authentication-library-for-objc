@@ -22,13 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeEndpoint: String {
-    case signUp = "/signup"
-    case signIn = "/signin"
-    case refreshToken = "/refreshtoken"
-    case resetPasswordStart = "/resetpassword/start"
-    case resetPasswordComplete = "/resetpassword/complete"
-    case resendCode = "/resendcode"
-    case verifyCode = "/verifycode"
-    case signOut = "/signout"
+@_implementationOnly import MSAL_Private
+
+protocol MSALNativeAuthRequestable {
+    var tenant: URL { get }
+    var clientId: String { get }
+    var endpoint: MSALNativeAuthEndpoint { get }
+    var context: MSIDRequestContext { get }
+    var correlationId: UUID { get }
+    var url: URL { get }
 }

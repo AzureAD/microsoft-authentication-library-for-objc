@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeTokenResponseValidating {
+protocol MSALNativeAuthTokenResponseValidating {
 
     var defaultValidator: MSIDTokenResponseValidator { get }
     var factory: MSIDOauth2Factory { get }
@@ -36,7 +36,7 @@ protocol MSALNativeTokenResponseValidating {
     func validateAccount(with tokenResult: MSIDTokenResult, error: inout NSError?) -> Bool
 }
 
-final class MSALNativeTokenResponseValidator: MSALNativeTokenResponseValidating {
+final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseValidating {
 
     // MARK: - Variables
 
@@ -80,12 +80,12 @@ final class MSALNativeTokenResponseValidator: MSALNativeTokenResponseValidating 
 
         if let error = validationError, error.code == MSIDErrorCode.serverProtectionPoliciesRequired.rawValue {
             MSALLogger.log(level: .warning, context: context, format: "Received Protection Policy Required error.")
-            throw MSALNativeError.serverProtectionPoliciesRequired(homeAccountId: accountIdentifier.homeAccountId)
+            throw MSALNativeAuthError.serverProtectionPoliciesRequired(homeAccountId: accountIdentifier.homeAccountId)
         }
 
         guard let tokenResult = tokenResult else {
             MSALLogger.log(level: .error, context: context, format: "TokenResult is nil after validation.")
-            throw MSALNativeError.validationError
+            throw MSALNativeAuthError.validationError
         }
 
         return tokenResult

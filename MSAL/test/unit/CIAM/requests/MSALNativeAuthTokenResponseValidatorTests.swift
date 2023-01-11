@@ -26,11 +26,11 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeTokenResponseValidatorTests: XCTestCase {
+final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
 
     // MARK: - Variables
 
-    private var sut: MSALNativeTokenResponseValidator!
+    private var sut: MSALNativeAuthTokenResponseValidator!
     private var defaultValidatorMock: DefaultValidatorMock!
 
     // MARK: - Setup
@@ -62,7 +62,7 @@ final class MSALNativeTokenResponseValidatorTests: XCTestCase {
         defaultValidatorMock.shouldReturnServerProtectionPoliciesRequiredError = true
 
         XCTAssertThrowsError(try sut.validateResponse(response)) {
-            XCTAssertEqual($0 as? MSALNativeError, .serverProtectionPoliciesRequired(homeAccountId: "home.account.id"))
+            XCTAssertEqual($0 as? MSALNativeAuthError, .serverProtectionPoliciesRequired(homeAccountId: "home.account.id"))
         }
     }
 
@@ -71,7 +71,7 @@ final class MSALNativeTokenResponseValidatorTests: XCTestCase {
         defaultValidatorMock.shouldThrowGenericError = true
 
         XCTAssertThrowsError(try sut.validateResponse(response)) {
-            XCTAssertEqual($0 as? MSALNativeError, .validationError)
+            XCTAssertEqual($0 as? MSALNativeAuthError, .validationError)
         }
     }
 
