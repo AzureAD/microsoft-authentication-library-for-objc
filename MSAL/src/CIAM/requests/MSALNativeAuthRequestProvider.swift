@@ -28,6 +28,7 @@ protocol MSALNativeAuthRequestProviding {
 
     var clientId: String { get }
     var tenant: URL { get }
+    var context: MSIDRequestContext { get }
 }
 
 final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
@@ -36,11 +37,13 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
     let clientId: String
     let tenant: URL
+    let context: MSIDRequestContext
 
     // MARK: - Init
 
-    init(clientId: String, tenant: URL) {
+    init(clientId: String, tenant: URL, context: MSIDRequestContext) {
         self.clientId = clientId
         self.tenant = tenant
+        self.context = context
     }
 }
