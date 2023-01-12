@@ -32,7 +32,7 @@ final class MSALNativeAuthTokenResponseHandlerTests: XCTestCase {
 
     private var sut: MSALNativeAuthTokenResponseHandler!
 
-    private static let loggerSpy = MSALNativeLoggingTests.staticLogger
+    private static let logger = MSALNativeLoggingTests.staticLogger
     private var tokenResponseValidatorMock: NativeTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
     private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
@@ -51,7 +51,7 @@ final class MSALNativeAuthTokenResponseHandlerTests: XCTestCase {
     }
 
     override func tearDown() {
-        Self.loggerSpy.reset()
+        Self.logger.reset()
         super.tearDown()
     }
 
@@ -70,17 +70,17 @@ final class MSALNativeAuthTokenResponseHandlerTests: XCTestCase {
     }
 
     func test_handleTokenResponse_withAccountValidation_logs_data() throws {
-        let expectation = expectation(description: "test_handleTokenResponse_withAccountValidation_logs_data_expectation")
+        let expectation = expectation(description: "Log account validation")
         expectation.expectedFulfillmentCount = 2
 
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
-        Self.loggerSpy.expectation = expectation
+        Self.logger.expectation = expectation
 
         _ = try? sut.handle(tokenResponse: .init(), validateAccount: true)
 
         wait(for: [expectation], timeout: 1)
 
-        let resultingLog = Self.loggerSpy.messages[1] as! String
+        let resultingLog = Self.logger.messages[1] as! String
         XCTAssertTrue(resultingLog.contains(
             "Validated account with result 1, old account Masked(null), new account Masked(null)")
         )

@@ -30,7 +30,7 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
 
     private var sut: MSALNativeAuthUrlRequestSerializer!
     private var request: URLRequest!
-    private static let loggerSpy = MSALNativeLoggingTests.staticLogger
+    private static let logger = MSALNativeLoggingTests.staticLogger
 
     override func setUp() {
         let url = URL(string: DEFAULT_TEST_RESOURCE)!
@@ -40,7 +40,7 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
     }
 
     override func tearDown() {
-        Self.loggerSpy.reset()
+        Self.logger.reset()
         super.tearDown()
     }
 
@@ -104,22 +104,22 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
     }
 
     func test_when_error_happens_in_headerSerialization_it_logs_it() {
-        let expectation = expectation(description: "header_serialization_expectation")
+        let expectation = expectation(description: "Header serialization error")
 
-        Self.loggerSpy.expectation = expectation
+        Self.logger.expectation = expectation
 
         _ = sut.serialize(with: request, parameters: [:], headers: ["header": 1])
 
         wait(for: [expectation], timeout: 1)
 
-        let resultingLog = Self.loggerSpy.messages[0] as! String
+        let resultingLog = Self.logger.messages[0] as! String
         XCTAssertTrue(resultingLog.contains("Header serialization failed"))
     }
 
     func test_when_error_happens_in_bodySerialization_it_logs_it() {
-        let expectation = expectation(description: "body_serialization_expectation")
+        let expectation = expectation(description: "Body request serialization error")
 
-        Self.loggerSpy.expectation = expectation
+        Self.logger.expectation = expectation
 
         let impossibleToEncode = [
             "param": UIView()
@@ -129,7 +129,7 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1)
 
-        let resultingLog = Self.loggerSpy.messages[0] as! String
-        XCTAssertTrue(resultingLog.contains("http body request serialization failed"))
+        let resultingLog = Self.logger.messages[0] as! String
+        XCTAssertTrue(resultingLog.contains("HTTP body request serialization failed"))
     }
 }

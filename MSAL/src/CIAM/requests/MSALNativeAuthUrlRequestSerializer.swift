@@ -51,7 +51,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
             let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
             request.httpBody = jsonData
         } else {
-            MSALLogger.log(level: .error, context: context, format: "http body request serialization failed")
+            MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
         }
 
         requestHeaders["Content-Type"] = "application/json"
