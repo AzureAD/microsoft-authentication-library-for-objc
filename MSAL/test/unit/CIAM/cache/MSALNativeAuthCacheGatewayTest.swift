@@ -172,6 +172,7 @@ final class MSALNativeAuthCacheGatewayTest: XCTestCase {
     
     private func getParameters() -> ParametersStub {
         ParametersStub(
+            telemetry: MSALNativeCurrentRequestTelemetry(),
             tenant: .init(string: DEFAULT_TEST_AUTHORITY)!,
             clientId: "clientId",
             endpoint: .signUp,
@@ -211,6 +212,7 @@ final class MSALNativeAuthCacheGatewayTest: XCTestCase {
 }
 
 private struct ParametersStub: MSALNativeRequestable {
+    var telemetry: MSAL.MSALNativeCurrentRequestTelemetry
     let tenant: URL
     let clientId: String
     let endpoint: MSAL.MSALNativeEndpoint

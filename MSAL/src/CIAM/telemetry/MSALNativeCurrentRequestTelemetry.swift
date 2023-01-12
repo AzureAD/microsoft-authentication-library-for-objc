@@ -26,9 +26,9 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeCurrentRequestTelemetry : NSObject, MSIDTelemetryStringSerializable {
-    var schemaVersion: Int!
-    var apiId: MSALNativeTelemetryApiId!
-    var operationType: MSALNativeOperationType!
+    var schemaVersion: Int?
+    var apiId: MSALNativeTelemetryApiId?
+    var operationType: MSALNativeOperationType?
     var platformFields: [String]?
     
     convenience init(apiId: MSALNativeTelemetryApiId,
@@ -46,13 +46,13 @@ class MSALNativeCurrentRequestTelemetry : NSObject, MSIDTelemetryStringSerializa
     }
     
     func serializeCurrentTelemetryString() -> String? {
-        let currentTelemetryFields = createSerializedItem()
+        guard let currentTelemetryFields = createSerializedItem() else { return nil }
         return currentTelemetryFields.serialize()
     }
     
-    func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem {
-        let defaultFields = [NSNumber.init(integerLiteral: apiId.rawValue), NSNumber.init(integerLiteral: operationType)]
-        return MSIDCurrentRequestTelemetrySerializedItem.init(schemaVersion: NSNumber.init(integerLiteral: schemaVersion),
+    func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem? {
+        let defaultFields = [NSNumber.init(integerLiteral: apiId?.rawValue ?? 0), NSNumber.init(integerLiteral: operationType ?? 0)]
+        return MSIDCurrentRequestTelemetrySerializedItem.init(schemaVersion: NSNumber.init(integerLiteral: schemaVersion ?? 0),
                                                                 defaultFields: defaultFields,
                                                                 platformFields: platformFields)
     }
