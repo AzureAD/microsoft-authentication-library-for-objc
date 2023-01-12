@@ -30,13 +30,18 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
 
     private var sut: MSALNativeAuthUrlRequestSerializer!
     private var request: URLRequest!
-    private static let loggerSpy = NativeAuthTestLoggerSpy()
+    private static let loggerSpy = MSALNativeLoggingTests.staticLogger
 
     override func setUp() {
         let url = URL(string: DEFAULT_TEST_RESOURCE)!
         request = URLRequest(url: url)
 
         sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext())
+    }
+
+    override func tearDown() {
+        Self.loggerSpy.reset()
+        super.tearDown()
     }
 
     func test_serialize_successfully() throws {
@@ -102,18 +107,19 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
         let expectation = expectation(description: "header_serialization_expectation")
 
         Self.loggerSpy.expectation = expectation
-        Self.loggerSpy.expectedMessage = "Header serialization failed"
 
         _ = sut.serialize(with: request, parameters: [:], headers: ["header": 1])
 
         wait(for: [expectation], timeout: 1)
+
+        let resultingLog = Self.loggerSpy.messages[0] as! String
+        XCTAssertTrue(resultingLog.contains("Header serialization failed"))
     }
 
     func test_when_error_happens_in_bodySerialization_it_logs_it() {
         let expectation = expectation(description: "body_serialization_expectation")
 
         Self.loggerSpy.expectation = expectation
-        Self.loggerSpy.expectedMessage = "http body request serialization failed"
 
         let impossibleToEncode = [
             "param": UIView()
@@ -122,5 +128,8 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
         _ = sut.serialize(with: request, parameters: impossibleToEncode, headers: [:])
 
         wait(for: [expectation], timeout: 1)
+
+        let resultingLog = Self.loggerSpy.messages[0] as! String
+        XCTAssertTrue(resultingLog.contains("http body request serialization failed"))
     }
 }

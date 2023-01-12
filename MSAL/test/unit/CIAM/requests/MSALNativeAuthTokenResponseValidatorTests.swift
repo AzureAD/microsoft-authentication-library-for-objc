@@ -112,7 +112,7 @@ private class DefaultValidatorMock: MSIDTokenResponseValidator {
             return tokenResult
         } else if shouldReturnServerProtectionPoliciesRequiredError {
             let serverProtectionPoliciesError = NSError(
-                domain: "aDomain",
+                domain: MSIDErrorDomain,
                 code: MSIDErrorCode.serverProtectionPoliciesRequired.rawValue
             )
 

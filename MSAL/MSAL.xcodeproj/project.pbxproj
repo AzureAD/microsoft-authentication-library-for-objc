@@ -840,7 +840,6 @@
 		E206FC85296DDB3D00AF4400 /* MSALNativeAuthTokenResponseValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC84296DDB3D00AF4400 /* MSALNativeAuthTokenResponseValidator.swift */; };
 		E206FC86296DDB3D00AF4400 /* MSALNativeAuthTokenResponseValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC84296DDB3D00AF4400 /* MSALNativeAuthTokenResponseValidator.swift */; };
 		E206FC88296DEF1800AF4400 /* MSALNativeAuthTokenResponseValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC87296DEF1800AF4400 /* MSALNativeAuthTokenResponseValidatorTests.swift */; };
-		E206FC9A296F39F600AF4400 /* NativeAuthTestLoggerSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC99296F39F600AF4400 /* NativeAuthTestLoggerSpy.swift */; };
 		E260965E2948C0440060DD7C /* MSALNativeAuthenticationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = E282FB4C2943B1610014345B /* MSALNativeAuthenticationResult.swift */; };
 		E26096662948C0470060DD7C /* MSALNativeAuthResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2AA772C292FDC9A00113F04 /* MSALNativeAuthResponse.swift */; };
 		E26096672948C04A0060DD7C /* MSALNativeDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FC92F029364E1200DD7C95 /* MSALNativeDefinitions.swift */; };
@@ -1575,7 +1574,6 @@
 		E206FC82296DD87500AF4400 /* MSALNativeAuthTokenResponseHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenResponseHandlerTests.swift; sourceTree = "<group>"; };
 		E206FC84296DDB3D00AF4400 /* MSALNativeAuthTokenResponseValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenResponseValidator.swift; sourceTree = "<group>"; };
 		E206FC87296DEF1800AF4400 /* MSALNativeAuthTokenResponseValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenResponseValidatorTests.swift; sourceTree = "<group>"; };
-		E206FC99296F39F600AF4400 /* NativeAuthTestLoggerSpy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthTestLoggerSpy.swift; sourceTree = "<group>"; };
 		E26097C22948FC4D0060DD7C /* MSALNativeLogging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeLogging.swift; sourceTree = "<group>"; };
 		E26097C62948FC720060DD7C /* MSALNativeServerTelemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeServerTelemetry.swift; sourceTree = "<group>"; };
 		E282FB4C2943B1610014345B /* MSALNativeAuthenticationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthenticationResult.swift; sourceTree = "<group>"; };
@@ -2490,7 +2488,6 @@
 		D69ADB281E516F9B00952049 /* utils */ = {
 			isa = PBXGroup;
 			children = (
-				E206FC98296F39DF00AF4400 /* NativeAuth */,
 				D61F5BBD1E5913BE00912CB8 /* ios */,
 				D69ADB2B1E516F9B00952049 /* MSALTestCase.h */,
 				D69ADB2C1E516F9B00952049 /* MSALTestCase.m */,
@@ -2623,14 +2620,6 @@
 				E206FC87296DEF1800AF4400 /* MSALNativeAuthTokenResponseValidatorTests.swift */,
 			);
 			path = requests;
-			sourceTree = "<group>";
-		};
-		E206FC98296F39DF00AF4400 /* NativeAuth */ = {
-			isa = PBXGroup;
-			children = (
-				E206FC99296F39F600AF4400 /* NativeAuthTestLoggerSpy.swift */,
-			);
-			path = NativeAuth;
 			sourceTree = "<group>";
 		};
 		E260964129489CA60060DD7C /* public */ = {
@@ -4214,7 +4203,6 @@
 				A0274CDD24B54C8800BD198D /* MSALDevicePopManagerUtil.m in Sources */,
 				E206FC88296DEF1800AF4400 /* MSALNativeAuthTokenResponseValidatorTests.swift in Sources */,
 				B2725E7F22BD88BE009B454A /* NSStringAccountIdentifiersTest.m in Sources */,
-				E206FC9A296F39F600AF4400 /* NativeAuthTestLoggerSpy.swift in Sources */,
 				B2725EC522BF4865009B454A /* MSALMockExternalAccountHandler.m in Sources */,
 				D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */,
 				B2725ECE22C04679009B454A /* MSALLegacySharedMSAAccountTests.m in Sources */,
