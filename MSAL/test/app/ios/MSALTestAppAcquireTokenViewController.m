@@ -264,11 +264,8 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         self.customWebviewContainer.hidden = NO;
     }
     
-    if (@available(iOS 13.0, *))
-    {
-        webviewParameters.parentViewController = self;
-        webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
-    }
+    webviewParameters.parentViewController = self;
+    webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
     
     return webviewParameters;
 }

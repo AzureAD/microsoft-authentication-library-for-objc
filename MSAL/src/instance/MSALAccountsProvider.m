@@ -350,7 +350,7 @@
 {
     BOOL shouldCallBroker = NO;
     
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         shouldCallBroker = [MSIDSSOExtensionGetAccountsRequest canPerformRequest] && [requestParameters shouldUseBroker];
     }
@@ -363,7 +363,7 @@
         return;
     }
     
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         [self allAccountsFromSSOExtension:parameters
                         requestParameters:requestParameters

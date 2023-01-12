@@ -102,13 +102,7 @@ jobs:
         # Zipping xcframework. -y : including symlinks (Need to preserve symlinks in xcframework so that codesign validation doesn't fail) -v : verbose logging
         zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
       failOnStderr: true
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core sdk for signing'
-    inputs:
-      packageType: sdk
-      version: 2.1.x
-      installationPath: $(Agent.ToolsDirectory)/dotnet
-  - task: EsrpCodeSigning@1
+  - task: EsrpCodeSigning@2
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
       FolderPath: '$(Build.ArtifactStagingDirectory)'
