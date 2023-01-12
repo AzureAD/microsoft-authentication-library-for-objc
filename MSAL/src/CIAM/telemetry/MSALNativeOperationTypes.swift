@@ -48,15 +48,15 @@ enum MSALNativeResetPasswordStartType: MSALNativeOperationType {
 }
 
 enum MSALNativeResetPasswordCompleteType: MSALNativeOperationType {
-    case MSALNativeTelemetryResetPasswordComplete = 0
+    case MSALNativeResetPasswordComplete = 0
 }
 
 enum MSALNativeResendCodeType: MSALNativeOperationType {
-    case MSALNativeTelemetryResendCode = 0
+    case MSALNativeResendCode = 0
 }
 
 enum MSALNativeVerifyCodeType: MSALNativeOperationType {
-    case MSALNativeTelemetryVerifyCode = 0
+    case MSALNativeVerifyCode = 0
 }
 
 enum MSALNativeSignOutType: MSALNativeOperationType {

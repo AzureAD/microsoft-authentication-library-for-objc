@@ -841,6 +841,7 @@
 		DEF9D99F296F08CE006CB384 /* MSALNativeTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D99E296F08CE006CB384 /* MSALNativeTelemetryProvider.swift */; };
 		DEF9D9A0296F08CE006CB384 /* MSALNativeTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D99E296F08CE006CB384 /* MSALNativeTelemetryProvider.swift */; };
 		DEF9D9B429701829006CB384 /* MSALNativeCurrentRequestTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D9B329701829006CB384 /* MSALNativeCurrentRequestTelemetryTests.swift */; };
+		DEF9D9B829702C78006CB384 /* MSALNativeTelemetryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D9B729702C78006CB384 /* MSALNativeTelemetryProviderTests.swift */; };
 		E20151042934D9B300D4A433 /* MSALNativePublicClientApplicationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20151032934D9B300D4A433 /* MSALNativePublicClientApplicationConfig.swift */; };
 		E206FC5F296D65DE00AF4400 /* MSALNativeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC5E296D65DE00AF4400 /* MSALNativeError.swift */; };
 		E206FC60296D65DE00AF4400 /* MSALNativeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E206FC5E296D65DE00AF4400 /* MSALNativeError.swift */; };
@@ -1581,6 +1582,7 @@
 		DEF9D998296EC848006CB384 /* MSALNativeOperationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeOperationTypes.swift; sourceTree = "<group>"; };
 		DEF9D99E296F08CE006CB384 /* MSALNativeTelemetryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeTelemetryProvider.swift; sourceTree = "<group>"; };
 		DEF9D9B329701829006CB384 /* MSALNativeCurrentRequestTelemetryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeCurrentRequestTelemetryTests.swift; sourceTree = "<group>"; };
+		DEF9D9B729702C78006CB384 /* MSALNativeTelemetryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeTelemetryProviderTests.swift; sourceTree = "<group>"; };
 		E02396F31E79E2F4004D6278 /* MSALTelemetryApiId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryApiId.h; sourceTree = "<group>"; };
 		E20151032934D9B300D4A433 /* MSALNativePublicClientApplicationConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativePublicClientApplicationConfig.swift; sourceTree = "<group>"; };
 		E206FC5E296D65DE00AF4400 /* MSALNativeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeError.swift; sourceTree = "<group>"; };
@@ -2623,6 +2625,7 @@
 			isa = PBXGroup;
 			children = (
 				DEF9D9B329701829006CB384 /* MSALNativeCurrentRequestTelemetryTests.swift */,
+				DEF9D9B729702C78006CB384 /* MSALNativeTelemetryProviderTests.swift */,
 			);
 			path = telemetry;
 			sourceTree = "<group>";
@@ -4242,6 +4245,7 @@
 				B286B9FD238A07A5007833AD /* MSALAcquireTokenTests.m in Sources */,
 				B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
 				B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
+				DEF9D9B829702C78006CB384 /* MSALNativeTelemetryProviderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
