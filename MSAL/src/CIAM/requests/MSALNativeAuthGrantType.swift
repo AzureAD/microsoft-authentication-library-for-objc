@@ -1,4 +1,7 @@
 //
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
 // This code is licensed under the MIT License.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -13,22 +16,13 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
 
-@objc
-public final class MSALNativeUserAccount: NSObject {
-
-    @objc public let email: String
-    @objc public let attributes: [String: Any]
-
-    init(email: String, attributes: [String: Any] = [:]) {
-        self.email = email
-        self.attributes = attributes
-    }
+enum MSALNativeAuthGrantType: String {
+    case password
+    case otp = "passwordless_otp"
 }

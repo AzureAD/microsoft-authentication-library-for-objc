@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,18 +23,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 @_implementationOnly import MSAL_Private
 
 protocol MSALLogging {
-    static func log(level: MSIDLogLevel, context: MSIDRequestContext, filename: String, lineNumber: Int, function: String, format: String, _ args: CVarArg...)
-    static func logPII(level: MSIDLogLevel, context: MSIDRequestContext, filename: String, lineNumber: Int, function: String, format: String, _ args: CVarArg...)
-    static func log(level: MSIDLogLevel, correlationId: UUID, filename: String, lineNumber: Int, function: String, format: String, _ args: CVarArg...)
-    static func logPII(level: MSIDLogLevel, correlationId: UUID, filename: String, lineNumber: Int, function: String, format: String, _ args: CVarArg...)
+    // swiftlint:disable function_parameter_count
+    static func log(
+        level: MSIDLogLevel,
+        context: MSIDRequestContext,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...)
+    static func logPII(
+        level: MSIDLogLevel,
+        context: MSIDRequestContext,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...)
+    static func log(
+        level: MSIDLogLevel,
+        correlationId: UUID,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...)
+    static func logPII(
+        level: MSIDLogLevel,
+        correlationId: UUID,
+        filename: String,
+        lineNumber: Int,
+        function: String,
+        format: String,
+        _ args: CVarArg...)
+    // swiftlint:enable function_parameter_count
 }
 
-extension MSALLogger : MSALLogging {
+extension MSALLogger: MSALLogging {
     private static func logCommon(level: MSIDLogLevel,
                                   context: MSIDRequestContext? = nil,
                                   correlationId: UUID? = nil,
@@ -54,7 +84,7 @@ extension MSALLogger : MSALLogging {
                                 format: format,
                                 formatArgs: args)
     }
-    
+
     static func log(level: MSIDLogLevel,
                     context: MSIDRequestContext,
                     filename: String = #fileID,
@@ -71,7 +101,7 @@ extension MSALLogger : MSALLogging {
                   format: format,
                   getVaList(args))
     }
-    
+
     static func logPII(level: MSIDLogLevel,
                        context: MSIDRequestContext,
                        filename: String = #fileID,
@@ -88,7 +118,7 @@ extension MSALLogger : MSALLogging {
                   format: format,
                   getVaList(args))
     }
-    
+
     static func log(level: MSIDLogLevel,
                     correlationId: UUID,
                     filename: String = #fileID,
@@ -105,7 +135,7 @@ extension MSALLogger : MSALLogging {
                   format: format,
                   getVaList(args))
     }
-    
+
     static func logPII(level: MSIDLogLevel,
                        correlationId: UUID,
                        filename: String = #fileID,

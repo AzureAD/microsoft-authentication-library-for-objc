@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,7 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 @_implementationOnly import MSAL_Private
 
@@ -41,8 +41,11 @@ class MSALCiamServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling 
     func setTelemetryToRequest(_ request: MSIDHttpRequestProtocol) {
 
         // Take a look at the class MSIDAADTokenRequestServerTelemetry to see how it sets the telemetry
-        // That class has two properties of type MSIDCurrentRequestTelemetry (lastRequestTelemetry and currentRequestTelemetry)
-        // The class `MSIDAADAuthorizationCodeGrantRequest` has a property `serverTelemetry: MSIDHttpRequestServerTelemetryHandling` equivalent to this class (that is set in `MSIDAADV2Oauth2Factory`)
+        // That class has two properties of type MSIDCurrentRequestTelemetry (lastRequestTelemetry
+        //  and currentRequestTelemetry)
+        // The class `MSIDAADAuthorizationCodeGrantRequest` has a property
+        //  `serverTelemetry: MSIDHttpRequestServerTelemetryHandling` equivalent to this class (that is set in
+        //  `MSIDAADV2Oauth2Factory`)
         // This serverTelemetry is used during sendWithBlock() in MSIDHttpRequest
         // We should set this class in httpRequest.serverTelemetry during the creation of our ciamRequests.
 

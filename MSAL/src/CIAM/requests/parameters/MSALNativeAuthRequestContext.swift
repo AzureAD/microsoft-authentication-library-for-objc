@@ -1,4 +1,3 @@
-// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,28 +16,43 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
 
-/**
- `Result` wrapper for Authentication API operations.
- */
-public typealias AuthResult = Result<MSALNativeAuthResponse, Error>
+@_implementationOnly import MSAL_Private
 
-/**
- `Result` wrapper for ResendCode API operations.
- - Parameters:
-    - SessionToken: String
-    - Error
- */
-public typealias ResendCodeResult = Result<String, Error>
+final class MSALNativeAuthRequestContext: MSIDRequestContext {
 
-/**
- `Result` wrapper for UserAccount API operations.
- */
-public typealias UserAccountResult = Result<MSALNativeUserAccount, Error>
+    private let _correlationId = UUID()
+    private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
+
+    func correlationId() -> UUID {
+        _correlationId
+    }
+
+    func logComponent() -> String {
+        MSIDVersion.sdkName()
+    }
+
+    func telemetryRequestId() -> String {
+        _telemetryRequestId
+    }
+
+    func appRequestMetadata() -> [AnyHashable: Any] {
+        guard let metadata = Bundle.main.infoDictionary else {
+            return [:]
+        }
+
+        let appName = metadata["CFBundleDisplayName"] ?? (metadata["CFBundleName"] ?? "")
+        let appVersion = metadata["CFBundleShortVersionString"] ?? ""
+
+        return [
+            MSID_VERSION_KEY: MSIDVersion.sdkVersion() ?? "",
+            MSID_APP_NAME_KEY: appName,
+            MSID_APP_VER_KEY: appVersion
+        ]
+    }
+}

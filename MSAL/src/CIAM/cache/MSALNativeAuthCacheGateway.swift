@@ -26,32 +26,80 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCacheGateway: MSALNativeAuthCacheInterface {
-    
+
     private let tokenCacheAccessor: MSIDDefaultTokenCacheAccessor = {
         let dataSource = MSIDKeychainTokenCache()
         return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
     }()
-    
-    func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSALNativeAuthTokens {
-        let idToken = try tokenCacheAccessor.getIDToken(forAccount: accountIdentifier, configuration: configuration, idTokenType: MSIDCredentialType.MSIDIDTokenType, context: context)
-        let refreshToken = try tokenCacheAccessor.getRefreshToken(withAccount: accountIdentifier, familyId: nil, configuration: configuration, context: context)
-        let accessToken = try tokenCacheAccessor.getAccessToken(forAccount: accountIdentifier, configuration: configuration, context: context)
+
+    func getTokens(
+        accountIdentifier: MSIDAccountIdentifier,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext) throws -> MSALNativeAuthTokens {
+        let idToken = try tokenCacheAccessor.getIDToken(
+            forAccount: accountIdentifier,
+            configuration: configuration,
+            idTokenType: MSIDCredentialType.MSIDIDTokenType,
+            context: context)
+        let refreshToken = try tokenCacheAccessor.getRefreshToken(
+            withAccount: accountIdentifier,
+            familyId: nil,
+            configuration: configuration,
+            context: context)
+        let accessToken = try tokenCacheAccessor.getAccessToken(
+            forAccount: accountIdentifier,
+            configuration: configuration,
+            context: context)
         return MSALNativeAuthTokens(idToken: idToken, accessToken: accessToken, refreshToken: refreshToken)
     }
-    
-    func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount? {
-        return try tokenCacheAccessor.getAccountFor(accountIdentifier, authority: authority, realmHint: nil, context: context)
+
+    func getAccount(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        context: MSIDRequestContext) throws -> MSIDAccount? {
+        return try tokenCacheAccessor.getAccountFor(
+            accountIdentifier,
+            authority: authority,
+            realmHint: nil,
+            context: context)
     }
-    
-    func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
-        try tokenCacheAccessor.saveTokens(with: configuration, response: tokenResult, factory: MSIDAADOauth2Factory(), context: context)
+
+    func saveTokensAndAccount(
+        tokenResult: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext) throws {
+        try tokenCacheAccessor.saveTokens(
+            with: configuration,
+            response: tokenResult,
+            factory: MSIDAADOauth2Factory(),
+            context: context)
     }
-    
-    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
-        try tokenCacheAccessor.clearCache(forAccount: accountIdentifier, authority: authority, clientId: clientId, familyId: nil, clearAccounts: false, context: context)
+
+    func removeTokens(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        clientId: String,
+        context: MSIDRequestContext) throws {
+        try tokenCacheAccessor.clearCache(
+            forAccount: accountIdentifier,
+            authority: authority,
+            clientId: clientId,
+            familyId: nil,
+            clearAccounts: false,
+            context: context)
     }
-    
-    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
-        try tokenCacheAccessor.clearCache(forAccount: accountIdentifier, authority: authority, clientId: clientId, familyId: nil, clearAccounts: true, context: context)
+
+    func clearCache(
+        accountIdentifier: MSIDAccountIdentifier,
+        authority: MSIDAuthority,
+        clientId: String,
+        context: MSIDRequestContext) throws {
+        try tokenCacheAccessor.clearCache(
+            forAccount: accountIdentifier,
+            authority: authority,
+            clientId: clientId,
+            familyId: nil,
+            clearAccounts: true,
+            context: context)
     }
 }

@@ -32,7 +32,7 @@ final class MSALNativeAuthCacheGatewayTest: XCTestCase {
     private lazy var contextStub = ContextStub()
     
     override func tearDownWithError() throws {
-        try gateway.clearCache(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, clientId: parameters.clientId, context: contextStub)
+        try gateway.clearCache(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, clientId: parameters.msidConfiguration.clientId, context: contextStub)
     }
     
     // MARK: happy cases
@@ -172,13 +172,6 @@ final class MSALNativeAuthCacheGatewayTest: XCTestCase {
     
     private func getParameters() -> ParametersStub {
         ParametersStub(
-            telemetry: MSALNativeCurrentRequestTelemetry(),
-            tenant: .init(string: DEFAULT_TEST_AUTHORITY)!,
-            clientId: "clientId",
-            endpoint: .signUp,
-            context: MSIDBasicContext(),
-            correlationId: .init(),
-            url: .init(string: DEFAULT_TEST_RESOURCE)!,
             accountIdentifier: getAccountIdentifier(),
             msidConfiguration: getMSIDConfiguration()
         )
@@ -211,14 +204,7 @@ final class MSALNativeAuthCacheGatewayTest: XCTestCase {
     }
 }
 
-private struct ParametersStub: MSALNativeRequestable {
-    var telemetry: MSAL.MSALNativeCurrentRequestTelemetry
-    let tenant: URL
-    let clientId: String
-    let endpoint: MSAL.MSALNativeEndpoint
-    let context: MSIDRequestContext
-    let correlationId: UUID
-    let url: URL
+private struct ParametersStub {
     var accountIdentifier: MSIDAccountIdentifier
     let msidConfiguration: MSIDConfiguration
 }
