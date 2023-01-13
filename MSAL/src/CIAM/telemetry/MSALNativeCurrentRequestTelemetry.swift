@@ -25,12 +25,12 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-class MSALNativeCurrentRequestTelemetry : NSObject, MSIDTelemetryStringSerializable {
+class MSALNativeCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
     var schemaVersion: Int?
     var apiId: MSALNativeTelemetryApiId?
     var operationType: MSALNativeOperationType?
     var platformFields: [String]?
-    
+
     convenience init(apiId: MSALNativeTelemetryApiId,
                      operationType: MSALNativeOperationType,
                      platformFields: [String]?) {
@@ -40,20 +40,22 @@ class MSALNativeCurrentRequestTelemetry : NSObject, MSIDTelemetryStringSerializa
         self.operationType = operationType
         self.platformFields = platformFields
     }
-    
+
     func telemetryString() -> String {
         return serializeCurrentTelemetryString() ?? ""
     }
-    
+
     func serializeCurrentTelemetryString() -> String? {
         guard let currentTelemetryFields = createSerializedItem() else { return nil }
         return currentTelemetryFields.serialize()
     }
-    
+
     func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem? {
-        let defaultFields = [NSNumber.init(integerLiteral: apiId?.rawValue ?? 0), NSNumber.init(integerLiteral: operationType ?? 0)]
-        return MSIDCurrentRequestTelemetrySerializedItem.init(schemaVersion: NSNumber.init(integerLiteral: schemaVersion ?? 0),
-                                                                defaultFields: defaultFields,
-                                                                platformFields: platformFields)
+        let defaultFields: [NSNumber] = [.init(value: apiId?.rawValue ?? 0),
+                                         .init(value: operationType ?? 0)]
+        return MSIDCurrentRequestTelemetrySerializedItem.init(schemaVersion:
+                .init(value: schemaVersion ?? 0),
+                                                              defaultFields: defaultFields,
+                                                              platformFields: platformFields)
     }
 }

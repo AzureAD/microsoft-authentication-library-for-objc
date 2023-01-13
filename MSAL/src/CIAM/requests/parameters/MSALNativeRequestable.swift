@@ -29,7 +29,7 @@ protocol MSALNativeRequestable {
     var clientId: String { get }
     var endpoint: MSALNativeEndpoint { get }
     var context: MSIDRequestContext { get }
-    var telemetry : MSALNativeCurrentRequestTelemetry { get }
+    var telemetry: MSALNativeCurrentRequestTelemetry { get }
     var correlationId: UUID { get }
     var url: URL { get }
 }

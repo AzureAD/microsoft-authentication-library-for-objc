@@ -25,7 +25,8 @@
 import Foundation
 
 enum MSALNativeTelemetryApiId: Int {
-    // TODO: Untill we know exactly how to define them, to prevent any clashes with existing id's
+    // TODO: Untill we know exactly how to define them,
+    // to prevent any clashes with existing id's
     // I've added a number that is unlikely to be used
     case MSALNativeTelemetrySignUp = 75001
     case MSALNativeTelemetrySignIn = 75002

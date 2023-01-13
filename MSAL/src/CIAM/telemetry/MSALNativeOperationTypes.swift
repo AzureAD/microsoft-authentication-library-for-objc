@@ -63,4 +63,3 @@ enum MSALNativeSignOutType: MSALNativeOperationType {
     case MSALNativeTelemetrySignOutAction = 0
     case MSALNativeTelemetrySignOutForced = 1
 }
-
