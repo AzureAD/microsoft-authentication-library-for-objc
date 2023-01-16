@@ -27,39 +27,39 @@ import Foundation
 
 // TODO: Add or remove cases as needed to handle all possible cases needed by our logic
 
-typealias MSALNativeOperationType = Int
+typealias MSALNativeAuthOperationType = Int
 
-enum MSALNativeSignUpType: MSALNativeOperationType {
-    case MSALNativeSignUpWithPassword = 0
-    case MSALNativeSignUpWithOTP = 1
-    case MSALNativeSignUpWithMFA = 2
+enum MSALNativeAuthSignUpType: MSALNativeAuthOperationType {
+    case MSALNativeAuthSignUpWithPassword = 0
+    case MSALNativeAuthSignUpWithOTP = 1
+    case MSALNativeAuthSignUpWithMFA = 2
 }
 
-enum MSALNativeSignInType: MSALNativeOperationType {
-    case MSALNativeSignInithPassword = 0
-    case MSALNativeSignInWithOTP = 1
-    case MSALNativeSignInWithMFA = 2
+enum MSALNativeAuthSignInType: MSALNativeAuthOperationType {
+    case MSALNativeAuthSignInithPassword = 0
+    case MSALNativeAuthSignInWithOTP = 1
+    case MSALNativeAuthSignInWithMFA = 2
 }
 
-typealias MSALNativeTokenRefreshType = TokenCacheRefreshType
+typealias MSALNativeAuthTokenRefreshType = TokenCacheRefreshType
 
-enum MSALNativeResetPasswordStartType: MSALNativeOperationType {
-    case MSALNativeResetPasswordStart = 0
+enum MSALNativeAuthResetPasswordStartType: MSALNativeAuthOperationType {
+    case MSALNativeAuthResetPasswordStart = 0
 }
 
-enum MSALNativeResetPasswordCompleteType: MSALNativeOperationType {
-    case MSALNativeResetPasswordComplete = 0
+enum MSALNativeAuthResetPasswordCompleteType: MSALNativeAuthOperationType {
+    case MSALNativeAuthResetPasswordComplete = 0
 }
 
-enum MSALNativeResendCodeType: MSALNativeOperationType {
-    case MSALNativeResendCode = 0
+enum MSALNativeAuthResendCodeType: MSALNativeAuthOperationType {
+    case MSALNativeAuthResendCode = 0
 }
 
-enum MSALNativeVerifyCodeType: MSALNativeOperationType {
-    case MSALNativeVerifyCode = 0
+enum MSALNativeAuthVerifyCodeType: MSALNativeAuthOperationType {
+    case MSALNativeAuthVerifyCode = 0
 }
 
-enum MSALNativeSignOutType: MSALNativeOperationType {
-    case MSALNativeTelemetrySignOutAction = 0
-    case MSALNativeTelemetrySignOutForced = 1
+enum MSALNativeAuthSignOutType: MSALNativeAuthOperationType {
+    case MSALNativeAuthTelemetrySignOutAction = 0
+    case MSALNativeAuthTelemetrySignOutForced = 1
 }

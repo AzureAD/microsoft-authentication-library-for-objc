@@ -25,14 +25,14 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-class MSALNativeCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
+class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
     var schemaVersion: Int?
-    var apiId: MSALNativeTelemetryApiId?
-    var operationType: MSALNativeOperationType?
+    var apiId: MSALNativeAuthTelemetryApiId?
+    var operationType: MSALNativeAuthOperationType?
     var platformFields: [String]?
 
-    convenience init(apiId: MSALNativeTelemetryApiId,
-                     operationType: MSALNativeOperationType,
+    convenience init(apiId: MSALNativeAuthTelemetryApiId,
+                     operationType: MSALNativeAuthOperationType,
                      platformFields: [String]?) {
         self.init()
         self.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION

@@ -24,16 +24,16 @@
 
 import Foundation
 
-enum MSALNativeTelemetryApiId: Int {
+enum MSALNativeAuthTelemetryApiId: Int {
     // TODO: Untill we know exactly how to define them,
     // to prevent any clashes with existing id's
     // I've added a number that is unlikely to be used
-    case MSALNativeTelemetrySignUp = 75001
-    case MSALNativeTelemetrySignIn = 75002
-    case MSALNativeTelemetryRefreshToken = 75003
-    case MSALNativeTelemetryResetPasswordStart = 75004
-    case MSALNativeTelemetryResetPasswordComplete = 75005
-    case MSALNativeTelemetryResendCode = 75006
-    case MSALNativeTelemetryVerifyCode = 75007
-    case MSALNativeTelemetrySignOut = 75008
+    case MSALNativeAuthTelemetrySignUp = 75001
+    case MSALNativeAuthTelemetrySignIn = 75002
+    case MSALNativeAuthTelemetryRefreshToken = 75003
+    case MSALNativeAuthTelemetryResetPasswordStart = 75004
+    case MSALNativeAuthTelemetryResetPasswordComplete = 75005
+    case MSALNativeAuthTelemetryResendCode = 75006
+    case MSALNativeAuthTelemetryVerifyCode = 75007
+    case MSALNativeAuthTelemetrySignOut = 75008
 }

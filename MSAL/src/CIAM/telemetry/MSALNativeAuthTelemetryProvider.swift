@@ -23,67 +23,67 @@
 // THE SOFTWARE.
 
 import Foundation
-class MSALNativeTelemetryProvider {
+class MSALNativeAuthTelemetryProvider {
     static func telemetryForSignUp(
-        type: MSALNativeSignUpType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetrySignUp,
+        type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetrySignUp,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForSignIn(
-        type: MSALNativeSignInType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetrySignIn,
+        type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetrySignIn,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForRefreshToken(
-        type: MSALNativeTokenRefreshType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetryRefreshToken,
+        type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetryRefreshToken,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForResetPasswordStart(
-        type: MSALNativeResetPasswordStartType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetryResetPasswordStart,
+        type: MSALNativeAuthResetPasswordStartType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetryResetPasswordStart,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForResetPasswordComplete(
-        type: MSALNativeResetPasswordCompleteType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetryResetPasswordComplete,
+        type: MSALNativeAuthResetPasswordCompleteType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetryResetPasswordComplete,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForResendCode(
-        type: MSALNativeResendCodeType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetryResendCode,
+        type: MSALNativeAuthResendCodeType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetryResendCode,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForVerifyCode(
-        type: MSALNativeVerifyCodeType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetryVerifyCode,
+        type: MSALNativeAuthVerifyCodeType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetryVerifyCode,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     static func telemetryForSignOut(
-        type: MSALNativeSignOutType) -> MSALNativeCurrentRequestTelemetry {
-        return MSALNativeCurrentRequestTelemetry(
-            apiId: .MSALNativeTelemetrySignOut,
+        type: MSALNativeAuthSignOutType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .MSALNativeAuthTelemetrySignOut,
             operationType: type.rawValue,
             platformFields: nil)
     }
