@@ -65,21 +65,4 @@ final class MSALNativeCurrentRequestTelemetryTests: XCTestCase {
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "0|0,0|")
     }
-    
-    func testURLCache() {
-        let cache = URLCache.shared
-        let urlResponse = URLResponse(url: URL(string: "www.contoso.com")!, mimeType: nil, expectedContentLength: 1, textEncodingName: nil)
-        let response = CachedURLResponse(response: urlResponse, data: Data("TestString".utf8))
-        let request = getRequest()
-        cache.storeCachedResponse(response, for: request)
-        let storedResponse1 = cache.cachedResponse(for: request)
-        let request2 = getRequest()
-        let storedResponse2 = cache.cachedResponse(for: request2)
-        XCTAssertEqual(storedResponse1, storedResponse2)    }
-    private func getRequest() -> URLRequest {
-        var urlRequest = URLRequest(url: URL(string: "www.contoso.com")!)
-        urlRequest.httpMethod = "GET"
-        return urlRequest
-        
-    }
 }
