@@ -31,42 +31,42 @@ final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
     // MARK: Correct API Id tests
     func testTelemetryForSignUp_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForSignUp(type: MSALNativeAuthSignUpType.MSALNativeAuthSignUpWithPassword)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetrySignUp)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdSignUp)
     }
     
     func testTelemetryForSignIn_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForSignIn(type: MSALNativeAuthSignInType.MSALNativeAuthSignInithPassword)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetrySignIn)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdSignIn)
     }
     
     func testTelemetryForRefreshToken_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.noCacheLookupInvolved)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryRefreshToken)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdRefreshToken)
     }
     
     func testTelemetryForResetPasswordStart_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForResetPasswordStart(type: MSALNativeAuthResetPasswordStartType.MSALNativeAuthResetPasswordStart)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryResetPasswordStart)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdResetPasswordStart)
     }
     
     func testTelemetryForResetPasswordComplete_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForResetPasswordComplete(type: MSALNativeAuthResetPasswordCompleteType.MSALNativeAuthResetPasswordComplete)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryResetPasswordComplete)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdResetPasswordComplete)
     }
     
     func testTelemetryForResendCode_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForResendCode(type: MSALNativeAuthResendCodeType.MSALNativeAuthResendCode)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryResendCode)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdResendCode)
     }
     
     func testTelemetryForVerifyCode_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForVerifyCode(type: MSALNativeAuthVerifyCodeType.MSALNativeAuthVerifyCode)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryVerifyCode)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdVerifyCode)
     }
     
     func testTelemetryForSignOut_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForSignOut(type: MSALNativeAuthSignOutType.MSALNativeAuthTelemetrySignOutAction)
-        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetrySignOut)
+        XCTAssertEqual(result.apiId, .MSALNativeAuthTelemetryApiIdSignOut)
     }
     
     // MARK: Correct Operation Type tests

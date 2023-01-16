@@ -27,7 +27,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForSignUp(
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetrySignUp,
+            apiId: .MSALNativeAuthTelemetryApiIdSignUp,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -35,7 +35,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForSignIn(
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetrySignIn,
+            apiId: .MSALNativeAuthTelemetryApiIdSignIn,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -43,7 +43,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForRefreshToken(
         type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetryRefreshToken,
+            apiId: .MSALNativeAuthTelemetryApiIdRefreshToken,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -51,7 +51,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForResetPasswordStart(
         type: MSALNativeAuthResetPasswordStartType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetryResetPasswordStart,
+            apiId: .MSALNativeAuthTelemetryApiIdResetPasswordStart,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -59,7 +59,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForResetPasswordComplete(
         type: MSALNativeAuthResetPasswordCompleteType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetryResetPasswordComplete,
+            apiId: .MSALNativeAuthTelemetryApiIdResetPasswordComplete,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -67,7 +67,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForResendCode(
         type: MSALNativeAuthResendCodeType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetryResendCode,
+            apiId: .MSALNativeAuthTelemetryApiIdResendCode,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -75,7 +75,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForVerifyCode(
         type: MSALNativeAuthVerifyCodeType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetryVerifyCode,
+            apiId: .MSALNativeAuthTelemetryApiIdVerifyCode,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -83,7 +83,7 @@ class MSALNativeAuthTelemetryProvider {
     static func telemetryForSignOut(
         type: MSALNativeAuthSignOutType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .MSALNativeAuthTelemetrySignOut,
+            apiId: .MSALNativeAuthTelemetryApiIdSignOut,
             operationType: type.rawValue,
             platformFields: nil)
     }
