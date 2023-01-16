@@ -28,12 +28,12 @@ enum MSALNativeAuthTelemetryApiId: Int {
     // TODO: Untill we know exactly how to define them,
     // to prevent any clashes with existing id's
     // I've added a number that is unlikely to be used
-    case MSALNativeAuthTelemetryApiIdSignUp = 75001
-    case MSALNativeAuthTelemetryApiIdSignIn = 75002
-    case MSALNativeAuthTelemetryApiIdRefreshToken = 75003
-    case MSALNativeAuthTelemetryApiIdResetPasswordStart = 75004
-    case MSALNativeAuthTelemetryApiIdResetPasswordComplete = 75005
-    case MSALNativeAuthTelemetryApiIdResendCode = 75006
-    case MSALNativeAuthTelemetryApiIdVerifyCode = 75007
-    case MSALNativeAuthTelemetryApiIdSignOut = 75008
+    case telemetryApiIdSignUp = 75001
+    case telemetryApiIdSignIn = 75002
+    case telemetryApiIdRefreshToken = 75003
+    case telemetryApiIdResetPasswordStart = 75004
+    case telemetryApiIdResetPasswordComplete = 75005
+    case telemetryApiIdResendCode = 75006
+    case telemetryApiIdVerifyCode = 75007
+    case telemetryApiIdSignOut = 75008
 }

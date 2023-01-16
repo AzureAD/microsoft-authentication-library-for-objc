@@ -30,36 +30,36 @@ import Foundation
 typealias MSALNativeAuthOperationType = Int
 
 enum MSALNativeAuthSignUpType: MSALNativeAuthOperationType {
-    case MSALNativeAuthSignUpWithPassword = 0
-    case MSALNativeAuthSignUpWithOTP = 1
-    case MSALNativeAuthSignUpWithMFA = 2
+    case signUpWithPassword = 0
+    case signUpWithOTP = 1
+    case signUpWithMFA = 2
 }
 
 enum MSALNativeAuthSignInType: MSALNativeAuthOperationType {
-    case MSALNativeAuthSignInithPassword = 0
-    case MSALNativeAuthSignInWithOTP = 1
-    case MSALNativeAuthSignInWithMFA = 2
+    case signInithPassword = 0
+    case signInWithOTP = 1
+    case signInWithMFA = 2
 }
 
 typealias MSALNativeAuthTokenRefreshType = TokenCacheRefreshType
 
 enum MSALNativeAuthResetPasswordStartType: MSALNativeAuthOperationType {
-    case MSALNativeAuthResetPasswordStart = 0
+    case resetPasswordStart = 0
 }
 
 enum MSALNativeAuthResetPasswordCompleteType: MSALNativeAuthOperationType {
-    case MSALNativeAuthResetPasswordComplete = 0
+    case resetPasswordComplete = 0
 }
 
 enum MSALNativeAuthResendCodeType: MSALNativeAuthOperationType {
-    case MSALNativeAuthResendCode = 0
+    case resendCode = 0
 }
 
 enum MSALNativeAuthVerifyCodeType: MSALNativeAuthOperationType {
-    case MSALNativeAuthVerifyCode = 0
+    case verifyCode = 0
 }
 
 enum MSALNativeAuthSignOutType: MSALNativeAuthOperationType {
-    case MSALNativeAuthTelemetrySignOutAction = 0
-    case MSALNativeAuthTelemetrySignOutForced = 1
+    case signOutAction = 0
+    case signOutForced = 1
 }
