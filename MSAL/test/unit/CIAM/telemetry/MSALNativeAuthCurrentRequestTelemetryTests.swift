@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeCurrentRequestTelemetryTests: XCTestCase {
+final class MSALNativeAuthCurrentRequestTelemetryTests: XCTestCase {
     
     func testSerialization_whenValidProperties_shouldCreateString() {
         let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: .MSALNativeAuthTelemetrySignUp,
