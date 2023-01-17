@@ -22,7 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
 enum MSALNativeAuthError: Error, Equatable {
     case validationError
     case tokenResultNotPresent

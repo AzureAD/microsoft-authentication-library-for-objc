@@ -36,7 +36,7 @@ enum MSALNativeAuthSignUpType: MSALNativeAuthOperationType {
 }
 
 enum MSALNativeAuthSignInType: MSALNativeAuthOperationType {
-    case signInithPassword = 0
+    case signInWithPassword = 0
     case signInWithOTP = 1
     case signInWithMFA = 2
 }
