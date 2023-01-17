@@ -30,32 +30,32 @@ final class MSALNativeAuthCurrentRequestTelemetryTests: XCTestCase {
     
     func testSerialization_whenValidProperties_shouldCreateString() {
         let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: .telemetryApiIdSignUp,
-                                                          operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
-                                                          platformFields: nil)
+                                                              operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
+                                                              platformFields: nil)
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "4|75001,0|")
     }
     
     func testSerialization_whenSignUpType_SignUpOTP_shouldCreateString() {
         let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: .telemetryApiIdSignUp,
-                                                          operationType: MSALNativeAuthSignUpType.signUpWithOTP.rawValue,
-                                                          platformFields: nil)
+                                                              operationType: MSALNativeAuthSignUpType.signUpWithOTP.rawValue,
+                                                              platformFields: nil)
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "4|75001,1|")
     }
-
+    
     func testSerialization_withOnePlatfomField_shouldCreateString() {
         let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: .telemetryApiIdSignUp,
-                                                          operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
-                                                          platformFields: ["iPhone14,5"])
+                                                              operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
+                                                              platformFields: ["iPhone14,5"])
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "4|75001,0|iPhone14,5")
     }
     
     func testSerialization_withMultiplePlatfomField_shouldCreateString() {
         let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: .telemetryApiIdSignUp,
-                                                          operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
-                                                          platformFields: ["iPhone14,5","iOS 16.0"])
+                                                              operationType: MSALNativeAuthSignUpType.signUpWithPassword.rawValue,
+                                                              platformFields: ["iPhone14,5","iOS 16.0"])
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "4|75001,0|iPhone14,5,iOS 16.0")
     }

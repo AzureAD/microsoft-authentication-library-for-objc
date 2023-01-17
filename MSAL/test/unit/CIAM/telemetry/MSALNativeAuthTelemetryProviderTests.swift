@@ -27,7 +27,7 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
-
+    
     // MARK: Correct API Id tests
     func testTelemetryForSignUp_returnsCorrectApiId() {
         let result = MSALNativeAuthTelemetryProvider.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithPassword)
