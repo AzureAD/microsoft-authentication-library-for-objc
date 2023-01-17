@@ -26,13 +26,13 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
-    let schemaVersion: Int
-    let apiId: MSALNativeAuthTelemetryApiId
-    let operationType: MSALNativeAuthOperationType
+    let schemaVersion: Int?
+    let apiId: MSALNativeAuthTelemetryApiId?
+    let operationType: MSALNativeAuthOperationType?
     let platformFields: [String]?
 
-    init(apiId: MSALNativeAuthTelemetryApiId,
-         operationType: MSALNativeAuthOperationType,
+    init(apiId: MSALNativeAuthTelemetryApiId?,
+         operationType: MSALNativeAuthOperationType?,
          platformFields: [String]?) {
         self.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION
         self.apiId = apiId
@@ -50,9 +50,9 @@ class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerial
     }
 
     func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem? {
-        let defaultFields: [NSNumber] = [.init(value: apiId.rawValue),
-                                         .init(value: operationType)]
-        return .init(schemaVersion: .init(value: schemaVersion),
+        let defaultFields: [NSNumber] = [.init(value: apiId?.rawValue ?? 0),
+                                         .init(value: operationType ?? 0)]
+        return .init(schemaVersion: .init(value: schemaVersion ?? 0),
                      defaultFields: defaultFields,
                      platformFields: platformFields)
     }

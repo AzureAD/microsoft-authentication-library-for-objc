@@ -61,8 +61,10 @@ final class MSALNativeAuthCurrentRequestTelemetryTests: XCTestCase {
     }
     
     func testSerialization_whenNilProperties_shouldCreateEmptyString() {
-        let telemetry = MSALNativeAuthCurrentRequestTelemetry()
+        let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: nil,
+                                                              operationType: nil,
+                                                              platformFields: nil)
         let result = telemetry.telemetryString()
-        XCTAssertEqual(result, "0|0,0|")
+        XCTAssertEqual(result, "4|0,0|")
     }
 }
