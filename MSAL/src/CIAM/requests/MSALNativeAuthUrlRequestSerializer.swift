@@ -32,7 +32,11 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
         self.context = context
     }
 
-    func serialize(with request: URLRequest, parameters: [AnyHashable: Any], headers: [AnyHashable: Any]) -> URLRequest {
+    func serialize(
+        with request: URLRequest,
+        parameters: [AnyHashable: Any],
+        headers: [AnyHashable: Any]
+    ) -> URLRequest {
 
         var request = request
         var requestHeaders: [String: String] = [:]
@@ -48,8 +52,12 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
         }
 
         if JSONSerialization.isValidJSONObject(parameters) {
-            let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
-            request.httpBody = jsonData
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: parameters)
+                request.httpBody = jsonData
+            } catch {
+                MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed with error: \(error.localizedDescription)")
+            }
         } else {
             MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
         }

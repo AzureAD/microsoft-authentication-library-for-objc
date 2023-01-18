@@ -31,12 +31,12 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
     // MARK: - Variables
 
     private var sut: MSALNativeAuthTokenResponseValidator!
-    private var defaultValidatorMock: DefaultValidatorMock!
+    private var defaultValidatorMock: MSALNativeAuthDefaultValidatorMock!
 
     // MARK: - Setup
 
     override func setUpWithError() throws {
-        defaultValidatorMock = DefaultValidatorMock()
+        defaultValidatorMock = MSALNativeAuthDefaultValidatorMock()
 
         sut = .init(
             defaultValidator: defaultValidatorMock,
@@ -90,7 +90,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
     }
 }
 
-private class DefaultValidatorMock: MSIDTokenResponseValidator {
+private class MSALNativeAuthDefaultValidatorMock: MSIDTokenResponseValidator {
 
     var shouldReturnTokenResult = false
     var shouldReturnServerProtectionPoliciesRequiredError = false

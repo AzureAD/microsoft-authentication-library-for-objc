@@ -103,7 +103,21 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
         XCTAssertEqual(httpHeadersResult["Content-Type"], "application/json")
     }
 
-    func test_when_error_happens_in_headerSerialization_it_logs_it() {
+    func test_when_passingEmptyBodyParams_it_still_succeeds() throws {
+        let expectation = expectation(description: "Body request serialization error")
+        expectation.isInverted = true
+
+        Self.logger.expectation = expectation
+
+        let result = sut.serialize(with: request, parameters: [:], headers: [:])
+
+        wait(for: [expectation], timeout: 1)
+
+        let bodyParametersResult = try JSONDecoder().decode([String: [String: String]].self, from: result.httpBody!)
+        XCTAssertEqual(bodyParametersResult.count, 0)
+    }
+
+    func test_when_error_happens_in_headerSerialization_it_logs_it() throws {
         let expectation = expectation(description: "Header serialization error")
 
         Self.logger.expectation = expectation
@@ -116,7 +130,7 @@ final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
         XCTAssertTrue(resultingLog.contains("Header serialization failed"))
     }
 
-    func test_when_error_happens_in_bodySerialization_it_logs_it() {
+    func test_when_error_happens_in_bodySerialization_it_logs_it() throws {
         let expectation = expectation(description: "Body request serialization error")
 
         Self.logger.expectation = expectation
