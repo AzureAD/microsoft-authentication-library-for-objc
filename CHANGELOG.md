@@ -1,3 +1,7 @@
+## [1.2.7]
+* Fix logger statement (#1630)
+* Address github issue 1141 when getting current account crashes by using await in Swift (#1634)
+
 ## [1.2.6]
 * Update minimum OS version to iOS14 and macOS 10.13
 
