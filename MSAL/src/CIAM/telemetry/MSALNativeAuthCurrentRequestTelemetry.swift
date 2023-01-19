@@ -25,7 +25,7 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
+final class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
     let apiId: MSALNativeAuthTelemetryApiId
     let operationType: MSALNativeAuthOperationType
     private let schemaVersion: Int

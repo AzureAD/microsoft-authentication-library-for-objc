@@ -27,56 +27,62 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
+
+    private var sut : MSALNativeAuthTelemetryProviding!
+
+    override func setUpWithError() throws {
+        sut = MSALNativeAuthTelemetryProvider()
+    }
     
     // MARK: Correct API Id tests
     func testTelemetryForSignUp_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithPassword)
+        let result = sut.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithPassword)
         XCTAssertEqual(result.apiId, .telemetryApiIdSignUp)
     }
     
     func testTelemetryForSignIn_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForSignIn(type: MSALNativeAuthSignInType.signInWithPassword)
+        let result = sut.telemetryForSignIn(type: MSALNativeAuthSignInType.signInWithPassword)
         XCTAssertEqual(result.apiId, .telemetryApiIdSignIn)
     }
     
     func testTelemetryForRefreshToken_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.noCacheLookupInvolved)
+        let result = sut.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.noCacheLookupInvolved)
         XCTAssertEqual(result.apiId, .telemetryApiIdRefreshToken)
     }
     
     func testTelemetryForResetPasswordStart_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForResetPasswordStart(type: MSALNativeAuthResetPasswordStartType.resetPasswordStart)
+        let result = sut.telemetryForResetPasswordStart(type: MSALNativeAuthResetPasswordStartType.resetPasswordStart)
         XCTAssertEqual(result.apiId, .telemetryApiIdResetPasswordStart)
     }
     
     func testTelemetryForResetPasswordComplete_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForResetPasswordComplete(type: MSALNativeAuthResetPasswordCompleteType.resetPasswordComplete)
+        let result = sut.telemetryForResetPasswordComplete(type: MSALNativeAuthResetPasswordCompleteType.resetPasswordComplete)
         XCTAssertEqual(result.apiId, .telemetryApiIdResetPasswordComplete)
     }
     
     func testTelemetryForResendCode_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForResendCode(type: MSALNativeAuthResendCodeType.resendCode)
+        let result = sut.telemetryForResendCode(type: MSALNativeAuthResendCodeType.resendCode)
         XCTAssertEqual(result.apiId, .telemetryApiIdResendCode)
     }
     
     func testTelemetryForVerifyCode_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForVerifyCode(type: MSALNativeAuthVerifyCodeType.verifyCode)
+        let result = sut.telemetryForVerifyCode(type: MSALNativeAuthVerifyCodeType.verifyCode)
         XCTAssertEqual(result.apiId, .telemetryApiIdVerifyCode)
     }
     
     func testTelemetryForSignOut_returnsCorrectApiId() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForSignOut(type: MSALNativeAuthSignOutType.signOutAction)
+        let result = sut.telemetryForSignOut(type: MSALNativeAuthSignOutType.signOutAction)
         XCTAssertEqual(result.apiId, .telemetryApiIdSignOut)
     }
     
     // MARK: Correct Operation Type tests
     func testTelemetryForSignUp_returnsCorrectOperationType() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithOTP)
+        let result = sut.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithOTP)
         XCTAssertEqual(result.operationType, MSALNativeAuthSignUpType.signUpWithOTP.rawValue)
     }
     
     func testTelemetryForRefreshToken_returnsCorrectOperationType() {
-        let result = MSALNativeAuthTelemetryProvider.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.expiredAT)
+        let result = sut.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.expiredAT)
         XCTAssertEqual(result.operationType, MSALNativeAuthTokenRefreshType.expiredAT.rawValue)
     }
 }
