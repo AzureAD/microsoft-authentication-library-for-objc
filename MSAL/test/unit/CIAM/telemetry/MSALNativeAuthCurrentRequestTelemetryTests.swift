@@ -59,12 +59,4 @@ final class MSALNativeAuthCurrentRequestTelemetryTests: XCTestCase {
         let result = telemetry.telemetryString()
         XCTAssertEqual(result, "4|75001,0|iPhone14,5,iOS 16.0")
     }
-    
-    func testSerialization_whenNilProperties_shouldCreateEmptyString() {
-        let telemetry = MSALNativeAuthCurrentRequestTelemetry(apiId: nil,
-                                                              operationType: nil,
-                                                              platformFields: nil)
-        let result = telemetry.telemetryString()
-        XCTAssertEqual(result, "4|0,0|")
-    }
 }

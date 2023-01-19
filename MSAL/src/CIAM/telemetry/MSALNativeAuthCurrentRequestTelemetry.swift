@@ -26,13 +26,13 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
-    let schemaVersion: Int?
-    let apiId: MSALNativeAuthTelemetryApiId?
-    let operationType: MSALNativeAuthOperationType?
-    let platformFields: [String]?
+    let apiId: MSALNativeAuthTelemetryApiId
+    let operationType: MSALNativeAuthOperationType
+    private let schemaVersion: Int
+    private let platformFields: [String]?
 
-    init(apiId: MSALNativeAuthTelemetryApiId?,
-         operationType: MSALNativeAuthOperationType?,
+    init(apiId: MSALNativeAuthTelemetryApiId,
+         operationType: MSALNativeAuthOperationType,
          platformFields: [String]?) {
         self.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION
         self.apiId = apiId
@@ -41,18 +41,18 @@ class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerial
     }
 
     func telemetryString() -> String {
-        return serializeCurrentTelemetryString() ?? ""
+        return serializeCurrentTelemetryString()
     }
 
-    func serializeCurrentTelemetryString() -> String? {
-        guard let currentTelemetryFields = createSerializedItem() else { return nil }
-        return currentTelemetryFields.serialize()
+    private func serializeCurrentTelemetryString() -> String {
+        let currentTelemetryFields = createSerializedItem()
+        return currentTelemetryFields.serialize() ?? ""
     }
 
-    func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem? {
-        let defaultFields: [NSNumber] = [.init(value: apiId?.rawValue ?? 0),
-                                         .init(value: operationType ?? 0)]
-        return .init(schemaVersion: .init(value: schemaVersion ?? 0),
+    private func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem {
+        let defaultFields: [NSNumber] = [.init(value: apiId.rawValue),
+                                         .init(value: operationType)]
+        return .init(schemaVersion: .init(value: schemaVersion),
                      defaultFields: defaultFields,
                      platformFields: platformFields)
     }

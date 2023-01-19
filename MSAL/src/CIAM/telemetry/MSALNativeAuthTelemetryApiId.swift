@@ -25,9 +25,9 @@
 import Foundation
 
 enum MSALNativeAuthTelemetryApiId: Int {
-    // TODO: Untill we know exactly how to define them,
+    // Until we know exactly how to define them,
     // to prevent any clashes with existing id's
-    // I've added a number that is unlikely to be used
+    // a number that is unlikely to be used has been added
     case telemetryApiIdSignUp = 75001
     case telemetryApiIdSignIn = 75002
     case telemetryApiIdRefreshToken = 75003

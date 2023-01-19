@@ -25,8 +25,6 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-// TODO: Add or remove cases as needed to handle all possible cases needed by our logic
-
 typealias MSALNativeAuthOperationType = Int
 
 enum MSALNativeAuthSignUpType: MSALNativeAuthOperationType {
