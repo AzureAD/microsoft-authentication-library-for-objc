@@ -1,5 +1,5 @@
 ## [TBD]
-* * Add more detailed error codes for JIT (#1639)
+* Add more detailed error codes for JIT (#1639)
 
 ## [1.2.7]
 * Fix logger statement (#1630)
