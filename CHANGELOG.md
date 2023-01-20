@@ -1,6 +1,9 @@
 ## [TBD]
 * Add more detailed error codes for JIT (#1639)
 
+## [1.2.8]
+* Fix a crash when identity is nil during getting device registration information on iOS (#1184)
+
 ## [1.2.7]
 * Fix logger statement (#1630)
 * Address github issue 1141 when getting current account crashes by using await in Swift (#1634)
