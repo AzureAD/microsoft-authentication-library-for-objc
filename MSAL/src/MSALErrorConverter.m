@@ -97,6 +97,13 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITComplianceCheckResultNotCompliant) : @(MSALInternalErrorJITComplianceCheckResultNotCompliant),
                                    @(MSIDErrorJITComplianceCheckResultTimeout) : @(MSALInternalErrorJITComplianceCheckResultTimeout),
                                    @(MSIDErrorJITComplianceCheckResultUnknown) : @(MSALInternalErrorJITComplianceCheckResultUnknown),
+                                   @(MSIDErrorJITComplianceCheckInvalidLinkPayload) : @(MSALErrorJITComplianceCheckInvalidLinkPayload),
+                                   @(MSIDErrorJITComplianceCheckCreateController) : @(MSALErrorJITComplianceCheckCreateController),
+                                   @(MSIDErrorJITLinkConfigNotFound) : @(MSALErrorJITLinkConfigNotFound),
+                                   @(MSIDErrorJITInvalidLinkTokenConfig) : @(MSALErrorJITInvalidLinkTokenConfig),
+                                   @(MSIDErrorJITWPJDeviceRegistrationFailed) : @(MSALErrorJITWPJDeviceRegistrationFailed),
+                                   @(MSIDErrorJITWPJAccountIdentifierNil) : @(MSALErrorJITWPJAccountIdentifierNil),
+                                   @(MSIDErrorJITWPJAcquireTokenError) : @(MSALErrorJITWPJAcquireTokenError),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
