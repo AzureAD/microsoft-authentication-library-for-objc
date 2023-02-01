@@ -56,8 +56,8 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     {
         _clientId = clientId;
         _redirectUri = redirectUri;
-        _nestedClientId = nestedClientId;
-        _nestedRedirectUri = nestedRedirectUri;
+        _nestedAuthBrokerClientId = nestedClientId;
+        _nestedAuthBrokerRedirectUri = nestedRedirectUri;
         
         NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
@@ -109,8 +109,8 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:[clientId copy]];
     item->_redirectUri = [_redirectUri copyWithZone:zone];
     item->_authority = [_authority copyWithZone:zone];
-    item->_nestedClientId = [_nestedClientId copyWithZone:zone];
-    item->_nestedRedirectUri = [_nestedRedirectUri copyWithZone:zone];
+    item->_nestedAuthBrokerClientId = [_nestedAuthBrokerClientId copyWithZone:zone];
+    item->_nestedAuthBrokerRedirectUri = [_nestedAuthBrokerRedirectUri copyWithZone:zone];
     
     if (_knownAuthorities)
     {

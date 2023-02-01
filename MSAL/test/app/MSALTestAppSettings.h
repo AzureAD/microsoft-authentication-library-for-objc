@@ -37,8 +37,8 @@ extern NSString* MSALTestAppCacheChangeNotification;
 #define MSAL_APP_PROFILE @"currentProfile"
 #define MSAL_APP_REDIRECT_URI @"redirectUri"
 #define MSAL_APP_KEYCHAIN_GROUP @"keychainGroup"
-#define MSAL_APP_NESTED_CLIENT_ID @"nestedClientId"
-#define MSAL_APP_NESTED_REDIRECT_URI @"nestedRedirectUri"
+#define MSAL_APP_NESTED_CLIENT_ID @"nestedAuthBrokerClientId"
+#define MSAL_APP_NESTED_REDIRECT_URI @"nestedAuthBrokerRedirectUri"
 
 @property (nonatomic) MSALAuthority *authority;
 @property (nonatomic) MSALAccount *currentAccount;

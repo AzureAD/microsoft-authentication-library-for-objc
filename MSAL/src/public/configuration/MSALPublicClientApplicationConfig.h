@@ -50,10 +50,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, nullable) NSString *redirectUri;
 
 /** The client ID of the nested application. */
-@property (atomic) NSString *nestedClientId;
+@property (atomic) NSString *nestedAuthBrokerClientId;
 
 /** The redirect URI of the nested application */
-@property (atomic, nullable) NSString *nestedRedirectUri;
+@property (atomic, nullable) NSString *nestedAuthBrokerRedirectUri;
 
 /** The authority the application will use to obtain tokens */
 @property (atomic) MSALAuthority *authority;
@@ -116,7 +116,7 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority DEPRECATED_MSG_ATTRIBUTE("Use initWithClientId:redirectUri:authority:nestedClientId:nestedRedirectUri instead");
+                               authority:(nullable MSALAuthority *)authority DEPRECATED_MSG_ATTRIBUTE("Use initWithClientId:redirectUri:authority:nestedAuthBrokerClientId:nestedAuthBrokerRedirectUri instead");
 
 /**
  Initialize a MSALPublicClientApplicationConfig with a given clientId and a nested clientid

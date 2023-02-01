@@ -875,8 +875,8 @@
     msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
      
     // Nested auth protocol
-    msidParams.nestedClientId = self.internalConfig.nestedClientId;
-    msidParams.nestedRedirectUri = self.internalConfig.nestedRedirectUri;
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1159,8 +1159,8 @@
     }
     
     // Nested auth protocol
-    msidParams.nestedClientId = self.internalConfig.nestedClientId;
-    msidParams.nestedRedirectUri = self.internalConfig.nestedRedirectUri;
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
