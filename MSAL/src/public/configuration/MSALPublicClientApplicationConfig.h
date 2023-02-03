@@ -116,7 +116,7 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority DEPRECATED_MSG_ATTRIBUTE("Use initWithClientId:redirectUri:authority:nestedAuthBrokerClientId:nestedAuthBrokerRedirectUri instead");
+                               authority:(nullable MSALAuthority *)authority;
 
 /**
  Initialize a MSALPublicClientApplicationConfig with a given clientId and a nested clientid
@@ -124,14 +124,14 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  redirectUri    The redirect URI of the application
  @param  authority      The target authority
- @param  nestedClientId     The clientID of your child application
- @param  nestedRedirectUri    The redirect URI of the child application
+ @param  nestedAuthBrokerClientId     The clientID of your child application
+ @param  nestedAuthBrokerRedirectUri    The redirect URI of the child application
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
                                authority:(nullable MSALAuthority *)authority
-                          nestedClientId:(nullable NSString *)nestedClientId
-                       nestedRedirectUri:(nullable NSString *)nestedRedirectUri NS_DESIGNATED_INITIALIZER;
+                nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
+             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri NS_DESIGNATED_INITIALIZER;
 
 #pragma mark - Unavailable initializers
 

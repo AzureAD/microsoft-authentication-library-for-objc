@@ -126,18 +126,16 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     MSALTestAppSettingsRow* redirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_REDIRECT_URI];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     redirectUriRow.valueBlock = ^NSString *{ return redirectUri; };
-    MSALTestAppSettingsRow* nestedClientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_CLIENT_ID];
-    NSString *nestedClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
-    nestedClientIdRow.valueBlock = ^NSString *{ return nestedClientId; };
-    MSALTestAppSettingsRow* nestedRedirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_REDIRECT_URI];
-    NSString *nestedRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
-    nestedRedirectUriRow.valueBlock = ^NSString *{ return nestedRedirectUri; };
+    MSALTestAppSettingsRow* nestedAuthBrokerClientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    nestedAuthBrokerClientIdRow.valueBlock = ^NSString *{ return nestedAuthBrokerClientId; };
+    MSALTestAppSettingsRow* nestedAuthBrokerRedirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_REDIRECT_URI];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
+    nestedAuthBrokerRedirectUriRow.valueBlock = ^NSString *{ return nestedAuthBrokerRedirectUri; };
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:nil
-                                                                                                nestedClientId:nil
-                                                                                             nestedRedirectUri:nil];
+                                                                                                     authority:nil];
     
     NSString *accessGroup = pcaConfig.cacheConfig.keychainSharingGroup;
     NSString *keychainGroup = [[MSIDKeychainUtil sharedInstance] accessGroup:accessGroup];
@@ -146,9 +144,9 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     MSALTestAppSettingsRow* keychainGroupRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_KEYCHAIN_GROUP];
     keychainGroupRow.valueBlock = ^NSString *{ return keychainSharingGroup; };
     
-    if (![NSString msidIsStringNilOrBlank:nestedClientId] && ![NSString msidIsStringNilOrBlank:nestedRedirectUri])
+    if (![NSString msidIsStringNilOrBlank:nestedAuthBrokerClientId] && ![NSString msidIsStringNilOrBlank:nestedAuthBrokerRedirectUri])
     {
-        _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow, nestedClientIdRow, nestedRedirectUriRow ];
+        _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow, nestedAuthBrokerClientIdRow, nestedAuthBrokerRedirectUriRow ];
     }
     else
     {

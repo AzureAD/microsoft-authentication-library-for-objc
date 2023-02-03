@@ -250,9 +250,7 @@ static NSString * const defaultScope = @"User.Read";
     NSError *error = nil;
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:authority
-                                                                                                nestedClientId:nil
-                                                                                             nestedRedirectUri:nil];
+                                                                                                     authority:authority];
     if (self.validateAuthoritySegment.selectedSegment == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
@@ -350,8 +348,8 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    NSString *nestedClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
-    NSString *nestedRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     NSString *authorityString = currentProfile[@"authority"] ?: @"https://login.microsoftonline.com/common";
     __auto_type authorityUrl =  [NSURL URLWithString:authorityString];
     MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
@@ -359,8 +357,8 @@ static NSString * const defaultScope = @"User.Read";
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
-                                                                                                nestedClientId:nestedClientId
-                                                                                             nestedRedirectUri:nestedRedirectUri];
+                                                                                      nestedAuthBrokerClientId:nestedAuthBrokerClientId
+                                                                                   nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
     if (self.validateAuthoritySegment.selectedSegment == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];

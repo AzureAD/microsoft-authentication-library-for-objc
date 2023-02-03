@@ -194,14 +194,14 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    NSString *nestedClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
-    NSString *nestedRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
-                                                                                                nestedClientId:nestedClientId
-                                                                                             nestedRedirectUri:nestedRedirectUri];
+                                                                                      nestedAuthBrokerClientId:nestedAuthBrokerClientId
+                                                                                   nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
     if (self.validateAuthoritySegmentControl.selectedSegmentIndex == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
@@ -502,9 +502,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSError *error = nil;
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:authority
-                                                                                                nestedClientId:nil
-                                                                                             nestedRedirectUri:nil];
+                                                                                                     authority:authority];
     if ([MSALTestAppSettings isSSOSeeding]) pcaConfig.bypassRedirectURIValidation = YES;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
                                                                                                     error:&error];
@@ -734,15 +732,15 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    NSString *nestedClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
-    NSString *nestedRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     __auto_type authority = [settings authority];
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
-                                                                                                nestedClientId:nestedClientId
-                                                                                             nestedRedirectUri:nestedRedirectUri];
+                                                                                      nestedAuthBrokerClientId:nestedAuthBrokerClientId
+                                                                                   nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
     
     MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.microsoft.adalcache" serviceIdentifier:@"legacy-accounts-service" applicationIdentifier:@"my.msal.testapp"];
     provider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;

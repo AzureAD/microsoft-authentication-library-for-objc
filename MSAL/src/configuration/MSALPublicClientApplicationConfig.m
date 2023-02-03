@@ -42,22 +42,22 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
-    return [self initWithClientId:clientId redirectUri:nil authority:nil nestedClientId:nil nestedRedirectUri:nil];
+    return [self initWithClientId:clientId redirectUri:nil authority:nil nestedAuthBrokerClientId:nil nestedAuthBrokerRedirectUri:nil];
 }
 
 - (instancetype)initWithClientId:(NSString *)clientId
                      redirectUri:(nullable NSString *)redirectUri
                        authority:(nullable MSALAuthority *)authority
-                  nestedClientId:(nullable NSString *)nestedClientId
-               nestedRedirectUri:(nullable NSString *)nestedRedirectUri
+        nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
+     nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri
 {
     self = [super init];
     if (self)
     {
         _clientId = clientId;
         _redirectUri = redirectUri;
-        _nestedAuthBrokerClientId = nestedClientId;
-        _nestedAuthBrokerRedirectUri = nestedRedirectUri;
+        _nestedAuthBrokerClientId = nestedAuthBrokerClientId;
+        _nestedAuthBrokerRedirectUri = nestedAuthBrokerRedirectUri;
         
         NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
@@ -76,8 +76,8 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     return [self initWithClientId:clientId
                       redirectUri:redirectUri
                         authority:authority
-                   nestedClientId:nil
-                nestedRedirectUri:nil];
+         nestedAuthBrokerClientId:nil
+      nestedAuthBrokerRedirectUri:nil];
 }
 
 - (void)setSliceConfig:(MSALSliceConfig *)sliceConfig

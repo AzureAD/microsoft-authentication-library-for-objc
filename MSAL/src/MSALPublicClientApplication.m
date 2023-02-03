@@ -1026,7 +1026,7 @@
     {
         return nil;
     }
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority nestedClientId:nil nestedRedirectUri:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
     
 #if TARGET_OS_IPHONE
     config.cacheConfig.keychainSharingGroup = keychainGroup;
