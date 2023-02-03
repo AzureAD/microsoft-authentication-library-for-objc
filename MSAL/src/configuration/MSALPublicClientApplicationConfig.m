@@ -42,7 +42,7 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
-    return [self initWithClientId:clientId redirectUri:nil authority:nil nestedAuthBrokerClientId:nil nestedAuthBrokerRedirectUri:nil];
+    return [self initWithClientId:clientId redirectUri:nil authority:nil];
 }
 
 - (instancetype)initWithClientId:(NSString *)clientId

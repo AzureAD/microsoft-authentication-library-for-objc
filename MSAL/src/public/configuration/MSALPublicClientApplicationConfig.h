@@ -131,7 +131,7 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
                              redirectUri:(nullable NSString *)redirectUri
                                authority:(nullable MSALAuthority *)authority
                 nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
-             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri NS_DESIGNATED_INITIALIZER;
+             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri;
 
 #pragma mark - Unavailable initializers
 
