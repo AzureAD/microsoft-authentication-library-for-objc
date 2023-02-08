@@ -43,7 +43,7 @@
 #if TARGET_OS_IPHONE
     if (parentViewController == nil)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS.", nil, nil, nil, nil, nil, YES);
         if (error) *error = msidError;
         return NO;
     }
