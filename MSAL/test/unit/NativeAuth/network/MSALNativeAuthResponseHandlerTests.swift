@@ -26,13 +26,12 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthResponseHandlerTests: XCTestCase {
+final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthLoggingHelperXCTestCase {
 
     // MARK: - Variables
 
     private var sut: MSALNativeAuthResponseHandler!
 
-    private static let logger = MSALNativeLoggingTests.staticLogger
     private var tokenResponseValidatorMock: MSALNativeTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
     private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
@@ -41,16 +40,12 @@ final class MSALNativeAuthResponseHandlerTests: XCTestCase {
     // MARK: - Setup
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         tokenResponseValidatorMock = MSALNativeTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
 
         sut = MSALNativeAuthResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock
         )
-    }
-
-    override func tearDown() {
-        Self.logger.reset()
-        super.tearDown()
     }
 
     // MARK: - tests

@@ -27,17 +27,21 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthTestLogger : NSObject {
+    static var instanceCreated = false
+
     @objc dynamic var containsPII = false
-    @objc dynamic var callbackInvokedCount = 0
     @objc dynamic var messages = NSMutableArray()
     var expectation = XCTestExpectation()
     
     override init () {
         super.init()
+        guard Self.instanceCreated == false else {
+            fatalError("Only one instance allowed, inherit the MSALNativeAuthLoggingHelperXCTestCase class and use the Self.logger property there")
+        }
+        Self.instanceCreated = true
         MSALGlobalConfig.loggerConfig.setLogCallback { [weak self] level, message, containsPII in
             self?.messages.add(message as Any)
             self?.containsPII = containsPII
-            self?.callbackInvokedCount += 1
             // Making sure expectation has been set in the test case
             if self?.expectation.description != "" {
                 self?.expectation.fulfill()
@@ -48,27 +52,21 @@ class MSALNativeAuthTestLogger : NSObject {
     func reset() {
         expectation = XCTestExpectation(description: "")
         containsPII = false
-        callbackInvokedCount = 0
         messages.removeAllObjects()
         MSALGlobalConfig.loggerConfig.logLevel = .last
     }
 }
 
-final class MSALNativeLoggingTests: XCTestCase {
-    
-    static let staticLogger = MSALNativeAuthTestLogger()
+final class MSALNativeLoggingTests: MSALNativeAuthLoggingHelperXCTestCase {
     // Used for clarity of code. The static object is needed because MSALGlobalConfig.loggerConfig.setLogCallback
     // must be set only once per execution of test
-    var logger : MSALNativeAuthTestLogger {
-        MSALNativeLoggingTests.staticLogger
-    }
+
     let context = MSIDBasicContext()
     var correlationId = UUID()
     let messageRegexFormat = "\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} - %@\\] %@"
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        logger.reset()
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
         context.correlationId = UUID()
         correlationId = UUID()
@@ -76,13 +74,13 @@ final class MSALNativeLoggingTests: XCTestCase {
     
     // MARK: Log With Context
     
-    func testLogWithContext() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+    func testLogWithContext_noMaskNonNil() throws {
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test String"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -95,12 +93,12 @@ final class MSALNativeLoggingTests: XCTestCase {
 
     
     func testLogWithContext_andMasked() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(not-null\\)"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -112,12 +110,12 @@ final class MSALNativeLoggingTests: XCTestCase {
     }
     
     func testLogWithContext_maskedAndNull() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(null\\)"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -133,12 +131,12 @@ final class MSALNativeLoggingTests: XCTestCase {
     func testLogPIIWithContext_andMaskAll() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(not\\-null\\)"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -147,18 +145,18 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertFalse(logger.containsPII)
+        XCTAssertFalse(Self.logger.containsPII)
     }
     
     func testLogPIIWithContext_andMaskEUII() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test String"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -167,17 +165,17 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertTrue(logger.containsPII)
+        XCTAssertTrue(Self.logger.containsPII)
     }
     
     func testLogPIIWithContext_nilString() throws {
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(null\\)"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -186,18 +184,18 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertFalse(logger.containsPII)
+        XCTAssertFalse(Self.logger.containsPII)
     }
     
     func testLogPIIWithContext_nilStringNotMasked() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test \\(null\\)"
             let correlationId = context.correlationId?.uuidString ?? "Wrong Correlation Id"
             if string.range(of: String(format:messageRegexFormat, correlationId, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
@@ -206,18 +204,18 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertTrue(logger.containsPII)
+        XCTAssertTrue(Self.logger.containsPII)
     }
     
     // MARK: Log With Correlation Id
     
-    func testLogWithCorrelationId() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+    func testLogWithCorrelationId_noMaskNonNil() throws {
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test String"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -228,12 +226,12 @@ final class MSALNativeLoggingTests: XCTestCase {
     }
     
     func testLogWithCorrelationId_andMasked() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(not\\-null\\)"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -244,12 +242,12 @@ final class MSALNativeLoggingTests: XCTestCase {
     }
     
     func testLogWithCorrelationId_maskedAndNull() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(null\\)"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -264,12 +262,12 @@ final class MSALNativeLoggingTests: XCTestCase {
     func testLogPIIWithCorrelationId_andMaskAll() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(not\\-null\\)"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -277,18 +275,18 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertFalse(logger.containsPII)
+        XCTAssertFalse(Self.logger.containsPII)
     }
     
     func testLogPIIWithCorrelationId_andMaskEUII() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test String"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -296,16 +294,16 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertTrue(logger.containsPII)
+        XCTAssertTrue(Self.logger.containsPII)
     }
     
     func testLogPIIWithCorrelationId_nilString() throws {
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test Masked\\(null\\)"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -313,18 +311,18 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertFalse(logger.containsPII)
+        XCTAssertFalse(Self.logger.containsPII)
     }
     
     func testLogPIIWithCorrelationId_nilStringNotMasked() throws {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
-        logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
         MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
-        XCTWaiter().wait(for: [logger.expectation], timeout: 1)
+        XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
-        XCTAssertNotNil(logger.messages.object(at: 0));
-        if let string = logger.messages.object(at: 0) as? String {
+        XCTAssertNotNil(Self.logger.messages.object(at: 0));
+        if let string = Self.logger.messages.object(at: 0) as? String {
             let correctString = "Test \\(null\\)"
             if string.range(of: String(format:messageRegexFormat, correlationId.uuidString, correctString), options: .regularExpression, range: nil, locale: nil) == nil {
                 XCTFail("Message doesn't contain proper data or has incorrect format")
@@ -332,6 +330,6 @@ final class MSALNativeLoggingTests: XCTestCase {
         } else {
             XCTFail("Message is not string")
         }
-        XCTAssertTrue(logger.containsPII)
+        XCTAssertTrue(Self.logger.containsPII)
     }
 }

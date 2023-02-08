@@ -866,6 +866,7 @@
 		D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
 		D6A2063F1FC512EF00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
 		D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
+		DE14D76129898CF900F37BEF /* MSALNativeAuthLoggingHelperXCTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE14D76029898CF900F37BEF /* MSALNativeAuthLoggingHelperXCTestCase.swift */; };
 		DECC1F9629521E35006D9FB1 /* MSALLogMask.m in Sources */ = {isa = PBXBuildFile; fileRef = DECC1F9229521E34006D9FB1 /* MSALLogMask.m */; };
 		DECC1F9729521E35006D9FB1 /* MSALLogMask.m in Sources */ = {isa = PBXBuildFile; fileRef = DECC1F9229521E34006D9FB1 /* MSALLogMask.m */; };
 		DECC1F9829521E35006D9FB1 /* MSALLogMask.h in Headers */ = {isa = PBXBuildFile; fileRef = DECC1F9329521E34006D9FB1 /* MSALLogMask.h */; };
@@ -1635,6 +1636,7 @@
 		D6A206371FC510B500755A51 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		D6A2063B1FC510FB00755A51 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenTests.m; sourceTree = "<group>"; };
+		DE14D76029898CF900F37BEF /* MSALNativeAuthLoggingHelperXCTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthLoggingHelperXCTestCase.swift; sourceTree = "<group>"; };
 		DE53C7D4293F9F5A00E5B2BB /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		DECC1F9229521E34006D9FB1 /* MSALLogMask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALLogMask.m; sourceTree = "<group>"; };
 		DECC1F9329521E34006D9FB1 /* MSALLogMask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALLogMask.h; sourceTree = "<group>"; };
@@ -2764,6 +2766,7 @@
 		DECC1FB029530FEB006D9FB1 /* NativeAuth */ = {
 			isa = PBXGroup;
 			children = (
+				DE14D76029898CF900F37BEF /* MSALNativeAuthLoggingHelperXCTestCase.swift */,
 				287F64F42981A7B800ED90BD /* mock */,
 				287F64F129819F6B00ED90BD /* public */,
 				287F64EE298186C800ED90BD /* inputValidator */,
@@ -4464,6 +4467,7 @@
 				A0274CBE24B432B100BD198D /* MSALAuthSchemeTests.m in Sources */,
 				B286BA00238A08F6007833AD /* MSALB2CPolicyTests.m in Sources */,
 				289747AC2979487900838C80 /* MSALNativeAuthUrlRequestSerializerTests.swift in Sources */,
+				DE14D76129898CF900F37BEF /* MSALNativeAuthLoggingHelperXCTestCase.swift in Sources */,
 				B2725ED222C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m in Sources */,
 				609AF9332256BD0C00E2978D /* MSALAccountsProviderTests.m in Sources */,
 				B2725EAC22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */,

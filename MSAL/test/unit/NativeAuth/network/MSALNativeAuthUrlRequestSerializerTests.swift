@@ -26,22 +26,18 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthUrlRequestSerializerTests: XCTestCase {
+final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthLoggingHelperXCTestCase {
 
     private var sut: MSALNativeAuthUrlRequestSerializer!
     private var request: URLRequest!
-    private static let logger = MSALNativeLoggingTests.staticLogger
 
-    override func setUp() {
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+
         let url = URL(string: DEFAULT_TEST_RESOURCE)!
         request = URLRequest(url: url)
 
         sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext())
-    }
-
-    override func tearDown() {
-        Self.logger.reset()
-        super.tearDown()
     }
 
     func test_serialize_successfully() throws {
