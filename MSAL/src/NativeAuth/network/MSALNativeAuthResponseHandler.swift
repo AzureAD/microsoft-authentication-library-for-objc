@@ -26,8 +26,6 @@
 
 protocol MSALNativeAuthResponseHandling {
 
-    var tokenResponseValidator: MSALNativeAuthTokenResponseValidating { get }
-
     func handle(
         context: MSIDRequestContext,
         accountIdentifier: MSIDAccountIdentifier,
@@ -40,7 +38,7 @@ final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
 
     // MARK: - Variables
 
-    let tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+    private let tokenResponseValidator: MSALNativeAuthTokenResponseValidating
 
     // MARK: - Init
 

@@ -35,7 +35,7 @@ final class MSALNativeAuthAuthority: MSIDAuthority {
     // MARK: - Variables
 
     private var baseUrl: URL
-    private let tenantName: String
+    let tenantName: String
 
     override var url: URL {
         return baseUrl.appendingPathComponent(tenantName)

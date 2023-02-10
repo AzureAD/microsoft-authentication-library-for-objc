@@ -22,31 +22,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling {
 
-// TODO: This class is not currently used (`MSIDAADTokenRequestServerTelemetry` is being used).
-// Once we reach a decision about telemetry, decide whether we remove it completely or extend it to our custom solution.
+    let currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry
+    let context: MSIDRequestContext
+    private let lastRequestTelemetry: MSIDLastRequestTelemetry
+    init(currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry,
+         context: MSIDRequestContext) {
+        self.currentRequestTelemetry = currentRequestTelemetry
+        self.context = context
+        self.lastRequestTelemetry = MSIDLastRequestTelemetry.sharedInstance()
+    }
 
     func handleError(_ error: Error, context: MSIDRequestContext) {
+        // We need to change the MSIDHttpRequestServerTelemetryHandling
+        // protocol because error here could be nil so we should be able to use Error?
+        guard error != nil else { return }
+        let errorString = (error as NSError).msidServerTelemetryErrorString()
+        handleError(error, errorString: errorString, context: context)
     }
 
     func handleError(_ error: Error, errorString: String, context: MSIDRequestContext) {
+        lastRequestTelemetry.update(withApiId: currentRequestTelemetry.apiId.rawValue,
+                                    errorString: errorString,
+                                    context: context)
     }
 
     func setTelemetryToRequest(_ request: MSIDHttpRequestProtocol) {
 
-        // Take a look at the class MSIDAADTokenRequestServerTelemetry to see how it sets the telemetry
-        // That class has two properties of type MSIDCurrentRequestTelemetry (lastRequestTelemetry
-        //  and currentRequestTelemetry)
-        // The class `MSIDAADAuthorizationCodeGrantRequest` has a property
-        //  `serverTelemetry: MSIDHttpRequestServerTelemetryHandling` equivalent to this class (that is set in
-        //  `MSIDAADV2Oauth2Factory`)
-        // This serverTelemetry is used during sendWithBlock() in MSIDHttpRequest
-        // We should set this class in httpRequest.serverTelemetry during the creation of our ciamRequests.
+        let currentRequestTelemetryString = currentRequestTelemetry.telemetryString()
+        let lastRequestTelemetryString = lastRequestTelemetry.telemetryString()
 
-        request.urlRequest.setValue(nil, forHTTPHeaderField: "x-client-current-telemetry")
-        request.urlRequest.setValue(nil, forHTTPHeaderField: "x-client-last-telemetry")
+        guard let mutableUrlRequest = (request.urlRequest as NSURLRequest).mutableCopy() as? NSMutableURLRequest else {
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Mutable copy of request could not be made for telemetry")
+            return
+        }
+        mutableUrlRequest.setValue(currentRequestTelemetryString, forHTTPHeaderField: "x-client-current-telemetry")
+        mutableUrlRequest.setValue(lastRequestTelemetryString, forHTTPHeaderField: "x-client-last-telemetry")
+        request.urlRequest = mutableUrlRequest as URLRequest
     }
 }

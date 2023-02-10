@@ -22,14 +22,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import XCTest
-@testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControllerFactoryProtocol {
-    
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthSignUpController(requestProvider: MSALNativeAuthRequestProvider(clientId: "", tenantName: ""), cacheAccessor: MSALNativeAuthCacheAccessor(), responseHandler: MSALNativeAuthResponseHandler())
+struct MSALNativeAuthSignInRequestParameters: MSALNativeAuthRequestable {
+
+    let authority: MSALNativeAuthAuthority
+    let clientId: String
+    let endpoint: MSALNativeAuthEndpoint
+    let context: MSIDRequestContext
+    let email: String
+    let password: String
+    let scope: String
+    let grantType: MSALNativeAuthGrantType
+}
+
+// MARK: - Convenience init
+
+extension MSALNativeAuthSignInRequestParameters {
+
+    init(
+        authority: MSALNativeAuthAuthority,
+        clientId: String,
+        email: String,
+        password: String,
+        scope: String,
+        context: MSIDRequestContext
+    ) {
+        self.init(
+            authority: authority,
+            clientId: clientId,
+            endpoint: .signIn,
+            context: context,
+            email: email,
+            password: password,
+            scope: scope,
+            grantType: .password
+        )
     }
 }

@@ -22,13 +22,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthEndpoint: String, CaseIterable {
-    case signUp = "/signup"
-    case signIn = "/signin"
-    case refreshToken = "/refreshtoken"
-    case resetPasswordStart = "/resetpassword/start"
-    case resetPasswordComplete = "/resetpassword/complete"
-    case resendCode = "/resendcode"
-    case verifyCode = "/verifycode"
-    case signOut = "/signout"
+import XCTest
+@testable import MSAL
+
+final class MSALNativeAuthEndpointTests: XCTestCase {
+
+    private typealias sut = MSALNativeAuthEndpoint
+
+    func test_allEndpoints_are_tested() {
+        XCTAssertEqual(sut.allCases.count, 8)
+    }
+
+    func test_signUp_endpoint() {
+        XCTAssertEqual(sut.signUp.rawValue, "/signup")
+    }
+
+    func test_signIn_endpoint() {
+        XCTAssertEqual(sut.signIn.rawValue, "/signin")
+    }
+
+    func test_refreshToken_endpoint() {
+        XCTAssertEqual(sut.refreshToken.rawValue, "/refreshtoken")
+    }
+
+    func test_resetPasswordStart_endpoint() {
+        XCTAssertEqual(sut.resetPasswordStart.rawValue, "/resetpassword/start")
+    }
+
+    func test_resetPasswordComplete_endpoint() {
+        XCTAssertEqual(sut.resetPasswordComplete.rawValue, "/resetpassword/complete")
+    }
+
+    func test_resendCode_endpoint() {
+        XCTAssertEqual(sut.resendCode.rawValue, "/resendcode")
+    }
+
+    func test_verifyCode_endpoint() {
+        XCTAssertEqual(sut.verifyCode.rawValue, "/verifycode")
+    }
+
+    func test_signOut_endpoint() {
+        XCTAssertEqual(sut.signOut.rawValue, "/signout")
+    }
 }

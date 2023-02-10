@@ -22,13 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthEndpoint: String, CaseIterable {
-    case signUp = "/signup"
-    case signIn = "/signin"
-    case refreshToken = "/refreshtoken"
-    case resetPasswordStart = "/resetpassword/start"
-    case resetPasswordComplete = "/resetpassword/complete"
-    case resendCode = "/resendcode"
-    case verifyCode = "/verifycode"
-    case signOut = "/signout"
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
+
+class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
+
+    enum E: Error {
+        case notImplemented
+    }
+
+    private(set) var saveTokenWasCalled = false
+
+    func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
+        throw E.notImplemented
+    }
+
+    func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount? {
+        throw E.notImplemented
+    }
+
+    func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
+        saveTokenWasCalled = true
+    }
+
+    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
+        throw E.notImplemented
+    }
+
+    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
+        throw E.notImplemented
+    }
 }

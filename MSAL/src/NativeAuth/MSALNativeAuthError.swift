@@ -29,6 +29,9 @@ enum MSALNativeAuthError: Error, Equatable {
     case serverProtectionPoliciesRequired(homeAccountId: String?)
     case headerNotSerialized
     case invalidAuthority
-    case responseSerializationError
     case invalidUrl
+    case responseSerializationError
+    case invalidResponse
+    case invalidRequest
+    case generalError
 }

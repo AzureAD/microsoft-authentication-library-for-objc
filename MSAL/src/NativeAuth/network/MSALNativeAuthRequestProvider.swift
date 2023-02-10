@@ -25,22 +25,57 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestProviding {
-
-    var clientId: String { get }
-    var tenantName: String { get }
+    func signInRequest(
+        parameters: MSALNativeAuthSignInParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignInRequest
 }
 
 final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
     // MARK: - Variables
 
-    let clientId: String
-    let tenantName: String
+    private let clientId: String
+    private let authority: MSALNativeAuthAuthority
+    private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
     // MARK: - Init
 
-    init(clientId: String, tenantName: String) {
+    init(clientId: String, authority: MSALNativeAuthAuthority,
+         telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()) {
         self.clientId = clientId
-        self.tenantName = tenantName
+        self.authority = authority
+        self.telemetryProvider = telemetryProvider
+    }
+
+    // MARK: - SignIn with Password
+
+    func signInRequest(
+        parameters: MSALNativeAuthSignInParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignInRequest {
+
+        let params = MSALNativeAuthSignInRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            email: parameters.email,
+            password: parameters.password,
+            scope: parameters.scopes.joined(separator: ","),
+            context: context
+        )
+
+        let request = try MSALNativeAuthSignInRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
+            context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
     }
 }

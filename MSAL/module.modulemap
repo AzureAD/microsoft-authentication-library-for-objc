@@ -53,6 +53,7 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/cache/metadata/MSIDAccountMetadataCacheAccessor.h"
     header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry.h"
     header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry+Internal.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetryEventInterface.h"
     header "IdentityCore/IdentityCore/src/network/request_serializer/MSIDRequestSerialization.h"
     header "IdentityCore/IdentityCore/src/network/request_configurator/MSIDHttpRequestConfiguratorProtocol.h"
     header "IdentityCore/IdentityCore/src/network/request_configurator/MSIDAADRequestConfigurator.h"
@@ -67,9 +68,13 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/requests/sdk/MSIDTokenResponseValidator.h"
     header "IdentityCore/IdentityCore/src/MSIDError.h"
     header "IdentityCore/IdentityCore/tests/util/MSIDTestIdentifiers.h"
+    header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLResponse.h"
+    header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLSession.h"
+    header "IdentityCore/IdentityCore/tests/util/MSIDTelemetryTestDispatcher.h"
     header "IdentityCore/IdentityCore/src/MSIDTelemetryStringSerializable.h"
     header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDCurrentRequestTelemetry.h"
     header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDRequestTelemetryConstants.h"
     header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDCurrentRequestTelemetrySerializedItem.h"
+    header "IdentityCore/IdentityCore/src/util/NSError+MSIDServerTelemetryError.h"
     export *
 }

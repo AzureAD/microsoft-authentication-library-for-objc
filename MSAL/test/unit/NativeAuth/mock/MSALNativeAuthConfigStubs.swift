@@ -16,36 +16,36 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRequestControllerFactoryProtocol {
-    func makeSignUpController() -> MSALNativeAuthSignUpControlling
+enum ErrorMock: Error {
+    case error
 }
 
-final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControllerFactoryProtocol {
-    private let requestProvider: MSALNativeAuthRequestProviding
-    private let cacheGateway: MSALNativeAuthCacheInterface
-    private let responseHandler: MSALNativeAuthResponseHandling
+struct MSALNativeAuthConfigStubs {
 
-    init(
-        requestProvider: MSALNativeAuthRequestProviding,
-        cacheGateway: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling) {
-        self.requestProvider = requestProvider
-        self.cacheGateway = cacheGateway
-        self.responseHandler = responseHandler
+    static var configuration: MSALNativeAuthPublicClientApplicationConfig {
+        .init(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            authority: URL(string: DEFAULT_TEST_AUTHORITY)!,
+            tenantName: MSALNativeAuthNetworkStubs.tenantName
+        )
     }
 
-    func makeSignUpController() -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(
-            requestProvider: requestProvider,
-            cacheAccessor: cacheGateway,
-            responseHandler: responseHandler)
+    static var msidConfiguration: MSIDConfiguration {
+        .init(
+            authority: MSALNativeAuthNetworkStubs.authority,
+            redirectUri: "",
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            target: ""
+        )
     }
 }

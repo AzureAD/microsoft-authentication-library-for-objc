@@ -35,17 +35,6 @@ struct MSALNativeAuthSignUpRequestParameters: MSALNativeAuthRequestable {
     let attributes: [String: Any]
     let scope: String
     let grantType: MSALNativeAuthGrantType
-
-    func makeEndpointUrl() throws -> URL {
-        let baseUrl = authority.url.absoluteString
-        let endpointUrl = baseUrl + endpoint.rawValue
-
-        guard let url = URL(string: endpointUrl) else {
-            throw MSALNativeAuthError.invalidUrl
-        }
-
-        return url
-    }
 }
 
 // MARK: - Convenience init

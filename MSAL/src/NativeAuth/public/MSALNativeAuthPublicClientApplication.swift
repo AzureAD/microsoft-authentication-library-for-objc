@@ -35,28 +35,51 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
             which contains authority, tenant and clientId.
      */
 
-    private let controllerFactory: MSALNativeAuthRequestControllerFactoryProtocol
+    private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let configuration: MSALNativeAuthPublicClientApplicationConfig
     private let inputValidator: MSALNativeAuthInputValidating
 
     @objc
     public convenience init(configuration: MSALNativeAuthPublicClientApplicationConfig) {
-        let requestProvider = MSALNativeAuthRequestProvider(
-            clientId: configuration.clientId,
-            tenantName: configuration.tenantName)
-        let cacheGateway = MSALNativeAuthCacheAccessor()
-        let responseHandler = MSALNativeAuthResponseHandler()
-        let factory = MSALNativeAuthRequestControllerFactory(
-            requestProvider: requestProvider,
-            cacheGateway: cacheGateway,
-            responseHandler: responseHandler)
-        let inputValidator = MSALNativeAuthInputValidator()
-        self.init(configuration: configuration, controllerFactory: factory, inputValidator: inputValidator)
+
+        do {
+            let authority = try MSALNativeAuthAuthority(
+                tenant: configuration.tenantName,
+                context: MSALNativeAuthRequestContext()
+            )
+
+            let requestProvider = MSALNativeAuthRequestProvider(
+                clientId: configuration.clientId,
+                authority: authority
+            )
+
+            let factory = MSALNativeAuthRequestControllerFactory(
+                requestProvider: requestProvider,
+                cacheGateway: MSALNativeAuthCacheAccessor(),
+                responseHandler: MSALNativeAuthResponseHandler(),
+                configuration: configuration,
+                authority: authority
+            )
+
+            self.init(
+                configuration: configuration,
+                controllerFactory: factory,
+                inputValidator: MSALNativeAuthInputValidator()
+            )
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: MSALNativeAuthRequestContext(),
+                format: "Error building MSALNativeAuthAuthority"
+            )
+
+            self.init(configuration: configuration)
+        }
     }
 
     init(
         configuration: MSALNativeAuthPublicClientApplicationConfig,
-        controllerFactory: MSALNativeAuthRequestControllerFactoryProtocol,
+        controllerFactory: MSALNativeAuthRequestControllerBuildable,
         inputValidator: MSALNativeAuthInputValidating
     ) {
         self.configuration = configuration
@@ -87,9 +110,14 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
 
     public func signIn(parameters: MSALNativeAuthSignInParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
-            signIn(parameters: parameters) { _, _ in
-                continuation.resume(returning:
-                        .success(.init(stage: .completed, credentialToken: nil, authentication: nil)))
+            signIn(parameters: parameters) { result, error in
+                if let result = result {
+                    continuation.resume(returning: .success(result))
+                } else if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else {
+                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                }
             }
         }
     }
@@ -158,8 +186,17 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     @objc
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
+        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
+    ) {
+        guard inputValidator.isEmailValid(parameters.email) else {
+            completion(nil, MSALNativeAuthError.invalidInput)
+            return
+        }
 
+        let controller = controllerFactory.makeSignInController(
+            with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
+        )
+        controller.signIn(parameters: parameters, completion: completion)
     }
 
     @objc
