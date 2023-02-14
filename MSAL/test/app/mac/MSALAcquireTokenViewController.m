@@ -348,13 +348,17 @@ static NSString * const defaultScope = @"User.Read";
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     NSString *authorityString = currentProfile[@"authority"] ?: @"https://login.microsoftonline.com/common";
     __auto_type authorityUrl =  [NSURL URLWithString:authorityString];
     MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:authority];
+                                                                                                     authority:authority
+                                                                                      nestedAuthBrokerClientId:nestedAuthBrokerClientId
+                                                                                   nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
     if (self.validateAuthoritySegment.selectedSegment == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
@@ -499,10 +503,12 @@ static NSString * const defaultScope = @"User.Read";
         [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
         return;
     }
-    
+
+    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
     parameters.authority = self.settings.authority;
     parameters.authenticationScheme = [self authScheme];
+    parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {

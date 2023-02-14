@@ -126,6 +126,12 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     MSALTestAppSettingsRow* redirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_REDIRECT_URI];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     redirectUriRow.valueBlock = ^NSString *{ return redirectUri; };
+    MSALTestAppSettingsRow* nestedAuthBrokerClientIdRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    nestedAuthBrokerClientIdRow.valueBlock = ^NSString *{ return nestedAuthBrokerClientId; };
+    MSALTestAppSettingsRow* nestedAuthBrokerRedirectUriRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_NESTED_REDIRECT_URI];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
+    nestedAuthBrokerRedirectUriRow.valueBlock = ^NSString *{ return nestedAuthBrokerRedirectUri; };
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
@@ -138,7 +144,14 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     MSALTestAppSettingsRow* keychainGroupRow = [MSALTestAppSettingsRow rowWithTitle:MSAL_APP_KEYCHAIN_GROUP];
     keychainGroupRow.valueBlock = ^NSString *{ return keychainSharingGroup; };
     
-    _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow];
+    if (![NSString msidIsStringNilOrBlank:nestedAuthBrokerClientId] && ![NSString msidIsStringNilOrBlank:nestedAuthBrokerRedirectUri])
+    {
+        _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow, nestedAuthBrokerClientIdRow, nestedAuthBrokerRedirectUriRow ];
+    }
+    else
+    {
+        _profileRows = @[ clientIdRow, redirectUriRow, keychainGroupRow ];
+    }
 
     NSString *userPrincipalName = @"<No User Info Found>";
     NSString *aadDeviceIdentifier = @"<No Device Info Group Found>";
