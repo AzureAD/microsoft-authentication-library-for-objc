@@ -87,6 +87,16 @@ target_specifiers = [
         "target" : "sampleIosAppSwift"
     },
 	{
+		"name" : "Simple Sample NativeAuth iOS App",
+		"scheme" : "NativeAuthSampleApp",
+		"project" : "Samples/ios-native-auth-simple/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
+		"directory" : "Samples/ios-native-auth-simple",
+		"linter" : "swiftlint",
+		"operations" : [ "build", "lint" ],
+		"platform" : "iOS",
+        "target" : "simpleSampleNativeAuthIosApp"
+	},
+	{
 		"name" : "Sample NativeAuth iOS App",
 		"scheme" : "SDKSampleApp",
 		"project" : "Samples/ios-native-auth/SDKSampleApp.xcodeproj",

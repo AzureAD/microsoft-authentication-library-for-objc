@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="JEn-C5-To2">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Email & Pasword-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="EmailAndPasswordViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email &amp; Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="POR-Hb-X33">
+                                <rect key="frame" x="16" y="59" width="361" height="41"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="POR-Hb-X33" secondAttribute="trailing" constant="16" id="HWV-Gu-0s5"/>
+                            <constraint firstItem="POR-Hb-X33" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="P8b-xN-2ZZ"/>
+                            <constraint firstItem="POR-Hb-X33" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="Yps-vM-skf"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Email &amp; Pasword" image="rectangle.and.pencil.and.ellipsis" catalog="system" id="qWR-sX-H51"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1098.4732824427481" y="741.54929577464793"/>
+        </scene>
+        <!--Email & OTP-->
+        <scene sceneID="P3g-8l-ZA5">
+            <objects>
+                <viewController id="wIe-Lj-NaN" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="F7U-wo-INk">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email &amp; OTP" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tw6-Rk-Y7r">
+                                <rect key="frame" x="16" y="59" width="361" height="41"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vdW-vQ-Zwd"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Tw6-Rk-Y7r" firstAttribute="top" secondItem="vdW-vQ-Zwd" secondAttribute="top" id="8OS-SS-bhd"/>
+                            <constraint firstItem="Tw6-Rk-Y7r" firstAttribute="leading" secondItem="vdW-vQ-Zwd" secondAttribute="leading" constant="16" id="trX-Ch-A1y"/>
+                            <constraint firstItem="vdW-vQ-Zwd" firstAttribute="trailing" secondItem="Tw6-Rk-Y7r" secondAttribute="trailing" constant="16" id="wy2-IK-1IR"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Email &amp; OTP" image="number.square" catalog="system" id="Let-tl-7gQ"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="r5m-VX-JJH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-234.35114503816794" y="741.54929577464793"/>
+        </scene>
+        <!--Advanced-->
+        <scene sceneID="di9-x8-VaH">
+            <objects>
+                <viewController id="qvO-Ew-1SQ" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="l3g-9B-c0u">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Advanced" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i5T-RP-wR4">
+                                <rect key="frame" x="16" y="59" width="361" height="41"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="qOP-jt-ywb"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="i5T-RP-wR4" firstAttribute="top" secondItem="qOP-jt-ywb" secondAttribute="top" id="6U4-ne-jGt"/>
+                            <constraint firstItem="i5T-RP-wR4" firstAttribute="leading" secondItem="qOP-jt-ywb" secondAttribute="leading" constant="16" id="uu9-4z-nDk"/>
+                            <constraint firstItem="qOP-jt-ywb" firstAttribute="trailing" secondItem="i5T-RP-wR4" secondAttribute="trailing" constant="16" id="uw7-4r-9Sk"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Advanced" image="compass.drawing" catalog="system" id="Noo-Ha-6Pb"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="c7g-Zp-i0p" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="638.93129770992368" y="741.54929577464793"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="n6k-av-6OL">
+            <objects>
+                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="JEn-C5-To2" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="KHC-GA-ueP">
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="YWa-of-Dmc"/>
+                        <segue destination="wIe-Lj-NaN" kind="relationship" relationship="viewControllers" id="SBI-3o-oJS"/>
+                        <segue destination="qvO-Ew-1SQ" kind="relationship" relationship="viewControllers" id="rjq-eY-ckc"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jbq-eW-m7M" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-234" y="-75"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="compass.drawing" catalog="system" width="99" height="128"/>
+        <image name="number.square" catalog="system" width="128" height="114"/>
+        <image name="rectangle.and.pencil.and.ellipsis" catalog="system" width="128" height="80"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
