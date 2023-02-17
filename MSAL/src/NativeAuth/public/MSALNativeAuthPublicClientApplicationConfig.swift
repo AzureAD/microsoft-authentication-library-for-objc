@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 @objcMembers
+// swiftlint:disable:next type_name
 public final class MSALNativeAuthPublicClientApplicationConfig: NSObject {
 
     public let clientId: String

@@ -29,6 +29,11 @@ protocol MSALNativeAuthRequestProviding {
         parameters: MSALNativeAuthSignInParameters,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInRequest
+
+    func resendCodeRequest(
+        parameters: MSALNativeAuthResendCodeParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthResendCodeRequest
 }
 
 final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
@@ -69,6 +74,35 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
             context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - Resend Code
+
+    func resendCodeRequest(
+        parameters: MSALNativeAuthResendCodeParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthResendCodeRequest {
+
+        let params = MSALNativeAuthResendCodeRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            credentialToken: parameters.credentialToken,
+            context: context
+        )
+
+        let request = try MSALNativeAuthResendCodeRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForResendCode(type: .resendCode),
+            context: params.context
         )
 
         request.configure(

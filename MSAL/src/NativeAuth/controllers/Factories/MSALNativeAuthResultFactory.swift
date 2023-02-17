@@ -31,6 +31,7 @@ protocol MSALNativeAuthResultBuildable {
         credentialToken: String?,
         tokenResult: MSIDTokenResult
     ) -> MSALNativeAuthResponse
+
     func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration
 }
 

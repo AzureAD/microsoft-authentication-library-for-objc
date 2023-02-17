@@ -142,8 +142,14 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
 
     public func resendCode(parameters: MSALNativeAuthResendCodeParameters) async -> ResendCodeResult {
         return await withCheckedContinuation { continuation in
-            resendCode(parameters: parameters) { _, _ in
-                continuation.resume(returning: .success(""))
+            resendCode(parameters: parameters) { result, error in
+                if let result = result {
+                    continuation.resume(returning: .success(result))
+                } else if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else {
+                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                }
             }
         }
     }
@@ -216,9 +222,11 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     @objc
     public func resendCode(
         parameters: MSALNativeAuthResendCodeParameters,
-        completion: @escaping (_ credentialToken: String, Error) -> Void) {
-
-    }
+        completion: @escaping (_ credentialToken: String?, _ error: Error?) -> Void) {
+            let resendCodeController = controllerFactory
+                .makeResendCodeController(with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId))
+            resendCodeController.resendCode(parameters: parameters, completion: completion)
+        }
 
     @objc
     public func getUserAccount(completion: @escaping (MSALNativeAuthUserAccount, Error) -> Void) {

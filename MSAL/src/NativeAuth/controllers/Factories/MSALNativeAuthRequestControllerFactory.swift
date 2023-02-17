@@ -27,6 +27,7 @@
 protocol MSALNativeAuthRequestControllerBuildable {
     func makeSignUpController() -> MSALNativeAuthSignUpControlling
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling
+    func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling
 }
 
 final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControllerBuildable {
@@ -59,6 +60,14 @@ final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControl
 
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
         return MSALNativeAuthSignInController(
+            configuration: configuration,
+            authority: authority,
+            context: context
+        )
+    }
+
+    func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {
+        return MSALNativeAuthResendCodeController(
             configuration: configuration,
             authority: authority,
             context: context

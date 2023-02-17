@@ -45,6 +45,15 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
             context: MSALNativeAuthRequestContextMock()
         )
     }
+
+    func makeResendCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthResendCodeControlling {
+        XCTFail("This method should not be called")
+        return MSALNativeAuthResendCodeController(
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            authority: MSALNativeAuthNetworkStubs.authority,
+            context: MSALNativeAuthRequestContextMock()
+        )
+    }
 }
 
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
@@ -63,7 +72,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     ) -> MSALNativeAuthResponse {
         return makeNativeAuthResponseResult
     }
-
+    
     func mockMakeMsidConfigurationFunc(_ result: MSIDConfiguration) {
         self.makeMsidConfigurationResult = result
     }

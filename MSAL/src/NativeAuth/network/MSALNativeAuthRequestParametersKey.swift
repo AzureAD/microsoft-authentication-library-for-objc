@@ -30,4 +30,5 @@ enum MSALNativeAuthRequestParametersKey: String {
     case email
     case password
     case scope
+    case flowToken
 }

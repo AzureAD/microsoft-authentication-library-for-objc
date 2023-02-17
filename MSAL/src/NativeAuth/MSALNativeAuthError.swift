@@ -30,6 +30,7 @@ enum MSALNativeAuthError: Error, Equatable {
     case headerNotSerialized
     case invalidAuthority
     case invalidUrl
+    case missingResponseSerializer
     case responseSerializationError
     case invalidResponse
     case invalidRequest

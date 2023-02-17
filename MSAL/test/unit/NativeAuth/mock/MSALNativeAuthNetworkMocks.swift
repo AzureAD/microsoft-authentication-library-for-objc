@@ -73,6 +73,7 @@ class MSALNativeAuthRequestProviderMock: MSALNativeAuthRequestProviding {
 
     private(set) var throwingError: Error?
     private(set) var signInRequestFuncResult: MSALNativeAuthSignInRequest?
+    private(set) var resendCodeRequestFuncResult: MSALNativeAuthResendCodeRequest?
 
     func mockSignInRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthSignInRequest? = nil) {
         self.throwingError = throwingError
@@ -95,12 +96,35 @@ class MSALNativeAuthRequestProviderMock: MSALNativeAuthRequestProviding {
         // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
         return signInRequestFuncResult!
     }
+
+    func mockResendCodeRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthResendCodeRequest? = nil) {
+        self.throwingError = throwingError
+        self.resendCodeRequestFuncResult = result
+    }
+
+    func resendCodeRequest(parameters: MSAL.MSALNativeAuthResendCodeParameters, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthResendCodeRequest {
+        if throwingError == nil && resendCodeRequestFuncResult == nil {
+            XCTFail("Both parameters are nil")
+        }
+
+        if let error = throwingError {
+            throw error
+        }
+
+        if let resendCodeRequestFuncResult = resendCodeRequestFuncResult {
+            return resendCodeRequestFuncResult
+        }
+
+        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
+        return resendCodeRequestFuncResult!
+    }
 }
 
 class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
 
     private(set) var throwingError: Error?
     private(set) var handleTokenFuncResult: MSIDTokenResult?
+    private(set) var handleResendCodeFuncResult: Bool?
 
     func mockHandleTokenFunc(throwingError: Error? = nil, result: MSIDTokenResult? = nil) {
         self.throwingError = throwingError
@@ -128,6 +152,31 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
 
         // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
         return handleTokenFuncResult!
+    }
+
+    func mockHandleResendCodeFunc(throwingError: Error? = nil, result: Bool? = nil) {
+        self.throwingError = throwingError
+        self.handleResendCodeFuncResult = result
+    }
+
+    func handle(
+        context: MSIDRequestContext,
+        resendCodeReponse: MSAL.MSALNativeAuthResendCodeRequestResponse
+    ) throws -> Bool {
+        if throwingError == nil && handleResendCodeFuncResult == nil {
+            XCTFail("Both parameters are nil")
+        }
+
+        if let error = throwingError {
+            throw error
+        }
+
+        if let handleResendCodeFuncResult = handleResendCodeFuncResult {
+            return handleResendCodeFuncResult
+        }
+
+        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
+        return handleResendCodeFuncResult!
     }
 }
 

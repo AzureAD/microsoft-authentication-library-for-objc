@@ -16,22 +16,21 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
-@objcMembers
-final public class MSALNativeAuthResendCodeParameters: MSALNativeAuthParameters {
+struct MSALNativeAuthResendCodeRequestResponse: Decodable {
 
-    public let credentialToken: String
+    // MARK: - Variables
+    let credentialToken: String
 
-    public init(credentialToken: String,
-                correlationId: UUID? = nil) {
-        self.credentialToken = credentialToken
-        super.init(correlationId: correlationId)
-    }
+enum CodingKeys: String, CodingKey {
+    case credentialToken = "flowToken"
+}
 }

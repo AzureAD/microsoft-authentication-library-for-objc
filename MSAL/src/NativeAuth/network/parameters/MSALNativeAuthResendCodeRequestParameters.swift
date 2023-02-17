@@ -24,14 +24,34 @@
 
 import Foundation
 
-@objcMembers
-final public class MSALNativeAuthResendCodeParameters: MSALNativeAuthParameters {
+@_implementationOnly import MSAL_Private
 
-    public let credentialToken: String
+// swiftlint:disable:next type_name
+struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
 
-    public init(credentialToken: String,
-                correlationId: UUID? = nil) {
-        self.credentialToken = credentialToken
-        super.init(correlationId: correlationId)
+    let authority: MSALNativeAuthAuthority
+    let clientId: String
+    let endpoint: MSALNativeAuthEndpoint
+    let context: MSIDRequestContext
+    let credentialToken: String
+}
+
+// MARK: - Convenience init
+
+extension MSALNativeAuthResendCodeRequestParameters {
+
+    init(
+        authority: MSALNativeAuthAuthority,
+        clientId: String,
+        credentialToken: String,
+        context: MSIDRequestContext
+    ) {
+        self.init(
+            authority: authority,
+            clientId: clientId,
+            endpoint: .resendCode,
+            context: context,
+            credentialToken: credentialToken
+        )
     }
 }
