@@ -45,19 +45,21 @@ struct MSALNativeAuthNetworkStubs {
 
 class MSALNativeAuthRequestContextMock: MSIDRequestContext {
 
-    let id: UUID
+    let mockCorrelationId: UUID
     var mockTelemetryRequestId = ""
+    var mockLogComponent = ""
+    var mockAppRequestMetadata: [AnyHashable: Any] = [:]
 
     init(correlationId: UUID = .init(uuidString: DEFAULT_TEST_UID)!) {
-        self.id = correlationId
+        self.mockCorrelationId = correlationId
     }
 
     func correlationId() -> UUID {
-        return id
+        return mockCorrelationId
     }
 
     func logComponent() -> String {
-        return ""
+        return mockLogComponent
     }
 
     func telemetryRequestId() -> String {
@@ -65,7 +67,7 @@ class MSALNativeAuthRequestContextMock: MSIDRequestContext {
     }
 
     func appRequestMetadata() -> [AnyHashable: Any] {
-        return [:]
+        return mockAppRequestMetadata
     }
 }
 

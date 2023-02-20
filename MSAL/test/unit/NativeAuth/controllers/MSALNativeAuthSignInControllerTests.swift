@@ -35,6 +35,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     private var authorityMock: MSALNativeAuthAuthority!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
+    private var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
+    private var receivedEvents: [MSIDTelemetryEventInterface] = []
 
     private var publicParametersStub: MSALNativeAuthSignInParameters {
         .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
@@ -83,7 +85,15 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         responseHandlerMock = .init()
         authorityMock = MSALNativeAuthNetworkStubs.authority
         contextMock = .init()
+        contextMock.mockTelemetryRequestId = "telemetry_request_id"
         factoryMock = .init()
+        dispatcher = MSALNativeAuthTelemetryTestDispatcher()
+
+        dispatcher.setTestCallback { event in
+            self.receivedEvents.append(event)
+        }
+
+        MSIDTelemetry.sharedInstance().add(dispatcher)
 
         sut = .init(
             configuration: MSALNativeAuthConfigStubs.configuration,
@@ -96,6 +106,12 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         )
     }
 
+    override func tearDown() {
+        super.tearDown()
+        receivedEvents.removeAll()
+        MSIDTelemetry.sharedInstance().remove(dispatcher)
+    }
+
     func test_when_creatingRequest_it_fails() throws {
         let expectation = expectation(description: "SignInController create request error")
 
@@ -104,6 +120,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidRequest)
+            self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: false)
+
             expectation.fulfill()
         }
 
@@ -145,6 +163,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? ErrorMock), .error)
+            self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
+
             expectation.fulfill()
         }
 
@@ -163,6 +183,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidResponse)
+            self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
+
             expectation.fulfill()
         }
 
@@ -183,6 +205,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .validationError)
+            self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
+
             expectation.fulfill()
         }
 
@@ -205,6 +229,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
             XCTAssertNotNil(response)
             XCTAssertNil(error)
             XCTAssertTrue(self.cacheAccessorMock.saveTokenWasCalled)
+            self.checkTelemetryEventsForSuccessfulResult()
+
             expectation.fulfill()
         }
 
@@ -230,10 +256,55 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
             XCTAssertEqual(response?.authentication?.idToken, "<id_token>")
             XCTAssertEqual(response?.authentication?.scopes, ["<scope_1>, <scope_2>"])
             XCTAssertEqual(response?.authentication?.tenantId, "myTenant")
+            self.checkTelemetryEventsForSuccessfulResult()
 
             expectation.fulfill()
         }
 
         wait(for: [expectation], timeout: 1)
+    }
+
+    private func checkTelemetryEventsForSuccessfulResult() {
+        // There are two events: one from MSIDHttpRequest and other started by the controller
+        // We want to check the second
+
+        XCTAssertEqual(receivedEvents.count, 2)
+
+        guard let telemetryEventDict = receivedEvents[1].propertyMap else {
+            return XCTFail("Telemetry test fail")
+        }
+
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
+        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
+        XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
+        XCTAssertEqual(telemetryEventDict["request_id"] as? String, "telemetry_request_id")
+        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, "yes")
+        XCTAssertEqual(telemetryEventDict["status"] as? String, "succeeded")
+        XCTAssertNotNil(telemetryEventDict["start_time"])
+        XCTAssertNotNil(telemetryEventDict["stop_time"])
+        XCTAssertNotNil(telemetryEventDict["response_time"])
+    }
+
+    private func checkTelemetryEventsForFailedResult(networkEventHappensBefore: Bool) {
+        // There are two events: one from MSIDHttpRequest and other started by the controller
+        // We want to test the event started by the controller
+
+        let indexEvent = networkEventHappensBefore ? 1 : 0
+
+        guard let telemetryEventDict = receivedEvents[indexEvent].propertyMap else {
+            return XCTFail("Telemetry test fail")
+        }
+
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
+        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
+        XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
+        XCTAssertEqual(telemetryEventDict["request_id"] as? String, "telemetry_request_id")
+        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, "no")
+        XCTAssertEqual(telemetryEventDict["status"] as? String, "failed")
+        XCTAssertNotNil(telemetryEventDict["start_time"])
+        XCTAssertNotNil(telemetryEventDict["stop_time"])
+        XCTAssertNotNil(telemetryEventDict["response_time"])
     }
 }
