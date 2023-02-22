@@ -468,6 +468,70 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:objc(cs)MSALPublicClientApplicationConfig(py)nestedAuthBrokerClientId"></a>
+                    <a name="//apple_ref/objc/Property/nestedAuthBrokerClientId" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALPublicClientApplicationConfig(py)nestedAuthBrokerClientId">nestedAuthBrokerClientId</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The client ID of the nested application.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">nestedAuthBrokerClientId</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">nestedAuthBrokerClientId</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALPublicClientApplicationConfig(py)nestedAuthBrokerRedirectUri"></a>
+                    <a name="//apple_ref/objc/Property/nestedAuthBrokerRedirectUri" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALPublicClientApplicationConfig(py)nestedAuthBrokerRedirectUri">nestedAuthBrokerRedirectUri</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The redirect URI of the nested application</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">nullable</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">nestedAuthBrokerRedirectUri</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">nestedAuthBrokerRedirectUri</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:objc(cs)MSALPublicClientApplicationConfig(py)authority"></a>
                     <a name="//apple_ref/objc/Property/authority" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALPublicClientApplicationConfig(py)authority">authority</a>
@@ -772,7 +836,7 @@ If set to YES, the Microsoft identity platform will automatically redirect user 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -908,6 +972,111 @@ If set to YES, MSAL will skip the verification of redirectURI. Brokered authenti
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)MSALPublicClientApplicationConfig(im)initWithClientId:redirectUri:authority:nestedAuthBrokerClientId:nestedAuthBrokerRedirectUri:"></a>
+                    <a name="//apple_ref/objc/Method/-initWithClientId:redirectUri:authority:nestedAuthBrokerClientId:nestedAuthBrokerRedirectUri:" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALPublicClientApplicationConfig(im)initWithClientId:redirectUri:authority:nestedAuthBrokerClientId:nestedAuthBrokerRedirectUri:">-initWithClientId:<wbr>redirectUri:<wbr>authority:<wbr>nestedAuthBrokerClientId:<wbr>nestedAuthBrokerRedirectUri:<wbr></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initialize a MSALPublicClientApplicationConfig with a given clientId and a nested clientid</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nonnull</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithClientId</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">clientId</span>
+                             <span class="nf">redirectUri</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">redirectUri</span>
+                               <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
+                <span class="nf">nestedAuthBrokerClientId</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">nestedAuthBrokerClientId</span>
+             <span class="nf">nestedAuthBrokerRedirectUri</span><span class="p">:</span>
+                 <span class="p">(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">nestedAuthBrokerRedirectUri</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">redirectUri</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?,</span> <span class="nv">nestedAuthBrokerClientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">nestedAuthBrokerRedirectUri</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>clientId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The clientID of your application, you should get this from the app portal.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>redirectUri</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The redirect URI of the application</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>authority</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The target authority</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>nestedAuthBrokerClientId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The clientID of your child application</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>nestedAuthBrokerRedirectUri</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The redirect URI of the child application</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -991,7 +1160,7 @@ If set to YES, MSAL will skip the verification of redirectURI. Brokered authenti
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2023 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2023-01-19)</p>
+      <p>&copy; 2023 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2023-02-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
