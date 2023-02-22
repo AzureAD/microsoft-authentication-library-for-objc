@@ -45,13 +45,19 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     return [self initWithClientId:clientId redirectUri:nil authority:nil];
 }
 
-- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+- (instancetype)initWithClientId:(NSString *)clientId
+                     redirectUri:(nullable NSString *)redirectUri
+                       authority:(nullable MSALAuthority *)authority
+        nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
+     nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri
 {
     self = [super init];
     if (self)
     {
         _clientId = clientId;
         _redirectUri = redirectUri;
+        _nestedAuthBrokerClientId = nestedAuthBrokerClientId;
+        _nestedAuthBrokerRedirectUri = nestedAuthBrokerRedirectUri;
         
         NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
@@ -63,6 +69,15 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     }
     
     return self;
+}
+
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+{
+    return [self initWithClientId:clientId
+                      redirectUri:redirectUri
+                        authority:authority
+         nestedAuthBrokerClientId:nil
+      nestedAuthBrokerRedirectUri:nil];
 }
 
 - (void)setSliceConfig:(MSALSliceConfig *)sliceConfig
@@ -94,6 +109,8 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:[clientId copy]];
     item->_redirectUri = [_redirectUri copyWithZone:zone];
     item->_authority = [_authority copyWithZone:zone];
+    item->_nestedAuthBrokerClientId = [_nestedAuthBrokerClientId copyWithZone:zone];
+    item->_nestedAuthBrokerRedirectUri = [_nestedAuthBrokerRedirectUri copyWithZone:zone];
     
     if (_knownAuthorities)
     {
