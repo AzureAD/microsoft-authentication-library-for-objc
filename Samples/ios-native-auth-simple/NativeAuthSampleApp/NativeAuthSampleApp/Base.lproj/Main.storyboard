@@ -66,6 +66,9 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Sign In"/>
+                                <connections>
+                                    <action selector="signInTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="x9B-Y9-esr"/>
+                                </connections>
                             </button>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="WdB-vT-PXQ">
                                 <rect key="frame" x="16" y="462" width="361" height="224"/>
@@ -92,6 +95,11 @@
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Email &amp; Pasword" image="rectangle.and.pencil.and.ellipsis" catalog="system" id="qWR-sX-H51"/>
+                    <connections>
+                        <outlet property="emailTextField" destination="jYK-e0-AbA" id="7J7-7n-8JN"/>
+                        <outlet property="passwordTextField" destination="RQU-kF-yPS" id="6iW-9V-1gZ"/>
+                        <outlet property="resultTextView" destination="WdB-vT-PXQ" id="Et5-xa-lJt"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

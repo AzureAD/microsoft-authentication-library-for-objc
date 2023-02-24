@@ -23,12 +23,48 @@
 // THE SOFTWARE.
 
 import UIKit
+import MSAL
 
 class EmailAndPasswordViewController: UIViewController {
+    
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var resultTextView: UITextView!
+    
+    var appContext: MSALNativeAuthPublicClientApplication!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        appContext = MSALNativeAuthPublicClientApplication(
+            configuration: MSALNativeAuthPublicClientApplicationConfig(
+                clientId: "clientId",
+                authority: URL(string: "https://example.com")!,
+                tenantName: "tenant"))
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        
     }
 
+    @IBAction func signInTapped(_ sender: Any) {
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "email or password not set"
+            return
+        }
+                
+        appContext.signIn(parameters: MSALNativeAuthSignInParameters(email: email, password: password)) { response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    debugPrint("Error: \(error)")
+                    self.resultTextView.text = "Error: \(error.localizedDescription)"
+                }
+                
+            } else {
+                debugPrint("sign in response: ", response ?? "nil")
+            }
+        }
+    }
 }
