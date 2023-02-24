@@ -25,7 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestControllerBuildable {
-    func makeSignUpController() -> MSALNativeAuthSignUpControlling
+    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling
     func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling
 }
@@ -51,11 +51,12 @@ final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControl
         self.authority = authority
     }
 
-    func makeSignUpController() -> MSALNativeAuthSignUpControlling {
+    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
         return MSALNativeAuthSignUpController(
-            requestProvider: requestProvider,
-            cacheAccessor: cacheGateway,
-            responseHandler: responseHandler)
+            configuration: configuration,
+            authority: authority,
+            context: context
+        )
     }
 
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {

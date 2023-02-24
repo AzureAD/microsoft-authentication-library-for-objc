@@ -97,13 +97,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         )
         startTelemetryEvent(telemetryEvent)
 
-        func completeWithTelemetry(_ response: MSALNativeAuthResponse?, _ error: Error?) {
-            stopTelemetryEvent(telemetryEvent, error: error)
-            completion(response, error)
-        }
-
         guard let request = createRequest(with: parameters) else {
-            return completeWithTelemetry(nil, MSALNativeAuthError.invalidRequest)
+            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, completion: completion)
+            return
         }
 
         performRequest(request) { [self] result in
@@ -113,7 +109,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
                 guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    return completeWithTelemetry(nil, MSALNativeAuthError.validationError)
+                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
+                    return
                 }
 
                 telemetryEvent?.setUserInformation(tokenResult.account)
@@ -126,7 +123,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     tokenResult: tokenResult
                 )
 
-                completeWithTelemetry(response, nil)
+                complete(telemetryEvent, response: response, completion: completion)
 
             case .failure(let error):
                 MSALLogger.log(
@@ -135,7 +132,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     format: "SignIn request error: \(error)"
                 )
 
-                completeWithTelemetry(nil, error)
+                complete(telemetryEvent, error: error, completion: completion)
             }
         }
     }
@@ -170,6 +167,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 tokenResponse.correlationId = context.correlationId().uuidString
                 completion(.success(tokenResponse))
             } catch {
+                MSALLogger.log(level: .error, context: context, format: "Error creating TokenResponse: \(error)")
                 completion(.failure(MSALNativeAuthError.invalidResponse))
             }
         }
@@ -212,7 +210,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(
                 level: .error,
                 context: context,
-                format: "Error caching response: \(error)"
+                format: "Error caching response: \(error) (ignoring)"
             )
         }
     }

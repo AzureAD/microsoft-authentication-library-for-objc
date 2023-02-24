@@ -35,4 +35,5 @@ enum MSALNativeAuthError: Error, Equatable {
     case invalidResponse
     case invalidRequest
     case generalError
+    case invalidAttributes
 }

@@ -29,7 +29,7 @@ import XCTest
 final class MSALNativeAuthResponseSerializerTests: XCTestCase {
 
     func testSerialize_correctSignUpResponse_shouldReturnSuccess() {
-        let serializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpResponse>()
+        let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let responseString = """
         {
           "token_type": "Bearer",
@@ -41,8 +41,8 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
           "id_token": "id"
         }
         """
-        var response: MSALNativeAuthSignUpResponse? = nil
-        XCTAssertNoThrow(response = try serializer.responseObject(for: nil, data:responseString.data(using: .utf8) , context: nil) as? MSALNativeAuthSignUpResponse)
+        var response: ResponseStub? = nil
+        XCTAssertNoThrow(response = try serializer.responseObject(for: nil, data:responseString.data(using: .utf8) , context: nil) as? ResponseStub)
         XCTAssertEqual(response?.idToken, "id")
         XCTAssertEqual(response?.tokenType, "Bearer")
         XCTAssertEqual(response?.scope, "scope")
@@ -53,7 +53,7 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
     }
 
     func testSerialize_wrongSignUpResponse_shouldFail() throws {
-        let serializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpResponse>()
+        let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let wrongResponseString = """
         {
           "tokenType": "Bearer",
@@ -66,6 +66,26 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
         }
         """
         XCTAssertThrowsError(try serializer.responseObject(for: nil, data: wrongResponseString.data(using: .utf8) , context: nil))
+    }
+}
+
+private struct ResponseStub: Decodable {
+    let tokenType: String
+    let scope: String
+    let expiresIn: Int
+    let extendedExpiresIn: Int
+    let accessToken: String
+    let refreshToken: String
+    let idToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case tokenType = "token_type"
+        case scope = "scope"
+        case expiresIn = "expires_in"
+        case extendedExpiresIn = "ext_expires_in"
+        case accessToken = "access_token"
+        case refreshToken = "refresh_token"
+        case idToken = "id_token"
     }
 
 }

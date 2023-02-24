@@ -55,8 +55,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
     private class MSALNativeAuthRequestControllerFactoryCustomSuccess: MSALNativeAuthRequestControllerFactoryFail {
         private class MSALNativeAuthSignUpControllerCustomSuccess: MSALNativeAuthSignUpControlling {
-            func signUp(parameters: MSAL.MSALNativeAuthSignUpParameters, completion: @escaping (Result<MSAL.MSALNativeAuthResponse, Error>) -> Void) {
-                completion(.success(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult)))
+            func signUp(parameters: MSAL.MSALNativeAuthSignUpParameters, completion: @escaping (MSAL.MSALNativeAuthResponse?, Error?) -> Void) {
+                completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
             }
         }
 
@@ -66,7 +66,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             }
         }
 
-        override func makeSignUpController() -> MSALNativeAuthSignUpControlling {
+        override func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
             return MSALNativeAuthSignUpControllerCustomSuccess()
         }
 
@@ -89,6 +89,30 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
+    }
+
+    func test_signUp_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
+        let expectation = XCTestExpectation()
+
+        let validator = MSALNativeAuthInputValidatorStub()
+        validator.expectedResult = true
+
+        let application = MSALNativeAuthPublicClientApplication(
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
+            inputValidator: validator
+        )
+
+        let result = await application.signUp(parameters: .init(email: "", password: ""))
+
+        switch result {
+        case .success(let response):
+            XCTAssertEqual(response.stage, .completed)
+            XCTAssertEqual(response.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
+            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
+        case .failure(let error):
+            XCTFail("Should not reach here: \(error)")
+        }
     }
 
     func test_signIn_whenControllerReturnsAResult_ApplicationShouldMatchResult() {

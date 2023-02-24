@@ -49,12 +49,38 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
             context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
         )
 
-        checkBodyParams(request.parameters)
-        checkUrlRequest(request.urlRequest)
-        checkServerTelemetry(request.serverTelemetry)
+        checkSignInBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest, for: .signIn)
+
+        let expectedTelemetryResult = MSALNativeAuthTelemetryProvider()
+            .telemetryForSignIn(type: .signInWithPassword)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
     }
 
-    private func checkBodyParams(_ result: [String: String]?) {
+    func test_signUpRequest_is_created_successfully() throws {
+        let parameters = MSALNativeAuthSignUpParameters(
+            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "strong-password",
+            attributes: ["attribute1": "value1"],
+            scopes: ["<scope-1>"]
+        )
+
+        let request = try sut.signUpRequest(
+            parameters: parameters,
+            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        )
+
+        checkSignUpBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest, for: .signUp)
+
+        let expectedTelemetryResult = MSALNativeAuthTelemetryProvider()
+            .telemetryForSignUp(type: .signUpWithPassword)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+    }
+
+    private func checkSignInBodyParams(_ result: [String: String]?) {
         let expectedBodyParams = [
             "clientId": DEFAULT_TEST_CLIENT_ID,
             "grantType": "password",
@@ -66,25 +92,35 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
         XCTAssertEqual(result, expectedBodyParams)
     }
 
-    private func checkUrlRequest(_ result: URLRequest?) {
+    private func checkSignUpBodyParams(_ result: [String: String]?) {
+        let expectedBodyParams = [
+            "clientId": DEFAULT_TEST_CLIENT_ID,
+            "grantType": "password",
+            "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "strong-password",
+            "scope": "<scope-1>",
+            "customAttributes":  "{\"attribute1\":\"value1\"}"
+        ]
+
+        XCTAssertEqual(result, expectedBodyParams)
+    }
+
+    private func checkUrlRequest(_ result: URLRequest?, for endpoint: MSALNativeAuthEndpoint) {
         XCTAssertEqual(result?.httpMethod, MSALParameterStringForHttpMethod(.POST))
 
-        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + MSALNativeAuthEndpoint.signIn.rawValue)!
+        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + endpoint.rawValue)!
         XCTAssertEqual(result?.url, expectedUrl)
 
         XCTAssertEqual(result?.allHTTPHeaderFields?["return-client-request-id"], "true")
         XCTAssertEqual(result?.allHTTPHeaderFields?["Accept"], "application/json")
     }
 
-    private func checkServerTelemetry(_ result: MSIDHttpRequestServerTelemetryHandling?) {
+    private func checkServerTelemetry(_ result: MSIDHttpRequestServerTelemetryHandling?, expectedTelemetryResult: String) {
         guard let serverTelemetry = result as? MSALNativeAuthServerTelemetry else {
             return XCTFail("Server telemetry should be of kind MSALNativeAuthServerTelemetry")
         }
 
         XCTAssertEqual(serverTelemetry.context.correlationId().uuidString, DEFAULT_TEST_UID.uppercased())
-
-        let telemetryProvider = MSALNativeAuthTelemetryProvider()
-        let expectedResult = telemetryProvider.telemetryForSignIn(type: .signInWithPassword).telemetryString()
-        XCTAssertEqual(serverTelemetry.currentRequestTelemetry.telemetryString(), expectedResult)
+        XCTAssertEqual(serverTelemetry.currentRequestTelemetry.telemetryString(), expectedTelemetryResult)
     }
 }

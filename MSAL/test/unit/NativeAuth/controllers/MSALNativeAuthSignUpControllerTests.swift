@@ -26,30 +26,31 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignInControllerTests: XCTestCase {
+final class MSALNativeAuthSignUpControllerTests: XCTestCase {
 
-    private var sut: MSALNativeAuthSignInController!
+    private var sut: MSALNativeAuthSignUpController!
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!
     private var authorityMock: MSALNativeAuthAuthority!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
-    private var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
     private var receivedEvents: [MSIDTelemetryEventInterface] = []
+    private var telemetryDispatcher: MSALNativeAuthTelemetryTestDispatcher!
 
-    private var publicParametersStub: MSALNativeAuthSignInParameters {
+    private var publicParametersStub: MSALNativeAuthSignUpParameters {
         .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
     }
 
-    private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
+    private var requestParametersStub: MSALNativeAuthSignUpRequestParameters {
         .init(
             authority: MSALNativeAuthNetworkStubs.authority,
             clientId: DEFAULT_TEST_CLIENT_ID,
-            endpoint: .signIn,
+            endpoint: .signUp,
             context: contextMock,
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "strong-password",
+            attributes: "<attributes1: value1>",
             scope: "<scope-1>",
             grantType: .password
         )
@@ -87,13 +88,14 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         contextMock = .init()
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
         factoryMock = .init()
-        dispatcher = MSALNativeAuthTelemetryTestDispatcher()
 
-        dispatcher.setTestCallback { event in
+        telemetryDispatcher = MSALNativeAuthTelemetryTestDispatcher()
+
+        telemetryDispatcher.setTestCallback { event in
             self.receivedEvents.append(event)
         }
 
-        MSIDTelemetry.sharedInstance().add(dispatcher)
+        MSIDTelemetry.sharedInstance().add(telemetryDispatcher)
 
         sut = .init(
             configuration: MSALNativeAuthConfigStubs.configuration,
@@ -109,15 +111,15 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
         receivedEvents.removeAll()
-        MSIDTelemetry.sharedInstance().remove(dispatcher)
+        MSIDTelemetry.sharedInstance().remove(telemetryDispatcher)
     }
 
     func test_whenCreateRequestFails_shouldReturnError() throws {
-        let expectation = expectation(description: "SignInController create request error")
+        let expectation = expectation(description: "SignUpController create request error")
 
-        requestProviderMock.mockSignInRequestFunc(throwingError: ErrorMock.error)
+        requestProviderMock.mockSignUpRequestFunc(throwingError: ErrorMock.error)
 
-        sut.signIn(parameters: publicParametersStub) { response, error in
+        sut.signUp(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidRequest)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: false)
@@ -151,16 +153,16 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         testUrlResponse?.setResponseJSON([])
         MSIDTestURLSession.add(testUrlResponse)
 
-        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignUpRequest(params: requestParametersStub)
 
         request.urlRequest = urlRequest
         request.parameters = parameters
 
-        let expectation = expectation(description: "SignInController perform request error")
+        let expectation = expectation(description: "SignUpController perform request error")
 
-        requestProviderMock.mockSignInRequestFunc(result: request)
+        requestProviderMock.mockSignUpRequestFunc(result: request)
 
-        sut.signIn(parameters: publicParametersStub) { response, error in
+        sut.signUp(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? ErrorMock), .error)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -172,15 +174,15 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     }
 
     func test_whenRequestDecodeFails_shouldReturnError() throws {
-        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignUpRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: [])
 
-        let expectation = expectation(description: "SignInController perform request error")
+        let expectation = expectation(description: "SignUpController perform request error")
 
-        requestProviderMock.mockSignInRequestFunc(result: request)
+        requestProviderMock.mockSignUpRequestFunc(result: request)
 
-        sut.signIn(parameters: publicParametersStub) { response, error in
+        sut.signUp(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidResponse)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -192,17 +194,17 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     }
 
     func test_whenRequestVerificationDoesNotPass_shouldReturnError() throws {
-        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignUpRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "SignInController perform request error")
+        let expectation = expectation(description: "SignUpController perform request error")
 
-        requestProviderMock.mockSignInRequestFunc(result: request)
+        requestProviderMock.mockSignUpRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         responseHandlerMock.mockHandleTokenFunc(throwingError: ErrorMock.error)
 
-        sut.signIn(parameters: publicParametersStub) { response, error in
+        sut.signUp(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .validationError)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -214,23 +216,23 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     }
 
     func test_whenPerformRequestSucceeds_shouldCacheResponse() throws {
-        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignUpRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "SignInController perform request and cache response")
+        let expectation = expectation(description: "SignUpController perform request and cache response")
 
-        requestProviderMock.mockSignInRequestFunc(result: request)
+        requestProviderMock.mockSignUpRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         factoryMock.mockMakeNativeAuthResponse(nativeAuthResponse)
         responseHandlerMock.mockHandleTokenFunc(result: .init())
 
-        sut.signIn(parameters: publicParametersStub) { [unowned self] response, error in
+        sut.signUp(parameters: publicParametersStub) { [unowned self] response, error in
             XCTAssertNotNil(response)
             XCTAssertNil(error)
             XCTAssertTrue(self.cacheAccessorMock.saveTokenWasCalled)
             self.checkTelemetryEventsForSuccessfulResult()
-
+            
             expectation.fulfill()
         }
 
@@ -238,18 +240,18 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     }
 
     func test_whenPerformRequestSucceeds_shouldReturnResponse() throws {
-        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignUpRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "SignInController perform request success")
+        let expectation = expectation(description: "SignUpController perform request success")
 
-        requestProviderMock.mockSignInRequestFunc(result: request)
+        requestProviderMock.mockSignUpRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         factoryMock.mockMakeNativeAuthResponse(nativeAuthResponse)
         responseHandlerMock.mockHandleTokenFunc(result: .init())
 
-        sut.signIn(parameters: publicParametersStub) { response, error in
+        sut.signUp(parameters: publicParametersStub) { response, error in
             XCTAssertNil(error)
 
             XCTAssertEqual(response?.authentication?.accessToken, "<access_token>")
@@ -274,7 +276,7 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignUp.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
@@ -296,7 +298,7 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignUp.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())

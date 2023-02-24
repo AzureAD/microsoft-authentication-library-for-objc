@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthBaseControllerTests: XCTestCase {
+final class MSALNativeAuthBaseControllerTests: MSALNativeAuthLoggingHelperXCTestCase {
 
     private var sut: MSALNativeAuthBaseController!
     private var contextMock: MSALNativeAuthRequestContextMock!
@@ -175,5 +175,31 @@ final class MSALNativeAuthBaseControllerTests: XCTestCase {
         sut.stopTelemetryEvent(event, error: error)
 
         wait(for: [expectation], timeout: 1)
+    }
+
+    func test_completeWithTelemetry_withInvalidParameters_shouldComplete() {
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+
+        let exp1 = expectation(description: "Telemetry event")
+        let exp2 = expectation(description: "Completion event")
+
+        dispatcher.setTestCallback { event in
+            let dict = event.getProperties()!
+
+            XCTAssertEqual(dict[MSID_TELEMETRY_KEY_EVENT_NAME] as? String, "anEvent")
+            exp1.fulfill()
+        }
+
+        MSIDTelemetry.sharedInstance().add(dispatcher)
+
+        sut.startTelemetryEvent(event)
+
+        let responseNil: String? = nil
+
+        sut.complete(event, response: responseNil, error: nil) { _, _ in
+            exp2.fulfill()
+        }
+
+        wait(for: [exp1, exp2], timeout: 1)
     }
 }

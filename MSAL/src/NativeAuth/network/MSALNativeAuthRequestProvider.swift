@@ -34,6 +34,11 @@ protocol MSALNativeAuthRequestProviding {
         parameters: MSALNativeAuthResendCodeParameters,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthResendCodeRequest
+
+    func signUpRequest(
+        parameters: MSALNativeAuthSignUpParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest
 }
 
 final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
@@ -65,7 +70,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             clientId: clientId,
             email: parameters.email,
             password: parameters.password,
-            scope: parameters.scopes.joined(separator: ","),
+            scope: formatScope(parameters.scopes),
             context: context
         )
 
@@ -111,5 +116,50 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         return request
+    }
+
+    // MARK: - Sign Up with password
+
+    func signUpRequest(
+        parameters: MSALNativeAuthSignUpParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest {
+
+        guard let attributes = try formatAttributes(parameters.attributes) else {
+            throw MSALNativeAuthError.invalidAttributes
+        }
+
+        let params = MSALNativeAuthSignUpRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            email: parameters.email,
+            password: parameters.password,
+            attributes: attributes,
+            scope: formatScope(parameters.scopes),
+            context: context
+        )
+
+        let request = try MSALNativeAuthSignUpRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
+            context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    private func formatAttributes(_ attributes: [String: Any]) throws -> String? {
+        let data = try JSONSerialization.data(withJSONObject: attributes)
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func formatScope(_ scope: [String]) -> String {
+        return scope.joined(separator: ",")
     }
 }

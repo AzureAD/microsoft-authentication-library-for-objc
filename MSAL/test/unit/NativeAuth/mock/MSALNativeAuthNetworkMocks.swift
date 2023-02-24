@@ -76,6 +76,29 @@ class MSALNativeAuthRequestProviderMock: MSALNativeAuthRequestProviding {
     private(set) var throwingError: Error?
     private(set) var signInRequestFuncResult: MSALNativeAuthSignInRequest?
     private(set) var resendCodeRequestFuncResult: MSALNativeAuthResendCodeRequest?
+    private(set) var signUpRequestFuncResult: MSALNativeAuthSignUpRequest?
+
+    func mockSignUpRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthSignUpRequest? = nil) {
+        self.throwingError = throwingError
+        self.signUpRequestFuncResult = result
+    }
+
+    func signUpRequest(parameters: MSAL.MSALNativeAuthSignUpParameters, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthSignUpRequest {
+        if throwingError == nil && signUpRequestFuncResult == nil {
+            XCTFail("Both parameters are nil")
+        }
+
+        if let error = throwingError {
+            throw error
+        }
+
+        if let signUpRequestFuncResult = signUpRequestFuncResult {
+            return signUpRequestFuncResult
+        }
+
+        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
+        return signUpRequestFuncResult!
+    }
 
     func mockSignInRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthSignInRequest? = nil) {
         self.throwingError = throwingError

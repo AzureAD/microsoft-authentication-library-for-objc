@@ -28,12 +28,12 @@ import XCTest
 
 class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControllerBuildable {
 
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+    func makeSignUpController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignUpController(
-            requestProvider:MSALNativeAuthRequestProviderMock(),
-            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
-            responseHandler: MSALNativeAuthResponseHandlerMock()
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            authority: MSALNativeAuthNetworkStubs.authority,
+            context: MSALNativeAuthRequestContextMock()
         )
     }
 

@@ -26,17 +26,13 @@
 
 final class MSALNativeAuthSignUpRequest: MSIDHttpRequest {
 
-    init(
-        params: MSALNativeAuthSignUpRequestParameters,
-        requestSerializer: MSIDRequestSerialization,
-        serverTelemetry: MSIDHttpRequestServerTelemetryHandling
-    ) throws {
+    let telemetryApiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdSignUp
+
+    init(params: MSALNativeAuthSignUpRequestParameters) throws {
         super.init()
 
         self.context = params.context
-        self.serverTelemetry = serverTelemetry
 
-        self.requestSerializer = requestSerializer
         self.parameters = makeBodyRequestParameters(with: params)
 
         let url = try params.makeEndpointUrl()
@@ -47,33 +43,25 @@ final class MSALNativeAuthSignUpRequest: MSIDHttpRequest {
 
     func configure(
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
-        responseSerializer: MSIDResponseSerialization = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpResponse>()
+        requestSerializer: MSIDRequestSerialization,
+        serverTelemetry: MSIDHttpRequestServerTelemetryHandling
     ) {
+        self.serverTelemetry = serverTelemetry
+        self.requestSerializer = requestSerializer
+        self.acceptAnySuccessResponseCodes = true
         requestConfigurator.configure(self)
-
-        // To use Codable we need to set the responseSerializer after configuring the request
-        // in order to override the default configuration by MSAL
-
-        self.responseSerializer = responseSerializer
     }
 
-    convenience init(params: MSALNativeAuthSignUpRequestParameters) throws {
-        try self.init(
-            params: params,
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
-            serverTelemetry: MSIDAADTokenRequestServerTelemetry()
-        )
-    }
+    private func makeBodyRequestParameters(with params: MSALNativeAuthSignUpRequestParameters) -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
 
-    private func makeBodyRequestParameters(
-        with params: MSALNativeAuthSignUpRequestParameters
-    ) -> [String: String] {
-        [
-            MSALNativeAuthRequestParametersKey.clientId.rawValue: params.clientId,
-            MSALNativeAuthRequestParametersKey.grantType.rawValue: params.grantType.rawValue,
-            MSALNativeAuthRequestParametersKey.email.rawValue: params.email,
-            MSALNativeAuthRequestParametersKey.password.rawValue: params.password,
-            MSALNativeAuthRequestParametersKey.scope.rawValue: params.scope
+        return [
+            Key.clientId.rawValue: params.clientId,
+            Key.grantType.rawValue: params.grantType.rawValue,
+            Key.email.rawValue: params.email,
+            Key.password.rawValue: params.password,
+            Key.scope.rawValue: params.scope,
+            Key.customAttributes.rawValue: params.attributes
         ]
     }
 }

@@ -96,4 +96,14 @@ class MSALNativeAuthBaseController {
         MSIDTelemetry.sharedInstance().stopEvent(context.telemetryRequestId(), event: event)
         MSIDTelemetry.sharedInstance().flush(context.telemetryRequestId())
     }
+
+    func complete<T>(
+        _ telemetryEvent: MSIDTelemetryAPIEvent?,
+        response: T? = nil,
+        error: Error? = nil,
+        completion: @escaping (T?, Error?) -> Void
+    ) {
+        stopTelemetryEvent(telemetryEvent, error: error)
+        completion(response, error)
+    }
 }
