@@ -38,29 +38,6 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
         )
     }
 
-    func test_signInRequest_is_created_successfully() throws {
-        let parameters = MSALNativeAuthSignInParameters(
-            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            password: "strong-password",
-            scopes: ["<scope-1>"]
-        )
-
-        let request = try sut.signInRequest(
-            parameters: parameters,
-            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
-        )
-
-        checkSignInBodyParams(request.parameters)
-        checkUrlRequest(request.urlRequest,
-                        for: .signIn)
-
-        let expectedTelemetryResult = telemetryProvider
-            .telemetryForSignIn(type: .signInWithPassword)
-            .telemetryString()
-        checkServerTelemetry(request.serverTelemetry,
-                             expectedTelemetryResult: expectedTelemetryResult)
-    }
-
     func test_signUpRequest_is_created_successfully() throws {
         let parameters = MSALNativeAuthSignUpParameters(
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -80,6 +57,29 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
 
         let expectedTelemetryResult = telemetryProvider
             .telemetryForSignUp(type: .signUpWithPassword)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry,
+                             expectedTelemetryResult: expectedTelemetryResult)
+    }
+
+    func test_signInRequest_is_created_successfully() throws {
+        let parameters = MSALNativeAuthSignInParameters(
+            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "strong-password",
+            scopes: ["<scope-1>"]
+        )
+
+        let request = try sut.signInRequest(
+            parameters: parameters,
+            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        )
+
+        checkSignInBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest,
+                        for: .signIn)
+
+        let expectedTelemetryResult = telemetryProvider
+            .telemetryForSignIn(type: .signInWithPassword)
             .telemetryString()
         checkServerTelemetry(request.serverTelemetry,
                              expectedTelemetryResult: expectedTelemetryResult)

@@ -111,8 +111,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     }
 
     func test_signUp_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let expectation = XCTestExpectation()
-
         let validator = MSALNativeAuthInputValidatorStub()
         validator.expectedResult = true
 

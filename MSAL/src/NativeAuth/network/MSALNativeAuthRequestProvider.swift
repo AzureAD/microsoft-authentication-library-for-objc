@@ -63,37 +63,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         self.telemetryProvider = telemetryProvider
     }
 
-    // MARK: - SignIn with Password
-
-    func signInRequest(
-        parameters: MSALNativeAuthSignInParameters,
-        context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignInRequest {
-
-        let params = MSALNativeAuthSignInRequestParameters(
-            authority: authority,
-            clientId: clientId,
-            email: parameters.email,
-            password: parameters.password,
-            scope: formatScope(parameters.scopes),
-            context: context
-        )
-
-        let request = try MSALNativeAuthSignInRequest(params: params)
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
-            context: context
-        )
-
-        request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
-            serverTelemetry: serverTelemetry
-        )
-
-        return request
-    }
-
     // MARK: - Sign Up with password
 
     func signUpRequest(
@@ -119,6 +88,37 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
+            context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - SignIn with Password
+
+    func signInRequest(
+        parameters: MSALNativeAuthSignInParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignInRequest {
+
+        let params = MSALNativeAuthSignInRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            email: parameters.email,
+            password: parameters.password,
+            scope: formatScope(parameters.scopes),
+            context: context
+        )
+
+        let request = try MSALNativeAuthSignInRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
             context: context
         )
 

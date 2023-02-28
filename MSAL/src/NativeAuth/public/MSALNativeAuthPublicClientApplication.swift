@@ -126,13 +126,13 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         }
     }
 
-    public func verifyCode(parameters: MSALNativeAuthVerifyCodeParameters) async -> AuthResult {
+    public func resendCode(parameters: MSALNativeAuthResendCodeParameters) async -> ResendCodeResult {
         return await withCheckedContinuation { continuation in
-            verifyCode(parameters: parameters) { result, error in
-                if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else if let error = error {
+            resendCode(parameters: parameters) { result, error in
+                if let error = error {
                     continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
                     assert(false)
@@ -141,9 +141,9 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         }
     }
 
-    public func resendCode(parameters: MSALNativeAuthResendCodeParameters) async -> ResendCodeResult {
+    public func verifyCode(parameters: MSALNativeAuthVerifyCodeParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
-            resendCode(parameters: parameters) { result, error in
+            verifyCode(parameters: parameters) { result, error in
                 if let error = error {
                     continuation.resume(returning: .failure(error))
                 } else if let result = result {
@@ -213,6 +213,16 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     }
 
     @objc
+
+    public func resendCode(
+        parameters: MSALNativeAuthResendCodeParameters,
+        completion: @escaping (_ credentialToken: String?, _ error: Error?) -> Void) {
+            let resendCodeController = controllerFactory
+                .makeResendCodeController(with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId))
+            resendCodeController.resendCode(parameters: parameters, completion: completion)
+        }
+
+    @objc
     public func verifyCode(
         parameters: MSALNativeAuthVerifyCodeParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
@@ -220,15 +230,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
                 with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
             )
             controller.verifyCode(parameters: parameters, completion: completion)
-        }
-
-    @objc
-    public func resendCode(
-        parameters: MSALNativeAuthResendCodeParameters,
-        completion: @escaping (_ credentialToken: String?, _ error: Error?) -> Void) {
-            let resendCodeController = controllerFactory
-                .makeResendCodeController(with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId))
-            resendCodeController.resendCode(parameters: parameters, completion: completion)
         }
 
     @objc
