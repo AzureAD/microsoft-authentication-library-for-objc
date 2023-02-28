@@ -82,10 +82,10 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     public func signUp(parameters: MSALNativeAuthSignUpParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
             signUp(parameters: parameters) { result, error in
-                if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else if let error = error {
+                if let error = error {
                     continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
                 }
@@ -105,10 +105,10 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     public func signIn(parameters: MSALNativeAuthSignInParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
             signIn(parameters: parameters) { result, error in
-                if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else if let error = error {
+                if let error = error {
                     continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
                 }
@@ -137,10 +137,10 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     public func resendCode(parameters: MSALNativeAuthResendCodeParameters) async -> ResendCodeResult {
         return await withCheckedContinuation { continuation in
             resendCode(parameters: parameters) { result, error in
-                if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else if let error = error {
+                if let error = error {
                     continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
                 }
