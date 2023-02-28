@@ -111,6 +111,7 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
                     continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                    assert(false)
                 }
             }
         }
@@ -127,9 +128,15 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
 
     public func verifyCode(parameters: MSALNativeAuthVerifyCodeParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
-            verifyCode(parameters: parameters) { _, _ in
-                continuation.resume(returning:
-                        .success(.init(stage: .completed, credentialToken: nil, authentication: nil)))
+            verifyCode(parameters: parameters) { result, error in
+                if let result = result {
+                    continuation.resume(returning: .success(result))
+                } else if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else {
+                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                    assert(false)
+                }
             }
         }
     }
@@ -143,6 +150,7 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
                     continuation.resume(returning: .success(result))
                 } else {
                     continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                    assert(false)
                 }
             }
         }
@@ -207,9 +215,12 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     @objc
     public func verifyCode(
         parameters: MSALNativeAuthVerifyCodeParameters,
-        completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
-
-    }
+        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
+            let controller = controllerFactory.makeVerifyCodeController(
+                with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
+            )
+            controller.verifyCode(parameters: parameters, completion: completion)
+        }
 
     @objc
     public func resendCode(

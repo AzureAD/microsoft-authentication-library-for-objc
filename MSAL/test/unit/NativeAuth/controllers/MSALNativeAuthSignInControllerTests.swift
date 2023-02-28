@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignInControllerTests: XCTestCase {
+final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthSignInController!
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
@@ -35,8 +35,6 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
     private var authorityMock: MSALNativeAuthAuthority!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
-    private var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
-    private var receivedEvents: [MSIDTelemetryEventInterface] = []
 
     private var publicParametersStub: MSALNativeAuthSignInParameters {
         .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
@@ -87,13 +85,6 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
         contextMock = .init()
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
         factoryMock = .init()
-        dispatcher = MSALNativeAuthTelemetryTestDispatcher()
-
-        dispatcher.setTestCallback { event in
-            self.receivedEvents.append(event)
-        }
-
-        MSIDTelemetry.sharedInstance().add(dispatcher)
 
         sut = .init(
             configuration: MSALNativeAuthConfigStubs.configuration,
@@ -104,12 +95,8 @@ final class MSALNativeAuthSignInControllerTests: XCTestCase {
             context: contextMock,
             factory: factoryMock
         )
-    }
 
-    override func tearDown() {
-        super.tearDown()
-        receivedEvents.removeAll()
-        MSIDTelemetry.sharedInstance().remove(dispatcher)
+        try super.setUpWithError()
     }
 
     func test_whenCreateRequestFails_shouldReturnError() throws {

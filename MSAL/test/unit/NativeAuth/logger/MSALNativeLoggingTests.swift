@@ -36,7 +36,7 @@ class MSALNativeAuthTestLogger : NSObject {
     override init () {
         super.init()
         guard Self.instanceCreated == false else {
-            fatalError("Only one instance allowed, inherit the MSALNativeAuthLoggingHelperXCTestCase class and use the Self.logger property there")
+            fatalError("Only one instance allowed, inherit the MSALNativeAuthTestCase class and use the Self.logger property there")
         }
         Self.instanceCreated = true
         MSALGlobalConfig.loggerConfig.setLogCallback { [weak self] level, message, containsPII in
@@ -57,7 +57,7 @@ class MSALNativeAuthTestLogger : NSObject {
     }
 }
 
-final class MSALNativeLoggingTests: MSALNativeAuthLoggingHelperXCTestCase {
+final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     // Used for clarity of code. The static object is needed because MSALGlobalConfig.loggerConfig.setLogCallback
     // must be set only once per execution of test
 

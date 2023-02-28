@@ -30,15 +30,20 @@ protocol MSALNativeAuthRequestProviding {
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInRequest
 
+    func signUpRequest(
+        parameters: MSALNativeAuthSignUpParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest
+
     func resendCodeRequest(
         parameters: MSALNativeAuthResendCodeParameters,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthResendCodeRequest
 
-    func signUpRequest(
-        parameters: MSALNativeAuthSignUpParameters,
+    func verifyCodeRequest(
+        parameters: MSALNativeAuthVerifyCodeParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpRequest
+    ) throws -> MSALNativeAuthVerifyCodeRequest
 }
 
 final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
@@ -89,35 +94,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         return request
     }
 
-    // MARK: - Resend Code
-
-    func resendCodeRequest(
-        parameters: MSALNativeAuthResendCodeParameters,
-        context: MSIDRequestContext
-    ) throws -> MSALNativeAuthResendCodeRequest {
-
-        let params = MSALNativeAuthResendCodeRequestParameters(
-            authority: authority,
-            clientId: clientId,
-            credentialToken: parameters.credentialToken,
-            context: context
-        )
-
-        let request = try MSALNativeAuthResendCodeRequest(params: params)
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForResendCode(type: .resendCode),
-            context: params.context
-        )
-
-        request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
-            serverTelemetry: serverTelemetry
-        )
-
-        return request
-    }
-
     // MARK: - Sign Up with password
 
     func signUpRequest(
@@ -145,6 +121,64 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
             context: context
         )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - Resend Code
+
+    func resendCodeRequest(
+        parameters: MSALNativeAuthResendCodeParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthResendCodeRequest {
+
+        let params = MSALNativeAuthResendCodeRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            credentialToken: parameters.credentialToken,
+            context: context
+        )
+
+        let request = try MSALNativeAuthResendCodeRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForResendCode(type: .resendCode),
+            context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - Verify Code
+
+    func verifyCodeRequest(
+        parameters: MSALNativeAuthVerifyCodeParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthVerifyCodeRequest {
+
+        let params = MSALNativeAuthVerifyCodeRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            credentialToken: parameters.credentialToken,
+            otp: parameters.otp,
+            context: context
+        )
+
+        let request = try MSALNativeAuthVerifyCodeRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForVerifyCode(type: .verifyCode),
+            context: context)
 
         request.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),

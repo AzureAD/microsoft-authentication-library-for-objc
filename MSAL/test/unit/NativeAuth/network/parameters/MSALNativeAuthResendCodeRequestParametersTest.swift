@@ -24,12 +24,19 @@
 
 import Foundation
 
-struct MSALNativeAuthResendCodeRequestResponse: Decodable {
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-    // MARK: - Variables
-    let credentialToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "flowToken"
+final class MSALNativeAuthResendCodeRequestParametersTest: XCTestCase {
+    
+    func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
+        let baseUrl = URL(string: "www.contoso.com")!
+        var authority: MSALNativeAuthAuthority? = nil
+        XCTAssertNoThrow(authority = try MSALNativeAuthAuthority(baseUrl: baseUrl, tenant: "tenant", context: MSIDBasicContext()))
+        let parameters = MSALNativeAuthResendCodeRequestParameters(authority: authority!, clientId: "clientId", credentialToken: "Test Credential Token", context: MSALNativeAuthRequestContextMock())
+        var resultUrl: URL? = nil
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertEqual(resultUrl?.absoluteString, authority!.url.absoluteString + MSALNativeAuthEndpoint.resendCode.rawValue)
     }
 }

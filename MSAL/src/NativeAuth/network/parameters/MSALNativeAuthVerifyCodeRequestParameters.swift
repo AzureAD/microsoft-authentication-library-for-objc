@@ -22,14 +22,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthResendCodeRequestResponse: Decodable {
+// swiftlint:disable:next type_name
+struct MSALNativeAuthVerifyCodeRequestParameters: MSALNativeAuthRequestable {
 
-    // MARK: - Variables
+    let authority: MSALNativeAuthAuthority
+    let clientId: String
+    let endpoint: MSALNativeAuthEndpoint
+    let context: MSIDRequestContext
     let credentialToken: String
+    let otp: String
+}
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "flowToken"
+// MARK: - Convenience init
+
+extension MSALNativeAuthVerifyCodeRequestParameters {
+
+    init(
+        authority: MSALNativeAuthAuthority,
+        clientId: String,
+        credentialToken: String,
+        otp: String,
+        context: MSIDRequestContext
+    ) {
+        self.init(
+            authority: authority,
+            clientId: clientId,
+            endpoint: .verifyCode,
+            context: context,
+            credentialToken: credentialToken,
+            otp: otp
+        )
     }
 }

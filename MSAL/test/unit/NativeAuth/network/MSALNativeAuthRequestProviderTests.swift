@@ -29,6 +29,7 @@ import XCTest
 final class MSALNativeAuthRequestProviderTests: XCTestCase {
 
     private var sut: MSALNativeAuthRequestProvider!
+    let telemetryProvider = MSALNativeAuthTelemetryProvider()
 
     override func setUpWithError() throws {
         sut = MSALNativeAuthRequestProvider(
@@ -50,12 +51,14 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
         )
 
         checkSignInBodyParams(request.parameters)
-        checkUrlRequest(request.urlRequest, for: .signIn)
+        checkUrlRequest(request.urlRequest,
+                        for: .signIn)
 
-        let expectedTelemetryResult = MSALNativeAuthTelemetryProvider()
+        let expectedTelemetryResult = telemetryProvider
             .telemetryForSignIn(type: .signInWithPassword)
             .telemetryString()
-        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+        checkServerTelemetry(request.serverTelemetry,
+                             expectedTelemetryResult: expectedTelemetryResult)
     }
 
     func test_signUpRequest_is_created_successfully() throws {
@@ -72,12 +75,57 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
         )
 
         checkSignUpBodyParams(request.parameters)
-        checkUrlRequest(request.urlRequest, for: .signUp)
+        checkUrlRequest(request.urlRequest,
+                        for: .signUp)
 
-        let expectedTelemetryResult = MSALNativeAuthTelemetryProvider()
+        let expectedTelemetryResult = telemetryProvider
             .telemetryForSignUp(type: .signUpWithPassword)
             .telemetryString()
-        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+        checkServerTelemetry(request.serverTelemetry,
+                             expectedTelemetryResult: expectedTelemetryResult)
+    }
+
+    func test_resendCodeRequest_is_created_successfully() throws {
+        let parameters = MSALNativeAuthResendCodeParameters(
+            credentialToken: "Test Credential Token"
+        )
+
+        let request = try sut.resendCodeRequest(
+            parameters: parameters,
+            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        )
+
+        checkResendCodeBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest,
+                        for: .resendCode)
+
+        let expectedTelemetryResult = telemetryProvider
+            .telemetryForResendCode(type: .resendCode)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry,
+                             expectedTelemetryResult: expectedTelemetryResult)
+    }
+
+    func test_verifyCodeRequest_is_created_successfully() throws {
+        let parameters = MSALNativeAuthVerifyCodeParameters(
+            credentialToken: "Test Credential Token",
+            otp: "Test OTP"
+        )
+
+        let request = try sut.verifyCodeRequest(
+            parameters: parameters,
+            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        )
+
+        checkVerifyCodeBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest,
+                        for: .verifyCode)
+
+        let expectedTelemetryResult = telemetryProvider
+            .telemetryForVerifyCode(type: .verifyCode)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry,
+                             expectedTelemetryResult: expectedTelemetryResult)
     }
 
     private func checkSignInBodyParams(_ result: [String: String]?) {
@@ -102,6 +150,23 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
             "customAttributes":  "{\"attribute1\":\"value1\"}"
         ]
 
+        XCTAssertEqual(result, expectedBodyParams)
+    }
+
+    private func checkResendCodeBodyParams(_ result: [String: String]?) {
+        let expectedBodyParams = [
+            "flowToken": "Test Credential Token"
+        ]
+
+        XCTAssertEqual(result, expectedBodyParams)
+    }
+
+    private func checkVerifyCodeBodyParams(_ result: [String: String]?) {
+        let expectedBodyParams = [
+            "clientId": DEFAULT_TEST_CLIENT_ID,
+            "flowToken": "Test Credential Token",
+            "otp": "Test OTP"
+        ]
         XCTAssertEqual(result, expectedBodyParams)
     }
 

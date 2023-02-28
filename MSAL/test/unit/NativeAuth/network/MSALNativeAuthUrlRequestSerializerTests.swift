@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthLoggingHelperXCTestCase {
+final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthUrlRequestSerializer!
     private var request: URLRequest!

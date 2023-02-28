@@ -22,14 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthResendCodeRequestResponse: Decodable {
+class MSALNativeAuthTestCase: XCTestCase {
+    //Do not create more than one instance of this variable, inherit this class instead
+    static let logger = MSALNativeAuthTestLogger()
+    var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
+    var receivedEvents: [MSIDTelemetryEventInterface] = []
 
-    // MARK: - Variables
-    let credentialToken: String
+    override func setUpWithError() throws {
+        // Logger needs to reset so the expectation name and count resets from the previous test
+        // The previous test could be across class
+        Self.logger.reset()
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "flowToken"
+        dispatcher = MSALNativeAuthTelemetryTestDispatcher()
+
+        dispatcher.setTestCallback { event in
+            self.receivedEvents.append(event)
+        }
+
+        MSIDTelemetry.sharedInstance().add(dispatcher)
+    }
+
+    override func tearDown() {
+        // Logger needs to reset so the expectation name and count resets for the next test.
+        // The next test could be across classes
+        Self.logger.reset()
+
+        receivedEvents.removeAll()
+        MSIDTelemetry.sharedInstance().remove(dispatcher)
     }
 }

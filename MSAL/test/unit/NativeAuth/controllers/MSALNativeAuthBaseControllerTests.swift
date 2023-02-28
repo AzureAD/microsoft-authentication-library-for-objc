@@ -26,12 +26,11 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthBaseControllerTests: MSALNativeAuthLoggingHelperXCTestCase {
+final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthBaseController!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var configurationStub: MSALNativeAuthPublicClientApplicationConfig!
-    private var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
 
     override func setUp() {
         super.setUp()

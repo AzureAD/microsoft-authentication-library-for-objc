@@ -30,7 +30,9 @@ final public class MSALNativeAuthVerifyCodeParameters: MSALNativeAuthParameters 
     public let credentialToken: String
     public let otp: String
 
-    public init(credentialToken: String, otp: String, correlationId: UUID? = nil) {
+    public init(credentialToken: String,
+                otp: String,
+                correlationId: UUID? = nil) {
         self.credentialToken = credentialToken
         self.otp = otp
         super.init(correlationId: correlationId)

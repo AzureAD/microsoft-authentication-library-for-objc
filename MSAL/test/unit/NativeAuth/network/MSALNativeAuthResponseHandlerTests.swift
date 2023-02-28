@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthLoggingHelperXCTestCase {
+final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
 
     // MARK: - Variables
 

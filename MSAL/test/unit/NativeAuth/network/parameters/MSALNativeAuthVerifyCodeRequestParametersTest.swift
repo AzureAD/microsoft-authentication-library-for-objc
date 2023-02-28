@@ -22,21 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
+
 import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-class MSALNativeAuthLoggingHelperXCTestCase: XCTestCase {
-    //Do not create more than one instance of this variable, inherit this class instead
-    static let logger = MSALNativeAuthTestLogger()
-
-    override func setUp() {
-        // Logger needs to reset so the expectation name and count resets from the previous test
-        // The previous test could be across class
-        Self.logger.reset()
-    }
-
-    override func tearDown() {
-        // Logger needs to reset so the expectation name and count resets for the next test.
-        // The next test could be across classes
-        Self.logger.reset()
+final class MSALNativeAuthVerifyCodeRequestParametersTest: XCTestCase {
+    
+    func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
+        let baseUrl = URL(string: "www.contoso.com")!
+        var authority: MSALNativeAuthAuthority? = nil
+        XCTAssertNoThrow(authority = try MSALNativeAuthAuthority(baseUrl: baseUrl, tenant: "tenant", context: MSIDBasicContext()))
+        let parameters = MSALNativeAuthVerifyCodeRequestParameters(authority: authority!, clientId: "clientId", credentialToken: "Test Credential Token", otp:"Test OTP", context: MSALNativeAuthRequestContextMock())
+        var resultUrl: URL? = nil
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertEqual(resultUrl?.absoluteString, authority!.url.absoluteString + MSALNativeAuthEndpoint.verifyCode.rawValue)
     }
 }
