@@ -28,13 +28,19 @@ class MSALNativeAuthBaseController {
 
     let configuration: MSALNativeAuthPublicClientApplicationConfig
     let context: MSIDRequestContext
+    let responseHandler: MSALNativeAuthResponseHandling
+    let cacheAccessor: MSALNativeAuthCacheInterface?
 
     init(
         configuration: MSALNativeAuthPublicClientApplicationConfig,
-        context: MSIDRequestContext
+        context: MSIDRequestContext,
+        responseHandler: MSALNativeAuthResponseHandling,
+        cacheAccessor: MSALNativeAuthCacheInterface? = nil
     ) {
         self.configuration = configuration
         self.context = context
+        self.responseHandler = responseHandler
+        self.cacheAccessor = cacheAccessor
     }
 
     func makeLocalTelemetryApiEvent(

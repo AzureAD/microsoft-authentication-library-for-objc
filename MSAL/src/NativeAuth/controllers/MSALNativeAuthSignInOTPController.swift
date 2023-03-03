@@ -24,14 +24,14 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthVerifyCodeControlling: MSALNativeAuthTokenRequestHandling {
-    func verifyCode(
-        parameters: MSALNativeAuthVerifyCodeParameters,
+protocol MSALNativeAuthSignInOTPControlling: MSALNativeAuthTokenRequestHandling {
+    func signIn(
+        parameters: MSALNativeAuthSignInOTPParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControlling {
+final class MSALNativeAuthSignInOTPController: MSALNativeAuthBaseController, MSALNativeAuthSignInOTPControlling {
 
     // MARK: - Variables
 
@@ -82,33 +82,41 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
 
     // MARK: - Internal
 
-    func verifyCode(
-        parameters: MSALNativeAuthVerifyCodeParameters,
+    func signIn(
+        parameters: MSALNativeAuthSignInOTPParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdVerifyCode
+            telemetryApiId: .telemetryApiIdSignIn // TODO: Update local telemetry event id to differentiate sign-in with password and otp
         )
         startTelemetryEvent(telemetryEvent)
 
-        func completeWithTelemetry(_ response: MSALNativeAuthResponse?, _ error: Error?) {
-            stopTelemetryEvent(telemetryEvent, error: error)
-            completion(response, error)
-        }
-
         guard let request = createRequest(with: parameters) else {
-            return completeWithTelemetry(nil, MSALNativeAuthError.invalidRequest)
+            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, completion: completion)
+            return
         }
 
         performRequest(request) { [self] result in
             switch result {
             case .success(let tokenResponse):
-                // TODO: Scopes need to be the same ones as the ones in SignUp or SignIn
-                let msidConfiguration = factory.makeMSIDConfiguration(scope: [""])
+
+                // Mock API v1 returns a tokenResponse when we send a SignIn with OTP
+                // TODO: Look for 403 error and return the following:
+
+//                let response = MSALNativeAuthResponse(
+//                    stage: .verificationRequired,
+//                    credentialToken: "flow-token-here",
+//                    authentication: nil
+//                )
+//
+//                complete(telemetryEvent, response: response, completion: completion)
+
+                let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
                 guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    return completeWithTelemetry(nil, MSALNativeAuthError.validationError)
+                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
+                    return
                 }
 
                 telemetryEvent?.setUserInformation(tokenResult.account)
@@ -121,31 +129,30 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
                     tokenResult: tokenResult
                 )
 
-                completeWithTelemetry(response, nil)
+                complete(telemetryEvent, response: response, completion: completion)
 
             case .failure(let error):
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "VerifyCode request error: \(error)"
+                    format: "SignIn OTP request error: \(error)"
                 )
-                completeWithTelemetry(nil, error)
+
+                complete(telemetryEvent, error: error, completion: completion)
             }
         }
     }
 
     // MARK: - Private
 
-    private func createRequest(
-        with parameters: MSALNativeAuthVerifyCodeParameters
-    ) -> MSALNativeAuthVerifyCodeRequest? {
+    private func createRequest(with parameters: MSALNativeAuthSignInOTPParameters) -> MSALNativeAuthSignInRequest? {
         do {
-            return try requestProvider.verifyCodeRequest(
+            return try requestProvider.signInOTPRequest(
                 parameters: parameters,
                 context: context
             )
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating VerifyCode Request: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn OTP Request: \(error)")
             return nil
         }
     }

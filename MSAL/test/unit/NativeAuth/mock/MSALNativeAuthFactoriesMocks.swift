@@ -46,6 +46,15 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
         )
     }
 
+    func makeSignInOTPController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignInOTPControlling {
+        XCTFail("This method should not be called")
+        return MSALNativeAuthSignInOTPController(
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            authority: MSALNativeAuthNetworkStubs.authority,
+            context: MSALNativeAuthRequestContextMock()
+        )
+    }
+
     func makeResendCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthResendCodeControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthResendCodeController(

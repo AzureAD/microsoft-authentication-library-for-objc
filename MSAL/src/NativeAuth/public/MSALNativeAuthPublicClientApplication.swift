@@ -117,11 +117,17 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         }
     }
 
-    public func signIn(parameters: MSALNativeAuthSignInOTPParameters) async -> AuthResult {
+    public func signIn(otpParameters: MSALNativeAuthSignInOTPParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
-            signIn(otpParameters: parameters) { _, _ in
-                continuation.resume(returning:
-                        .success(.init(stage: .completed, credentialToken: nil, authentication: nil)))
+            signIn(otpParameters: otpParameters) { result, error in
+                if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
+                } else {
+                    assert(false)
+                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                }
             }
         }
     }
@@ -208,8 +214,17 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     @objc
     public func signIn(
         otpParameters: MSALNativeAuthSignInOTPParameters,
-        completion: @escaping (MSALNativeAuthResponse, Error) -> Void) {
+        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
+    ) {
+        guard inputValidator.isEmailValid(otpParameters.email) else {
+            completion(nil, MSALNativeAuthError.invalidInput)
+            return
+        }
 
+        let controller = controllerFactory.makeSignInOTPController(
+            with: MSALNativeAuthRequestContext(correlationId: otpParameters.correlationId)
+        )
+        controller.signIn(parameters: otpParameters, completion: completion)
     }
 
     @objc

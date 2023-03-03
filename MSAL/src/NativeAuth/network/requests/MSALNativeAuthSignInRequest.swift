@@ -58,6 +58,6 @@ final class MSALNativeAuthSignInRequest: MSIDHttpRequest {
             Key.email.rawValue: params.email,
             Key.password.rawValue: params.password,
             Key.scope.rawValue: params.scope
-        ]
+        ].compactMapValues { $0 }
     }
 }

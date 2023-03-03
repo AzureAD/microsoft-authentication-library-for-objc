@@ -31,9 +31,7 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
     private var sut: MSALNativeAuthResendCodeController!
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
     private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!
-    private var authorityMock: MSALNativeAuthAuthority!
     private var contextMock: MSALNativeAuthRequestContextMock!
-    private var factoryMock: MSALNativeAuthResultFactoryMock!
 
     private var publicParametersStub: MSALNativeAuthResendCodeParameters {
         .init(credentialToken:"Test Credential Token")
@@ -62,18 +60,14 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
     override func setUpWithError() throws {
         requestProviderMock = .init()
         responseHandlerMock = .init()
-        authorityMock = MSALNativeAuthNetworkStubs.authority
         contextMock = .init()
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
-        factoryMock = .init()
 
         sut = .init(
             configuration: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
             responseHandler: responseHandlerMock,
-            authority: authorityMock,
-            context: contextMock,
-            factory: factoryMock
+            context: contextMock
         )
 
         try super.setUpWithError()
@@ -168,7 +162,6 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "ResendCodeController perform request error")
 
         requestProviderMock.mockResendCodeRequestFunc(result: request)
-        factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         responseHandlerMock.mockHandleResendCodeFunc(throwingError: ErrorMock.error)
 
         sut.resendCode(parameters: publicParametersStub) { response, error in
@@ -192,7 +185,6 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "ResendCodeController perform request success")
 
         requestProviderMock.mockResendCodeRequestFunc(result: request)
-        factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         responseHandlerMock.mockHandleResendCodeFunc(result: true)
 
         sut.resendCode(parameters: publicParametersStub) { response, error in

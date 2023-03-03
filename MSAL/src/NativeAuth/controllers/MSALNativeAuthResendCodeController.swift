@@ -38,9 +38,6 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
     private typealias ResendCodeCompletionHandler = (Result<MSALNativeAuthResendCodeRequestResponse, Error>) -> Void
 
     private let requestProvider: MSALNativeAuthRequestProviding
-    private let responseHandler: MSALNativeAuthResponseHandling
-    private let authority: MSALNativeAuthAuthority
-    private let factory: MSALNativeAuthResultBuildable
 
     // MARK: - Init
 
@@ -48,16 +45,15 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         configuration: MSALNativeAuthPublicClientApplicationConfig,
         requestProvider: MSALNativeAuthRequestProviding,
         responseHandler: MSALNativeAuthResponseHandling,
-        authority: MSALNativeAuthAuthority,
-        context: MSIDRequestContext,
-        factory: MSALNativeAuthResultBuildable
+        context: MSIDRequestContext
     ) {
         self.requestProvider = requestProvider
-        self.responseHandler = responseHandler
-        self.authority = authority
-        self.factory = factory
 
-        super.init(configuration: configuration, context: context)
+        super.init(
+            configuration: configuration,
+            context: context,
+            responseHandler: responseHandler
+        )
     }
 
     convenience init(
@@ -72,12 +68,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
                 authority: authority
             ),
             responseHandler: MSALNativeAuthResponseHandler(),
-            authority: authority,
-            context: context,
-            factory: MSALNativeAuthResultFactory(
-                authority: authority,
-                configuration: configuration
-            )
+            context: context
         )
     }
 

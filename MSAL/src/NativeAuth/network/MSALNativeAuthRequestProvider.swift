@@ -25,15 +25,20 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestProviding {
+    func signUpRequest(
+        parameters: MSALNativeAuthSignUpParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest
+
     func signInRequest(
         parameters: MSALNativeAuthSignInParameters,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInRequest
 
-    func signUpRequest(
-        parameters: MSALNativeAuthSignUpParameters,
+    func signInOTPRequest(
+        parameters: MSALNativeAuthSignInOTPParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpRequest
+    ) throws -> MSALNativeAuthSignInRequest
 
     func resendCodeRequest(
         parameters: MSALNativeAuthResendCodeParameters,
@@ -112,13 +117,45 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             email: parameters.email,
             password: parameters.password,
             scope: formatScope(parameters.scopes),
-            context: context
+            context: context,
+            grantType: .password
         )
 
         let request = try MSALNativeAuthSignInRequest(params: params)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
+            context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - SignIn with OTP
+
+    func signInOTPRequest(
+        parameters: MSALNativeAuthSignInOTPParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignInRequest {
+
+        let params = MSALNativeAuthSignInRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            email: parameters.email,
+            scope: formatScope(parameters.scopes),
+            context: context,
+            grantType: .otp
+        )
+
+        let request = try MSALNativeAuthSignInRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithOTP),
             context: context
         )
 

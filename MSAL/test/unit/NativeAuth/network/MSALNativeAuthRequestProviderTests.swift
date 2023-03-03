@@ -85,6 +85,26 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
                              expectedTelemetryResult: expectedTelemetryResult)
     }
 
+    func test_createSignInOTPRequest_shouldBeCreatedSuccessfully() throws {
+        let parameters = MSALNativeAuthSignInOTPParameters(
+            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            scopes: ["<scope-1>"]
+        )
+
+        let request = try sut.signInOTPRequest(
+            parameters: parameters,
+            context: MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        )
+
+        checkSignInOTPBodyParams(request.parameters)
+        checkUrlRequest(request.urlRequest, for: .signIn)
+
+        let expectedTelemetryResult = MSALNativeAuthTelemetryProvider()
+            .telemetryForSignIn(type: .signInWithOTP)
+            .telemetryString()
+        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+    }
+
     func test_resendCodeRequest_is_created_successfully() throws {
         let parameters = MSALNativeAuthResendCodeParameters(
             credentialToken: "Test Credential Token"
@@ -134,6 +154,17 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
             "grantType": "password",
             "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "strong-password",
+            "scope": "<scope-1>"
+        ]
+
+        XCTAssertEqual(result, expectedBodyParams)
+    }
+
+    private func checkSignInOTPBodyParams(_ result: [String: String]?) {
+        let expectedBodyParams = [
+            "clientId": DEFAULT_TEST_CLIENT_ID,
+            "grantType": "passwordless_otp",
+            "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "scope": "<scope-1>"
         ]
 

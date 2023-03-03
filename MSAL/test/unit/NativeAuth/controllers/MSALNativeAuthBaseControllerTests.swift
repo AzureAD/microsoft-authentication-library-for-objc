@@ -42,7 +42,9 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         sut = MSALNativeAuthBaseController(
             configuration: configurationStub,
-            context: contextMock
+            context: contextMock,
+            responseHandler: MSALNativeAuthResponseHandlerMock(),
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
     }
 

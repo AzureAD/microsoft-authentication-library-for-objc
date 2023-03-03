@@ -26,27 +26,29 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
+final class MSALNativeAuthSignInOTPControllerTests: MSALNativeAuthTestCase {
 
-    private var sut: MSALNativeAuthVerifyCodeController!
+    private var sut: MSALNativeAuthSignInOTPController!
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
 
-    private var publicParametersStub: MSALNativeAuthVerifyCodeParameters {
-        .init(credentialToken: "Test Credential Token", otp: "Test OTP")
+    private var publicParametersStub: MSALNativeAuthSignInOTPParameters {
+        .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME)
     }
 
-    private var requestParametersStub: MSALNativeAuthVerifyCodeRequestParameters {
+    private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
         .init(
             authority: MSALNativeAuthNetworkStubs.authority,
             clientId: DEFAULT_TEST_CLIENT_ID,
-            endpoint: .verifyCode,
+            endpoint: .signIn,
             context: contextMock,
-            credentialToken: "Test Credential Token",
-            otp:"Test OTP"
+            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: nil,
+            scope: "<scope-1>",
+            grantType: .otp
         )
     }
 
@@ -75,6 +77,8 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
     }
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
+
         requestProviderMock = .init()
         cacheAccessorMock = .init()
         responseHandlerMock = .init()
@@ -90,16 +94,14 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
             context: contextMock,
             factory: factoryMock
         )
-
-        try super.setUpWithError()
     }
 
     func test_whenCreateRequestFails_shouldReturnError() throws {
-        let expectation = expectation(description: "VerifyCodeController create request error")
+        let expectation = expectation(description: "SignInOTPController create request error")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(throwingError: ErrorMock.error)
+        requestProviderMock.mockSignInRequestFunc(throwingError: ErrorMock.error)
 
-        sut.verifyCode(parameters: publicParametersStub) { response, error in
+        sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidRequest)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: false)
@@ -133,16 +135,16 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
         testUrlResponse?.setResponseJSON([])
         MSIDTestURLSession.add(testUrlResponse)
 
-        let request = try MSALNativeAuthVerifyCodeRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
 
         request.urlRequest = urlRequest
         request.parameters = parameters
 
-        let expectation = expectation(description: "VerifyCodeController perform request error")
+        let expectation = expectation(description: "SignInOTPController perform request error")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(result: request)
+        requestProviderMock.mockSignInRequestFunc(result: request)
 
-        sut.verifyCode(parameters: publicParametersStub) { response, error in
+        sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? ErrorMock), .error)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -154,15 +156,15 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenRequestDecodeFails_shouldReturnError() throws {
-        let request = try MSALNativeAuthVerifyCodeRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: [])
 
-        let expectation = expectation(description: "VerifyCodeController perform request error")
+        let expectation = expectation(description: "SignInOTPController perform request error")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(result: request)
+        requestProviderMock.mockSignInRequestFunc(result: request)
 
-        sut.verifyCode(parameters: publicParametersStub) { response, error in
+        sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .invalidResponse)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -174,17 +176,17 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenRequestVerificationDoesNotPass_shouldReturnError() throws {
-        let request = try MSALNativeAuthVerifyCodeRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "VerifyCodeController perform request error")
+        let expectation = expectation(description: "SignInOTPController perform request error")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(result: request)
+        requestProviderMock.mockSignInRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         responseHandlerMock.mockHandleTokenFunc(throwingError: ErrorMock.error)
 
-        sut.verifyCode(parameters: publicParametersStub) { response, error in
+        sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(response)
             XCTAssertEqual((error as? MSALNativeAuthError), .validationError)
             self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -196,18 +198,18 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenPerformRequestSucceeds_shouldCacheResponse() throws {
-        let request = try MSALNativeAuthVerifyCodeRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "VerifyCodeController perform request and cache response")
+        let expectation = expectation(description: "SignInOTPController perform request and cache response")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(result: request)
+        requestProviderMock.mockSignInRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         factoryMock.mockMakeNativeAuthResponse(nativeAuthResponse)
         responseHandlerMock.mockHandleTokenFunc(result: .init())
 
-        sut.verifyCode(parameters: publicParametersStub) { [unowned self] response, error in
+        sut.signIn(parameters: publicParametersStub) { [unowned self] response, error in
             XCTAssertNotNil(response)
             XCTAssertNil(error)
             XCTAssertTrue(self.cacheAccessorMock.saveTokenWasCalled)
@@ -220,18 +222,18 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenPerformRequestSucceeds_shouldReturnResponse() throws {
-        let request = try MSALNativeAuthVerifyCodeRequest(params: requestParametersStub)
+        let request = try MSALNativeAuthSignInRequest(params: requestParametersStub)
 
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
 
-        let expectation = expectation(description: "VerifyCodeController perform request success")
+        let expectation = expectation(description: "SignInOTPController perform request success")
 
-        requestProviderMock.mockVerifyCodeRequestFunc(result: request)
+        requestProviderMock.mockSignInRequestFunc(result: request)
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         factoryMock.mockMakeNativeAuthResponse(nativeAuthResponse)
         responseHandlerMock.mockHandleTokenFunc(result: .init())
 
-        sut.verifyCode(parameters: publicParametersStub) { response, error in
+        sut.signIn(parameters: publicParametersStub) { response, error in
             XCTAssertNil(error)
 
             XCTAssertEqual(response?.authentication?.accessToken, "<access_token>")
@@ -256,7 +258,7 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdVerifyCode.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
@@ -278,7 +280,7 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdVerifyCode.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())

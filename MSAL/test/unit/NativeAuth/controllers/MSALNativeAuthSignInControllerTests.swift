@@ -32,7 +32,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!
-    private var authorityMock: MSALNativeAuthAuthority!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
 
@@ -81,7 +80,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         requestProviderMock = .init()
         cacheAccessorMock = .init()
         responseHandlerMock = .init()
-        authorityMock = MSALNativeAuthNetworkStubs.authority
         contextMock = .init()
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
         factoryMock = .init()
@@ -91,7 +89,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             requestProvider: requestProviderMock,
             cacheAccessor: cacheAccessorMock,
             responseHandler: responseHandlerMock,
-            authority: authorityMock,
             context: contextMock,
             factory: factoryMock
         )

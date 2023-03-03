@@ -42,15 +42,21 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     }
 
     private class MSALNativeAuthRequestControllerFactoryCustomSuccess: MSALNativeAuthRequestControllerFactoryFail {
-        private class MSALNativeAuthSignUpControllerCustomSuccess: MSALNativeAuthSignUpControlling {
+        private class MSALNativeAuthSignUpControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignUpControlling {
             func signUp(parameters: MSAL.MSALNativeAuthSignUpParameters, completion: @escaping (MSAL.MSALNativeAuthResponse?, Error?) -> Void) {
                 completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
             }
         }
 
-        private class MSALNativeAuthSignInControllerCustomSuccess: MSALNativeAuthSignInControlling {
+        private class MSALNativeAuthSignInControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
             func signIn(parameters: MSALNativeAuthSignInParameters, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
                 completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
+            }
+        }
+
+        private class MSALNativeAuthSignInOTPControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignInOTPControlling {
+            func signIn(parameters: MSALNativeAuthSignInOTPParameters, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
+                completion(MSALNativeAuthResponse(stage: .verificationRequired, credentialToken: credentialToken, authentication: nil), nil)
             }
         }
 
@@ -59,18 +65,37 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                 completion(credentialToken, nil)            }
         }
 
-        private class MSALNativeAuthVerifyCodeControllerCustomSuccess: MSALNativeAuthVerifyCodeControlling {
+        private class MSALNativeAuthVerifyCodeControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControlling {
             func verifyCode(parameters: MSAL.MSALNativeAuthVerifyCodeParameters, completion: @escaping (MSAL.MSALNativeAuthResponse?, Error?) -> Void) {
                 completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
             }
         }
 
         override func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
-            return MSALNativeAuthSignUpControllerCustomSuccess()
+            return MSALNativeAuthSignUpControllerCustomSuccess(
+                configuration: MSALNativeAuthConfigStubs.configuration,
+                context: MSALNativeAuthRequestContextMock(),
+                responseHandler: MSALNativeAuthResponseHandlerMock(),
+                cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            )
         }
 
         override func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
-            return MSALNativeAuthSignInControllerCustomSuccess()
+            return MSALNativeAuthSignInControllerCustomSuccess(
+                configuration: MSALNativeAuthConfigStubs.configuration,
+                context: MSALNativeAuthRequestContextMock(),
+                responseHandler: MSALNativeAuthResponseHandlerMock(),
+                cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            )
+        }
+
+        override func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling {
+            return MSALNativeAuthSignInOTPControllerCustomSuccess(
+                configuration: MSALNativeAuthConfigStubs.configuration,
+                context: MSALNativeAuthRequestContextMock(),
+                responseHandler: MSALNativeAuthResponseHandlerMock(),
+                cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            )
         }
 
         override func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {
@@ -78,7 +103,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         }
 
         override func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling {
-            return MSALNativeAuthVerifyCodeControllerCustomSuccess()
+            return MSALNativeAuthVerifyCodeControllerCustomSuccess(
+                configuration: MSALNativeAuthConfigStubs.configuration,
+                context: MSALNativeAuthRequestContextMock(),
+                responseHandler: MSALNativeAuthResponseHandlerMock(),
+                cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            )
         }
     }
     
@@ -183,6 +213,51 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         case .success(let response):
             XCTAssertEqual(response.stage, .completed)
             XCTAssertEqual(response.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
+            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
+        case .failure(let error):
+            XCTFail("Should not reach here: \(error)")
+        }
+    }
+
+    func test_signInOTP_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
+        let expectation = XCTestExpectation()
+
+        let validator = MSALNativeAuthInputValidatorStub()
+        validator.expectedResult = true
+
+        let application = MSALNativeAuthPublicClientApplication(
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
+            inputValidator: validator
+        )
+
+        application.signIn(otpParameters: .init(email: "")) { response, error in
+            XCTAssertEqual(response?.stage, .verificationRequired)
+            XCTAssertNil(response?.authentication)
+            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
+            XCTAssertNil(error)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1)
+    }
+
+    func test_signInOTP_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
+        let validator = MSALNativeAuthInputValidatorStub()
+        validator.expectedResult = true
+
+        let application = MSALNativeAuthPublicClientApplication(
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
+            inputValidator: validator
+        )
+
+        let result = await application.signIn(otpParameters: .init(email: ""))
+
+        switch result {
+        case .success(let response):
+            XCTAssertEqual(response.stage, .verificationRequired)
+            XCTAssertNil(response.authentication)
             XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
         case .failure(let error):
             XCTFail("Should not reach here: \(error)")
