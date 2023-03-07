@@ -31,6 +31,10 @@ class EmailAndPasswordViewController: UIViewController {
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
     
+    @IBOutlet weak var signUpButton: UIButton!
+    @IBOutlet weak var signInButton: UIButton!
+    @IBOutlet weak var signOutButton: UIButton!
+    
     var appContext: MSALNativeAuthPublicClientApplication!
 
     override func viewDidLoad() {
@@ -46,7 +50,7 @@ class EmailAndPasswordViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        
+        //TODO: Call appContext.getUserAccount() and update UI accordingly
     }
 
     @IBAction func signInTapped(_ sender: Any) {
