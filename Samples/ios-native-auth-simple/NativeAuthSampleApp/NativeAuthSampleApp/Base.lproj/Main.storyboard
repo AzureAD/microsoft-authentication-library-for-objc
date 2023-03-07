@@ -26,7 +26,7 @@
                                 <rect key="frame" x="110" y="147" width="266" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="email"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Email" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mzb-La-per">
                                 <rect key="frame" x="16" y="154" width="41" height="21"/>
@@ -39,7 +39,7 @@
                                 <rect key="frame" x="110" y="199" width="266" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aBE-Tc-10A">
                                 <rect key="frame" x="16" y="206" width="74" height="21"/>
@@ -99,6 +99,9 @@
                         <outlet property="emailTextField" destination="jYK-e0-AbA" id="7J7-7n-8JN"/>
                         <outlet property="passwordTextField" destination="RQU-kF-yPS" id="6iW-9V-1gZ"/>
                         <outlet property="resultTextView" destination="WdB-vT-PXQ" id="Et5-xa-lJt"/>
+                        <outlet property="signInButton" destination="2Bd-5E-YnL" id="Bb6-jD-w5a"/>
+                        <outlet property="signOutButton" destination="1xh-Tz-0h6" id="vzL-BZ-BrH"/>
+                        <outlet property="signUpButton" destination="b67-RN-KhO" id="rMu-pb-700"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
