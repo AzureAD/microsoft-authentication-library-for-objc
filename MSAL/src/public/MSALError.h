@@ -455,4 +455,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorJITWPJAcquireTokenError                    =   -42728,
     
+    /**
+     JIT - Link is required to proceed
+     */
+    MSALErrorLinkRequired = -42729,
+    
 };
