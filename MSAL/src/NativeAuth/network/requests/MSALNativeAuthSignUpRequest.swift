@@ -56,7 +56,7 @@ final class MSALNativeAuthSignUpRequest: MSIDHttpRequest {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.clientId,
+            Key.clientId.rawValue: params.config.clientId,
             Key.grantType.rawValue: params.grantType.rawValue,
             Key.email.rawValue: params.email,
             Key.password.rawValue: params.password,

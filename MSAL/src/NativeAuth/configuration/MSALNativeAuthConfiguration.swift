@@ -16,28 +16,24 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import XCTest
-@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthAuthorityTests: XCTestCase {
+struct MSALNativeAuthConfiguration {
+    let clientId: String
+    let authority: MSIDAADAuthority
 
-    func test_authority_returns_correct_url() throws {
-        let tenant = "myTenant"
-        let sut = try MSALNativeAuthAuthority(tenant: tenant, context: MSALNativeAuthRequestContext())
-
-        XCTAssertEqual(sut.url, URL(string: "https://devexclientauthsdkmockapi.azure-api.net/v1.0/myTenant"))
-    }
-
-    func test_authority_returns_correct_realm() throws {
-        let tenant = "myTenant"
-        let sut = try MSALNativeAuthAuthority(tenant: tenant, context: MSALNativeAuthRequestContext())
-
-        XCTAssertEqual(sut.realm, tenant)
+    init(clientId: String, authority: MSALAADAuthority, rawTenant: String? = nil) throws {
+        self.clientId = clientId
+        self.authority = try MSIDAADAuthority(
+            url: authority.url,
+            rawTenant: rawTenant,
+            context: MSALNativeAuthRequestContext()
+        )
     }
 }

@@ -36,8 +36,7 @@ final class MSALNativeAuthResendCodeRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthResendCodeRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .resendCode,
             context: context,
             credentialToken: "Test Credential Token"

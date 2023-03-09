@@ -41,8 +41,7 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
 
     private var requestParametersStub: MSALNativeAuthVerifyCodeRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .verifyCode,
             context: contextMock,
             credentialToken: "Test Credential Token",
@@ -83,7 +82,7 @@ final class MSALNativeAuthVerifyCodeControllerTests: MSALNativeAuthTestCase {
         factoryMock = .init()
 
         sut = .init(
-            configuration: MSALNativeAuthConfigStubs.configuration,
+            clientId: DEFAULT_TEST_CLIENT_ID,
             requestProvider: requestProviderMock,
             cacheAccessor: cacheAccessorMock,
             responseHandler: responseHandlerMock,

@@ -34,71 +34,33 @@ protocol MSALNativeAuthRequestControllerBuildable {
 }
 
 final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControllerBuildable {
-    private let requestProvider: MSALNativeAuthRequestProviding
-    private let cacheGateway: MSALNativeAuthCacheInterface
-    private let responseHandler: MSALNativeAuthResponseHandling
-    private let configuration: MSALNativeAuthPublicClientApplicationConfig
-    private let authority: MSALNativeAuthAuthority
+    private let config: MSALNativeAuthConfiguration
 
-    init(
-        requestProvider: MSALNativeAuthRequestProviding,
-        cacheGateway: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling,
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
-        authority: MSALNativeAuthAuthority
-    ) {
-        self.requestProvider = requestProvider
-        self.cacheGateway = cacheGateway
-        self.responseHandler = responseHandler
-        self.configuration = configuration
-        self.authority = authority
+    init(config: MSALNativeAuthConfiguration) {
+        self.config = config
     }
 
     func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthSignUpController(config: config, context: context)
     }
 
     func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling {
-        return MSALNativeAuthSignUpOTPController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthSignUpOTPController(config: config, context: context)
     }
 
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
-        return MSALNativeAuthSignInController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthSignInController(config: config, context: context)
     }
 
     func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling {
-        return MSALNativeAuthSignInOTPController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthSignInOTPController(config: config, context: context)
     }
 
     func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {
-        return MSALNativeAuthResendCodeController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthResendCodeController(config: config, context: context)
     }
 
     func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling {
-        return MSALNativeAuthVerifyCodeController(
-            configuration: configuration,
-            authority: authority,
-            context: context
-        )
+        return MSALNativeAuthVerifyCodeController(config: config, context: context)
     }
 }

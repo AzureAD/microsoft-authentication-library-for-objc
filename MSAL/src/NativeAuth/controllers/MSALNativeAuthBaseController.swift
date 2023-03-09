@@ -26,18 +26,18 @@
 
 class MSALNativeAuthBaseController {
 
-    let configuration: MSALNativeAuthPublicClientApplicationConfig
+    let clientId: String
     let context: MSIDRequestContext
     let responseHandler: MSALNativeAuthResponseHandling
     let cacheAccessor: MSALNativeAuthCacheInterface?
 
     init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
+        clientId: String,
         context: MSIDRequestContext,
         responseHandler: MSALNativeAuthResponseHandling,
         cacheAccessor: MSALNativeAuthCacheInterface? = nil
     ) {
-        self.configuration = configuration
+        self.clientId = clientId
         self.context = context
         self.responseHandler = responseHandler
         self.cacheAccessor = cacheAccessor
@@ -54,7 +54,7 @@ class MSALNativeAuthBaseController {
 
         event?.setApiId(String(telemetryApiId.rawValue))
         event?.setCorrelationId(context.correlationId())
-        event?.setClientId(configuration.clientId)
+        event?.setClientId(clientId)
 
         return event
     }

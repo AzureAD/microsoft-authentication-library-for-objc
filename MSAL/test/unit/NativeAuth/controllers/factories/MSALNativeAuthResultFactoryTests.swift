@@ -41,10 +41,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     ]
 
     override func setUpWithError() throws {
-        sut = .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            configuration: MSALNativeAuthConfigStubs.configuration
-        )
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration)
     }
 
     func test_makeNativeAuthResponse() {
@@ -62,7 +59,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             refreshToken: MSIDRefreshToken(),
             idToken: idToken,
             account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.authority,
+            authority: MSALNativeAuthNetworkStubs.msidAuthority,
             correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
             tokenResponse: nil
         )!
@@ -93,7 +90,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             refreshToken: MSIDRefreshToken(),
             idToken: "",
             account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.authority,
+            authority: MSALNativeAuthNetworkStubs.msidAuthority,
             correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
             tokenResponse: nil
         )!
@@ -117,7 +114,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             refreshToken: MSIDRefreshToken(),
             idToken: "",
             account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.authority,
+            authority: MSALNativeAuthNetworkStubs.msidAuthority,
             correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
             tokenResponse: nil
         )!
@@ -133,8 +130,8 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     func test_makeMsidConfiguration() {
         let result = sut.makeMSIDConfiguration(scope: ["<scope_1>", "<scope_2>"])
 
-        XCTAssertEqual(result.authority, MSALNativeAuthNetworkStubs.authority)
-        XCTAssertEqual(result.redirectUri, "")
+        XCTAssertEqual(result.authority, MSALNativeAuthNetworkStubs.msidAuthority)
+        XCTAssertNil(result.redirectUri)
         XCTAssertEqual(result.clientId, DEFAULT_TEST_CLIENT_ID)
         XCTAssertEqual(result.target, "<scope_1>,<scope_2>")
     }

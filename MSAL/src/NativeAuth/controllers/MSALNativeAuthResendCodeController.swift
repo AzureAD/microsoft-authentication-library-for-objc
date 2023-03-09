@@ -42,7 +42,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
     // MARK: - Init
 
     init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
+        clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
         responseHandler: MSALNativeAuthResponseHandling,
         context: MSIDRequestContext
@@ -50,23 +50,16 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         self.requestProvider = requestProvider
 
         super.init(
-            configuration: configuration,
+            clientId: clientId,
             context: context,
             responseHandler: responseHandler
         )
     }
 
-    convenience init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
-        authority: MSALNativeAuthAuthority,
-        context: MSIDRequestContext
-    ) {
+    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
         self.init(
-            configuration: configuration,
-            requestProvider: MSALNativeAuthRequestProvider(
-                clientId: configuration.clientId,
-                authority: authority
-            ),
+            clientId: config.clientId,
+            requestProvider: MSALNativeAuthRequestProvider(config: config),
             responseHandler: MSALNativeAuthResponseHandler(),
             context: context
         )

@@ -31,8 +31,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeSignUpController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignUpController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
@@ -40,8 +39,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeSignUpOTPController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpOTPControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignUpOTPController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
@@ -49,8 +47,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeSignInController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignInControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignInController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
@@ -58,8 +55,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeSignInOTPController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignInOTPControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignInOTPController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
@@ -67,8 +63,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeResendCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthResendCodeControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthResendCodeController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
@@ -76,8 +71,7 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControlle
     func makeVerifyCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthVerifyCodeControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthVerifyCodeController(
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            authority: MSALNativeAuthNetworkStubs.authority,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
