@@ -81,6 +81,41 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         checkUrlRequest(sut.urlRequest)
     }
 
+    func test_configureSignUpRequestWithNilPassword_shouldCreateCorrectParameters() throws {
+        let telemetry = MSIDAADTokenRequestServerTelemetry()
+        telemetry.currentRequestTelemetry = .init(
+            appId: 1234,
+            tokenCacheRefreshType: .proactiveTokenRefresh,
+            platformFields: ["ios"]
+        )!
+
+        let sut = try MSALNativeAuthSignUpRequest(params: .init(
+            authority: params.authority,
+            clientId: params.clientId,
+            email: params.email,
+            password: nil,
+            attributes: "<attribute1: value1>",
+            scope: params.scope,
+            context: params.context,
+            grantType: .otp
+        ))
+
+        sut.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            serverTelemetry: telemetry
+        )
+
+        let expectedBodyParams = [
+            "clientId": params.clientId,
+            "grantType": "passwordless_otp",
+            "email": params.email,
+            "customAttributes": "<attribute1: value1>",
+            "scope": "<scope-1>"
+        ]
+
+        XCTAssertEqual(sut.parameters, expectedBodyParams)
+    }
+
     private func checkTelemetry(_ result: MSIDHttpRequestServerTelemetryHandling?, _ expected: MSIDAADTokenRequestServerTelemetry) {
 
         guard let resultTelemetry = (result as? MSIDAADTokenRequestServerTelemetry)?.currentRequestTelemetry else {

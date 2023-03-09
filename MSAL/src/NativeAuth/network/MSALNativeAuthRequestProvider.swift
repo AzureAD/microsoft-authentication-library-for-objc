@@ -30,6 +30,11 @@ protocol MSALNativeAuthRequestProviding {
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignUpRequest
 
+    func signUpOTPRequest(
+        parameters: MSALNativeAuthSignUpOTPParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest
+
     func signInRequest(
         parameters: MSALNativeAuthSignInParameters,
         context: MSIDRequestContext
@@ -86,7 +91,44 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             password: parameters.password,
             attributes: attributes,
             scope: formatScope(parameters.scopes),
+            context: context,
+            grantType: .password
+        )
+
+        let request = try MSALNativeAuthSignUpRequest(params: params)
+
+        let serverTelemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
             context: context
+        )
+
+        request.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            serverTelemetry: serverTelemetry
+        )
+
+        return request
+    }
+
+    // MARK: - Sign Up with OTP
+
+    func signUpOTPRequest(
+        parameters: MSALNativeAuthSignUpOTPParameters,
+        context: MSIDRequestContext
+    ) throws -> MSALNativeAuthSignUpRequest {
+
+        guard let attributes = try formatAttributes(parameters.attributes) else {
+            throw MSALNativeAuthError.invalidAttributes
+        }
+
+        let params = MSALNativeAuthSignUpRequestParameters(
+            authority: authority,
+            clientId: clientId,
+            email: parameters.email,
+            attributes: attributes,
+            scope: formatScope(parameters.scopes),
+            context: context,
+            grantType: .otp
         )
 
         let request = try MSALNativeAuthSignUpRequest(params: params)

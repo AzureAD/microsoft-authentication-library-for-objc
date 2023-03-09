@@ -101,6 +101,10 @@ class MSALNativeAuthRequestProviderMock: MSALNativeAuthRequestProviding {
         return signUpRequestFuncResult!
     }
 
+    func signUpOTPRequest(parameters: MSAL.MSALNativeAuthSignUpOTPParameters, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthSignUpRequest {
+        try signUpRequest(parameters: .init(email: "", password: ""), context: context)
+    }
+
     func mockSignInRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthSignInRequest? = nil) {
         self.throwingError = throwingError
         self.signInRequestFuncResult = result

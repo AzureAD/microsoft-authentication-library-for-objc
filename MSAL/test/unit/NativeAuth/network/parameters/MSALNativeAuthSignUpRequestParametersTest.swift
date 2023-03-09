@@ -34,7 +34,7 @@ final class MSALNativeAuthSignUpRequestParametersTest: XCTestCase {
         let baseUrl = URL(string: "www.contoso.com")!
         var authority: MSALNativeAuthAuthority? = nil
         XCTAssertNoThrow(authority = try MSALNativeAuthAuthority(baseUrl: baseUrl, tenant: "tenant", context: MSIDBasicContext()))
-        let parameters = MSALNativeAuthSignUpRequestParameters(authority: authority!, clientId: "clientId", email: "email", password: "password", attributes: "", scope: "scope", context: MSALNativeAuthRequestContextMock())
+        let parameters = MSALNativeAuthSignUpRequestParameters(authority: authority!, clientId: "clientId", email: "email", password: "password", attributes: "", scope: "scope", context: MSALNativeAuthRequestContextMock(), grantType: .password)
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, authority!.url.absoluteString + MSALNativeAuthEndpoint.signUp.rawValue)

@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let email: String
-    let password: String
+    let password: String?
     let attributes: String
     let scope: String
     let grantType: MSALNativeAuthGrantType
@@ -45,10 +45,11 @@ extension MSALNativeAuthSignUpRequestParameters {
         authority: MSALNativeAuthAuthority,
         clientId: String,
         email: String,
-        password: String,
+        password: String? = nil,
         attributes: String,
         scope: String,
-        context: MSIDRequestContext
+        context: MSIDRequestContext,
+        grantType: MSALNativeAuthGrantType
     ) {
         self.init(
             authority: authority,
@@ -59,7 +60,7 @@ extension MSALNativeAuthSignUpRequestParameters {
             password: password,
             attributes: attributes,
             scope: scope,
-            grantType: .password
+            grantType: grantType
         )
     }
 }

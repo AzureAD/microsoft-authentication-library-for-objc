@@ -95,9 +95,14 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
 
     public func signUp(parameters: MSALNativeAuthSignUpOTPParameters) async -> AuthResult {
         return await withCheckedContinuation { continuation in
-            signUp(otpParameters: parameters) { _, _ in
-                continuation.resume(returning:
-                        .success(.init(stage: .completed, credentialToken: nil, authentication: nil)))
+            signUp(otpParameters: parameters) { result, error in
+                if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else if let result = result {
+                    continuation.resume(returning: .success(result))
+                } else {
+                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
+                }
             }
         }
     }
@@ -190,9 +195,20 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
     }
 
     @objc
-    public func signUp(otpParameters: MSALNativeAuthSignUpOTPParameters,
-                       completion: @escaping (_ response: MSALNativeAuthResponse, _ error: Error) -> Void) {
+    public func signUp(
+        otpParameters: MSALNativeAuthSignUpOTPParameters,
+        completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
+    ) {
+        guard inputValidator.isEmailValid(otpParameters.email) else {
+            completion(nil, MSALNativeAuthError.invalidInput)
+            return
+        }
 
+        let controller = controllerFactory.makeSignUpOTPController(
+            with: MSALNativeAuthRequestContext(correlationId: otpParameters.correlationId)
+        )
+
+        controller.signUp(parameters: otpParameters, completion: completion)
     }
 
     @objc
