@@ -456,8 +456,13 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALErrorJITWPJAcquireTokenError                    =   -42728,
     
     /**
-     JIT - Link is required to proceed
+     JIT - Retry JIT process (WPJ or Link)
      */
-    MSALErrorLinkRequired = -42729,
+    MSALErrorJITRetryRequired                           = -42729,
+    
+    /**
+     JIT - Unexpected status received from webCP troubleshooting flow
+     */
+    MSALErrorJITUnknownStatusWebCP                      = -42730,
     
 };

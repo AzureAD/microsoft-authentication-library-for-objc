@@ -104,7 +104,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITWPJDeviceRegistrationFailed) : @(MSALErrorJITWPJDeviceRegistrationFailed),
                                    @(MSIDErrorJITWPJAccountIdentifierNil) : @(MSALErrorJITWPJAccountIdentifierNil),
                                    @(MSIDErrorJITWPJAcquireTokenError) : @(MSALErrorJITWPJAcquireTokenError),
-                                   @(MSIDErrorLinkRequired) : @(MSALErrorLinkRequired),
+                                   @(MSIDErrorJITRetryRequired) : @(MSALErrorJITRetryRequired),
+                                   @(MSIDErrorJITUnknownStatusWebCP) : @(MSALErrorJITUnknownStatusWebCP),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
