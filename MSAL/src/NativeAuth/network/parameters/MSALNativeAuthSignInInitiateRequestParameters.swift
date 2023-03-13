@@ -22,16 +22,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthEndpoint: String, CaseIterable {
-    case signUp = "/signup"
-    case signIn = "/signin"
-    case signInInitiate = "/oauth/v2.0/initiate"
-    case signInChallenge = "/oauth/v2.0/challenge"
-    case signInToken = "/oauth/v2.0/token"
-    case refreshToken = "/refreshtoken"
-    case resetPasswordStart = "/resetpassword/start"
-    case resetPasswordComplete = "/resetpassword/complete"
-    case resendCode = "/resendcode"
-    case verifyCode = "/verifycode"
-    case signOut = "/signout"
+@_implementationOnly import MSAL_Private
+
+struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable {
+
+    let authority: MSALNativeAuthAuthority
+    let clientId: String
+    let endpoint: MSALNativeAuthEndpoint
+    let context: MSIDRequestContext
+    let username: String
+    let challengeType: MSALNativeAuthChallengeType
+}
+
+// MARK: - Convenience init
+
+extension MSALNativeAuthSignInInitiateRequestParameters {
+
+    init(
+        authority: MSALNativeAuthAuthority,
+        clientId: String,
+        username: String,
+        context: MSIDRequestContext,
+        challengeType: MSALNativeAuthChallengeType
+    ) {
+        self.init(
+            authority: authority,
+            clientId: clientId,
+            endpoint: .signInInitiate,
+            context: context,
+            username: username,
+            challengeType: challengeType
+        )
+    }
 }
