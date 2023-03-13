@@ -25,7 +25,7 @@
 import Foundation
 
 @objcMembers
-public class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
+public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
     private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
@@ -194,7 +194,6 @@ public class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication 
         controller.signUp(parameters: parameters, completion: completion)
     }
 
-    @objc
     public func signUp(
         otpParameters: MSALNativeAuthSignUpOTPParameters,
         completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
