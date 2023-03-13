@@ -279,8 +279,8 @@
 		289E15592948E601006104D9 /* MSALNativeAuthCacheInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E15582948E601006104D9 /* MSALNativeAuthCacheInterface.swift */; };
 		289E156D2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E156C2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift */; };
 		28CA6F5D29689F34004DB11D /* MSALNativeAuthCacheAccessorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CA6F5429689F26004DB11D /* MSALNativeAuthCacheAccessorTest.swift */; };
-		28D1D56F29BF62E900CE75F4 /* MSAL_iOS_Native_Auth_Integration_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D1D56E29BF62E900CE75F4 /* MSAL_iOS_Native_Auth_Integration_Tests.swift */; };
 		28D1D57029BF62E900CE75F4 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
+		28D1D58029BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D1D57F29BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift */; };
 		28F74D54295C90E100B89A78 /* MSALNativeAuthCacheAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E156C2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift */; };
 		28F74D55295C90E100B89A78 /* MSALNativeAuthCacheInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E15582948E601006104D9 /* MSALNativeAuthCacheInterface.swift */; };
 		38880DF423280C5900688C24 /* MSALPublicClientApplicationConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */; };
@@ -1387,7 +1387,7 @@
 		289E156C2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheAccessor.swift; sourceTree = "<group>"; };
 		28CA6F5429689F26004DB11D /* MSALNativeAuthCacheAccessorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheAccessorTest.swift; sourceTree = "<group>"; };
 		28D1D56C29BF62E900CE75F4 /* MSAL iOS Native Auth Integration Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MSAL iOS Native Auth Integration Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		28D1D56E29BF62E900CE75F4 /* MSAL_iOS_Native_Auth_Integration_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSAL_iOS_Native_Auth_Integration_Tests.swift; sourceTree = "<group>"; };
+		28D1D57F29BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthIntegrationBaseTests.swift; sourceTree = "<group>"; };
 		583BFD1524DDF9B10035B901 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestCacheTokenResponse.h; sourceTree = "<group>"; };
 		58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestCacheTokenResponse.m; sourceTree = "<group>"; };
@@ -2044,12 +2044,20 @@
 			path = cache;
 			sourceTree = "<group>";
 		};
-		28D1D56D29BF62E900CE75F4 /* MSAL iOS Native Auth Integration Tests */ = {
+		28D1D58129BF885500CE75F4 /* integration */ = {
 			isa = PBXGroup;
 			children = (
-				28D1D56E29BF62E900CE75F4 /* MSAL_iOS_Native_Auth_Integration_Tests.swift */,
+				28D1D58229BF886000CE75F4 /* NativeAuth */,
 			);
-			path = "MSAL iOS Native Auth Integration Tests";
+			path = integration;
+			sourceTree = "<group>";
+		};
+		28D1D58229BF886000CE75F4 /* NativeAuth */ = {
+			isa = PBXGroup;
+			children = (
+				28D1D57F29BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift */,
+			);
+			path = NativeAuth;
 			sourceTree = "<group>";
 		};
 		94E876C91E492D2800FB96ED /* instance */ = {
@@ -2500,6 +2508,7 @@
 		D61F5B691E53FCA100912CB8 /* test */ = {
 			isa = PBXGroup;
 			children = (
+				28D1D58129BF885500CE75F4 /* integration */,
 				962E37BE1E720E1700DE71FE /* automation */,
 				D61A647D1E5AA7C60086D120 /* app */,
 				D65A6FDB1E3FF71000C69FBA /* unit */,
@@ -2858,7 +2867,6 @@
 				D61F5B691E53FCA100912CB8 /* test */,
 				D65A6FB71E3FF44A00C69FBA /* resources */,
 				D65A6FBC1E3FF46100C69FBA /* xcconfig */,
-				28D1D56D29BF62E900CE75F4 /* MSAL iOS Native Auth Integration Tests */,
 				D6DFF3A31E2579360012891A /* Products */,
 				D6A2062E1FC5106F00755A51 /* Frameworks */,
 				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
@@ -4397,7 +4405,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				28D1D56F29BF62E900CE75F4 /* MSAL_iOS_Native_Auth_Integration_Tests.swift in Sources */,
+				28D1D58029BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
