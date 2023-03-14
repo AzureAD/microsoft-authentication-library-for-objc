@@ -41,8 +41,7 @@ final class MSALNativeAuthSignInOTPControllerTests: MSALNativeAuthTestCase {
 
     private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .signIn,
             context: contextMock,
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -87,7 +86,7 @@ final class MSALNativeAuthSignInOTPControllerTests: MSALNativeAuthTestCase {
         factoryMock = .init()
 
         sut = .init(
-            configuration: MSALNativeAuthConfigStubs.configuration,
+            clientId: DEFAULT_TEST_CLIENT_ID,
             requestProvider: requestProviderMock,
             cacheAccessor: cacheAccessorMock,
             responseHandler: responseHandlerMock,

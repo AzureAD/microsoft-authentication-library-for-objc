@@ -53,7 +53,7 @@ final class MSALNativeAuthVerifyCodeRequest: MSIDHttpRequest {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.clientId,
+            Key.clientId.rawValue: params.config.clientId,
             Key.flowToken.rawValue: params.credentialToken,
             Key.otp.rawValue: params.otp
         ]

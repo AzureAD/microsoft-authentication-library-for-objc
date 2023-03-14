@@ -27,8 +27,7 @@
 // swiftlint:disable:next type_name
 struct MSALNativeAuthVerifyCodeRequestParameters: MSALNativeAuthRequestable {
 
-    let authority: MSALNativeAuthAuthority
-    let clientId: String
+    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let credentialToken: String
@@ -40,15 +39,13 @@ struct MSALNativeAuthVerifyCodeRequestParameters: MSALNativeAuthRequestable {
 extension MSALNativeAuthVerifyCodeRequestParameters {
 
     init(
-        authority: MSALNativeAuthAuthority,
-        clientId: String,
+        config: MSALNativeAuthConfiguration,
         credentialToken: String,
         otp: String,
         context: MSIDRequestContext
     ) {
         self.init(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             endpoint: .verifyCode,
             context: context,
             credentialToken: credentialToken,

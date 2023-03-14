@@ -30,18 +30,18 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthBaseController!
     private var contextMock: MSALNativeAuthRequestContextMock!
-    private var configurationStub: MSALNativeAuthPublicClientApplicationConfig!
+    private var clientId: String!
 
     override func setUp() {
         super.setUp()
 
         contextMock = MSALNativeAuthRequestContextMock()
         contextMock.mockTelemetryRequestId = "mock_id"
-        configurationStub = MSALNativeAuthConfigStubs.configuration
+        clientId = DEFAULT_TEST_CLIENT_ID
         dispatcher = MSALNativeAuthTelemetryTestDispatcher()
 
         sut = MSALNativeAuthBaseController(
-            configuration: configurationStub,
+            clientId: clientId,
             context: contextMock,
             responseHandler: MSALNativeAuthResponseHandlerMock(),
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
@@ -63,7 +63,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
         let expectedTelemetryApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignUp.rawValue)
         XCTAssertEqual(properties[MSID_TELEMETRY_KEY_API_ID] as? String, expectedTelemetryApiId)
         XCTAssertEqual(properties[MSID_TELEMETRY_KEY_CORRELATION_ID] as? String, DEFAULT_TEST_UID.uppercased())
-        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_CLIENT_ID] as? String, configurationStub.clientId)
+        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_CLIENT_ID] as? String, clientId)
     }
 
     func test_stopTelemetryEvent_with_no_error() {

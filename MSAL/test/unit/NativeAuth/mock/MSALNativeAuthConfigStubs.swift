@@ -32,17 +32,22 @@ enum ErrorMock: Error {
 
 struct MSALNativeAuthConfigStubs {
 
-    static var configuration: MSALNativeAuthPublicClientApplicationConfig {
-        .init(
+    static var configuration: MSALNativeAuthConfiguration {
+        try! .init(
             clientId: DEFAULT_TEST_CLIENT_ID,
-            authority: URL(string: DEFAULT_TEST_AUTHORITY)!,
-            tenantName: MSALNativeAuthNetworkStubs.tenantName
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!,
+                rawTenant: MSALNativeAuthNetworkStubs.tenantName
+            )
         )
     }
 
     static var msidConfiguration: MSIDConfiguration {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!,
+                context: MSALNativeAuthRequestContext()
+            ),
             redirectUri: "",
             clientId: DEFAULT_TEST_CLIENT_ID,
             target: ""

@@ -37,12 +37,10 @@ protocol MSALNativeAuthResultBuildable {
 
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
-    private let authority: MSALNativeAuthAuthority
-    private let configuration: MSALNativeAuthPublicClientApplicationConfig
+    private let config: MSALNativeAuthConfiguration
 
-    init(authority: MSALNativeAuthAuthority, configuration: MSALNativeAuthPublicClientApplicationConfig) {
-        self.authority = authority
-        self.configuration = configuration
+    init(config: MSALNativeAuthConfiguration) {
+        self.config = config
     }
 
     func makeNativeAuthResponse(
@@ -58,16 +56,16 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 idToken: tokenResult.rawIdToken,
                 scopes: tokenResult.accessToken.scopes.compactMap(formatScope),
                 expiresOn: tokenResult.accessToken.expiresOn,
-                tenantId: authority.tenantName
+                tenantId: config.authority.tenant.rawTenant
             )
         )
     }
 
     func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration {
         return .init(
-            authority: authority,
-            redirectUri: "",
-            clientId: configuration.clientId,
+            authority: config.authority,
+            redirectUri: nil,
+            clientId: config.clientId,
             target: scope.joined(separator: ",")
         )
     }

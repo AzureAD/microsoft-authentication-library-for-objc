@@ -60,16 +60,16 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
     // MARK: - Variables
 
-    private let clientId: String
-    private let authority: MSALNativeAuthAuthority
+    private let config: MSALNativeAuthConfiguration
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
     // MARK: - Init
 
-    init(clientId: String, authority: MSALNativeAuthAuthority,
-         telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()) {
-        self.clientId = clientId
-        self.authority = authority
+    init(
+        config: MSALNativeAuthConfiguration,
+        telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()
+    ) {
+        self.config = config
         self.telemetryProvider = telemetryProvider
     }
 
@@ -85,8 +85,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         }
 
         let params = MSALNativeAuthSignUpRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             email: parameters.email,
             password: parameters.password,
             attributes: attributes,
@@ -122,8 +121,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         }
 
         let params = MSALNativeAuthSignUpRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             email: parameters.email,
             attributes: attributes,
             scope: formatScope(parameters.scopes),
@@ -154,8 +152,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthSignInRequest {
 
         let params = MSALNativeAuthSignInRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             email: parameters.email,
             password: parameters.password,
             scope: formatScope(parameters.scopes),
@@ -186,8 +183,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthSignInRequest {
 
         let params = MSALNativeAuthSignInRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             email: parameters.email,
             scope: formatScope(parameters.scopes),
             context: context,
@@ -217,8 +213,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthResendCodeRequest {
 
         let params = MSALNativeAuthResendCodeRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             credentialToken: parameters.credentialToken,
             context: context
         )
@@ -246,8 +241,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthVerifyCodeRequest {
 
         let params = MSALNativeAuthVerifyCodeRequestParameters(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             credentialToken: parameters.credentialToken,
             otp: parameters.otp,
             context: context

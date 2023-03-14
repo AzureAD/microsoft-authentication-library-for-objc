@@ -30,15 +30,20 @@ struct MSALNativeAuthNetworkStubs {
 
     static let tenantName = "test_tenant"
 
-    static let requestProvider: MSALNativeAuthRequestProvider = .init(
-        clientId: DEFAULT_TEST_CLIENT_ID,
-        authority: authority
-    )
+    static let requestProvider = MSALNativeAuthRequestProvider(config: MSALNativeAuthConfigStubs.configuration)
 
-    static var authority: MSALNativeAuthAuthority {
+    static var authority: MSALAADAuthority {
         try! .init(
-            tenant: Self.tenantName,
-            context: MSALNativeAuthRequestContext()
+            url: .init(string: DEFAULT_TEST_AUTHORITY)!,
+            rawTenant: tenantName
+        )
+    }
+
+    static var msidAuthority: MSIDAADAuthority {
+        try! .init(
+            url: .init(string: DEFAULT_TEST_AUTHORITY)!,
+            rawTenant: tenantName,
+            context: nil
         )
     }
 }

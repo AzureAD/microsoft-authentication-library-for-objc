@@ -36,7 +36,7 @@ final class MSALNativeAuthTokenRequestHandlingTests: XCTestCase {
 
         init(responseHandler: MSALNativeAuthResponseHandling, cacheAccessor: MSALNativeAuthCacheInterface) {
             super.init(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: responseHandler,
                 cacheAccessor: cacheAccessor

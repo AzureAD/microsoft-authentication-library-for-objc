@@ -24,45 +24,18 @@
 
 @_implementationOnly import MSAL_Private
 
-// TODO: Complete this class when we have more clarity about the rules our authority must have.
-// - Consider to reuse `MSIDAADAuthority` if the url normalization and caching work for us.
-final class MSALNativeAuthAuthority: MSIDAuthority {
+protocol MSALNativeAuthAuthorityProviding {
+    func authority(rawTenant: String?) throws -> MSALAADAuthority
+}
 
-    // MARK: - Constants
+final class MSALNativeAuthAuthorityProvider: MSALNativeAuthAuthorityProviding {
 
-    private static let mockServerBaseURLString = "https://devexclientauthsdkmockapi.azure-api.net/v1.0"
-
-    // MARK: - Variables
-
-    private var baseUrl: URL
-    let tenantName: String
-
-    override var url: URL {
-        return baseUrl.appendingPathComponent(tenantName)
-    }
-
-    override var realm: String {
-        return tenantName
-    }
-
-    // MARK: - Init
-
-    init(
-        baseUrl: URL? = URL(string: mockServerBaseURLString),
-        tenant: String?,
-        context: MSIDRequestContext
-    ) throws {
-        guard let baseUrl = baseUrl, let rawTenant = tenant, !rawTenant.isEmpty else {
+    func authority(rawTenant: String?) throws -> MSALAADAuthority {
+        guard let url = URL(string: MSID_DEFAULT_AAD_AUTHORITY) else {
+            assert(false, "URL for default AAD Authority must be valid")
             throw MSALNativeAuthError.invalidAuthority
         }
 
-        self.baseUrl = baseUrl
-        self.tenantName = rawTenant
-
-        try super.init(url: baseUrl, validateFormat: false, context: context)
-    }
-
-    required init(jsonDictionary json: [AnyHashable: Any]!) throws {
-        fatalError("init(jsonDictionary:) has not been implemented")
+        return try MSALAADAuthority(url: url, rawTenant: rawTenant)
     }
 }

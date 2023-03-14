@@ -24,57 +24,58 @@
 
 import Foundation
 
-@objc
-public final class MSALNativeAuthPublicClientApplication: NSObject {
-
-    /**
-     Initializes a new application.
-
-     - Parameters:
-        - configuration: `MSALCiamPublicClientApplicationConfig` . CIAM's sdk configuration,
-            which contains authority, tenant and clientId.
-     */
+@objcMembers
+public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
     private let controllerFactory: MSALNativeAuthRequestControllerBuildable
-    private let configuration: MSALNativeAuthPublicClientApplicationConfig
     private let inputValidator: MSALNativeAuthInputValidating
 
-    @objc
-    public convenience init(configuration: MSALNativeAuthPublicClientApplicationConfig) throws {
+    public override init(configuration config: MSALPublicClientApplicationConfig) throws {
+        guard let aadAuthority = config.authority as? MSALAADAuthority else {
+            throw MSALNativeAuthError.invalidAuthority
+        }
 
-        let authority = try MSALNativeAuthAuthority(
-            tenant: configuration.tenantName,
-            context: MSALNativeAuthRequestContext()
+        let nativeConfiguration = try MSALNativeAuthConfiguration(
+            clientId: config.clientId,
+            authority: aadAuthority
         )
 
-        let requestProvider = MSALNativeAuthRequestProvider(
-            clientId: configuration.clientId,
-            authority: authority
+        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.inputValidator = MSALNativeAuthInputValidator()
+
+        try super.init(configuration: config)
+    }
+
+    public init(clientId: String, rawTenant: String? = nil, redirectUri: String? = nil) throws {
+        let aadAuthority = try MSALNativeAuthAuthorityProvider()
+            .authority(rawTenant: rawTenant)
+
+        let nativeConfiguration = try MSALNativeAuthConfiguration(
+            clientId: clientId,
+            authority: aadAuthority,
+            rawTenant: rawTenant
         )
 
-        let factory = MSALNativeAuthRequestControllerFactory(
-            requestProvider: requestProvider,
-            cacheGateway: MSALNativeAuthCacheAccessor(),
-            responseHandler: MSALNativeAuthResponseHandler(),
-            configuration: configuration,
-            authority: authority
+        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.inputValidator = MSALNativeAuthInputValidator()
+
+        let configuration = MSALPublicClientApplicationConfig(
+            clientId: clientId,
+            redirectUri: redirectUri,
+            authority: aadAuthority
         )
 
-        self.init(
-            configuration: configuration,
-            controllerFactory: factory,
-            inputValidator: MSALNativeAuthInputValidator()
-        )
+        try super.init(configuration: configuration)
     }
 
     init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
         controllerFactory: MSALNativeAuthRequestControllerBuildable,
         inputValidator: MSALNativeAuthInputValidating
     ) {
-        self.configuration = configuration
         self.controllerFactory = controllerFactory
         self.inputValidator = inputValidator
+
+        super.init()
     }
 
     // MARK: - Async/Await
@@ -177,7 +178,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
 
     // MARK: - Closures
 
-    @objc
     public func signUp(
         parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
@@ -194,7 +194,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         controller.signUp(parameters: parameters, completion: completion)
     }
 
-    @objc
     public func signUp(
         otpParameters: MSALNativeAuthSignUpOTPParameters,
         completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
@@ -211,7 +210,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         controller.signUp(parameters: otpParameters, completion: completion)
     }
 
-    @objc
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
@@ -227,7 +225,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         controller.signIn(parameters: parameters, completion: completion)
     }
 
-    @objc
     public func signIn(
         otpParameters: MSALNativeAuthSignInOTPParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
@@ -243,8 +240,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
         controller.signIn(parameters: otpParameters, completion: completion)
     }
 
-    @objc
-
     public func resendCode(
         parameters: MSALNativeAuthResendCodeParameters,
         completion: @escaping (_ credentialToken: String?, _ error: Error?) -> Void) {
@@ -253,7 +248,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
             resendCodeController.resendCode(parameters: parameters, completion: completion)
         }
 
-    @objc
     public func verifyCode(
         parameters: MSALNativeAuthVerifyCodeParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
@@ -263,7 +257,6 @@ public final class MSALNativeAuthPublicClientApplication: NSObject {
             controller.verifyCode(parameters: parameters, completion: completion)
         }
 
-    @objc
     public func getUserAccount(completion: @escaping (MSALNativeAuthUserAccount, Error) -> Void) {
 
     }
