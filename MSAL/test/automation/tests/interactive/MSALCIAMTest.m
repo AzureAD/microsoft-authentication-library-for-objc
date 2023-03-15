@@ -28,7 +28,7 @@
 #import "MSALADFSBaseUITest.h"
 #import "MSALBaseAADUITest.h"
 
-@interface MSALCIAMTest : MSALADFSBaseUITest
+@interface MSALCIAMTest : MSALBaseAADUITest
 
 @property (nonatomic) NSString *testEnvironment;
 
