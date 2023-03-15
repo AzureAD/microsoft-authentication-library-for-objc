@@ -44,7 +44,7 @@
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
-    accountConfigurationRequest.federationProviderType = @"ciam";
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAM;
     accountConfigurationRequest.additionalQueryParameters = @{@"signInAudience": @"azureadmyorg",@"PublicClient": @"No"};
     
     [self loadTestAccount:accountConfigurationRequest];
