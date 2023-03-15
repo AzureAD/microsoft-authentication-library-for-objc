@@ -62,7 +62,6 @@
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = @"https://substrate.office.com/profile//User.Read";
     request.promptBehavior = @"force";
     request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
