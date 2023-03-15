@@ -26,6 +26,7 @@
 #import "MSIDTestAutomationAppConfigurationRequest.h"
 #import "MSIDTestAutomationAccountConfigurationRequest.h"
 #import "MSALADFSBaseUITest.h"
+#import "MSALBaseAADUITest.h"
 
 @interface MSALCIAMTest : MSALADFSBaseUITest
 
@@ -67,10 +68,10 @@
     request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
     
     // 1. Do interactive login
-    NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
     
-    // 2. Now do silent login #296725
+    // 2. Now do silent login
     request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
