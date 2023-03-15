@@ -24,15 +24,22 @@
 
 import XCTest
 
-class MSALNativeAuthIntegrationBaseTests: XCTestCase {
-
-    var correlationId = UUID()
-
-    override func setUp()  {
-        correlationId = UUID()
+final class MockAPIHandlerTest: MSALNativeAuthIntegrationBaseTests {
+    
+    func testAddNewResponse() async {
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .SignInInitiate, correlationId: correlationId, responses: [.InvalidClient, .UserNotFound])
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+    
+    func testGetAllConfig() async {
+        do {
+            print(try await mockAPIHandler.getAllConfig())
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
     }
 
-    override func tearDown() async throws {
-        // call the MockAPIHandler.clearQueuesForCorrelationId
-    }
 }
