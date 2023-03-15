@@ -32,33 +32,44 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let context: MSIDRequestContext
     let username: String?
     let credentialToken: String?
-    
+    let signInSLT: String?
     let grantType: MSALNativeAuthGrantType
-    let scope: String
+    let challengeType: MSALNativeAuthChallengeType?
+    let scope: String?
+    let password: String?
+    let oob: String?
 }
 
 // MARK: - Convenience init
 
-extension MSALNativeAuthSignInRequestParameters {
+extension MSALNativeAuthSignInTokenRequestParameters {
 
     init(
         authority: MSALNativeAuthAuthority,
         clientId: String,
-        email: String,
-        password: String? = nil,
-        scope: String,
         context: MSIDRequestContext,
-        grantType: MSALNativeAuthGrantType
+        username: String? = nil,
+        credentialToken: String? = nil,
+        signInSLT: String? = nil,
+        grantType: MSALNativeAuthGrantType,
+        challengeType: MSALNativeAuthChallengeType? = nil,
+        scope: String? = nil,
+        password: String? = nil,
+        oob: String? = nil
     ) {
         self.init(
             authority: authority,
             clientId: clientId,
-            endpoint: .signIn,
+            endpoint: .signInToken,
             context: context,
-            email: email,
-            password: password,
+            username: username,
+            credentialToken: credentialToken,
+            signInSLT: signInSLT,
+            grantType: grantType,
+            challengeType: challengeType,
             scope: scope,
-            grantType: grantType
+            password: password,
+            oob: oob
         )
     }
 }

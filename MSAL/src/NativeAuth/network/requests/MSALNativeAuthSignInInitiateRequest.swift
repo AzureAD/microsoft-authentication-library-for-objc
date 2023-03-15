@@ -24,37 +24,38 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
+final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
 
-    let authority: MSALNativeAuthAuthority
-    let clientId: String
-    let endpoint: MSALNativeAuthEndpoint
-    let context: MSIDRequestContext
-    let credentialToken: String
-    let challengeType: MSALNativeAuthChallengeType?
-    let challengeTarget: String?
-}
+    init(params: MSALNativeAuthSignInInitiateRequestParameters) throws {
+        super.init()
 
-// MARK: - Convenience init
+        self.context = params.context
 
-extension MSALNativeAuthSignInChallengeRequestParameters {
+        self.parameters = makeBodyRequestParameters(with: params)
 
-    init(
-        authority: MSALNativeAuthAuthority,
-        clientId: String,
-        context: MSIDRequestContext,
-        credentialToken: String,
-        challengeType: MSALNativeAuthChallengeType? = nil,
-        challengeTarget: String? = nil
+        let url = try params.makeEndpointUrl()
+        self.urlRequest = URLRequest(url: url)
+
+        self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
+    }
+
+    func configure(
+        requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
+        requestSerializer: MSIDRequestSerialization,
+        serverTelemetry: MSIDHttpRequestServerTelemetryHandling
     ) {
-        self.init(
-            authority: authority,
-            clientId: clientId,
-            endpoint: .signInChallenge,
-            context: context,
-            credentialToken: credentialToken,
-            challengeType: challengeType,
-            challengeTarget: challengeTarget
-        )
+        self.serverTelemetry = serverTelemetry
+        self.requestSerializer = requestSerializer
+        requestConfigurator.configure(self)
+    }
+
+    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInInitiateRequestParameters) -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: params.clientId,
+            Key.username.rawValue: params.username,
+            Key.challengeType.rawValue: params.challengeType.rawValue
+        ].compactMapValues { $0 }
     }
 }

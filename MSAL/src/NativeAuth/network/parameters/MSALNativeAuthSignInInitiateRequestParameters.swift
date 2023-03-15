@@ -41,8 +41,8 @@ extension MSALNativeAuthSignInInitiateRequestParameters {
     init(
         authority: MSALNativeAuthAuthority,
         clientId: String,
-        username: String,
         context: MSIDRequestContext,
+        username: String,
         challengeType: MSALNativeAuthChallengeType
     ) {
         self.init(

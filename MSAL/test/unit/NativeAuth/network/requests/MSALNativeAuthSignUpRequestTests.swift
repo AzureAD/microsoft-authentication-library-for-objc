@@ -106,8 +106,8 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "clientId": params.clientId,
-            "grantType": "passwordless_otp",
+            "client_id": params.clientId,
+            "grant_type": "passwordless_otp",
             "email": params.email,
             "customAttributes": "<attribute1: value1>",
             "scope": "<scope-1>"
@@ -131,8 +131,8 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
 
     private func checkBodyParams(_ result: [String: String]?) {
         let expectedBodyParams = [
-            "clientId": DEFAULT_TEST_CLIENT_ID,
-            "grantType": "password",
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "grant_type": "password",
             "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "strong-password",
             "scope": "<scope-1>",

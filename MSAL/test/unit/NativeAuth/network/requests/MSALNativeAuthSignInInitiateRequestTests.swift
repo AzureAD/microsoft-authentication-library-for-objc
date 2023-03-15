@@ -26,7 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
+final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
 
     let context = MSALNativeAuthRequestContext(
         correlationId: .init(
@@ -34,18 +34,18 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
         )
     )
 
-    private var params: MSALNativeAuthVerifyCodeRequestParameters {
+    private var params: MSALNativeAuthSignInInitiateRequestParameters {
         .init(
             authority: MSALNativeAuthNetworkStubs.authority,
             clientId: DEFAULT_TEST_CLIENT_ID,
-            endpoint: .verifyCode,
+            endpoint: .signInInitiate,
             context: context,
-            credentialToken: "Test Credential Token",
-            otp: "Test OTP"
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            challengeType: .password
         )
     }
 
-    func test_verifyCodeRequest_gets_created_successfully() throws {
+    func test_signInInitiateRequest_getsCreatedSuccessfully() throws {
 
         let telemetry = MSIDAADTokenRequestServerTelemetry()
         telemetry.currentRequestTelemetry = .init(
@@ -54,13 +54,13 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
+        let sut = try MSALNativeAuthSignInInitiateRequest(params: params)
 
         XCTAssertEqual(sut.context!.correlationId(), context.correlationId())
         checkBodyParams(sut.parameters)
     }
 
-    func test_configure_verifyCodeRequest() throws {
+    func test_configure_signInInitiateRequest() throws {
         let telemetry = MSIDAADTokenRequestServerTelemetry()
         telemetry.currentRequestTelemetry = .init(
             appId: 1234,
@@ -68,7 +68,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
+        let sut = try MSALNativeAuthSignInInitiateRequest(params: params)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
@@ -77,6 +77,36 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
 
         checkTelemetry(sut.serverTelemetry, telemetry)
         checkUrlRequest(sut.urlRequest)
+    }
+
+    func test_configureSignInRequestWithSpecificChallengeType_shouldCreateCorrectParameters() throws {
+        let telemetry = MSIDAADTokenRequestServerTelemetry()
+        telemetry.currentRequestTelemetry = .init(
+            appId: 1234,
+            tokenCacheRefreshType: .proactiveTokenRefresh,
+            platformFields: ["ios"]
+        )!
+
+        let sut = try MSALNativeAuthSignInInitiateRequest(params: .init(
+            authority: params.authority,
+            clientId: params.clientId,
+            context: params.context,
+            username: params.username,
+            challengeType: .oob
+        ))
+
+        sut.configure(
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            serverTelemetry: telemetry
+        )
+
+        let expectedBodyParams = [
+            "client_id": params.clientId,
+            "username": params.username,
+            "challenge_type": "oob",
+        ]
+
+        XCTAssertEqual(sut.parameters, expectedBodyParams)
     }
 
     private func checkTelemetry(_ result: MSIDHttpRequestServerTelemetryHandling?, _ expected: MSIDAADTokenRequestServerTelemetry) {
@@ -95,8 +125,8 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
     private func checkBodyParams(_ result: [String: String]?) {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "flowToken": "Test Credential Token",
-            "otp": "Test OTP"
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "challenge_type": "password",
         ]
 
         XCTAssertEqual(result, expectedBodyParams)
@@ -105,7 +135,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
     private func checkUrlRequest(_ result: URLRequest?) {
         XCTAssertEqual(result?.httpMethod, MSALParameterStringForHttpMethod(.POST))
 
-        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + MSALNativeAuthEndpoint.verifyCode.rawValue)!
+        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + MSALNativeAuthEndpoint.signInInitiate.rawValue)!
         XCTAssertEqual(result?.url, expectedUrl)
     }
 }

@@ -22,39 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
+
+import XCTest
+@testable import MSAL
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
-
-    let authority: MSALNativeAuthAuthority
-    let clientId: String
-    let endpoint: MSALNativeAuthEndpoint
-    let context: MSIDRequestContext
-    let credentialToken: String
-    let challengeType: MSALNativeAuthChallengeType?
-    let challengeTarget: String?
-}
-
-// MARK: - Convenience init
-
-extension MSALNativeAuthSignInChallengeRequestParameters {
-
-    init(
-        authority: MSALNativeAuthAuthority,
-        clientId: String,
-        context: MSIDRequestContext,
-        credentialToken: String,
-        challengeType: MSALNativeAuthChallengeType? = nil,
-        challengeTarget: String? = nil
-    ) {
-        self.init(
-            authority: authority,
-            clientId: clientId,
-            endpoint: .signInChallenge,
-            context: context,
-            credentialToken: credentialToken,
-            challengeType: challengeType,
-            challengeTarget: challengeTarget
-        )
+final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
+    
+    func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
+        let baseUrl = URL(string: "www.contoso.com")!
+        var authority: MSALNativeAuthAuthority? = nil
+        XCTAssertNoThrow(authority = try MSALNativeAuthAuthority(baseUrl: baseUrl, tenant: "tenant", context: MSIDBasicContext()))
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(authority: authority!, clientId: "clientId", context: MSALNativeAuthRequestContextMock(), username: "username", credentialToken: "Test Credential Token", signInSLT: "Test SignIn SLT", grantType: .password, challengeType: .password, scope: "scope", password: "password", oob: "Test OTP Code")
+        var resultUrl: URL? = nil
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertEqual(resultUrl?.absoluteString, authority!.url.absoluteString + MSALNativeAuthEndpoint.signInToken.rawValue)
     }
 }
