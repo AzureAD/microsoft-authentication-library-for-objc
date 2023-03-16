@@ -27,6 +27,7 @@
 #import "MSIDTestAutomationAccountConfigurationRequest.h"
 #import "MSALADFSBaseUITest.h"
 #import "MSALBaseAADUITest.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @interface MSALCIAMTest : MSALBaseAADUITest
 
@@ -52,7 +53,7 @@
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
     appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMyOrg;
     appConfigurationRequest.testAppEnvironment = self.testEnvironment;
-    appConfigurationRequest.appId = self.primaryAccount.associatedAppID;
+    appConfigurationRequest.appId = self.primaryAccount.associatedAppID;;
     
     [self loadTestApp:appConfigurationRequest];
 }
@@ -63,7 +64,7 @@
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = @"https://substrate.office.com/profile//User.Read";
+    request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.promptBehavior = @"force";
     request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
     
