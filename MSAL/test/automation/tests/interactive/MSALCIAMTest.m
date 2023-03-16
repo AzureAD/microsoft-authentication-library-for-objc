@@ -53,7 +53,7 @@
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
     appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMyOrg;
     appConfigurationRequest.testAppEnvironment = self.testEnvironment;
-    appConfigurationRequest.appId = self.primaryAccount.associatedAppID;;
+    appConfigurationRequest.appId = self.primaryAccount.associatedAppID;
     
     [self loadTestApp:appConfigurationRequest];
 }
