@@ -1,7 +1,9 @@
+## [1.2.10]
+* Performed testing for CIAM behaviors in MSAL (#1668)
+
 ## [1.2.9]
 * Add more detailed error codes for JIT (#1639)
 * Add support for nested auth protocol (#1631)
-* Performed testing for CIAM behaviors in MSAL (#1668)
 
 ## [1.2.8]
 * Fix a crash when identity is nil during getting device registration information on iOS (#1184)
