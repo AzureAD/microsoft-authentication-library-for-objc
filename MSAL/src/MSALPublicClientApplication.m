@@ -872,7 +872,11 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
+    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
      
+    // Nested auth protocol
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -918,7 +922,11 @@
 #endif
     
     NSError *requestError = nil;
-    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams
+                                                                                                  forceRefresh:parameters.forceRefresh
+                                                                                                   skipLocalRt:MSIDSilentControllerUndefinedLocalRtUsage
+                                                                                          tokenRequestProvider:tokenRequestProvider
+                                                                                                         error:&requestError];
     
     if (!requestController)
     {
@@ -1104,16 +1112,12 @@
     MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
-    if (@available(iOS 13.0, *))
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
-    }
+    requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
     
     if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
     {
         brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
     }
     
     brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
@@ -1153,6 +1157,10 @@
         block(nil, msidError, nil);
         return;
     }
+    
+    // Nested auth protocol
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
@@ -1631,15 +1639,7 @@
 #if TARGET_OS_IPHONE
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
-    if (@available(iOS 13.0, *))
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-    }
-    
-    if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
-    {
-        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
-    }
+    requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
     
     // Parameter protocolType does not matter here
     MSIDBrokerInvocationOptions *brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType

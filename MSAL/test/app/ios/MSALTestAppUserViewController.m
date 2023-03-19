@@ -72,12 +72,16 @@
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
+    NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
-                                                                                                     authority:authority];
+                                                                                                     authority:authority
+                                                                                      nestedAuthBrokerClientId:nestedAuthBrokerClientId
+                                                                                   nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
@@ -90,28 +94,21 @@
     MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
     parameters.returnOnlySignedInAccounts = YES;
     
-    if (@available(iOS 13.0, *))
+    [application accountsFromDeviceForParameters:parameters
+                                 completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
     {
-        [application accountsFromDeviceForParameters:parameters
-                                     completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, __unused NSError * _Nullable error)
-        {
-            [self refreshWithAccounts:accounts];
-        }];
+        [self refreshWithAccounts:accounts];
+    }];
+    
+    [application getCurrentAccountWithParameters:parameters
+                                 completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
+    {
+        self.currentAccount = account;
         
-        [application getCurrentAccountWithParameters:parameters
-                                     completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
-        {
-            self.currentAccount = account;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [super refresh];
-            });
-        }];
-    }
-    else
-    {
-        [self refreshWithAccounts:[application accountsForParameters:parameters error:nil]];
-    }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [super refresh];
+        });
+    }];
 }
 
 - (void)refreshWithAccounts:(NSArray *)accounts

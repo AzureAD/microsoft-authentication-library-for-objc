@@ -254,6 +254,7 @@
 		6077D4A922498D87001798A2 /* MSALTenantProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 6077D4A822498D87001798A2 /* MSALTenantProfile.m */; };
 		6077D4AA22498D87001798A2 /* MSALTenantProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 6077D4A822498D87001798A2 /* MSALTenantProfile.m */; };
 		609AF9332256BD0C00E2978D /* MSALAccountsProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */; };
+		8893E96929B13A4C0017B148 /* MSALCIAMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8893E96729B13A4C0017B148 /* MSALCIAMTest.m */; };
 		94E876CE1E492D6000FB96ED /* MSALAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 94E876CB1E492D6000FB96ED /* MSALAuthority.m */; };
 		960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
 		960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
@@ -1205,6 +1206,7 @@
 		609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountsProviderTests.m; sourceTree = "<group>"; };
 		609AF958225B348900E2978D /* MSALTenantProfile+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALTenantProfile+Internal.h"; sourceTree = "<group>"; };
 		60DEF15A1E67756800966664 /* MSAL Test App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "MSAL Test App.entitlements"; path = "../../../../MSAL Test App.entitlements"; sourceTree = "<group>"; };
+		8893E96729B13A4C0017B148 /* MSALCIAMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCIAMTest.m; sourceTree = "<group>"; };
 		94E876B01E4556B400FB96ED /* MSAL.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAL.pch; sourceTree = "<group>"; };
 		94E876CA1E492D6000FB96ED /* MSALAuthority.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAuthority.h; sourceTree = "<group>"; };
 		94E876CB1E492D6000FB96ED /* MSALAuthority.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAuthority.m; sourceTree = "<group>"; };
@@ -1994,6 +1996,7 @@
 		B2BB73802112C3AC000EA4C5 /* interactive */ = {
 			isa = PBXGroup;
 			children = (
+				8893E96729B13A4C0017B148 /* MSALCIAMTest.m */,
 				B2BB73722112C32C000EA4C5 /* MSALAADBasicInteractiveTests.m */,
 				B2BB73742112C32C000EA4C5 /* Info.plist */,
 				B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */,
@@ -3733,6 +3736,7 @@
 				B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */,
 				B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */,
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,
+				8893E96929B13A4C0017B148 /* MSALCIAMTest.m in Sources */,
 				B2D0A38F21C71D900071E0DA /* MSALCacheRemovalTests.m in Sources */,
 				B282256223EF9BFF0007DFE4 /* MSALChinaCloudUITests.m in Sources */,
 				B2D0A38A21C70AF50071E0DA /* MSALPingUITests.m in Sources */,
@@ -4147,7 +4151,7 @@
 				ENABLE_BITCODE = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "MSAL (iOS Static Library)";
 			};
 			name = Debug;
@@ -4159,7 +4163,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_BITCODE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "MSAL (iOS Static Library)";
 			};
 			name = Release;
@@ -4171,7 +4175,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = "MSAL (macOS Static Library)";
 			};
 			name = Debug;
@@ -4182,7 +4186,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = "MSAL (macOS Static Library)";
 			};
 			name = Release;
@@ -4240,7 +4244,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/test/app/mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4303,7 +4307,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/test/app/mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
@@ -4326,7 +4330,7 @@
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4345,7 +4349,7 @@
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4405,7 +4409,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/test/unit/mac/unit-test-host/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4466,7 +4470,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/test/unit/mac/unit-test-host/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.unit-test-host";
@@ -4529,7 +4533,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4593,7 +4597,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MultiAppiOSTests;
@@ -4659,7 +4663,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks @executable_path/Frameworks $(inherited)";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4724,7 +4728,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks @executable_path/Frameworks $(inherited)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveiOSTests;
@@ -4751,7 +4755,7 @@
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
@@ -4772,7 +4776,7 @@
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
@@ -4789,7 +4793,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.1.24;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/**";
 			};
@@ -4803,7 +4807,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.1.24;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/**";
 			};
@@ -4816,7 +4820,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.1.24;
 			};
 			name = Debug;
@@ -4827,7 +4831,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.1.24;
 			};
 			name = Release;
@@ -4842,7 +4846,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/** $IDCORE_PATH/tests/mocks/**";
@@ -4858,7 +4862,7 @@
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/** $IDCORE_PATH/tests/mocks/**";
@@ -4872,7 +4876,7 @@
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/Contents/MacOS/unit-test-host-mac";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/** $IDCORE_PATH/tests/mocks/**";
@@ -4885,7 +4889,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/Contents/MacOS/unit-test-host-mac";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/** $IDCORE_PATH/tests/mocks/**";
@@ -4900,7 +4904,7 @@
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
@@ -4913,7 +4917,7 @@
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
