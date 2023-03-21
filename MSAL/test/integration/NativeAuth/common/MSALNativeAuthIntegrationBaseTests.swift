@@ -27,12 +27,7 @@ import XCTest
 class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     
     let mockAPIHandler = MockAPIHandler()
-
     var correlationId = UUID()
-
-    override func setUp()  {
-        correlationId = UUID()
-    }
 
     override func tearDown() {
         try? mockAPIHandler.clearQueues(correlationId: correlationId)

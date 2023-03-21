@@ -31,55 +31,55 @@ enum MockAPIError: Error {
 }
 
 enum MockAPIEndpoint: String {
-    case SignInInitiate
-    case SignInChallenge
-    case SignInToken
-    case SignUpStart
-    case SignUpChallenge
-    case SignUpContinue
-    case SSPRStart
-    case SSPRChallenge
-    case SSPRContinue
-    case SSPRSubmit
-    case SSPRPoll
+    case signInInitiate = "SignInInitiate"
+    case signInChallenge = "SignInChallenge"
+    case signInToken = "SignInToken"
+    case signUpStart = "SignUpStart"
+    case signUpChallenge = "SignUpChallenge"
+    case signUpContinue = "SignUpContinue"
+    case ssprStart = "SSPRStart"
+    case ssprChallenge = "SSPRChallenge"
+    case ssprContinue = "SSPRContinue"
+    case ssprSubmit = "SSPRSubmit"
+    case ssprPoll = "SSPRPoll"
 }
 
 enum MockAPIResponse: String {
-    case InvalidRequest
-    case InvalidToken
-    case InvalidClient
-    case InvalidGrant
-    case InvalidScope
-    case ExpiredToken
-    case InvalidPurposeToken
-    case AuthNotSupported
-    case UserAlreadyExists
-    case UserNotFound
-    case SlowDown
-    case InvalidPassword
-    case InvalidOOBValue
-    case PasswordTooWeak
-    case PasswordTooShort
-    case PasswordTooLong
-    case PasswordRecentlyUsed
-    case PasswordBanned
-    case AuthorizationPending
-    case ChallengeTypePassword
-    case ChallengeTypeOOB
-    case UnsupportedChallengeType
-    case ChallengeTypeRedirect
-    case CredentialRequired
-    case InitiateSuccess
-    case TokenSuccess
-    case AttributesRequired
-    case VerificationRequired
-    case ValidationFailed
-    case SSPRStartSuccess
-    case SSPRContinueSuccess
-    case SSPRSubmitSuccess
-    case SSPRPollSuccess
-    case SSPRPollInProgress
-    case SSPRPollFailed
+    case invalidRequest = "InvalidRequest"
+    case invalidToken = "InvalidToken"
+    case invalidClient = "InvalidClient"
+    case invalidGrant = "InvalidGrant"
+    case invalidScope = "InvalidScope"
+    case expiredToken = "ExpiredToken"
+    case invalidPurposeToken = "InvalidPurposeToken"
+    case authNotSupported = "AuthNotSupported"
+    case userAlreadyExists = "UserAlreadyExists"
+    case userNotFound = "UserNotFound"
+    case slowDown = "SlowDown"
+    case invalidPassword = "InvalidPassword"
+    case invalidOOBValue = "InvalidOOBValue"
+    case passwordTooWeak = "PasswordTooWeak"
+    case passwordTooShort = "PasswordTooShort"
+    case passwordTooLong = "PasswordTooLong"
+    case passwordRecentlyUsed = "PasswordRecentlyUsed"
+    case passwordBanned = "PasswordBanned"
+    case authorizationPending = "AuthorizationPending"
+    case challengeTypePassword = "ChallengeTypePassword"
+    case challengeTypeOOB = "ChallengeTypeOOB"
+    case unsupportedChallengeType = "UnsupportedChallengeType"
+    case challengeTypeRedirect = "ChallengeTypeRedirect"
+    case credentialRequired = "CredentialRequired"
+    case initiateSuccess = "InitiateSuccess"
+    case tokenSuccess = "TokenSuccess"
+    case attributesRequired = "AttributesRequired"
+    case verificationRequired = "VerificationRequired"
+    case validationFailed = "ValidationFailed"
+    case ssprStartSuccess = "SSPRStartSuccess"
+    case ssprContinueSuccess = "SSPRContinueSuccess"
+    case ssprSubmitSuccess = "SSPRSubmitSuccess"
+    case ssprPollSuccess = "SSPRPollSuccess"
+    case ssprPollInProgress = "SSPRPollInProgress"
+    case ssprPollFailed = "SSPRPollFailed"
 }
 
 // MARK: request body

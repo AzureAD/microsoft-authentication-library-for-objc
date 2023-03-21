@@ -28,7 +28,7 @@ final class MockAPIHandlerTest: MSALNativeAuthIntegrationBaseTests {
     
     func testAddNewResponse() async {
         do {
-            try await mockAPIHandler.addResponse(endpoint: .SignInInitiate, correlationId: correlationId, responses: [.InvalidClient, .UserNotFound])
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.invalidClient, .userNotFound])
         } catch {
             XCTFail("Unexpected error: \(error)")
         }
