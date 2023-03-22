@@ -1,6 +1,9 @@
 ## [TBD]
 * Add troubleshooting flow when doing Just in Time registration (#1646)
 
+## [1.2.10]
+* Performed testing for CIAM behaviors in MSAL (#1668)
+
 ## [1.2.9]
 * Add more detailed error codes for JIT (#1639)
 * Add support for nested auth protocol (#1631)
