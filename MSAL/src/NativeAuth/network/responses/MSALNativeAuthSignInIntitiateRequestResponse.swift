@@ -35,4 +35,14 @@ struct MSALNativeAuthSignInInitiateRequestResponse: Decodable {
         case credentialToken = "credential_token"
         case challengeType = "challenge_type"
     }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
+        self.challengeType = try container.decodeIfPresent(MSALNativeAuthChallengeType.self, forKey: .challengeType)
+        if (self.credentialToken == nil && self.challengeType == nil) ||
+            (self.credentialToken != nil && self.challengeType != nil) {
+            throw MSALNativeAuthError.responseSerializationError
+        }
+    }
 }

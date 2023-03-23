@@ -44,9 +44,10 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling
     ) {
-        self.serverTelemetry = serverTelemetry
-        self.requestSerializer = requestSerializer
         requestConfigurator.configure(self)
+        self.requestSerializer = requestSerializer
+        self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateRequestResponse>()
+        self.serverTelemetry = serverTelemetry
     }
 
     private func makeBodyRequestParameters(
