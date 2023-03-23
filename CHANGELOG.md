@@ -1,3 +1,6 @@
+## TBD
+* Updated extraDeviceInfo to include platform sso status on macOS
+
 ## [1.2.10]
 * Performed testing for CIAM behaviors in MSAL (#1668)
 
