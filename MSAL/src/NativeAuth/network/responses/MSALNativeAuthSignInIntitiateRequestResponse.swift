@@ -22,9 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthChallengeType: String, Decodable {
-    case oob
-    case password
-    case otp
-    case redirect
+import Foundation
+
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignInInitiateRequestResponse: Decodable {
+
+    // MARK: - Variables
+    let credentialToken: String?
+    let challengeType: MSALNativeAuthChallengeType?
+
+    enum CodingKeys: String, CodingKey {
+        case credentialToken = "credential_token"
+        case challengeType = "challenge_type"
+    }
 }
