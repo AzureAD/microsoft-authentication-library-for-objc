@@ -34,8 +34,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthSignUpRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .signUp,
             context: context,
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -90,8 +89,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         )!
 
         let sut = try MSALNativeAuthSignUpRequest(params: .init(
-            authority: params.authority,
-            clientId: params.clientId,
+            config: MSALNativeAuthConfigStubs.configuration,
             email: params.email,
             password: nil,
             attributes: "<attribute1: value1>",
@@ -106,7 +104,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "client_id": params.clientId,
+            "client_id": params.config.clientId,
             "grant_type": "passwordless_otp",
             "email": params.email,
             "customAttributes": "<attribute1: value1>",

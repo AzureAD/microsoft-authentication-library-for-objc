@@ -22,34 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import XCTest
 
-// swiftlint:disable:next type_name
-struct MSALNativeAuthVerifyCodeRequestParameters: MSALNativeAuthRequestable {
-
-    let config: MSALNativeAuthConfiguration
-    let endpoint: MSALNativeAuthEndpoint
-    let context: MSIDRequestContext
-    let credentialToken: String
-    let otp: String
-}
-
-// MARK: - Convenience init
-
-extension MSALNativeAuthVerifyCodeRequestParameters {
-
-    init(
-        config: MSALNativeAuthConfiguration,
-        credentialToken: String,
-        otp: String,
-        context: MSIDRequestContext
-    ) {
-        self.init(
-            config: config,
-            endpoint: .verifyCode,
-            context: context,
-            credentialToken: credentialToken,
-            otp: otp
-        )
+final class MockAPIHandlerTest: MSALNativeAuthIntegrationBaseTests {
+    
+    func testAddNewResponse() async {
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.invalidClient, .userNotFound])
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
     }
+    
+    func testGetAllConfig() async {
+        do {
+            print(try await mockAPIHandler.getAllConfig())
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
 }

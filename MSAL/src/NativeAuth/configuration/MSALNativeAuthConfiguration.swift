@@ -22,18 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@objcMembers
-// swiftlint:disable:next type_name
-public final class MSALNativeAuthPublicClientApplicationConfig: NSObject {
+@_implementationOnly import MSAL_Private
 
-    public let clientId: String
-    public let authority: URL
-    public let tenantName: String
+struct MSALNativeAuthConfiguration {
+    let clientId: String
+    let authority: MSIDAADAuthority
 
-    @objc(initWithClientId:authority:tenantName:)
-    public init(clientId: String, authority: URL, tenantName: String) {
+    init(clientId: String, authority: MSALAADAuthority, rawTenant: String? = nil) throws {
         self.clientId = clientId
-        self.authority = authority
-        self.tenantName = tenantName
+        self.authority = try MSIDAADAuthority(
+            url: authority.url,
+            rawTenant: rawTenant,
+            context: MSALNativeAuthRequestContext()
+        )
     }
 }

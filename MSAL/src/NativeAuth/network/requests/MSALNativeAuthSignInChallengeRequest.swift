@@ -49,11 +49,13 @@ final class MSALNativeAuthSignInChallengeRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInChallengeRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthSignInChallengeRequestParameters
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.clientId,
+            Key.clientId.rawValue: params.config.clientId,
             Key.credentialToken.rawValue: params.credentialToken,
             Key.challengeType.rawValue: params.challengeType?.rawValue,
             Key.challengeTarget.rawValue: params.challengeTarget

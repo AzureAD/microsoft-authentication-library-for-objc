@@ -36,8 +36,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthSignInInitiateRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .signInInitiate,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -88,8 +87,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
         )!
 
         let sut = try MSALNativeAuthSignInInitiateRequest(params: .init(
-            authority: params.authority,
-            clientId: params.clientId,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: params.context,
             username: params.username,
             challengeType: .oob
@@ -101,7 +99,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "client_id": params.clientId,
+            "client_id": params.config.clientId,
             "username": params.username,
             "challenge_type": "oob",
         ]

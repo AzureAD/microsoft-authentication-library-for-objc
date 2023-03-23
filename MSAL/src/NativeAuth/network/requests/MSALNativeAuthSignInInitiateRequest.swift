@@ -49,11 +49,13 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInInitiateRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthSignInInitiateRequestParameters
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.clientId,
+            Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,
             Key.challengeType.rawValue: params.challengeType.rawValue
         ].compactMapValues { $0 }

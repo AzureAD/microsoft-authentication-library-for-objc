@@ -31,12 +31,12 @@ import XCTest
 final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
     
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        let baseUrl = URL(string: "www.contoso.com")!
-        var authority: MSALNativeAuthAuthority? = nil
-        XCTAssertNoThrow(authority = try MSALNativeAuthAuthority(baseUrl: baseUrl, tenant: "tenant", context: MSIDBasicContext()))
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(authority: authority!, clientId: "clientId", context: MSALNativeAuthRequestContextMock(), username: "username", credentialToken: "Test Credential Token", signInSLT: "Test SignIn SLT", grantType: .password, challengeType: .password, scope: "scope", password: "password", oob: "Test OTP Code")
+        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+        var config: MSALNativeAuthConfiguration! = nil
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant")))
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(config:config, context: MSALNativeAuthRequestContextMock(), username: "username", credentialToken: "Test Credential Token", signInSLT: "Test SignIn SLT", grantType: .password, challengeType: .password, scope: "scope", password: "password", oob: "Test OTP Code")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
-        XCTAssertEqual(resultUrl?.absoluteString, authority!.url.absoluteString + MSALNativeAuthEndpoint.signInToken.rawValue)
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth/v2.0/token")
     }
 }

@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     private let factory: MSALNativeAuthResultBuildable
 
     init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
+        clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         responseHandler: MSALNativeAuthResponseHandling,
@@ -48,31 +48,21 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         self.factory = factory
 
         super.init(
-            configuration: configuration,
+            clientId: clientId,
             context: context,
             responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
     }
 
-    convenience init(
-        configuration: MSALNativeAuthPublicClientApplicationConfig,
-        authority: MSALNativeAuthAuthority,
-        context: MSIDRequestContext
-    ) {
+    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
         self.init(
-            configuration: configuration,
-            requestProvider: MSALNativeAuthRequestProvider(
-                clientId: configuration.clientId,
-                authority: authority
-            ),
+            clientId: config.clientId,
+            requestProvider: MSALNativeAuthRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             responseHandler: MSALNativeAuthResponseHandler(),
             context: context,
-            factory: MSALNativeAuthResultFactory(
-                authority: authority,
-                configuration: configuration
-            )
+            factory: MSALNativeAuthResultFactory(config: config)
         )
     }
 

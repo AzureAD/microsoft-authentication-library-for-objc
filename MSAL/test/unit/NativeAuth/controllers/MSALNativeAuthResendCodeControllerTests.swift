@@ -39,8 +39,7 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
 
     private var requestParametersStub: MSALNativeAuthResendCodeRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .resendCode,
             context: contextMock,
             credentialToken: "Test Credential Token"
@@ -64,7 +63,7 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
 
         sut = .init(
-            configuration: MSALNativeAuthConfigStubs.configuration,
+            clientId: DEFAULT_TEST_CLIENT_ID,
             requestProvider: requestProviderMock,
             responseHandler: responseHandlerMock,
             context: contextMock

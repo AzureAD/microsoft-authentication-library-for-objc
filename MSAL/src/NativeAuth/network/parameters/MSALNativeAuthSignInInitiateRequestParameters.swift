@@ -24,10 +24,10 @@
 
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable:next type_name
 struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable {
 
-    let authority: MSALNativeAuthAuthority
-    let clientId: String
+    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let username: String
@@ -39,15 +39,13 @@ struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable 
 extension MSALNativeAuthSignInInitiateRequestParameters {
 
     init(
-        authority: MSALNativeAuthAuthority,
-        clientId: String,
+        config: MSALNativeAuthConfiguration,
         context: MSIDRequestContext,
         username: String,
         challengeType: MSALNativeAuthChallengeType
     ) {
         self.init(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             endpoint: .signInInitiate,
             context: context,
             username: username,

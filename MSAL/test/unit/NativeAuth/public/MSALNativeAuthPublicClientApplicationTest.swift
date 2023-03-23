@@ -79,7 +79,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         override func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
             return MSALNativeAuthSignUpControllerCustomSuccess(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: MSALNativeAuthResponseHandlerMock(),
                 cacheAccessor: MSALNativeAuthCacheAccessorMock()
@@ -88,7 +88,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         override func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling {
             return MSALNativeAuthSignUpOTPControllerCustomSuccess(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: MSALNativeAuthResponseHandlerMock(),
                 cacheAccessor: MSALNativeAuthCacheAccessorMock()
@@ -97,7 +97,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         override func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
             return MSALNativeAuthSignInControllerCustomSuccess(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: MSALNativeAuthResponseHandlerMock(),
                 cacheAccessor: MSALNativeAuthCacheAccessorMock()
@@ -106,7 +106,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         override func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling {
             return MSALNativeAuthSignInOTPControllerCustomSuccess(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: MSALNativeAuthResponseHandlerMock(),
                 cacheAccessor: MSALNativeAuthCacheAccessorMock()
@@ -119,18 +119,24 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         override func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling {
             return MSALNativeAuthVerifyCodeControllerCustomSuccess(
-                configuration: MSALNativeAuthConfigStubs.configuration,
+                clientId: DEFAULT_TEST_CLIENT_ID,
                 context: MSALNativeAuthRequestContextMock(),
                 responseHandler: MSALNativeAuthResponseHandlerMock(),
                 cacheAccessor: MSALNativeAuthCacheAccessorMock()
             )
         }
     }
+
+    func testInit_whenPassingB2CAuthority_itShouldThrowError() throws {
+        let b2cAuthority = try MSALB2CAuthority(url: .init(string: "https://login.contoso.com")!)
+        let configuration = MSALPublicClientApplicationConfig(clientId: DEFAULT_TEST_CLIENT_ID, redirectUri: nil, authority: b2cAuthority)
+
+        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration))
+    }
     
     func testSignUp_whenValidationFails_shouldReturnAnError() {
         let expectation = XCTestExpectation()
-        let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "", authority: URL(string: "www.contoso.com")!, tenantName: "")
-        let application = MSALNativeAuthPublicClientApplication(configuration: config, controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
         application.signUp(parameters: MSALNativeAuthSignUpParameters(email: "", password: "")) { response, error in
             XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
             XCTAssertNil(response)
@@ -141,10 +147,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
     func testSignUp_whenControllerReturnAResult_ApplicationShouldMatchResult() {
         let expectation = XCTestExpectation()
-        let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "", authority: URL(string: "www.contoso.com")!, tenantName: "")
         let validator = MSALNativeAuthInputValidatorStub()
         validator.expectedResult = true
-        let application = MSALNativeAuthPublicClientApplication(configuration: config, controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(), inputValidator: validator)
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(), inputValidator: validator)
         application.signUp(parameters: MSALNativeAuthSignUpParameters(email: "", password: "")) { response, error in
             XCTAssertEqual(response?.stage, .completed)
             XCTAssertEqual(response?.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
@@ -160,7 +165,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -179,8 +183,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testSignUpOTP_whenValidationFails_shouldReturnAnError() {
         let expectation = XCTestExpectation()
-        let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "", authority: URL(string: "www.contoso.com")!, tenantName: "")
-        let application = MSALNativeAuthPublicClientApplication(configuration: config, controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
         application.signUp(otpParameters: MSALNativeAuthSignUpOTPParameters(email: "")) { response, error in
             XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
             XCTAssertNil(response)
@@ -196,7 +199,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -217,7 +219,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -236,8 +237,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testSignIn_whenValidationFails_shouldReturnAnError() {
         let expectation = XCTestExpectation()
-        let config = MSALNativeAuthPublicClientApplicationConfig(clientId: "", authority: URL(string: "www.contoso.com")!, tenantName: "")
-        let application = MSALNativeAuthPublicClientApplication(configuration: config, controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
         application.signIn(parameters: MSALNativeAuthSignInParameters(email: "", password: "")) { response, error in
             XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
             XCTAssertNil(response)
@@ -253,7 +253,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -274,7 +273,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -298,7 +296,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -319,7 +316,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -343,7 +339,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -362,7 +357,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -384,7 +378,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )
@@ -405,7 +398,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         validator.expectedResult = true
 
         let application = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthConfigStubs.configuration,
             controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
             inputValidator: validator
         )

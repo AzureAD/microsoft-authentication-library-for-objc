@@ -36,8 +36,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthSignInTokenRequestParameters {
         .init(
-            authority: MSALNativeAuthNetworkStubs.authority,
-            clientId: DEFAULT_TEST_CLIENT_ID,
+            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .signInToken,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -94,8 +93,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
         )!
 
         let sut = try MSALNativeAuthSignInTokenRequest(params: .init(
-            authority: params.authority,
-            clientId: params.clientId,
+            config: MSALNativeAuthConfigStubs.configuration,
             context: params.context,
             username: nil,
             credentialToken: nil,
@@ -113,7 +111,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "client_id": params.clientId,
+            "client_id": params.config.clientId,
             "grant_type": "password"
         ]
 

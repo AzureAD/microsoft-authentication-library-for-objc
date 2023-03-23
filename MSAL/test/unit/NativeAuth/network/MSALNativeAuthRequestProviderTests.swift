@@ -32,10 +32,7 @@ final class MSALNativeAuthRequestProviderTests: XCTestCase {
     let telemetryProvider = MSALNativeAuthTelemetryProvider()
 
     override func setUpWithError() throws {
-        sut = MSALNativeAuthRequestProvider(
-            clientId: DEFAULT_TEST_CLIENT_ID,
-            authority: MSALNativeAuthNetworkStubs.authority
-        )
+        sut = MSALNativeAuthRequestProvider(config: MSALNativeAuthConfigStubs.configuration)
     }
 
     func test_signUpRequest_is_created_successfully() throws {

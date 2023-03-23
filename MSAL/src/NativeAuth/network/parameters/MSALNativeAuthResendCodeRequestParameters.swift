@@ -29,8 +29,7 @@ import Foundation
 // swiftlint:disable:next type_name
 struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
 
-    let authority: MSALNativeAuthAuthority
-    let clientId: String
+    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let credentialToken: String
@@ -41,14 +40,12 @@ struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
 extension MSALNativeAuthResendCodeRequestParameters {
 
     init(
-        authority: MSALNativeAuthAuthority,
-        clientId: String,
+        config: MSALNativeAuthConfiguration,
         credentialToken: String,
         context: MSIDRequestContext
     ) {
         self.init(
-            authority: authority,
-            clientId: clientId,
+            config: config,
             endpoint: .resendCode,
             context: context,
             credentialToken: credentialToken

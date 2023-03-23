@@ -23,21 +23,13 @@
 // THE SOFTWARE.
 
 import XCTest
-@testable import MSAL
 
-final class MSALNativeAuthAuthorityTests: XCTestCase {
+class MSALNativeAuthIntegrationBaseTests: XCTestCase {
+    
+    let mockAPIHandler = MockAPIHandler()
+    var correlationId = UUID()
 
-    func test_authority_returns_correct_url() throws {
-        let tenant = "myTenant"
-        let sut = try MSALNativeAuthAuthority(tenant: tenant, context: MSALNativeAuthRequestContext())
-
-        XCTAssertEqual(sut.url, URL(string: "https://devexclientauthsdkmockapi.azure-api.net/v1.0/myTenant"))
-    }
-
-    func test_authority_returns_correct_realm() throws {
-        let tenant = "myTenant"
-        let sut = try MSALNativeAuthAuthority(tenant: tenant, context: MSALNativeAuthRequestContext())
-
-        XCTAssertEqual(sut.realm, tenant)
+    override func tearDown() {
+        try? mockAPIHandler.clearQueues(correlationId: correlationId)
     }
 }

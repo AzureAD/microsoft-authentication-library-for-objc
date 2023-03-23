@@ -49,11 +49,13 @@ final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInTokenRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthSignInTokenRequestParameters
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.clientId,
+            Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,
             Key.credentialToken.rawValue: params.credentialToken,
             Key.signInSLT.rawValue: params.signInSLT,
