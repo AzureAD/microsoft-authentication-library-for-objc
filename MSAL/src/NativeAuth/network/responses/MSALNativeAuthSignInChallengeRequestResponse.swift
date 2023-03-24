@@ -45,16 +45,4 @@ struct MSALNativeAuthSignInChallengeRequestResponse: Decodable {
         case codeLength = "code_length"
         case interval = "interval"
     }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decode(MSALNativeAuthChallengeType.self, forKey: .challengeType)
-        self.bindingMethod = try container.decodeIfPresent(String.self, forKey: .bindingMethod)
-        self.displayName = try container.decodeIfPresent(String.self, forKey: .displayName)
-        self.displayType = try container.decodeIfPresent(String.self, forKey: .displayType)
-        self.codeLength = try container.decodeIfPresent(String.self, forKey: .codeLength)
-        // Interval should be 5 if not present in JSON
-        self.interval = try container.decodeIfPresent(Double.self, forKey: .interval) ?? 5
-    }
 }
