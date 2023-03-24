@@ -367,7 +367,7 @@
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
 #if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
-        extraDeviceInfoDict[MSID_PLATFORM_SSO_STATUS] = @"MSIDPlatformSSOEnabledAndRegistered";
+        deviceInfo.platformSSOStatus = MSIDPlatformSSOEnabledAndRegistered;
 #endif
         deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         
@@ -389,10 +389,10 @@
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
 #if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
-        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_PLATFORM_SSO_STATUS], @"MSIDPlatformSSOEnabledAndRegistered");
+        XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSOEnabledAndRegistered);
 #endif
 #if TARGET_OS_IPHONE
-        XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_PLATFORM_SSO_STATUS]);
+        XCTAssertNil(deviceInformation.platformSSOStatus);
 #endif
         [successExpectation fulfill];
     }];
@@ -469,8 +469,8 @@
         MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
+        deviceInfo.platformSSOStatus = MSIDPlatformSSONotEnabled;
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
-        extraDeviceInfoDict[MSID_PLATFORM_SSO_STATUS] = @"MSIDPlatformSSONotEnabled";
         deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         callback(deviceInfo, nil);
     }];
@@ -485,7 +485,7 @@
     {
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
-        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_PLATFORM_SSO_STATUS], @"MSIDPlatformSSONotEnabled");
+        XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSONotEnabled);
         [successExpectation fulfill];
     }];
     
