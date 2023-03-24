@@ -391,9 +391,6 @@
 #if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
         XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSOEnabledAndRegistered);
 #endif
-#if TARGET_OS_IPHONE
-        XCTAssertNil(deviceInformation.platformSSOStatus);
-#endif
         [successExpectation fulfill];
     }];
     

@@ -2016,7 +2016,7 @@
                 XCTAssertNotNil(error);
     }];    
 }
-
+#if TARGET_OS_OSX
 - (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoWithPlatformSSOStatus API_AVAILABLE(ios(13.0), macos(10.15))
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
@@ -2040,7 +2040,9 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+
         msidDeviceInfo.platformSSOStatus = MSIDPlatformSSOEnabledAndRegistered;
+        
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
@@ -2066,6 +2068,7 @@
     
     [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
 }
+#endif
 
 #if TARGET_OS_IPHONE
 
