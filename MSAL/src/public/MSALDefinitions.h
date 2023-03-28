@@ -158,6 +158,27 @@ typedef NS_ENUM(NSUInteger, MSALDeviceMode)
 };
 
 /**
+ Platform SSO status on macOS device
+ */
+typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
+{
+    /*
+        Administrator hasn't configured Platform SSO in sso config.
+    */
+    MSALPlatformSSONotEnabled,
+    
+    /*
+     Administrator has configured Platform SSO in sso config. But device has not been registred with AAD via platform SSO
+     */
+    MSALPlatformSSOEnabledNotRegistered,
+    
+    /*
+     Administrator has configured Platform SSO in sso config and the device is registred with AAD via platform SSO
+     */
+    MSALPlatformSSOEnabledAndRegistered
+};
+
+/**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
