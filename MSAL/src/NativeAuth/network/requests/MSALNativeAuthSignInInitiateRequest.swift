@@ -42,12 +42,14 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
     func configure(
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
-        serverTelemetry: MSIDHttpRequestServerTelemetryHandling
+        serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer
         self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateRequestResponse>()
         self.serverTelemetry = serverTelemetry
+        self.errorHandler = errorHandler
     }
 
     private func makeBodyRequestParameters(

@@ -24,27 +24,16 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
-struct MSALNativeAuthSignInInitiateRequestResponse: Decodable {
+enum NativeAuthOauth2ErrorCode: String, Decodable {
 
-    // MARK: - Variables
-    let credentialToken: String?
-    let challengeType: MSALNativeAuthChallengeType?
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case invalidGrant = "invalid_grant"
+    case expiredToken = "expired_token"
+    case unsupportedChallengeType = "unsupported_challenge_type"
+    case invalidScope = "invalid_scope"
+    case authorizationPending = "authorization_pending"
+    case slowDown = "slow_down"
+    case credentialRequired = "credential_required"
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "credential_token"
-        case challengeType = "challenge_type"
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decodeIfPresent(MSALNativeAuthChallengeType.self, forKey: .challengeType)
-        if self.credentialToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-        if self.credentialToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-    }
 }
