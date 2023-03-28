@@ -58,6 +58,10 @@ class EmailAndPasswordViewController: UIViewController {
             resultTextView.text = "email or password not set"
             return
         }
+
+        showOTPModal()
+
+        return
                 
         appContext.signIn(parameters: MSALNativeAuthSignInParameters(email: email, password: password)) { response, error in
             if let error = error {
@@ -71,4 +75,42 @@ class EmailAndPasswordViewController: UIViewController {
             }
         }
     }
+
+    func showOTPModal() {
+            guard let vc = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController else {
+                return
+            }
+
+            vc.otpSubmittedCallback = { [self] otp in
+                DispatchQueue.main.async { [self] in
+                    Task {
+                            showResultText("Submitted OTP: \(otp)")
+                            dismiss(animated: true)
+
+                        updateUI()
+                    }
+                }
+            }
+
+            present(vc, animated: true)
+        }
+
+    func showResultText(_ text: String) {
+        resultTextView.text = text
+    }
+
+    func updateUI() {
+        let signedIn = true
+
+        if signedIn {
+            signUpButton.isEnabled = false
+            signInButton.isEnabled = false
+            signOutButton.isEnabled = true
+        } else {
+            signUpButton.isEnabled = true
+            signInButton.isEnabled = true
+            signOutButton.isEnabled = false
+        }
+    }
+
 }
