@@ -32,7 +32,7 @@ public class MSALNativeError: LocalizedError {
     init(message: String? = nil) {
         self.message = message
     }
-    
+
     public var errorDescription: String? {
         message
     }
@@ -41,7 +41,7 @@ public class MSALNativeError: LocalizedError {
 @objcMembers
 public class SignUpError: MSALNativeError {
     let type: SignUpErrorType
-    
+
     init(type: SignUpErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
@@ -51,7 +51,7 @@ public class SignUpError: MSALNativeError {
 @objcMembers
 public class VerifyCodeError: MSALNativeError {
     let type: VerifyCodeErrorType
-    
+
     init(type: VerifyCodeErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
@@ -61,7 +61,7 @@ public class VerifyCodeError: MSALNativeError {
 @objcMembers
 public class PasswordRequiredError: MSALNativeError {
     let type: PasswordRequiredErrorType
-    
+
     init(type: PasswordRequiredErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
@@ -71,7 +71,7 @@ public class PasswordRequiredError: MSALNativeError {
 @objcMembers
 public class AttributeRequiredError: MSALNativeError {
     let type: AttributeRequiredErrorType
-    
+
     init(type: AttributeRequiredErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
@@ -82,7 +82,7 @@ public class AttributeRequiredError: MSALNativeError {
 @objc
 public enum SignUpErrorType: Int {
     case userExists
-    case passwordValidation
+    case passwordInvalid
     case invalidAttributes
     case generalError
 }
@@ -91,6 +91,7 @@ public enum SignUpErrorType: Int {
 public enum VerifyCodeErrorType: Int {
     case generalError
     case invalidOOB
+    case tooManyOOB
 }
 
 @objc
@@ -116,10 +117,8 @@ public protocol VerifyCodeDelegate {
     func completed()
     //TODO: do we need the state for the error? can the ext dev use the existing flow instance?
     func onError(error: VerifyCodeError, state: OOBSentFlow?)
-    //TODO: do we need this method for verifyCode?
     func onRedirect()
     func passwordRequired(flow: PasswordRequiredFlow)
-    //question for Rodhan, can we fall here after email verification?
     func attributesRequired(flow: AttributeRequiredFlow)
 }
 
@@ -127,7 +126,7 @@ public protocol PasswordRequiredDelegate {
     func completed()
     //TODO: do we need the state for the error? can the ext dev use the existing flow instance?
     func onError(error: PasswordRequiredError, state: PasswordRequiredFlow?)
-    //TODO: do we need this method for passwordRequired?
+    // TODO: exception
     func onRedirect()
     func attributesRequired(flow: AttributeRequiredFlow)
 }
@@ -154,8 +153,8 @@ public class OOBSentFlow {
         delegate.onOOBSent(flow: self)
     }
 
-    public func verifyCode(otp: String, flow: VerifyCodeDelegate, correlationId: UUID? = nil) {
-        flow.completed()
+    public func verifyCode(otp: String, callback: VerifyCodeDelegate, correlationId: UUID? = nil) {
+        callback.completed()
     }
 }
 
@@ -167,7 +166,7 @@ public class PasswordRequiredFlow {
         self.credentialToken = credentialToken
     }
 
-    public func setPassword(password: String, flow: PasswordRequiredDelegate, correlationId: UUID? = nil) {
+    public func setPassword(password: String, callback: PasswordRequiredDelegate, correlationId: UUID? = nil) {
         
     }
 }
@@ -180,7 +179,7 @@ public class AttributeRequiredFlow {
         self.credentialToken = credentialToken
     }
 
-    public func setAttributes(attributes: [String: Any], flow: AttributeRequiredDelegate, correlationId: UUID? = nil) {
+    public func setAttributes(attributes: [String: Any], callback: AttributeRequiredDelegate, correlationId: UUID? = nil) {
         
     }
 }
@@ -244,6 +243,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public func signUp(email: String, password: String?, attributes: [String: Any], correlationId: UUID?, callback: SignUpDelegate) {
         callback.onError(error: SignUpError(type: SignUpErrorType.userExists))
     }
+    
+    public func signIn(email: String, password: String?, correlationId: UUID?, callback: SignInStartDelegate) {
+        callback.onError(error: SignInStartError(type: SignInStartErrorType.userNotFound))
+    }
+    
     
     // MARK: - Async/Await
 

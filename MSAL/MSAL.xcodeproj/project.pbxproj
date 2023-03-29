@@ -241,6 +241,7 @@
 		23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2811CDD8296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2811CDD7296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift */; };
 		2811CDDA296F1945007BA21B /* MSALNativeAuthSignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2811CDD9296F1945007BA21B /* MSALNativeAuthSignUpController.swift */; };
+		2814F2BD29D3067A0034B121 /* MSALLoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */; };
 		287F64D4297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */; };
 		287F64D5297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */; };
 		287F64D92981781A00ED90BD /* MSALNativeAuthSignInParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D82981781A00ED90BD /* MSALNativeAuthSignInParameters.swift */; };
@@ -1364,6 +1365,7 @@
 		23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonDeserializable.h; sourceTree = "<group>"; };
 		2811CDD7296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRequestControllerFactory.swift; sourceTree = "<group>"; };
 		2811CDD9296F1945007BA21B /* MSALNativeAuthSignUpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpController.swift; sourceTree = "<group>"; };
+		2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALLoginModel.swift; sourceTree = "<group>"; };
 		287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTelemetryProviderTests.swift; sourceTree = "<group>"; };
 		287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCurrentRequestTelemetryTests.swift; sourceTree = "<group>"; };
 		287F64D82981781A00ED90BD /* MSALNativeAuthSignInParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInParameters.swift; sourceTree = "<group>"; };
@@ -1943,6 +1945,14 @@
 				DEC1E431298C07EC00948BED /* MSALNativeAuthVerifyCodeController.swift */,
 			);
 			path = controllers;
+			sourceTree = "<group>";
+		};
+		2814F2B429D3065E0034B121 /* login */ = {
+			isa = PBXGroup;
+			children = (
+				2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */,
+			);
+			path = login;
 			sourceTree = "<group>";
 		};
 		287F64D1297EC27200ED90BD /* telemetry */ = {
@@ -2978,6 +2988,7 @@
 		E260964129489CA60060DD7C /* public */ = {
 			isa = PBXGroup;
 			children = (
+				2814F2B429D3065E0034B121 /* login */,
 				E2FC92F029364E1200DD7C95 /* MSALNativeAuthDefinitions.swift */,
 				E282FB4C2943B1610014345B /* MSALNativeAuthenticationResult.swift */,
 				E2DC31BB29AFA1E700051CE7 /* MSALNativeAuthPublicClientApplication.swift */,
@@ -4593,6 +4604,7 @@
 				287F64D92981781A00ED90BD /* MSALNativeAuthSignInParameters.swift in Sources */,
 				96B5E6E22256D166002232F9 /* MSALTelemetryConfig.m in Sources */,
 				E2FC92F129364E1200DD7C95 /* MSALNativeAuthDefinitions.swift in Sources */,
+				2814F2BD29D3067A0034B121 /* MSALLoginModel.swift in Sources */,
 				DEF9D989296EC26A006CB384 /* MSALNativeAuthCurrentRequestTelemetry.swift in Sources */,
 				B253151B23DD607600432133 /* MSALDeviceInformation.m in Sources */,
 				963377C1211E14C600943EE0 /* MSALWebviewType.m in Sources */,
