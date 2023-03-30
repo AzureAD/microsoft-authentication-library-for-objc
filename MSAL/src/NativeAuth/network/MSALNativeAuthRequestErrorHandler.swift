@@ -93,10 +93,14 @@ final class MSALNativeAuthRequestErrorHandler: NSObject, MSIDHttpRequestErrorHan
             }
 
             do {
-                let responseErrorObject = try JSONDecoder()
+                let errorObject = try JSONDecoder()
                     .decode(MSALNativeAuthErrorRequestResponse.self, from: data ?? Data())
                 if let completionBlock = completionBlock {
-                    completionBlock(responseErrorObject, error)
+                    let innerError = MSALNativeAuthRequestError(error: errorObject.error,
+                                                           errorDescription: errorObject.errorDescription,
+                                                           errorURI: errorObject.errorURI,
+                                                           innerErrors: errorObject.innerErrors)
+                    completionBlock(nil, innerError)
                 }
             } catch {
                 if let completionBlock = completionBlock {

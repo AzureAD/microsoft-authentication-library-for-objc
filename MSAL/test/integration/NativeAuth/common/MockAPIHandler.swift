@@ -27,8 +27,10 @@ import XCTest
 class MockAPIHandler {
     
     private let baseURL = "https://native-ux-mock-api.azurewebsites.net/config/"
-    
+    private var shouldClearQueue = false
+
     func clearQueues(correlationId: UUID) throws {
+        guard shouldClearQueue else { return }
         guard let url = URL(string: baseURL + "all") else {
             XCTFail("Invalid Delete URL")
             throw MockAPIError.invalidURL
@@ -52,6 +54,7 @@ class MockAPIHandler {
     }
     
     func addResponse(endpoint: MockAPIEndpoint, correlationId: UUID, responses: [MockAPIResponse]) async throws {
+        shouldClearQueue = true
         guard let url = URL(string: baseURL + "response") else {
             XCTFail("Invalid add response URL")
             throw MockAPIError.invalidURL

@@ -27,28 +27,138 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private var sut: MSALNativeAuthRequestProvider!
+    private var provider: MSALNativeAuthRequestProvider!
     let telemetryProvider = MSALNativeAuthTelemetryProvider()
 
     override func setUpWithError() throws {
-        sut = MSALNativeAuthRequestProvider(config: config)
+        provider = MSALNativeAuthRequestProvider(config: config)
         try super.setUpWithError()
     }
 
-    func test_createSendAndRecieveRequest_correctParameters() {
+    func test_succeedRequest_correctParameters() {
+        let request = createCorrectRequest()
+        let expectation = XCTestExpectation()
+        request.send { result, error in
+            if let result = result as? MSALNativeAuthSignInInitiateRequestResponse {
+                XCTAssertNotNil(result.credentialToken)
+            } else {
+                XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateRequestResponse")
+            }
+            expectation.fulfill()
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    func test_succeedRequest_challengeTypeRedirect() async {
+        let expectation = XCTestExpectation()
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.challengeTypeRedirect])
+            let request = createCorrectRequest()
+            request.send { result, error in
+                if let result = result as? MSALNativeAuthSignInInitiateRequestResponse {
+                    XCTAssertNotNil(result.challengeType)
+                } else {
+                    XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateRequestResponse")
+                }
+                expectation.fulfill()
+            }
+
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    func test_failRequest_incorrectParameters() {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config,
                                                                        context: context,
-                                                                       username: "test@test.com",
+                                                                       username: "",
                                                                        challengeType: .otp)
 
-        let request = try! sut.signInInitiateRequest(parameters: parameters,
-                                                    context: context)
+        let request = try! provider.signInInitiateRequest(parameters: parameters,
+                                                     context: context)
         let expectation = XCTestExpectation()
         request.send { result, error in
-            print(result)
+            if let error = error as? MSALNativeAuthRequestError {
+                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidRequest)
+            } else {
+                XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
+            }
             expectation.fulfill()
         }
-        XCTWaiter().wait(for: [expectation], timeout: 5)
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    func test_failRequest_invalidClient() async {
+        let expectation = XCTestExpectation()
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.invalidClient])
+            let request = createCorrectRequest()
+            request.send { result, error in
+                print("Response received \(String(describing: self.correlationId))")
+                if let error = error as? MSALNativeAuthRequestError {
+                    XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidClient)
+                } else {
+                    XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
+                }
+                expectation.fulfill()
+            }
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    func test_failRequest_userNotFound() async {
+        let expectation = XCTestExpectation()
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.userNotFound])
+            let request = createCorrectRequest()
+            request.send { result, error in
+                if let error = error as? MSALNativeAuthRequestError {
+                    XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+                } else {
+                    XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
+                }
+                expectation.fulfill()
+            }
+
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    func test_failRequest_unsupportedChallengeType() async {
+        let expectation = XCTestExpectation()
+        do {
+            try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.unsupportedChallengeType])
+            let request = createCorrectRequest()
+
+            request.send { result, error in
+                if let error = error as? MSALNativeAuthRequestError {
+                    XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.unsupportedChallengeType)
+                } else {
+                    XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
+                }
+                expectation.fulfill()
+            }
+
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 10)
+    }
+
+    private func createCorrectRequest() -> MSALNativeAuthSignInInitiateRequest {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config,
+                                                                       context: context,
+                                                                       username: "test@contoso.com",
+                                                                       challengeType: .otp)
+
+        return try! provider.signInInitiateRequest(parameters: parameters,
+                                                          context: context)
     }
 }
