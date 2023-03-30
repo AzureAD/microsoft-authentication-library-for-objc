@@ -242,6 +242,7 @@
 		2811CDD8296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2811CDD7296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift */; };
 		2811CDDA296F1945007BA21B /* MSALNativeAuthSignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2811CDD9296F1945007BA21B /* MSALNativeAuthSignUpController.swift */; };
 		2814F2BD29D3067A0034B121 /* MSALLoginModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */; };
+		2814F2C029D5895C0034B121 /* MSALResetPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2814F2BF29D5895C0034B121 /* MSALResetPasswordModel.swift */; };
 		287F64D4297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */; };
 		287F64D5297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */; };
 		287F64D92981781A00ED90BD /* MSALNativeAuthSignInParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D82981781A00ED90BD /* MSALNativeAuthSignInParameters.swift */; };
@@ -1366,6 +1367,7 @@
 		2811CDD7296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRequestControllerFactory.swift; sourceTree = "<group>"; };
 		2811CDD9296F1945007BA21B /* MSALNativeAuthSignUpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpController.swift; sourceTree = "<group>"; };
 		2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALLoginModel.swift; sourceTree = "<group>"; };
+		2814F2BF29D5895C0034B121 /* MSALResetPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALResetPasswordModel.swift; sourceTree = "<group>"; };
 		287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTelemetryProviderTests.swift; sourceTree = "<group>"; };
 		287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCurrentRequestTelemetryTests.swift; sourceTree = "<group>"; };
 		287F64D82981781A00ED90BD /* MSALNativeAuthSignInParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInParameters.swift; sourceTree = "<group>"; };
@@ -1953,6 +1955,14 @@
 				2814F2BC29D3067A0034B121 /* MSALLoginModel.swift */,
 			);
 			path = login;
+			sourceTree = "<group>";
+		};
+		2814F2BE29D5893F0034B121 /* resetPassword */ = {
+			isa = PBXGroup;
+			children = (
+				2814F2BF29D5895C0034B121 /* MSALResetPasswordModel.swift */,
+			);
+			path = resetPassword;
 			sourceTree = "<group>";
 		};
 		287F64D1297EC27200ED90BD /* telemetry */ = {
@@ -2988,6 +2998,7 @@
 		E260964129489CA60060DD7C /* public */ = {
 			isa = PBXGroup;
 			children = (
+				2814F2BE29D5893F0034B121 /* resetPassword */,
 				2814F2B429D3065E0034B121 /* login */,
 				E2FC92F029364E1200DD7C95 /* MSALNativeAuthDefinitions.swift */,
 				E282FB4C2943B1610014345B /* MSALNativeAuthenticationResult.swift */,
@@ -4586,6 +4597,7 @@
 				DE0FECAC2993AD3700B139A8 /* MSALNativeAuthResendCodeRequestResponse.swift in Sources */,
 				23A68A7C20F538B90071E435 /* MSALB2CAuthority.m in Sources */,
 				6077D4A922498D87001798A2 /* MSALTenantProfile.m in Sources */,
+				2814F2C029D5895C0034B121 /* MSALResetPasswordModel.swift in Sources */,
 				A0274CD824B54A4E00BD198D /* MSALDevicePopManagerUtil.m in Sources */,
 				B223B0C022ADFACB00FB8713 /* MSALLegacySharedAccount.m in Sources */,
 				D61BD2AF1EBD09F90007E484 /* MSALLogger.m in Sources */,

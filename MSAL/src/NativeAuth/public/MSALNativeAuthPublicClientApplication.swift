@@ -24,6 +24,10 @@
 
 import Foundation
 
+public enum ChallengeType {
+    case oob
+    case password
+}
 
 @objcMembers
 public class MSALNativeError: LocalizedError {
@@ -206,7 +210,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: config)
     }
 
-    public init(clientId: String, rawTenant: String? = nil, redirectUri: String? = nil) throws {
+    public init(clientId: String, challengeTypes: [ChallengeType], rawTenant: String? = nil, redirectUri: String? = nil) throws {
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
             .authority(rawTenant: rawTenant)
 
@@ -248,186 +252,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         callback.onError(error: SignInStartError(type: SignInStartErrorType.userNotFound))
     }
     
+    public func resetPassword(email: String, correlationId: UUID?, callback: ResetPasswordStartDelegate) {
+        
+    }
     
-    // MARK: - Async/Await
-
-    public func signUp(parameters: MSALNativeAuthSignUpParameters) async -> AuthResult {
-        return await withCheckedContinuation { continuation in
-            signUp(parameters: parameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                }
-            }
-        }
-    }
-
-    public func signUp(parameters: MSALNativeAuthSignUpOTPParameters) async -> AuthResult {
-        return await withCheckedContinuation { continuation in
-            signUp(otpParameters: parameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                }
-            }
-        }
-    }
-
-    public func signIn(parameters: MSALNativeAuthSignInParameters) async -> AuthResult {
-        return await withCheckedContinuation { continuation in
-            signIn(parameters: parameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                    assert(false)
-                }
-            }
-        }
-    }
-
-    public func signIn(otpParameters: MSALNativeAuthSignInOTPParameters) async -> AuthResult {
-        return await withCheckedContinuation { continuation in
-            signIn(otpParameters: otpParameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    assert(false)
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                }
-            }
-        }
-    }
-
-    public func resendCode(parameters: MSALNativeAuthResendCodeParameters) async -> ResendCodeResult {
-        return await withCheckedContinuation { continuation in
-            resendCode(parameters: parameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                    assert(false)
-                }
-            }
-        }
-    }
-
-    public func verifyCode(parameters: MSALNativeAuthVerifyCodeParameters) async -> AuthResult {
-        return await withCheckedContinuation { continuation in
-            verifyCode(parameters: parameters) { result, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                } else if let result = result {
-                    continuation.resume(returning: .success(result))
-                } else {
-                    continuation.resume(returning: .failure(MSALNativeAuthError.generalError))
-                    assert(false)
-                }
-            }
-        }
-    }
-
-    public func getUserAccount() async -> UserAccountResult {
-        return await withCheckedContinuation { continuation in
-            getUserAccount { _, _ in
-                continuation.resume(returning: .success(.init(email: "", attributes: [:])))
-            }
-        }
-    }
-
-    // MARK: - Closures
-
-    public func signUp(
-        parameters: MSALNativeAuthSignUpParameters,
-        completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
-    ) {
-        guard inputValidator.isEmailValid(parameters.email) else {
-            completion(nil, MSALNativeAuthError.invalidInput)
-            return
-        }
-
-        let controller = controllerFactory.makeSignUpController(
-            with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        )
-
-        controller.signUp(parameters: parameters, completion: completion)
-    }
-
-    public func signUp(
-        otpParameters: MSALNativeAuthSignUpOTPParameters,
-        completion: @escaping (_ response: MSALNativeAuthResponse?, _ error: Error?) -> Void
-    ) {
-        guard inputValidator.isEmailValid(otpParameters.email) else {
-            completion(nil, MSALNativeAuthError.invalidInput)
-            return
-        }
-
-        let controller = controllerFactory.makeSignUpOTPController(
-            with: MSALNativeAuthRequestContext(correlationId: otpParameters.correlationId)
-        )
-
-        controller.signUp(parameters: otpParameters, completion: completion)
-    }
-
-    public func signIn(
-        parameters: MSALNativeAuthSignInParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
-    ) {
-        guard inputValidator.isEmailValid(parameters.email) else {
-            completion(nil, MSALNativeAuthError.invalidInput)
-            return
-        }
-
-        let controller = controllerFactory.makeSignInController(
-            with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        )
-        controller.signIn(parameters: parameters, completion: completion)
-    }
-
-    public func signIn(
-        otpParameters: MSALNativeAuthSignInOTPParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
-    ) {
-        guard inputValidator.isEmailValid(otpParameters.email) else {
-            completion(nil, MSALNativeAuthError.invalidInput)
-            return
-        }
-
-        let controller = controllerFactory.makeSignInOTPController(
-            with: MSALNativeAuthRequestContext(correlationId: otpParameters.correlationId)
-        )
-        controller.signIn(parameters: otpParameters, completion: completion)
-    }
-
-    public func resendCode(
-        parameters: MSALNativeAuthResendCodeParameters,
-        completion: @escaping (_ credentialToken: String?, _ error: Error?) -> Void) {
-            let resendCodeController = controllerFactory
-                .makeResendCodeController(with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId))
-            resendCodeController.resendCode(parameters: parameters, completion: completion)
-        }
-
-    public func verifyCode(
-        parameters: MSALNativeAuthVerifyCodeParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
-            let controller = controllerFactory.makeVerifyCodeController(
-                with: MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-            )
-            controller.verifyCode(parameters: parameters, completion: completion)
-        }
-
     public func getUserAccount(completion: @escaping (MSALNativeAuthUserAccount, Error) -> Void) {
 
     }
