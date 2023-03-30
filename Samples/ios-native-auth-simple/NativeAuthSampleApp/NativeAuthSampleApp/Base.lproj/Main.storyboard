@@ -410,7 +410,7 @@
                             <constraint firstItem="GeJ-Ip-lat" firstAttribute="leading" secondItem="l3g-9B-c0u" secondAttribute="leading" constant="20" id="i4q-Ev-ONH"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Custom Attributes" image="compass.drawing" catalog="system" id="Noo-Ha-6Pb"/>
+                    <tabBarItem key="tabBarItem" title="Custom Attributes" image="list.bullet.rectangle" catalog="system" id="Noo-Ha-6Pb"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c7g-Zp-i0p" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -511,7 +511,7 @@
                             <constraint firstItem="HCQ-Ay-TF3" firstAttribute="trailing" secondItem="5Ea-MT-hib" secondAttribute="trailing" constant="20" id="pt3-8L-Chv"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Password Reset" id="rZj-Cb-72Y"/>
+                    <tabBarItem key="tabBarItem" title="Password Reset" image="questionmark.key.filled" catalog="system" id="rZj-Cb-72Y"/>
                     <connections>
                         <outlet property="emailTextField" destination="bNb-JY-hyR" id="9Kf-bY-IVB"/>
                         <outlet property="resultTextView" destination="1hd-wN-wPj" id="3C4-uw-RCb"/>
@@ -519,7 +519,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zzw-zP-n1k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3021" y="742"/>
+            <point key="canvasLocation" x="1445" y="742"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="n6k-av-6OL">
@@ -567,11 +567,11 @@
                             <constraint firstItem="3CI-rT-LSC" firstAttribute="trailing" secondItem="fC0-Hj-2R6" secondAttribute="trailingMargin" id="oC1-QM-YQb"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="SwiftUI" id="cXd-GF-1rd"/>
+                    <tabBarItem key="tabBarItem" title="SwiftUI" image="swift" catalog="system" id="cXd-GF-1rd"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HXQ-A1-7zZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1431" y="742"/>
+            <point key="canvasLocation" x="3057" y="742"/>
         </scene>
         <!--Fallback to Web UX-->
         <scene sceneID="VzO-k9-MWo">
@@ -596,7 +596,7 @@
                             <constraint firstItem="3ya-kM-TsQ" firstAttribute="top" secondItem="I9O-ez-rIW" secondAttribute="top" id="hU1-wm-ZCJ"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Fallback to Web UX" id="pDE-hZ-QNr"/>
+                    <tabBarItem key="tabBarItem" title="Fallback to Web UX" image="globe.badge.chevron.backward" catalog="system" id="pDE-hZ-QNr"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sW6-ta-w18" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -830,9 +830,12 @@
         </scene>
     </scenes>
     <resources>
-        <image name="compass.drawing" catalog="system" width="99" height="128"/>
+        <image name="globe.badge.chevron.backward" catalog="system" width="128" height="114"/>
+        <image name="list.bullet.rectangle" catalog="system" width="128" height="93"/>
         <image name="number.square" catalog="system" width="128" height="114"/>
+        <image name="questionmark.key.filled" catalog="system" width="128" height="86"/>
         <image name="rectangle.and.pencil.and.ellipsis" catalog="system" width="128" height="80"/>
+        <image name="swift" catalog="system" width="128" height="108"/>
         <systemColor name="labelColor">
             <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
