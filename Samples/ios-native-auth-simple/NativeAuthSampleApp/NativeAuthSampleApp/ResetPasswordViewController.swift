@@ -40,11 +40,12 @@ class ResetPasswordViewController: UIViewController {
     }
 
     func showOTPModal() {
-        guard let vc = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController else {
+        guard let otpViewController = storyboard?.instantiateViewController(
+            withIdentifier: "OTPViewController") as? OTPViewController else {
             return
         }
 
-        vc.otpSubmittedCallback = { [self] otp in
+        otpViewController.otpSubmittedCallback = { [self] otp in
             DispatchQueue.main.async { [self] in
                 Task {
                     showResultText("Submitted OTP: \(otp)")
@@ -52,20 +53,20 @@ class ResetPasswordViewController: UIViewController {
                     dismiss(animated: true) {
                         self.showNewPasswordModal()
                     }
-
                 }
             }
         }
 
-        present(vc, animated: true)
+        present(otpViewController, animated: true)
     }
 
     func showNewPasswordModal() {
-        guard let vc = storyboard?.instantiateViewController(withIdentifier: "NewPasswordViewController") as? NewPasswordViewController else {
+        guard let newPasswordViewController = storyboard?.instantiateViewController(
+            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController else {
             return
         }
 
-        vc.passwordSubmittedCallback = { [self] password in
+        newPasswordViewController.passwordSubmittedCallback = { [self] password in
             DispatchQueue.main.async { [self] in
                 Task {
                     showResultText("Submitted new Password: \(password)")
@@ -74,24 +75,10 @@ class ResetPasswordViewController: UIViewController {
             }
         }
 
-        present(vc, animated: true)
+        present(newPasswordViewController, animated: true)
     }
-
-
 
     func showResultText(_ text: String) {
         resultTextView.text = text
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

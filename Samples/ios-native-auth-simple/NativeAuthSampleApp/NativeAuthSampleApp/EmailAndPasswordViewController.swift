@@ -26,31 +26,31 @@ import UIKit
 import MSAL
 
 class EmailAndPasswordViewController: UIViewController {
-    
+
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
-    
+
     @IBOutlet weak var signUpButton: UIButton!
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
-    
+
     var appContext: MSALNativeAuthPublicClientApplication!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         appContext = MSALNativeAuthPublicClientApplication(
             configuration: MSALNativeAuthPublicClientApplicationConfig(
                 clientId: "clientId",
                 authority: URL(string: "https://example.com")!,
                 tenantName: "tenant"))
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        //TODO: Call appContext.getUserAccount() and update UI accordingly
+
+        // TODO: Call appContext.getUserAccount() and update UI accordingly
     }
 
     @IBAction func signInTapped(_ sender: Any) {
@@ -60,40 +60,27 @@ class EmailAndPasswordViewController: UIViewController {
         }
 
         showOTPModal()
-
-        return
-                
-        appContext.signIn(parameters: MSALNativeAuthSignInParameters(email: email, password: password)) { response, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    debugPrint("Error: \(error)")
-                    self.resultTextView.text = "Error: \(error.localizedDescription)"
-                }
-                
-            } else {
-                debugPrint("sign in response: ", response ?? "nil")
-            }
-        }
     }
 
     func showOTPModal() {
-            guard let vc = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController else {
-                return
-            }
+        guard let otpViewController = storyboard?.instantiateViewController(
+            withIdentifier: "OTPViewController") as? OTPViewController else {
+            return
+        }
 
-            vc.otpSubmittedCallback = { [self] otp in
-                DispatchQueue.main.async { [self] in
-                    Task {
-                            showResultText("Submitted OTP: \(otp)")
-                            dismiss(animated: true)
+        otpViewController.otpSubmittedCallback = { [self] otp in
+            DispatchQueue.main.async { [self] in
+                Task {
+                    showResultText("Submitted OTP: \(otp)")
+                    dismiss(animated: true)
 
-                        updateUI()
-                    }
+                    updateUI()
                 }
             }
-
-            present(vc, animated: true)
         }
+
+        present(otpViewController, animated: true)
+    }
 
     func showResultText(_ text: String) {
         resultTextView.text = text
