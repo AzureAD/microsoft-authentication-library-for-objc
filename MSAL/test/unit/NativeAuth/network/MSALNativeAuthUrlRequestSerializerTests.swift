@@ -37,7 +37,7 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         let url = URL(string: DEFAULT_TEST_RESOURCE)!
         request = URLRequest(url: url)
 
-        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext())
+        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext(), encoding: .json)
     }
 
     func test_serialize_successfully() throws {

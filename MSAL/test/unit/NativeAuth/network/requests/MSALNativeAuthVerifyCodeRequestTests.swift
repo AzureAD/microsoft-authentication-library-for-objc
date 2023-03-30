@@ -70,7 +70,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
         let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
             serverTelemetry: telemetry
         )
 

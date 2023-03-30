@@ -117,7 +117,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 
@@ -152,7 +152,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 
@@ -174,7 +174,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context, encoding: .wwwFormUrlEncoded),
             serverTelemetry: serverTelemetry
         )
 
@@ -196,7 +196,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context, encoding: .wwwFormUrlEncoded),
             serverTelemetry: serverTelemetry
         )
 
@@ -218,13 +218,12 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context, encoding: .wwwFormUrlEncoded),
             serverTelemetry: serverTelemetry
         )
 
         return request
     }
-
 
     // MARK: - SignIn with Password
 
@@ -250,7 +249,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 
@@ -280,7 +279,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 
@@ -308,7 +307,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         )
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 
@@ -336,7 +335,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             context: context)
 
         request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: params.context, encoding: .json),
             serverTelemetry: serverTelemetry
         )
 

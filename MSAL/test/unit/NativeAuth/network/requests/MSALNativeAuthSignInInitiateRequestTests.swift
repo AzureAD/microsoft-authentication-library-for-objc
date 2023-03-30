@@ -70,7 +70,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
         let sut = try MSALNativeAuthSignInInitiateRequest(params: params)
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .wwwFormUrlEncoded),
             serverTelemetry: telemetry
         )
 
@@ -94,7 +94,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
         ))
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .wwwFormUrlEncoded),
             serverTelemetry: telemetry
         )
 
