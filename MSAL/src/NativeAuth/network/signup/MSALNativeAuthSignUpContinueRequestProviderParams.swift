@@ -22,17 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthChallengeType: String, Decodable {
-    case oob
-    case password
-    case otp
-    case redirect
-}
+@_implementationOnly import MSAL_Private
 
-extension Array where Element == MSALNativeAuthChallengeType {
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignUpContinueRequestProviderParams {
+    let grantType: MSALNativeAuthGrantType
+    let signUpToken: String
+    let password: String?
+    let oob: String?
+    let attributes: [String: Any]?
+    let context: MSIDRequestContext
 
-    func toString() -> String {
-        self.map { $0.rawValue }
-            .joined(separator: " ")
+    init(
+        grantType: MSALNativeAuthGrantType,
+        signUpToken: String,
+        password: String? = nil,
+        oob: String? = nil,
+        attributes: [String : Any]? = nil,
+        context: MSIDRequestContext
+    ) {
+        self.grantType = grantType
+        self.signUpToken = signUpToken
+        self.password = password
+        self.oob = oob
+        self.attributes = attributes
+        self.context = context
     }
 }

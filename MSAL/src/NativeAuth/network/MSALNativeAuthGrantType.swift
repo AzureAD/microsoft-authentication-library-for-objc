@@ -28,4 +28,5 @@ enum MSALNativeAuthGrantType: String {
     case oob
     case refreshToken = "refresh_token"
     case slt
+    case attributes
 }

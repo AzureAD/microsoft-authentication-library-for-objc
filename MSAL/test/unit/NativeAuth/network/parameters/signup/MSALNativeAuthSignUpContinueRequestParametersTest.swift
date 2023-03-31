@@ -22,17 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthChallengeType: String, Decodable {
-    case oob
-    case password
-    case otp
-    case redirect
-}
+import Foundation
 
-extension Array where Element == MSALNativeAuthChallengeType {
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-    func toString() -> String {
-        self.map { $0.rawValue }
-            .joined(separator: " ")
+final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
+
+    func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
+        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+        var config: MSALNativeAuthConfiguration! = nil
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant")))
+        let parameters = MSALNativeAuthSignUpContinueRequestParameters(config: config, grantType: .oob, signUpToken: "token", oob: "1234", context: MSALNativeAuthRequestContextMock())
+        var resultUrl: URL? = nil
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/continue")
     }
 }

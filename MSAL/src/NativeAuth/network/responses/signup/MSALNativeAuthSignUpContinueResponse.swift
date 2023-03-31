@@ -22,17 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthChallengeType: String, Decodable {
-    case oob
-    case password
-    case otp
-    case redirect
-}
+import Foundation
 
-extension Array where Element == MSALNativeAuthChallengeType {
+struct MSALNativeAuthSignUpContinueResponse: Decodable {
+    let signinSLT: String?
+    let expiresIn: Int?
+    let signupToken: String?
 
-    func toString() -> String {
-        self.map { $0.rawValue }
-            .joined(separator: " ")
+    enum CodingKeys: String, CodingKey {
+        case expiresIn, signupToken
+        case signinSLT = "signinSlt"
     }
 }

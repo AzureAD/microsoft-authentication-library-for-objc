@@ -24,6 +24,7 @@
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
 class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     
@@ -32,7 +33,137 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
                                                                                authority: MSALAADAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
                                                                                rawTenant: "test")
+    var sut: MSIDHttpRequest!
+    
     override func tearDown() {
         try? mockAPIHandler.clearQueues(correlationId: correlationId)
+    }
+
+    func performTestSucceed<T: Any>() async -> T? {
+        return await withCheckedContinuation { continuation in
+            let exp = expectation(description: "msal_native_auth_integration_test_exp")
+
+            sut.send { response, error in
+                guard error == nil else {
+                    XCTFail("Error should be nil")
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                guard let response = response as? T else {
+                    XCTFail("Response should be castable to `T`")
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                continuation.resume(returning: response)
+                exp.fulfill()
+            }
+
+            wait(for: [exp], timeout: 3)
+        }
+    }
+
+    func performTestFail() async -> MSALNativeAuthRequestError? {
+        return await withCheckedContinuation { continuation  in
+            let exp = expectation(description: "msal_native_auth_integration_test_exp")
+
+            sut.send { response, error in
+                guard response == nil else {
+                    XCTFail("Response should be nil")
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                guard let error = error as? MSALNativeAuthRequestError else {
+                    XCTFail("Error should be MSALNativeAuthRequestError")
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                continuation.resume(returning: error)
+                exp.fulfill()
+            }
+
+            wait(for: [exp], timeout: 3)
+        }
+    }
+
+    // MARK: - Common Fail test cases
+
+    func perform_testFail_invalidClient() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .invalidClient)
+    }
+
+    func perform_testFail_invalidPurposeToken() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .invalidRequest)
+
+        guard let innerError = response?.innerErrors?.first else {
+            return XCTFail("There should be an inner error")
+        }
+
+        XCTAssertEqual(innerError.error, .invalidPurposeToken)
+        XCTAssertNotNil(innerError.errorDescription)
+    }
+
+    func perform_testFail_expiredToken() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .expiredToken)
+    }
+
+    func perform_testFail_unsupportedChallengeType() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .unsupportedChallengeType)
+    }
+
+    func perform_testFail_passwordTooWeak() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .passwordTooWeak)
+    }
+
+    func perform_testFail_passwordTooShort() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .passwordTooShort)
+    }
+
+    func perform_testFail_passwordTooLong() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .passwordTooLong)
+    }
+
+    func perform_testFail_passwordRecentlyUsed() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .passwordRecentlyUsed)
+    }
+
+    func perform_testFail_passwordBanned() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .passwordBanned)
+    }
+
+    func perform_testFail_userAlreadyExists() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .userAlreadyExists)
+    }
+
+    func perform_testFail_attributesRequired() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .attributesRequired)
+        XCTAssertNotNil(response?.signUpToken)
+    }
+
+    func perform_testFail_verificationRequired() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .verificationRequired)
+        XCTAssertNotNil(response?.signUpToken)
+        XCTAssertNotNil(response?.attributesToVerify)
+    }
+
+    func perform_testFail_validationFailed() async {
+        let response = await performTestFail()
+        XCTAssertEqual(response?.error, .validationFailed)
+        XCTAssertNotNil(response?.signUpToken)
     }
 }

@@ -142,4 +142,55 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         let resultingLog = Self.logger.messages[0] as! String
         XCTAssertTrue(resultingLog.contains("HTTP body request serialization failed"))
     }
+
+    func test_serializeUrlForm_successfully() {
+        let parameters = [
+            "clientId": DEFAULT_TEST_CLIENT_ID,
+            "grantType": "oob",
+            "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "12345",
+            "scope": DEFAULT_TEST_SCOPE
+        ]
+
+        let headers = [
+            "custom-header": "value"
+        ]
+
+        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext(), encoding: .wwwFormUrlEncoded)
+
+        let result = sut.serialize(with: request, parameters: parameters, headers: headers)
+        let bodyResultFormUrlEncoded = String(data: result.httpBody!, encoding: .utf8)
+
+        let expectedScope = "scope=\(DEFAULT_TEST_SCOPE)"
+        let expectedClientId = "clientId=\(DEFAULT_TEST_CLIENT_ID)"
+        let expectedGrantType = "grantType=oob"
+        let expectedEmail = "email=\(DEFAULT_TEST_ID_TOKEN_USERNAME)"
+        let expectedPassword = "password=12345"
+
+        let expectedBodyResult = "\(expectedScope)&\(expectedClientId)&\(expectedGrantType)&\(expectedEmail)&\(expectedPassword)"
+
+        XCTAssertEqual(bodyResultFormUrlEncoded?.sorted(), expectedBodyResult.sorted())
+
+        let httpHeadersResult = result.allHTTPHeaderFields!
+
+        XCTAssertEqual(httpHeadersResult.count, 2)
+        XCTAssertEqual(httpHeadersResult["Content-Type"], "application/x-www-form-urlencoded")
+        XCTAssertEqual(httpHeadersResult["custom-header"], "value")
+    }
+
+    func test_when_passingEmptyBodyParamsUsingUrlForm_it_still_succeeds() throws {
+        let expectation = expectation(description: "Body request serialization error")
+        expectation.isInverted = true
+
+        Self.logger.expectation = expectation
+
+        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext(), encoding: .wwwFormUrlEncoded)
+
+        let result = sut.serialize(with: request, parameters: [:], headers: [:])
+
+        wait(for: [expectation], timeout: 1)
+
+        let bodyResultFormUrlEncoded = String(data: result.httpBody!, encoding: .utf8)!
+        XCTAssertTrue(bodyResultFormUrlEncoded.isEmpty)
+    }
 }
