@@ -83,6 +83,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
                 print("Response received \(self.correlationId)")
                 if let error = error as? MSALNativeAuthRequestError {
                     XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidClient)
+                    XCTAssertNotNil(error.errorDescription)
+                    XCTAssertNotNil(error.errorURI)
                 } else {
                     XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
                 }
@@ -102,6 +104,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
             request.send { result, error in
                 if let error = error as? MSALNativeAuthRequestError {
                     XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+                    XCTAssertNotNil(error.errorDescription)
+                    XCTAssertNotNil(error.errorURI)
                 } else {
                     XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
                 }
@@ -123,6 +127,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
             request.send { result, error in
                 if let error = error as? MSALNativeAuthRequestError {
                     XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.unsupportedChallengeType)
+                    XCTAssertNotNil(error.errorDescription)
+                    XCTAssertNotNil(error.errorURI)
                 } else {
                     XCTFail("MSALNativeAuthSignInInitiateRequest should fail with error of type MSALNativeAuthRequestError for this test")
                 }

@@ -33,7 +33,7 @@ struct MSALNativeAuthSignInChallengeRequestResponse: Decodable {
     let bindingMethod: String?
     let displayName: String?
     let displayType: String?
-    let codeLength: String?
+    let codeLength: Int?
     let interval: Double?
 
     enum CodingKeys: String, CodingKey {
