@@ -5633,6 +5633,10 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host";
+				USER_HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					$IDCORE_PATH/src,
+				);
 			};
 			name = Debug;
 		};
@@ -5702,6 +5706,10 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host";
+				USER_HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					$IDCORE_PATH/src,
+				);
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
