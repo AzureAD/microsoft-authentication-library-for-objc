@@ -101,7 +101,6 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
             try await mockAPIHandler.addResponse(endpoint: .signInChallenge, correlationId: correlationId, responses: [.invalidClient])
             let request = createRequest()
             request.send { result, error in
-                print("Response received \(self.correlationId)")
                 if let error = error as? MSALNativeAuthRequestError {
                     XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidClient)
                 } else {

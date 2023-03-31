@@ -34,7 +34,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try super.setUpWithError()
     }
 
-    func test_succeedRequest_credentialToken() async {
+    func test_succeedRequest_initiateSuccess() async {
         let expectation = XCTestExpectation()
         do {
             try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.initiateSuccess])
@@ -80,7 +80,6 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
             try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.invalidClient])
             let request = createRequest()
             request.send { result, error in
-                print("Response received \(self.correlationId)")
                 if let error = error as? MSALNativeAuthRequestError {
                     XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidClient)
                     XCTAssertNotNil(error.errorDescription)
