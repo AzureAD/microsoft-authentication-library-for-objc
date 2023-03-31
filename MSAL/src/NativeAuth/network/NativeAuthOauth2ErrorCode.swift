@@ -29,6 +29,7 @@ enum NativeAuthOauth2ErrorCode: String, Decodable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case invalidGrant = "invalid_grant"
+    case invalidPurposeToken = "invalid_purpose_token"
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
     case invalidScope = "invalid_scope"

@@ -28,11 +28,11 @@ class MSALNativeAuthRequestError: Error {
     let error: NativeAuthOauth2ErrorCode
     let errorDescription: String?
     let errorURI: String?
-    let innerErrors: [[String: String]]?
+    let innerErrors: [MSALNativeInnerError]?
     init(error: NativeAuthOauth2ErrorCode,
          errorDescription: String?,
          errorURI: String?,
-         innerErrors: [[String: String]]? ) {
+         innerErrors: [MSALNativeInnerError]? ) {
         self.error = error
         self.errorDescription = errorDescription
         self.errorURI = errorURI
