@@ -34,6 +34,7 @@ class SampleMSALAuthentication {
     let kCurrentAccountIdentifier = "MSALCurrentAccountIdentifier"
     
     let kAuthority = "https://login.microsoftonline.com/"
+    let application = MSALNativeAuthPublicClientApplication(clientId: kClientId, challengeTypes: [.oob, .password])
     
     // Singleton instance
     static let shared = SampleMSALAuthentication()

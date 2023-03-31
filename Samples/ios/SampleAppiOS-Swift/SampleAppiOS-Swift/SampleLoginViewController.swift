@@ -43,18 +43,48 @@ class SampleLoginViewController: UIViewController {
     }
     
     @IBAction func signIn(_ sender: Any) {
-        
-        SampleMSALAuthentication.shared.signInAccount(parentController: self, completion: {
-            (account, token, error) in
-            
-            if let error = error {
-                print("App error: \(error)")
-                return
-            }
-            
-            let appDelegate = UIApplication.shared.delegate as! AppDelegate
-            appDelegate.showMainVC()
-        })
+        SampleMSALAuthentication.shared.application.signIn(email: "email", password: "password", callback: self)
     }
 
+}
+
+extension SampleLoginViewController: SignInStartDelegate, VerifyCodeSignInDelegate {
+    func completed(result: MSAL.MSALNativeAuthenticationResult) {
+        <#code#>
+    }
+    
+    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInOOBSentState?) {
+        switch (error.type) {
+        case .generalError:
+            <#code#>
+        case .invalidOOB:
+            <#code#>
+        case .tooManyOOB:
+            <#code#>
+        }
+    }
+    
+    func onOOBSent(flow: MSAL.SignInOOBSentState) {
+        flow.resendCode(delegate: self)
+        flow.verifyCode(otp: "12345", flow: self)
+    }
+    
+    func onError(error: MSAL.SignInStartError) {
+        switch (error.type) {
+        case .userNotFound:
+            <#code#>
+        case .passwordInvalid:
+            <#code#>
+        case .generalError:
+            <#code#>
+        case .invalidAuthenticationType:
+            error.errorDescription
+        }
+    }
+    
+    func onRedirect() {
+        <#code#>
+    }
+    
+    
 }
