@@ -31,10 +31,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
 
     override func setUpWithError() throws {
-        let config = try MSALNativeAuthConfiguration(
-            clientId: "726E6501-BF0F-4A8B-9DDC-2ECF189DF7A7",
-            authority: try .init(url: URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!, rawTenant: nil)
-        )
+        try super.setUpWithError()
 
         provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
             config: config,
@@ -48,7 +45,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_whenSignUpChallengePassword_succeeds() async throws {
-        try await mockResponse(.challengeTypePassword)
+        try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
         let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .password)
@@ -61,7 +58,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_whenSignUpChallengeOOB_succeeds() async throws {
-        try await mockResponse(.challengeTypeOOB)
+        try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .oob)
@@ -74,7 +71,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_whenSignUpChallenge_redirects() async throws {
-        try await mockResponse(.challengeTypeRedirect)
+        try await mockResponse(.challengeTypeRedirect, endpoint: .signUpChallenge)
         let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .redirect)
@@ -87,30 +84,18 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_signUpChallenge_invalidClient() async throws {
-        try await mockResponse(.invalidClient)
-        await perform_testFail_invalidClient()
+        try await perform_testFail_invalidClient(endpoint: .signUpChallenge)
     }
 
     func test_signUpChallenge_invalidPurposeToken() async throws {
-        try await mockResponse(.invalidPurposeToken)
-        await perform_testFail_invalidPurposeToken()
+        try await perform_testFail_invalidPurposeToken(endpoint: .signUpChallenge)
     }
 
     func test_signUpChallenge_expiredToken() async throws {
-        try await mockResponse(.expiredToken)
-        await perform_testFail_expiredToken()
+        try await perform_testFail_expiredToken(endpoint: .signUpChallenge)
     }
 
     func test_signUpChallenge_unsupportedChallengeType() async throws {
-        try await mockResponse(.unsupportedChallengeType)
-        await perform_testFail_unsupportedChallengeType()
-    }
-
-    private func mockResponse(_ response: MockAPIResponse) async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpChallenge,
-            correlationId: correlationId,
-            responses: [response]
-        )
+        try await perform_testFail_unsupportedChallengeType(endpoint: .signUpChallenge)
     }
 }

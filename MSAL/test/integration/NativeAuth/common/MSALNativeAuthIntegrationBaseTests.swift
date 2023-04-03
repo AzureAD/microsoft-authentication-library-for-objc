@@ -89,14 +89,25 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         }
     }
 
+    func mockResponse(_ response: MockAPIResponse, endpoint: MockAPIEndpoint) async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: endpoint,
+            correlationId: correlationId,
+            responses: [response]
+        )
+    }
+
     // MARK: - Common Fail test cases
 
-    func perform_testFail_invalidClient() async {
+    func perform_testFail_invalidClient(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.invalidClient, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .invalidClient)
     }
 
-    func perform_testFail_invalidPurposeToken() async {
+    func perform_testFail_invalidPurposeToken(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.invalidPurposeToken, endpoint: endpoint)
+
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .invalidRequest)
 
@@ -108,60 +119,74 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         XCTAssertNotNil(innerError.errorDescription)
     }
 
-    func perform_testFail_expiredToken() async {
+    func perform_testFail_expiredToken(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.expiredToken, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .expiredToken)
     }
 
-    func perform_testFail_unsupportedChallengeType() async {
+    func perform_testFail_unsupportedChallengeType(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.unsupportedChallengeType, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .unsupportedChallengeType)
     }
 
-    func perform_testFail_passwordTooWeak() async {
+    func perform_testFail_passwordTooWeak(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.passwordTooWeak, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .passwordTooWeak)
     }
 
-    func perform_testFail_passwordTooShort() async {
+    func perform_testFail_passwordTooShort(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.passwordTooShort, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .passwordTooShort)
     }
 
-    func perform_testFail_passwordTooLong() async {
+    func perform_testFail_passwordTooLong(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.passwordTooLong, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .passwordTooLong)
     }
 
-    func perform_testFail_passwordRecentlyUsed() async {
+    func perform_testFail_passwordRecentlyUsed(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.passwordRecentlyUsed, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .passwordRecentlyUsed)
     }
 
-    func perform_testFail_passwordBanned() async {
+    func perform_testFail_passwordBanned(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.passwordBanned, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .passwordBanned)
     }
 
-    func perform_testFail_userAlreadyExists() async {
+    func perform_testFail_userAlreadyExists(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.userAlreadyExists, endpoint: endpoint)
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .userAlreadyExists)
     }
 
-    func perform_testFail_attributesRequired() async {
+    func perform_testFail_attributesRequired(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.attributesRequired, endpoint: endpoint)
+
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .attributesRequired)
         XCTAssertNotNil(response?.signUpToken)
     }
 
-    func perform_testFail_verificationRequired() async {
+    func perform_testFail_verificationRequired(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.verificationRequired, endpoint: endpoint)
+
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .verificationRequired)
         XCTAssertNotNil(response?.signUpToken)
         XCTAssertNotNil(response?.attributesToVerify)
     }
 
-    func perform_testFail_validationFailed() async {
+    func perform_testFail_validationFailed(endpoint: MockAPIEndpoint) async throws {
+        try await mockResponse(.validationFailed, endpoint: endpoint)
+
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .validationFailed)
         XCTAssertNotNil(response?.signUpToken)

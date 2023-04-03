@@ -30,20 +30,8 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
     private var context: MSIDRequestContext!
 
-    private var params: MSALNativeAuthSignUpContinueRequestProviderParams {
-        .init(
-            grantType: .password,
-            signUpToken: "<token>",
-            password: "12345",
-            context: context
-        )
-    }
-
     override func setUpWithError() throws {
-        let config = try MSALNativeAuthConfiguration(
-            clientId: "726E6501-BF0F-4A8B-9DDC-2ECF189DF7A7",
-            authority: try .init(url: URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!, rawTenant: nil)
-        )
+        try super.setUpWithError()
 
         provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
             config: config,
@@ -51,6 +39,15 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
 
         context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        let params = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .password,
+            signUpToken: "<token>",
+            password: "12345",
+            context: context
+        )
+
+        sut = try provider.continue(params: params)
     }
 
     func test_signUpContinue_withPassword_succeeds() async throws {
@@ -87,75 +84,51 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     }
 
     func test_signUpChallenge_invalidClient() async throws {
-        try await mockResponse(.invalidClient)
-        sut = try provider.continue(params: params)
-        await perform_testFail_invalidClient()
+        try await perform_testFail_invalidClient(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_invalidPurposeToken() async throws {
-        try await mockResponse(.invalidPurposeToken)
-        sut = try provider.continue(params: params)
-        await perform_testFail_invalidPurposeToken()
+        try await perform_testFail_invalidPurposeToken(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_expiredToken() async throws {
-        try await mockResponse(.expiredToken)
-        sut = try provider.continue(params: params)
-        await perform_testFail_expiredToken()
+        try await perform_testFail_expiredToken(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_passwordTooWeak() async throws {
-        try await mockResponse(.passwordTooWeak)
-        sut = try provider.continue(params: params)
-        await perform_testFail_passwordTooWeak()
+        try await perform_testFail_passwordTooWeak(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_passwordTooShort() async throws {
-        try await mockResponse(.passwordTooShort)
-        sut = try provider.continue(params: params)
-        await perform_testFail_passwordTooShort()
+        try await perform_testFail_passwordTooShort(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_passwordTooLong() async throws {
-        try await mockResponse(.passwordTooLong)
-        sut = try provider.continue(params: params)
-        await perform_testFail_passwordTooLong()
+        try await perform_testFail_passwordTooLong(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_passwordRecentlyUsed() async throws {
-        try await mockResponse(.passwordRecentlyUsed)
-        sut = try provider.continue(params: params)
-        await perform_testFail_passwordRecentlyUsed()
+        try await perform_testFail_passwordRecentlyUsed(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_passwordBanned() async throws {
-        try await mockResponse(.passwordBanned)
-        sut = try provider.continue(params: params)
-        await perform_testFail_passwordBanned()
+        try await perform_testFail_passwordBanned(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_userAlreadyExists() async throws {
-        try await mockResponse(.userAlreadyExists)
-        sut = try provider.continue(params: params)
-        await perform_testFail_userAlreadyExists()
+        try await perform_testFail_userAlreadyExists(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_attributesRequired() async throws {
-        try await mockResponse(.attributesRequired)
-        sut = try provider.continue(params: params)
-        await perform_testFail_attributesRequired()
+        try await perform_testFail_attributesRequired(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_verificationRequired() async throws {
-        try await mockResponse(.verificationRequired)
-        sut = try provider.continue(params: params)
-        await perform_testFail_verificationRequired()
+        try await perform_testFail_verificationRequired(endpoint: .signUpContinue)
     }
 
     func test_signUpChallenge_validationFailed() async throws {
-        try await mockResponse(.validationFailed)
-        sut = try provider.continue(params: params)
-        await perform_testFail_validationFailed()
+        try await perform_testFail_validationFailed(endpoint: .signUpContinue)
     }
 
     func performSuccessfulTestCase(with params: MSALNativeAuthSignUpContinueRequestProviderParams) async throws {
@@ -167,13 +140,5 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         XCTAssertNotNil(response?.signinSLT)
 //        XCTAssertNotNil(response?.expiresIn) // TODO: Enable when Mock Api fixes it
         XCTAssertNil(response?.signupToken)
-    }
-
-    private func mockResponse(_ response: MockAPIResponse) async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpContinue,
-            correlationId: correlationId,
-            responses: [response]
-        )
     }
 }

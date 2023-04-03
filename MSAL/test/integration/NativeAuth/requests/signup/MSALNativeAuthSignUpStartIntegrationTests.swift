@@ -33,11 +33,6 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        let config = try MSALNativeAuthConfiguration(
-            clientId: "726E6501-BF0F-4A8B-9DDC-2ECF189DF7A7",
-            authority: try .init(url: URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!, rawTenant: nil)
-        )
-
         provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
             config: config,
             telemetryProvider: MSALNativeAuthTelemetryProvider()
@@ -76,75 +71,56 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     }
 
     func test_signUpStart_invalidClient() async throws {
-        try await mockResponse(.invalidClient)
-        await perform_testFail_invalidClient()
+        try await perform_testFail_invalidClient(endpoint: .signUpStart)
     }
 
     func test_signUpStart_unsupportedChallengeType() async throws {
-        try await mockResponse(.unsupportedChallengeType)
-        await perform_testFail_unsupportedChallengeType()
+        try await perform_testFail_unsupportedChallengeType(endpoint: .signUpStart)
     }
 
     func test_signUpStart_passwordTooWeak() async throws {
-        try await mockResponse(.passwordTooWeak)
-        await perform_testFail_passwordTooWeak()
+        try await perform_testFail_passwordTooWeak(endpoint: .signUpStart)
     }
 
     func test_signUpStart_passwordTooShort() async throws {
-        try await mockResponse(.passwordTooShort)
-        await perform_testFail_passwordTooShort()
+        try await perform_testFail_passwordTooShort(endpoint: .signUpStart)
     }
 
     func test_signUpStart_passwordTooLong() async throws {
-        try await mockResponse(.passwordTooLong)
-        await perform_testFail_passwordTooLong()
+        try await perform_testFail_passwordTooLong(endpoint: .signUpStart)
     }
 
     func test_signUpStart_passwordRecentlyUsed() async throws {
-        try await mockResponse(.passwordRecentlyUsed)
-        await perform_testFail_passwordRecentlyUsed()
+        try await perform_testFail_passwordRecentlyUsed(endpoint: .signUpStart)
     }
 
     func test_signUpStart_passwordBanned() async throws {
-        try await mockResponse(.passwordBanned)
-        await perform_testFail_passwordBanned()
+        try await perform_testFail_passwordBanned(endpoint: .signUpStart)
     }
 
     func test_signUpStart_userAlreadyExists() async throws {
-        try await mockResponse(.userAlreadyExists)
-        await perform_testFail_userAlreadyExists()
+        try await perform_testFail_userAlreadyExists(endpoint: .signUpStart)
     }
 
     func test_signUpStart_attributesRequired() async throws {
-        try await mockResponse(.attributesRequired)
-        await perform_testFail_attributesRequired()
+        try await perform_testFail_attributesRequired(endpoint: .signUpStart)
     }
 
     func test_signUpStart_verificationRequired() async throws {
-        try await mockResponse(.verificationRequired)
-        await perform_testFail_verificationRequired()
+        try await perform_testFail_verificationRequired(endpoint: .signUpStart)
     }
 
     func test_signUpStart_validationFailed() async throws {
-        try await mockResponse(.validationFailed)
-        await perform_testFail_validationFailed()
+        try await perform_testFail_validationFailed(endpoint: .signUpStart)
     }
 
     func test_signUpStart_authNotSupported() async throws {
-        try await mockResponse(.authNotSupported)
+        try await mockResponse(.authNotSupported, endpoint: .signUpStart)
         await perform_testFail_authNotSupported()
     }
 
     private func perform_testFail_authNotSupported() async {
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .authNotSupported)
-    }
-
-    private func mockResponse(_ response: MockAPIResponse) async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpStart,
-            correlationId: correlationId,
-            responses: [response]
-        )
     }
 }
