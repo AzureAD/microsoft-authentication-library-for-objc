@@ -52,7 +52,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: config)
     }
 
-    public init(clientId: String, challengeTypes: [ChallengeType], rawTenant: String? = nil, redirectUri: String? = nil) throws {
+    public init(
+        clientId: String,
+        challengeTypes: [ChallengeType],
+        rawTenant: String? = nil,
+        redirectUri: String? = nil) throws {
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
             .authority(rawTenant: rawTenant)
 
@@ -86,15 +90,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: new methods
 
-    public func signUp(email: String, password: String?, attributes: [String: Any], correlationId: UUID? = nil, callback: SignUpStartDelegate) {
-        callback.onError(error: SignUpError(type: SignUpErrorType.invalidAttributes))
+    public func signUp(
+        email: String,
+        password: String?,
+        attributes: [String: Any],
+        correlationId: UUID? = nil,
+        delegate: SignUpStartDelegate) {
+        delegate.onError(error: SignUpError(type: SignUpErrorType.invalidAttributes))
     }
 
-    public func signIn(email: String, password: String?, correlationId: UUID? = nil, callback: SignInStartDelegate) {
-        callback.onError(error: SignInStartError(type: SignInStartErrorType.passwordInvalid))
+    public func signIn(email: String, password: String?, correlationId: UUID? = nil, delegate: SignInStartDelegate) {
+        delegate.onError(error: SignInStartError(type: SignInStartErrorType.passwordInvalid))
     }
 
-    public func resetPassword(email: String, correlationId: UUID? = nil, callback: ResetPasswordStartDelegate) {
+    public func resetPassword(email: String, correlationId: UUID? = nil, delegate: ResetPasswordStartDelegate) {
 
     }
 

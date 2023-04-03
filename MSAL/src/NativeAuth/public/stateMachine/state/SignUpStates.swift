@@ -27,7 +27,7 @@ import Foundation
 @objc
 public class SignUpOOBSentState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpStartDelegate, correlationId: UUID? = nil) {
-        delegate.onOOBSent(flow: self, displayName: "email")
+        delegate.onOOBSent(state: self, displayName: "email")
     }
 
     public func verifyCode(otp: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
@@ -44,7 +44,10 @@ public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
 
 @objc
 public class SignUpAttributeRequiredState: MSALNativeAuthBaseState {
-    public func setAttributes(attributes: [String: Any], delegate: SignUpAttributeRequiredDelegate, correlationId: UUID? = nil) {
+    public func setAttributes(
+        attributes: [String: Any],
+        delegate: SignUpAttributeRequiredDelegate,
+        correlationId: UUID? = nil) {
 
     }
 }

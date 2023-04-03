@@ -26,15 +26,15 @@ import Foundation
 
 @objc
 public protocol SignInStartDelegate {
-    func flowInterrupted(reason: SignInFlowInterruptionReason)
+    func signInFlowInterrupted(reason: SignInFlowInterruptionReason)
     func onError(error: SignInStartError)
-    func onOOBSent(state: SignInOOBSentState)
-    func onRedirect()
+    func onOOBSent(state: SignInOOBSentState, displayName: String?)
+    func completed(result: MSALNativeAuthAccount)
 }
 
 @objc
 public protocol VerifyCodeSignInDelegate {
-    func flowInterrupted(reason: BaseFlowInterruptionReason)
-    func onOOBSent(error: VerifyCodeError, state: SignInOOBSentState)
+    func verifyCodeFlowInterrupted(reason: BaseFlowInterruptionReason)
+    func onError(error: VerifyCodeError, state: SignInOOBSentState)
     func completed(result: MSALNativeAuthAccount)
 }

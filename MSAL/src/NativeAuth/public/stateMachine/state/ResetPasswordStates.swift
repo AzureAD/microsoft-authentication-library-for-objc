@@ -37,7 +37,10 @@ public class OOBSentResetPasswordState: MSALNativeAuthBaseState {
 
 @objc
 public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
-    public func setPassword(password: String, delegate: PasswordRequiredResetPasswordDelegate, correlationId: UUID? = nil) {
+    public func setPassword(
+        password: String,
+        delegate: PasswordRequiredResetPasswordDelegate,
+        correlationId: UUID? = nil) {
 
     }
 }

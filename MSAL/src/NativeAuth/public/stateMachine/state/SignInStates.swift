@@ -28,7 +28,7 @@ import Foundation
 public class SignInOOBSentState: MSALNativeAuthBaseState {
 
     public func resendCode(delegate: SignInStartDelegate, correlationId: UUID? = nil) {
-        delegate.onOOBSent(state: self)
+        delegate.onOOBSent(state: self, displayName: nil)
     }
 
     public func verifyCode(otp: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {

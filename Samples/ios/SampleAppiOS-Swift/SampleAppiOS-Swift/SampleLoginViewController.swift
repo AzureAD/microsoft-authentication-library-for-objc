@@ -48,43 +48,35 @@ class SampleLoginViewController: UIViewController {
 
 }
 
-extension SampleLoginViewController: SignInStartDelegate, VerifyCodeSignInDelegate {
-    func completed(result: MSAL.MSALNativeAuthenticationResult) {
+extension SampleLoginViewController: SignInStartDelegate {
+    func signInFlowInterrupted(reason: MSAL.SignInFlowInterruptionReason) {
         <#code#>
-    }
-    
-    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInOOBSentState?) {
-        switch (error.type) {
-        case .generalError:
-            <#code#>
-        case .invalidOOB:
-            <#code#>
-        case .tooManyOOB:
-            <#code#>
-        }
-    }
-    
-    func onOOBSent(flow: MSAL.SignInOOBSentState) {
-        flow.resendCode(delegate: self)
-        flow.verifyCode(otp: "12345", flow: self)
     }
     
     func onError(error: MSAL.SignInStartError) {
-        switch (error.type) {
-        case .userNotFound:
-            <#code#>
-        case .passwordInvalid:
-            <#code#>
-        case .generalError:
-            <#code#>
-        case .invalidAuthenticationType:
-            error.errorDescription
-        }
-    }
-    
-    func onRedirect() {
         <#code#>
     }
     
+    func onOOBSent(state: MSAL.SignInOOBSentState, displayName: String?) {
+        <#code#>
+    }
+    
+    func completed(result: MSAL.MSALNativeAuthAccount) {
+        <#code#>
+    }
+    
+    
+   
+    
+}
+
+extension SampleLoginViewController: VerifyCodeSignInDelegate {
+    func verifyCodeFlowInterrupted(reason: MSAL.BaseFlowInterruptionReason) {
+        <#code#>
+    }
+    
+    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInOOBSentState) {
+        <#code#>
+    }
     
 }

@@ -28,7 +28,7 @@ import Foundation
 public protocol SignUpStartDelegate {
     func flowInterrupted(reason: SignUpStartFlowInterruptionReason)
     func onError(error: SignUpError)
-    func onOOBSent(flow: SignUpOOBSentState, displayName: String)
+    func onOOBSent(state: SignUpOOBSentState, displayName: String?)
 }
 
 @objc
@@ -45,7 +45,7 @@ public protocol SignUpPasswordRequiredDelegate {
     func flowInterrupted(reason: BaseFlowInterruptionReason)
     func onError(error: PasswordRequiredError, state: SignUpPasswordRequiredState)
     func completed()
-    func attributesRequired(flow: SignUpAttributeRequiredState)
+    func attributesRequired(state: SignUpAttributeRequiredState)
 }
 
 @objc
