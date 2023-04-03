@@ -86,21 +86,23 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         XCTAssertNil(response?.interval)
     }
 
-    func test_all_fail_cases() async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpChallenge,
-            correlationId: correlationId,
-            responses: [
-                .invalidClient,
-                .invalidPurposeToken,
-                .expiredToken,
-                .unsupportedChallengeType
-            ]
-        )
-
+    func test_signUpChallenge_invalidClient() async throws {
+        try await mockResponse(.invalidClient)
         await perform_testFail_invalidClient()
+    }
+
+    func test_signUpChallenge_invalidPurposeToken() async throws {
+        try await mockResponse(.invalidPurposeToken)
         await perform_testFail_invalidPurposeToken()
+    }
+
+    func test_signUpChallenge_expiredToken() async throws {
+        try await mockResponse(.expiredToken)
         await perform_testFail_expiredToken()
+    }
+
+    func test_signUpChallenge_unsupportedChallengeType() async throws {
+        try await mockResponse(.unsupportedChallengeType)
         await perform_testFail_unsupportedChallengeType()
     }
 

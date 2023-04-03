@@ -30,6 +30,15 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
     private var context: MSIDRequestContext!
 
+    private var params: MSALNativeAuthSignUpContinueRequestProviderParams {
+        .init(
+            grantType: .password,
+            signUpToken: "<token>",
+            password: "12345",
+            context: context
+        )
+    }
+
     override func setUpWithError() throws {
         let config = try MSALNativeAuthConfiguration(
             clientId: "726E6501-BF0F-4A8B-9DDC-2ECF189DF7A7",
@@ -77,46 +86,75 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await performSuccessfulTestCase(with: params)
     }
 
-    func test_signUpContinue_fail_cases() async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpContinue,
-            correlationId: correlationId,
-            responses: [
-                .invalidClient,
-                .invalidPurposeToken,
-                .expiredToken,
-                .passwordTooWeak,
-                .passwordTooShort,
-                .passwordTooLong,
-                .passwordRecentlyUsed,
-                .passwordBanned,
-                .userAlreadyExists,
-                .attributesRequired,
-                .verificationRequired,
-                .validationFailed
-            ]
-        )
-
-        let params = MSALNativeAuthSignUpContinueRequestProviderParams(
-            grantType: .password,
-            signUpToken: "<token>",
-            password: "1234",
-            context: context
-        )
-
+    func test_signUpChallenge_invalidClient() async throws {
+        try await mockResponse(.invalidClient)
         sut = try provider.continue(params: params)
-
         await perform_testFail_invalidClient()
+    }
+
+    func test_signUpChallenge_invalidPurposeToken() async throws {
+        try await mockResponse(.invalidPurposeToken)
+        sut = try provider.continue(params: params)
         await perform_testFail_invalidPurposeToken()
+    }
+
+    func test_signUpChallenge_expiredToken() async throws {
+        try await mockResponse(.expiredToken)
+        sut = try provider.continue(params: params)
         await perform_testFail_expiredToken()
+    }
+
+    func test_signUpChallenge_passwordTooWeak() async throws {
+        try await mockResponse(.passwordTooWeak)
+        sut = try provider.continue(params: params)
         await perform_testFail_passwordTooWeak()
+    }
+
+    func test_signUpChallenge_passwordTooShort() async throws {
+        try await mockResponse(.passwordTooShort)
+        sut = try provider.continue(params: params)
         await perform_testFail_passwordTooShort()
+    }
+
+    func test_signUpChallenge_passwordTooLong() async throws {
+        try await mockResponse(.passwordTooLong)
+        sut = try provider.continue(params: params)
         await perform_testFail_passwordTooLong()
+    }
+
+    func test_signUpChallenge_passwordRecentlyUsed() async throws {
+        try await mockResponse(.passwordRecentlyUsed)
+        sut = try provider.continue(params: params)
         await perform_testFail_passwordRecentlyUsed()
+    }
+
+    func test_signUpChallenge_passwordBanned() async throws {
+        try await mockResponse(.passwordBanned)
+        sut = try provider.continue(params: params)
         await perform_testFail_passwordBanned()
+    }
+
+    func test_signUpChallenge_userAlreadyExists() async throws {
+        try await mockResponse(.userAlreadyExists)
+        sut = try provider.continue(params: params)
         await perform_testFail_userAlreadyExists()
+    }
+
+    func test_signUpChallenge_attributesRequired() async throws {
+        try await mockResponse(.attributesRequired)
+        sut = try provider.continue(params: params)
         await perform_testFail_attributesRequired()
+    }
+
+    func test_signUpChallenge_verificationRequired() async throws {
+        try await mockResponse(.verificationRequired)
+        sut = try provider.continue(params: params)
         await perform_testFail_verificationRequired()
+    }
+
+    func test_signUpChallenge_validationFailed() async throws {
+        try await mockResponse(.validationFailed)
+        sut = try provider.continue(params: params)
         await perform_testFail_validationFailed()
     }
 

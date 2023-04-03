@@ -75,42 +75,76 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 
-    func test_all_fail_cases() async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpStart,
-            correlationId: correlationId,
-            responses: [
-                .invalidClient,
-                .unsupportedChallengeType,
-                .passwordTooWeak,
-                .passwordTooShort,
-                .passwordTooLong,
-                .passwordRecentlyUsed,
-                .passwordBanned,
-                .userAlreadyExists,
-                .attributesRequired,
-                .verificationRequired,
-                .validationFailed,
-                .authNotSupported
-            ]
-        )
-
+    func test_signUpStart_invalidClient() async throws {
+        try await mockResponse(.invalidClient)
         await perform_testFail_invalidClient()
+    }
+
+    func test_signUpStart_unsupportedChallengeType() async throws {
+        try await mockResponse(.unsupportedChallengeType)
         await perform_testFail_unsupportedChallengeType()
+    }
+
+    func test_signUpStart_passwordTooWeak() async throws {
+        try await mockResponse(.passwordTooWeak)
         await perform_testFail_passwordTooWeak()
+    }
+
+    func test_signUpStart_passwordTooShort() async throws {
+        try await mockResponse(.passwordTooShort)
         await perform_testFail_passwordTooShort()
+    }
+
+    func test_signUpStart_passwordTooLong() async throws {
+        try await mockResponse(.passwordTooLong)
         await perform_testFail_passwordTooLong()
+    }
+
+    func test_signUpStart_passwordRecentlyUsed() async throws {
+        try await mockResponse(.passwordRecentlyUsed)
         await perform_testFail_passwordRecentlyUsed()
+    }
+
+    func test_signUpStart_passwordBanned() async throws {
+        try await mockResponse(.passwordBanned)
         await perform_testFail_passwordBanned()
+    }
+
+    func test_signUpStart_userAlreadyExists() async throws {
+        try await mockResponse(.userAlreadyExists)
         await perform_testFail_userAlreadyExists()
+    }
+
+    func test_signUpStart_attributesRequired() async throws {
+        try await mockResponse(.attributesRequired)
         await perform_testFail_attributesRequired()
+    }
+
+    func test_signUpStart_verificationRequired() async throws {
+        try await mockResponse(.verificationRequired)
         await perform_testFail_verificationRequired()
+    }
+
+    func test_signUpStart_validationFailed() async throws {
+        try await mockResponse(.validationFailed)
         await perform_testFail_validationFailed()
+    }
+
+    func test_signUpStart_authNotSupported() async throws {
+        try await mockResponse(.authNotSupported)
         await perform_testFail_authNotSupported()
     }
 
     private func perform_testFail_authNotSupported() async {
         let response = await performTestFail()
         XCTAssertEqual(response?.error, .authNotSupported)
+    }
+
+    private func mockResponse(_ response: MockAPIResponse) async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: .signUpStart,
+            correlationId: correlationId,
+            responses: [response]
+        )
     }
 }
