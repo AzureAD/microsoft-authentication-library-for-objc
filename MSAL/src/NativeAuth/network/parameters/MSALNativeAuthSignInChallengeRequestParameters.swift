@@ -43,8 +43,8 @@ extension MSALNativeAuthSignInChallengeRequestParameters {
         config: MSALNativeAuthConfiguration,
         context: MSIDRequestContext,
         credentialToken: String,
-        challengeType: MSALNativeAuthChallengeType? = nil,
-        challengeTarget: String? = nil
+        challengeType: MSALNativeAuthChallengeType?,
+        challengeTarget: String?
     ) {
         self.init(
             config: config,

@@ -37,7 +37,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignInTokenRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signInToken,
+            endpoint: .token,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             credentialToken: "Test Credential Token",
@@ -150,7 +150,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
     private func checkUrlRequest(_ result: URLRequest?) {
         XCTAssertEqual(result?.httpMethod, MSALParameterStringForHttpMethod(.POST))
 
-        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + MSALNativeAuthEndpoint.signInToken.rawValue)!
+        let expectedUrl = URL(string: MSALNativeAuthNetworkStubs.authority.url.absoluteString + MSALNativeAuthEndpoint.token.rawValue)!
         XCTAssertEqual(result?.url, expectedUrl)
     }
 }

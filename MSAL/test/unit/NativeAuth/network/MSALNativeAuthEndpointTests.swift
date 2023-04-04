@@ -46,7 +46,7 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     }
 
     func test_signInToken_endpoint() {
-        XCTAssertEqual(sut.signInToken.rawValue, "/oauth/v2.0/token")
+        XCTAssertEqual(sut.token.rawValue, "/oauth/v2.0/token")
     }
 
     func test_signIn_endpoint() {
