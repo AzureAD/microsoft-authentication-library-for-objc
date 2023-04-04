@@ -26,9 +26,9 @@ import Foundation
 
 @objc
 public protocol ResetPasswordStartDelegate {
-    func flowInterrupted(reason: BaseFlowInterruptionReason)
+    func flowInterrupted(reason: ResetPasswordStartFlowInterruptionReason)
     func onError(error: ResetPasswordStartError)
-    func onCodeSent(state: CodeSentResetPasswordState)
+    func onCodeSent(state: CodeSentResetPasswordState, displayName: String?)
 }
 
 @objc
@@ -36,6 +36,12 @@ public protocol VerifyCodeResetPasswordDelegate {
     func flowInterrupted(reason: BaseFlowInterruptionReason)
     func onError(error: VerifyCodeError, state: CodeSentResetPasswordState)
     func passwordRequired(state: PasswordRequiredResetPasswordState)
+}
+
+@objc
+public protocol ResendCodeResetPasswordDelegate {
+    func onError(error: ResendCodeError)
+    func onCodeSent(state: CodeSentResetPasswordState, displayName: String?)
 }
 
 @objc

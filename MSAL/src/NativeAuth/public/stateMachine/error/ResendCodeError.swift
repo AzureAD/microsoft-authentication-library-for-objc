@@ -37,4 +37,5 @@ public class ResendCodeError: MSALNativeBaseError {
 @objc
 public enum ResendCodeErrorType: Int {
     case generalError
+    case accountTemporarilyLocked
 }

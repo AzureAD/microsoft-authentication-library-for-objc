@@ -27,7 +27,7 @@ import Foundation
 @objc
 public class SignUpCodeSentState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpStartDelegate, correlationId: UUID? = nil) {
-        delegate.onCodeSent(state: self, displayName: "email")
+        delegate.onCodeSent(state: self, displayName: "email@contoso.com")
     }
 
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {

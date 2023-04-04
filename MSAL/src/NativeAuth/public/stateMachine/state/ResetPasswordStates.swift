@@ -26,12 +26,22 @@ import Foundation
 
 @objc
 public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
-    public func resendCode(delegate: ResetPasswordStartDelegate, correlationId: UUID? = nil) {
-        delegate.onCodeSent(state: self)
+    public func resendCode(delegate: ResendCodeResetPasswordDelegate, correlationId: UUID? = nil) {
+        if correlationId != nil {
+            delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
+        } else {
+            delegate.onCodeSent(state: self, displayName: "email@contoso.com")
+        }
     }
 
-    public func verifyCode(otp: String, delegate: VerifyCodeResetPasswordDelegate, correlationId: UUID? = nil) {
-        delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: "password_reset_token"))
+    public func verifyCode(code: String, delegate: VerifyCodeResetPasswordDelegate, correlationId: UUID? = nil) {
+        switch code {
+        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
+        case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
+        case "3333": delegate.onError(error: VerifyCodeError(type: .codeVerificationPending), state: self)
+        case "4444": delegate.flowInterrupted(reason: .redirect)
+        default: delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: flowToken))
+        }
     }
 }
 
@@ -41,6 +51,11 @@ public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
         password: String,
         delegate: PasswordRequiredResetPasswordDelegate,
         correlationId: UUID? = nil) {
-
+            switch password {
+            case "redirect": delegate.flowInterrupted(reason: .redirect)
+            case "generalerror": delegate.onError(error: PasswordRequiredError(type: .generalError), state: self)
+            case "invalid": delegate.onError(error: PasswordRequiredError(type: .invalidPassword), state: self)
+            default: delegate.completed()
+            }
     }
 }

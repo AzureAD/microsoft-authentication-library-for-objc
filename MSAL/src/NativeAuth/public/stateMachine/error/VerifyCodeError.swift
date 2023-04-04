@@ -38,6 +38,5 @@ public class VerifyCodeError: MSALNativeBaseError {
 public enum VerifyCodeErrorType: Int {
     case generalError
     case invalidCode
-    // TODO: when we receive this error?
-    case tooManyCodesRequested
+    case codeVerificationPending
 }

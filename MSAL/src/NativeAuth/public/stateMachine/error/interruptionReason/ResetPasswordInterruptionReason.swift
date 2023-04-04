@@ -27,7 +27,6 @@ import Foundation
 @objc
 public enum ResetPasswordStartFlowInterruptionReason: Int {
     case redirect
-    case userExists
     case userDoesNotHavePassword
     case userNotFound
 }

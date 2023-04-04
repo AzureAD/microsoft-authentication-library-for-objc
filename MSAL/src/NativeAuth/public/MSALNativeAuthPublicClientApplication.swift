@@ -118,7 +118,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     public func resetPassword(email: String, correlationId: UUID? = nil, delegate: ResetPasswordStartDelegate) {
-
+        switch email {
+        case "redirect@contoso.com": delegate.flowInterrupted(reason: .redirect)
+        case "nopassword@contoso.com": delegate.flowInterrupted(reason: .userDoesNotHavePassword)
+        case "notfound@contoso.com": delegate.flowInterrupted(reason: .userNotFound)
+        case "generalerror@contoso.com": delegate.onError(error: ResetPasswordStartError(type: .generalError))
+        default: delegate.onCodeSent(state:
+                                        CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: nil)
+        }
     }
 
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
