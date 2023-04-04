@@ -32,8 +32,8 @@ struct MSALNativeAuthSignInInitiateRequestResponse: Decodable {
     let challengeType: MSALNativeAuthChallengeType?
 
     enum CodingKeys: String, CodingKey {
-        case credentialToken = "credential_token"
-        case challengeType = "challenge_type"
+        case credentialToken
+        case challengeType
     }
 
     init(from decoder: Decoder) throws {

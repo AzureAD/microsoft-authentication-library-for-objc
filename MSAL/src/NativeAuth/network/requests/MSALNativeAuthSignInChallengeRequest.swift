@@ -61,7 +61,7 @@ final class MSALNativeAuthSignInChallengeRequest: MSIDHttpRequest {
             Key.clientId.rawValue: params.config.clientId,
             Key.credentialToken.rawValue: params.credentialToken,
             Key.challengeType.rawValue: params.challengeType?.rawValue,
-            Key.challengeTarget.rawValue: params.challengeTarget
+            Key.challengeTargetKey.rawValue: params.challengeTarget
         ].compactMapValues { $0 }
     }
 }

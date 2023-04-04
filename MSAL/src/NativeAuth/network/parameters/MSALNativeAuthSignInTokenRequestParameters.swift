@@ -58,7 +58,7 @@ extension MSALNativeAuthSignInTokenRequestParameters {
     ) {
         self.init(
             config: config,
-            endpoint: .signInToken,
+            endpoint: .token,
             context: context,
             username: username,
             credentialToken: credentialToken,

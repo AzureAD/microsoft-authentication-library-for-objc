@@ -30,7 +30,7 @@ enum NativeAuthOauth2ErrorCode: String, Decodable {
     case invalidClient = "invalid_client"
     case invalidGrant = "invalid_grant"
     case invalidPassword = "invalid_password"
-    case invalidOOBValues = "invalid_oob_value"
+    case invalidOOBValue = "invalid_oob_value"
     case invalidPurposeToken = "invalid_purpose_token"
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
@@ -38,5 +38,4 @@ enum NativeAuthOauth2ErrorCode: String, Decodable {
     case authorizationPending = "authorization_pending"
     case slowDown = "slow_down"
     case credentialRequired = "credential_required"
-
 }

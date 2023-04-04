@@ -37,6 +37,6 @@ enum MSALNativeAuthRequestParametersKey: String {
     case oob
     case otp
     case customAttributes
-    case challengeTarget = "challenge_target_key"
+    case challengeTargetKey = "challenge_target_key"
     case signInSLT = "signin_slt"
 }

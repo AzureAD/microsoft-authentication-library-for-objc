@@ -61,6 +61,6 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
             Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,
             Key.challengeType.rawValue: params.challengeType.rawValue
-        ].compactMapValues { $0 }
+        ]
     }
 }

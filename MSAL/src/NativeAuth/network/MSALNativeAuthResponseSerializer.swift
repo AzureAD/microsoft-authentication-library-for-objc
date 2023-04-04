@@ -31,6 +31,9 @@ final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDRespon
             throw MSALNativeAuthError.responseSerializationError
         }
 
-        return try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try decoder.decode(T.self, from: data)
     }
 }

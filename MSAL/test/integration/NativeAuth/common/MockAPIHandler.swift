@@ -28,7 +28,7 @@ class MockAPIHandler {
     
     private let baseURL = "https://native-ux-mock-api.azurewebsites.net/config/"
 
-    func clearQueues(correlationId: UUID) throws  {
+    func clearQueues(correlationId: UUID) throws {
         guard let url = URL(string: baseURL + "all") else {
             XCTFail("Invalid Delete URL")
             throw MockAPIError.invalidURL

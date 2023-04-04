@@ -34,15 +34,5 @@ struct MSALNativeAuthSignInChallengeRequestResponse: Decodable {
     let displayName: String?
     let displayType: String?
     let codeLength: Int?
-    let interval: Double?
-
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "credential_token"
-        case challengeType = "challenge_type"
-        case bindingMethod = "binding_method"
-        case displayName = "display_name"
-        case displayType = "display_type"
-        case codeLength = "code_length"
-        case interval
-    }
+    let interval: Int?
 }
