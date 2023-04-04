@@ -25,19 +25,19 @@
 import Foundation
 
 @objc
-public class OOBSentResetPasswordState: MSALNativeAuthBaseState {
+public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
     public func resendCode(delegate: ResetPasswordStartDelegate, correlationId: UUID? = nil) {
-        delegate.onOOBSent(state: self)
+        delegate.onCodeSent(state: self)
     }
 
     public func verifyCode(otp: String, delegate: VerifyCodeResetPasswordDelegate, correlationId: UUID? = nil) {
-        delegate.passwordRequired(state: PasswordRequiredResetPasswordState(credentialToken: "credentialToken"))
+        delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: "password_reset_token"))
     }
 }
 
 @objc
 public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
-    public func setPassword(
+    public func submitPassword(
         password: String,
         delegate: PasswordRequiredResetPasswordDelegate,
         correlationId: UUID? = nil) {

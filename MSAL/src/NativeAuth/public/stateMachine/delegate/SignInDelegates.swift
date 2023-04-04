@@ -28,19 +28,19 @@ import Foundation
 public protocol SignInStartDelegate {
     func signInFlowInterrupted(reason: SignInFlowInterruptionReason)
     func onError(error: SignInStartError)
-    func onOOBSent(state: SignInOOBSentState, displayName: String?)
+    func onCodeSent(state: SignInCodeSentState, displayName: String?)
     func completed(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol ResendCodeSignInDelegate {
     func onError(error: ResendCodeError)
-    func onOOBSent(state: SignInOOBSentState, displayName: String?)
+    func onCodeSent(state: SignInCodeSentState, displayName: String?)
 }
 
 @objc
 public protocol VerifyCodeSignInDelegate {
     func verifyCodeFlowInterrupted(reason: BaseFlowInterruptionReason)
-    func onError(error: VerifyCodeError, state: SignInOOBSentState)
+    func onError(error: VerifyCodeError, state: SignInCodeSentState)
     func completed(result: MSALNativeAuthUserAccount)
 }

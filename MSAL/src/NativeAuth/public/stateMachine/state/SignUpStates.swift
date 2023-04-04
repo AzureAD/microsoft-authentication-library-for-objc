@@ -25,26 +25,26 @@
 import Foundation
 
 @objc
-public class SignUpOOBSentState: MSALNativeAuthBaseState {
+public class SignUpCodeSentState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpStartDelegate, correlationId: UUID? = nil) {
-        delegate.onOOBSent(state: self, displayName: "email")
+        delegate.onCodeSent(state: self, displayName: "email")
     }
 
-    public func verifyCode(otp: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
+    public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
         delegate.completed()
     }
 }
 
 @objc
 public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
-    public func setPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
+    public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
 
     }
 }
 
 @objc
 public class SignUpAttributeRequiredState: MSALNativeAuthBaseState {
-    public func setAttributes(
+    public func submitAttributes(
         attributes: [String: Any],
         delegate: SignUpAttributeRequiredDelegate,
         correlationId: UUID? = nil) {

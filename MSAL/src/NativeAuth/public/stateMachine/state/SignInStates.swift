@@ -25,17 +25,17 @@
 import Foundation
 
 @objcMembers
-public class SignInOOBSentState: MSALNativeAuthBaseState {
+public class SignInCodeSentState: MSALNativeAuthBaseState {
 
     public func resendCode(delegate: ResendCodeSignInDelegate, correlationId: UUID? = nil) {
-        delegate.onOOBSent(state: self, displayName: nil)
+        delegate.onCodeSent(state: self, displayName: nil)
     }
 
-    public func verifyCode(otp: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {
-        switch otp {
-        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidOOB), state: self)
+    public func submitCode(code: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {
+        switch code {
+        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
         case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onError(error: VerifyCodeError(type: .tooManyOOB), state: self)
+        case "3333": delegate.onError(error: VerifyCodeError(type: .tooManyCodesRequested), state: self)
         case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
         default: delegate.completed(result:
                                         MSALNativeAuthUserAccount(

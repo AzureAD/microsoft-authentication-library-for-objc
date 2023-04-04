@@ -28,13 +28,13 @@ import Foundation
 public protocol SignUpStartDelegate {
     func flowInterrupted(reason: SignUpStartFlowInterruptionReason)
     func onError(error: SignUpError)
-    func onOOBSent(state: SignUpOOBSentState, displayName: String?)
+    func onCodeSent(state: SignUpCodeSentState, displayName: String?)
 }
 
 @objc
 public protocol SignUpVerifyCodeDelegate {
     func flowInterrupted(reason: BaseFlowInterruptionReason)
-    func onError(error: VerifyCodeError, state: SignUpOOBSentState)
+    func onError(error: VerifyCodeError, state: SignUpCodeSentState)
     func completed()
     func passwordRequired(state: SignUpPasswordRequiredState)
     func attributesRequired(state: SignUpAttributeRequiredState)

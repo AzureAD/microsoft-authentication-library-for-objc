@@ -37,6 +37,7 @@ public class VerifyCodeError: MSALNativeBaseError {
 @objc
 public enum VerifyCodeErrorType: Int {
     case generalError
-    case invalidOOB
-    case tooManyOOB
+    case invalidCode
+    // TODO: when we receive this error?
+    case tooManyCodesRequested
 }

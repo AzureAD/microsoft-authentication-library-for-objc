@@ -27,7 +27,7 @@ import Foundation
 @objc
 public class MSALNativeBaseError: NSObject, LocalizedError {
     private let message: String?
-    
+
     init(message: String? = nil) {
         self.message = message
     }

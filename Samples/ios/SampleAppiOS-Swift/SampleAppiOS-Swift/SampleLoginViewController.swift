@@ -57,7 +57,7 @@ extension SampleLoginViewController: SignInStartDelegate {
         <#code#>
     }
     
-    func onOOBSent(state: MSAL.SignInOOBSentState, displayName: String?) {
+    func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String?) {
         <#code#>
     }
     
@@ -75,7 +75,7 @@ extension SampleLoginViewController: VerifyCodeSignInDelegate {
         <#code#>
     }
     
-    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInOOBSentState) {
+    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInCodeSentState) {
         <#code#>
     }
     

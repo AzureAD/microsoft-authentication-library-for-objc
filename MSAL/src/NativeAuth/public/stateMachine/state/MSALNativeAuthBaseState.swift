@@ -26,9 +26,9 @@ import Foundation
 
 @objcMembers
 public class MSALNativeAuthBaseState: NSObject {
-    private let credentialToken: String
+    private let flowToken: String
 
-    init(credentialToken: String) {
-        self.credentialToken = credentialToken
+    init(flowToken: String) {
+        self.flowToken = flowToken
     }
 }

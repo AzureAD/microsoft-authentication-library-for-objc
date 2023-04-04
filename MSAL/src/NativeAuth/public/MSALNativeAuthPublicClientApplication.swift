@@ -106,8 +106,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "invalidauth@contoso.com": delegate.signInFlowInterrupted(reason: .invalidAuthenticationType)
         case "invalidpassword@contoso.com": delegate.onError(error: SignInStartError(type: .passwordInvalid))
         case "generalerror@contoso.com": delegate.onError(error: SignInStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onOOBSent(
-            state: SignInOOBSentState(credentialToken: "credentialToken"),
+        case "oob@contoso.com": delegate.onCodeSent(
+            state: SignInCodeSentState(flowToken: "credentialToken"),
             displayName: "oob@contoso.com")
         default: delegate.completed(
             result:
