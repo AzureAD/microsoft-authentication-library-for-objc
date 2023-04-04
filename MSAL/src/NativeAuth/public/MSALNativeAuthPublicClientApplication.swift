@@ -100,15 +100,31 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     public func signIn(email: String, password: String?, correlationId: UUID? = nil, delegate: SignInStartDelegate) {
-        delegate.onError(error: SignInStartError(type: SignInStartErrorType.passwordInvalid))
+        switch email {
+        case "notfound@contoso.com": delegate.signInFlowInterrupted(reason: .userNotFound)
+        case "redirect@contoso.com": delegate.signInFlowInterrupted(reason: .redirect)
+        case "invalidauth@contoso.com": delegate.signInFlowInterrupted(reason: .invalidAuthenticationType)
+        case "invalidpassword@contoso.com": delegate.onError(error: SignInStartError(type: .passwordInvalid))
+        case "generalerror@contoso.com": delegate.onError(error: SignInStartError(type: .generalError))
+        case "oob@contoso.com": delegate.onOOBSent(
+            state: SignInOOBSentState(credentialToken: "credentialToken"),
+            displayName: "oob@contoso.com")
+        default: delegate.completed(
+            result:
+                MSALNativeAuthUserAccount(
+                    email: email,
+                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+        }
     }
 
     public func resetPassword(email: String, correlationId: UUID? = nil, delegate: ResetPasswordStartDelegate) {
 
     }
 
-    //TODO: complete this method
-    public func getUserAccount(completion: @escaping (MSALNativeAuthUserAccount, Error) -> Void) {
-
+    public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
+        return MSALNativeAuthUserAccount(
+            email: "email@contoso.com",
+            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
+        )
     }
 }

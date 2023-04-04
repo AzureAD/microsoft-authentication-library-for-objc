@@ -27,11 +27,20 @@ import Foundation
 @objcMembers
 public class SignInOOBSentState: MSALNativeAuthBaseState {
 
-    public func resendCode(delegate: SignInStartDelegate, correlationId: UUID? = nil) {
+    public func resendCode(delegate: ResendCodeSignInDelegate, correlationId: UUID? = nil) {
         delegate.onOOBSent(state: self, displayName: nil)
     }
 
     public func verifyCode(otp: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {
-        delegate.completed(result: MSALNativeAuthAccount())
+        switch otp {
+        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidOOB), state: self)
+        case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
+        case "3333": delegate.onError(error: VerifyCodeError(type: .tooManyOOB), state: self)
+        case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
+        default: delegate.completed(result:
+                                        MSALNativeAuthUserAccount(
+                                            email: "email@contoso.com",
+                                            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+        }
     }
 }
