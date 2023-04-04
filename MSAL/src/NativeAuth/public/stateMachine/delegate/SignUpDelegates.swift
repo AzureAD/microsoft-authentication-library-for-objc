@@ -26,31 +26,37 @@ import Foundation
 
 @objc
 public protocol SignUpStartDelegate {
-    func flowInterrupted(reason: SignUpStartFlowInterruptionReason)
-    func onError(error: SignUpError)
+    func signUpFlowInterrupted(reason: SignUpStartFlowInterruptionReason)
+    func onError(error: SignUpStartError)
     func onCodeSent(state: SignUpCodeSentState, displayName: String?)
 }
 
 @objc
-public protocol SignUpVerifyCodeDelegate {
-    func flowInterrupted(reason: BaseFlowInterruptionReason)
+public protocol VerifyCodeSignUpDelegate {
+    func verifyCodeFlowInterrupted(reason: BaseFlowInterruptionReason)
     func onError(error: VerifyCodeError, state: SignUpCodeSentState)
     func completed()
     func passwordRequired(state: SignUpPasswordRequiredState)
-    func attributesRequired(state: SignUpAttributeRequiredState)
+    func attributesRequired(state: SignUpAttributesRequiredState)
 }
 
 @objc
-public protocol SignUpPasswordRequiredDelegate {
-    func flowInterrupted(reason: BaseFlowInterruptionReason)
+public protocol ResendCodeSignUpDelegate {
+    func onError(error: ResendCodeError)
+    func onCodeSent(state: SignUpCodeSentState, displayName: String?)
+}
+
+@objc
+public protocol PasswordRequiredSignUpDelegate {
+    func passwordRequiredFlowInterrupted(reason: BaseFlowInterruptionReason)
     func onError(error: PasswordRequiredError, state: SignUpPasswordRequiredState)
     func completed()
-    func attributesRequired(state: SignUpAttributeRequiredState)
+    func attributesRequired(state: SignUpAttributesRequiredState)
 }
 
 @objc
-public protocol SignUpAttributeRequiredDelegate {
-    func flowInterrupted(reason: BaseFlowInterruptionReason)
-    func onError(error: AttributeRequiredError, state: SignUpAttributeRequiredState)
+public protocol AttributeRequiredSignUpDelegate {
+    func attributeRequiredFlowInterrupted(reason: BaseFlowInterruptionReason)
+    func onError(error: AttributeRequiredError, state: SignUpAttributesRequiredState)
     func completed()
 }

@@ -39,7 +39,7 @@ public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
         case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
         case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
         case "3333": delegate.onError(error: VerifyCodeError(type: .codeVerificationPending), state: self)
-        case "4444": delegate.flowInterrupted(reason: .redirect)
+        case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
         default: delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: flowToken))
         }
     }
@@ -52,7 +52,7 @@ public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
         delegate: PasswordRequiredResetPasswordDelegate,
         correlationId: UUID? = nil) {
             switch password {
-            case "redirect": delegate.flowInterrupted(reason: .redirect)
+            case "redirect": delegate.passwordRequiredFlowInterrupted(reason: .redirect)
             case "generalerror": delegate.onError(error: PasswordRequiredError(type: .generalError), state: self)
             case "invalid": delegate.onError(error: PasswordRequiredError(type: .invalidPassword), state: self)
             default: delegate.completed()

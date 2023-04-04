@@ -25,17 +25,17 @@
 import Foundation
 
 @objc
-public class SignUpError: MSALNativeBaseError {
-    let type: SignUpErrorType
+public class SignUpStartError: MSALNativeBaseError {
+    let type: SignUpStartErrorType
 
-    init(type: SignUpErrorType, message: String? = nil) {
+    init(type: SignUpStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 }
 
 @objc
-public enum SignUpErrorType: Int {
+public enum SignUpStartErrorType: Int {
     case passwordInvalid
     case invalidAttributes
     case generalError

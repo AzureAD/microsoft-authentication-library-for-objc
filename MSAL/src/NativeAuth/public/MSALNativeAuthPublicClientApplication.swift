@@ -88,18 +88,33 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         super.init()
     }
 
-    // MARK: new methods
+    // MARK: delegate methods
 
     public func signUp(
         email: String,
         password: String?,
         attributes: [String: Any],
         correlationId: UUID? = nil,
-        delegate: SignUpStartDelegate) {
-        delegate.onError(error: SignUpError(type: SignUpErrorType.invalidAttributes))
+        delegate: SignUpStartDelegate
+    ) {
+            switch email {
+            case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userExists)
+            case "redirect@contoso.com": delegate.signUpFlowInterrupted(reason: .redirect)
+            case "invalidpassword@contoso.com": delegate.onError(error: SignUpStartError(type: .passwordInvalid))
+            case "invalidattributes@contoso.com": delegate.onError(error: SignUpStartError(type: .invalidAttributes))
+            case "generalerror@contoso.com": delegate.onError(error: SignUpStartError(type: .generalError))
+            default: delegate.onCodeSent(
+                state: SignUpCodeSentState(flowToken: "signup_token"),
+                displayName: email)
+            }
     }
 
-    public func signIn(email: String, password: String?, correlationId: UUID? = nil, delegate: SignInStartDelegate) {
+    public func signIn(
+        email: String,
+        password: String?,
+        correlationId: UUID? = nil,
+        delegate: SignInStartDelegate
+    ) {
         switch email {
         case "notfound@contoso.com": delegate.signInFlowInterrupted(reason: .userNotFound)
         case "redirect@contoso.com": delegate.signInFlowInterrupted(reason: .redirect)
@@ -107,8 +122,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "invalidpassword@contoso.com": delegate.onError(error: SignInStartError(type: .passwordInvalid))
         case "generalerror@contoso.com": delegate.onError(error: SignInStartError(type: .generalError))
         case "oob@contoso.com": delegate.onCodeSent(
-            state: SignInCodeSentState(flowToken: "credentialToken"),
-            displayName: "oob@contoso.com")
+            state: SignInCodeSentState(flowToken: "credential_token"),
+            displayName: email)
         default: delegate.completed(
             result:
                 MSALNativeAuthUserAccount(
@@ -117,11 +132,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func resetPassword(email: String, correlationId: UUID? = nil, delegate: ResetPasswordStartDelegate) {
+    public func resetPassword(
+        email: String,
+        correlationId: UUID? = nil,
+        delegate: ResetPasswordStartDelegate
+    ) {
         switch email {
-        case "redirect@contoso.com": delegate.flowInterrupted(reason: .redirect)
-        case "nopassword@contoso.com": delegate.flowInterrupted(reason: .userDoesNotHavePassword)
-        case "notfound@contoso.com": delegate.flowInterrupted(reason: .userNotFound)
+        case "redirect@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .redirect)
+        case "nopassword@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userDoesNotHavePassword)
+        case "notfound@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userNotFound)
         case "generalerror@contoso.com": delegate.onError(error: ResetPasswordStartError(type: .generalError))
         default: delegate.onCodeSent(state:
                                         CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: nil)
