@@ -26,7 +26,23 @@ import Foundation
 
 @objc
 public protocol SignInStartDelegate {
+    /// This method is called when the signIn flow is interrupted.
+    /// In this case the user needs to take action before to restart the signIn process.
+    /// Checks the `reason` parameter to see more detail
+    ///
+    ///
+    /// - Parameters:
+    ///     - reason: The reason why the signIn flow got interrupted.
+    ///
     func signInFlowInterrupted(reason: SignInFlowInterruptionReason)
+    /// An error happened, but the user can continue the authentication flow.
+    ///
+    /// Checks the `error` parameter to see more detail
+    ///
+    ///
+    /// - Parameters:
+    ///     - error: Error details.
+    ///
     func onError(error: SignInStartError)
     func onCodeSent(state: SignInCodeSentState, displayName: String?)
     func completed(result: MSALNativeAuthUserAccount)

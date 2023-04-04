@@ -43,40 +43,18 @@ class SampleLoginViewController: UIViewController {
     }
     
     @IBAction func signIn(_ sender: Any) {
-        SampleMSALAuthentication.shared.application.signIn(email: "email", password: "password", callback: self)
+        
+        SampleMSALAuthentication.shared.signInAccount(parentController: self, completion: {
+            (account, token, error) in
+            
+            if let error = error {
+                print("App error: \(error)")
+                return
+            }
+            
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
+            appDelegate.showMainVC()
+        })
     }
 
-}
-
-extension SampleLoginViewController: SignInStartDelegate {
-    func signInFlowInterrupted(reason: MSAL.SignInFlowInterruptionReason) {
-        <#code#>
-    }
-    
-    func onError(error: MSAL.SignInStartError) {
-        <#code#>
-    }
-    
-    func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String?) {
-        <#code#>
-    }
-    
-    func completed(result: MSAL.MSALNativeAuthAccount) {
-        <#code#>
-    }
-    
-    
-   
-    
-}
-
-extension SampleLoginViewController: VerifyCodeSignInDelegate {
-    func verifyCodeFlowInterrupted(reason: MSAL.BaseFlowInterruptionReason) {
-        <#code#>
-    }
-    
-    func onError(error: MSAL.VerifyCodeError, state: MSAL.SignInCodeSentState) {
-        <#code#>
-    }
-    
 }
