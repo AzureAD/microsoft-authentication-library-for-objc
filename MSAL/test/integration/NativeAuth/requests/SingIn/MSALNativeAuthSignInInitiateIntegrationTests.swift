@@ -121,7 +121,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config,
                                                                        context: context,
                                                                        username: "test@contoso.com",
-                                                                       challengeType: .otp)
+                                                                       challengeTypes: [.otp])
 
         return try! provider.signInInitiateRequest(parameters: parameters,
                                                    context: context)

@@ -71,7 +71,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                         completionBlock: completionBlock)
     }
 
-    func shouldRetry(httpResponse: HTTPURLResponse,
+    private func shouldRetry(httpResponse: HTTPURLResponse,
                      httpRequest: MSIDHttpRequestProtocol?,
                      context: MSIDRequestContext?,
                      completionBlock: MSIDHttpRequestDidCompleteBlock?) -> Bool {
@@ -97,7 +97,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         return false
     }
 
-    func handleAuthenticateHeader(
+    private func handleAuthenticateHeader(
         httpResponse: HTTPURLResponse,
         httpRequest: MSIDHttpRequestProtocol?,
         context: MSIDRequestContext?,
@@ -133,7 +133,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         return false
     }
 
-    func handleAPIError(
+    private func handleAPIError(
         data: Data?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
@@ -155,7 +155,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         }
     }
 
-    func handleHTTPError(
+    private func handleHTTPError(
         httpResponse: HTTPURLResponse,
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?

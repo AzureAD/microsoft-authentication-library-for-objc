@@ -2982,9 +2982,7 @@
 		DE0D65C429D344AC005798B1 /* requests */ = {
 			isa = PBXGroup;
 			children = (
-				DE0D65C529D344F1005798B1 /* MSALNativeAuthSignInInitiateIntegrationTests.swift */,
-				DE0D65CA29D5CD6D005798B1 /* MSALNativeAuthSignInChallengeIntegrationTests.swift */,
-				DE4F0F2929D6F1AA00D561FD /* MSALNativeAuthSignInTokenIntegrationTests.swift */,
+				DEDB29AE29DDC04A008DA85B /* SingIn */,
 			);
 			path = requests;
 			sourceTree = "<group>";
@@ -3072,6 +3070,16 @@
 				DEDB29AB29DDAF53008DA85B /* MSALNativeAuthSignInTokenRequestError.swift */,
 			);
 			path = SignIn;
+			sourceTree = "<group>";
+		};
+		DEDB29AE29DDC04A008DA85B /* SingIn */ = {
+			isa = PBXGroup;
+			children = (
+				DE0D65C529D344F1005798B1 /* MSALNativeAuthSignInInitiateIntegrationTests.swift */,
+				DE0D65CA29D5CD6D005798B1 /* MSALNativeAuthSignInChallengeIntegrationTests.swift */,
+				DE4F0F2929D6F1AA00D561FD /* MSALNativeAuthSignInTokenIntegrationTests.swift */,
+			);
+			path = SingIn;
 			sourceTree = "<group>";
 		};
 		E02396F51E7AFFF7004D6278 /* telemetry */ = {

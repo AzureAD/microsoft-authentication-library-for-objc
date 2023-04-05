@@ -73,7 +73,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
             } else {
                 MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
             }
-        } else if encoding == .wwwFormUrlEncoded {
+        } else {
             let encodedBody = formUrlEncode(parameters)
             request.httpBody = encodedBody.data(using: .utf8)
         }
