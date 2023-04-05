@@ -63,7 +63,6 @@
     {
         return [[MSALCIAMOauth2Provider alloc] initWithClientId:clientId tokenCache:tokenCache accountMetadataCache:accountMetadataCache];
     }
-
     else if ([authority isKindOfClass:[MSALADFSAuthority class]])
     {
         MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"ADFS authority is not yet supported.", nil);
