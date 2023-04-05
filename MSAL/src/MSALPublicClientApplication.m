@@ -42,6 +42,7 @@
 #import "MSALOauth2ProviderFactory.h"
 #import "MSALWebviewType_Internal.h"
 #import "MSIDAuthority.h"
+#import "MSIDCIAMAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSALRedirectUriVerifier.h"
 #import "MSIDWebviewAuthorization.h"
@@ -1676,12 +1677,17 @@
     {
         for (MSALAuthority *knownAuthority in self.internalConfig.knownAuthorities)
         {
-            if ([authority isKindOfClass:knownAuthority.msidAuthority.class]
-                && [knownAuthority.url isEqual:authority.url])
+            if (([authority isKindOfClass:knownAuthority.msidAuthority.class]
+                && [knownAuthority.url isEqual:authority.url]) )
             {
                 return YES;
             }
         }
+    }
+    
+    if (authority.excludeFromAuthorityValidation)
+    {
+        return YES;
     }
     
     return NO;
