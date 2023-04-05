@@ -22,28 +22,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
 /**
     CIAM endpoint that MSAL will use to get a token and perform CIAM policies.
-     @note By default, the B2C authority url should be in the following format, where custom_port is optional: https://b2c_host:custom_port/tfp/b2c_tenant/b2c_policy. However, MSAL also supports other arbitrary B2C authority formats.
-     See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-protocols
+     @note By default, the CIAM authority url should be in the following format https://tenant.ciamlogin.com. However, MSAL also supports other arbitrary CIAM such as: https://tenant.ciamlogin.com/GUID and https://tenant.ciamlogin.com/aDomain, where GUID is tenantID and aDomain and domainName
 */
 @interface MSALCIAMAuthority : MSALAuthority
 
 #pragma mark - Constructing a CIAM authority
-
-//- (instancetype)init NS_UNAVAILABLE;
 
 /**
  Initializes MSALCIAMAuthority with NSURL.
  @param     url                    Authority indicating a CIAM endpoint that MSAL can use to obtain tokens.
  @param     error               The error that occurred creating the authority object, if any, if you're not interested in the specific error pass in nil.
  //*/
-//- (nullable instancetype)initWithURL:(nonnull NSURL *)url
-//                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
@@ -51,6 +45,4 @@
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                       validateFormat:(BOOL)validateFormat
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
-
-
 @end

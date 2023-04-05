@@ -1677,8 +1677,8 @@
     {
         for (MSALAuthority *knownAuthority in self.internalConfig.knownAuthorities)
         {
-            if (([authority isKindOfClass:knownAuthority.msidAuthority.class]
-                && [knownAuthority.url isEqual:authority.url]) )
+            if ([authority isKindOfClass:knownAuthority.msidAuthority.class]
+                && [knownAuthority.url isEqual:authority.url])
             {
                 return YES;
             }
