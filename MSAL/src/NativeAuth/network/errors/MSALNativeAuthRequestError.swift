@@ -24,18 +24,9 @@
 
 import Foundation
 
-enum NativeAuthOauth2ErrorCode: String, Decodable {
+protocol MSALNativeAuthRequestError: Decodable, Error {
 
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case invalidPassword = "invalid_password"
-    case invalidOOBValue = "invalid_oob_value"
-    case invalidPurposeToken = "invalid_purpose_token"
-    case expiredToken = "expired_token"
-    case unsupportedChallengeType = "unsupported_challenge_type"
-    case invalidScope = "invalid_scope"
-    case authorizationPending = "authorization_pending"
-    case slowDown = "slow_down"
-    case credentialRequired = "credential_required"
+    var errorDescription: String? { get set }
+    var errorURI: String? { get set }
+    var innerErrors: [MSALNativeInnerError]? { get set }
 }

@@ -60,8 +60,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.credentialRequired])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.credentialRequired)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.credentialRequired)
             } else {
                 XCTFail("MSALNativeAuthSignInTokenRequest should fail with error of type MSALNativeAuthRequestError for this test")
             }
@@ -75,8 +75,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.invalidPurposeToken])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidRequest)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.invalidRequest)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -92,8 +92,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.invalidPassword])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.invalidGrant)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -109,8 +109,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.invalidOOBValue])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.invalidGrant)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -126,8 +126,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.invalidGrant])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.invalidGrant)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -143,8 +143,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.expiredToken])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.expiredToken)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.expiredToken)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -161,8 +161,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         let request = createRequest()
 
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.unsupportedChallengeType)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.unsupportedChallengeType)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -178,8 +178,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.authorizationPending])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.authorizationPending)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.authorizationPending)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -195,8 +195,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.slowDown])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.slowDown)
+            if let error = error as? MSALNativeAuthSignInTokenRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInTokenOauth2ErrorCode.slowDown)
                 XCTAssertNotNil(error.errorDescription)
             } else {
                 XCTFail("MSALNativeAuthSignInTokenRequest should fail with error of type MSALNativeAuthRequestError for this test")

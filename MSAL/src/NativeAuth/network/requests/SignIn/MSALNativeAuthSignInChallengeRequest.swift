@@ -43,7 +43,7 @@ final class MSALNativeAuthSignInChallengeRequest: MSIDHttpRequest {
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<MSALNativeAuthRequestError>()
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInChallengeRequestError>()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer

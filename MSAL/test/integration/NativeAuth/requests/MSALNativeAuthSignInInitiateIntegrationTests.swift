@@ -69,8 +69,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.invalidClient])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidClient)
+            if let error = error as? MSALNativeAuthSignInInitiateRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidClient)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -86,8 +86,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.userNotFound])
         let request = createRequest()
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.invalidGrant)
+            if let error = error as? MSALNativeAuthSignInInitiateRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidGrant)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {
@@ -104,8 +104,8 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         let request = createRequest()
 
         request.send { result, error in
-            if let error = error as? MSALNativeAuthRequestError {
-                XCTAssertEqual(error.error, NativeAuthOauth2ErrorCode.unsupportedChallengeType)
+            if let error = error as? MSALNativeAuthSignInInitiateRequestError {
+                XCTAssertEqual(error.error, MSALNativeAuthSignInInitiateOauth2ErrorCode.unsupportedChallengeType)
                 XCTAssertNotNil(error.errorDescription)
                 XCTAssertNotNil(error.errorURI)
             } else {

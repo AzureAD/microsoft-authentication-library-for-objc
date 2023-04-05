@@ -24,11 +24,18 @@
 
 import Foundation
 
-struct MSALNativeInnerError: Decodable {
-    let error: NativeAuthOauth2ErrorCode
-    let errorDescription: String?
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignInChallengeRequestError: MSALNativeAuthRequestError {
+
+    let error: MSALNativeAuthSignInChallengeOauth2ErrorCode
+    var errorDescription: String?
+    var errorURI: String?
+    var innerErrors: [MSALNativeInnerError]?
+
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
     }
 }
