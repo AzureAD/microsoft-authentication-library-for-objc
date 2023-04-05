@@ -25,7 +25,7 @@
 import Foundation
 
 // swiftlint:disable:next type_name
-struct MSALNativeAuthSignInChallengeRequestResponse: Decodable {
+struct MSALNativeAuthSignInChallengeResponse: Decodable {
 
     // MARK: - Variables
     let credentialToken: String?
