@@ -26,7 +26,8 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthRequestErrorHandler: NSObject, MSIDHttpRequestErrorHandling {
+final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, MSIDHttpRequestErrorHandling {
+    private var customError: T?
 
     // swiftlint:disable:next function_parameter_count
     func handleError(
@@ -137,14 +138,15 @@ final class MSALNativeAuthRequestErrorHandler: NSObject, MSIDHttpRequestErrorHan
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
         do {
-            let errorObject = try JSONDecoder()
-                .decode(MSALNativeAuthErrorRequestResponse.self, from: data ?? Data())
+            customError = try JSONDecoder()
+                .decode(T.self, from: data ?? Data())
             if let completionBlock = completionBlock {
-                let innerError = MSALNativeAuthRequestError(error: errorObject.error,
+                /*let innerError = MSALNativeAuthRequestError(error: errorObject.error,
                                                             errorDescription: errorObject.errorDescription,
                                                             errorURI: errorObject.errorURI,
                                                             innerErrors: errorObject.innerErrors)
-                completionBlock(nil, innerError)
+                 */
+                completionBlock(nil, customError)
             }
         } catch {
             if let completionBlock = completionBlock {

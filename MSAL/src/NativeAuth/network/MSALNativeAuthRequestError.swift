@@ -24,18 +24,17 @@
 
 import Foundation
 
-class MSALNativeAuthRequestError: Error {
+struct MSALNativeAuthRequestError: Decodable, Error {
+
     let error: NativeAuthOauth2ErrorCode
     let errorDescription: String?
     let errorURI: String?
     let innerErrors: [MSALNativeInnerError]?
-    init(error: NativeAuthOauth2ErrorCode,
-         errorDescription: String?,
-         errorURI: String?,
-         innerErrors: [MSALNativeInnerError]? ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
     }
 }

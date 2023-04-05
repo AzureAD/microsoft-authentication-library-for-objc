@@ -24,9 +24,9 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
+final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
 
-    init(params: MSALNativeAuthSignInTokenRequestParameters) throws {
+    init(params: MSALNativeAuthSignInInitiateRequestParameters) throws {
         super.init()
 
         self.context = params.context
@@ -43,29 +43,24 @@ final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler()
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<MSALNativeAuthRequestError>()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer
+        self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateRequestResponse>()
         self.serverTelemetry = serverTelemetry
         self.errorHandler = errorHandler
     }
 
     private func makeBodyRequestParameters(
-        with params: MSALNativeAuthSignInTokenRequestParameters
+        with params: MSALNativeAuthSignInInitiateRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
             Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,
-            Key.credentialToken.rawValue: params.credentialToken,
-            Key.signInSLT.rawValue: params.signInSLT,
-            Key.grantType.rawValue: params.grantType.rawValue,
-            Key.challengeType.rawValue: params.challengeType?.rawValue,
-            Key.scope.rawValue: params.scope,
-            Key.password.rawValue: params.password,
-            Key.oob.rawValue: params.oob
-        ].compactMapValues { $0 }
+            Key.challengeType.rawValue: params.challengeType.rawValue
+        ]
     }
 }
