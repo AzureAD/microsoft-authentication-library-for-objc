@@ -39,10 +39,10 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.initiateSuccess])
         let request = createRequest()
         request.send { result, error in
-            if let result = result as? MSALNativeAuthSignInInitiateRequestResponse {
+            if let result = result as? MSALNativeAuthSignInInitiateResponse {
                 XCTAssertNotNil(result.credentialToken)
             } else {
-                XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateRequestResponse")
+                XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateResponse")
             }
             expectation.fulfill()
         }
@@ -54,10 +54,10 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await mockAPIHandler.addResponse(endpoint: .signInInitiate, correlationId: correlationId, responses: [.challengeTypeRedirect])
         let request = createRequest()
         request.send { result, error in
-            if let result = result as? MSALNativeAuthSignInInitiateRequestResponse {
+            if let result = result as? MSALNativeAuthSignInInitiateResponse {
                 XCTAssertEqual(result.challengeType, .redirect)
             } else {
-                XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateRequestResponse")
+                XCTFail("Response for MSALNativeAuthSignInInitiateRequest is not of type MSALNativeAuthSignInInitiateResponse")
             }
             expectation.fulfill()
         }

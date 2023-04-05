@@ -39,11 +39,11 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await mockAPIHandler.addResponse(endpoint: .signInChallenge, correlationId: correlationId, responses: [.challengeTypePassword])
         let request = createRequest()
         request.send { result, error in
-            if let result = result as? MSALNativeAuthSignInChallengeRequestResponse {
+            if let result = result as? MSALNativeAuthSignInChallengeResponse {
                 XCTAssertTrue(result.challengeType == .password)
                 XCTAssertNotNil(result.credentialToken)
             } else {
-                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeRequestResponse")
+                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeResponse")
             }
             expectation.fulfill()
         }
@@ -55,11 +55,11 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await mockAPIHandler.addResponse(endpoint: .signInChallenge, correlationId: correlationId, responses: [.challengeTypeOOB])
         let request = createRequest()
         request.send { result, error in
-            if let result = result as? MSALNativeAuthSignInChallengeRequestResponse {
+            if let result = result as? MSALNativeAuthSignInChallengeResponse {
                 XCTAssertTrue(result.challengeType == .oob)
                 XCTAssertNotNil(result.credentialToken)
             } else {
-                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeRequestResponse")
+                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeResponse")
             }
             expectation.fulfill()
         }
@@ -71,10 +71,10 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await mockAPIHandler.addResponse(endpoint: .signInChallenge, correlationId: correlationId, responses: [.challengeTypeRedirect])
         let request = createRequest()
         request.send { result, error in
-            if let result = result as? MSALNativeAuthSignInChallengeRequestResponse {
+            if let result = result as? MSALNativeAuthSignInChallengeResponse {
                 XCTAssertTrue(result.challengeType == .redirect)
             } else {
-                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeRequestResponse")
+                XCTFail("Response for MSALNativeAuthSignInChallengeRequest is not of type MSALNativeAuthSignInChallengeResponse")
             }
             expectation.fulfill()
         }
