@@ -34,6 +34,41 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         try super.setUpWithError()
     }
 
+    func test_succeedRequest_atokenSuccess() async throws {
+        let expectation = XCTestExpectation()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config,
+                                                                    context: context,
+                                                                    username: "test@contoso.com",
+                                                                    credentialToken: nil,
+                                                                    signInSLT: nil,
+                                                                    grantType: .otp,
+                                                                    challengeTypes: nil,
+                                                                    scope: "test & alt test",
+                                                                    password: nil,
+                                                                    oob: nil)
+
+
+        let request = try! provider.signInTokenRequest(parameters: parameters,
+                                                context: context)
+
+        request.send { result, error in
+            if let result = result as? [String: Any] {
+                XCTAssertNotNil(result["token_type"])
+                XCTAssertNotNil(result["scope"])
+                XCTAssertNotNil(result["ext_expires_in"])
+                XCTAssertNotNil(result["refresh_token"])
+                XCTAssertNotNil(result["access_token"])
+                XCTAssertNotNil(result["id_token"])
+                XCTAssertNotNil(result["expires_in"])
+            } else {
+                XCTFail("MSALNativeAuthSignInTokenRequest should return a [String: Any] structure in this test")
+            }
+            expectation.fulfill()
+        }
+        XCTWaiter().wait(for: [expectation], timeout: 2)
+    }
+
     func test_succeedRequest_tokenSuccess() async throws {
         let expectation = XCTestExpectation()
         try await mockAPIHandler.addResponse(endpoint: .signInToken, correlationId: correlationId, responses: [.tokenSuccess])
@@ -212,7 +247,13 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config,
                                                                     context: context,
                                                                     username: "test@contoso.com",
-                                                                    grantType: .otp)
+                                                                    credentialToken: nil,
+                                                                    signInSLT: nil,
+                                                                    grantType: .otp,
+                                                                    challengeTypes: nil,
+                                                                    scope: nil,
+                                                                    password: nil,
+                                                                    oob: nil)
 
         return try! provider.signInTokenRequest(parameters: parameters,
                                                 context: context)

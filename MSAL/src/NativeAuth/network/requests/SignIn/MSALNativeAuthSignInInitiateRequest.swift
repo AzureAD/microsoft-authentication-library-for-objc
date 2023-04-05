@@ -43,7 +43,8 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateRequestError>()
+        errorHandler: MSIDHttpRequestErrorHandling =
+        MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateRequestError>()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer
@@ -56,7 +57,7 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         with params: MSALNativeAuthSignInInitiateRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
-        
+
         return [
             Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,

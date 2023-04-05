@@ -153,7 +153,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let parameters = MSALNativeAuthSignInChallengeRequestParameters(config: config,
                                                                         context: context,
                                                                         credentialToken: "Test Credential Token",
-                                                                        challengeType: nil,
+                                                                        challengeTypes: nil,
                                                                         challengeTarget: nil)
 
         return try! provider.signInChallengeRequest(parameters: parameters,

@@ -72,9 +72,9 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
     }
 
     private func shouldRetry(httpResponse: HTTPURLResponse,
-                     httpRequest: MSIDHttpRequestProtocol?,
-                     context: MSIDRequestContext?,
-                     completionBlock: MSIDHttpRequestDidCompleteBlock?) -> Bool {
+                             httpRequest: MSIDHttpRequestProtocol?,
+                             context: MSIDRequestContext?,
+                             completionBlock: MSIDHttpRequestDidCompleteBlock?) -> Bool {
         var shouldRetry = true
         shouldRetry = (httpRequest?.retryCounter ?? 0) > 0
         // 5xx Server errors.
@@ -142,9 +142,9 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                 .decode(T.self, from: data ?? Data())
             if let completionBlock = completionBlock {
                 /*let innerError = MSALNativeAuthRequestError(error: errorObject.error,
-                                                            errorDescription: errorObject.errorDescription,
-                                                            errorURI: errorObject.errorURI,
-                                                            innerErrors: errorObject.innerErrors)
+                 errorDescription: errorObject.errorDescription,
+                 errorURI: errorObject.errorURI,
+                 innerErrors: errorObject.innerErrors)
                  */
                 completionBlock(nil, customError)
             }
