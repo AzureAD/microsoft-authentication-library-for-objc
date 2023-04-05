@@ -37,10 +37,9 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignInInitiateRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signInInitiate,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            challengeType: .password
+            challengeTypes: [.password]
         )
     }
 
@@ -90,7 +89,7 @@ final class MSALNativeAuthSignInInitiateRequestTests: XCTestCase {
             config: MSALNativeAuthConfigStubs.configuration,
             context: params.context,
             username: params.username,
-            challengeType: .oob
+            challengeTypes: [.oob]
         ))
 
         sut.configure(

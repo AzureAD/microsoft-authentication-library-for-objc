@@ -34,7 +34,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
         var config: MSALNativeAuthConfiguration! = nil
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant")))
-        let parameters = MSALNativeAuthSignInChallengeRequestParameters(config:config, context: MSALNativeAuthRequestContextMock(), credentialToken: "Test Credential Token", challengeType: .password, challengeTarget: "email")
+        let parameters = MSALNativeAuthSignInChallengeRequestParameters(config:config, context: MSALNativeAuthRequestContextMock(), credentialToken: "Test Credential Token", challengeTypes: [.password], challengeTarget: "email")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth/v2.0/challenge")

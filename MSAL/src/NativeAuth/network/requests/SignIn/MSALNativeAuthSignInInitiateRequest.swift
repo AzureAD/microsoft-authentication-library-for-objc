@@ -56,11 +56,11 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         with params: MSALNativeAuthSignInInitiateRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
-
+        
         return [
             Key.clientId.rawValue: params.config.clientId,
             Key.username.rawValue: params.username,
-            Key.challengeType.rawValue: params.challengeType.rawValue
+            Key.challengeType.rawValue: params.challengeTypes.map { $0.rawValue }.joined(separator: " ")
         ]
     }
 }

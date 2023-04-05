@@ -62,7 +62,7 @@ final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
             Key.credentialToken.rawValue: params.credentialToken,
             Key.signInSLT.rawValue: params.signInSLT,
             Key.grantType.rawValue: params.grantType.rawValue,
-            Key.challengeType.rawValue: params.challengeType?.rawValue,
+            Key.challengeType.rawValue: params.challengeTypes?.map { $0.rawValue }.joined(separator: " "),
             Key.scope.rawValue: params.scope,
             Key.password.rawValue: params.password,
             Key.oob.rawValue: params.oob

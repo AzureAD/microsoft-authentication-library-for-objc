@@ -37,10 +37,9 @@ final class MSALNativeAuthSignInChallengeRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignInChallengeRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signInChallenge,
             context: context,
             credentialToken: "Test Credential Token",
-            challengeType: .otp,
+            challengeTypes: [.otp],
             challengeTarget: "phone"
         )
     }
@@ -89,10 +88,9 @@ final class MSALNativeAuthSignInChallengeRequestTests: XCTestCase {
 
         let sut = try MSALNativeAuthSignInChallengeRequest(params: .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signInChallenge,
             context: context,
             credentialToken: params.credentialToken,
-            challengeType: nil,
+            challengeTypes: nil,
             challengeTarget: nil
         ))
 

@@ -37,13 +37,12 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignInTokenRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .token,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             credentialToken: "Test Credential Token",
             signInSLT: "Test SignIn SLT",
             grantType: .password,
-            challengeType: .password,
+            challengeTypes: [.password],
             scope: "<scope-1>",
             password: "password",
             oob: "oob"
@@ -99,7 +98,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
             credentialToken: nil,
             signInSLT: nil,
             grantType: .password,
-            challengeType: nil,
+            challengeTypes: nil,
             scope: nil,
             password: nil,
             oob: nil
