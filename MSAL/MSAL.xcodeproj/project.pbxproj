@@ -3082,6 +3082,16 @@
 			path = SingIn;
 			sourceTree = "<group>";
 		};
+		DEDB29AF29DDC18D008DA85B /* SignIn */ = {
+			isa = PBXGroup;
+			children = (
+				DE0D659929C1E41B005798B1 /* MSALNativeAuthSignInInitiateRequestTests.swift */,
+				DE0D659829C1E41B005798B1 /* MSALNativeAuthSignInChallengeRequestTests.swift */,
+				DE0D659A29C1E41B005798B1 /* MSALNativeAuthSignInTokenRequestTests.swift */,
+			);
+			path = SignIn;
+			sourceTree = "<group>";
+		};
 		E02396F51E7AFFF7004D6278 /* telemetry */ = {
 			isa = PBXGroup;
 			children = (
@@ -3242,10 +3252,8 @@
 		E2F5BE8F29894DA400C67EC7 /* requests */ = {
 			isa = PBXGroup;
 			children = (
+				DEDB29AF29DDC18D008DA85B /* SignIn */,
 				E25BC03D29927AFF00588549 /* MSALNativeAuthSignUpRequestTests.swift */,
-				DE0D659929C1E41B005798B1 /* MSALNativeAuthSignInInitiateRequestTests.swift */,
-				DE0D659829C1E41B005798B1 /* MSALNativeAuthSignInChallengeRequestTests.swift */,
-				DE0D659A29C1E41B005798B1 /* MSALNativeAuthSignInTokenRequestTests.swift */,
 				E2F5BE9029894DB400C67EC7 /* MSALNativeAuthSignInRequestTests.swift */,
 				DE54DA23299BAE2F0078B850 /* MSALNativeAuthResendCodeRequestTests.swift */,
 				DE54DA96299FD05A0078B850 /* MSALNativeAuthVerifyCodeRequestTests.swift */,
