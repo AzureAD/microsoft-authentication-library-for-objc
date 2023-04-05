@@ -86,7 +86,9 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
 
     private func formUrlEncode(_ parameters: [AnyHashable: Any]) -> String {
         parameters.map {
-            "\($0.key)=\($0.value)"
+            let encodedKey = (($0.key as? String) ?? "").msidWWWFormURLEncode() ?? ""
+            let encodedValue = (($0.value as? String) ?? "").msidWWWFormURLEncode() ?? ""
+            return "\(encodedKey)=\(encodedValue)"
         }.joined(separator: "&")
     }
 }
