@@ -26,12 +26,14 @@
 
 final class MSALNativeAuthSignUpStartRequest: MSIDHttpRequest {
 
+    private typealias RequestError = MSALNativeAuthSignUpStartRequestError
+
     func configure(
         params: MSALNativeAuthSignUpStartRequestParameters,
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler()
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<RequestError>()
     ) throws {
         context = params.context
         parameters = makeBodyRequestParameters(with: params)
@@ -61,7 +63,7 @@ final class MSALNativeAuthSignUpStartRequest: MSIDHttpRequest {
             Key.username.rawValue: params.username,
             Key.password.rawValue: params.password,
             Key.attributes.rawValue: params.attributes,
-            Key.challengeType.rawValue: params.challengeType.toString()
+            Key.challengeType.rawValue: params.challengeTypes.map { $0.rawValue }.joined(separator: " ")
         ].compactMapValues { $0 }
     }
 }

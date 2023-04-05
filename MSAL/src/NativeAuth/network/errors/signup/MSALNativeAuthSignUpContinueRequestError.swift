@@ -24,17 +24,40 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInTokenRequestError: MSALNativeAuthRequestError {
-
-    let error: MSALNativeAuthSignInTokenOauth2ErrorCode
+struct MSALNativeAuthSignUpContinueRequestError: MSALNativeAuthRequestError {
+    let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
     let errorURI: String?
     let innerErrors: [MSALNativeInnerError]?
+    let requiredAttributes: [String: String]?
+    let signUpToken: String?
+    let attributesToVerify: [[String: String]]?
+
+    init(
+        error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeInnerError]? = nil,
+        requiredAttributes: [String: String]? = nil,
+        signUpToken: String? = nil,
+        attributesToVerify: [[String: String]]? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.requiredAttributes = requiredAttributes
+        self.signUpToken = signUpToken
+        self.attributesToVerify = attributesToVerify
+    }
 
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
+        case requiredAttributes = "required_attributes"
+        case signUpToken = "signup_token"
+        case attributesToVerify = "attributes_to_verify"
     }
 }

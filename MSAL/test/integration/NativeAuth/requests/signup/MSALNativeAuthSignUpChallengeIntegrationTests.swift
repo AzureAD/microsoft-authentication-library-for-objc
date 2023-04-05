@@ -28,25 +28,27 @@ import XCTest
 
 final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
+    private typealias Error = MSALNativeAuthSignUpChallengeRequestError
+    private var provider: MSALNativeAuthSignUpRequestProvider!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
+        provider = MSALNativeAuthSignUpRequestProvider(
             config: config,
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
         sut = try provider.challenge(
             token: "<token>",
+            challengeTypes: [.redirect, .password, .oob],
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }
 
     func test_whenSignUpChallengePassword_succeeds() async throws {
         try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
-        let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .password)
         XCTAssertNotNil(response?.signUpToken)
@@ -59,7 +61,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
     func test_whenSignUpChallengeOOB_succeeds() async throws {
         try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .oob)
         XCTAssertNotNil(response?.signUpToken)
@@ -72,7 +74,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
     func test_whenSignUpChallenge_redirects() async throws {
         try await mockResponse(.challengeTypeRedirect, endpoint: .signUpChallenge)
-        let response: MSALNativeAuthSignUpChallengeResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .redirect)
         XCTAssertNil(response?.signUpToken)
@@ -84,18 +86,41 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_signUpChallenge_invalidClient() async throws {
-        try await perform_testFail_invalidClient(endpoint: .signUpChallenge)
+        try await perform_testFail(
+            endpoint: .signUpChallenge,
+            response: .invalidClient,
+            expectedError: Error(error: .invalidClient)
+        )
     }
 
     func test_signUpChallenge_invalidPurposeToken() async throws {
-        try await perform_testFail_invalidPurposeToken(endpoint: .signUpChallenge)
+        let response = try await perform_testFail(
+            endpoint: .signUpChallenge,
+            response: .invalidPurposeToken,
+            expectedError: Error(error: .invalidRequest)
+        )
+
+        guard let innerError = response.innerErrors?.first else {
+            return XCTFail("There should be an inner error")
+        }
+
+        XCTAssertEqual(innerError.error, "invalid_purpose_token")
+        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_signUpChallenge_expiredToken() async throws {
-        try await perform_testFail_expiredToken(endpoint: .signUpChallenge)
+        try await perform_testFail(
+            endpoint: .signUpChallenge,
+            response: .expiredToken,
+            expectedError: Error(error: .expiredToken)
+        )
     }
 
     func test_signUpChallenge_unsupportedChallengeType() async throws {
-        try await perform_testFail_unsupportedChallengeType(endpoint: .signUpChallenge)
+        try await perform_testFail(
+            endpoint: .signUpChallenge,
+            response: .unsupportedChallengeType,
+            expectedError: Error(error: .unsupportedChallengeType)
+        )
     }
 }

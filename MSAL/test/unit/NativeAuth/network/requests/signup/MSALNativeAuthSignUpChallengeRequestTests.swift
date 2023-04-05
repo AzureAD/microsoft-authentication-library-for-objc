@@ -36,7 +36,7 @@ final class MSALNativeAuthSignUpChallengeRequestTests: XCTestCase {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
             signUpToken: "<sign-up-token>",
-            challengeType: [.password, .oob, .redirect],
+            challengeTypes: [.password, .oob, .redirect],
             context: context
         )
     }

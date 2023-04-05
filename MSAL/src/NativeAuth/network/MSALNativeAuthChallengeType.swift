@@ -28,11 +28,3 @@ enum MSALNativeAuthChallengeType: String, Decodable {
     case otp
     case redirect
 }
-
-extension Array where Element == MSALNativeAuthChallengeType {
-
-    func toString() -> String {
-        self.map { $0.rawValue }
-            .joined(separator: " ")
-    }
-}

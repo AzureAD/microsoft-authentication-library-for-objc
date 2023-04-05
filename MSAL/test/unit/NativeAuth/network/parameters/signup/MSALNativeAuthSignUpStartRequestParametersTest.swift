@@ -34,7 +34,14 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
         let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
         var config: MSALNativeAuthConfiguration! = nil
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant")))
-        let parameters = MSALNativeAuthSignUpStartRequestParameters(config: config, username: "username", context: MSALNativeAuthRequestContextMock())
+        let parameters = MSALNativeAuthSignUpStartRequestParameters(
+            config: config,
+            username: "username",
+            password: nil,
+            attributes: nil,
+            challengeTypes: [.redirect],
+            context: MSALNativeAuthRequestContextMock()
+        )
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/start")

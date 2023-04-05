@@ -24,17 +24,20 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInTokenRequestError: MSALNativeAuthRequestError {
-
-    let error: MSALNativeAuthSignInTokenOauth2ErrorCode
-    let errorDescription: String?
-    let errorURI: String?
-    let innerErrors: [MSALNativeInnerError]?
-
-    enum CodingKeys: String, CodingKey {
-        case error
-        case errorDescription = "error_description"
-        case errorURI = "error_uri"
-        case innerErrors = "inner_errors"
-    }
+// swiftlint:disable:next type_name
+enum MSALNativeAuthSignUpContinueOauth2ErrorCode: String, Decodable {
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case invalidGrant = "invalid_grant"
+    case expiredToken = "expired_token"
+    case invalidPurposeToken = "invalid_purpose_token"
+    case passwordTooWeak = "password_too_weak"
+    case passwordTooShort = "password_too_short"
+    case passwordTooLong = "password_too_long"
+    case passwordRecentlyUsed = "password_recently_used"
+    case passwordBanned = "password_banned"
+    case userAlreadyExists = "user_already_exists"
+    case attributesRequired = "attributes_required"
+    case verificationRequired = "verification_required"
+    case validationFailed = "validation_failed"
 }

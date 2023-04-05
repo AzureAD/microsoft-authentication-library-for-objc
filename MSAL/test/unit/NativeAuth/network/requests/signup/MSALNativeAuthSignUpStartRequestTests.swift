@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpStartRequestTests: XCTestCase {
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "strong-password",
             attributes: "<attribute1: value1>",
-            challengeType: [.password, .oob, .redirect],
+            challengeTypes: [.password, .oob, .redirect],
             context: context
         )
     }

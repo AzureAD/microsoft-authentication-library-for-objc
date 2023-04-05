@@ -34,22 +34,4 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
     let oob: String?
     let attributes: String?
     let context: MSIDRequestContext
-
-    init(
-        config: MSALNativeAuthConfiguration,
-        grantType: MSALNativeAuthGrantType,
-        signUpToken: String,
-        password: String? = nil,
-        oob: String? = nil,
-        attributes: String? = nil,
-        context: MSIDRequestContext
-    ) {
-        self.config = config
-        self.grantType = grantType
-        self.signUpToken = signUpToken
-        self.password = password
-        self.oob = oob
-        self.attributes = attributes
-        self.context = context
-    }
 }

@@ -26,12 +26,14 @@
 
 final class MSALNativeAuthSignUpContinueRequest: MSIDHttpRequest {
 
+    private typealias RequestError = MSALNativeAuthSignUpContinueRequestError
+
     func configure(
         params: MSALNativeAuthSignUpContinueRequestParameters,
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler()
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<RequestError>()
     ) throws {
         context = params.context
         parameters = makeBodyRequestParameters(with: params)

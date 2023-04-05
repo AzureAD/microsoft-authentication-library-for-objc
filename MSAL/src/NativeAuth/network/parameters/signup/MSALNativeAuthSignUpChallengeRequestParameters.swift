@@ -29,24 +29,6 @@ struct MSALNativeAuthSignUpChallengeRequestParameters: MSALNativeAuthRequestable
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signUpChallenge
     let signUpToken: String
-    let challengeType: [MSALNativeAuthChallengeType]
+    let challengeTypes: [MSALNativeAuthChallengeType]
     let context: MSIDRequestContext
-}
-
-// MARK: - Convenience init
-
-extension MSALNativeAuthSignUpChallengeRequestParameters {
-
-    init(
-        config: MSALNativeAuthConfiguration,
-        signUpToken: String,
-        context: MSIDRequestContext
-    ) {
-        self.init(
-            config: config,
-            signUpToken: signUpToken,
-            challengeType: [.password, .oob, .redirect],
-            context: context
-        )
-    }
 }

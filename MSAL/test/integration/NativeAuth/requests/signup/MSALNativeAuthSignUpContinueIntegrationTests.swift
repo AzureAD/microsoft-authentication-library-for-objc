@@ -27,13 +27,15 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
+
+    private typealias Error = MSALNativeAuthSignUpContinueRequestError
+    private var provider: MSALNativeAuthSignUpRequestProvider!
     private var context: MSIDRequestContext!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
+        provider = MSALNativeAuthSignUpRequestProvider(
             config: config,
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
@@ -84,61 +86,122 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     }
 
     func test_signUpChallenge_invalidClient() async throws {
-        try await perform_testFail_invalidClient(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .invalidClient,
+            expectedError: Error(error: .invalidClient)
+        )
     }
 
     func test_signUpChallenge_invalidPurposeToken() async throws {
-        try await perform_testFail_invalidPurposeToken(endpoint: .signUpContinue)
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .invalidPurposeToken,
+            expectedError: Error(error: .invalidRequest)
+        )
+
+        guard let innerError = response.innerErrors?.first else {
+            return XCTFail("There should be an inner error")
+        }
+
+        XCTAssertEqual(innerError.error, "invalid_purpose_token")
+        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_signUpChallenge_expiredToken() async throws {
-        try await perform_testFail_expiredToken(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .expiredToken,
+            expectedError: Error(error: .expiredToken)
+        )
     }
 
     func test_signUpChallenge_passwordTooWeak() async throws {
-        try await perform_testFail_passwordTooWeak(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .passwordTooWeak,
+            expectedError: Error(error: .passwordTooWeak)
+        )
     }
 
     func test_signUpChallenge_passwordTooShort() async throws {
-        try await perform_testFail_passwordTooShort(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .passwordTooShort,
+            expectedError: Error(error: .passwordTooShort)
+        )
     }
 
     func test_signUpChallenge_passwordTooLong() async throws {
-        try await perform_testFail_passwordTooLong(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .passwordTooLong,
+            expectedError: Error(error: .passwordTooLong)
+        )
     }
 
     func test_signUpChallenge_passwordRecentlyUsed() async throws {
-        try await perform_testFail_passwordRecentlyUsed(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .passwordRecentlyUsed,
+            expectedError: Error(error: .passwordRecentlyUsed)
+        )
     }
 
     func test_signUpChallenge_passwordBanned() async throws {
-        try await perform_testFail_passwordBanned(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .passwordBanned,
+            expectedError: Error(error: .passwordBanned)
+        )
     }
 
     func test_signUpChallenge_userAlreadyExists() async throws {
-        try await perform_testFail_userAlreadyExists(endpoint: .signUpContinue)
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .userAlreadyExists,
+            expectedError: Error(error: .userAlreadyExists)
+        )
     }
 
     func test_signUpChallenge_attributesRequired() async throws {
-        try await perform_testFail_attributesRequired(endpoint: .signUpContinue)
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .attributesRequired,
+            expectedError: Error(error: .attributesRequired)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
     }
 
     func test_signUpChallenge_verificationRequired() async throws {
-        try await perform_testFail_verificationRequired(endpoint: .signUpContinue)
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .verificationRequired,
+            expectedError: Error(error: .verificationRequired)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.attributesToVerify)
     }
 
     func test_signUpChallenge_validationFailed() async throws {
-        try await perform_testFail_validationFailed(endpoint: .signUpContinue)
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .validationFailed,
+            expectedError: Error(error: .validationFailed)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
     }
 
     func performSuccessfulTestCase(with params: MSALNativeAuthSignUpContinueRequestProviderParams) async throws {
         try await mockAPIHandler.addResponse(endpoint: .signUpContinue, correlationId: correlationId, responses: [])
         sut = try provider.continue(params: params)
 
-        let response: MSALNativeAuthSignUpContinueResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.signinSLT)
-//        XCTAssertNotNil(response?.expiresIn) // TODO: Enable when Mock Api fixes it
         XCTAssertNil(response?.signupToken)
     }
 }

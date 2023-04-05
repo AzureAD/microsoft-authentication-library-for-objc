@@ -77,9 +77,4 @@ private struct ResponseStub: Decodable {
     let accessToken: String
     let refreshToken: String
     let idToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case tokenType, scope, expiresIn, accessToken, refreshToken, idToken
-        case extendedExpiresIn = "extExpiresIn"
-    }
 }

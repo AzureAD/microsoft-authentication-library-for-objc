@@ -28,18 +28,19 @@ import XCTest
 
 final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private var provider: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
+    private typealias Error = MSALNativeAuthSignUpStartRequestError
+    private var provider: MSALNativeAuthSignUpRequestProvider!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider(
+        provider = MSALNativeAuthSignUpRequestProvider(
             config: config,
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
         sut = try provider.start(
-            parameters: MSALNativeAuthSignUpParameters(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "1234"),
+            parameters: MSALNativeAuthSignUpParameters(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "1234"), challengeTypes: [.password, .oob, .redirect],
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }
@@ -51,7 +52,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             responses: []
         )
 
-        let response: MSALNativeAuthSignUpStartResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.signupToken)
         XCTAssertNil(response?.challengeType)
@@ -64,63 +65,112 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             responses: [.challengeTypeRedirect]
         )
 
-        let response: MSALNativeAuthSignUpStartResponse? = await performTestSucceed()
+        let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
 
         XCTAssertNil(response?.signupToken)
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 
     func test_signUpStart_invalidClient() async throws {
-        try await perform_testFail_invalidClient(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .invalidClient,
+            expectedError: Error(error: .invalidClient)
+        )
     }
 
     func test_signUpStart_unsupportedChallengeType() async throws {
-        try await perform_testFail_unsupportedChallengeType(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .unsupportedChallengeType,
+            expectedError: Error(error: .unsupportedChallengeType)
+        )
     }
 
     func test_signUpStart_passwordTooWeak() async throws {
-        try await perform_testFail_passwordTooWeak(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .passwordTooWeak,
+            expectedError: Error(error: .passwordTooWeak)
+        )
     }
 
     func test_signUpStart_passwordTooShort() async throws {
-        try await perform_testFail_passwordTooShort(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .passwordTooShort,
+            expectedError: Error(error: .passwordTooShort)
+        )
     }
 
     func test_signUpStart_passwordTooLong() async throws {
-        try await perform_testFail_passwordTooLong(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .passwordTooLong,
+            expectedError: Error(error: .passwordTooLong)
+        )
     }
 
     func test_signUpStart_passwordRecentlyUsed() async throws {
-        try await perform_testFail_passwordRecentlyUsed(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .passwordRecentlyUsed,
+            expectedError: Error(error: .passwordRecentlyUsed)
+        )
     }
 
     func test_signUpStart_passwordBanned() async throws {
-        try await perform_testFail_passwordBanned(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .passwordBanned,
+            expectedError: Error(error: .passwordBanned)
+        )
     }
 
     func test_signUpStart_userAlreadyExists() async throws {
-        try await perform_testFail_userAlreadyExists(endpoint: .signUpStart)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .userAlreadyExists,
+            expectedError: Error(error: .userAlreadyExists)
+        )
     }
 
     func test_signUpStart_attributesRequired() async throws {
-        try await perform_testFail_attributesRequired(endpoint: .signUpStart)
+        let response = try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .attributesRequired,
+            expectedError: Error(error: .attributesRequired)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
     }
 
     func test_signUpStart_verificationRequired() async throws {
-        try await perform_testFail_verificationRequired(endpoint: .signUpStart)
+        let response = try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .verificationRequired,
+            expectedError: Error(error: .verificationRequired)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.attributesToVerify)
     }
 
     func test_signUpStart_validationFailed() async throws {
-        try await perform_testFail_validationFailed(endpoint: .signUpStart)
+        let response = try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .validationFailed,
+            expectedError: Error(error: .validationFailed)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
     }
 
     func test_signUpStart_authNotSupported() async throws {
-        try await mockResponse(.authNotSupported, endpoint: .signUpStart)
-        await perform_testFail_authNotSupported()
-    }
-
-    private func perform_testFail_authNotSupported() async {
-        let response = await performTestFail()
-        XCTAssertEqual(response?.error, .authNotSupported)
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .authNotSupported,
+            expectedError: Error(error: .authNotSupported)
+        )
     }
 }

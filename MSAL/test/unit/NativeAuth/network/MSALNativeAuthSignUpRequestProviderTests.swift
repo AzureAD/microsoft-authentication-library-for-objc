@@ -28,7 +28,7 @@ import XCTest
 
 final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
 
-    private var sut: MSALNativeAuthRequestProvider.MSALNativeAuthSignUpRequestProvider!
+    private var sut: MSALNativeAuthSignUpRequestProvider!
     private var telemetryProvider: MSALNativeAuthTelemetryProvider!
     private var context: MSIDRequestContext!
 
@@ -46,7 +46,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             attributes: ["city": "dublin"]
         )
 
-        let request = try sut.start(parameters: parameters, context: context)
+        let request = try sut.start(parameters: parameters, challengeTypes: [.redirect], context: context)
 
         checkBodyParams(request.parameters, for: .signUpStart)
         checkUrlRequest(request.urlRequest!, for: .signUpStart)
@@ -56,7 +56,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     }
 
     func test_signUpChallengeRequest_is_created_successfully() throws {
-        let request = try sut.challenge(token: "sign-up-token", context: context)
+        let request = try sut.challenge(token: "sign-up-token", challengeTypes: [.redirect], context: context)
 
         checkBodyParams(request.parameters, for: .signUpChallenge)
         checkUrlRequest(request.urlRequest!, for: .signUpChallenge)
@@ -94,15 +94,15 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.username.rawValue: DEFAULT_TEST_ID_TOKEN_USERNAME,
-                Key.challengeType.rawValue: "password oob redirect",
-                Key.attributes.rawValue: "%7B%22city%22:%22dublin%22%7D",
+                Key.challengeType.rawValue: "redirect",
+                Key.attributes.rawValue: "%7B%22city%22%3A%22dublin%22%7D",
                 Key.password.rawValue: "1234"
             ]
         case .signUpChallenge:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.signUpToken.rawValue: "sign-up-token",
-                Key.challengeType.rawValue: "password oob redirect"
+                Key.challengeType.rawValue: "redirect"
             ]
         case .signUpContinue:
             expectedBodyParams = [

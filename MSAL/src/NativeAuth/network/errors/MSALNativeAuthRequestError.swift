@@ -24,9 +24,11 @@
 
 import Foundation
 
-protocol MSALNativeAuthRequestError: Decodable, Error {
+protocol MSALNativeAuthRequestError: Error, Decodable {
+    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
 
-    var errorDescription: String? { get set }
-    var errorURI: String? { get set }
-    var innerErrors: [MSALNativeInnerError]? { get set }
+    var error: ErrorCode { get }
+    var errorDescription: String? { get }
+    var errorURI: String? { get }
+    var innerErrors: [MSALNativeInnerError]? { get }
 }

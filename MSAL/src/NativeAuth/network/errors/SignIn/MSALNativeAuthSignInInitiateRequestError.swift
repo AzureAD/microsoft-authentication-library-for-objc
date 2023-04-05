@@ -27,9 +27,9 @@ import Foundation
 struct MSALNativeAuthSignInInitiateRequestError: MSALNativeAuthRequestError {
 
     let error: MSALNativeAuthSignInInitiateOauth2ErrorCode
-    var errorDescription: String?
-    var errorURI: String?
-    var innerErrors: [MSALNativeInnerError]?
+    let errorDescription: String?
+    let errorURI: String?
+    let innerErrors: [MSALNativeInnerError]?
 
     enum CodingKeys: String, CodingKey {
         case error

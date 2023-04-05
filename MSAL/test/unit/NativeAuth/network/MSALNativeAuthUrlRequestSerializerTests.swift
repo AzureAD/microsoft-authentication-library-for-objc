@@ -161,10 +161,10 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         let result = sut.serialize(with: request, parameters: parameters, headers: headers)
         let bodyResultFormUrlEncoded = String(data: result.httpBody!, encoding: .utf8)
 
-        let expectedScope = "scope=\(DEFAULT_TEST_SCOPE)"
+        let expectedScope = "scope=https%3A%2F%2Fgraph.microsoft.com%2Fmail.read"
         let expectedClientId = "clientId=\(DEFAULT_TEST_CLIENT_ID)"
         let expectedGrantType = "grantType=oob"
-        let expectedEmail = "email=\(DEFAULT_TEST_ID_TOKEN_USERNAME)"
+        let expectedEmail = "email=user%40contoso.com"
         let expectedPassword = "password=12345"
 
         let expectedBodyResult = "\(expectedScope)&\(expectedClientId)&\(expectedGrantType)&\(expectedEmail)&\(expectedPassword)"
