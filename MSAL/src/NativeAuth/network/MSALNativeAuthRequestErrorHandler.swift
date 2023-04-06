@@ -103,7 +103,15 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) -> Bool {
-        let wwwAuthValue = httpResponse.allHeaderFields[kMSIDWwwAuthenticateHeader] as? String
+        let wwwAuthKey = httpResponse.allHeaderFields.keys.first(where: {
+            if let keyNameUppercased = ($0 as? String)?.uppercased() {
+                return keyNameUppercased == kMSIDWwwAuthenticateHeader.uppercased()
+            }
+            return false
+        })
+        let wwwAuthValue = httpResponse
+                            .allHeaderFields[wwwAuthKey ?? "" as Dictionary<AnyHashable, Any>.Keys.Element] as? String
+
         if !NSString.msidIsStringNilOrBlank(wwwAuthValue),
            let wwwAuthValue = wwwAuthValue,
            wwwAuthValue.contains(kMSIDPKeyAuthName) {
@@ -141,11 +149,6 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
             customError = try JSONDecoder()
                 .decode(T.self, from: data ?? Data())
             if let completionBlock = completionBlock {
-                /*let innerError = MSALNativeAuthRequestError(error: errorObject.error,
-                 errorDescription: errorObject.errorDescription,
-                 errorURI: errorObject.errorURI,
-                 innerErrors: errorObject.innerErrors)
-                 */
                 completionBlock(nil, customError)
             }
         } catch {

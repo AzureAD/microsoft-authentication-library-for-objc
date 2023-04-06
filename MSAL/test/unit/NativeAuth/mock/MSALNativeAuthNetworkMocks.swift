@@ -315,22 +315,30 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
 
 class HttpModuleMockConfigurator {
 
-    static func configure(request: MSIDHttpRequest, responseJson: Any) {
-        let baseUrl = URL(string: "https://www.contoso.com")!
+    static let baseUrl = URL(string: "https://www.contoso.com")!
+
+    static func configure(request: MSIDHttpRequest,
+                          response: HTTPURLResponse? = nil,
+                          responseJson: Any) {
 
         let parameters = ["p1": "v1"]
 
-        let httpResponse = HTTPURLResponse(
-            url: baseUrl,
-            statusCode: 200,
-            httpVersion: nil,
-            headerFields: nil
-        )
+        var httpResponse: HTTPURLResponse!
+        if response == nil {
+            httpResponse = HTTPURLResponse(
+                url: HttpModuleMockConfigurator.baseUrl,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )
+        } else {
+            httpResponse = response
+        }
 
-        var urlRequest = URLRequest(url: baseUrl)
+        var urlRequest = URLRequest(url: HttpModuleMockConfigurator.baseUrl)
         urlRequest.httpMethod = "POST"
 
-        let testUrlResponse = MSIDTestURLResponse.request(baseUrl, reponse: httpResponse)
+        let testUrlResponse = MSIDTestURLResponse.request(HttpModuleMockConfigurator.baseUrl, reponse: httpResponse)
         testUrlResponse?.setUrlFormEncodedBody(parameters)
         testUrlResponse?.setResponseJSON(responseJson)
         MSIDTestURLSession.add(testUrlResponse)
