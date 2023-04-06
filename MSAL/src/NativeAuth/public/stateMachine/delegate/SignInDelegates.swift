@@ -37,7 +37,7 @@ public protocol SignInStartDelegate {
     func signInFlowInterrupted(reason: SignInStartFlowInterruptionReason)
     /// An error happened, but the user can continue the authentication flow.
     ///
-    /// Checks the `error` parameter to see more detail
+    /// Check the `error` parameter to see more detail
     ///
     ///
     /// - Parameters:
