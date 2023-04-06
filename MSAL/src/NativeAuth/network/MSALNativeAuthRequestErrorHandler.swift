@@ -40,25 +40,24 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
         guard let httpResponse = httpResponse else {
-            if let completionBlock = completionBlock {
-                completionBlock(nil, error)
-            }
+            completionBlock?(nil, error)
             return
         }
 
-        if shouldRetry(httpResponse: httpResponse,
-                       httpRequest: httpRequest,
-                       context: context,
-                       completionBlock: completionBlock) {
+        if shouldRetry(httpResponse: httpResponse, httpRequest: httpRequest) {
+            retryRequest(httpRequest: httpRequest,
+                         context: context,
+                         completionBlock: completionBlock)
             return
         }
 
         if httpResponse.statusCode == 400 || httpResponse.statusCode == 401 {
             // pkeyauth challenge
-            if handleAuthenticateHeader(httpResponse: httpResponse,
-                                        httpRequest: httpRequest,
-                                        context: context,
-                                        completionBlock: completionBlock) {
+            if let authValue = wwwAuthValue(httpResponse: httpResponse) {
+                handleAuthenticateHeader(wwwAuthValue: authValue,
+                                         httpRequest: httpRequest,
+                                         context: context,
+                                         completionBlock: completionBlock)
                 return
             }
 
@@ -72,37 +71,31 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
     }
 
     private func shouldRetry(httpResponse: HTTPURLResponse,
-                             httpRequest: MSIDHttpRequestProtocol?,
-                             context: MSIDRequestContext?,
-                             completionBlock: MSIDHttpRequestDidCompleteBlock?) -> Bool {
-        var shouldRetry = true
-        shouldRetry = (httpRequest?.retryCounter ?? 0) > 0
-        // 5xx Server errors.
-        shouldRetry = shouldRetry && httpResponse.statusCode >= 500 && httpResponse.statusCode <= 599
-        if shouldRetry {
-            httpRequest?.retryCounter -= 1
-            if let context = context {
-                MSALLogger.log(level: .verbose,
-                               context: context,
-                               format: "Retrying network request, retryCounter: %d", httpRequest?.retryCounter ?? 0)
-            }
-
-            let deadline = DispatchTime.now() + Double(UInt64(httpRequest?.retryInterval ?? 0) * NSEC_PER_SEC )
-            DispatchQueue.main.asyncAfter(deadline: deadline) {
-                httpRequest?.send(completionBlock)
-            }
-
-            return true
+                             httpRequest: MSIDHttpRequestProtocol?) -> Bool {
+        guard let httpRequest = httpRequest, httpRequest.retryCounter > 0 else {
+            return false
         }
-        return false
+        return httpResponse.statusCode >= 500 && httpResponse.statusCode <= 599
     }
 
-    private func handleAuthenticateHeader(
-        httpResponse: HTTPURLResponse,
+    private func retryRequest(
         httpRequest: MSIDHttpRequestProtocol?,
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) -> Bool {
+    ) {
+        httpRequest?.retryCounter -= 1
+        if let context = context {
+            MSALLogger.log(level: .verbose,
+                           context: context,
+                           format: "Retrying network request, retryCounter: %d", httpRequest?.retryCounter ?? 0)
+        }
+        let deadline = DispatchTime.now() + Double(UInt64(httpRequest?.retryInterval ?? 0) * NSEC_PER_SEC )
+        DispatchQueue.main.asyncAfter(deadline: deadline) {
+            httpRequest?.send(completionBlock)
+        }
+    }
+
+    private func wwwAuthValue(httpResponse: HTTPURLResponse) -> String? {
         let wwwAuthKey = httpResponse.allHeaderFields.keys.first(where: {
             if let keyNameUppercased = ($0 as? String)?.uppercased() {
                 return keyNameUppercased == kMSIDWwwAuthenticateHeader.uppercased()
@@ -113,32 +106,37 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                             .allHeaderFields[wwwAuthKey ?? "" as Dictionary<AnyHashable, Any>.Keys.Element] as? String
 
         if !NSString.msidIsStringNilOrBlank(wwwAuthValue),
-           let wwwAuthValue = wwwAuthValue,
-           wwwAuthValue.contains(kMSIDPKeyAuthName) {
-
-            MSIDPKeyAuthHandler.handleWwwAuthenticateHeader(wwwAuthValue,
-                                                            request: httpRequest?.urlRequest.url,
-                                                            context: context) { authHeader, completionError in
-                if !NSString.msidIsStringNilOrBlank(authHeader) {
-                    // append auth header
-                    if let newRequest = (httpRequest?.urlRequest as? NSURLRequest)?
-                        .mutableCopy() as? NSMutableURLRequest {
-                        newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
-                        httpRequest?.urlRequest = newRequest as URLRequest
-
-                        DispatchQueue.main.async {
-                            httpRequest?.send(completionBlock)
-                        }
-                    }
-                    return
-                }
-                if let completionBlock = completionBlock {
-                    completionBlock(nil, completionError)
-                }
-            }
-            return true
+            let wwwAuthValue = wwwAuthValue,
+            wwwAuthValue.contains(kMSIDPKeyAuthName) {
+            return wwwAuthValue
         }
-        return false
+        return nil
+    }
+
+    private func handleAuthenticateHeader(
+        wwwAuthValue: String,
+        httpRequest: MSIDHttpRequestProtocol?,
+        context: MSIDRequestContext?,
+        completionBlock: MSIDHttpRequestDidCompleteBlock?
+    ) {
+        MSIDPKeyAuthHandler.handleWwwAuthenticateHeader(wwwAuthValue,
+                                                        request: httpRequest?.urlRequest.url,
+                                                        context: context) { authHeader, completionError in
+            if !NSString.msidIsStringNilOrBlank(authHeader) {
+                // append auth header
+                if let newRequest = (httpRequest?.urlRequest as? NSURLRequest)?
+                    .mutableCopy() as? NSMutableURLRequest {
+                    newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
+                    httpRequest?.urlRequest = newRequest as URLRequest
+
+                    DispatchQueue.main.async {
+                        httpRequest?.send(completionBlock)
+                    }
+                }
+                return
+            }
+            completionBlock?(nil, completionError)
+        }
     }
 
     private func handleAPIError(
@@ -148,13 +146,9 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         do {
             customError = try JSONDecoder()
                 .decode(T.self, from: data ?? Data())
-            if let completionBlock = completionBlock {
-                completionBlock(nil, customError)
-            }
+            completionBlock?(nil, customError)
         } catch {
-            if let completionBlock = completionBlock {
-                completionBlock(nil, error)
-            }
+            completionBlock?(nil, error)
         }
     }
 
@@ -168,7 +162,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         if let context = context {
             MSALLogger.log(level: .warning,
                            context: context,
-                           format: "Http error raised. Http Code: %d Description %@", statusCode,
+                           format: "HTTP error raised. HTTP Code: %d Description %@", statusCode,
                            MSALLogMask.maskPII(errorDescription))
         }
 
@@ -190,9 +184,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                                              context.correlationId(),
                                              additionalInfo,
                                              true)
-            if let completionBlock = completionBlock {
-                completionBlock(nil, httpError)
-            }
+            completionBlock?(nil, httpError)
         }
     }
 }
