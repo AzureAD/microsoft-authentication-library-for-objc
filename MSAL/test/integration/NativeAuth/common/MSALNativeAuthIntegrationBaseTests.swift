@@ -23,12 +23,15 @@
 // THE SOFTWARE.
 
 import XCTest
+@testable import MSAL
 
 class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     
     let mockAPIHandler = MockAPIHandler()
-    var correlationId = UUID()
-
+    let correlationId = UUID()
+    let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
+                                                                               authority: MSALAADAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
+                                                                               rawTenant: "test")
     override func tearDown() {
         try? mockAPIHandler.clearQueues(correlationId: correlationId)
     }

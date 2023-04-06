@@ -37,13 +37,13 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         let url = URL(string: DEFAULT_TEST_RESOURCE)!
         request = URLRequest(url: url)
 
-        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext())
+        sut = MSALNativeAuthUrlRequestSerializer(context: MSALNativeAuthRequestContext(), encoding: .json)
     }
 
     func test_serialize_successfully() throws {
         let parameters = [
-            "clientId": DEFAULT_TEST_CLIENT_ID,
-            "grantType": "passwordless_otp",
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "grant_type": "passwordless_otp",
             "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "12345",
             "scope": DEFAULT_TEST_SCOPE
@@ -58,8 +58,8 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         let bodyParametersResult = try JSONDecoder().decode([String: String].self, from: result.httpBody!)
 
         XCTAssertEqual(bodyParametersResult.count, 5)
-        XCTAssertEqual(bodyParametersResult["clientId"], DEFAULT_TEST_CLIENT_ID)
-        XCTAssertEqual(bodyParametersResult["grantType"], "passwordless_otp")
+        XCTAssertEqual(bodyParametersResult["client_id"], DEFAULT_TEST_CLIENT_ID)
+        XCTAssertEqual(bodyParametersResult["grant_type"], "passwordless_otp")
         XCTAssertEqual(bodyParametersResult["email"], DEFAULT_TEST_ID_TOKEN_USERNAME)
         XCTAssertEqual(bodyParametersResult["password"], "12345")
         XCTAssertEqual(bodyParametersResult["scope"], DEFAULT_TEST_SCOPE)

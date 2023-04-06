@@ -22,18 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDResponseSerialization {
+protocol MSALNativeAuthRequestError: Decodable, Error {
 
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        guard let data = data else {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-        return try decoder.decode(T.self, from: data)
-    }
+    var errorDescription: String? { get set }
+    var errorURI: String? { get set }
+    var innerErrors: [MSALNativeInnerError]? { get set }
 }

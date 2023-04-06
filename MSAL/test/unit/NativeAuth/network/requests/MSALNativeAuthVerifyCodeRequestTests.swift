@@ -70,7 +70,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
         let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
             serverTelemetry: telemetry
         )
 
@@ -93,7 +93,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
 
     private func checkBodyParams(_ result: [String: String]?) {
         let expectedBodyParams = [
-            "clientId": DEFAULT_TEST_CLIENT_ID,
+            "client_id": DEFAULT_TEST_CLIENT_ID,
             "flowToken": "Test Credential Token",
             "otp": "Test OTP"
         ]

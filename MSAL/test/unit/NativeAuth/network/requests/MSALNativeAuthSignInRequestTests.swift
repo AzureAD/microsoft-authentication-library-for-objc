@@ -72,7 +72,7 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
         let sut = try MSALNativeAuthSignInRequest(params: params)
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
             serverTelemetry: telemetry
         )
 
@@ -98,13 +98,13 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
         ))
 
         sut.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context),
+            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
             serverTelemetry: telemetry
         )
 
         let expectedBodyParams = [
-            "clientId": params.config.clientId,
-            "grantType": "passwordless_otp",
+            "client_id": params.config.clientId,
+            "grant_type": "passwordless_otp",
             "email": params.email,
             "scope": "<scope-1>"
         ]
@@ -127,8 +127,8 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
 
     private func checkBodyParams(_ result: [String: String]?) {
         let expectedBodyParams = [
-            "clientId": DEFAULT_TEST_CLIENT_ID,
-            "grantType": "password",
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "grant_type": "password",
             "email": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "strong-password",
             "scope": "<scope-1>"

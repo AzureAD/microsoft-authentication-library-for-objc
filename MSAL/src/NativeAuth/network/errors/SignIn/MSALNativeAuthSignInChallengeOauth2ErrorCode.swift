@@ -22,18 +22,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDResponseSerialization {
+// swiftlint:disable:next type_name
+enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable {
 
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        guard let data = data else {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-        return try decoder.decode(T.self, from: data)
-    }
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case invalidGrant = "invalid_grant"
+    case expiredToken = "expired_token"
+    case unsupportedChallengeType = "unsupported_challenge_type"
 }

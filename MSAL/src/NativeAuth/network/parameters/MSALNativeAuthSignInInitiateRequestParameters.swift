@@ -24,16 +24,12 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDResponseSerialization {
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable {
 
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        guard let data = data else {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-        return try decoder.decode(T.self, from: data)
-    }
+    let config: MSALNativeAuthConfiguration
+    let endpoint: MSALNativeAuthEndpoint = .signInInitiate
+    let context: MSIDRequestContext
+    let username: String
+    let challengeTypes: [MSALNativeAuthChallengeType]
 }

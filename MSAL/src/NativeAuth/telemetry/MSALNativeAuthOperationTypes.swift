@@ -37,6 +37,9 @@ enum MSALNativeAuthSignInType: MSALNativeAuthOperationType {
     case signInWithPassword = 0
     case signInWithOTP = 1
     case signInWithMFA = 2
+    case signInInitiate = 3
+    case signInChallenge = 4
+    case signInToken = 5
 }
 
 typealias MSALNativeAuthTokenRefreshType = TokenCacheRefreshType

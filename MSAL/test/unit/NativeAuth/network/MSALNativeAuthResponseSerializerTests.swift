@@ -35,7 +35,7 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
           "token_type": "Bearer",
           "scope": "scope",
           "expires_in": 4141,
-          "ext_expires_in": 4141,
+          "extended_expires_in": 4141,
           "access_token": "access",
           "refresh_token": "refresh",
           "id_token": "id"
@@ -77,15 +77,4 @@ private struct ResponseStub: Decodable {
     let accessToken: String
     let refreshToken: String
     let idToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case tokenType = "token_type"
-        case scope = "scope"
-        case expiresIn = "expires_in"
-        case extendedExpiresIn = "ext_expires_in"
-        case accessToken = "access_token"
-        case refreshToken = "refresh_token"
-        case idToken = "id_token"
-    }
-
 }

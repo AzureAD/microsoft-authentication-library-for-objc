@@ -22,18 +22,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDResponseSerialization {
+struct MSALNativeAuthSignInInitiateResponse: Decodable {
 
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        guard let data = data else {
+    // MARK: - Variables
+    let credentialToken: String?
+    let challengeType: MSALNativeAuthChallengeType?
+
+    enum CodingKeys: String, CodingKey {
+        case credentialToken
+        case challengeType
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
+        self.challengeType = try container.decodeIfPresent(MSALNativeAuthChallengeType.self, forKey: .challengeType)
+        if self.credentialToken == nil && self.challengeType == nil {
             throw MSALNativeAuthError.responseSerializationError
         }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-        return try decoder.decode(T.self, from: data)
+        if self.credentialToken != nil && self.challengeType != nil {
+            throw MSALNativeAuthError.responseSerializationError
+        }
     }
 }
