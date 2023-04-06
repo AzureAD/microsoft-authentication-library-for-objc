@@ -31,11 +31,4 @@ struct MSALNativeAuthSignInChallengeRequestError: MSALNativeAuthRequestError {
     var errorDescription: String?
     var errorURI: String?
     var innerErrors: [MSALNativeInnerError]?
-
-    enum CodingKeys: String, CodingKey {
-        case error
-        case errorDescription = "error_description"
-        case errorURI = "error_uri"
-        case innerErrors = "inner_errors"
-    }
 }

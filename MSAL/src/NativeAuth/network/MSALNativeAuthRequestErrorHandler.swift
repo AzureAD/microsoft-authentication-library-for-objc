@@ -144,8 +144,9 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
         do {
-            customError = try JSONDecoder()
-                .decode(T.self, from: data ?? Data())
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            customError = try decoder.decode(T.self, from: data ?? Data())
             completionBlock?(nil, customError)
         } catch {
             completionBlock?(nil, error)
