@@ -34,7 +34,7 @@ public protocol SignInStartDelegate {
     /// - Parameters:
     ///     - reason: The reason why the signIn flow got interrupted.
     ///
-    func signInFlowInterrupted(reason: SignInFlowInterruptionReason)
+    func signInFlowInterrupted(reason: SignInStartFlowInterruptionReason)
     /// An error happened, but the user can continue the authentication flow.
     ///
     /// Checks the `error` parameter to see more detail
@@ -44,14 +44,14 @@ public protocol SignInStartDelegate {
     ///     - error: Error details.
     ///
     func onError(error: SignInStartError)
-    func onCodeSent(state: SignInCodeSentState, displayName: String?)
+    func onCodeSent(state: SignInCodeSentState, displayName: String, codeLength: Int)
     func completed(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol ResendCodeSignInDelegate {
     func onError(error: ResendCodeError)
-    func onCodeSent(state: SignInCodeSentState, displayName: String?)
+    func onCodeSent(state: SignInCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc

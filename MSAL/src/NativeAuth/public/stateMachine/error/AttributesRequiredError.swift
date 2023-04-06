@@ -25,17 +25,17 @@
 import Foundation
 
 @objcMembers
-public class AttributeRequiredError: MSALNativeBaseError {
-    let type: AttributeRequiredErrorType
+public class AttributesRequiredError: MSALNativeBaseError {
+    let type: AttributesRequiredErrorType
 
-    init(type: AttributeRequiredErrorType, message: String? = nil) {
+    init(type: AttributesRequiredErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 }
 
 @objc
-public enum AttributeRequiredErrorType: Int {
+public enum AttributesRequiredErrorType: Int {
     case generalError
-    case invalidAttribute
+    case invalidAttributes
 }

@@ -28,7 +28,7 @@ import Foundation
 public protocol ResetPasswordStartDelegate {
     func resetPasswordFlowInterrupted(reason: ResetPasswordStartFlowInterruptionReason)
     func onError(error: ResetPasswordStartError)
-    func onCodeSent(state: CodeSentResetPasswordState, displayName: String?)
+    func onCodeSent(state: CodeSentResetPasswordState, displayName: String, codeLength: Int)
 }
 
 @objc
@@ -41,7 +41,7 @@ public protocol VerifyCodeResetPasswordDelegate {
 @objc
 public protocol ResendCodeResetPasswordDelegate {
     func onError(error: ResendCodeError)
-    func onCodeSent(state: CodeSentResetPasswordState, displayName: String?)
+    func onCodeSent(state: CodeSentResetPasswordState, displayName: String, codeLength: Int)
 }
 
 @objc

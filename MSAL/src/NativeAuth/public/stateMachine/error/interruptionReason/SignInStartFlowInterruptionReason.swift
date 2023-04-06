@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public enum SignInFlowInterruptionReason: Int {
+public enum SignInStartFlowInterruptionReason: Int {
     case redirect
     case userNotFound
     case invalidAuthenticationType

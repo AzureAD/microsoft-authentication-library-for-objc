@@ -28,7 +28,7 @@ import Foundation
 public protocol SignUpStartDelegate {
     func signUpFlowInterrupted(reason: SignUpStartFlowInterruptionReason)
     func onError(error: SignUpStartError)
-    func onCodeSent(state: SignUpCodeSentState, displayName: String?)
+    func onCodeSent(state: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
@@ -43,7 +43,7 @@ public protocol VerifyCodeSignUpDelegate {
 @objc
 public protocol ResendCodeSignUpDelegate {
     func onError(error: ResendCodeError)
-    func onCodeSent(state: SignUpCodeSentState, displayName: String?)
+    func onCodeSent(state: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
@@ -57,6 +57,6 @@ public protocol PasswordRequiredSignUpDelegate {
 @objc
 public protocol AttributeRequiredSignUpDelegate {
     func attributeRequiredFlowInterrupted(reason: BaseFlowInterruptionReason)
-    func onError(error: AttributeRequiredError, state: SignUpAttributesRequiredState)
+    func onError(error: AttributesRequiredError, state: SignUpAttributesRequiredState)
     func completed()
 }

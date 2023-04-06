@@ -30,7 +30,7 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
         if correlationId != nil {
             delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
         } else {
-            delegate.onCodeSent(state: self, displayName: nil)
+            delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
@@ -69,11 +69,11 @@ public class SignUpAttributesRequiredState: MSALNativeAuthBaseState {
         delegate: AttributeRequiredSignUpDelegate,
         correlationId: UUID? = nil) {
             guard let key = attributes.keys.first else {
-                delegate.onError(error: AttributeRequiredError(type: .invalidAttribute), state: self)
+                delegate.onError(error: AttributesRequiredError(type: .invalidAttributes), state: self)
                 return
             }
             switch key {
-            case "general": delegate.onError(error: AttributeRequiredError(type: .generalError), state: self)
+            case "general": delegate.onError(error: AttributesRequiredError(type: .generalError), state: self)
             case "redirect": delegate.attributeRequiredFlowInterrupted(reason: .redirect)
             default: delegate.completed()
             }

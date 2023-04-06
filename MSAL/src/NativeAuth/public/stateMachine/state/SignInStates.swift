@@ -31,7 +31,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         if correlationId != nil {
             delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
         } else {
-            delegate.onCodeSent(state: self, displayName: nil)
+            delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
@@ -43,7 +43,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
         default: delegate.completed(result:
                                         MSALNativeAuthUserAccount(
-                                            email: "email@contoso.com",
+                                            username: "email@contoso.com",
                                             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
         }
     }

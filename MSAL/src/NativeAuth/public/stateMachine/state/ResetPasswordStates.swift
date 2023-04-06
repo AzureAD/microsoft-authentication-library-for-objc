@@ -30,7 +30,7 @@ public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
         if correlationId != nil {
             delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
         } else {
-            delegate.onCodeSent(state: self, displayName: "email@contoso.com")
+            delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 

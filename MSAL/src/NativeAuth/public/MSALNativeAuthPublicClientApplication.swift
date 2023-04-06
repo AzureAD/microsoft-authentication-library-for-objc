@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public enum ChallengeType: Int {
+public enum MSALNativeAuthChallengeType: Int {
     case oob
     case password
 }
@@ -54,7 +54,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     public init(
         clientId: String,
-        challengeTypes: [ChallengeType],
+        challengeTypes: [MSALNativeAuthChallengeType],
         rawTenant: String? = nil,
         redirectUri: String? = nil) throws {
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
@@ -91,31 +91,32 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     // MARK: delegate methods
 
     public func signUp(
-        email: String,
+        username: String,
         password: String?,
         attributes: [String: Any],
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
     ) {
-            switch email {
-            case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userExists)
+            switch username {
+            case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userAlreadyExists)
             case "redirect@contoso.com": delegate.signUpFlowInterrupted(reason: .redirect)
             case "invalidpassword@contoso.com": delegate.onError(error: SignUpStartError(type: .passwordInvalid))
             case "invalidattributes@contoso.com": delegate.onError(error: SignUpStartError(type: .invalidAttributes))
             case "generalerror@contoso.com": delegate.onError(error: SignUpStartError(type: .generalError))
             default: delegate.onCodeSent(
                 state: SignUpCodeSentState(flowToken: "signup_token"),
-                displayName: email)
+                displayName: username,
+                codeLength: 4)
             }
     }
 
     public func signIn(
-        email: String,
+        username: String,
         password: String?,
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
-        switch email {
+        switch username {
         case "notfound@contoso.com": delegate.signInFlowInterrupted(reason: .userNotFound)
         case "redirect@contoso.com": delegate.signInFlowInterrupted(reason: .redirect)
         case "invalidauth@contoso.com": delegate.signInFlowInterrupted(reason: .invalidAuthenticationType)
@@ -123,33 +124,34 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "generalerror@contoso.com": delegate.onError(error: SignInStartError(type: .generalError))
         case "oob@contoso.com": delegate.onCodeSent(
             state: SignInCodeSentState(flowToken: "credential_token"),
-            displayName: email)
+            displayName: username,
+            codeLength: 4)
         default: delegate.completed(
             result:
                 MSALNativeAuthUserAccount(
-                    email: email,
+                    username: username,
                     accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
         }
     }
 
     public func resetPassword(
-        email: String,
+        username: String,
         correlationId: UUID? = nil,
         delegate: ResetPasswordStartDelegate
     ) {
-        switch email {
+        switch username {
         case "redirect@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .redirect)
         case "nopassword@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userDoesNotHavePassword)
         case "notfound@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userNotFound)
         case "generalerror@contoso.com": delegate.onError(error: ResetPasswordStartError(type: .generalError))
         default: delegate.onCodeSent(state:
-                                        CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: nil)
+                                        CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: username, codeLength: 4)
         }
     }
 
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
         return MSALNativeAuthUserAccount(
-            email: "email@contoso.com",
+            username: "email@contoso.com",
             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
         )
     }

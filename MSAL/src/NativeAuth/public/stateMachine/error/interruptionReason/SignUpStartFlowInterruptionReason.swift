@@ -27,5 +27,5 @@ import Foundation
 @objc
 public enum SignUpStartFlowInterruptionReason: Int {
     case redirect
-    case userExists
+    case userAlreadyExists
 }
