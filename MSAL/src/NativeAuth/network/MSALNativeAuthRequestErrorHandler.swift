@@ -125,8 +125,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                                                         context: context) { authHeader, completionError in
             if !NSString.msidIsStringNilOrBlank(authHeader) {
                 // append auth header
-                if let newRequest = (httpRequest?.urlRequest as? NSURLRequest)?
-                    .mutableCopy() as? NSMutableURLRequest {
+                if var newRequest = httpRequest?.urlRequest {
                     newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
                     httpRequest?.urlRequest = newRequest as URLRequest
 
