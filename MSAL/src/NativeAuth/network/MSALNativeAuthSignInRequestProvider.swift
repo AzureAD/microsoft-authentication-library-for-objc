@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRequestSingInProviding {
+protocol MSALNativeAuthRequestSignInProviding {
     func signInInitiateRequest(
         parameters: MSALNativeAuthSignInInitiateRequestParameters,
         context: MSIDRequestContext
@@ -41,7 +41,7 @@ protocol MSALNativeAuthRequestSingInProviding {
     ) throws -> MSALNativeAuthSignInTokenRequest
 }
 
-final class MSALNativeAuthSingInRequestProvider: MSALNativeAuthRequestSingInProviding {
+final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProviding {
 
     // MARK: - Variables
 

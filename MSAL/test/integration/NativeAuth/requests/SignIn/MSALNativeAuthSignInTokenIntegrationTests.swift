@@ -27,10 +27,10 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private var provider: MSALNativeAuthRequestProvider!
+    private var provider: MSALNativeAuthSignInRequestProvider!
 
     override func setUpWithError() throws {
-        provider = MSALNativeAuthRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config)
         try super.setUpWithError()
     }
 

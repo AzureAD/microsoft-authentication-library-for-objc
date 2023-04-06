@@ -2987,7 +2987,7 @@
 		DE0D65C429D344AC005798B1 /* requests */ = {
 			isa = PBXGroup;
 			children = (
-				DEDB29AE29DDC04A008DA85B /* SingIn */,
+				DEDB29AE29DDC04A008DA85B /* SignIn */,
 			);
 			path = requests;
 			sourceTree = "<group>";
@@ -3077,14 +3077,14 @@
 			path = SignIn;
 			sourceTree = "<group>";
 		};
-		DEDB29AE29DDC04A008DA85B /* SingIn */ = {
+		DEDB29AE29DDC04A008DA85B /* SignIn */ = {
 			isa = PBXGroup;
 			children = (
 				DE0D65C529D344F1005798B1 /* MSALNativeAuthSignInInitiateIntegrationTests.swift */,
 				DE0D65CA29D5CD6D005798B1 /* MSALNativeAuthSignInChallengeIntegrationTests.swift */,
 				DE4F0F2929D6F1AA00D561FD /* MSALNativeAuthSignInTokenIntegrationTests.swift */,
 			);
-			path = SingIn;
+			path = SignIn;
 			sourceTree = "<group>";
 		};
 		DEDB29AF29DDC18D008DA85B /* SignIn */ = {
