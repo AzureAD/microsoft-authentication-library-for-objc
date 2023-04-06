@@ -109,6 +109,7 @@ class MSALNativeAuthRequestErrorHandlerTests: XCTestCase {
             XCTAssertEqual((error! as NSError).userInfo[MSIDServerUnavailableStatusKey] as! Int, 1)
             XCTAssertEqual((error! as NSError).userInfo[MSIDErrorDescriptionKey] as! String, "internal server error")
             XCTAssertEqual(((error! as NSError).userInfo[MSIDHTTPHeadersKey] as! [String: String]).count, 0)
+            MSIDTestURLSession.clearResponses()
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
