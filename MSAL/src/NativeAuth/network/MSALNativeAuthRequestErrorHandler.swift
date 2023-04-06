@@ -170,7 +170,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         additionalInfo[MSIDHTTPHeadersKey] = httpResponse.allHeaderFields
         additionalInfo[MSIDHTTPResponseCodeKey] = String(httpResponse.statusCode)
 
-        if statusCode >= 500, statusCode <= 599 {
+        if statusCode >= 500 && statusCode <= 599 {
             additionalInfo[MSIDServerUnavailableStatusKey] = NSNumber(value: 1)
         }
 
