@@ -52,7 +52,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
         }
 
         if httpResponse.statusCode == 400 || httpResponse.statusCode == 401 {
-            // pkeyauth challenge
+            // PKeyAuth challenge
             if let authValue = wwwAuthValue(httpResponse: httpResponse) {
                 handleAuthenticateHeader(wwwAuthValue: authValue,
                                          httpRequest: httpRequest,
@@ -90,8 +90,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                            format: "Retrying network request, retryCounter: %d", httpRequest?.retryCounter ?? 0)
         }
         let deadline = DispatchTime.now() + Double(UInt64(httpRequest?.retryInterval ?? 0) * NSEC_PER_SEC )
-        DispatchQueue.global().asyncAfter(deadline: deadline,
-                                          qos: DispatchQoS(qosClass: .default, relativePriority: 0)) {
+        DispatchQueue.global().asyncAfter(deadline: deadline) {
             httpRequest?.send(completionBlock)
         }
     }
@@ -124,7 +123,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                                                         request: httpRequest?.urlRequest.url,
                                                         context: context) { authHeader, completionError in
             if !NSString.msidIsStringNilOrBlank(authHeader) {
-                // append auth header
+                // Append Auth Header
                 if var newRequest = httpRequest?.urlRequest {
                     newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
                     httpRequest?.urlRequest = newRequest as URLRequest
