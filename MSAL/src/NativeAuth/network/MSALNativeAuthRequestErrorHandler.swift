@@ -90,7 +90,8 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                            format: "Retrying network request, retryCounter: %d", httpRequest?.retryCounter ?? 0)
         }
         let deadline = DispatchTime.now() + Double(UInt64(httpRequest?.retryInterval ?? 0) * NSEC_PER_SEC )
-        DispatchQueue.global().asyncAfter(deadline: deadline, qos: DispatchQoS(qosClass: .default, relativePriority: 0)) {
+        DispatchQueue.global().asyncAfter(deadline: deadline,
+                                          qos: DispatchQoS(qosClass: .default, relativePriority: 0)) {
             httpRequest?.send(completionBlock)
         }
     }
@@ -129,7 +130,7 @@ final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, M
                     newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
                     httpRequest?.urlRequest = newRequest as URLRequest
 
-                    DispatchQueue.main.async {
+                    DispatchQueue.global().async {
                         httpRequest?.send(completionBlock)
                     }
                 }
