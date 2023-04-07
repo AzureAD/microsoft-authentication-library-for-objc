@@ -25,9 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestProviding {
-
-    var signUp: MSALNativeAuthRequestSignUpProviding { get }
-
     func signUpRequest(
         parameters: MSALNativeAuthSignUpParameters,
         context: MSIDRequestContext
@@ -63,8 +60,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
     // MARK: - Variables
 
-    let signUp: MSALNativeAuthRequestSignUpProviding
-
     private let config: MSALNativeAuthConfiguration
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
@@ -72,23 +67,10 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
 
     init(
         config: MSALNativeAuthConfiguration,
-        telemetryProvider: MSALNativeAuthTelemetryProviding,
-        signUpRequestProvider: MSALNativeAuthRequestSignUpProviding
+        telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()
     ) {
         self.config = config
         self.telemetryProvider = telemetryProvider
-        self.signUp = signUpRequestProvider
-    }
-
-    convenience init(config: MSALNativeAuthConfiguration) {
-        self.init(
-            config: config,
-            telemetryProvider: MSALNativeAuthTelemetryProvider(),
-            signUpRequestProvider: MSALNativeAuthSignUpRequestProvider(
-                config: config,
-                telemetryProvider: MSALNativeAuthTelemetryProvider()
-            )
-        )
     }
 
     // MARK: - Sign Up with password

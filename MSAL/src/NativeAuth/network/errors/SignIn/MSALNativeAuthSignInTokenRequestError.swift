@@ -30,11 +30,15 @@ struct MSALNativeAuthSignInTokenRequestError: MSALNativeAuthRequestError {
     let errorDescription: String?
     let errorURI: String?
     let innerErrors: [MSALNativeInnerError]?
+    let credentialToken: String?
+    let interval: Int?
 
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
+        case credentialToken = "credential_token"
+        case interval = "interval"
     }
 }

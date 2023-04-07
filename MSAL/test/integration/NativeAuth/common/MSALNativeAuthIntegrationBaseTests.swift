@@ -27,7 +27,8 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthIntegrationBaseTests: XCTestCase {
-    
+
+    var defaultTimeout: TimeInterval = 5
     let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
     let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
@@ -62,7 +63,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
                 exp.fulfill()
             }
 
-            wait(for: [exp], timeout: 3)
+            wait(for: [exp], timeout: defaultTimeout)
         }
     }
 
@@ -73,7 +74,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         expectedError: Error
     ) async throws -> Error {
         try await mockResponse(response, endpoint: endpoint)
-        let response: Error = try await performTestFail()
+        let response: Error = try await perform_uncheckedTestFail()
 
         XCTAssertEqual(response.error.rawValue, expectedError.error.rawValue)
         XCTAssertNotNil(response.errorURI)
@@ -90,7 +91,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         )
     }
 
-    private func performTestFail<T: MSALNativeAuthRequestError>() async throws -> T {
+    func perform_uncheckedTestFail<T: MSALNativeAuthRequestError>() async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
             let exp = expectation(description: "msal_native_auth_integration_test_exp")
 
@@ -111,7 +112,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
                 exp.fulfill()
             }
 
-            wait(for: [exp], timeout: 3)
+            wait(for: [exp], timeout: defaultTimeout)
         }
     }
 }

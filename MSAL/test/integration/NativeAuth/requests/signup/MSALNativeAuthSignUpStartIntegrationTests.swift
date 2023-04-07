@@ -59,12 +59,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     }
 
     func test_whenSignUpStart_redirects() async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: .signUpStart,
-            correlationId: correlationId,
-            responses: [.challengeTypeRedirect]
-        )
-
+        try await mockResponse(.challengeTypeRedirect, endpoint: .signUpStart)
         let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
 
         XCTAssertNil(response?.signupToken)

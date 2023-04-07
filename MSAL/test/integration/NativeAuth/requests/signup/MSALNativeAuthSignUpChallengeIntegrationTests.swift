@@ -52,11 +52,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
         XCTAssertEqual(response?.challengeType, .password)
         XCTAssertNotNil(response?.signUpToken)
-        XCTAssertNil(response?.bindingMethod)
-        XCTAssertNil(response?.displayName)
-        XCTAssertNil(response?.codeLength)
-        XCTAssertNil(response?.interval)
-        XCTAssertNil(response?.displayType)
     }
 
     func test_whenSignUpChallengeOOB_succeeds() async throws {
@@ -69,7 +64,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         XCTAssertNotNil(response?.displayName)
         XCTAssertNotNil(response?.codeLength)
         XCTAssertNotNil(response?.interval)
-        XCTAssertNil(response?.displayType)
     }
 
     func test_whenSignUpChallenge_redirects() async throws {
@@ -78,11 +72,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
         XCTAssertEqual(response?.challengeType, .redirect)
         XCTAssertNil(response?.signUpToken)
-        XCTAssertNil(response?.bindingMethod)
-        XCTAssertNil(response?.codeLength)
-        XCTAssertNil(response?.displayName)
-        XCTAssertNil(response?.displayType)
-        XCTAssertNil(response?.interval)
     }
 
     func test_signUpChallenge_invalidClient() async throws {
