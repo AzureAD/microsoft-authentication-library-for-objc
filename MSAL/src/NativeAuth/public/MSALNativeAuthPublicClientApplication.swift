@@ -37,7 +37,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
-            authority: aadAuthority
+            authority: aadAuthority,
+            challengeTypes: [.redirect, .password, .oob]
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
@@ -53,7 +54,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: aadAuthority,
-            rawTenant: rawTenant
+            rawTenant: rawTenant,
+            challengeTypes: [.redirect, .password, .oob]
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)

@@ -28,7 +28,7 @@ import XCTest
 
 final class MSALNativeAuthResponseSerializerTests: XCTestCase {
 
-    func testSerialize_correctSignUpResponse_shouldReturnSuccess() {
+    func testSerialize_correctResponse_shouldReturnSuccess() {
         let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let responseString = """
         {
@@ -52,7 +52,7 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
         XCTAssertEqual(response?.accessToken, "access")
     }
 
-    func testSerialize_wrongSignUpResponse_shouldFail() throws {
+    func testSerialize_wrongResponse_shouldFail() throws {
         let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let wrongResponseString = """
         {
