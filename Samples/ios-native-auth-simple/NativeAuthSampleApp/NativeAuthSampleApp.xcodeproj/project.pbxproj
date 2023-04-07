@@ -18,6 +18,7 @@
 		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
 		9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; };
 		9BB32E4C29A6750800BD7D89 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,6 +149,7 @@
 		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
 		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
 		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
+		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +191,7 @@
 				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
 				9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
+				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
 				9B08477929969264003BA4B4 /* Main.storyboard */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
 				9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */,
@@ -397,6 +400,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
 				9B14AE4D29D204EA006F7C51 /* OTPViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
