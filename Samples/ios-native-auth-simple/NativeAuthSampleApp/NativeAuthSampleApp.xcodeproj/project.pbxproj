@@ -157,6 +157,7 @@
 		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
 		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
 		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
+		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -192,6 +193,7 @@
 		9B08477229969264003BA4B4 /* NativeAuthSampleApp */ = {
 			isa = PBXGroup;
 			children = (
+				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477329969264003BA4B4 /* AppDelegate.swift */,
 				9B08477529969264003BA4B4 /* SceneDelegate.swift */,
 				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
@@ -223,6 +225,7 @@
 				9BB32E3429A674BB00BD7D89 /* libMSAL (iOS Static Library).a */,
 				9BB32E3629A674BB00BD7D89 /* libMSAL (macOS Static Library).a */,
 				9BB32E3829A674BB00BD7D89 /* unit-test-host-mac.app */,
+				9BFB691029E0002B006F0CF4 /* MSAL iOS Native Auth Integration Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -573,6 +576,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
@@ -601,6 +605,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UBF8T346G9;
