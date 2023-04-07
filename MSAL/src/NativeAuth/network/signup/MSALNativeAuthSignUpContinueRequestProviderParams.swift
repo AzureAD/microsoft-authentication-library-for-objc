@@ -38,7 +38,7 @@ struct MSALNativeAuthSignUpContinueRequestProviderParams {
         signUpToken: String,
         password: String? = nil,
         oob: String? = nil,
-        attributes: [String : Any]? = nil,
+        attributes: [String: Any]? = nil,
         context: MSIDRequestContext
     ) {
         self.grantType = grantType

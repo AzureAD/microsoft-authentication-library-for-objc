@@ -41,7 +41,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
         sut = try provider.challenge(
             token: "<token>",
-            challengeTypes: [.redirect, .password, .oob],
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }

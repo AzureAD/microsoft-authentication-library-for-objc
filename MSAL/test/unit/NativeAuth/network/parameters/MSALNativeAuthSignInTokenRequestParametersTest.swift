@@ -33,7 +33,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
         var config: MSALNativeAuthConfiguration! = nil
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant")))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
         let parameters = MSALNativeAuthSignInTokenRequestParameters(config:config, context: MSALNativeAuthRequestContextMock(), username: "username", credentialToken: "Test Credential Token", signInSLT: "Test SignIn SLT", grantType: .password, challengeTypes: [.password], scope: "scope", password: "password", oob: "Test OTP Code")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())

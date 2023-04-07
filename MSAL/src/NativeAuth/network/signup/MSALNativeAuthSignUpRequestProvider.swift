@@ -27,13 +27,11 @@
 protocol MSALNativeAuthRequestSignUpProviding {
     func start(
         parameters: MSALNativeAuthSignUpParameters,
-        challengeTypes: [MSALNativeAuthChallengeType],
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignUpStartRequest
 
     func challenge(
         token: String,
-        challengeTypes: [MSALNativeAuthChallengeType],
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignUpChallengeRequest
 
@@ -54,7 +52,6 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
 
     func start(
         parameters: MSALNativeAuthSignUpParameters,
-        challengeTypes: [MSALNativeAuthChallengeType],
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignUpStartRequest {
         guard let attributes = try formatAttributes(parameters.attributes) else {
@@ -66,7 +63,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
             username: parameters.email,
             password: parameters.password,
             attributes: attributes,
-            challengeTypes: challengeTypes,
+            challengeTypes: config.challengeTypes,
             context: context
         )
 
@@ -89,15 +86,11 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
         return request
     }
 
-    func challenge(
-        token: String,
-        challengeTypes: [MSALNativeAuthChallengeType],
-        context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpChallengeRequest {
+    func challenge(token: String, context: MSIDRequestContext) throws -> MSALNativeAuthSignUpChallengeRequest {
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
             config: config,
             signUpToken: token,
-            challengeTypes: challengeTypes,
+            challengeTypes: config.challengeTypes,
             context: context
         )
 

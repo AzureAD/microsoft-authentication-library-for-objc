@@ -195,10 +195,9 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         let expectedError = createError(.slowDown)
 
         XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
-        XCTAssertNotNil(result.interval)
     }
 
     private func createError(_ code: MSALNativeAuthSignInTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, interval: nil)
+        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
     }
 }

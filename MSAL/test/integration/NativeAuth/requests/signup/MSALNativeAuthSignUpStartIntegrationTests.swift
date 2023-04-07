@@ -40,7 +40,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         )
 
         sut = try provider.start(
-            parameters: MSALNativeAuthSignUpParameters(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "1234"), challengeTypes: [.password, .oob, .redirect],
+            parameters: MSALNativeAuthSignUpParameters(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "1234"),
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }

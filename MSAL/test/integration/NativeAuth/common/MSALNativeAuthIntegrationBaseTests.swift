@@ -33,7 +33,8 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     let correlationId = UUID()
     let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
                                                                                authority: MSALAADAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
-                                                                               rawTenant: "test")
+                                                                               rawTenant: "test",
+                                                                               challengeTypes: [.password, .oob, .redirect])
     var sut: MSIDHttpRequest!
     
     override func tearDown() {

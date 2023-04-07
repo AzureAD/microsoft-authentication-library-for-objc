@@ -46,7 +46,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             attributes: ["city": "dublin"]
         )
 
-        let request = try sut.start(parameters: parameters, challengeTypes: [.redirect], context: context)
+        let request = try sut.start(parameters: parameters, context: context)
 
         checkBodyParams(request.parameters, for: .signUpStart)
         checkUrlRequest(request.urlRequest!, for: .signUpStart)
@@ -56,7 +56,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     }
 
     func test_signUpChallengeRequest_is_created_successfully() throws {
-        let request = try sut.challenge(token: "sign-up-token", challengeTypes: [.redirect], context: context)
+        let request = try sut.challenge(token: "sign-up-token", context: context)
 
         checkBodyParams(request.parameters, for: .signUpChallenge)
         checkUrlRequest(request.urlRequest!, for: .signUpChallenge)
