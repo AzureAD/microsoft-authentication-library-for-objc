@@ -29,12 +29,126 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
+    
+    private static var expectation = XCTestExpectation()
+    
+    private class SignInStartCompletionErrorDelegate: SignInStartDelegate {
+        var expectedErrorType = SignInStartErrorType.invalidUsername
+        
+        func signInFlowInterrupted(reason: MSAL.SignInStartFlowInterruptionReason) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func onError(error: MSAL.SignInStartError) {
+            XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
+        }
+        
+        func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func completed(result: MSAL.MSALNativeAuthUserAccount) {
+            XCTFail()
+            expectation.fulfill()
+        }
+    }
+    
+    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate {
+        
+        var expectedErrorType = SignUpStartErrorType.invalidUsername
+        
+        func onError(error: MSAL.SignUpStartError) {
+            XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
+        }
+        
+        func onCodeSent(state: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func completed(result: MSAL.MSALNativeAuthUserAccount) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func signUpFlowInterrupted(reason: MSAL.SignUpStartFlowInterruptionReason) {
+            XCTFail()
+            expectation.fulfill()
+        }
+    }
+    
+    private class ResetPasswordStartCompletionErrorDelegate: ResetPasswordStartDelegate {
+                
+        func resetPasswordFlowInterrupted(reason: MSAL.ResetPasswordStartFlowInterruptionReason) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func onError(error: MSAL.ResetPasswordStartError) {
+            XCTAssertEqual(error.type, ResetPasswordStartErrorType.invalidUsername)
+            expectation.fulfill()
+        }
+        
+        func onCodeSent(state: MSAL.CodeSentResetPasswordState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+    }
 
     func testInit_whenPassingB2CAuthority_itShouldThrowError() throws {
         let b2cAuthority = try MSALB2CAuthority(url: .init(string: "https://login.contoso.com")!)
         let configuration = MSALPublicClientApplicationConfig(clientId: DEFAULT_TEST_CLIENT_ID, redirectUri: nil, authority: b2cAuthority)
 
         XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration))
+    }
+    
+    func testSignIn_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "", password: nil, delegate: SignInStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
+    func testSignIn_whenInvalidPasswordUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let delegate = SignInStartCompletionErrorDelegate()
+        delegate.expectedErrorType = .passwordInvalid
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "correct", password: "", delegate: delegate)
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
+    func testSignUp_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "", password: nil, delegate: SignUpStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
+    func testSignUp_whenInvalidPasswordUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let delegate = SignUpStartCompletionErrorDelegate()
+        delegate.expectedErrorType = .passwordInvalid
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "correct", password: "", delegate: delegate)
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
+    func testResetPassword_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.resetPassword(username: "", delegate: ResetPasswordStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     
 }
