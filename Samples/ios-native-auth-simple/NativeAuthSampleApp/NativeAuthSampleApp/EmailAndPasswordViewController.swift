@@ -37,14 +37,19 @@ class EmailAndPasswordViewController: UIViewController {
 
     var appContext: MSALNativeAuthPublicClientApplication!
 
+    let kClientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
+    let kAuthority = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        appContext = MSALNativeAuthPublicClientApplication(
-            configuration: MSALNativeAuthPublicClientApplicationConfig(
-                clientId: "clientId",
-                authority: URL(string: "https://example.com")!,
-                tenantName: "tenant"))
+        let authority = try! MSALAuthority(url: URL(string: kAuthority)!)
+
+        appContext = try! MSALNativeAuthPublicClientApplication(
+            configuration: MSALPublicClientApplicationConfig(
+                clientId: kClientId,
+                redirectUri: nil,
+                authority: authority))
     }
 
     override func viewWillAppear(_ animated: Bool) {
