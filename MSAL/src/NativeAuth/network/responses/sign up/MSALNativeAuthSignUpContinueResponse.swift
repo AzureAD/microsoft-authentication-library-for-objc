@@ -31,6 +31,7 @@ struct MSALNativeAuthSignUpContinueResponse: Decodable {
 
     enum CodingKeys: String, CodingKey {
         case expiresIn, signupToken
+        // API returns signin_slt not sign_in_slt
         case signinSLT = "signinSlt"
     }
 }

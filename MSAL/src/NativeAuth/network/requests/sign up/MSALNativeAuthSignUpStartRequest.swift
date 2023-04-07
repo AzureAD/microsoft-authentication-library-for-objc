@@ -33,7 +33,7 @@ final class MSALNativeAuthSignUpStartRequest: MSIDHttpRequest {
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<RequestError>()
+        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthResponseErrorHandler<RequestError>()
     ) throws {
         context = params.context
         parameters = makeBodyRequestParameters(with: params)

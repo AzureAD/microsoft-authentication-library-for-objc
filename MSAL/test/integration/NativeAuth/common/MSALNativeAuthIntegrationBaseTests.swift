@@ -104,7 +104,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
                 }
 
                 guard let error = error as? T else {
-                    XCTFail("Error should be MSALNativeAuthRequestError")
+                    XCTFail("Error should be MSALNativeAuthResponseError")
                     continuation.resume(throwing: MockAPIError.invalidRequest)
                     return
                 }

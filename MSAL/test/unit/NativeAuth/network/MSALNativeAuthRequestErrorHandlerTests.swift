@@ -26,16 +26,16 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthRequestErrorHandlerTests: XCTestCase {
+class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
     // MARK: - Variables
 
-    private var sut: MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateResponseError>!
+    private var sut: MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>!
     private let error = NSError(domain:"Test Error Domain", code:400, userInfo:nil)
     private var httpRequest: MSIDHttpRequest!
     private let context = MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
     override func setUpWithError() throws {
-        sut = MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateResponseError>()
+        sut = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>()
         httpRequest = MSIDHttpRequest()
         try super.setUpWithError()
     }

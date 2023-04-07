@@ -148,7 +148,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         )
 
         XCTAssertNotNil(response.signUpToken)
-        XCTAssertNotNil(response.attributesToVerify)
+        XCTAssertNotNil(response.verifyAttributes)
     }
 
     func test_signUpStart_validationFailed() async throws {

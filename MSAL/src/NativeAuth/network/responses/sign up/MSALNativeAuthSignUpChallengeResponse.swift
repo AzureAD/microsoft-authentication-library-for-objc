@@ -35,6 +35,7 @@ struct MSALNativeAuthSignUpChallengeResponse: Decodable {
 
     enum CodingKeys: String, CodingKey {
         case challengeType, bindingMethod, interval, displayName, displayType, codeLength
+        // API returns signup_token not sign_up_token
         case signUpToken = "signupToken"
     }
 }

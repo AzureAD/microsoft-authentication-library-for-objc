@@ -44,7 +44,7 @@ final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
         errorHandler: MSIDHttpRequestErrorHandling =
-        MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInTokenResponseError>()
+        MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInTokenResponseError>()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer

@@ -26,7 +26,7 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthRequestErrorHandler<T: Decodable & Error>: NSObject, MSIDHttpRequestErrorHandling {
+final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, MSIDHttpRequestErrorHandling {
     private var customError: T?
 
     // swiftlint:disable:next function_parameter_count

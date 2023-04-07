@@ -31,7 +31,8 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
-    let attributesToVerify: [[String: String]]?
+    let verifyAttributes: [[String: String]]?
+    let invalidAttributes: [[String: String]]?
 
     init(
         error: MSALNativeAuthSignUpStartOauth2ErrorCode,
@@ -39,14 +40,16 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
-        attributesToVerify: [[String: String]]? = nil
+        verifyAttributes: [[String: String]]? = nil,
+        invalidAttributes: [[String: String]]? = nil
     ) {
         self.error = error
         self.errorDescription = errorDescription
         self.errorURI = errorURI
         self.innerErrors = innerErrors
         self.signUpToken = signUpToken
-        self.attributesToVerify = attributesToVerify
+        self.verifyAttributes = verifyAttributes
+        self.invalidAttributes = invalidAttributes
     }
 
     enum CodingKeys: String, CodingKey {
@@ -55,6 +58,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case signUpToken = "signup_token"
-        case attributesToVerify = "attributes_to_verify"
+        case verifyAttributes = "attributes_to_verify"
+        case invalidAttributes = "invalid_attributes"
     }
 }

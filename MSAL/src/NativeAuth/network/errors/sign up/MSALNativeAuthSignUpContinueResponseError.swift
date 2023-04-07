@@ -24,31 +24,35 @@
 
 import Foundation
 
+// swiftlint:disable type_name
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
-    let requiredAttributes: [String: String]?
     let signUpToken: String?
-    let attributesToVerify: [[String: String]]?
+    let requiredAttributes: [[String: String]]?
+    let verifyAttributes: [[String: String]]?
+    let invalidAttributes: [[String: String]]?
 
     init(
         error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         errorDescription: String? = nil,
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
-        requiredAttributes: [String: String]? = nil,
         signUpToken: String? = nil,
-        attributesToVerify: [[String: String]]? = nil
+        requiredAttributes: [[String: String]]? = nil,
+        verifyAttributes: [[String: String]]? = nil,
+        invalidAttributes: [[String: String]]? = nil
     ) {
         self.error = error
         self.errorDescription = errorDescription
         self.errorURI = errorURI
         self.innerErrors = innerErrors
-        self.requiredAttributes = requiredAttributes
         self.signUpToken = signUpToken
-        self.attributesToVerify = attributesToVerify
+        self.requiredAttributes = requiredAttributes
+        self.verifyAttributes = verifyAttributes
+        self.invalidAttributes = invalidAttributes
     }
 
     enum CodingKeys: String, CodingKey {
@@ -56,8 +60,9 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
         case errorDescription = "error_description"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
-        case requiredAttributes = "required_attributes"
         case signUpToken = "signup_token"
-        case attributesToVerify = "attributes_to_verify"
+        case requiredAttributes = "required_attributes"
+        case verifyAttributes = "attributes_to_verify"
+        case invalidAttributes = "invalid_attributes"
     }
 }
