@@ -37,4 +37,5 @@ public class ResetPasswordStartError: MSALNativeBaseError {
 @objc
 public enum ResetPasswordStartErrorType: Int {
     case generalError
+    case invalidUsername
 }

@@ -37,5 +37,6 @@ public class SignInStartError: MSALNativeBaseError {
 @objc
 public enum SignInStartErrorType: Int {
     case passwordInvalid
+    case invalidUsername
     case generalError
 }

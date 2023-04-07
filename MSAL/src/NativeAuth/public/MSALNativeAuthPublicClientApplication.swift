@@ -93,21 +93,29 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public func signUp(
         username: String,
         password: String?,
-        attributes: [String: Any],
+        attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
     ) {
-            switch username {
-            case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userAlreadyExists)
-            case "redirect@contoso.com": delegate.signUpFlowInterrupted(reason: .redirect)
-            case "invalidpassword@contoso.com": delegate.onError(error: SignUpStartError(type: .passwordInvalid))
-            case "invalidattributes@contoso.com": delegate.onError(error: SignUpStartError(type: .invalidAttributes))
-            case "generalerror@contoso.com": delegate.onError(error: SignUpStartError(type: .generalError))
-            default: delegate.onCodeSent(
-                state: SignUpCodeSentState(flowToken: "signup_token"),
-                displayName: username,
-                codeLength: 4)
-            }
+        guard inputValidator.isInputValid(username) else {
+            delegate.onError(error: SignUpStartError(type: .invalidUsername))
+            return
+        }
+        if let password = password, !inputValidator.isInputValid(password) {
+            delegate.onError(error: SignUpStartError(type: .passwordInvalid))
+            return
+        }
+        switch username {
+        case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userAlreadyExists)
+        case "redirect@contoso.com": delegate.signUpFlowInterrupted(reason: .redirect)
+        case "invalidpassword@contoso.com": delegate.onError(error: SignUpStartError(type: .passwordInvalid))
+        case "invalidattributes@contoso.com": delegate.onError(error: SignUpStartError(type: .invalidAttributes))
+        case "generalerror@contoso.com": delegate.onError(error: SignUpStartError(type: .generalError))
+        default: delegate.onCodeSent(
+            state: SignUpCodeSentState(flowToken: "signup_token"),
+            displayName: username,
+            codeLength: 4)
+        }
     }
 
     public func signIn(
@@ -116,6 +124,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
+        guard inputValidator.isInputValid(username) else {
+            delegate.onError(error: SignInStartError(type: .invalidUsername))
+            return
+        }
+        if let password = password, !inputValidator.isInputValid(password) {
+            delegate.onError(error: SignInStartError(type: .passwordInvalid))
+            return
+        }
         switch username {
         case "notfound@contoso.com": delegate.signInFlowInterrupted(reason: .userNotFound)
         case "redirect@contoso.com": delegate.signInFlowInterrupted(reason: .redirect)
@@ -127,10 +143,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             displayName: username,
             codeLength: 4)
         default: delegate.completed(
-            result:
-                MSALNativeAuthUserAccount(
-                    username: username,
-                    accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+                result:
+                    MSALNativeAuthUserAccount(
+                        username: username,
+                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
         }
     }
 
@@ -139,6 +155,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: ResetPasswordStartDelegate
     ) {
+        guard inputValidator.isInputValid(username) else {
+            delegate.onError(error: ResetPasswordStartError(type: .invalidUsername))
+            return
+        }
         switch username {
         case "redirect@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .redirect)
         case "nopassword@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userDoesNotHavePassword)
