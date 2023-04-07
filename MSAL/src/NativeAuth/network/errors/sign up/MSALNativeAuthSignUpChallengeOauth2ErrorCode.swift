@@ -25,17 +25,9 @@
 import Foundation
 
 // swiftlint:disable:next type_name
-struct MSALNativeAuthSignInChallengeRequestError: MSALNativeAuthRequestError {
-
-    let error: MSALNativeAuthSignInChallengeOauth2ErrorCode
-    let errorDescription: String?
-    let errorURI: String?
-    let innerErrors: [MSALNativeInnerError]?
-
-    enum CodingKeys: String, CodingKey {
-        case error
-        case errorDescription = "error_description"
-        case errorURI = "error_uri"
-        case innerErrors = "inner_errors"
-    }
+enum MSALNativeAuthSignUpChallengeOauth2ErrorCode: String, Decodable {
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case unsupportedChallengeType = "unsupported_challenge_type"
+    case expiredToken = "expired_token"
 }

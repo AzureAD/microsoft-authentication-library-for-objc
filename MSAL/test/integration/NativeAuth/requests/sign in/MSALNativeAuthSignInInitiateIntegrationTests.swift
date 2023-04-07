@@ -27,7 +27,7 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private typealias Error = MSALNativeAuthSignInInitiateRequestError
+    private typealias Error = MSALNativeAuthSignInInitiateResponseError
     private var provider: MSALNativeAuthSignInRequestProvider!
 
     override func setUpWithError() throws {

@@ -27,7 +27,7 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private typealias Error = MSALNativeAuthSignInTokenRequestError
+    private typealias Error = MSALNativeAuthSignInTokenResponseError
     private var provider: MSALNativeAuthSignInRequestProvider!
 
     override func setUpWithError() throws {
@@ -70,7 +70,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         let expectedError = createError(.credentialRequired)
 
         try await mockResponse(.credentialRequired, endpoint: .signInToken)
-        let result: MSALNativeAuthSignInTokenRequestError = try await perform_uncheckedTestFail()
+        let result: MSALNativeAuthSignInTokenResponseError = try await perform_uncheckedTestFail()
 
         XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
         XCTAssertNotNil(result.credentialToken)
@@ -190,7 +190,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
 
     func test_succeedRequest_slowDown() async throws {
         try await mockResponse(.slowDown, endpoint: .signInToken)
-        let result: MSALNativeAuthSignInTokenRequestError = try await perform_uncheckedTestFail()
+        let result: MSALNativeAuthSignInTokenResponseError = try await perform_uncheckedTestFail()
 
         let expectedError = createError(.slowDown)
 

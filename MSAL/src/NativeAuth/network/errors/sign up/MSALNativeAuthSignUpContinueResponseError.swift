@@ -24,11 +24,11 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpContinueRequestError: MSALNativeAuthRequestError {
+struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
     let errorURI: String?
-    let innerErrors: [MSALNativeInnerError]?
+    let innerErrors: [MSALNativeAuthInnerError]?
     let requiredAttributes: [String: String]?
     let signUpToken: String?
     let attributesToVerify: [[String: String]]?
@@ -37,7 +37,7 @@ struct MSALNativeAuthSignUpContinueRequestError: MSALNativeAuthRequestError {
         error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         errorDescription: String? = nil,
         errorURI: String? = nil,
-        innerErrors: [MSALNativeInnerError]? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
         requiredAttributes: [String: String]? = nil,
         signUpToken: String? = nil,
         attributesToVerify: [[String: String]]? = nil

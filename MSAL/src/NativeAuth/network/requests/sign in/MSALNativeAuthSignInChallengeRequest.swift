@@ -24,9 +24,9 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
+final class MSALNativeAuthSignInChallengeRequest: MSIDHttpRequest {
 
-    init(params: MSALNativeAuthSignInInitiateRequestParameters) throws {
+    init(params: MSALNativeAuthSignInChallengeRequestParameters) throws {
         super.init()
 
         self.context = params.context
@@ -44,24 +44,25 @@ final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
         errorHandler: MSIDHttpRequestErrorHandling =
-        MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateRequestError>()
+        MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInChallengeResponseError>()
     ) {
         requestConfigurator.configure(self)
         self.requestSerializer = requestSerializer
-        self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateResponse>()
+        self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInChallengeResponse>()
         self.serverTelemetry = serverTelemetry
         self.errorHandler = errorHandler
     }
 
     private func makeBodyRequestParameters(
-        with params: MSALNativeAuthSignInInitiateRequestParameters
+        with params: MSALNativeAuthSignInChallengeRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
             Key.clientId.rawValue: params.config.clientId,
-            Key.username.rawValue: params.username,
-            Key.challengeType.rawValue: params.challengeTypes.map { $0.rawValue }.joined(separator: " ")
-        ]
+            Key.credentialToken.rawValue: params.credentialToken,
+            Key.challengeType.rawValue: params.challengeTypes?.map { $0.rawValue }.joined(separator: " "),
+            Key.challengeTargetKey.rawValue: params.challengeTarget
+        ].compactMapValues { $0 }
     }
 }

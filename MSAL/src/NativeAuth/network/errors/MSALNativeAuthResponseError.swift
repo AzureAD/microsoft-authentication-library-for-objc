@@ -24,20 +24,11 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
-enum MSALNativeAuthSignUpContinueOauth2ErrorCode: String, Decodable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case expiredToken = "expired_token"
-    case invalidPurposeToken = "invalid_purpose_token"
-    case passwordTooWeak = "password_too_weak"
-    case passwordTooShort = "password_too_short"
-    case passwordTooLong = "password_too_long"
-    case passwordRecentlyUsed = "password_recently_used"
-    case passwordBanned = "password_banned"
-    case userAlreadyExists = "user_already_exists"
-    case attributesRequired = "attributes_required"
-    case verificationRequired = "verification_required"
-    case validationFailed = "validation_failed"
+protocol MSALNativeAuthResponseError: Error, Decodable {
+    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+
+    var error: ErrorCode { get }
+    var errorDescription: String? { get }
+    var errorURI: String? { get }
+    var innerErrors: [MSALNativeAuthInnerError]? { get }
 }

@@ -24,11 +24,29 @@
 
 import Foundation
 
-protocol MSALNativeAuthRequestError: Error, Decodable {
-    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
+    let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode
+    let errorDescription: String?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
 
-    var error: ErrorCode { get }
-    var errorDescription: String? { get }
-    var errorURI: String? { get }
-    var innerErrors: [MSALNativeInnerError]? { get }
+    init(
+        error: MSALNativeAuthSignUpChallengeOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+    }
 }

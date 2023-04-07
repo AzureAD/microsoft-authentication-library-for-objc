@@ -28,7 +28,7 @@ import XCTest
 
 final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthSignUpContinueRequestError
+    private typealias Error = MSALNativeAuthSignUpContinueResponseError
     private var provider: MSALNativeAuthSignUpRequestProvider!
     private var context: MSIDRequestContext!
 
@@ -85,7 +85,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await performSuccessfulTestCase(with: params)
     }
 
-    func test_signUpChallenge_invalidClient() async throws {
+    func test_signUpContinue_invalidClient() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .invalidClient,
@@ -93,22 +93,15 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_invalidPurposeToken() async throws {
-        let response = try await perform_testFail(
+    func test_signUpContinue_invalidGrant() async throws {
+        try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .invalidPurposeToken,
-            expectedError: Error(error: .invalidRequest)
+            response: .invalidGrant,
+            expectedError: Error(error: .invalidGrant)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
-    func test_signUpChallenge_expiredToken() async throws {
+    func test_signUpContinue_expiredToken() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .expiredToken,
@@ -116,7 +109,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_passwordTooWeak() async throws {
+    func test_signUpContinue_passwordTooWeak() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooWeak,
@@ -124,7 +117,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_passwordTooShort() async throws {
+    func test_signUpContinue_passwordTooShort() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooShort,
@@ -132,7 +125,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_passwordTooLong() async throws {
+    func test_signUpContinue_passwordTooLong() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooLong,
@@ -140,7 +133,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_passwordRecentlyUsed() async throws {
+    func test_signUpContinue_passwordRecentlyUsed() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordRecentlyUsed,
@@ -148,7 +141,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_passwordBanned() async throws {
+    func test_signUpContinue_passwordBanned() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordBanned,
@@ -156,7 +149,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_userAlreadyExists() async throws {
+    func test_signUpContinue_userAlreadyExists() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .userAlreadyExists,
@@ -164,7 +157,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpChallenge_attributesRequired() async throws {
+    func test_signUpContinue_attributesRequired() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .attributesRequired,
@@ -174,7 +167,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         XCTAssertNotNil(response.signUpToken)
     }
 
-    func test_signUpChallenge_verificationRequired() async throws {
+    func test_signUpContinue_verificationRequired() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .verificationRequired,
@@ -185,7 +178,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         XCTAssertNotNil(response.attributesToVerify)
     }
 
-    func test_signUpChallenge_validationFailed() async throws {
+    func test_signUpContinue_validationFailed() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .validationFailed,

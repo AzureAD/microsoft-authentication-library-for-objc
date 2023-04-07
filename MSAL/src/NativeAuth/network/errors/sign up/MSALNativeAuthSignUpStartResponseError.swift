@@ -24,12 +24,37 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
-enum MSALNativeAuthSignUpChallengeOauth2ErrorCode: String, Decodable {
-    case invalidRequest = "invalid_request"
-    case invalidPurposeToken = "invalid_purpose_token"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case unsupportedChallengeType = "unsupported_challenge_type"
-    case expiredToken = "expired_token"
+struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
+
+    let error: MSALNativeAuthSignUpStartOauth2ErrorCode
+    let errorDescription: String?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
+    let signUpToken: String?
+    let attributesToVerify: [[String: String]]?
+
+    init(
+        error: MSALNativeAuthSignUpStartOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        signUpToken: String? = nil,
+        attributesToVerify: [[String: String]]? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.signUpToken = signUpToken
+        self.attributesToVerify = attributesToVerify
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+        case signUpToken = "signup_token"
+        case attributesToVerify = "attributes_to_verify"
+    }
 }

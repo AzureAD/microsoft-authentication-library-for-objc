@@ -69,7 +69,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     }
 
     @discardableResult
-    func perform_testFail<Error: MSALNativeAuthRequestError>(
+    func perform_testFail<Error: MSALNativeAuthResponseError>(
         endpoint: MockAPIEndpoint,
         response: MockAPIResponse,
         expectedError: Error
@@ -92,7 +92,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         )
     }
 
-    func perform_uncheckedTestFail<T: MSALNativeAuthRequestError>() async throws -> T {
+    func perform_uncheckedTestFail<T: MSALNativeAuthResponseError>() async throws -> T {
         return try await withCheckedThrowingContinuation { continuation in
             let exp = expectation(description: "msal_native_auth_integration_test_exp")
 

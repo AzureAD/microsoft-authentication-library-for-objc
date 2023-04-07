@@ -24,44 +24,44 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignUpChallengeRequest: MSIDHttpRequest {
+final class MSALNativeAuthSignInInitiateRequest: MSIDHttpRequest {
 
-    private typealias RequestError = MSALNativeAuthSignUpChallengeRequestError
+    init(params: MSALNativeAuthSignInInitiateRequestParameters) throws {
+        super.init()
+
+        self.context = params.context
+
+        self.parameters = makeBodyRequestParameters(with: params)
+
+        let url = try params.makeEndpointUrl()
+        self.urlRequest = URLRequest(url: url)
+
+        self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
+    }
 
     func configure(
-        params: MSALNativeAuthSignUpChallengeRequestParameters,
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
-        errorHandler: MSIDHttpRequestErrorHandling = MSALNativeAuthRequestErrorHandler<RequestError>()
-    ) throws {
-        context = params.context
-        parameters = makeBodyRequestParameters(with: params)
-
-        let url = try params.makeEndpointUrl()
-        urlRequest = URLRequest(url: url)
-        urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
-
-        self.serverTelemetry = serverTelemetry
-        self.requestSerializer = requestSerializer
-
+        errorHandler: MSIDHttpRequestErrorHandling =
+        MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateResponseError>()
+    ) {
         requestConfigurator.configure(self)
-
-        // ResponseSerializer and ErrorHandler needs to be set after the RequestConfigurator
-
+        self.requestSerializer = requestSerializer
+        self.responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateResponse>()
+        self.serverTelemetry = serverTelemetry
         self.errorHandler = errorHandler
-        responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpChallengeResponse>()
     }
 
     private func makeBodyRequestParameters(
-        with params: MSALNativeAuthSignUpChallengeRequestParameters
+        with params: MSALNativeAuthSignInInitiateRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
             Key.clientId.rawValue: params.config.clientId,
-            Key.signUpToken.rawValue: params.signUpToken,
+            Key.username.rawValue: params.username,
             Key.challengeType.rawValue: params.challengeTypes.map { $0.rawValue }.joined(separator: " ")
-        ].compactMapValues { $0 }
+        ]
     }
 }

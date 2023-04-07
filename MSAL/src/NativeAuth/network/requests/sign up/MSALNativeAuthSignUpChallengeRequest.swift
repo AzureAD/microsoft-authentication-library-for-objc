@@ -24,12 +24,12 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignUpContinueRequest: MSIDHttpRequest {
+final class MSALNativeAuthSignUpChallengeRequest: MSIDHttpRequest {
 
-    private typealias RequestError = MSALNativeAuthSignUpContinueRequestError
+    private typealias RequestError = MSALNativeAuthSignUpChallengeResponseError
 
     func configure(
-        params: MSALNativeAuthSignUpContinueRequestParameters,
+        params: MSALNativeAuthSignUpChallengeRequestParameters,
         requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
         requestSerializer: MSIDRequestSerialization,
         serverTelemetry: MSIDHttpRequestServerTelemetryHandling,
@@ -50,21 +50,18 @@ final class MSALNativeAuthSignUpContinueRequest: MSIDHttpRequest {
         // ResponseSerializer and ErrorHandler needs to be set after the RequestConfigurator
 
         self.errorHandler = errorHandler
-        responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpContinueResponse>()
+        responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignUpChallengeResponse>()
     }
 
     private func makeBodyRequestParameters(
-        with params: MSALNativeAuthSignUpContinueRequestParameters
+        with params: MSALNativeAuthSignUpChallengeRequestParameters
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
             Key.clientId.rawValue: params.config.clientId,
-            Key.grantType.rawValue: params.grantType.rawValue,
             Key.signUpToken.rawValue: params.signUpToken,
-            Key.password.rawValue: params.password,
-            Key.oob.rawValue: params.oob,
-            Key.attributes.rawValue: params.attributes
+            Key.challengeType.rawValue: params.challengeTypes.map { $0.rawValue }.joined(separator: " ")
         ].compactMapValues { $0 }
     }
 }

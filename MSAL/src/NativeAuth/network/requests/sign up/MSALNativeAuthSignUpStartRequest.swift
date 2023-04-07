@@ -26,7 +26,7 @@
 
 final class MSALNativeAuthSignUpStartRequest: MSIDHttpRequest {
 
-    private typealias RequestError = MSALNativeAuthSignUpStartRequestError
+    private typealias RequestError = MSALNativeAuthSignUpStartResponseError
 
     func configure(
         params: MSALNativeAuthSignUpStartRequestParameters,
