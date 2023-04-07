@@ -123,7 +123,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
             grantType: params.grantType,
             signUpToken: params.signUpToken,
             password: params.password,
-            oob: params.oob,
+            oobCode: params.oobCode,
             attributes: attributesFormatted,
             context: params.context
         )

@@ -62,6 +62,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
         case innerErrors = "inner_errors"
         case signUpToken = "signup_token"
         case requiredAttributes = "required_attributes"
+        // TODO: change for verify_attributes when mock api fixes it
         case verifyAttributes = "attributes_to_verify"
         case invalidAttributes = "invalid_attributes"
     }

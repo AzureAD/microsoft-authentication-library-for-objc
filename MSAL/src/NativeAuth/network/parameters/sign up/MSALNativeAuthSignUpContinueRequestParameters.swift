@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
     let grantType: MSALNativeAuthGrantType
     let signUpToken: String
     let password: String?
-    let oob: String?
+    let oobCode: String?
     let attributes: String?
     let context: MSIDRequestContext
 }

@@ -34,10 +34,10 @@ final class MSALNativeAuthSignUpContinueRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignUpContinueRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            grantType: .oob,
+            grantType: .oobCode,
             signUpToken: "<sign-up-token>",
             password: "<strong-password>",
-            oob: "0000",
+            oobCode: "0000",
             attributes: "<attributes>",
             context: context
         )

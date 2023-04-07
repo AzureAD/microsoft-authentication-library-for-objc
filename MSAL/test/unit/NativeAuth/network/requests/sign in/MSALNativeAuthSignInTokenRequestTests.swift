@@ -45,7 +45,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
             challengeTypes: [.password],
             scope: "<scope-1>",
             password: "password",
-            oob: "oob"
+            oobCode: "oob"
         )
     }
 
@@ -101,7 +101,7 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
             challengeTypes: nil,
             scope: nil,
             password: nil,
-            oob: nil
+            oobCode: nil
         ))
 
         sut.configure(

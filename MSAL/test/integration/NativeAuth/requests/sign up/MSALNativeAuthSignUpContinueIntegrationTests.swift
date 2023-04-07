@@ -65,9 +65,9 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
     func test_signUpContinue_withOOB_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
-            grantType: .oob,
+            grantType: .oobCode,
             signUpToken: "<token>",
-            oob: "1234",
+            oobCode: "1234",
             context: context
         )
 

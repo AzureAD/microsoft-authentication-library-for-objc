@@ -63,7 +63,7 @@ final class MSALNativeAuthSignUpContinueRequest: MSIDHttpRequest {
             Key.grantType.rawValue: params.grantType.rawValue,
             Key.signUpToken.rawValue: params.signUpToken,
             Key.password.rawValue: params.password,
-            Key.oob.rawValue: params.oob,
+            Key.oobCode.rawValue: params.oobCode,
             Key.attributes.rawValue: params.attributes
         ].compactMapValues { $0 }
     }

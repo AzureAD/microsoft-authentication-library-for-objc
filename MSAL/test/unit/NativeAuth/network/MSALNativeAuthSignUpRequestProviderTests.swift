@@ -70,7 +70,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             grantType: .password,
             signUpToken: "sign-up-token",
             password: "1234",
-            oob: nil,
+            oobCode: nil,
             attributes: nil,
             context: context
         )
