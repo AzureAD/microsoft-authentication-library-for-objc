@@ -83,6 +83,10 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
         {
             _hasAADSSOExtension = NO;
         }
+        
+#if TARGET_OS_OSX
+        _platformSSOStatus = [self msalPlatformSSOStatusFromMSIDPlatformSSOStatus:deviceInfo.platformSSOStatus];
+#endif
 
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
@@ -115,6 +119,19 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
             
         default:
             return @"default";
+    }
+}
+
+- (MSALPlatformSSOStatus)msalPlatformSSOStatusFromMSIDPlatformSSOStatus:(MSIDPlatformSSOStatus)msidPlatformSSOStatus
+{
+    switch (msidPlatformSSOStatus) {
+        case MSIDPlatformSSOEnabledNotRegistered:
+            return MSALPlatformSSOEnabledNotRegistered;
+        case MSIDPlatformSSOEnabledAndRegistered:
+            return MSALPlatformSSOEnabledAndRegistered;
+            
+        default:
+            return MSALPlatformSSONotEnabled;
     }
 }
 
