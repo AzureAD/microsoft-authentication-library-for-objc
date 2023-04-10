@@ -1,4 +1,5 @@
 ## [TBD]
+* Updated extraDeviceInfo to include platform sso status on macOS
 * Add troubleshooting flow when doing Just in Time registration (#1646)
 
 ## [1.2.10]

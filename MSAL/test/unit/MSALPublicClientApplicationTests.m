@@ -2016,6 +2016,59 @@
                 XCTAssertNotNil(error);
     }];    
 }
+#if TARGET_OS_OSX
+- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoWithPlatformSSOStatus API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider  class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParameters, MSALDeviceInformationCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
+        msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+
+        msidDeviceInfo.platformSSOStatus = MSIDPlatformSSOEnabledAndRegistered;
+        
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
+        extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        msidDeviceInfo.extraDeviceInfo = extraDeviceInfoDict;
+        MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        
+        callback(deviceInfo, nil);
+    }];
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get device info"];
+    
+    [application getDeviceInformationWithParameters:nil
+                                    completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSOEnabledAndRegistered);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
+}
+#endif
 
 #if TARGET_OS_IPHONE
 
