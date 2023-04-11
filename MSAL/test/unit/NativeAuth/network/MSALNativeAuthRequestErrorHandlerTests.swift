@@ -26,16 +26,16 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthRequestErrorHandlerTests: XCTestCase {
+class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
     // MARK: - Variables
 
-    private var sut: MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateRequestError>!
+    private var sut: MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>!
     private let error = NSError(domain:"Test Error Domain", code:400, userInfo:nil)
     private var httpRequest: MSIDHttpRequest!
     private let context = MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
     override func setUpWithError() throws {
-        sut = MSALNativeAuthRequestErrorHandler<MSALNativeAuthSignInInitiateRequestError>()
+        sut = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>()
         httpRequest = MSIDHttpRequest()
         try super.setUpWithError()
     }
@@ -179,11 +179,11 @@ class MSALNativeAuthRequestErrorHandlerTests: XCTestCase {
             responseSerializer: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateRequestError).error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidRequest)
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateRequestError).errorDescription, "Request parameter validation failed")
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateRequestError).errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateRequestError).innerErrors![0].error, "invalid_username")
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateRequestError).innerErrors![0].errorDescription, "Username was invalid")
+            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidRequest)
+            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).errorDescription, "Request parameter validation failed")
+            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
+            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).innerErrors![0].error, "invalid_username")
+            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).innerErrors![0].errorDescription, "Username was invalid")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)

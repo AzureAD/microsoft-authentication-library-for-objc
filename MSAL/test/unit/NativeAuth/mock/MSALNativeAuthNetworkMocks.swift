@@ -90,6 +90,12 @@ class MSALNativeAuthRequestProviderMock: MSALNativeAuthRequestProviding {
     private(set) var verifyCodeRequestFuncResult: MSALNativeAuthVerifyCodeRequest?
 
 
+    var mockSignUp: MSALNativeAuthRequestSignUpProviding?
+
+    var signUp: MSAL.MSALNativeAuthRequestSignUpProviding {
+        mockSignUp!
+    }
+
     func mockSignUpRequestFunc(throwingError: Error? = nil, result: MSALNativeAuthSignUpRequest? = nil) {
         self.throwingError = throwingError
         self.signUpRequestFuncResult = result
