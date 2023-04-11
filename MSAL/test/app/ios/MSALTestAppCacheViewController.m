@@ -331,7 +331,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             if ([token isKindOfClass:[MSIDAccessTokenWithAuthScheme class]])
             {
                 MSIDAccessTokenWithAuthScheme *accessToken = (MSIDAccessTokenWithAuthScheme *)token;
-                if(MSIDAuthSchemeTypeFromString(accessToken.tokenType) == MSIDAuthSchemePop)
+                if (MSIDAuthSchemeTypeFromString(accessToken.tokenType) == MSIDAuthSchemePop)
                 {
                     isPopToken = YES;
                 }
