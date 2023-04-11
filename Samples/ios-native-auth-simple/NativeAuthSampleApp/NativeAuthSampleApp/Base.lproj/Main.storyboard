@@ -511,7 +511,7 @@
                             <constraint firstItem="HCQ-Ay-TF3" firstAttribute="trailing" secondItem="5Ea-MT-hib" secondAttribute="trailing" constant="20" id="pt3-8L-Chv"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Password Reset" image="questionmark.key.filled" catalog="system" id="rZj-Cb-72Y"/>
+                    <tabBarItem key="tabBarItem" title="Password Reset" image="lock.rotation" catalog="system" id="rZj-Cb-72Y"/>
                     <connections>
                         <outlet property="emailTextField" destination="bNb-JY-hyR" id="9Kf-bY-IVB"/>
                         <outlet property="resultTextView" destination="1hd-wN-wPj" id="3C4-uw-RCb"/>
@@ -935,8 +935,8 @@
     <resources>
         <image name="globe.badge.chevron.backward" catalog="system" width="128" height="114"/>
         <image name="list.bullet.rectangle" catalog="system" width="128" height="93"/>
+        <image name="lock.rotation" catalog="system" width="128" height="112"/>
         <image name="number.square" catalog="system" width="128" height="114"/>
-        <image name="questionmark.key.filled" catalog="system" width="128" height="86"/>
         <image name="rectangle.and.pencil.and.ellipsis" catalog="system" width="128" height="80"/>
         <image name="swift" catalog="system" width="128" height="108"/>
         <systemColor name="labelColor">
