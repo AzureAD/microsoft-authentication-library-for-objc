@@ -213,6 +213,8 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         pcaConfig.cacheConfig.keychainSharingGroup = @"com.microsoft.ssoseeding";
         pcaConfig.bypassRedirectURIValidation = YES;
     }
+    MSALSliceConfig *slice = [[MSALSliceConfig alloc] initWithSlice:nil dc:@"ESTS-PUB-EUS-AZ1-FD000-TEST1"];
+    pcaConfig.sliceConfig = slice;
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
