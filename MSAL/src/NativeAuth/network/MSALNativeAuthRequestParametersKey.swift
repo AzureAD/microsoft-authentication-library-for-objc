@@ -25,12 +25,20 @@
 import Foundation
 
 enum MSALNativeAuthRequestParametersKey: String {
-    case clientId
-    case grantType
+    case clientId = "client_id"
+    case challengeType = "challenge_type"
+    case grantType = "grant_type"
+    case username
     case email
     case password
     case scope
+    case credentialToken = "credential_token"
     case flowToken
+    case oobCode = "oob"
     case otp
     case customAttributes
+    case challengeTargetKey = "challenge_target_key"
+    case signInSLT = "signin_slt"
+    case attributes
+    case signUpToken = "signup_token"
 }

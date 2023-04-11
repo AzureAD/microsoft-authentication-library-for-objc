@@ -28,14 +28,14 @@ import XCTest
 
 final class MSALNativeAuthResponseSerializerTests: XCTestCase {
 
-    func testSerialize_correctSignUpResponse_shouldReturnSuccess() {
+    func testSerialize_correctResponse_shouldReturnSuccess() {
         let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let responseString = """
         {
           "token_type": "Bearer",
           "scope": "scope",
           "expires_in": 4141,
-          "ext_expires_in": 4141,
+          "extended_expires_in": 4141,
           "access_token": "access",
           "refresh_token": "refresh",
           "id_token": "id"
@@ -52,7 +52,7 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
         XCTAssertEqual(response?.accessToken, "access")
     }
 
-    func testSerialize_wrongSignUpResponse_shouldFail() throws {
+    func testSerialize_wrongResponse_shouldFail() throws {
         let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
         let wrongResponseString = """
         {
@@ -77,15 +77,4 @@ private struct ResponseStub: Decodable {
     let accessToken: String
     let refreshToken: String
     let idToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case tokenType = "token_type"
-        case scope = "scope"
-        case expiresIn = "expires_in"
-        case extendedExpiresIn = "ext_expires_in"
-        case accessToken = "access_token"
-        case refreshToken = "refresh_token"
-        case idToken = "id_token"
-    }
-
 }

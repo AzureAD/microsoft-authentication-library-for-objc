@@ -27,13 +27,19 @@
 struct MSALNativeAuthConfiguration {
     let clientId: String
     let authority: MSIDAADAuthority
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]
 
-    init(clientId: String, authority: MSALAADAuthority, rawTenant: String? = nil) throws {
+    init(
+        clientId: String,
+        authority: MSALAADAuthority,
+        rawTenant: String? = nil,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]) throws {
         self.clientId = clientId
         self.authority = try MSIDAADAuthority(
             url: authority.url,
             rawTenant: rawTenant,
             context: MSALNativeAuthRequestContext()
         )
+        self.challengeTypes = challengeTypes
     }
 }

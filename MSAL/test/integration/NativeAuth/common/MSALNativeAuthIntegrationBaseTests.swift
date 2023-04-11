@@ -23,13 +23,97 @@
 // THE SOFTWARE.
 
 import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
 class MSALNativeAuthIntegrationBaseTests: XCTestCase {
-    
-    let mockAPIHandler = MockAPIHandler()
-    var correlationId = UUID()
 
+    var defaultTimeout: TimeInterval = 5
+    let mockAPIHandler = MockAPIHandler()
+    let correlationId = UUID()
+    let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
+                                                                               authority: MSALAADAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
+                                                                               rawTenant: "test",
+                                                                               challengeTypes: [.password, .oob, .redirect])
+    var sut: MSIDHttpRequest!
+    
     override func tearDown() {
         try? mockAPIHandler.clearQueues(correlationId: correlationId)
+    }
+
+    // MARK: - Utility methods
+
+    func performTestSucceed<T: Any>() async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            let exp = expectation(description: "msal_native_auth_integration_test_exp")
+
+            sut.send { response, error in
+                guard error == nil else {
+                    XCTFail("Error should be nil")
+                    continuation.resume(throwing: MockAPIError.invalidRequest)
+                    return
+                }
+
+                guard let response = response as? T else {
+                    XCTFail("Response should be castable to `T`")
+                    continuation.resume(throwing: MockAPIError.invalidRequest)
+                    return
+                }
+
+                continuation.resume(returning: response)
+                exp.fulfill()
+            }
+
+            wait(for: [exp], timeout: defaultTimeout)
+        }
+    }
+
+    @discardableResult
+    func perform_testFail<Error: MSALNativeAuthResponseError>(
+        endpoint: MockAPIEndpoint,
+        response: MockAPIResponse,
+        expectedError: Error
+    ) async throws -> Error {
+        try await mockResponse(response, endpoint: endpoint)
+        let response: Error = try await perform_uncheckedTestFail()
+
+        XCTAssertEqual(response.error.rawValue, expectedError.error.rawValue)
+        XCTAssertNotNil(response.errorURI)
+        XCTAssertNotNil(response.errorDescription)
+
+        return response
+    }
+
+    func mockResponse(_ response: MockAPIResponse, endpoint: MockAPIEndpoint) async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: endpoint,
+            correlationId: correlationId,
+            responses: [response]
+        )
+    }
+
+    func perform_uncheckedTestFail<T: MSALNativeAuthResponseError>() async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            let exp = expectation(description: "msal_native_auth_integration_test_exp")
+
+            sut.send { response, error in
+                guard response == nil else {
+                    XCTFail("Response should be nil")
+                    continuation.resume(throwing: MockAPIError.invalidRequest)
+                    return
+                }
+
+                guard let error = error as? T else {
+                    XCTFail("Error should be MSALNativeAuthResponseError")
+                    continuation.resume(throwing: MockAPIError.invalidRequest)
+                    return
+                }
+
+                continuation.resume(returning: error)
+                exp.fulfill()
+            }
+
+            wait(for: [exp], timeout: defaultTimeout)
+        }
     }
 }

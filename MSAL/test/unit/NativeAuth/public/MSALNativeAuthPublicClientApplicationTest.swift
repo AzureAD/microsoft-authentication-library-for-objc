@@ -109,7 +109,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let b2cAuthority = try MSALB2CAuthority(url: .init(string: "https://login.contoso.com")!)
         let configuration = MSALPublicClientApplicationConfig(clientId: DEFAULT_TEST_CLIENT_ID, redirectUri: nil, authority: b2cAuthority)
 
-        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration))
+        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration, challengeTypes: [.password]))
     }
     
     func testSignIn_whenInvalidUsernameUsed_shouldReturnCorrectError() {

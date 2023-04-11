@@ -36,14 +36,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
 
-    public override init(configuration config: MSALPublicClientApplicationConfig) throws {
+    public init(
+        configuration config: MSALPublicClientApplicationConfig,
+        challengeTypes: [MSALNativeAuthChallengeType]) throws {
         guard let aadAuthority = config.authority as? MSALAADAuthority else {
             throw MSALNativeAuthError.invalidAuthority
         }
 
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
-            authority: aadAuthority
+            authority: aadAuthority,
+            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
@@ -63,7 +66,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: aadAuthority,
-            rawTenant: rawTenant
+            rawTenant: rawTenant,
+            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
@@ -174,5 +178,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             username: "email@contoso.com",
             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
         )
+    }
+
+    private static func getInternalChallengeTypes(
+        _ challengeTypes: [MSALNativeAuthChallengeType]) -> [MSALNativeAuthInternalChallengeType] {
+            var internalChallengeTypes = challengeTypes.map({
+                MSALNativeAuthInternalChallengeType.getChallengeType(type: $0)
+            })
+            internalChallengeTypes.append(.redirect)
+            return internalChallengeTypes
     }
 }

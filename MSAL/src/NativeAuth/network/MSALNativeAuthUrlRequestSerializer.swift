@@ -24,12 +24,19 @@
 
 @_implementationOnly import MSAL_Private
 
+enum MSALNativeAuthUrlRequestEncoding: String {
+    case wwwFormUrlEncoded = "application/x-www-form-urlencoded"
+    case json = "application/json"
+}
+
 final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerialization {
 
     private let context: MSIDRequestContext
+    private let encoding: MSALNativeAuthUrlRequestEncoding
 
-    init(context: MSIDRequestContext) {
+    init(context: MSIDRequestContext, encoding: MSALNativeAuthUrlRequestEncoding) {
         self.context = context
+        self.encoding = encoding
     }
 
     func serialize(
@@ -51,24 +58,37 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
             }
         }
 
-        if JSONSerialization.isValidJSONObject(parameters) {
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: parameters)
-                request.httpBody = jsonData
-            } catch {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "HTTP body request serialization failed with error: \(error.localizedDescription)"
-                )
+        if encoding == .json {
+            if JSONSerialization.isValidJSONObject(parameters) {
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: parameters)
+                    request.httpBody = jsonData
+                } catch {
+                    MSALLogger.log(
+                        level: .error,
+                        context: context,
+                        format: "HTTP body request serialization failed with error: \(error.localizedDescription)"
+                    )
+                }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
             }
         } else {
-            MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
+            let encodedBody = formUrlEncode(parameters)
+            request.httpBody = encodedBody.data(using: .utf8)
         }
 
-        requestHeaders["Content-Type"] = "application/json"
+        requestHeaders["Content-Type"] = encoding.rawValue
         request.allHTTPHeaderFields = requestHeaders
 
         return request
+    }
+
+    private func formUrlEncode(_ parameters: [AnyHashable: Any]) -> String {
+        parameters.map {
+            let encodedKey = (($0.key as? String) ?? "").msidWWWFormURLEncode() ?? ""
+            let encodedValue = (($0.value as? String) ?? "").msidWWWFormURLEncode() ?? ""
+            return "\(encodedKey)=\(encodedValue)"
+        }.joined(separator: "&")
     }
 }

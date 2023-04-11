@@ -23,8 +23,14 @@
 // THE SOFTWARE.
 
 enum MSALNativeAuthEndpoint: String, CaseIterable {
+    case signUpStart = "/signup/start"
+    case signUpChallenge = "/signup/challenge"
+    case signUpContinue = "/signup/continue"
     case signUp = "/signup"
     case signIn = "/signin"
+    case signInInitiate = "/oauth/v2.0/initiate"
+    case signInChallenge = "/oauth/v2.0/challenge"
+    case token = "/oauth/v2.0/token"
     case refreshToken = "/refreshtoken"
     case resetPasswordStart = "/resetpassword/start"
     case resetPasswordComplete = "/resetpassword/complete"
