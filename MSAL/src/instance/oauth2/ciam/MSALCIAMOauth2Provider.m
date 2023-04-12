@@ -35,7 +35,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAccountIdentifier.h"
-#import "MSIDCIAMIdTokenClaims.h"
+#import "MSIDAADV2IdTokenClaims.h"
 #import "MSALTenantProfile+Internal.h"
 
 @implementation MSALCIAMOauth2Provider
@@ -98,7 +98,7 @@
                                    environment:(NSString *)environment
                                          error:(NSError **)error
 {
-    MSIDCIAMIdTokenClaims *idTokenClaims = [[MSIDCIAMIdTokenClaims alloc] initWithJSONDictionary:claims error:error];
+    MSIDAADV2IdTokenClaims *idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithJSONDictionary:claims error:error];
     
     if (!idTokenClaims)
     {

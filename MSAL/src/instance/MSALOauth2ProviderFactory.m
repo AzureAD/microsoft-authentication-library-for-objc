@@ -68,12 +68,7 @@
         MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"ADFS authority is not yet supported.", nil);
         return nil;
     }
-    else if ([authority isKindOfClass:[MSALCIAMAuthority class]])
-    {
-        MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"CIAM authority is not yet supported.", nil);
-        return nil;
-    }
-
+    
     MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"Provided authority is not yet supported.", nil);
     return nil;
     

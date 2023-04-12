@@ -91,7 +91,9 @@ static NSDictionary *s_currentProfile = nil;
     }
     
     __auto_type authorityMSIDCIAM = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com"];
+    __auto_type authorityMSIDCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com/"];
     [authorities addObject:authorityMSIDCIAM];
+    [authorities addObject:authorityMSIDCIAMTenant];
     
     s_authorities = authorities;
     
