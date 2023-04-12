@@ -25,27 +25,20 @@
 import Foundation
 
 @objc
-public protocol SignInStartDelegate {
-    func onSignInError(error: SignInStartError)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onCompleted(result: MSALNativeAuthUserAccount)
+public class SignInOTPStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignInOTPStartErrorType
+
+    init(type: SignInOTPStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
 }
 
 @objc
-public protocol SignInOTPStartDelegate {
-    func onSignInOTPError(error: SignInOTPStartError)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onCompleted(result: MSALNativeAuthUserAccount)
-}
-
-@objc
-public protocol SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeSentState)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-}
-
-@objc
-public protocol SignInVerifyCodeDelegate {
-    func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeSentState?)
-    func onCompleted(result: MSALNativeAuthUserAccount)
+public enum SignInOTPStartErrorType: Int {
+    case redirect
+    case userNotFound
+    case invalidAuthenticationType
+    case invalidUsername
+    case generalError
 }

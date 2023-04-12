@@ -32,11 +32,17 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
     private static var expectation = XCTestExpectation()
     
-    private class SignInStartCompletionErrorDelegate: SignInStartDelegate {
+    private class SignInStartCompletionErrorDelegate: SignInStartDelegate, SignInOTPStartDelegate {
         var expectedErrorType = SignInStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignInOTPStartErrorType.invalidUsername
         
         func onSignInError(error: MSAL.SignInStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
+        }
+        
+        func onSignInOTPError(error: MSAL.SignInOTPStartError) {
+            XCTAssertEqual(error.type, expectedOTPErrorType)
             expectation.fulfill()
         }
         
@@ -51,11 +57,17 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         }
     }
     
-    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate {
+    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate, SignUpOTPStartDelegate {
         var expectedErrorType = SignUpStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignUpOTPStartErrorType.invalidUsername
         
         func onSignUpError(error: MSAL.SignUpStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
+        }
+        
+        func onSignUpOTPError(error: MSAL.SignUpOTPStartError) {
+            XCTAssertEqual(error.type, expectedOTPErrorType)
             expectation.fulfill()
         }
         
@@ -98,7 +110,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignIn_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
-        application.signIn(username: "", password: nil, delegate: SignInStartCompletionErrorDelegate())
+        application.signIn(username: "", password: "", delegate: SignInStartCompletionErrorDelegate())
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     
@@ -111,10 +123,17 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     
+    func testSignInOTP_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "", delegate: SignInStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
     func testSignUp_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
-        application.signUp(username: "", password: nil, delegate: SignUpStartCompletionErrorDelegate())
+        application.signUp(username: "", password: "", delegate: SignUpStartCompletionErrorDelegate())
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     
@@ -124,6 +143,13 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedErrorType = .invalidPassword
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
         application.signUp(username: "correct", password: "", delegate: delegate)
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
+    }
+    
+    func testSignUpOTP_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "", delegate: SignUpStartCompletionErrorDelegate())
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     

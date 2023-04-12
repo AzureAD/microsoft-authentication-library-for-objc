@@ -31,11 +31,21 @@ public protocol SignUpStartDelegate {
 }
 
 @objc
-public protocol SignUpVerifyCodeDelegate {
+public protocol SignUpOTPStartDelegate {
+    func onSignUpOTPError(error: SignUpOTPStartError)
+    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+}
+
+@objc
+public protocol SignUpOTPVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
-    func onPasswordRequired(newState: SignUpPasswordRequiredState)
     func onAttributesRequired(newState: SignUpAttributesRequiredState)
     func onCompleted()
+}
+
+@objc
+public protocol SignUpVerifyCodeDelegate: SignUpOTPVerifyCodeDelegate {
+    func onPasswordRequired(newState: SignUpPasswordRequiredState)
 }
 
 @objc

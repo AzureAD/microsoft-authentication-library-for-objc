@@ -90,7 +90,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     public func signUp(
         username: String,
-        password: String?,
+        password: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
@@ -99,7 +99,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
             return
         }
-        if let password = password, !inputValidator.isInputValid(password) {
+        guard inputValidator.isInputValid(password) else {
             delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
             return
         }
@@ -118,9 +118,34 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    public func signUp(
+        username: String,
+        attributes: [String: Any]? = nil,
+        correlationId: UUID? = nil,
+        delegate: SignUpOTPStartDelegate
+    ) {
+        guard inputValidator.isInputValid(username) else {
+            delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .invalidUsername))
+            return
+        }
+        switch username {
+        case "exists@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .userAlreadyExists))
+        case "redirect@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .redirect))
+        case "invalidemail@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type:
+                .invalidUsername, message: "email \(username) is invalid"))
+        case "invalidattributes@contoso.com": delegate.onSignUpOTPError(error:
+                                                                        SignUpOTPStartError(type: .invalidAttributes))
+        case "generalerror@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .generalError))
+        default: delegate.onCodeSent(
+            newState: SignUpCodeSentState(flowToken: "signup_token"),
+            displayName: username,
+            codeLength: 4)
+        }
+    }
+
     public func signIn(
         username: String,
-        password: String?,
+        password: String,
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
@@ -128,7 +153,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
             return
         }
-        if let password = password, !inputValidator.isInputValid(password) {
+        guard inputValidator.isInputValid(password) else {
             delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
@@ -139,6 +164,33 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             error: SignInStartError(type: .invalidAuthenticationType))
         case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
         case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
+        case "oob@contoso.com": delegate.onCodeSent(
+            newState: SignInCodeSentState(flowToken: "credential_token"),
+            displayName: username,
+            codeLength: 4)
+        default: delegate.onCompleted(
+                result:
+                    MSALNativeAuthUserAccount(
+                        username: username,
+                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+        }
+    }
+
+    public func signIn(
+        username: String,
+        correlationId: UUID? = nil,
+        delegate: SignInOTPStartDelegate
+    ) {
+        guard inputValidator.isInputValid(username) else {
+            delegate.onSignInOTPError(error: SignInOTPStartError(type: .invalidUsername))
+            return
+        }
+        switch username {
+        case "notfound@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .userNotFound))
+        case "redirect@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .redirect))
+        case "invalidauth@contoso.com": delegate.onSignInOTPError(
+            error: SignInOTPStartError(type: .invalidAuthenticationType))
+        case "generalerror@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .generalError))
         case "oob@contoso.com": delegate.onCodeSent(
             newState: SignInCodeSentState(flowToken: "credential_token"),
             displayName: username,
