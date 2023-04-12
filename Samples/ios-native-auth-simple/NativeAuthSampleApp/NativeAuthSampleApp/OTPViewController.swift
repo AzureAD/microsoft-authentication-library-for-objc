@@ -27,6 +27,7 @@ import UIKit
 class OTPViewController: UIViewController {
 
     var otpSubmittedCallback: ((_ otp: String) -> Void)?
+    var resendCodeCallback: (() -> Void)?
 
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var otpTextField: UITextField!
@@ -38,6 +39,7 @@ class OTPViewController: UIViewController {
     }
 
     @IBAction func resendPressed(_ sender: Any) {
+        resendCodeCallback?()
     }
 
     @IBAction func cancelPressed(_ sender: Any) {

@@ -72,6 +72,9 @@
                                                         <rect key="frame" x="0.0" y="0.0" width="105.66666666666667" height="34.333333333333336"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Up"/>
+                                                        <connections>
+                                                            <action selector="signUpTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Rfx-5c-EAf"/>
+                                                        </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Bd-5E-YnL">
                                                         <rect key="frame" x="0.0" y="42.333333333333343" width="105.66666666666667" height="34.333333333333343"/>
@@ -85,6 +88,9 @@
                                                         <rect key="frame" x="0.0" y="84.666666666666657" width="105.66666666666667" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Out"/>
+                                                        <connections>
+                                                            <action selector="signOutTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8Jg-CN-JbO"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <variation key="heightClass=compact" axis="horizontal"/>

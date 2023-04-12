@@ -37,6 +37,10 @@ class EmailAndPasswordViewController: UIViewController {
 
     var appContext: MSALNativeAuthPublicClientApplication!
 
+    var otpViewController: OTPViewController?
+
+    var signedIn = false
+
     let kClientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
     let kAuthority = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
 
@@ -58,33 +62,59 @@ class EmailAndPasswordViewController: UIViewController {
         // TODO: Call appContext.getUserAccount() and update UI accordingly
     }
 
+    @IBAction func signUpTapped(_ sender: Any) {
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "email or password not set"
+            return
+        }
+    }
+
     @IBAction func signInTapped(_ sender: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "email or password not set"
             return
         }
 
-        showOTPModal()
+        showOTPModal(submittedCallback: { [self] otp in
+            showResultText("Submitted OTP: \(otp)")
+            dismiss(animated: true)
+        }, resendCodeCallback: { [self] in
+            showResultText("Resending code")
+        })
     }
 
-    func showOTPModal() {
-        guard let otpViewController = storyboard?.instantiateViewController(
-            withIdentifier: "OTPViewController") as? OTPViewController else {
+    @IBAction func signOutTapped(_ sender: Any) {
+        signedIn = false
+
+        showResultText("Signed out")
+
+        updateUI()
+    }
+
+    func showOTPModal(submittedCallback: @escaping ((_ otp: String) -> Void), resendCodeCallback: @escaping (() -> Void)) {
+        otpViewController = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
+
+        guard let otpViewController = otpViewController else {
             return
         }
 
-        otpViewController.otpSubmittedCallback = { [self] otp in
-            DispatchQueue.main.async { [self] in
-                Task {
-                    showResultText("Submitted OTP: \(otp)")
-                    dismiss(animated: true)
+        otpViewController.otpSubmittedCallback = { otp in
+            DispatchQueue.main.async {
+                submittedCallback(otp)
+            }
+        }
 
-                    updateUI()
-                }
+        otpViewController.resendCodeCallback = {
+            DispatchQueue.main.async {
+                resendCodeCallback()
             }
         }
 
         present(otpViewController, animated: true)
+    }
+
+    func showOTPErrorMessage(_ message: String) {
+        otpViewController?.errorLabel.text = message
     }
 
     func showResultText(_ text: String) {
@@ -92,8 +122,6 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func updateUI() {
-        let signedIn = true
-
         if signedIn {
             signUpButton.isEnabled = false
             signInButton.isEnabled = false
