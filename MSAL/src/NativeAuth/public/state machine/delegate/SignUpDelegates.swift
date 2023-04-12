@@ -27,32 +27,32 @@ import Foundation
 @objc
 public protocol SignUpStartDelegate {
     func onSignUpError(error: SignUpStartError)
-    func onCodeSent(state: SignUpCodeSentState, displayName: String, codeLength: Int)
+    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
-public protocol VerifyCodeSignUpDelegate {
-    func onVerifyCodeError(error: VerifyCodeError, state: SignUpCodeSentState?)
-    func passwordRequired(state: SignUpPasswordRequiredState)
-    func attributesRequired(state: SignUpAttributesRequiredState)
-    func completed()
+public protocol SignUpVerifyCodeDelegate {
+    func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
+    func onPasswordRequired(newState: SignUpPasswordRequiredState)
+    func onAttributesRequired(newState: SignUpAttributesRequiredState)
+    func onCompleted()
 }
 
 @objc
-public protocol ResendCodeSignUpDelegate {
-    func onResendCodeError(error: ResendCodeError, state: SignUpCodeSentState?)
-    func onCodeSent(state: SignUpCodeSentState, displayName: String, codeLength: Int)
+public protocol SignUpResendCodeDelegate {
+    func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeSentState?)
+    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
-public protocol PasswordRequiredSignUpDelegate {
-    func onPasswordRequiredError(error: PasswordRequiredError, state: SignUpPasswordRequiredState?)
-    func attributesRequired(state: SignUpAttributesRequiredState)
-    func completed()
+public protocol SignUpPasswordRequiredDelegate {
+    func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
+    func onAttributesRequired(newState: SignUpAttributesRequiredState)
+    func onCompleted()
 }
 
 @objc
-public protocol AttributesRequiredSignUpDelegate {
-    func onAttributesRequiredError(error: AttributesRequiredError, state: SignUpAttributesRequiredState?)
-    func completed()
+public protocol SignUpAttributesRequiredDelegate {
+    func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
+    func onCompleted()
 }

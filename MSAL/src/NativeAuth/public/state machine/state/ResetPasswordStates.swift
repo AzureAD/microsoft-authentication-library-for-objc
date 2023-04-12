@@ -25,36 +25,44 @@
 import Foundation
 
 @objcMembers
-public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
-    public func resendCode(delegate: ResendCodeResetPasswordDelegate, correlationId: UUID? = nil) {
+public class ResetPasswordCodeSentState: MSALNativeAuthBaseState {
+    public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), state: self)
+            delegate.onResetPasswordResendCodeError(error:
+                                                    ResendCodeError(type: .accountTemporarilyLocked),
+                                                    newState: self)
         } else {
-            delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
+            delegate.onCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
-    public func verifyCode(code: String, delegate: VerifyCodeResetPasswordDelegate, correlationId: UUID? = nil) {
+    public func verifyCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         switch code {
-        case "0000": delegate.onVerifyCodeError(error: VerifyCodeError(type: .invalidCode), state: self)
-        case "2222": delegate.onVerifyCodeError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onVerifyCodeError(error: VerifyCodeError(type: .redirect), state: nil)
-        default: delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: flowToken))
+        case "0000": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+        case "2222": delegate.onResetPasswordVerifyCodeError(error:
+                                                                VerifyCodeError(type: .generalError),
+                                                                newState: self)
+        case "3333": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
+        default: delegate.onPasswordRequired(newState: ResetPasswordRequiredState(flowToken: flowToken))
         }
     }
 }
 
 @objcMembers
-public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
+public class ResetPasswordRequiredState: MSALNativeAuthBaseState {
     public func submitPassword(
         password: String,
-        delegate: PasswordRequiredResetPasswordDelegate,
+        delegate: ResetPasswordRequiredDelegate,
         correlationId: UUID? = nil) {
             switch password {
-            case "redirect": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .redirect), state: nil)
-            case "generalerror": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .generalError), state: self)
-            case "invalid": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), state: self)
-            default: delegate.completed()
+            case "redirect": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .redirect), newState: nil)
+            case "generalerror": delegate.onPasswordRequiredError(
+                error: PasswordRequiredError(type: .generalError),
+                newState: self)
+            case "invalid": delegate.onPasswordRequiredError(
+                error: PasswordRequiredError(type: .invalidPassword),
+                newState: self)
+            default: delegate.onCompleted()
             }
     }
 }

@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class AttributesRequiredError: MSALNativeBaseError {
+public class AttributesRequiredError: MSALNativeAuthBaseError {
     @objc public let type: AttributesRequiredErrorType
 
     init(type: AttributesRequiredErrorType, message: String? = nil) {

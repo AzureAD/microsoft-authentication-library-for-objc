@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class ResendCodeError: MSALNativeBaseError {
+public class ResendCodeError: MSALNativeAuthBaseError {
     @objc public let type: ResendCodeErrorType
 
     init(type: ResendCodeErrorType, message: String? = nil) {

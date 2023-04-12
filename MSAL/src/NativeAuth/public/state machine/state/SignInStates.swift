@@ -27,20 +27,20 @@ import Foundation
 @objcMembers
 public class SignInCodeSentState: MSALNativeAuthBaseState {
 
-    public func resendCode(delegate: ResendCodeSignInDelegate, correlationId: UUID? = nil) {
+    public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), state: self)
+            delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
         } else {
-            delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
+            delegate.onCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
-    public func submitCode(code: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {
+    public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
         switch code {
-        case "0000": delegate.onVerifyCodeError(error: VerifyCodeError(type: .invalidCode), state: self)
-        case "2222": delegate.onVerifyCodeError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onVerifyCodeError(error: VerifyCodeError(type: .redirect), state: nil)
-        default: delegate.completed(result:
+        case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+        case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
+        case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
+        default: delegate.onCompleted(result:
                                         MSALNativeAuthUserAccount(
                                             username: "email@contoso.com",
                                             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))

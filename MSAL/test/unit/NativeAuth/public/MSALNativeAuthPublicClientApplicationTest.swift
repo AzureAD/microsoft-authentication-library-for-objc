@@ -40,12 +40,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        func onCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
         }
         
-        func completed(result: MSAL.MSALNativeAuthUserAccount) {
+        func onCompleted(result: MSAL.MSALNativeAuthUserAccount) {
             XCTFail()
             expectation.fulfill()
         }
@@ -59,7 +59,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(state: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+        func onCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
         }
@@ -81,7 +81,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(state: MSAL.CodeSentResetPasswordState, displayName: String, codeLength: Int) {
+        func onCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
         }
@@ -105,7 +105,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignIn_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
         let delegate = SignInStartCompletionErrorDelegate()
-        delegate.expectedErrorType = .passwordInvalid
+        delegate.expectedErrorType = .invalidPassword
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
         application.signIn(username: "correct", password: "", delegate: delegate)
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
@@ -121,7 +121,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUp_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
         let delegate = SignUpStartCompletionErrorDelegate()
-        delegate.expectedErrorType = .passwordInvalid
+        delegate.expectedErrorType = .invalidPassword
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
         application.signUp(username: "correct", password: "", delegate: delegate)
         wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)

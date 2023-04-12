@@ -27,23 +27,23 @@ import Foundation
 @objc
 public protocol ResetPasswordStartDelegate {
     func onResetPasswordError(error: ResetPasswordStartError)
-    func onCodeSent(state: CodeSentResetPasswordState, displayName: String, codeLength: Int)
+    func onCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
-public protocol VerifyCodeResetPasswordDelegate {
-    func onVerifyCodeError(error: VerifyCodeError, state: CodeSentResetPasswordState?)
-    func passwordRequired(state: PasswordRequiredResetPasswordState)
+public protocol ResetPasswordVerifyCodeDelegate {
+    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeSentState?)
+    func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
-public protocol ResendCodeResetPasswordDelegate {
-    func onResendCodeError(error: ResendCodeError, state: CodeSentResetPasswordState)
-    func onCodeSent(state: CodeSentResetPasswordState, displayName: String, codeLength: Int)
+public protocol ResetPasswordResendCodeDelegate {
+    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState)
+    func onCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
-public protocol PasswordRequiredResetPasswordDelegate {
-    func onPasswordRequiredError(error: PasswordRequiredError, state: PasswordRequiredResetPasswordState?)
-    func completed()
+public protocol ResetPasswordRequiredDelegate {
+    func onPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    func onCompleted()
 }

@@ -25,14 +25,7 @@
 import Foundation
 
 @objc
-public class MSALNativeBaseError: NSObject, LocalizedError {
-    private let message: String?
-
-    init(message: String? = nil) {
-        self.message = message
-    }
-
-    public var errorDescription: String? {
-        message
-    }
+public enum MSALNativeAuthChallengeType: Int {
+    case oob
+    case password
 }

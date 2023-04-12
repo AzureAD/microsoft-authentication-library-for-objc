@@ -24,12 +24,6 @@
 
 import Foundation
 
-@objc
-public enum MSALNativeAuthChallengeType: Int {
-    case oob
-    case password
-}
-
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
@@ -106,19 +100,19 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         if let password = password, !inputValidator.isInputValid(password) {
-            delegate.onSignUpError(error: SignUpStartError(type: .passwordInvalid))
+            delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
             return
         }
         switch username {
         case "exists@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .userAlreadyExists))
         case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .redirect))
-        case "invalidpassword@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .passwordInvalid))
+        case "invalidpassword@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
         case "invalidemail@contoso.com": delegate.onSignUpError(error: SignUpStartError(type:
                 .invalidUsername, message: "email \(username) is invalid"))
         case "invalidattributes@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidAttributes))
         case "generalerror@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .generalError))
         default: delegate.onCodeSent(
-            state: SignUpCodeSentState(flowToken: "signup_token"),
+            newState: SignUpCodeSentState(flowToken: "signup_token"),
             displayName: username,
             codeLength: 4)
         }
@@ -135,20 +129,21 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         if let password = password, !inputValidator.isInputValid(password) {
-            delegate.onSignInError(error: SignInStartError(type: .passwordInvalid))
+            delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
         switch username {
         case "notfound@contoso.com": delegate.onSignInError(error: SignInStartError(type: .userNotFound))
         case "redirect@contoso.com": delegate.onSignInError(error: SignInStartError(type: .redirect))
-        case "invalidauth@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidAuthenticationType))
-        case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .passwordInvalid))
+        case "invalidauth@contoso.com": delegate.onSignInError(
+            error: SignInStartError(type: .invalidAuthenticationType))
+        case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
         case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
         case "oob@contoso.com": delegate.onCodeSent(
-            state: SignInCodeSentState(flowToken: "credential_token"),
+            newState: SignInCodeSentState(flowToken: "credential_token"),
             displayName: username,
             codeLength: 4)
-        default: delegate.completed(
+        default: delegate.onCompleted(
                 result:
                     MSALNativeAuthUserAccount(
                         username: username,
@@ -167,11 +162,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
         switch username {
         case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .redirect))
-        case "nopassword@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userDoesNotHavePassword))
+        case "nopassword@contoso.com": delegate.onResetPasswordError(
+            error: ResetPasswordStartError(type: .userDoesNotHavePassword))
         case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
-        case "generalerror@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .generalError))
-        default: delegate.onCodeSent(state:
-                                        CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: username, codeLength: 4)
+        case "generalerror@contoso.com": delegate.onResetPasswordError(
+            error: ResetPasswordStartError(type: .generalError))
+        default: delegate.onCodeSent(newState:
+                                        ResetPasswordCodeSentState(
+                                            flowToken: "password_reset_token"),
+                                            displayName: username,
+                                            codeLength: 4)
         }
     }
 
