@@ -102,19 +102,21 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onError(error: SignUpStartError(type: .invalidUsername))
+            delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
             return
         }
         if let password = password, !inputValidator.isInputValid(password) {
-            delegate.onError(error: SignUpStartError(type: .passwordInvalid))
+            delegate.onSignUpError(error: SignUpStartError(type: .passwordInvalid))
             return
         }
         switch username {
-        case "exists@contoso.com": delegate.signUpFlowInterrupted(reason: .userAlreadyExists)
-        case "redirect@contoso.com": delegate.signUpFlowInterrupted(reason: .redirect)
-        case "invalidpassword@contoso.com": delegate.onError(error: SignUpStartError(type: .passwordInvalid))
-        case "invalidattributes@contoso.com": delegate.onError(error: SignUpStartError(type: .invalidAttributes))
-        case "generalerror@contoso.com": delegate.onError(error: SignUpStartError(type: .generalError))
+        case "exists@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .userAlreadyExists))
+        case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .redirect))
+        case "invalidpassword@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .passwordInvalid))
+        case "invalidemail@contoso.com": delegate.onSignUpError(error: SignUpStartError(type:
+                .invalidUsername, message: "email \(username) is invalid"))
+        case "invalidattributes@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidAttributes))
+        case "generalerror@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .generalError))
         default: delegate.onCodeSent(
             state: SignUpCodeSentState(flowToken: "signup_token"),
             displayName: username,
@@ -129,19 +131,19 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignInStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onError(error: SignInStartError(type: .invalidUsername))
+            delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
             return
         }
         if let password = password, !inputValidator.isInputValid(password) {
-            delegate.onError(error: SignInStartError(type: .passwordInvalid))
+            delegate.onSignInError(error: SignInStartError(type: .passwordInvalid))
             return
         }
         switch username {
-        case "notfound@contoso.com": delegate.signInFlowInterrupted(reason: .userNotFound)
-        case "redirect@contoso.com": delegate.signInFlowInterrupted(reason: .redirect)
-        case "invalidauth@contoso.com": delegate.signInFlowInterrupted(reason: .invalidAuthenticationType)
-        case "invalidpassword@contoso.com": delegate.onError(error: SignInStartError(type: .passwordInvalid))
-        case "generalerror@contoso.com": delegate.onError(error: SignInStartError(type: .generalError))
+        case "notfound@contoso.com": delegate.onSignInError(error: SignInStartError(type: .userNotFound))
+        case "redirect@contoso.com": delegate.onSignInError(error: SignInStartError(type: .redirect))
+        case "invalidauth@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidAuthenticationType))
+        case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .passwordInvalid))
+        case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
         case "oob@contoso.com": delegate.onCodeSent(
             state: SignInCodeSentState(flowToken: "credential_token"),
             displayName: username,
@@ -160,14 +162,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onError(error: ResetPasswordStartError(type: .invalidUsername))
+            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
             return
         }
         switch username {
-        case "redirect@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .redirect)
-        case "nopassword@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userDoesNotHavePassword)
-        case "notfound@contoso.com": delegate.resetPasswordFlowInterrupted(reason: .userNotFound)
-        case "generalerror@contoso.com": delegate.onError(error: ResetPasswordStartError(type: .generalError))
+        case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .redirect))
+        case "nopassword@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userDoesNotHavePassword))
+        case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
+        case "generalerror@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .generalError))
         default: delegate.onCodeSent(state:
                                         CodeSentResetPasswordState(flowToken: "password_reset_token"), displayName: username, codeLength: 4)
         }

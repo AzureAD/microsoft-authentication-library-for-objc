@@ -35,12 +35,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     private class SignInStartCompletionErrorDelegate: SignInStartDelegate {
         var expectedErrorType = SignInStartErrorType.invalidUsername
         
-        func signInFlowInterrupted(reason: MSAL.SignInStartFlowInterruptionReason) {
-            XCTFail()
-            expectation.fulfill()
-        }
-        
-        func onError(error: MSAL.SignInStartError) {
+        func onSignInError(error: MSAL.SignInStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
             expectation.fulfill()
         }
@@ -57,10 +52,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     }
     
     private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate {
-        
         var expectedErrorType = SignUpStartErrorType.invalidUsername
         
-        func onError(error: MSAL.SignUpStartError) {
+        func onSignUpError(error: MSAL.SignUpStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
             expectation.fulfill()
         }
@@ -79,21 +73,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             XCTFail()
             expectation.fulfill()
         }
-        
-        func signUpFlowInterrupted(reason: MSAL.SignUpStartFlowInterruptionReason) {
-            XCTFail()
-            expectation.fulfill()
-        }
     }
     
     private class ResetPasswordStartCompletionErrorDelegate: ResetPasswordStartDelegate {
-                
-        func resetPasswordFlowInterrupted(reason: MSAL.ResetPasswordStartFlowInterruptionReason) {
-            XCTFail()
-            expectation.fulfill()
-        }
-        
-        func onError(error: MSAL.ResetPasswordStartError) {
+        func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
             XCTAssertEqual(error.type, ResetPasswordStartErrorType.invalidUsername)
             expectation.fulfill()
         }

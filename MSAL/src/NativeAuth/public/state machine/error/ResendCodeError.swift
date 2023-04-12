@@ -24,9 +24,9 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class ResendCodeError: MSALNativeBaseError {
-    public let type: ResendCodeErrorType
+    @objc public let type: ResendCodeErrorType
 
     init(type: ResendCodeErrorType, message: String? = nil) {
         self.type = type

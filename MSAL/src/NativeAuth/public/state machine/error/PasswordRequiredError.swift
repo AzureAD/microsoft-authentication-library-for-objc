@@ -24,9 +24,9 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class PasswordRequiredError: MSALNativeBaseError {
-    public let type: PasswordRequiredErrorType
+    @objc public let type: PasswordRequiredErrorType
 
     init(type: PasswordRequiredErrorType, message: String? = nil) {
         self.type = type
@@ -36,6 +36,7 @@ public class PasswordRequiredError: MSALNativeBaseError {
 
 @objc
 public enum PasswordRequiredErrorType: Int {
+    case redirect
     case generalError
     case invalidPassword
 }

@@ -24,11 +24,11 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class SignUpCodeSentState: MSALNativeAuthBaseState {
     public func resendCode(delegate: ResendCodeSignUpDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
+            delegate.onResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), state: self)
         } else {
             delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
@@ -36,10 +36,9 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
 
     public func submitCode(code: String, delegate: VerifyCodeSignUpDelegate, correlationId: UUID? = nil) {
         switch code {
-        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
-        case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onError(error: VerifyCodeError(type: .codeVerificationPending), state: self)
-        case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
+        case "0000": delegate.onVerifyCodeError(error: VerifyCodeError(type: .invalidCode), state: self)
+        case "2222": delegate.onVerifyCodeError(error: VerifyCodeError(type: .generalError), state: self)
+        case "3333": delegate.onVerifyCodeError(error: VerifyCodeError(type: .redirect), state: nil)
         case "5555": delegate.passwordRequired(state: SignUpPasswordRequiredState(flowToken: flowToken))
         case "6666": delegate.attributesRequired(state: SignUpAttributesRequiredState(flowToken: flowToken))
         default: delegate.completed()
@@ -47,13 +46,13 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
     }
 }
 
-@objc
+@objcMembers
 public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: PasswordRequiredSignUpDelegate, correlationId: UUID? = nil) {
         switch password {
-        case "redirect": delegate.passwordRequiredFlowInterrupted(reason: .redirect)
-        case "generalerror": delegate.onError(error: PasswordRequiredError(type: .generalError), state: self)
-        case "invalid": delegate.onError(error: PasswordRequiredError(type: .invalidPassword), state: self)
+        case "redirect": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .redirect), state: nil)
+        case "generalerror": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .generalError), state: self)
+        case "invalid": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), state: self)
         case "attributesRequired": delegate.attributesRequired(state:
                                                                 SignUpAttributesRequiredState(flowToken: flowToken)
         )
@@ -62,19 +61,25 @@ public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
     }
 }
 
-@objc
+@objcMembers
 public class SignUpAttributesRequiredState: MSALNativeAuthBaseState {
     public func submitAttributes(
         attributes: [String: Any],
-        delegate: AttributeRequiredSignUpDelegate,
+        delegate: AttributesRequiredSignUpDelegate,
         correlationId: UUID? = nil) {
             guard let key = attributes.keys.first else {
-                delegate.onError(error: AttributesRequiredError(type: .invalidAttributes), state: self)
+                delegate.onAttributesRequiredError(
+                    error: AttributesRequiredError(type: .invalidAttributes),
+                    state: self)
                 return
             }
             switch key {
-            case "general": delegate.onError(error: AttributesRequiredError(type: .generalError), state: self)
-            case "redirect": delegate.attributeRequiredFlowInterrupted(reason: .redirect)
+            case "general": delegate.onAttributesRequiredError(
+                error: AttributesRequiredError(type: .generalError),
+                state: self)
+            case "redirect": delegate.onAttributesRequiredError(
+                error: AttributesRequiredError(type: .redirect),
+                state: nil)
             default: delegate.completed()
             }
     }

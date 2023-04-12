@@ -24,7 +24,7 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class MSALNativeAuthBaseState: NSObject {
     let flowToken: String
 

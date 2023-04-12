@@ -24,9 +24,9 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class ResetPasswordStartError: MSALNativeBaseError {
-    let type: ResetPasswordStartErrorType
+    @objc public let type: ResetPasswordStartErrorType
 
     init(type: ResetPasswordStartErrorType, message: String? = nil) {
         self.type = type
@@ -36,6 +36,9 @@ public class ResetPasswordStartError: MSALNativeBaseError {
 
 @objc
 public enum ResetPasswordStartErrorType: Int {
+    case redirect
+    case userDoesNotHavePassword
+    case userNotFound
     case generalError
     case invalidUsername
 }

@@ -24,9 +24,9 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class AttributesRequiredError: MSALNativeBaseError {
-    let type: AttributesRequiredErrorType
+    @objc public let type: AttributesRequiredErrorType
 
     init(type: AttributesRequiredErrorType, message: String? = nil) {
         self.type = type
@@ -36,6 +36,7 @@ public class AttributesRequiredError: MSALNativeBaseError {
 
 @objc
 public enum AttributesRequiredErrorType: Int {
+    case redirect
     case generalError
     case invalidAttributes
 }

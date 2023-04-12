@@ -24,11 +24,11 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
     public func resendCode(delegate: ResendCodeResetPasswordDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
+            delegate.onResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), state: self)
         } else {
             delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
@@ -36,25 +36,24 @@ public class CodeSentResetPasswordState: MSALNativeAuthBaseState {
 
     public func verifyCode(code: String, delegate: VerifyCodeResetPasswordDelegate, correlationId: UUID? = nil) {
         switch code {
-        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
-        case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onError(error: VerifyCodeError(type: .codeVerificationPending), state: self)
-        case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
+        case "0000": delegate.onVerifyCodeError(error: VerifyCodeError(type: .invalidCode), state: self)
+        case "2222": delegate.onVerifyCodeError(error: VerifyCodeError(type: .generalError), state: self)
+        case "3333": delegate.onVerifyCodeError(error: VerifyCodeError(type: .redirect), state: nil)
         default: delegate.passwordRequired(state: PasswordRequiredResetPasswordState(flowToken: flowToken))
         }
     }
 }
 
-@objc
+@objcMembers
 public class PasswordRequiredResetPasswordState: MSALNativeAuthBaseState {
     public func submitPassword(
         password: String,
         delegate: PasswordRequiredResetPasswordDelegate,
         correlationId: UUID? = nil) {
             switch password {
-            case "redirect": delegate.passwordRequiredFlowInterrupted(reason: .redirect)
-            case "generalerror": delegate.onError(error: PasswordRequiredError(type: .generalError), state: self)
-            case "invalid": delegate.onError(error: PasswordRequiredError(type: .invalidPassword), state: self)
+            case "redirect": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .redirect), state: nil)
+            case "generalerror": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .generalError), state: self)
+            case "invalid": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), state: self)
             default: delegate.completed()
             }
     }

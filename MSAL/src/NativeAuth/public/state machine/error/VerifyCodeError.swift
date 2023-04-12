@@ -24,9 +24,9 @@
 
 import Foundation
 
-@objcMembers
+@objc
 public class VerifyCodeError: MSALNativeBaseError {
-    public let type: VerifyCodeErrorType
+    @objc public let type: VerifyCodeErrorType
 
     init(type: VerifyCodeErrorType, message: String? = nil) {
         self.type = type
@@ -36,7 +36,7 @@ public class VerifyCodeError: MSALNativeBaseError {
 
 @objc
 public enum VerifyCodeErrorType: Int {
+    case redirect
     case generalError
     case invalidCode
-    case codeVerificationPending
 }

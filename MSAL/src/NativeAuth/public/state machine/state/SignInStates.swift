@@ -29,7 +29,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
 
     public func resendCode(delegate: ResendCodeSignInDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onError(error: ResendCodeError(type: .accountTemporarilyLocked))
+            delegate.onResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), state: self)
         } else {
             delegate.onCodeSent(state: self, displayName: "email@contoso.com", codeLength: 4)
         }
@@ -37,10 +37,9 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
 
     public func submitCode(code: String, delegate: VerifyCodeSignInDelegate, correlationId: UUID? = nil) {
         switch code {
-        case "0000": delegate.onError(error: VerifyCodeError(type: .invalidCode), state: self)
-        case "2222": delegate.onError(error: VerifyCodeError(type: .generalError), state: self)
-        case "3333": delegate.onError(error: VerifyCodeError(type: .codeVerificationPending), state: self)
-        case "4444": delegate.verifyCodeFlowInterrupted(reason: .redirect)
+        case "0000": delegate.onVerifyCodeError(error: VerifyCodeError(type: .invalidCode), state: self)
+        case "2222": delegate.onVerifyCodeError(error: VerifyCodeError(type: .generalError), state: self)
+        case "3333": delegate.onVerifyCodeError(error: VerifyCodeError(type: .redirect), state: nil)
         default: delegate.completed(result:
                                         MSALNativeAuthUserAccount(
                                             username: "email@contoso.com",
