@@ -172,6 +172,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
+    
+    /**
+    The server error happens when server returns server_error
+     */
+    MSALErrorServerError                         = -50006,
 };
 
 /**
