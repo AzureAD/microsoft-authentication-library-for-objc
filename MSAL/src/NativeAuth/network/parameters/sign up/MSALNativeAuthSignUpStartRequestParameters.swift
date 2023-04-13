@@ -31,6 +31,6 @@ struct MSALNativeAuthSignUpStartRequestParameters: MSALNativeAuthRequestable {
     let username: String
     let password: String?
     let attributes: String?
-    let challengeTypes: [MSALNativeAuthChallengeType]
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]
     let context: MSIDRequestContext
 }

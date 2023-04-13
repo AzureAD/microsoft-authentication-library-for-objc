@@ -28,7 +28,7 @@ struct MSALNativeAuthSignInInitiateResponse: Decodable {
 
     // MARK: - Variables
     let credentialToken: String?
-    let challengeType: MSALNativeAuthChallengeType?
+    let challengeType: MSALNativeAuthInternalChallengeType?
 
     enum CodingKeys: String, CodingKey {
         case credentialToken
@@ -38,7 +38,8 @@ struct MSALNativeAuthSignInInitiateResponse: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decodeIfPresent(MSALNativeAuthChallengeType.self, forKey: .challengeType)
+        self.challengeType = try container.decodeIfPresent(
+            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
         if self.credentialToken == nil && self.challengeType == nil {
             throw MSALNativeAuthError.responseSerializationError
         }

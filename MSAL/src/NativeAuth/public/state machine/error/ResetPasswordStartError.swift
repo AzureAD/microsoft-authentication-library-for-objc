@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,13 +24,21 @@
 
 import Foundation
 
-protocol MSALNativeAuthInputValidating {
-    func isEmailValid(_ email: String) -> Bool
+@objc
+public class ResetPasswordStartError: MSALNativeAuthBaseError {
+    @objc public let type: ResetPasswordStartErrorType
+
+    init(type: ResetPasswordStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
 }
 
-final class MSALNativeAuthInputValidator: MSALNativeAuthInputValidating {
-    func isEmailValid(_ email: String) -> Bool {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        return NSPredicate(format: "SELF MATCHES %@", emailRegEx).evaluate(with: email)
-    }
+@objc
+public enum ResetPasswordStartErrorType: Int {
+    case redirect
+    case generalError
+    case userDoesNotHavePassword
+    case userNotFound
+    case invalidUsername
 }

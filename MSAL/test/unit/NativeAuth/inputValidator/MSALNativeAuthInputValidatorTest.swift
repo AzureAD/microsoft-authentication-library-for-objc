@@ -30,41 +30,13 @@ final class MSALNativeAuthInputValidatorTest: XCTestCase {
     
     private let validator = MSALNativeAuthInputValidator()
     
-    func testEmail_whenValidEmailIsUsed_resultShouldBeValid() {
-        XCTAssertTrue(validator.isEmailValid("email@contoso.com"))
-        XCTAssertTrue(validator.isEmailValid("t@e.st"))
-        XCTAssertTrue(validator.isEmailValid("loremipsumdolorsitametconsecteturadipiscingelitseddoeiusmodtemporincididuntutlaboreetdoloremagnaaliqua@e.st"))
-        XCTAssertTrue(validator.isEmailValid("--@contoso.com"))
-        XCTAssertTrue(validator.isEmailValid("firstname.lastname@microsoft.com"))
-        XCTAssertTrue(validator.isEmailValid("email@microsoft.co.uk"))
-        XCTAssertTrue(validator.isEmailValid("email@microsoft.museum"))
-        XCTAssertTrue(validator.isEmailValid("firstname-lastname@microsoft.com"))
-        XCTAssertTrue(validator.isEmailValid("email@microsoft-one.com"))
-        XCTAssertTrue(validator.isEmailValid("1234567890@microsoft.com"))
-        XCTAssertTrue(validator.isEmailValid("firstname+lastname@microsoft.com"))
-        XCTAssertTrue(validator.isEmailValid("email@microsoft.contoso.com"))
-        XCTAssertTrue(validator.isEmailValid("email@123.com"))
-        XCTAssertTrue(validator.isEmailValid("_______@contoso.com"))
+    func testInput_whenValidInputIsUsed_resultShouldBeValid() {
+        XCTAssertTrue(validator.isInputValid("email@contoso.com"))
+        XCTAssertTrue(validator.isInputValid("password"))
+        XCTAssertTrue(validator.isInputValid("1"))
     }
     
-    func testEmail_whenInvalidEmailIsUsed_resultShouldBeInvalid() {
-        XCTAssertFalse(validator.isEmailValid("email@.com"))
-        XCTAssertFalse(validator.isEmailValid("t@e"))
-        XCTAssertFalse(validator.isEmailValid("example@micorosoft.loremipsumdolorsitametconsecteturadipiscingelitseddoeiusmodtemporincididuntutlaboreetdol"))
-        XCTAssertFalse(validator.isEmailValid("contoso.com"))
-        XCTAssertFalse(validator.isEmailValid("firstname.lastname@microsoft!.com"))
-        XCTAssertFalse(validator.isEmailValid("email@contoso@microsoft.com"))
-        XCTAssertFalse(validator.isEmailValid("email.contoso.com"))
-        XCTAssertFalse(validator.isEmailValid("#@%^%#$@#$@#.com"))
-        XCTAssertFalse(validator.isEmailValid("microsoft"))
-        XCTAssertFalse(validator.isEmailValid("abc.def@microsoft#contoso.com"))
-        XCTAssertFalse(validator.isEmailValid("あいうえお@microsoft.com"))
-        XCTAssertFalse(validator.isEmailValid("abc.def@contoso.c"))
-        XCTAssertFalse(validator.isEmailValid("ema il@123.com"))
-        XCTAssertFalse(validator.isEmailValid("email@111.222.333.44444"))
-        XCTAssertFalse(validator.isEmailValid("abc#def@contoso.com"))
-        XCTAssertFalse(validator.isEmailValid("email@contoso.com (Joe Smith)"))
-        XCTAssertFalse(validator.isEmailValid("Joe Smith <email@contoso.com>"))
-        XCTAssertFalse(validator.isEmailValid("@contoso.com"))
+    func testInput_whenInvalidInputIsUsed_resultShouldBeInvalid() {
+        XCTAssertFalse(validator.isInputValid(""))
     }
 }
