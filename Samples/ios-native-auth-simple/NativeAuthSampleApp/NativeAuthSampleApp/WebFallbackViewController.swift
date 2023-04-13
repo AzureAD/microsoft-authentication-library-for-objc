@@ -51,7 +51,8 @@ class WebFallbackViewController: UIViewController {
             configuration: MSALPublicClientApplicationConfig(
                 clientId: kClientId,
                 redirectUri: nil,
-                authority: authority))
+                authority: authority),
+                challengeTypes: [.oob, .password])
 
         webviewParams = MSALWebviewParameters(authPresentationViewController: self)
     }

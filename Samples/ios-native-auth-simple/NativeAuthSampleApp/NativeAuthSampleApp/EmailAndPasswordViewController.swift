@@ -53,7 +53,8 @@ class EmailAndPasswordViewController: UIViewController {
             configuration: MSALPublicClientApplicationConfig(
                 clientId: kClientId,
                 redirectUri: nil,
-                authority: authority))
+                authority: authority),
+                challengeTypes: [.oob, .password])
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -67,6 +68,8 @@ class EmailAndPasswordViewController: UIViewController {
             resultTextView.text = "email or password not set"
             return
         }
+
+        print("Signing in with email \(email) and password \(password)")
     }
 
     @IBAction func signInTapped(_ sender: Any) {
@@ -74,6 +77,8 @@ class EmailAndPasswordViewController: UIViewController {
             resultTextView.text = "email or password not set"
             return
         }
+
+        print("Signing up with email \(email) and password \(password)")
 
         showOTPModal(submittedCallback: { [self] otp in
             showResultText("Submitted OTP: \(otp)")
