@@ -36,7 +36,14 @@ protocol MSALNativeAuthRequestSignInProviding {
     ) throws -> MSALNativeAuthSignInChallengeRequest
 
     func signInTokenRequest(
-        parameters: MSALNativeAuthSignInTokenRequestParameters,
+        username: String?,
+        credentialToken: String?,
+        signInSLT: String?,
+        grantType: MSALNativeAuthGrantType,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
+        scopes: [String],
+        password: String?,
+        oobCode: String?,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInTokenRequest
 }
@@ -106,11 +113,8 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
 
     // MARK: - SignIn Token
 
-    func signInTokenRequest(
-        parameters: MSALNativeAuthSignInTokenRequestParameters,
-        context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignInTokenRequest {
-
+    func signInTokenRequest(username: String?, credentialToken: String?, signInSLT: String?, grantType: MSALNativeAuthGrantType, challengeTypes: [MSALNativeAuthInternalChallengeType]?, scopes: [String], password: String?, oobCode: String?, context: MSIDRequestContext) throws -> MSALNativeAuthSignInTokenRequest {
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config, context: context, username: username, credentialToken: nil, signInSLT: signInSLT, grantType: grantType, challengeTypes: challengeTypes, scope: formatScope(scopes), password: password, oobCode: oobCode)
         let request = try MSALNativeAuthSignInTokenRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
@@ -125,5 +129,9 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
         )
 
         return request
+    }
+    
+    private func formatScope(_ scope: [String]) -> String {
+        return scope.joined(separator: ",")
     }
 }

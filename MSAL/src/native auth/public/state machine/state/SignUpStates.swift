@@ -27,9 +27,9 @@ import Foundation
 @objcMembers
 public class SignUpCodeSentState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
-        guard isActive else {
-            delegate.onSignUpResendCodeError(error: ResendCodeError(type: .generalError), newState: nil)
-        }
+//        guard isActive else {
+//            delegate.onSignUpResendCodeError(error: ResendCodeError(type: .generalError), newState: nil)
+//        }
         if correlationId != nil {
             delegate.onSignUpResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
         } else {

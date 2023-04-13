@@ -25,9 +25,15 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
+    
+    // TODO: add ad-hoc method for OTP and pwd?
     func signIn(
-        parameters: MSALNativeAuthSignInParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
+        username: String,
+        password: String?,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?,
+        delegate: SignInStartDelegate
     )
 }
 
@@ -35,14 +41,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Variables
 
-    private let requestProvider: MSALNativeAuthRequestProviding
+    private let requestProvider: MSALNativeAuthSignInRequestProvider
     private let factory: MSALNativeAuthResultBuildable
 
     // MARK: - Init
 
     init(
         clientId: String,
-        requestProvider: MSALNativeAuthRequestProviding,
+        requestProvider: MSALNativeAuthSignInRequestProvider,
         cacheAccessor: MSALNativeAuthCacheInterface,
         responseHandler: MSALNativeAuthResponseHandling,
         context: MSIDRequestContext,
@@ -62,7 +68,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
         self.init(
             clientId: config.clientId,
-            requestProvider: MSALNativeAuthRequestProvider(config: config),
+            requestProvider: MSALNativeAuthSignInRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             responseHandler: MSALNativeAuthResponseHandler(),
             context: context,
@@ -71,67 +77,69 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     }
 
     // MARK: - Internal
-
-    func signIn(
-        parameters: MSALNativeAuthSignInParameters,
-        completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
-    ) {
+    
+    func signIn(username: String, password: String?, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
+        // start telemetry ?
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignIn // TODO: Update local telemetry event id to differentiate sign-in with password and otp
+            telemetryApiId: .telemetryApiIdSignIn // TODO: Add signIn token
         )
         startTelemetryEvent(telemetryEvent)
 
-        guard let request = createRequest(with: parameters) else {
-            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, completion: completion)
+        guard let request = createTokenRequest(username: username, password: password, challengeTypes: challengeTypes, scopes: scopes) else {
+
+            stopTelemetryEvent(telemetryEvent, error: MSALNativeAuthError.invalidRequest)
+            delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
 
-        performRequest(request) { [self] result in
-
-            switch result {
-            case .success(let tokenResponse):
-                let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
-
-                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
-                    return
-                }
-
-                telemetryEvent?.setUserInformation(tokenResult.account)
-
-                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
-
-                let response = factory.makeNativeAuthResponse(
-                    stage: .completed,
-                    credentialToken: nil,
-                    tokenResult: tokenResult
-                )
-
-                complete(telemetryEvent, response: response, completion: completion)
-
-            case .failure(let error):
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "SignIn request error: \(error)"
-                )
-
-                complete(telemetryEvent, error: error, completion: completion)
-            }
-        }
+//        performRequest(request) { [self] result in
+//
+//            switch result {
+//            case .success(let tokenResponse):
+//                let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
+//
+//                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
+//                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
+//                    return
+//                }
+//
+//                telemetryEvent?.setUserInformation(tokenResult.account)
+//
+//                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
+//
+//                let response = factory.makeNativeAuthResponse(
+//                    stage: .completed,
+//                    credentialToken: nil,
+//                    tokenResult: tokenResult
+//                )
+//
+//                complete(telemetryEvent, response: response, completion: completion)
+//
+//            case .failure(let error):
+//                MSALLogger.log(
+//                    level: .error,
+//                    context: context,
+//                    format: "SignIn request error: \(error)"
+//                )
+//
+//                complete(telemetryEvent, error: error, completion: completion)
+//            }
+//        }
+        
     }
 
     // MARK: - Private
 
-    private func createRequest(with parameters: MSALNativeAuthSignInParameters) -> MSALNativeAuthSignInRequest? {
+    private func createTokenRequest(username: String,
+                                    password: String?,
+                                    challengeTypes: [MSALNativeAuthInternalChallengeType],
+                                    scopes: [String]?) -> MSALNativeAuthSignInTokenRequest? {
+        // TODO: do we need SDK default scope or we can omit it from the request?
         do {
-            return try requestProvider.signInRequest(
-                parameters: parameters,
-                context: context
-            )
+            return try requestProvider.signInTokenRequest(username: username, credentialToken: nil, signInSLT: nil, grantType: .password, challengeTypes: challengeTypes, scopes: scopes ?? [""], password: password, oobCode: nil, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Request: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil
         }
     }
