@@ -30,387 +30,142 @@ import XCTest
 
 final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
-    private static let credentialToken = "token"
-    private static let authenticationResult = MSALNativeAuthenticationResult(accessToken: "access", idToken: "id", scopes: ["user.read"], expiresOn: Date(), tenantId: "tenant")
+    private static var expectation = XCTestExpectation()
     
-    private class MSALNativeAuthInputValidatorStub: MSALNativeAuthInputValidating {
-        var expectedResult = false
+    private class SignInStartCompletionErrorDelegate: SignInStartDelegate, SignInOTPStartDelegate {
+        var expectedErrorType = SignInStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignInOTPStartErrorType.invalidUsername
         
-        func isEmailValid(_ email: String) -> Bool {
-            return expectedResult
+        func onSignInError(error: MSAL.SignInStartError) {
+            XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
+        }
+        
+        func onSignInOTPError(error: MSAL.SignInOTPStartError) {
+            XCTAssertEqual(error.type, expectedOTPErrorType)
+            expectation.fulfill()
+        }
+        
+        func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
+        }
+        
+        func onSignInOTPCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            onSignInCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
+        }
+        
+        func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+            XCTFail()
+            expectation.fulfill()
         }
     }
-
-    private class MSALNativeAuthRequestControllerFactoryCustomSuccess: MSALNativeAuthRequestControllerFactoryFail {
-        private class MSALNativeAuthSignUpControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignUpControlling {
-            func signUp(parameters: MSAL.MSALNativeAuthSignUpParameters, completion: @escaping (MSAL.MSALNativeAuthResponse?, Error?) -> Void) {
-                completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
-            }
+    
+    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate, SignUpOTPStartDelegate {
+        var expectedErrorType = SignUpStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignUpOTPStartErrorType.invalidUsername
+        
+        func onSignUpError(error: MSAL.SignUpStartError) {
+            XCTAssertEqual(error.type, expectedErrorType)
+            expectation.fulfill()
         }
-
-        private class MSALNativeAuthSignUpOTPControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignUpOTPControlling {
-            func signUp(parameters: MSALNativeAuthSignUpOTPParameters, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
-                completion(MSALNativeAuthResponse(stage: .verificationRequired, credentialToken: credentialToken, authentication: nil), nil)
-            }
+        
+        func onSignUpOTPError(error: MSAL.SignUpOTPStartError) {
+            XCTAssertEqual(error.type, expectedOTPErrorType)
+            expectation.fulfill()
         }
-
-        private class MSALNativeAuthSignInControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
-            func signIn(parameters: MSALNativeAuthSignInParameters, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
-                completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
-            }
+        
+        func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
         }
-
-        private class MSALNativeAuthSignInOTPControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthSignInOTPControlling {
-            func signIn(parameters: MSALNativeAuthSignInOTPParameters, completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void) {
-                completion(MSALNativeAuthResponse(stage: .verificationRequired, credentialToken: credentialToken, authentication: nil), nil)
-            }
+        
+        func onSignUpOTPCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+            onSignUpCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
         }
-
-        private class MSALNativeAuthResendCodeControllerCustomSuccess: MSALNativeAuthResendCodeControlling {
-            func resendCode(parameters: MSAL.MSALNativeAuthResendCodeParameters, completion: @escaping (String?, Error?) -> Void) {
-                completion(credentialToken, nil)            }
+        
+        func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
         }
-
-        private class MSALNativeAuthVerifyCodeControllerCustomSuccess: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControlling {
-            func verifyCode(parameters: MSAL.MSALNativeAuthVerifyCodeParameters, completion: @escaping (MSAL.MSALNativeAuthResponse?, Error?) -> Void) {
-                completion(MSALNativeAuthResponse(stage: .completed, credentialToken: credentialToken, authentication: authenticationResult), nil)
-            }
+        
+        func completed(result: MSAL.MSALNativeAuthUserAccount) {
+            XCTFail()
+            expectation.fulfill()
         }
-
-        override func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
-            return MSALNativeAuthSignUpControllerCustomSuccess(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: MSALNativeAuthResponseHandlerMock(),
-                cacheAccessor: MSALNativeAuthCacheAccessorMock()
-            )
+    }
+    
+    private class ResetPasswordStartCompletionErrorDelegate: ResetPasswordStartDelegate {
+        func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
+            XCTAssertEqual(error.type, ResetPasswordStartErrorType.invalidUsername)
+            expectation.fulfill()
         }
-
-        override func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling {
-            return MSALNativeAuthSignUpOTPControllerCustomSuccess(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: MSALNativeAuthResponseHandlerMock(),
-                cacheAccessor: MSALNativeAuthCacheAccessorMock()
-            )
+        
+        func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail()
+            expectation.fulfill()
         }
-
-        override func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
-            return MSALNativeAuthSignInControllerCustomSuccess(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: MSALNativeAuthResponseHandlerMock(),
-                cacheAccessor: MSALNativeAuthCacheAccessorMock()
-            )
-        }
-
-        override func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling {
-            return MSALNativeAuthSignInOTPControllerCustomSuccess(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: MSALNativeAuthResponseHandlerMock(),
-                cacheAccessor: MSALNativeAuthCacheAccessorMock()
-            )
-        }
-
-        override func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {
-            return MSALNativeAuthResendCodeControllerCustomSuccess()
-        }
-
-        override func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling {
-            return MSALNativeAuthVerifyCodeControllerCustomSuccess(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: MSALNativeAuthResponseHandlerMock(),
-                cacheAccessor: MSALNativeAuthCacheAccessorMock()
-            )
-        }
+        
     }
 
     func testInit_whenPassingB2CAuthority_itShouldThrowError() throws {
         let b2cAuthority = try MSALB2CAuthority(url: .init(string: "https://login.contoso.com")!)
         let configuration = MSALPublicClientApplicationConfig(clientId: DEFAULT_TEST_CLIENT_ID, redirectUri: nil, authority: b2cAuthority)
 
-        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration))
+        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration, challengeTypes: [.password]))
     }
     
-    func testSignUp_whenValidationFails_shouldReturnAnError() {
-        let expectation = XCTestExpectation()
-        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
-        application.signUp(parameters: MSALNativeAuthSignUpParameters(email: "", password: "")) { response, error in
-            XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
-            XCTAssertNil(response)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 1)
+    func testSignIn_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "", password: "", delegate: SignInStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
     
-    func testSignUp_whenControllerReturnAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(), inputValidator: validator)
-        application.signUp(parameters: MSALNativeAuthSignUpParameters(email: "", password: "")) { response, error in
-            XCTAssertEqual(response?.stage, .completed)
-            XCTAssertEqual(response?.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 1)
+    func testSignIn_whenInvalidPasswordUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let delegate = SignInStartCompletionErrorDelegate()
+        delegate.expectedErrorType = .invalidPassword
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "correct", password: "", delegate: delegate)
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func test_signUp_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.signUp(parameters: .init(email: "", password: ""))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response.stage, .completed)
-            XCTAssertEqual(response.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
+    
+    func testSignInOTP_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signIn(username: "", delegate: SignInStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func testSignUpOTP_whenValidationFails_shouldReturnAnError() {
-        let expectation = XCTestExpectation()
-        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
-        application.signUp(otpParameters: MSALNativeAuthSignUpOTPParameters(email: "")) { response, error in
-            XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
-            XCTAssertNil(response)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 1)
+    
+    func testSignUp_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "", password: "", delegate: SignUpStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func test_signUpOTP_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        application.signUp(otpParameters: .init(email: "")) { response, error in
-            XCTAssertEqual(response?.stage, .verificationRequired)
-            XCTAssertNil(response?.authentication)
-            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
+    
+    func testSignUp_whenInvalidPasswordUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let delegate = SignUpStartCompletionErrorDelegate()
+        delegate.expectedErrorType = .invalidPassword
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "correct", password: "", delegate: delegate)
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func test_signUpOTP_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.signUp(parameters: .init(email: "", attributes: [String : Any]()))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response.stage, .verificationRequired)
-            XCTAssertNil(response.authentication)
-            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
+    
+    func testSignUpOTP_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.signUp(username: "", delegate: SignUpStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func testSignIn_whenValidationFails_shouldReturnAnError() {
-        let expectation = XCTestExpectation()
-        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidatorStub())
-        application.signIn(parameters: MSALNativeAuthSignInParameters(email: "", password: "")) { response, error in
-            XCTAssertEqual(error?.localizedDescription, MSALNativeAuthError.invalidInput.localizedDescription)
-            XCTAssertNil(response)
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 1)
+    
+    func testResetPassword_whenInvalidUsernameUsed_shouldReturnCorrectError() {
+        MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
+        let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator())
+        application.resetPassword(username: "", delegate: ResetPasswordStartCompletionErrorDelegate())
+        wait(for: [MSALNativeAuthPublicClientApplicationTest.expectation], timeout: 1)
     }
-
-    func test_signIn_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        application.signIn(parameters: .init(email: "", password: "")) { response, error in
-            XCTAssertEqual(response?.stage, .completed)
-            XCTAssertEqual(response?.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
-    }
-
-    func test_signIn_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.signIn(parameters: .init(email: "", password: ""))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response.stage, .completed)
-            XCTAssertEqual(response.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
-    }
-
-    func test_signInOTP_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        application.signIn(otpParameters: .init(email: "")) { response, error in
-            XCTAssertEqual(response?.stage, .verificationRequired)
-            XCTAssertNil(response?.authentication)
-            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
-    }
-
-    func test_signInOTP_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.signIn(otpParameters: .init(email: ""))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response.stage, .verificationRequired)
-            XCTAssertNil(response.authentication)
-            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
-    }
-
-    func test_resendCode_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        application.resendCode(parameters: .init(credentialToken: "")) { response, error in
-            XCTAssertEqual(response, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
-    }
-
-    func test_resendCode_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.resendCode(parameters: .init(credentialToken: ""))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
-    }
-
-    func test_verifyCode_whenControllerReturnsAResult_ApplicationShouldMatchResult() {
-        let expectation = XCTestExpectation()
-
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        application.verifyCode(parameters: .init(credentialToken: "", otp: "")) { response, error in
-            XCTAssertEqual(response?.stage, .completed)
-            XCTAssertEqual(response?.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response?.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-            XCTAssertNil(error)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1)
-    }
-
-    func test_verifyCode_AsyncAwait_whenControllerReturnsAResult_ApplicationShouldMatchResult() async {
-        let validator = MSALNativeAuthInputValidatorStub()
-        validator.expectedResult = true
-
-        let application = MSALNativeAuthPublicClientApplication(
-            controllerFactory: MSALNativeAuthRequestControllerFactoryCustomSuccess(),
-            inputValidator: validator
-        )
-
-        let result = await application.verifyCode(parameters: .init(credentialToken: "", otp:""))
-
-        switch result {
-        case .success(let response):
-            XCTAssertEqual(response.stage, .completed)
-            XCTAssertEqual(response.authentication, MSALNativeAuthPublicClientApplicationTest.authenticationResult)
-            XCTAssertEqual(response.credentialToken, MSALNativeAuthPublicClientApplicationTest.credentialToken)
-        case .failure(let error):
-            XCTFail("Should not reach here: \(error)")
-        }
-    }
+    
 }

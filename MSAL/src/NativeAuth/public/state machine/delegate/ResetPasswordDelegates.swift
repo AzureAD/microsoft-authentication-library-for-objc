@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,7 +24,26 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpStartResponse: Decodable {
-    let signupToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
+@objc
+public protocol ResetPasswordStartDelegate {
+    func onResetPasswordError(error: ResetPasswordStartError)
+    func onResetPasswordCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+}
+
+@objc
+public protocol ResetPasswordVerifyCodeDelegate {
+    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeSentState?)
+    func onPasswordRequired(newState: ResetPasswordRequiredState)
+}
+
+@objc
+public protocol ResetPasswordResendCodeDelegate {
+    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState)
+    func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+}
+
+@objc
+public protocol ResetPasswordRequiredDelegate {
+    func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    func onResetPasswordCompleted()
 }

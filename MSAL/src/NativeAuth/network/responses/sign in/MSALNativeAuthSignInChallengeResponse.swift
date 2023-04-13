@@ -28,7 +28,7 @@ struct MSALNativeAuthSignInChallengeResponse: Decodable {
 
     // MARK: - Variables
     let credentialToken: String?
-    let challengeType: MSALNativeAuthChallengeType
+    let challengeType: MSALNativeAuthInternalChallengeType
     let bindingMethod: String?
     let displayName: String?
     let displayType: String?

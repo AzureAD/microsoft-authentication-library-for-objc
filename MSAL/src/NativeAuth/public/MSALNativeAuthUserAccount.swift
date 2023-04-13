@@ -25,11 +25,13 @@
 @objc
 public final class MSALNativeAuthUserAccount: NSObject {
 
-    @objc public let email: String
+    @objc public let username: String
+    @objc public let accessToken: String
     @objc public let attributes: [String: Any]
 
-    init(email: String, attributes: [String: Any] = [:]) {
-        self.email = email
+    init(username: String, accessToken: String, attributes: [String: Any] = [:]) {
+        self.username = username
+        self.accessToken = accessToken
         self.attributes = attributes
     }
 }

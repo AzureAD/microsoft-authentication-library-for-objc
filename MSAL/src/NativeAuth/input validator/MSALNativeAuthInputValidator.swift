@@ -24,7 +24,12 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpStartResponse: Decodable {
-    let signupToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
+protocol MSALNativeAuthInputValidating {
+    func isInputValid(_ input: String) -> Bool
+}
+
+final class MSALNativeAuthInputValidator: MSALNativeAuthInputValidating {
+    func isInputValid(_ input: String) -> Bool {
+        return !input.isEmpty
+    }
 }

@@ -16,15 +16,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthChallengeType: String, Decodable {
-    case oob
-    case password
-    case otp
+import Foundation
+
+@objc
+public class SignInOTPStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignInOTPStartErrorType
+
+    init(type: SignInOTPStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
+}
+
+@objc
+public enum SignInOTPStartErrorType: Int {
     case redirect
+    case userNotFound
+    case invalidAuthenticationType
+    case invalidUsername
+    case generalError
 }

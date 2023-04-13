@@ -29,6 +29,6 @@ struct MSALNativeAuthSignUpChallengeRequestParameters: MSALNativeAuthRequestable
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signUpChallenge
     let signUpToken: String
-    let challengeTypes: [MSALNativeAuthChallengeType]
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]
     let context: MSIDRequestContext
 }

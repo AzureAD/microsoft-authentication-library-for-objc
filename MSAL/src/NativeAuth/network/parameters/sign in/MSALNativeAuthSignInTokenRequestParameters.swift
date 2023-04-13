@@ -34,7 +34,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let credentialToken: String?
     let signInSLT: String?
     let grantType: MSALNativeAuthGrantType
-    let challengeTypes: [MSALNativeAuthChallengeType]?
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
     let scope: String?
     let password: String?
     let oobCode: String?
