@@ -188,7 +188,7 @@
     NSInteger errorCode = MSALErrorUserCanceled;
     NSString *errorDescription = @"a fake error description.";
     NSString *oauthError = @"a fake oauth error message.";
-    NSString *subError = @"a fake suberror";
+    NSString *subError = @"a fake suberror.";
     
     NSError *msalError = [MSALErrorConverter errorWithDomain:MSALErrorDomain
                                                         code:errorCode
