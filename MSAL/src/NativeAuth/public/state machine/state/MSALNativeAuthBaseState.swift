@@ -27,6 +27,7 @@ import Foundation
 @objc
 public class MSALNativeAuthBaseState: NSObject {
     let flowToken: String
+    var isActive: Bool = true
 
     init(flowToken: String) {
         self.flowToken = flowToken

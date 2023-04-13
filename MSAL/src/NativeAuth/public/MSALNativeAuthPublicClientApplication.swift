@@ -24,6 +24,43 @@
 
 import Foundation
 
+/// Duties:
+/// 1. execute HTTP request
+/// 2. parse the result
+/// 3. create the new state
+/// 4. call back the new delegate
+/// 
+class SignInController: BaseController {
+    
+    // factory class to create state?
+    // RemoteDAO
+    // TODO:  can this be in the public interface
+    private weak var currentState: MSALNativeAuthBaseState? = nil {
+        Set() {
+            currentState?.isActive = false
+            currentState = newState
+        }
+    }
+    
+    func startSignIn(email: String, password: String, challengeTypes: [MSALNativeAuthInternalChallengeType], delegate: SignInStartDelegate) {
+        // call /token API
+        currentState?.isActive = false
+        // generate a new state and assign it to currentState
+        // generate the new state that has a reference to this class
+        
+    }
+    
+    func resendCode() {
+        
+    }
+    
+    func submitCode() {
+        
+    }
+    
+    private
+}
+
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
@@ -103,6 +140,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
             return
         }
+        signInController.reset()
         switch username {
         case "exists@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .userAlreadyExists))
         case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .redirect))

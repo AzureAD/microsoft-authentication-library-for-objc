@@ -26,8 +26,13 @@ import Foundation
 
 @objcMembers
 public class SignInCodeSentState: MSALNativeAuthBaseState {
+    // disabled boolean? to disable old state (to prevent that the external dev call method on "old" state)
+    
+    // TODO: can this be instatiated every time?
+    private let signInController: SignInController = SignInController()
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
+        signInController.resendCode(delegate: SignInResendCodeDelegate, coorellationId:)
         if correlationId != nil {
             delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
         } else {
