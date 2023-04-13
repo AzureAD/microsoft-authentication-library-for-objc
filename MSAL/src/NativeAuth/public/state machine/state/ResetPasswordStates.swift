@@ -32,7 +32,7 @@ public class ResetPasswordCodeSentState: MSALNativeAuthBaseState {
                                                     ResendCodeError(type: .accountTemporarilyLocked),
                                                     newState: self)
         } else {
-            delegate.onCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
+            delegate.onResetPasswordResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
@@ -55,14 +55,15 @@ public class ResetPasswordRequiredState: MSALNativeAuthBaseState {
         delegate: ResetPasswordRequiredDelegate,
         correlationId: UUID? = nil) {
             switch password {
-            case "redirect": delegate.onPasswordRequiredError(error: PasswordRequiredError(type: .redirect), newState: nil)
-            case "generalerror": delegate.onPasswordRequiredError(
+            case "redirect": delegate.onResetPasswordRequiredError(
+                error: PasswordRequiredError(type: .redirect), newState: nil)
+            case "generalerror": delegate.onResetPasswordRequiredError(
                 error: PasswordRequiredError(type: .generalError),
                 newState: self)
-            case "invalid": delegate.onPasswordRequiredError(
+            case "invalid": delegate.onResetPasswordRequiredError(
                 error: PasswordRequiredError(type: .invalidPassword),
                 newState: self)
-            default: delegate.onCompleted()
+            default: delegate.onResetPasswordCompleted()
             }
     }
 }

@@ -31,7 +31,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         if correlationId != nil {
             delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
         } else {
-            delegate.onCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
+            delegate.onSignInResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
@@ -40,7 +40,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
         case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
-        default: delegate.onCompleted(result:
+        default: delegate.onSignInCompleted(result:
                                         MSALNativeAuthUserAccount(
                                             username: "email@contoso.com",
                                             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))

@@ -27,25 +27,25 @@ import Foundation
 @objc
 public protocol SignInStartDelegate {
     func onSignInError(error: SignInStartError)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onCompleted(result: MSALNativeAuthUserAccount)
+    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol SignInOTPStartDelegate {
     func onSignInOTPError(error: SignInOTPStartError)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onCompleted(result: MSALNativeAuthUserAccount)
+    func onSignInOTPCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol SignInResendCodeDelegate {
     func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeSentState)
-    func onCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInResendCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
 public protocol SignInVerifyCodeDelegate {
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeSentState?)
-    func onCompleted(result: MSALNativeAuthUserAccount)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }

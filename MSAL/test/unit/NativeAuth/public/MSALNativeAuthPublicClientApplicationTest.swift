@@ -46,12 +46,16 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
         }
         
-        func onCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        func onSignInOTPCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            onSignInCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
+        }
+        
+        func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
             XCTFail()
             expectation.fulfill()
         }
@@ -71,9 +75,13 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+        func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
+        }
+        
+        func onSignUpOTPCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+            onSignUpCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
         }
         
         func onCodeSent(state: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
@@ -93,7 +101,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
+        func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
             XCTFail()
             expectation.fulfill()
         }

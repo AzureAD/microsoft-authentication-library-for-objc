@@ -27,7 +27,7 @@ import Foundation
 @objc
 public protocol ResetPasswordStartDelegate {
     func onResetPasswordError(error: ResetPasswordStartError)
-    func onCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+    func onResetPasswordCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
@@ -39,11 +39,11 @@ public protocol ResetPasswordVerifyCodeDelegate {
 @objc
 public protocol ResetPasswordResendCodeDelegate {
     func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState)
-    func onCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+    func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
 public protocol ResetPasswordRequiredDelegate {
-    func onPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
-    func onCompleted()
+    func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    func onResetPasswordCompleted()
 }

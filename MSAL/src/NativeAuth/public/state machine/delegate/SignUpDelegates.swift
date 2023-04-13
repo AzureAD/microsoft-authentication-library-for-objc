@@ -27,42 +27,45 @@ import Foundation
 @objc
 public protocol SignUpStartDelegate {
     func onSignUpError(error: SignUpStartError)
-    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+    func onSignUpCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
 public protocol SignUpOTPStartDelegate {
     func onSignUpOTPError(error: SignUpOTPStartError)
-    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+    func onSignUpOTPCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
 public protocol SignUpOTPVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
-    func onAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onCompleted()
+    func onSignUpOTPVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
+    func onSignUpOTPAttributesRequired(newState: SignUpAttributesRequiredState)
+    func onSignUpOTPCompleted()
 }
 
 @objc
-public protocol SignUpVerifyCodeDelegate: SignUpOTPVerifyCodeDelegate {
+public protocol SignUpVerifyCodeDelegate {
+    func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
+    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
     func onPasswordRequired(newState: SignUpPasswordRequiredState)
+    func onSignUpCompleted()
 }
 
 @objc
 public protocol SignUpResendCodeDelegate {
     func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeSentState?)
-    func onCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+    func onSignUpResendCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 
 @objc
 public protocol SignUpPasswordRequiredDelegate {
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
-    func onAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onCompleted()
+    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+    func onSignUpCompleted()
 }
 
 @objc
 public protocol SignUpAttributesRequiredDelegate {
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
-    func onCompleted()
+    func onSignUpCompleted()
 }

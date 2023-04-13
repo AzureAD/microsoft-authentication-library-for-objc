@@ -30,7 +30,7 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
         if correlationId != nil {
             delegate.onSignUpResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
         } else {
-            delegate.onCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
+            delegate.onSignUpResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
         }
     }
 
@@ -40,8 +40,8 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
         case "2222": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
         case "3333": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
         case "5555": delegate.onPasswordRequired(newState: SignUpPasswordRequiredState(flowToken: flowToken))
-        case "6666": delegate.onAttributesRequired(newState: SignUpAttributesRequiredState(flowToken: flowToken))
-        default: delegate.onCompleted()
+        case "6666": delegate.onSignUpAttributesRequired(newState: SignUpAttributesRequiredState(flowToken: flowToken))
+        default: delegate.onSignUpCompleted()
         }
     }
 }
@@ -50,17 +50,18 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
 public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
         switch password {
-        case "redirect": delegate.onSignUpPasswordRequiredError(error: PasswordRequiredError(type: .redirect), newState: nil)
+        case "redirect": delegate.onSignUpPasswordRequiredError(
+            error: PasswordRequiredError(type: .redirect), newState: nil)
         case "generalerror": delegate.onSignUpPasswordRequiredError(
             error: PasswordRequiredError(type: .generalError),
             newState: self)
         case "invalid": delegate.onSignUpPasswordRequiredError(
             error: PasswordRequiredError(type: .invalidPassword),
             newState: self)
-        case "attributesRequired": delegate.onAttributesRequired(newState:
+        case "attributesRequired": delegate.onSignUpAttributesRequired(newState:
                                                                 SignUpAttributesRequiredState(flowToken: flowToken)
         )
-        default: delegate.onCompleted()
+        default: delegate.onSignUpCompleted()
         }
     }
 }
@@ -84,7 +85,7 @@ public class SignUpAttributesRequiredState: MSALNativeAuthBaseState {
             case "redirect": delegate.onSignUpAttributesRequiredError(
                 error: AttributesRequiredError(type: .redirect),
                 newState: nil)
-            default: delegate.onCompleted()
+            default: delegate.onSignUpCompleted()
             }
     }
 }

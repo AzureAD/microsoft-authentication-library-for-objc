@@ -111,7 +111,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 .invalidUsername, message: "email \(username) is invalid"))
         case "invalidattributes@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidAttributes))
         case "generalerror@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .generalError))
-        default: delegate.onCodeSent(
+        default: delegate.onSignUpCodeSent(
             newState: SignUpCodeSentState(flowToken: "signup_token"),
             displayName: username,
             codeLength: 4)
@@ -136,7 +136,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "invalidattributes@contoso.com": delegate.onSignUpOTPError(error:
                                                                         SignUpOTPStartError(type: .invalidAttributes))
         case "generalerror@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .generalError))
-        default: delegate.onCodeSent(
+        default: delegate.onSignUpOTPCodeSent(
             newState: SignUpCodeSentState(flowToken: "signup_token"),
             displayName: username,
             codeLength: 4)
@@ -164,11 +164,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             error: SignInStartError(type: .invalidAuthenticationType))
         case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
         case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onCodeSent(
+        case "oob@contoso.com": delegate.onSignInCodeSent(
             newState: SignInCodeSentState(flowToken: "credential_token"),
             displayName: username,
             codeLength: 4)
-        default: delegate.onCompleted(
+        default: delegate.onSignInCompleted(
                 result:
                     MSALNativeAuthUserAccount(
                         username: username,
@@ -191,11 +191,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "invalidauth@contoso.com": delegate.onSignInOTPError(
             error: SignInOTPStartError(type: .invalidAuthenticationType))
         case "generalerror@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onCodeSent(
+        case "oob@contoso.com": delegate.onSignInOTPCodeSent(
             newState: SignInCodeSentState(flowToken: "credential_token"),
             displayName: username,
             codeLength: 4)
-        default: delegate.onCompleted(
+        default: delegate.onSignInCompleted(
                 result:
                     MSALNativeAuthUserAccount(
                         username: username,
@@ -219,7 +219,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
         case "generalerror@contoso.com": delegate.onResetPasswordError(
             error: ResetPasswordStartError(type: .generalError))
-        default: delegate.onCodeSent(newState:
+        default: delegate.onResetPasswordCodeSent(newState:
                                         ResetPasswordCodeSentState(
                                             flowToken: "password_reset_token"),
                                             displayName: username,
