@@ -47,12 +47,10 @@ class ResetPasswordViewController: UIViewController {
 
         otpViewController.otpSubmittedCallback = { [self] otp in
             DispatchQueue.main.async { [self] in
-                Task {
-                    showResultText("Submitted OTP: \(otp)")
-
-                    dismiss(animated: true) {
-                        self.showNewPasswordModal()
-                    }
+                showResultText("Submitted OTP: \(otp)")
+                
+                dismiss(animated: true) {
+                    self.showNewPasswordModal()
                 }
             }
         }
@@ -68,10 +66,8 @@ class ResetPasswordViewController: UIViewController {
 
         newPasswordViewController.passwordSubmittedCallback = { [self] password in
             DispatchQueue.main.async { [self] in
-                Task {
-                    showResultText("Submitted new Password: \(password)")
-                    dismiss(animated: true)
-                }
+                showResultText("Submitted new Password: \(password)")
+                dismiss(animated: true)
             }
         }
 
