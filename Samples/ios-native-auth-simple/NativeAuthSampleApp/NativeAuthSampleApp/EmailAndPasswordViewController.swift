@@ -69,7 +69,7 @@ class EmailAndPasswordViewController: UIViewController {
             return
         }
 
-        print("Signing in with email \(email) and password \(password)")
+        print("Signing up with email \(email) and password \(password)")
     }
 
     @IBAction func signInTapped(_ sender: Any) {
@@ -78,7 +78,7 @@ class EmailAndPasswordViewController: UIViewController {
             return
         }
 
-        print("Signing up with email \(email) and password \(password)")
+        print("Signing in with email \(email) and password \(password)")
 
         showOTPModal(submittedCallback: { [self] otp in
             showResultText("Submitted OTP: \(otp)")
