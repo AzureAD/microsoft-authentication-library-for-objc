@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
-    let verifyAttributes: [[String: String]]?
+    let unverifiedAttributes: [[String: String]]?
     let invalidAttributes: [[String: String]]?
 
     init(
@@ -40,7 +40,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
-        verifyAttributes: [[String: String]]? = nil,
+        unverifiedAttributes: [[String: String]]? = nil,
         invalidAttributes: [[String: String]]? = nil
     ) {
         self.error = error
@@ -48,7 +48,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         self.errorURI = errorURI
         self.innerErrors = innerErrors
         self.signUpToken = signUpToken
-        self.verifyAttributes = verifyAttributes
+        self.unverifiedAttributes = unverifiedAttributes
         self.invalidAttributes = invalidAttributes
     }
 
@@ -58,8 +58,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case signUpToken = "signup_token"
-        // TODO: change for verify_attributes when mock api fixes it
-        case verifyAttributes = "attributes_to_verify"
+        case unverifiedAttributes = "unverified_attributes"
         case invalidAttributes = "invalid_attributes"
     }
 }

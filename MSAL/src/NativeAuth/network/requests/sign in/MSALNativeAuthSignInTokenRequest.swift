@@ -66,7 +66,8 @@ final class MSALNativeAuthSignInTokenRequest: MSIDHttpRequest {
             Key.challengeType.rawValue: params.challengeTypes?.map { $0.rawValue }.joined(separator: " "),
             Key.scope.rawValue: params.scope,
             Key.password.rawValue: params.password,
-            Key.oobCode.rawValue: params.oobCode
+            Key.oobCode.rawValue: params.oobCode,
+            Key.clientInfo.rawValue: String(params.clientInfo)
         ].compactMapValues { $0 }
     }
 }
