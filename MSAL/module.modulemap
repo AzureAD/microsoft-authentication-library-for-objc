@@ -49,7 +49,7 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
     header "IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
     header "IdentityCore/IdentityCore/src/MSIDBasicContext.h"
-    header "src/NativeAuth/logger/MSALLogMask.h"
+    header "src/native\ auth/logger/MSALLogMask.h"
     header "IdentityCore/IdentityCore/src/cache/metadata/MSIDAccountMetadataCacheAccessor.h"
     header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry.h"
     header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry+Internal.h"

@@ -2115,8 +2115,8 @@
 		2811CDCF296F16DE007BA21B /* controllers */ = {
 			isa = PBXGroup;
 			children = (
-				E2C1D2FC29A6875A00B26449 /* Protocols */,
-				E2F5BE892988322600C67EC7 /* Factories */,
+				E2C1D2FC29A6875A00B26449 /* protocols */,
+				E2F5BE892988322600C67EC7 /* factories */,
 				E2C1D286299BA15D00B26449 /* MSALNativeAuthBaseController.swift */,
 				2811CDD9296F1945007BA21B /* MSALNativeAuthSignUpController.swift */,
 				DE6B701429B0BD970098B957 /* MSALNativeAuthSignUpOTPController.swift */,
@@ -2137,12 +2137,12 @@
 			path = telemetry;
 			sourceTree = "<group>";
 		};
-		287F64EE298186C800ED90BD /* inputValidator */ = {
+		287F64EE298186C800ED90BD /* input validator */ = {
 			isa = PBXGroup;
 			children = (
 				287F64EF298186EA00ED90BD /* MSALNativeAuthInputValidatorTest.swift */,
 			);
-			path = inputValidator;
+			path = "input validator";
 			sourceTree = "<group>";
 		};
 		287F64F129819F6B00ED90BD /* public */ = {
@@ -2239,19 +2239,19 @@
 		28D1D58129BF885500CE75F4 /* integration */ = {
 			isa = PBXGroup;
 			children = (
-				28D1D58229BF886000CE75F4 /* NativeAuth */,
+				28D1D58229BF886000CE75F4 /* native auth */,
 			);
 			path = integration;
 			sourceTree = "<group>";
 		};
-		28D1D58229BF886000CE75F4 /* NativeAuth */ = {
+		28D1D58229BF886000CE75F4 /* native auth */ = {
 			isa = PBXGroup;
 			children = (
 				DE0D65C429D344AC005798B1 /* requests */,
 				28D1D59A29C2265400CE75F4 /* common */,
 				28D1D59D29C2392000CE75F4 /* MockAPIHandlerTest.swift */,
 			);
-			path = NativeAuth;
+			path = "native auth";
 			sourceTree = "<group>";
 		};
 		28D1D59A29C2265400CE75F4 /* common */ = {
@@ -2786,7 +2786,7 @@
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
-				E2AA770B292F972500113F04 /* NativeAuth */,
+				E2AA770B292F972500113F04 /* native auth */,
 				94E876C91E492D2800FB96ED /* instance */,
 				D65A6F7E1E3FF3D900C69FBA /* public */,
 				96D9A5461E4AB21400674A85 /* telemetry */,
@@ -2947,7 +2947,7 @@
 		D65A6FDB1E3FF71000C69FBA /* unit */ = {
 			isa = PBXGroup;
 			children = (
-				DECC1FB029530FEB006D9FB1 /* NativeAuth */,
+				DECC1FB029530FEB006D9FB1 /* native auth */,
 				A0274CBD24B432B100BD198D /* MSALAuthSchemeTests.m */,
 				B295A15E22D0344B00FFB313 /* mac */,
 				B2725EBD22BF2805009B454A /* mocks */,
@@ -3165,21 +3165,21 @@
 			path = responses;
 			sourceTree = "<group>";
 		};
-		DECC1FB029530FEB006D9FB1 /* NativeAuth */ = {
+		DECC1FB029530FEB006D9FB1 /* native auth */ = {
 			isa = PBXGroup;
 			children = (
-				E25BC0902995559700588549 /* Utils */,
+				E25BC0902995559700588549 /* utils */,
 				DE14D76029898CF900F37BEF /* MSALNativeAuthTestCase.swift */,
 				E2F5BE9829896AC700C67EC7 /* controllers */,
 				287F64F42981A7B800ED90BD /* mock */,
 				287F64F129819F6B00ED90BD /* public */,
-				287F64EE298186C800ED90BD /* inputValidator */,
+				287F64EE298186C800ED90BD /* input validator */,
 				287F64D1297EC27200ED90BD /* telemetry */,
 				28A3147029705B4500573AFF /* network */,
 				28CA6F5E29689F3E004DB11D /* cache */,
 				DECC1FB129530FF6006D9FB1 /* logger */,
 			);
-			path = NativeAuth;
+			path = "native auth";
 			sourceTree = "<group>";
 		};
 		DECC1FB129530FF6006D9FB1 /* logger */ = {
@@ -3328,12 +3328,12 @@
 			path = "sign up";
 			sourceTree = "<group>";
 		};
-		E25BC0902995559700588549 /* Utils */ = {
+		E25BC0902995559700588549 /* utils */ = {
 			isa = PBXGroup;
 			children = (
 				E25BC098299555C000588549 /* MSALNativeAuthTelemetryTestDispatcher.swift */,
 			);
-			path = Utils;
+			path = utils;
 			sourceTree = "<group>";
 		};
 		E260964129489CA60060DD7C /* public */ = {
@@ -3383,7 +3383,7 @@
 			path = telemetry;
 			sourceTree = "<group>";
 		};
-		E2AA770B292F972500113F04 /* NativeAuth */ = {
+		E2AA770B292F972500113F04 /* native auth */ = {
 			isa = PBXGroup;
 			children = (
 				E206FC5E296D65DE00AF4400 /* MSALNativeAuthError.swift */,
@@ -3397,7 +3397,7 @@
 				E26097C52948FC630060DD7C /* telemetry */,
 				E206FCFB297B01DF00AF4400 /* validation */,
 			);
-			path = NativeAuth;
+			path = "native auth";
 			sourceTree = "<group>";
 		};
 		E2BC027F29D7566F00041DBC /* sign up */ = {
@@ -3420,20 +3420,20 @@
 			path = "sign up";
 			sourceTree = "<group>";
 		};
-		E2C1D2FC29A6875A00B26449 /* Protocols */ = {
+		E2C1D2FC29A6875A00B26449 /* protocols */ = {
 			isa = PBXGroup;
 			children = (
 				E2C1D30429A6877000B26449 /* MSALNativeAuthTokenRequestHandling.swift */,
 			);
-			path = Protocols;
+			path = protocols;
 			sourceTree = "<group>";
 		};
-		E2C1D30A29A6899C00B26449 /* Protocols */ = {
+		E2C1D30A29A6899C00B26449 /* protocols */ = {
 			isa = PBXGroup;
 			children = (
 				E2C1D31229A689AB00B26449 /* MSALNativeAuthTokenRequestHandlingTests.swift */,
 			);
-			path = Protocols;
+			path = protocols;
 			sourceTree = "<group>";
 		};
 		E2C61FD829DECE8900F15203 /* sign up */ = {
@@ -3508,13 +3508,13 @@
 			path = parameters;
 			sourceTree = "<group>";
 		};
-		E2F5BE892988322600C67EC7 /* Factories */ = {
+		E2F5BE892988322600C67EC7 /* factories */ = {
 			isa = PBXGroup;
 			children = (
 				2811CDD7296F1706007BA21B /* MSALNativeAuthRequestControllerFactory.swift */,
 				E2F5BE8A2988323600C67EC7 /* MSALNativeAuthResultFactory.swift */,
 			);
-			path = Factories;
+			path = factories;
 			sourceTree = "<group>";
 		};
 		E2F5BE8F29894DA400C67EC7 /* requests */ = {
@@ -3533,7 +3533,7 @@
 		E2F5BE9829896AC700C67EC7 /* controllers */ = {
 			isa = PBXGroup;
 			children = (
-				E2C1D30A29A6899C00B26449 /* Protocols */,
+				E2C1D30A29A6899C00B26449 /* protocols */,
 				E2F5BE9B298A6CDB00C67EC7 /* factories */,
 				E2C1D2D329A3992100B26449 /* MSALNativeAuthBaseControllerTests.swift */,
 				E25BC0462992933A00588549 /* MSALNativeAuthSignUpControllerTests.swift */,
