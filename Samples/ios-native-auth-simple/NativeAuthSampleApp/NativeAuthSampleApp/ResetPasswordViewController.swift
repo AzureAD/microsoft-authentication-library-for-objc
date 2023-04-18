@@ -45,12 +45,14 @@ class ResetPasswordViewController: UIViewController {
             return
         }
 
-        otpViewController.otpSubmittedCallback = { [self] otp in
-            DispatchQueue.main.async { [self] in
+        otpViewController.otpSubmittedCallback = { [weak self] otp in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+
                 showResultText("Submitted OTP: \(otp)")
                 
-                dismiss(animated: true) {
-                    self.showNewPasswordModal()
+                dismiss(animated: true) { [weak self] in
+                    self?.showNewPasswordModal()
                 }
             }
         }
@@ -64,8 +66,10 @@ class ResetPasswordViewController: UIViewController {
             return
         }
 
-        newPasswordViewController.passwordSubmittedCallback = { [self] password in
-            DispatchQueue.main.async { [self] in
+        newPasswordViewController.passwordSubmittedCallback = { [weak self] password in
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+
                 showResultText("Submitted new Password: \(password)")
                 dismiss(animated: true)
             }

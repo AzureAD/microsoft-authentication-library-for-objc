@@ -81,7 +81,9 @@ class WebFallbackViewController: UIViewController {
     fileprivate func performMSALSignIn() {
         let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParams)
 
-        appContext.acquireToken(with: parameters) { [self] (result: MSALResult?, error: Error?) in
+        appContext.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
+            guard let self = self else { return }
+
             if let error = error {
                 showResultText("Error acquiring token: \(error)")
                 return
@@ -104,7 +106,9 @@ class WebFallbackViewController: UIViewController {
         let parameters = MSALSignoutParameters(webviewParameters: webviewParams)
         parameters.signoutFromBrowser = true
 
-        appContext.signout(with: msalAccount!, signoutParameters: parameters) { [self] (result: Bool, error: Error?) in
+        appContext.signout(with: msalAccount!, signoutParameters: parameters) { [weak self] (result: Bool, error: Error?) in
+            guard let self = self else { return }
+
             if let error = error {
                 showResultText("Error signing out: \(error)")
                 return

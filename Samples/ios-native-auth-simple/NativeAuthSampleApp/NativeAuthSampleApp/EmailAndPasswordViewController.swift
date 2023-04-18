@@ -77,11 +77,13 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password \(password)")
 
-        showOTPModal(submittedCallback: { [self] otp in
+        showOTPModal(submittedCallback: { [weak self] otp in
+            guard let self = self else { return }
+
             showResultText("Submitted OTP: \(otp)")
             dismiss(animated: true)
-        }, resendCodeCallback: { [self] in
-            showResultText("Resending code")
+        }, resendCodeCallback: { [weak self] in
+            self?.showResultText("Resending code")
         })
     }
 
