@@ -43,6 +43,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     private let requestProvider: MSALNativeAuthSignInRequestProvider
     private let factory: MSALNativeAuthResultBuildable
+    // TODO: is this the right place to keep the state? What if we add it to publicClientApplication class?
+    // add it to the super class?
+    private weak var currentState: MSALNativeAuthBaseState?
 
     // MARK: - Init
 
@@ -85,7 +88,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             telemetryApiId: .telemetryApiIdSignIn // TODO: Add signIn token
         )
         startTelemetryEvent(telemetryEvent)
-
         guard let request = createTokenRequest(username: username, password: password, challengeTypes: challengeTypes, scopes: scopes) else {
 
             stopTelemetryEvent(telemetryEvent, error: MSALNativeAuthError.invalidRequest)
@@ -93,40 +95,45 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             return
         }
 
-//        performRequest(request) { [self] result in
-//
-//            switch result {
-//            case .success(let tokenResponse):
-//                let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
-//
-//                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-//                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
-//                    return
-//                }
-//
-//                telemetryEvent?.setUserInformation(tokenResult.account)
-//
-//                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
-//
-//                let response = factory.makeNativeAuthResponse(
-//                    stage: .completed,
-//                    credentialToken: nil,
-//                    tokenResult: tokenResult
-//                )
-//
-//                complete(telemetryEvent, response: response, completion: completion)
-//
-//            case .failure(let error):
-//                MSALLogger.log(
-//                    level: .error,
-//                    context: context,
-//                    format: "SignIn request error: \(error)"
-//                )
-//
-//                complete(telemetryEvent, error: error, completion: completion)
-//            }
-//        }
-        
+        performRequest(request) { [self] result in
+            switch result {
+            case .success(let tokenResponse):
+                delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(username: username, accessToken: tokenResponse.accessToken ?? "use guard here"))
+            case .failure(let signInTokenResponseError):
+                // this should be MSALNativeAuthSignInTokenResponseError
+                guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
+                    delegate.onSignInError(error: SignInStartError(type: .generalError))
+                    return
+                }
+                // TODO: return error to the delegate, parse the error description/code
+                switch signInTokenResponseError.error {
+                case .invalidRequest:
+                    <#code#>
+                case .invalidClient:
+                    <#code#>
+                case .invalidGrant:
+                    <#code#>
+                case .expiredToken:
+                    <#code#>
+                case .unsupportedChallengeType:
+                    <#code#>
+                case .invalidScope:
+                    <#code#>
+                case .authorizationPending:
+                    <#code#>
+                case .slowDown:
+                    <#code#>
+                case .credentialRequired:
+                    //TODO: hit /challenge API
+                    //TODO: create here a new state
+                    let newState = SignInCodeSentState(flowToken: "parses flow token", signInController: self)
+                    //TODO: this should be automated
+                    currentState?.isActive = false
+                    currentState = newState
+                    delegate.onSignInCodeSent(newState: newState, displayName: "parsedDisplayName", codeLength: 4)
+                }
+            }
+        }
     }
 
     // MARK: - Private
@@ -137,6 +144,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                                     scopes: [String]?) -> MSALNativeAuthSignInTokenRequest? {
         // TODO: do we need SDK default scope or we can omit it from the request?
         do {
+            // TODO: create parameter class?
             return try requestProvider.signInTokenRequest(username: username, credentialToken: nil, signInSLT: nil, grantType: .password, challengeTypes: challengeTypes, scopes: scopes ?? [""], password: password, oobCode: nil, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")

@@ -28,8 +28,13 @@ import Foundation
 public class SignInCodeSentState: MSALNativeAuthBaseState {
     // disabled boolean? to disable old state (to prevent that the external dev call method on "old" state)
     
+    init(flowToken: String, signInController: MSALNativeAuthSignInController) {
+        self.signInController = signInController
+        super.init(flowToken: flowToken)
+    }
+    
     // TODO: can this be instatiated every time?
-//    private let signInController: SignInController = SignInController()
+    private let signInController: MSALNativeAuthSignInController
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
 //        signInController.resendCode(delegate: SignInResendCodeDelegate, coorellationId:)
