@@ -100,36 +100,62 @@ class EmailAndPasswordViewController: UIViewController {
         updateUI()
     }
 
+    func updateOTPModal(
+        errorMessage: String?,
+        submittedCallback: @escaping ((_ otp: String) -> Void),
+        resendCodeCallback: @escaping (() -> Void)) {
+            guard let otpViewController = otpViewController else {
+                return
+            }
+
+            if let errorMessage {
+                otpViewController.errorLabel.text = errorMessage
+            }
+
+            otpViewController.otpSubmittedCallback = { otp in
+                DispatchQueue.main.async {
+                    submittedCallback(otp)
+                }
+            }
+
+            otpViewController.resendCodeCallback = {
+                DispatchQueue.main.async {
+                    resendCodeCallback()
+                }
+            }
+    }
+
     func showOTPModal(
         submittedCallback: @escaping ((_ otp: String) -> Void),
         resendCodeCallback: @escaping (() -> Void)) {
+            guard otpViewController == nil else {
+                print("Unexpected error: OTP view controller already exists")
+                return
+            }
 
-        if otpViewController == nil {
             otpViewController = storyboard?.instantiateViewController(
                 withIdentifier: "OTPViewController") as? OTPViewController
+
+            guard let otpViewController = otpViewController else {
+                print("Error creating OTP view controller")
+                return
+            }
+
+            updateOTPModal(errorMessage: nil,
+                           submittedCallback: submittedCallback,
+                           resendCodeCallback: resendCodeCallback)
+
+            present(otpViewController, animated: true)
         }
 
-        guard let otpViewController = otpViewController else {
+    func dismissOTPModal() {
+        guard otpViewController != nil else {
+            print("Unexpected error: OTP view controller is nil")
             return
         }
 
-        otpViewController.otpSubmittedCallback = { otp in
-            DispatchQueue.main.async {
-                submittedCallback(otp)
-            }
-        }
-
-        otpViewController.resendCodeCallback = {
-            DispatchQueue.main.async {
-                resendCodeCallback()
-            }
-        }
-
-        present(otpViewController, animated: true)
-    }
-
-    func showOTPErrorMessage(_ message: String) {
-        otpViewController?.errorLabel.text = message
+        dismiss(animated: true)
+        otpViewController = nil
     }
 
     func showResultText(_ text: String) {
@@ -160,6 +186,84 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
     }
 
     func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
-        showResultText("Sign up code sent")
+        print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
+
+        showResultText("Email verification required")
+
+        showOTPModal { [weak self] otp in
+            guard let self else { return }
+
+            newState.submitCode(code: otp, delegate: self)
+        } resendCodeCallback: { [weak self] in
+            guard let self else { return }
+
+            newState.resendCode(delegate: self)
+        }
+    }
+}
+
+extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+        switch error.type {
+        case .invalidCode:
+            guard let newState else {
+                print("Unexpected state. Received invalidCode but newState is nil")
+
+                showResultText("Internal error verifying code")
+                return
+            }
+
+            updateOTPModal(errorMessage: "Invalid code") { [weak self] otp in
+                guard let self else { return }
+
+                newState.submitCode(code: otp, delegate: self)
+            } resendCodeCallback: { [weak self] in
+                guard let self else { return }
+
+                newState.resendCode(delegate: self)
+            }
+        case .redirect:
+            showResultText("Unable to sign up: Web UX required")
+            dismissOTPModal()
+        default:
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+            dismissOTPModal()
+        }
+    }
+
+    func onSignUpAttributesRequired(newState: MSAL.SignUpAttributesRequiredState) {
+        showResultText("Unexpected result while signing up: Attributes Required")
+        dismissOTPModal()
+    }
+
+    func onPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
+        showResultText("Unexpected result while signing up: Password Required")
+        dismissOTPModal()
+    }
+
+    func onSignUpCompleted() {
+        showResultText("Signed up successfully!")
+        dismissOTPModal()
+    }
+}
+
+extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeSentState?) {
+        print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
+
+        showResultText("Unexpected error while requesting new code")
+        dismissOTPModal()
+    }
+
+    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+        updateOTPModal(errorMessage: nil) { [weak self] otp in
+            guard let self else { return }
+
+            newState.submitCode(code: otp, delegate: self)
+        } resendCodeCallback: { [weak self] in
+            guard let self else { return }
+
+            newState.resendCode(delegate: self)
+        }
     }
 }
