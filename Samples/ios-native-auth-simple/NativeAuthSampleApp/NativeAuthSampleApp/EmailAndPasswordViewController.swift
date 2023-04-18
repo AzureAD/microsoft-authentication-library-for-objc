@@ -96,7 +96,9 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func showOTPModal(submittedCallback: @escaping ((_ otp: String) -> Void), resendCodeCallback: @escaping (() -> Void)) {
-        otpViewController = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
+        if otpViewController == nil {
+            otpViewController = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
+        }
 
         guard let otpViewController = otpViewController else {
             return
