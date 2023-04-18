@@ -38,4 +38,5 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let scope: String?
     let password: String?
     let oobCode: String?
+    let clientInfo = true
 }

@@ -30,8 +30,8 @@ struct MSALNativeAuthSignInChallengeResponse: Decodable {
     let credentialToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType
     let bindingMethod: String?
-    let displayName: String?
-    let displayType: String?
+    let challengeTargetLabel: String?
+    let challengeChannel: String?
     let codeLength: Int?
     let interval: Int?
 }

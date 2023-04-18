@@ -28,7 +28,7 @@ jobs:
         target: "macFramework"
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-11'
+    vmImage: 'macOS-12'
     timeOutInMinutes: 30
 
   steps:
