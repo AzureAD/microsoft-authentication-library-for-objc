@@ -70,6 +70,8 @@ class EmailAndPasswordViewController: UIViewController {
         }
 
         print("Signing up with email \(email) and password \(password)")
+
+        appContext.signUp(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_ sender: Any) {
@@ -139,5 +141,25 @@ class EmailAndPasswordViewController: UIViewController {
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
     }
+}
 
+extension EmailAndPasswordViewController: SignUpStartDelegate {
+    func onSignUpError(error: MSAL.SignUpStartError) {
+        switch error.type {
+        case .redirect:
+            showResultText("Unable to sign up: Web UX required")
+        case .userAlreadyExists:
+            showResultText("Unable to sign up: User already exists")
+        case .invalidPassword:
+            showResultText("Unable to sign up: The password is invalid")
+        case .invalidUsername:
+            showResultText("Unable to sign up: The username is invalid")
+        default:
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+        showResultText("Sign up code sent")
+    }
 }
