@@ -60,7 +60,7 @@ class EmailAndPasswordViewController: UIViewController {
         // TODO: Call appContext.getUserAccount() and update UI accordingly
     }
 
-    @IBAction func signUpTapped(_ sender: Any) {
+    @IBAction func signUpPressed(_ sender: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "email or password not set"
             return
@@ -69,7 +69,7 @@ class EmailAndPasswordViewController: UIViewController {
         print("Signing up with email \(email) and password \(password)")
     }
 
-    @IBAction func signInTapped(_ sender: Any) {
+    @IBAction func signInPressed(_ sender: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "email or password not set"
             return
@@ -87,7 +87,7 @@ class EmailAndPasswordViewController: UIViewController {
         })
     }
 
-    @IBAction func signOutTapped(_ sender: Any) {
+    @IBAction func signOutPressed(_ sender: Any) {
         signedIn = false
 
         showResultText("Signed out")
