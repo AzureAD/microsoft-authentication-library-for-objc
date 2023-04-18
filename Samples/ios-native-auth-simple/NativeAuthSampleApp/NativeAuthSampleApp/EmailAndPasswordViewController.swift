@@ -135,15 +135,9 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func updateUI() {
-        if signedIn {
-            signUpButton.isEnabled = false
-            signInButton.isEnabled = false
-            signOutButton.isEnabled = true
-        } else {
-            signUpButton.isEnabled = true
-            signInButton.isEnabled = true
-            signOutButton.isEnabled = false
-        }
+        signUpButton.isEnabled = !signedIn
+        signInButton.isEnabled = !signedIn
+        signOutButton.isEnabled = signedIn
     }
 
 }

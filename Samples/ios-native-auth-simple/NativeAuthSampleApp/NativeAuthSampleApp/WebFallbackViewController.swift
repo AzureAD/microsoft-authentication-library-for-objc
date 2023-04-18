@@ -73,13 +73,8 @@ class WebFallbackViewController: UIViewController {
     fileprivate func updateUI() {
         let signedIn = msalAccount != nil
 
-        if signedIn {
-            signInButton.isEnabled = false
-            signOutButton.isEnabled = true
-        } else {
-            signInButton.isEnabled = true
-            signOutButton.isEnabled = false
-        }
+        signInButton.isEnabled = !signedIn
+        signOutButton.isEnabled = signedIn
     }
 
     fileprivate func performMSALSignIn() {
