@@ -1,2 +1,2 @@
 included:
-  - src/NativeAuth
+  - "src/native\ auth"

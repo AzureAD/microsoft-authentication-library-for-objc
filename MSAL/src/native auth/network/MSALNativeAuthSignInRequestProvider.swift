@@ -26,25 +26,19 @@
 
 protocol MSALNativeAuthRequestSignInProviding {
     func signInInitiateRequest(
-        parameters: MSALNativeAuthSignInInitiateRequestParameters,
-        context: MSIDRequestContext
+        context: MSIDRequestContext,
+        username: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]
     ) throws -> MSALNativeAuthSignInInitiateRequest
 
     func signInChallengeRequest(
-        parameters: MSALNativeAuthSignInChallengeRequestParameters,
+        credentialToken: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInChallengeRequest
 
     func signInTokenRequest(
-        username: String?,
-        credentialToken: String?,
-        signInSLT: String?,
-        grantType: MSALNativeAuthGrantType,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
-        scopes: [String],
-        password: String?,
-        oobCode: String?,
-        context: MSIDRequestContext
+        parameters: MSALNativeAuthSignInTokenRequestProviderParams
     ) throws -> MSALNativeAuthSignInTokenRequest
 }
 
@@ -68,10 +62,12 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
     // MARK: - SignIn Initiate
 
     func signInInitiateRequest(
-        parameters: MSALNativeAuthSignInInitiateRequestParameters,
-        context: MSIDRequestContext
+        context: MSIDRequestContext,
+        username: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]
     ) throws -> MSALNativeAuthSignInInitiateRequest {
-
+        let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config, context: context, username: username, challengeTypes: challengeTypes)
+        
         let request = try MSALNativeAuthSignInInitiateRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
@@ -91,10 +87,11 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
     // MARK: - SignIn Challenge
 
     func signInChallengeRequest(
-        parameters: MSALNativeAuthSignInChallengeRequestParameters,
+        credentialToken: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInChallengeRequest {
-
+        let parameters = MSALNativeAuthSignInChallengeRequestParameters(config: config, context: context, credentialToken: credentialToken, challengeTypes: challengeTypes)
         let request = try MSALNativeAuthSignInChallengeRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
@@ -113,13 +110,23 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
 
     // MARK: - SignIn Token
 
-    func signInTokenRequest(username: String?, credentialToken: String?, signInSLT: String?, grantType: MSALNativeAuthGrantType, challengeTypes: [MSALNativeAuthInternalChallengeType]?, scopes: [String], password: String?, oobCode: String?, context: MSIDRequestContext) throws -> MSALNativeAuthSignInTokenRequest {
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config, context: context, username: username, credentialToken: nil, signInSLT: signInSLT, grantType: grantType, challengeTypes: challengeTypes, scope: formatScope(scopes), password: password, oobCode: oobCode)
+    func signInTokenRequest(parameters: MSALNativeAuthSignInTokenRequestProviderParams) throws -> MSALNativeAuthSignInTokenRequest {
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(
+            config: config,
+            scope: formatScope(parameters.scopes),
+            username: parameters.username,
+            credentialToken: parameters.credentialToken,
+            signInSLT: parameters.signInSLT,
+            grantType: parameters.grantType,
+            challengeTypes: parameters.challengeTypes,
+            password: parameters.password,
+            oobCode: parameters.oobCode,
+            context: parameters.context)
         let request = try MSALNativeAuthSignInTokenRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInChallenge),
-            context: context
+            context: parameters.context
         )
 
         request.configure(

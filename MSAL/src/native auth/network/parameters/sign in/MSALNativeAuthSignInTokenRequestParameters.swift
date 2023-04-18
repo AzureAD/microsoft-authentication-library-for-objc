@@ -25,17 +25,33 @@
 @_implementationOnly import MSAL_Private
 
 // swiftlint:disable:next type_name
-struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
+class MSALNativeAuthSignInTokenRequestParameters:
+    MSALNativeAuthSignInTokenRequestProviderBaseParams, MSALNativeAuthRequestable {
 
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .token
-    let context: MSIDRequestContext
-    let username: String?
-    let credentialToken: String?
-    let signInSLT: String?
-    let grantType: MSALNativeAuthGrantType
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
     let scope: String?
-    let password: String?
-    let oobCode: String?
+
+    init(
+        config: MSALNativeAuthConfiguration,
+        scope: String?, username: String?,
+        credentialToken: String?,
+        signInSLT: String?,
+        grantType: MSALNativeAuthGrantType,
+        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
+        password: String?,
+        oobCode: String?,
+        context: MSIDRequestContext) {
+        self.config = config
+        self.scope = scope
+        super.init(
+            username: username,
+            credentialToken: credentialToken,
+            signInSLT: signInSLT,
+            grantType: grantType,
+            challengeTypes: challengeTypes,
+            password: password,
+            oobCode: oobCode,
+            context: context)
+    }
 }

@@ -24,43 +24,6 @@
 
 import Foundation
 
-/// Duties:
-/// 1. execute HTTP request
-/// 2. parse the result
-/// 3. create the new state
-/// 4. call back the new delegate
-/// 
-//class SignInController: BaseController {
-//    
-//    // factory class to create state?
-//    // RemoteDAO
-//    // TODO:  can this be in the public interface
-//    private weak var currentState: MSALNativeAuthBaseState? = nil {
-//        Set() {
-//            currentState?.isActive = false
-//            currentState = newState
-//        }
-//    }
-//    
-//    func startSignIn(email: String, password: String, challengeTypes: [MSALNativeAuthInternalChallengeType], delegate: SignInStartDelegate) {
-//        // call /token API
-//        currentState?.isActive = false
-//        // generate a new state and assign it to currentState
-//        // generate the new state that has a reference to this class
-//        
-//    }
-//    
-//    func resendCode() {
-//        
-//    }
-//    
-//    func submitCode() {
-//        
-//    }
-//    
-//    private
-//}
-
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
@@ -195,23 +158,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
-        switch username {
-        case "notfound@contoso.com": delegate.onSignInError(error: SignInStartError(type: .userNotFound))
-        case "redirect@contoso.com": delegate.onSignInError(error: SignInStartError(type: .redirect))
-        case "invalidauth@contoso.com": delegate.onSignInError(
-            error: SignInStartError(type: .invalidAuthenticationType))
-        case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
-        case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onSignInCodeSent(
-            newState: SignInCodeSentState(flowToken: "credential_token"),
-            displayName: username,
-            codeLength: 4)
-        default: delegate.onSignInCompleted(
-                result:
-                    MSALNativeAuthUserAccount(
-                        username: username,
-                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
-        }
+        // TODO: call signInController signIn
     }
 
     public func signIn(
@@ -224,22 +171,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInOTPError(error: SignInOTPStartError(type: .invalidUsername))
             return
         }
-        switch username {
-        case "notfound@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .userNotFound))
-        case "redirect@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .redirect))
-        case "invalidauth@contoso.com": delegate.onSignInOTPError(
-            error: SignInOTPStartError(type: .invalidAuthenticationType))
-        case "generalerror@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onSignInOTPCodeSent(
-            newState: SignInCodeSentState(flowToken: "credential_token"),
-            displayName: username,
-            codeLength: 4)
-        default: delegate.onSignInCompleted(
-                result:
-                    MSALNativeAuthUserAccount(
-                        username: username,
-                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
-        }
+        // TODO: call signInController signIn
     }
 
     public func resetPassword(
