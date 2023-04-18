@@ -110,7 +110,9 @@ class WebFallbackViewController: UIViewController {
         let parameters = MSALSignoutParameters(webviewParameters: webviewParams)
         parameters.signoutFromBrowser = true
 
-        appContext.signout(with: msalAccount!, signoutParameters: parameters) { [weak self] (result: Bool, error: Error?) in
+        appContext.signout(
+            with: msalAccount!,
+            signoutParameters: parameters) { [weak self] (result: Bool, error: Error?) in
             guard let self = self else { return }
 
             if let error = error {
