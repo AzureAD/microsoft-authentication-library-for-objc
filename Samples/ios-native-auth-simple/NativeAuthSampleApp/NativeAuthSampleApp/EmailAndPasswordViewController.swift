@@ -44,14 +44,18 @@ class EmailAndPasswordViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let authority = try! MSALAuthority(url: URL(string: Configuration.authority)!)
+        do {
+            let authority = try MSALAuthority(url: URL(string: Configuration.authority)!)
 
-        appContext = try! MSALNativeAuthPublicClientApplication(
-            configuration: MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: authority),
-                challengeTypes: [.oob, .password])
+            appContext = try MSALNativeAuthPublicClientApplication(
+                configuration: MSALPublicClientApplicationConfig(
+                    clientId: Configuration.clientId,
+                    redirectUri: nil,
+                    authority: authority),
+                    challengeTypes: [.oob, .password])
+        } catch {
+            showResultText("Unable to initialize MSAL")
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
