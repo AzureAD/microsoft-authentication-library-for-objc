@@ -28,4 +28,3 @@ enum Configuration {
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
     static let authority = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
 }
-

@@ -61,7 +61,6 @@ class EmailAndPasswordViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        // TODO: Call appContext.getUserAccount() and update UI accordingly
     }
 
     @IBAction func signUpPressed(_ sender: Any) {

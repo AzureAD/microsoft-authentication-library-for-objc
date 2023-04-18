@@ -50,7 +50,7 @@ class ResetPasswordViewController: UIViewController {
                 guard let self = self else { return }
 
                 showResultText("Submitted OTP: \(otp)")
-                
+
                 dismiss(animated: true) { [weak self] in
                     self?.showNewPasswordModal()
                 }
