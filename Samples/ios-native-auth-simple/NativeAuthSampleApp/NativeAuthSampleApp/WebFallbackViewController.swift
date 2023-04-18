@@ -39,17 +39,14 @@ class WebFallbackViewController: UIViewController {
     fileprivate var msalAccount: MSALAccount?
     fileprivate var webviewParams: MSALWebviewParameters!
 
-    fileprivate let kClientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
-    fileprivate let kAuthority = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let authority = try! MSALAuthority(url: URL(string: kAuthority)!)
+        let authority = try! MSALAuthority(url: URL(string: Configuration.authority)!)
 
         appContext = try! MSALNativeAuthPublicClientApplication(
             configuration: MSALPublicClientApplicationConfig(
-                clientId: kClientId,
+                clientId: Configuration.clientId,
                 redirectUri: nil,
                 authority: authority),
                 challengeTypes: [.oob, .password])
