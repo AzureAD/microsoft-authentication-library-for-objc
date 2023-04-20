@@ -420,11 +420,12 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
                     break;
                 }
                 default:
+                    textValue = [NSString stringWithFormat:@"[%@]: ClientId - %@, Realm - %@", [MSIDCredentialTypeHelpers credentialTypeAsString:token.credentialType], token.clientId, token.realm];
                     break;
             }
         }
         
-        [cellView.textField setTextColor:NSColor.blackColor];
+        [cellView.textField setTextColor:NSColor.textColor];
         [cellView.textField setStringValue:textValue];
         return cellView;
     }

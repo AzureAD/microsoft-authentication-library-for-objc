@@ -31,7 +31,9 @@
 #import "MSALADFSAuthority.h"
 #import "MSALB2COauth2Provider.h"
 #import "MSALAADOauth2Provider.h"
+#import "MSALCIAMOauth2Provider.h"
 #import "MSALADFSAuthority.h"
+#import "MSALCIAMAuthority.h"
 
 @implementation MSALOauth2ProviderFactory
 
@@ -57,12 +59,16 @@
     {
         return [[MSALAADOauth2Provider alloc] initWithClientId:clientId tokenCache:tokenCache accountMetadataCache:accountMetadataCache];
     }
+    else if ([authority isKindOfClass:[MSALCIAMAuthority class]])
+    {
+        return [[MSALCIAMOauth2Provider alloc] initWithClientId:clientId tokenCache:tokenCache accountMetadataCache:accountMetadataCache];
+    }
     else if ([authority isKindOfClass:[MSALADFSAuthority class]])
     {
         MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"ADFS authority is not yet supported.", nil);
         return nil;
     }
-
+    
     MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"Provided authority is not yet supported.", nil);
     return nil;
     

@@ -48,6 +48,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: nil,
             httpRequest: nil,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: nil
         ) { result, error in
             XCTAssertEqual(self.error.domain, (error! as NSError).domain)
@@ -75,6 +76,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: nil,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual(self.httpRequest.retryCounter, 4)
@@ -102,6 +104,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: nil,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((error! as NSError).code, MSIDErrorCode.serverUnhandledResponse.rawValue)
@@ -145,6 +148,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: nil,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((result as! NSDictionary)["Test"] as! String, "Response")
@@ -177,6 +181,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: data,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidRequest)
@@ -208,6 +213,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: data,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((error as! DecodingError).localizedDescription,"The data couldn’t be read because it is missing.")
@@ -236,6 +242,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: data,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((error as! DecodingError).localizedDescription,"The data couldn’t be read because it is missing.")
@@ -260,6 +267,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             data: nil,
             httpRequest: httpRequest,
             responseSerializer: nil,
+            externalSSOContext: nil,
             context: context
         ) { result, error in
             XCTAssertEqual((error! as NSError).code, MSIDErrorCode.serverUnhandledResponse.rawValue)
