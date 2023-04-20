@@ -25,7 +25,6 @@
 import UIKit
 
 class OTPViewController: UIViewController {
-
     var otpSubmittedCallback: ((_ otp: String) -> Void)?
     var resendCodeCallback: (() -> Void)?
 
@@ -38,15 +37,15 @@ class OTPViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-    @IBAction func resendPressed(_ sender: Any) {
+    @IBAction func resendPressed(_: Any) {
         resendCodeCallback?()
     }
 
-    @IBAction func cancelPressed(_ sender: Any) {
+    @IBAction func cancelPressed(_: Any) {
         dismiss(animated: true)
     }
 
-    @IBAction func submitPressed(_ sender: Any) {
+    @IBAction func submitPressed(_: Any) {
         guard let otp = otpTextField.text else {
             return
         }

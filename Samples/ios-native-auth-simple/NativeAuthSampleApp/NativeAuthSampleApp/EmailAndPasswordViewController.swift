@@ -22,8 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import UIKit
 import MSAL
+import UIKit
 
 class EmailAndPasswordViewController: UIViewController {
 
@@ -51,8 +51,10 @@ class EmailAndPasswordViewController: UIViewController {
                 configuration: MSALPublicClientApplicationConfig(
                     clientId: Configuration.clientId,
                     redirectUri: nil,
-                    authority: authority),
-                    challengeTypes: [.oob, .password])
+                    authority: authority
+                ),
+                challengeTypes: [.oob, .password]
+            )
         } catch {
             showResultText("Unable to initialize MSAL")
         }
@@ -60,10 +62,9 @@ class EmailAndPasswordViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
     }
 
-    @IBAction func signUpPressed(_ sender: Any) {
+    @IBAction func signUpPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "Email or password not set"
             return
@@ -74,7 +75,7 @@ class EmailAndPasswordViewController: UIViewController {
         appContext.signUp(username: email, password: password, delegate: self)
     }
 
-    @IBAction func signInPressed(_ sender: Any) {
+    @IBAction func signInPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "email or password not set"
             return
@@ -89,7 +90,7 @@ class EmailAndPasswordViewController: UIViewController {
         updateUI()
     }
 
-    @IBAction func signOutPressed(_ sender: Any) {
+    @IBAction func signOutPressed(_: Any) {
         signedIn = false
 
         showResultText("Signed out")
@@ -100,50 +101,52 @@ class EmailAndPasswordViewController: UIViewController {
     func updateOTPModal(
         errorMessage: String?,
         submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)) {
-            guard let otpViewController = otpViewController else {
-                return
-            }
+        resendCodeCallback: @escaping (() -> Void)
+    ) {
+        guard let otpViewController = otpViewController else {
+            return
+        }
 
-            if let errorMessage {
-                otpViewController.errorLabel.text = errorMessage
-            }
+        if let errorMessage {
+            otpViewController.errorLabel.text = errorMessage
+        }
 
-            otpViewController.otpSubmittedCallback = { otp in
-                DispatchQueue.main.async {
-                    submittedCallback(otp)
-                }
+        otpViewController.otpSubmittedCallback = { otp in
+            DispatchQueue.main.async {
+                submittedCallback(otp)
             }
+        }
 
-            otpViewController.resendCodeCallback = {
-                DispatchQueue.main.async {
-                    resendCodeCallback()
-                }
+        otpViewController.resendCodeCallback = {
+            DispatchQueue.main.async {
+                resendCodeCallback()
             }
+        }
     }
 
     func showOTPModal(
         submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)) {
-            guard otpViewController == nil else {
-                print("Unexpected error: OTP view controller already exists")
-                return
-            }
-
-            otpViewController = storyboard?.instantiateViewController(
-                withIdentifier: "OTPViewController") as? OTPViewController
-
-            guard let otpViewController = otpViewController else {
-                print("Error creating OTP view controller")
-                return
-            }
-
-            updateOTPModal(errorMessage: nil,
-                           submittedCallback: submittedCallback,
-                           resendCodeCallback: resendCodeCallback)
-
-            present(otpViewController, animated: true)
+        resendCodeCallback: @escaping (() -> Void)
+    ) {
+        guard otpViewController == nil else {
+            print("Unexpected error: OTP view controller already exists")
+            return
         }
+
+        otpViewController = storyboard?.instantiateViewController(
+            withIdentifier: "OTPViewController") as? OTPViewController
+
+        guard let otpViewController = otpViewController else {
+            print("Error creating OTP view controller")
+            return
+        }
+
+        updateOTPModal(errorMessage: nil,
+                       submittedCallback: submittedCallback,
+                       resendCodeCallback: resendCodeCallback)
+
+        present(otpViewController, animated: true)
+    }
 
     func dismissOTPModal() {
         guard otpViewController != nil else {
@@ -182,7 +185,7 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
         }
     }
 
-    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
         print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
 
         showResultText("Email verification required")
@@ -228,12 +231,12 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
         }
     }
 
-    func onSignUpAttributesRequired(newState: MSAL.SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
         showResultText("Unexpected result while signing up: Attributes Required")
         dismissOTPModal()
     }
 
-    func onPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
+    func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
         dismissOTPModal()
     }
@@ -245,14 +248,14 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 }
 
 extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeSentState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissOTPModal()
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
         updateOTPModal(errorMessage: nil) { [weak self] otp in
             guard let self else { return }
 
