@@ -65,7 +65,7 @@ class EmailAndPasswordViewController: UIViewController {
 
     @IBAction func signUpPressed(_ sender: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
-            resultTextView.text = "email or password not set"
+            resultTextView.text = "Email or password not set"
             return
         }
 
