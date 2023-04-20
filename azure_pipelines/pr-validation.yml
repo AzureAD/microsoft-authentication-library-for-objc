@@ -32,6 +32,9 @@ jobs:
     timeOutInMinutes: 30
 
   steps:
+  - script: |
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_13.4.1.app"
+    displayName: 'Switch to use Xcode 13.4.1'
   - task: CmdLine@2
     displayName: Installing dependencies
     inputs:

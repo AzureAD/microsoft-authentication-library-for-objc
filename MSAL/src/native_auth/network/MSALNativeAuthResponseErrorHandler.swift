@@ -36,6 +36,7 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
         data: Data?,
         httpRequest: MSIDHttpRequestProtocol?,
         responseSerializer: MSIDResponseSerialization?,
+        externalSSOContext ssoContext: MSIDExternalSSOContext?,
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
@@ -57,6 +58,7 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
                 handleAuthenticateHeader(wwwAuthValue: authValue,
                                          httpRequest: httpRequest,
                                          context: context,
+                                         ssoContext: ssoContext,
                                          completionBlock: completionBlock)
                 return
             }
@@ -117,11 +119,14 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
         wwwAuthValue: String,
         httpRequest: MSIDHttpRequestProtocol?,
         context: MSIDRequestContext?,
+        ssoContext: MSIDExternalSSOContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
-        MSIDPKeyAuthHandler.handleWwwAuthenticateHeader(wwwAuthValue,
-                                                        request: httpRequest?.urlRequest.url,
-                                                        context: context) { authHeader, completionError in
+        MSIDPKeyAuthHandler.handleWwwAuthenticateHeader(
+            wwwAuthValue,
+            request: httpRequest?.urlRequest.url,
+            externalSSOContext: ssoContext,
+            context: context) { authHeader, completionError in
             if !NSString.msidIsStringNilOrBlank(authHeader) {
                 // Append Auth Header
                 if var newRequest = httpRequest?.urlRequest {
