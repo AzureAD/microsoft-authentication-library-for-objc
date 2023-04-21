@@ -262,7 +262,7 @@
         <!--Custom Attributes-->
         <scene sceneID="di9-x8-VaH">
             <objects>
-                <viewController id="qvO-Ew-1SQ" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CustomAttributesViewController" id="qvO-Ew-1SQ" customClass="CustomAttributesViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="l3g-9B-c0u">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -291,7 +291,7 @@
                                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="bcI-75-H9s">
                                                         <rect key="frame" x="93.666666666666657" y="0.0" width="259.33333333333337" height="40"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                        <textInputTraits key="textInputTraits" textContentType="email"/>
+                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" textContentType="email"/>
                                                     </textField>
                                                 </subviews>
                                             </stackView>
@@ -366,6 +366,9 @@
                                                         <rect key="frame" x="0.0" y="0.0" width="105.66666666666667" height="34.333333333333336"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Up"/>
+                                                        <connections>
+                                                            <action selector="signUpPressed:" destination="qvO-Ew-1SQ" eventType="touchUpInside" id="3cX-J7-d2h"/>
+                                                        </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yht-mC-UQN">
                                                         <rect key="frame" x="0.0" y="42.333333333333371" width="105.66666666666667" height="34.333333333333343"/>
@@ -415,6 +418,15 @@
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Custom Attributes" image="list.bullet.rectangle" catalog="system" id="Noo-Ha-6Pb"/>
+                    <connections>
+                        <outlet property="ageTextField" destination="ZLA-Wu-FZ9" id="VCu-dO-OCe"/>
+                        <outlet property="cityTextField" destination="tRW-pU-vRm" id="UBd-CN-Gpc"/>
+                        <outlet property="emailTextField" destination="bcI-75-H9s" id="dIW-OL-AUc"/>
+                        <outlet property="passwordTextField" destination="jRP-EZ-IgC" id="u7S-gy-3C6"/>
+                        <outlet property="resultTextView" destination="bYT-qv-DSC" id="kwc-y2-lZx"/>
+                        <outlet property="signOutButton" destination="Yht-mC-UQN" id="guh-7k-mF1"/>
+                        <outlet property="signUpButton" destination="nzh-FD-NEd" id="MX8-JQ-Blz"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c7g-Zp-i0p" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
