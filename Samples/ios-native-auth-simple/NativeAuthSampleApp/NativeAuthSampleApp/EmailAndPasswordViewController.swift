@@ -34,17 +34,17 @@ class EmailAndPasswordViewController: UIViewController {
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
 
-    var appContext: MSALNativeAuthPublicClientApplication!
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
 
-    var signedIn = false
+    var account: MSALNativeAuthUserAccount?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         do {
-            appContext = try MSALNativeAuthPublicClientApplication(
+            nativeAuth = try MSALNativeAuthPublicClientApplication(
                 configuration: MSALPublicClientApplicationConfig(
                     clientId: Configuration.clientId,
                     redirectUri: nil,
@@ -70,7 +70,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing up with email \(email) and password \(password)")
 
-        appContext.signUp(username: email, password: password, delegate: self)
+        nativeAuth.signUp(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -81,15 +81,16 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password \(password)")
 
-        signedIn = true
-
-        showResultText("Signed in")
-
-        updateUI()
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
-        signedIn = false
+        guard account != nil else {
+            print("signOutPressed: Not currently signed in")
+            return
+        }
+
+        account = nil
 
         showResultText("Signed out")
 
@@ -161,11 +162,14 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func updateUI() {
+        let signedIn = (account != nil)
+
         signUpButton.isEnabled = !signedIn
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
     }
 }
+// MARK: - Sign Up delegates
 
 extension EmailAndPasswordViewController: SignUpStartDelegate {
     func onSignUpError(error: MSAL.SignUpStartError) {
@@ -266,5 +270,32 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
 
                                   newState.resendCode(delegate: self)
                               })
+    }
+}
+
+// MARK: - Sign In delegates
+
+extension EmailAndPasswordViewController: SignInStartDelegate {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        showResultText("Signed in successfully.")
+
+        account = result
+
+        updateUI()
+    }
+
+    func onSignInError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInError: \(error)")
+
+        switch error.type {
+        case .userNotFound, .invalidPassword, .invalidUsername:
+            showResultText("Invalid username or password")
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        showResultText("Unexpected result while signing in: Verification required")
     }
 }
