@@ -172,6 +172,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
+    
+    /**
+    The server error happens when server returns server_error
+     */
+    MSALErrorServerError                         = -50006,
 };
 
 /**
@@ -419,5 +424,40 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      JIT - Compliance Check - Device unknown
      */
     MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
+
+    /**
+     JIT - JIT - Compliance Check - Invalid linkPayload from SSO configuration
+     */
+    MSALErrorJITComplianceCheckInvalidLinkPayload       =   -42722,
+
+    /**
+     JIT - Compliance Check - Could not create compliance check web view controller
+     */
+    MSALErrorJITComplianceCheckCreateController         =   -42723,
+
+    /**
+     JIT - Link - LinkConfig not found
+     */
+    MSALErrorJITLinkConfigNotFound                      =   -42724,
+
+    /**
+     JIT - Link - Invalid LinkTokenConfig
+     */
+    MSALErrorJITInvalidLinkTokenConfig                  =   -42725,
+
+    /**
+     JIT - WPJ - Device Registration Failed
+     */
+    MSALErrorJITWPJDeviceRegistrationFailed             =   -42726,
+
+    /**
+     JIT - WPJ - AccountIdentifier is nil
+     */
+    MSALErrorJITWPJAccountIdentifierNil                 =   -42727,
+
+    /**
+     JIT - WPJ - Failed to acquire broker token
+     */
+    MSALErrorJITWPJAcquireTokenError                    =   -42728,
     
 };

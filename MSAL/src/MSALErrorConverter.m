@@ -97,6 +97,13 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITComplianceCheckResultNotCompliant) : @(MSALInternalErrorJITComplianceCheckResultNotCompliant),
                                    @(MSIDErrorJITComplianceCheckResultTimeout) : @(MSALInternalErrorJITComplianceCheckResultTimeout),
                                    @(MSIDErrorJITComplianceCheckResultUnknown) : @(MSALInternalErrorJITComplianceCheckResultUnknown),
+                                   @(MSIDErrorJITComplianceCheckInvalidLinkPayload) : @(MSALErrorJITComplianceCheckInvalidLinkPayload),
+                                   @(MSIDErrorJITComplianceCheckCreateController) : @(MSALErrorJITComplianceCheckCreateController),
+                                   @(MSIDErrorJITLinkConfigNotFound) : @(MSALErrorJITLinkConfigNotFound),
+                                   @(MSIDErrorJITInvalidLinkTokenConfig) : @(MSALErrorJITInvalidLinkTokenConfig),
+                                   @(MSIDErrorJITWPJDeviceRegistrationFailed) : @(MSALErrorJITWPJDeviceRegistrationFailed),
+                                   @(MSIDErrorJITWPJAccountIdentifierNil) : @(MSALErrorJITWPJAccountIdentifierNil),
+                                   @(MSIDErrorJITWPJAcquireTokenError) : @(MSALErrorJITWPJAcquireTokenError),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
@@ -111,6 +118,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerUnauthorizedClient): @(MSALInternalErrorUnauthorizedClient),
                                    @(MSIDErrorServerAccessDenied): @(MSALErrorUserCanceled),
                                    @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
+                                   @(MSIDErrorServerError) : @(MSALErrorServerError),
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse)

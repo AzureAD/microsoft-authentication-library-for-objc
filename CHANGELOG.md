@@ -1,3 +1,21 @@
+## [1.2.11]
+* Updated extraDeviceInfo to include platform sso status on macOS
+* Created CIAM authority for MSAL (#1682)
+
+## [1.2.10]
+* Performed testing for CIAM behaviors in MSAL (#1668)
+
+## [1.2.9]
+* Add more detailed error codes for JIT (#1639)
+* Add support for nested auth protocol (#1631)
+
+## [1.2.8]
+* Fix a crash when identity is nil during getting device registration information on iOS (#1184)
+
+## [1.2.7]
+* Fix logger statement (#1630)
+* Address github issue 1141 when getting current account crashes by using await in Swift (#1634)
+
 ## [1.2.6]
 * Update minimum OS version to iOS14 and macOS 10.13
 

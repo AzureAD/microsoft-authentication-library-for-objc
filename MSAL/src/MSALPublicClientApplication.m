@@ -42,6 +42,7 @@
 #import "MSALOauth2ProviderFactory.h"
 #import "MSALWebviewType_Internal.h"
 #import "MSIDAuthority.h"
+#import "MSIDCIAMAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSALRedirectUriVerifier.h"
 #import "MSIDWebviewAuthorization.h"
@@ -874,6 +875,9 @@
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
     msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
      
+    // Nested auth protocol
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -919,7 +923,11 @@
 #endif
     
     NSError *requestError = nil;
-    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams
+                                                                                                  forceRefresh:parameters.forceRefresh
+                                                                                                   skipLocalRt:MSIDSilentControllerUndefinedLocalRtUsage
+                                                                                          tokenRequestProvider:tokenRequestProvider
+                                                                                                         error:&requestError];
     
     if (!requestController)
     {
@@ -1150,6 +1158,10 @@
         block(nil, msidError, nil);
         return;
     }
+    
+    // Nested auth protocol
+    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
@@ -1671,6 +1683,11 @@
                 return YES;
             }
         }
+    }
+    
+    if (authority.excludeFromAuthorityValidation)
+    {
+        return YES;
     }
     
     return NO;
