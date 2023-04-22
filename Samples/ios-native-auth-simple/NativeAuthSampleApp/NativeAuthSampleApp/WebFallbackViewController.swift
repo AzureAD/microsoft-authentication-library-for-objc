@@ -33,10 +33,11 @@ class WebFallbackViewController: UIViewController {
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
 
-    fileprivate var nativeAuth: MSALNativeAuthPublicClientApplication!
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
+    var webviewParams: MSALWebviewParameters!
 
-    fileprivate var msalAccount: MSALAccount?
-    fileprivate var webviewParams: MSALWebviewParameters!
+    var account: MSALNativeAuthUserAccount?
+    var msalAccount: MSALAccount?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,11 +59,28 @@ class WebFallbackViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
-        performMSALSignIn()
+        guard let email = emailTextField.text, !email.isEmpty,
+              let password = passwordTextField.text, !password.isEmpty
+        else {
+            resultTextView.text = "Invalid email address or password"
+            return
+        }
+
+        print("Signing in with email \(email) and password \(password)")
+
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
-        performMSALSignOut()
+        if msalAccount != nil {
+            signOutWithWebUX()
+        } else if account != nil {
+            account = nil
+
+            showResultText("Signed out")
+
+            updateUI()
+        }
     }
 
     fileprivate func showResultText(_ text: String) {
@@ -70,13 +88,13 @@ class WebFallbackViewController: UIViewController {
     }
 
     fileprivate func updateUI() {
-        let signedIn = msalAccount != nil
+        let signedIn = msalAccount != nil || account != nil
 
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
     }
 
-    fileprivate func performMSALSignIn() {
+    fileprivate func signInWithWebUX() {
         let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParams)
 
         nativeAuth.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
@@ -96,11 +114,11 @@ class WebFallbackViewController: UIViewController {
 
             updateUI()
 
-            showResultText("Signed in successfully: \(msalAccount.accountClaims!.description)")
+            showResultText("Signed in successfully with Web UX: \(msalAccount.accountClaims!.description)")
         }
     }
 
-    fileprivate func performMSALSignOut() {
+    fileprivate func signOutWithWebUX() {
         let parameters = MSALSignoutParameters(webviewParameters: webviewParams)
         parameters.signoutFromBrowser = true
 
@@ -125,5 +143,34 @@ class WebFallbackViewController: UIViewController {
 
             updateUI()
         }
+    }
+}
+
+// MARK: - Sign In delegates
+
+extension WebFallbackViewController: SignInStartDelegate {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
+
+        account = result
+
+        updateUI()
+    }
+
+    func onSignInError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInError: \(error)")
+
+        switch error.type {
+        case .userNotFound, .invalidUsername:
+            showResultText("Invalid username or password")
+        case .redirect:
+            signInWithWebUX()
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        showResultText("Unexpected result while signing in: Verification required")
     }
 }
