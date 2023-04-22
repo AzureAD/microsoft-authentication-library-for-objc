@@ -29,8 +29,8 @@ class CustomAttributesViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
 
-    @IBOutlet weak var cityTextField: UITextField!
-    @IBOutlet weak var ageTextField: UITextField!
+    @IBOutlet weak var firstNameTextField: UITextField!
+    @IBOutlet weak var lastNameTextField: UITextField!
 
     @IBOutlet weak var resultTextView: UITextView!
 
@@ -45,13 +45,11 @@ class CustomAttributesViewController: UIViewController {
         super.viewDidLoad()
 
         do {
-            let authority = try MSALAuthority(url: URL(string: Configuration.authority)!)
-
             appContext = try MSALNativeAuthPublicClientApplication(
                 configuration: MSALPublicClientApplicationConfig(
                     clientId: Configuration.clientId,
                     redirectUri: nil,
-                    authority: authority
+                    authority: Configuration.authority
                 ),
                 challengeTypes: [.oob, .password]
             )
@@ -68,20 +66,15 @@ class CustomAttributesViewController: UIViewController {
             return
         }
 
-        guard let city = cityTextField.text, !city.isEmpty else {
-            resultTextView.text = "Please enter a city"
-            return
-        }
-
-        guard let ageString = ageTextField.text, let age = Int(ageString) else {
-            resultTextView.text = "Please enter a valid age"
-            return
-        }
-
         var attributes: [String: Any] = [:]
 
-        attributes["city"] = city
-        attributes["age"] = age
+        if let firstName = firstNameTextField.text, !firstName.isEmpty {
+            attributes["first_name"] = firstName
+        }
+
+        if let lastName = lastNameTextField.text, !lastName.isEmpty {
+            attributes["last_name"] = lastName
+        }
 
         print("Signing up with email \(email), password \(password) and attributes: \(attributes)")
 
