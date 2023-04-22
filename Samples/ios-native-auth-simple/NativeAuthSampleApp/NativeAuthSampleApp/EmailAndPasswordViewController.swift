@@ -215,7 +215,7 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
                 return
             }
 
-            updateOTPModal(errorMessage: "Invalid code",
+            updateOTPModal(errorMessage: "Check the code and try again",
                            submittedCallback: { [weak self] otp in
                                guard let self else { return }
 
@@ -276,7 +276,7 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
 
 extension EmailAndPasswordViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        showResultText("Signed in successfully.")
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
 
         account = result
 
