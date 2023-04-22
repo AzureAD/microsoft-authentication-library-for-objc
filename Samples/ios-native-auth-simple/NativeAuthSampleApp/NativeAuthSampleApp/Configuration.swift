@@ -22,9 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import MSAL
+
 enum Configuration {
     // Update the below to your client ID you received in the portal. The below is for running the demo only
 
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
-    static let authority = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
+    static let authorityURL = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
+    // swiftlint:disable:next force_try
+    static var authority = try! MSALAuthority(url: URL(string: authorityURL)!)
 }

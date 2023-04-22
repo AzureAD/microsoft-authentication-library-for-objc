@@ -43,13 +43,11 @@ class WebFallbackViewController: UIViewController {
         super.viewDidLoad()
 
         do {
-            let authority = try MSALAuthority(url: URL(string: Configuration.authority)!)
-
             appContext = try MSALNativeAuthPublicClientApplication(
                 configuration: MSALPublicClientApplicationConfig(
                     clientId: Configuration.clientId,
                     redirectUri: nil,
-                    authority: authority),
+                    authority: Configuration.authority),
                     challengeTypes: [.oob, .password])
         } catch {
             showResultText("Unable to initialize MSAL")
