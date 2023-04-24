@@ -272,7 +272,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
     func onPasswordRequired(newState: MSAL.ResetPasswordRequiredState) {
         dismissVerifyCodeModal { [self] in
             showNewPasswordModal { [weak self] password in
-                guard let self = self else { return }
+                guard let self else { return }
 
                 newState.submitPassword(password: password, delegate: self)
             }

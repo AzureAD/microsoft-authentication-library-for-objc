@@ -108,7 +108,7 @@ class WebFallbackViewController: UIViewController {
 
             msalAccount = result?.account
 
-            guard let msalAccount = msalAccount else {
+            guard let msalAccount else {
                 showResultText("Could not acquire token: No result or account returned")
                 return
             }
