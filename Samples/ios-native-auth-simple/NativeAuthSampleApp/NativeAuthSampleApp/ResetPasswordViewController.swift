@@ -65,7 +65,7 @@ class ResetPasswordViewController: UIViewController {
         nativeAuth.resetPassword(username: email, delegate: self)
     }
 
-    // MARK: - OTP modal methods
+    // MARK: - Verify Code modal methods
 
     func showVerifyCodeModal(
         submitCallback: @escaping ((_ code: String) -> Void),

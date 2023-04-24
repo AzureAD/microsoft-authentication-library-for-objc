@@ -97,6 +97,32 @@ class EmailAndPasswordViewController: UIViewController {
         updateUI()
     }
 
+    // MARK: - Verify Code modal methods
+
+    func showVerifyCodeModal(
+        submitCallback: @escaping ((_ code: String) -> Void),
+        resendCallback: @escaping (() -> Void)
+    ) {
+        guard verifyCodeViewController == nil else {
+            print("Unexpected error: Verify Code view controller already exists")
+            return
+        }
+
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
     func updateVerifyCodeModal(
         errorMessage: String?,
         submitCallback: @escaping ((_ code: String) -> Void),
@@ -121,30 +147,6 @@ class EmailAndPasswordViewController: UIViewController {
                 resendCallback()
             }
         }
-    }
-
-    func showVerifyCodeModal(
-        submitCallback: @escaping ((_ code: String) -> Void),
-        resendCallback: @escaping (() -> Void)
-    ) {
-        guard verifyCodeViewController == nil else {
-            print("Unexpected error: Verify Code view controller already exists")
-            return
-        }
-
-        verifyCodeViewController = storyboard?.instantiateViewController(
-            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
-
-        guard let verifyCodeViewController else {
-            print("Error creating Verify Code view controller")
-            return
-        }
-
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: submitCallback,
-                              resendCallback: resendCallback)
-
-        present(verifyCodeViewController, animated: true)
     }
 
     func dismissVerifyCodeModal() {
