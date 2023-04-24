@@ -13,7 +13,7 @@
 		9B08477B29969264003BA4B4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477929969264003BA4B4 /* Main.storyboard */; };
 		9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477C29969265003BA4B4 /* Assets.xcassets */; };
 		9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */; };
-		9B14AE4D29D204EA006F7C51 /* OTPViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */; };
+		9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */; };
 		9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */; };
 		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
 		9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; };
@@ -153,7 +153,7 @@
 		9B08477C29969265003BA4B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B08477F29969265003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B08478129969265003BA4B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPViewController.swift; sourceTree = "<group>"; };
+		9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
 		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
 		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
 		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
@@ -201,7 +201,7 @@
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
 				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
 				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
-				9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */,
+				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
 				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
 				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
 				9B08477929969264003BA4B4 /* Main.storyboard */,
@@ -443,7 +443,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
-				9B14AE4D29D204EA006F7C51 /* OTPViewController.swift in Sources */,
+				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
 				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,

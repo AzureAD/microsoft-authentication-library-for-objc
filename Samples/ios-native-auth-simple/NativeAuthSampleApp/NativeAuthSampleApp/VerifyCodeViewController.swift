@@ -24,12 +24,12 @@
 
 import UIKit
 
-class OTPViewController: UIViewController {
-    var otpSubmittedCallback: ((_ otp: String) -> Void)?
-    var resendCodeCallback: (() -> Void)?
+class VerifyCodeViewController: UIViewController {
+    var onSubmit: ((_ otp: String) -> Void)?
+    var onResend: (() -> Void)?
 
     @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var otpTextField: UITextField!
+    @IBOutlet weak var codeTextField: UITextField!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +38,7 @@ class OTPViewController: UIViewController {
     }
 
     @IBAction func resendPressed(_: Any) {
-        resendCodeCallback?()
+        onResend?()
     }
 
     @IBAction func cancelPressed(_: Any) {
@@ -46,10 +46,10 @@ class OTPViewController: UIViewController {
     }
 
     @IBAction func submitPressed(_: Any) {
-        guard let otp = otpTextField.text else {
+        guard let code = codeTextField.text else {
             return
         }
 
-        otpSubmittedCallback?(otp)
+        onSubmit?(code)
     }
 }

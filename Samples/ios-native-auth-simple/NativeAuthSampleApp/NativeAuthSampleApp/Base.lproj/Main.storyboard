@@ -708,10 +708,10 @@
             </objects>
             <point key="canvasLocation" x="2219" y="742"/>
         </scene>
-        <!--View Controller-->
+        <!--Verify Code View Controller-->
         <scene sceneID="i7G-Xh-ctS">
             <objects>
-                <viewController storyboardIdentifier="OTPViewController" id="OPC-LL-z7s" customClass="OTPViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="OTPViewController" id="OPC-LL-z7s" customClass="VerifyCodeViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="6og-Vs-K5A">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -817,8 +817,8 @@
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
+                        <outlet property="codeTextField" destination="t7t-Cd-O9T" id="rOP-CW-aa3"/>
                         <outlet property="errorLabel" destination="dtE-A5-Ad5" id="4h6-qT-loG"/>
-                        <outlet property="otpTextField" destination="t7t-Cd-O9T" id="rOP-CW-aa3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="foN-gt-Ro9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
