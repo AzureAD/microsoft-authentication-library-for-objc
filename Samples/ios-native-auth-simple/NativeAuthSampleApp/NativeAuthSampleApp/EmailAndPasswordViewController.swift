@@ -299,3 +299,30 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }
+
+// MARK: - Sign In delegates
+
+extension EmailAndPasswordViewController: SignInStartDelegate {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
+
+        account = result
+
+        updateUI()
+    }
+
+    func onSignInError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInError: \(error)")
+
+        switch error.type {
+        case .userNotFound, .invalidPassword, .invalidUsername:
+            showResultText("Invalid username or password")
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        showResultText("Unexpected result while signing in: Verification required")
+    }
+}
