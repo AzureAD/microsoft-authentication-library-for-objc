@@ -197,22 +197,38 @@
 		9B08477229969264003BA4B4 /* NativeAuthSampleApp */ = {
 			isa = PBXGroup;
 			children = (
-				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477329969264003BA4B4 /* AppDelegate.swift */,
 				9B08477529969264003BA4B4 /* SceneDelegate.swift */,
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
-				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
-				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
-				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
-				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
-				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
-				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
+				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
+				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477929969264003BA4B4 /* Main.storyboard */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
 				9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */,
 				9B08478129969265003BA4B4 /* Info.plist */,
 			);
 			path = NativeAuthSampleApp;
+			sourceTree = "<group>";
+		};
+		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
+				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
+			);
+			name = "Modal View Controllers";
+			sourceTree = "<group>";
+		};
+		9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
+				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
+				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
+				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+			);
+			name = "Scenario View Controllers";
 			sourceTree = "<group>";
 		};
 		9BB32E1029A674BB00BD7D89 /* Products */ = {
