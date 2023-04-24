@@ -138,7 +138,7 @@ class ResetPasswordViewController: UIViewController {
             return
         }
 
-        newPasswordViewController.passwordSubmittedCallback = submittedCallback
+        newPasswordViewController.onSubmit = submittedCallback
 
         present(newPasswordViewController, animated: true)
     }
@@ -155,7 +155,7 @@ class ResetPasswordViewController: UIViewController {
             newPasswordViewController.errorLabel.text = errorMessage
         }
 
-        newPasswordViewController.passwordSubmittedCallback = { password in
+        newPasswordViewController.onSubmit = { password in
             DispatchQueue.main.async {
                 submittedCallback(password)
             }
@@ -290,9 +290,10 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
                 return
             }
 
-            updateNewPasswordModal(errorMessage: "Invalid password") { password in
-                newState.submitPassword(password: password, delegate: self)
-            }
+            updateNewPasswordModal(errorMessage: "Invalid password",
+                                   submittedCallback: { password in
+                                       newState.submitPassword(password: password, delegate: self)
+                                   })
         default:
             showResultText("Error setting password: \(error.errorDescription ?? String(error.type.rawValue))")
             dismissNewPasswordModal()

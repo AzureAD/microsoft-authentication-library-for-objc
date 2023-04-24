@@ -25,8 +25,7 @@
 import UIKit
 
 class NewPasswordViewController: UIViewController {
-
-    var passwordSubmittedCallback: ((_ otp: String) -> Void)?
+    var onSubmit: ((_ password: String) -> Void)?
 
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -46,7 +45,6 @@ class NewPasswordViewController: UIViewController {
             return
         }
 
-        passwordSubmittedCallback?(password)
+        onSubmit?(password)
     }
-
 }
