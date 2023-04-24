@@ -277,7 +277,7 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
 
 extension EmailAndPasswordViewController: SignInStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        showResultText("Signed in successfully.")
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
 
         account = result
 
