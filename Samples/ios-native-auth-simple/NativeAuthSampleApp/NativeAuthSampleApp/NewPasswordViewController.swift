@@ -36,11 +36,11 @@ class NewPasswordViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-    @IBAction func cancelPressed(_ sender: Any) {
+    @IBAction func cancelPressed(_: Any) {
         dismiss(animated: true)
     }
 
-    @IBAction func submitPressed(_ sender: Any) {
+    @IBAction func submitPressed(_: Any) {
         guard let password = passwordTextField.text else {
             return
         }

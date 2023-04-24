@@ -171,7 +171,7 @@ extension WebFallbackViewController: SignInStartDelegate {
         }
     }
 
-    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+    func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }
