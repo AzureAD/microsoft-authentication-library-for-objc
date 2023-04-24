@@ -39,7 +39,7 @@ class CustomAttributesViewController: UIViewController {
 
     var appContext: MSALNativeAuthPublicClientApplication!
 
-    var otpViewController: OTPViewController?
+    var verifyCodeViewController: VerifyCodeViewController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,64 +84,66 @@ class CustomAttributesViewController: UIViewController {
                           delegate: self)
     }
 
-    func updateOTPModal(
-        errorMessage: String?,
-        submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)
+    // MARK: - Verify Code modal methods
+
+    func showVerifyCodeModal(
+        submitCallback: @escaping ((_ code: String) -> Void),
+        resendCallback: @escaping (() -> Void)
     ) {
-        guard let otpViewController = otpViewController else {
+        guard verifyCodeViewController == nil else {
+            print("Unexpected error: Verify Code view controller already exists")
+            return
+        }
+
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping ((_ code: String) -> Void),
+        resendCallback: @escaping (() -> Void)
+    ) {
+        guard let verifyCodeViewController else {
             return
         }
 
         if let errorMessage {
-            otpViewController.errorLabel.text = errorMessage
+            verifyCodeViewController.errorLabel.text = errorMessage
         }
 
-        otpViewController.otpSubmittedCallback = { otp in
+        verifyCodeViewController.onSubmit = { code in
             DispatchQueue.main.async {
-                submittedCallback(otp)
+                submitCallback(code)
             }
         }
 
-        otpViewController.resendCodeCallback = {
+        verifyCodeViewController.onResend = {
             DispatchQueue.main.async {
-                resendCodeCallback()
+                resendCallback()
             }
         }
     }
 
-    func showOTPModal(
-        submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)
-    ) {
-        guard otpViewController == nil else {
-            print("Unexpected error: OTP view controller already exists")
+    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
             return
         }
 
-        otpViewController = storyboard?.instantiateViewController(
-            withIdentifier: "OTPViewController") as? OTPViewController
-
-        guard let otpViewController = otpViewController else {
-            print("Error creating OTP view controller")
-            return
-        }
-
-        updateOTPModal(errorMessage: nil,
-                       submittedCallback: submittedCallback,
-                       resendCodeCallback: resendCodeCallback)
-
-        present(otpViewController, animated: true)
-    }
-
-    func dismissOTPModal() {
-        guard otpViewController != nil else {
-            print("Unexpected error: OTP view controller is nil")
-            return
-        }
-
-        dismiss(animated: true)
-        otpViewController = nil
+        dismiss(animated: true, completion: completion)
+        verifyCodeViewController = nil
     }
 
     func showResultText(_ text: String) {
@@ -170,15 +172,16 @@ extension CustomAttributesViewController: SignUpStartDelegate {
 
         showResultText("Email verification required")
 
-        showOTPModal { [weak self] otp in
-            guard let self else { return }
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self else { return }
 
-            newState.submitCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                                newState.submitCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                                newState.resendCode(delegate: self)
+                            })
     }
 }
 
@@ -193,37 +196,38 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
                 return
             }
 
-            updateOTPModal(errorMessage: "Invalid code") { [weak self] otp in
-                guard let self else { return }
+            updateVerifyCodeModal(errorMessage: "Invalid code",
+                                  submitCallback: { [weak self] code in
+                                      guard let self else { return }
 
-                newState.submitCode(code: otp, delegate: self)
-            } resendCodeCallback: { [weak self] in
-                guard let self else { return }
+                                      newState.submitCode(code: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self else { return }
 
-                newState.resendCode(delegate: self)
-            }
+                                      newState.resendCode(delegate: self)
+                                  })
         case .redirect:
             showResultText("Unable to sign up: Web UX required")
-            dismissOTPModal()
+            dismissVerifyCodeModal()
         default:
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
-            dismissOTPModal()
+            dismissVerifyCodeModal()
         }
     }
 
     func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
         showResultText("Unexpected result while signing up: Attributes Required")
-        dismissOTPModal()
+        dismissVerifyCodeModal()
     }
 
     func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
-        dismissOTPModal()
+        dismissVerifyCodeModal()
     }
 
     func onSignUpCompleted() {
         showResultText("Signed up successfully!")
-        dismissOTPModal()
+        dismissVerifyCodeModal()
     }
 }
 
@@ -232,18 +236,19 @@ extension CustomAttributesViewController: SignUpResendCodeDelegate {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
-        dismissOTPModal()
+        dismissVerifyCodeModal()
     }
 
     func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
-        updateOTPModal(errorMessage: nil) { [weak self] otp in
-            guard let self else { return }
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: { [weak self] code in
+                                  guard let self else { return }
 
-            newState.submitCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                                  newState.submitCode(code: code, delegate: self)
+                              }, resendCallback: { [weak self] in
+                                  guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                                  newState.resendCode(delegate: self)
+                              })
     }
 }
