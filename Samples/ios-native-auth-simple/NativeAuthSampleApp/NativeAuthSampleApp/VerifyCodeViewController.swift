@@ -25,7 +25,7 @@
 import UIKit
 
 class VerifyCodeViewController: UIViewController {
-    var onSubmit: ((_ otp: String) -> Void)?
+    var onSubmit: ((_ code: String) -> Void)?
     var onResend: (() -> Void)?
 
     @IBOutlet weak var errorLabel: UILabel!
