@@ -26,7 +26,6 @@ import MSAL
 import UIKit
 
 class EmailAndPasswordViewController: UIViewController {
-
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
@@ -188,15 +187,16 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
 
         showResultText("Email verification required")
 
-        showOTPModal { [weak self] otp in
-            guard let self else { return }
+        showOTPModal(submittedCallback: { [weak self] otp in
+                         guard let self else { return }
 
-            newState.submitCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                         newState.submitCode(code: otp, delegate: self)
+                     },
+                     resendCodeCallback: { [weak self] in
+                         guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                         newState.resendCode(delegate: self)
+                     })
     }
 }
 
@@ -211,15 +211,16 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
                 return
             }
 
-            updateOTPModal(errorMessage: "Invalid code") { [weak self] otp in
-                guard let self else { return }
+            updateOTPModal(errorMessage: "Invalid code",
+                           submittedCallback: { [weak self] otp in
+                               guard let self else { return }
 
-                newState.submitCode(code: otp, delegate: self)
-            } resendCodeCallback: { [weak self] in
-                guard let self else { return }
+                               newState.submitCode(code: otp, delegate: self)
+                           }, resendCodeCallback: { [weak self] in
+                               guard let self else { return }
 
-                newState.resendCode(delegate: self)
-            }
+                               newState.resendCode(delegate: self)
+                           })
         case .redirect:
             showResultText("Unable to sign up: Web UX required")
             dismissOTPModal()
@@ -254,14 +255,15 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
     }
 
     func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
-        updateOTPModal(errorMessage: nil) { [weak self] otp in
-            guard let self else { return }
+        updateOTPModal(errorMessage: nil,
+                       submittedCallback: { [weak self] otp in
+                           guard let self else { return }
 
-            newState.submitCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                           newState.submitCode(code: otp, delegate: self)
+                       }, resendCodeCallback: { [weak self] in
+                           guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                           newState.resendCode(delegate: self)
+                       })
     }
 }
