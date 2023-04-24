@@ -100,8 +100,8 @@ class EmailAndPasswordViewController: UIViewController {
     // MARK: - Verify Code modal methods
 
     func showVerifyCodeModal(
-        submitCallback: @escaping ((_ code: String) -> Void),
-        resendCallback: @escaping (() -> Void)
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
     ) {
         guard verifyCodeViewController == nil else {
             print("Unexpected error: Verify Code view controller already exists")
@@ -125,8 +125,8 @@ class EmailAndPasswordViewController: UIViewController {
 
     func updateVerifyCodeModal(
         errorMessage: String?,
-        submitCallback: @escaping ((_ code: String) -> Void),
-        resendCallback: @escaping (() -> Void)
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
     ) {
         guard let verifyCodeViewController else {
             return
