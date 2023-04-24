@@ -31,7 +31,7 @@ class ResetPasswordViewController: UIViewController {
 
     var nativeAuth: MSALNativeAuthPublicClientApplication!
 
-    var otpViewController: OTPViewController?
+    var verifyCodeViewController: VerifyCodeViewController?
     var newPasswordViewController: NewPasswordViewController?
 
     override func viewDidLoad() {
@@ -67,65 +67,64 @@ class ResetPasswordViewController: UIViewController {
 
     // MARK: - OTP modal methods
 
-    func showOTPModal(
-        submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)
+    func showVerifyCodeModal(
+        submitCallback: @escaping ((_ code: String) -> Void),
+        resendCallback: @escaping (() -> Void)
     ) {
-        guard otpViewController == nil else {
-            print("Unexpected error: OTP view controller already exists")
+        guard verifyCodeViewController == nil else {
+            print("Unexpected error: Verify Code view controller already exists")
             return
         }
 
-        otpViewController = storyboard?.instantiateViewController(
-            withIdentifier: "OTPViewController") as? OTPViewController
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
 
-        guard let otpViewController else {
-            print("Error creating OTP view controller")
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
             return
         }
 
-        updateOTPModal(errorMessage: nil,
-                       submittedCallback: submittedCallback,
-                       resendCodeCallback: resendCodeCallback)
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
 
-        present(otpViewController, animated: true)
+        present(verifyCodeViewController, animated: true)
     }
 
-    func updateOTPModal(
+    func updateVerifyCodeModal(
         errorMessage: String?,
-        submittedCallback: @escaping ((_ otp: String) -> Void),
-        resendCodeCallback: @escaping (() -> Void)
+        submitCallback: @escaping ((_ code: String) -> Void),
+        resendCallback: @escaping (() -> Void)
     ) {
-        guard let otpViewController = otpViewController else {
+        guard let verifyCodeViewController else {
             return
         }
 
         if let errorMessage {
-            otpViewController.errorLabel.text = errorMessage
+            verifyCodeViewController.errorLabel.text = errorMessage
         }
 
-        otpViewController.otpSubmittedCallback = { otp in
+        verifyCodeViewController.onSubmit = { code in
             DispatchQueue.main.async {
-                submittedCallback(otp)
+                submitCallback(code)
             }
         }
 
-        otpViewController.resendCodeCallback = {
+        verifyCodeViewController.onResend = {
             DispatchQueue.main.async {
-                resendCodeCallback()
+                resendCallback()
             }
         }
     }
 
-    func dismissOTPModal(completion: (() -> Void)? = nil) {
-        guard otpViewController != nil else {
-            print("Unexpected error: OTP view controller is nil")
+    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
             return
         }
 
         dismiss(animated: true, completion: completion)
-
-        otpViewController = nil
+        verifyCodeViewController = nil
     }
 
     // MARK: - New Password modal methods
@@ -183,15 +182,16 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
     func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName _: String, codeLength _: Int) {
         print("ResetPasswordStartDelegate: onResetPasswordCodeSent: \(newState)")
 
-        showOTPModal { [weak self] otp in
-            guard let self else { return }
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self else { return }
 
-            newState.verifyCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                                newState.verifyCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                                newState.resendCode(delegate: self)
+                            })
     }
 
     func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
@@ -214,7 +214,7 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
         print("ResetPasswordResendCodeDelegate: onResetPasswordResendCodeError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
-        dismissOTPModal()
+        dismissVerifyCodeModal()
     }
 
     func onResetPasswordResendCodeSent(
@@ -222,15 +222,16 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
         displayName _: String,
         codeLength _: Int
     ) {
-        updateOTPModal(errorMessage: nil) { [weak self] otp in
-            guard let self else { return }
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: { [weak self] code in
+                                  guard let self else { return }
 
-            newState.verifyCode(code: otp, delegate: self)
-        } resendCodeCallback: { [weak self] in
-            guard let self else { return }
+                                  newState.verifyCode(code: code, delegate: self)
+                              }, resendCallback: { [weak self] in
+                                  guard let self else { return }
 
-            newState.resendCode(delegate: self)
-        }
+                                  newState.resendCode(delegate: self)
+                              })
     }
 }
 
@@ -248,26 +249,27 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
                 return
             }
 
-            updateOTPModal(errorMessage: "Invalid code") { [weak self] otp in
-                guard let self else { return }
+            updateVerifyCodeModal(errorMessage: "Check the code and try again",
+                                  submitCallback: { [weak self] code in
+                                      guard let self else { return }
 
-                newState.verifyCode(code: otp, delegate: self)
-            } resendCodeCallback: { [weak self] in
-                guard let self else { return }
+                                      newState.verifyCode(code: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self else { return }
 
-                newState.resendCode(delegate: self)
-            }
+                                      newState.resendCode(delegate: self)
+                                  })
         case .redirect:
             showResultText("Unable to sign up: Web UX required")
-            dismissOTPModal()
+            dismissVerifyCodeModal()
         default:
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
-            dismissOTPModal()
+            dismissVerifyCodeModal()
         }
     }
 
     func onPasswordRequired(newState: MSAL.ResetPasswordRequiredState) {
-        dismissOTPModal { [self] in
+        dismissVerifyCodeModal { [self] in
             showNewPasswordModal { [weak self] password in
                 guard let self = self else { return }
 
