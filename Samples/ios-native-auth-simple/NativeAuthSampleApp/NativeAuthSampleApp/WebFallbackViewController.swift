@@ -52,6 +52,7 @@ class WebFallbackViewController: UIViewController {
                 challengeTypes: [.oob, .password]
             )
         } catch {
+            print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
         }
 
