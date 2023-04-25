@@ -92,9 +92,9 @@ static NSDictionary *s_currentProfile = nil;
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default", @"https://microsoftgraph.chinacloudapi.cn/.default"];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default", @"https://microsoftgraph.chinacloudapi.cn/.default",
+        @"https://substrate.office.com/profile//User.Read"];
 
-    
     __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
     __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
     __auto_type profilePolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy";
@@ -110,7 +110,11 @@ static NSDictionary *s_currentProfile = nil;
     NSDictionary *defaultMacValue = @{@"clientId" : @"70cc5569-23e9-45e3-8e15-137722eabf72",
                                    @"redirectUri" :@"msauth.com.microsoft.MSALMacTestApp://auth"};
     
-    s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, defaultMacValue, defaultMacKey, nil];
+    NSString *defaultAutomationKey = @"MSAL-Automation-TestApp";
+    NSDictionary *defaultAutomationValue = @{@"clientId" : @"b8e9d222-c4ee-414c-ac29-b0eff1f32400",
+                                   @"redirectUri" :@"msauth.com.microsoft.MSALAutomationApp://auth"};
+    
+    s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, defaultMacValue, defaultMacKey, defaultAutomationValue, defaultAutomationKey, nil];
     s_additionalProfiles = _additionalProfiles();
     [s_profiles addEntriesFromDictionary:s_additionalProfiles];
     
