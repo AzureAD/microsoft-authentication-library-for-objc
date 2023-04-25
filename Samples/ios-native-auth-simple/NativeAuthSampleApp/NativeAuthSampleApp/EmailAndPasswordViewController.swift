@@ -58,10 +58,6 @@ class EmailAndPasswordViewController: UIViewController {
         }
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     @IBAction func signUpPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
             resultTextView.text = "Email or password not set"
@@ -172,8 +168,6 @@ class EmailAndPasswordViewController: UIViewController {
 extension EmailAndPasswordViewController: SignUpStartDelegate {
     func onSignUpError(error: MSAL.SignUpStartError) {
         switch error.type {
-        case .redirect:
-            showResultText("Unable to sign up: Web UX required")
         case .userAlreadyExists:
             showResultText("Unable to sign up: User already exists")
         case .invalidPassword:
@@ -187,8 +181,6 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
 
     func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
         print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
-
-        showResultText("Email verification required")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self else { return }
@@ -224,13 +216,15 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .redirect:
-            showResultText("Unable to sign up: Web UX required")
-            dismissVerifyCodeModal()
         default:
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
             dismissVerifyCodeModal()
         }
+    }
+
+    func onSignUpCompleted() {
+        showResultText("Signed up successfully!")
+        dismissVerifyCodeModal()
     }
 
     func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
@@ -240,11 +234,6 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 
     func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
-        dismissVerifyCodeModal()
-    }
-
-    func onSignUpCompleted() {
-        showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
     }
 }
