@@ -72,11 +72,6 @@ class ResetPasswordViewController: UIViewController {
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void
     ) {
-        guard verifyCodeViewController == nil else {
-            print("Unexpected error: Verify Code view controller already exists")
-            return
-        }
-
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
 
