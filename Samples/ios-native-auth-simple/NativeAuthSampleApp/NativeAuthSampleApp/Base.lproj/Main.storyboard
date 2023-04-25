@@ -152,7 +152,7 @@
         <!--Email + Code-->
         <scene sceneID="P3g-8l-ZA5">
             <objects>
-                <viewController id="wIe-Lj-NaN" sceneMemberID="viewController">
+                <viewController id="wIe-Lj-NaN" customClass="EmailAndCodeViewController" customModule="NativeAuthSampleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="F7U-wo-INk">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -197,6 +197,9 @@
                                                         <rect key="frame" x="0.0" y="0.0" width="105.66666666666667" height="34.333333333333336"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Up"/>
+                                                        <connections>
+                                                            <action selector="signUpPressed:" destination="wIe-Lj-NaN" eventType="touchUpInside" id="386-Hz-SCb"/>
+                                                        </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zwz-VE-ZGn">
                                                         <rect key="frame" x="0.0" y="42.333333333333343" width="105.66666666666667" height="34.333333333333343"/>
@@ -204,12 +207,16 @@
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign In"/>
                                                         <connections>
                                                             <action selector="signInPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Iup-9B-taH"/>
+                                                            <action selector="signInPressed:" destination="wIe-Lj-NaN" eventType="touchUpInside" id="fsf-ro-hgf"/>
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YSG-X9-x5q">
                                                         <rect key="frame" x="0.0" y="84.666666666666657" width="105.66666666666667" height="34.333333333333343"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Sign Out"/>
+                                                        <connections>
+                                                            <action selector="signOutPressed:" destination="wIe-Lj-NaN" eventType="touchUpInside" id="pMs-vl-THG"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <variation key="heightClass=compact" axis="horizontal"/>
@@ -254,6 +261,13 @@
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Email + Code" image="number.square" catalog="system" id="Let-tl-7gQ"/>
+                    <connections>
+                        <outlet property="emailTextField" destination="N18-5j-Ln6" id="mch-FM-vTh"/>
+                        <outlet property="resultTextView" destination="LHi-M3-ZZW" id="QuA-l5-Xm9"/>
+                        <outlet property="signInButton" destination="zwz-VE-ZGn" id="XK0-pN-uLK"/>
+                        <outlet property="signOutButton" destination="YSG-X9-x5q" id="2zn-Sx-DlU"/>
+                        <outlet property="signUpButton" destination="e0F-KI-1jf" id="GIq-ZY-9r2"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="r5m-VX-JJH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
