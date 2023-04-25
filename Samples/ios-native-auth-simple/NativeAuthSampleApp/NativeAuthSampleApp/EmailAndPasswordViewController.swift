@@ -68,7 +68,7 @@ class EmailAndPasswordViewController: UIViewController {
             return
         }
 
-        print("Signing up with email \(email) and password \(password)")
+        print("Signing up with email \(email) and password")
 
         nativeAuth.signUp(username: email, password: password, delegate: self)
     }
@@ -79,7 +79,7 @@ class EmailAndPasswordViewController: UIViewController {
             return
         }
 
-        print("Signing in with email \(email) and password \(password)")
+        print("Signing in with email \(email) and password")
 
         nativeAuth.signIn(username: email, password: password, delegate: self)
     }

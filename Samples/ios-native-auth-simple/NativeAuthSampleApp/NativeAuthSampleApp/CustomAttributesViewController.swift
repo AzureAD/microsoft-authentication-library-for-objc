@@ -77,7 +77,7 @@ class CustomAttributesViewController: UIViewController {
             attributes["last_name"] = lastName
         }
 
-        print("Signing up with email \(email), password \(password) and attributes: \(attributes)")
+        print("Signing up with email \(email), password and attributes: \(attributes)")
 
         appContext.signUp(username: email,
                           password: password,
