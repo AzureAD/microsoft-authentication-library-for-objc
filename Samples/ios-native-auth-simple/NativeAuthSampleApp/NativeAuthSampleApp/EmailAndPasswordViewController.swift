@@ -93,63 +93,6 @@ class EmailAndPasswordViewController: UIViewController {
         updateUI()
     }
 
-    // MARK: - Verify Code modal methods
-
-    func showVerifyCodeModal(
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        verifyCodeViewController = storyboard?.instantiateViewController(
-            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
-
-        guard let verifyCodeViewController else {
-            print("Error creating Verify Code view controller")
-            return
-        }
-
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: submitCallback,
-                              resendCallback: resendCallback)
-
-        present(verifyCodeViewController, animated: true)
-    }
-
-    func updateVerifyCodeModal(
-        errorMessage: String?,
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        guard let verifyCodeViewController else {
-            return
-        }
-
-        if let errorMessage {
-            verifyCodeViewController.errorLabel.text = errorMessage
-        }
-
-        verifyCodeViewController.onSubmit = { code in
-            DispatchQueue.main.async {
-                submitCallback(code)
-            }
-        }
-
-        verifyCodeViewController.onResend = {
-            DispatchQueue.main.async {
-                resendCallback()
-            }
-        }
-    }
-
-    func dismissVerifyCodeModal() {
-        guard verifyCodeViewController != nil else {
-            print("Unexpected error: Verify Code view controller is nil")
-            return
-        }
-
-        dismiss(animated: true)
-        verifyCodeViewController = nil
-    }
-
     func showResultText(_ text: String) {
         resultTextView.text = text
     }
@@ -284,5 +227,63 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
 
     func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
         showResultText("Unexpected result while signing in: Verification required")
+    }
+}
+
+// MARK: - Verify Code modal methods
+extension EmailAndPasswordViewController {
+    func showVerifyCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeViewController else {
+            return
+        }
+
+        if let errorMessage {
+            verifyCodeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
+            }
+        }
+
+        verifyCodeViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+    }
+
+    func dismissVerifyCodeModal() {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        verifyCodeViewController = nil
     }
 }
