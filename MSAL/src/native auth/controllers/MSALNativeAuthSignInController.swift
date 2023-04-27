@@ -27,6 +27,7 @@
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
     
     // TODO: add ad-hoc method for OTP and pwd?
+    // TODO: add parameter struct or class
     func signIn(
         username: String,
         password: String?,
@@ -43,7 +44,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     private let requestProvider: MSALNativeAuthSignInRequestProvider
     private let factory: MSALNativeAuthResultBuildable
-//    private let responseValidator: MSALNAtiveAuthSignInResponseValidator
+    private let responseValidator: MSALNativeAuthSignInResponseValidating
     // TODO: is this the right place to keep the state? What if we add it to publicClientApplication class?
     // add it to the super class?
     private weak var currentState: MSALNativeAuthBaseState?
@@ -56,7 +57,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         cacheAccessor: MSALNativeAuthCacheInterface,
         responseHandler: MSALNativeAuthResponseHandling,
         context: MSIDRequestContext,
-        factory: MSALNativeAuthResultBuildable
+        factory: MSALNativeAuthResultBuildable,
+        responseValidator: MSALNativeAuthSignInResponseValidating
     ) {
         self.requestProvider = requestProvider
         self.factory = factory
@@ -76,12 +78,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             responseHandler: MSALNativeAuthResponseHandler(),
             context: context,
-            factory: MSALNativeAuthResultFactory(config: config)
+            factory: MSALNativeAuthResultFactory(config: config),
+            responseValidator: MSALNativeAuthResponseValidator()
         )
     }
 
     // MARK: - Internal
-    
+
     func signIn(username: String, password: String?, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
         // start telemetry ?
         let telemetryEvent = makeLocalTelemetryApiEvent(
@@ -97,30 +100,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
 
         performRequest(request) { [self] result in
-//            let result = responseValidator.validateSignInTokenResponse(result)
-//
-//            switch(result) {
-//            case .redirect:
-//
-//            case .credentialRequired(flowToken)
-//
-//            case .error(errorType)
-//
-//            case .success(MSALNativeAuthUserAccount)
-//
-//            }
-            
-            
-            
+            let result = responseValidator.validateSignInTokenResponse(result: result)
             switch result {
-            case .success(let tokenResponse):
-                delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(username: username, accessToken: tokenResponse.accessToken ?? "use guard here"))
-            case .failure(let signInTokenResponseError):
-                // this should be MSALNativeAuthSignInTokenResponseError
-                guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
-                    delegate.onSignInError(error: SignInStartError(type: .generalError))
-                    return
-                }
+            case .success(let account):
+                delegate.onSignInCompleted(result: account)
+            case .credentialRequired(let credentialToken):
+                <#code#>
+            case .error(let errorType):
+                <#code#>
+            }
+            
+            
+            
+            
                 // TODO: return error to the delegate, parse the error description/code
 //                switch signInTokenResponseError.error {
 //                case .invalidRequest:
@@ -149,7 +141,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 //                    // TODO: validate that all the required fields are there, and log meaningful error to the API
 //                    delegate.onSignInCodeSent(newState: newState, displayName: "parsedDisplayName", codeLength: 4)
 //                }
-            }
         }
     }
 
