@@ -29,6 +29,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType {
     case expiredToken
     case invalidClient
     case invalidRequest
+    case invalidServerResponse
     case unsupportedChallengeType
     case invalidScope
     case authorizationPending
@@ -36,12 +37,13 @@ enum MSALNativeAuthSignInTokenValidatedErrorType {
 }
 
 enum MSALNativeAuthSignInTokenValidatedResponse {
-    case success(MSALNativeAuthUserAccount)
+    case success(MSIDAADTokenResponse)
     case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
 
 protocol MSALNativeAuthSignInResponseValidating {
+    // TODO: inject the response validator to validate the MSIDAADTokenResponse
     func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse
 }
 
@@ -52,11 +54,10 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating {
         case .success(let tokenResponse):
             
         case .failure(let signInTokenResponseError):
-            // this should be MSALNativeAuthSignInTokenResponseError
             guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
-                delegate.onSignInError(error: SignInStartError(type: .generalError))
-                return
+                return .error(.invalidServerResponse)
             }
+            
         }
     }
 }
