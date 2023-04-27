@@ -29,6 +29,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
+    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
     public init(
         configuration config: MSALPublicClientApplicationConfig,
@@ -37,10 +38,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             throw MSALNativeAuthError.invalidAuthority
         }
 
+        self.internalChallengeTypes =
+            MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+            
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: aadAuthority,
-            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+            challengeTypes: internalChallengeTypes
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
@@ -57,11 +61,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
             .authority(rawTenant: rawTenant)
 
+        self.internalChallengeTypes =
+                MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: aadAuthority,
             rawTenant: rawTenant,
-            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+            challengeTypes: internalChallengeTypes
         )
 
         self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
@@ -158,7 +164,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
-        // TODO: call signInController signIn
+        let controller = controllerFactory.makeSignInController(with:
+                                                                    MSALNativeAuthRequestContext(correlationId: correlationId))
+        controller.signIn(username: username, password: password, challengeTypes: internalChallengeTypes, correlationId: correlationId, scopes: scopes, delegate: delegate)
     }
 
     public func signIn(

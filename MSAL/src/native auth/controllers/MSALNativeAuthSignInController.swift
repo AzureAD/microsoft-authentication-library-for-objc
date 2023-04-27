@@ -56,7 +56,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         requestProvider: MSALNativeAuthSignInRequestProvider,
         cacheAccessor: MSALNativeAuthCacheInterface,
         responseHandler: MSALNativeAuthResponseHandling,
-        context: MSIDRequestContext,
+        context: MSALNativeAuthRequestContext,
         factory: MSALNativeAuthResultBuildable,
         responseValidator: MSALNativeAuthSignInResponseValidating
     ) {
@@ -71,7 +71,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
+    convenience init(config: MSALNativeAuthConfiguration, context: MSALNativeAuthRequestContext) {
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthSignInRequestProvider(config: config),
@@ -86,7 +86,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Internal
 
     func signIn(username: String, password: String?, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
-        // start telemetry ?
+        context.setCorrelationId(correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
             telemetryApiId: .telemetryApiIdSignIn // TODO: Add signIn token

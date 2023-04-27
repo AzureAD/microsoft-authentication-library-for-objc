@@ -26,7 +26,7 @@
 
 final class MSALNativeAuthRequestContext: MSIDRequestContext {
 
-    private let _correlationId: UUID
+    private var _correlationId: UUID
     private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
 
     init(correlationId: UUID? = nil) {
@@ -35,6 +35,10 @@ final class MSALNativeAuthRequestContext: MSIDRequestContext {
 
     func correlationId() -> UUID {
         _correlationId
+    }
+    
+    func setCorrelationId(_ correlationId: UUID?) {
+        _correlationId = correlationId ?? UUID()
     }
 
     func logComponent() -> String {
