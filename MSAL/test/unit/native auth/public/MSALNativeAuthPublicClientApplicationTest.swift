@@ -32,16 +32,16 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
     private static var expectation = XCTestExpectation()
     
-    private class SignInStartCompletionErrorDelegate: SignInStartDelegate, SignInOTPStartDelegate {
+    private class SignInStartCompletionErrorDelegate: SignInStartDelegate, SignInCodeStartDelegate {
         var expectedErrorType = SignInStartErrorType.invalidUsername
-        var expectedOTPErrorType = SignInOTPStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignInCodeStartErrorType.invalidUsername
         
         func onSignInError(error: MSAL.SignInStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
             expectation.fulfill()
         }
         
-        func onSignInOTPError(error: MSAL.SignInOTPStartError) {
+        func onSignInCodeError(error: MSAL.SignInCodeStartError) {
             XCTAssertEqual(error.type, expectedOTPErrorType)
             expectation.fulfill()
         }
@@ -51,7 +51,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onSignInOTPCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
             onSignInCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
         }
         
@@ -61,16 +61,16 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         }
     }
     
-    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate, SignUpOTPStartDelegate {
+    private class SignUpStartCompletionErrorDelegate: SignUpStartDelegate, SignUpCodeStartDelegate {
         var expectedErrorType = SignUpStartErrorType.invalidUsername
-        var expectedOTPErrorType = SignUpOTPStartErrorType.invalidUsername
+        var expectedOTPErrorType = SignUpCodeStartErrorType.invalidUsername
         
         func onSignUpError(error: MSAL.SignUpStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
             expectation.fulfill()
         }
         
-        func onSignUpOTPError(error: MSAL.SignUpOTPStartError) {
+        func onSignUpCodeError(error: MSAL.SignUpCodeStartError) {
             XCTAssertEqual(error.type, expectedOTPErrorType)
             expectation.fulfill()
         }
@@ -80,7 +80,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onSignUpOTPCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+        func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
             onSignUpCodeSent(newState: newState, displayName: displayName, codeLength: codeLength)
         }
         

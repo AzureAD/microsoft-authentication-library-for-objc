@@ -32,9 +32,9 @@ public protocol SignInStartDelegate {
 }
 
 @objc
-public protocol SignInOTPStartDelegate {
-    func onSignInOTPError(error: SignInOTPStartError)
-    func onSignInOTPCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+public protocol SignInCodeStartDelegate {
+    func onSignInCodeError(error: SignInCodeStartError)
+    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 

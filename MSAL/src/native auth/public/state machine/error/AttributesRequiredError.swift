@@ -36,7 +36,7 @@ public class AttributesRequiredError: MSALNativeAuthBaseError {
 
 @objc
 public enum AttributesRequiredErrorType: Int {
-    case redirect
+    case browserRequired
     case generalError
     case invalidAttributes
 }

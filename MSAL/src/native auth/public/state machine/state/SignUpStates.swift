@@ -41,7 +41,7 @@ public class SignUpCodeSentState: MSALNativeAuthBaseState {
         switch code {
         case "0000": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-        case "3333": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
+        case "3333": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
         case "5555": delegate.onPasswordRequired(newState: SignUpPasswordRequiredState(flowToken: flowToken))
         case "6666": delegate.onSignUpAttributesRequired(newState: SignUpAttributesRequiredState(flowToken: flowToken))
         default: delegate.onSignUpCompleted()
@@ -54,7 +54,7 @@ public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
         switch password {
         case "redirect": delegate.onSignUpPasswordRequiredError(
-            error: PasswordRequiredError(type: .redirect), newState: nil)
+            error: PasswordRequiredError(type: .browserRequired), newState: nil)
         case "generalerror": delegate.onSignUpPasswordRequiredError(
             error: PasswordRequiredError(type: .generalError),
             newState: self)
@@ -86,7 +86,7 @@ public class SignUpAttributesRequiredState: MSALNativeAuthBaseState {
                 error: AttributesRequiredError(type: .generalError),
                 newState: self)
             case "redirect": delegate.onSignUpAttributesRequiredError(
-                error: AttributesRequiredError(type: .redirect),
+                error: AttributesRequiredError(type: .browserRequired),
                 newState: nil)
             default: delegate.onSignUpCompleted()
             }

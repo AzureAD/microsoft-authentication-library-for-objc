@@ -49,7 +49,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         switch code {
         case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-        case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
+        case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
         default: delegate.onSignInCompleted(result:
                                         MSALNativeAuthUserAccount(
                                             username: "email@contoso.com",

@@ -105,7 +105,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
         switch username {
         case "exists@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .userAlreadyExists))
-        case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .redirect))
+        case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .browserRequired))
         case "invalidpassword@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
         case "invalidemail@contoso.com": delegate.onSignUpError(error: SignUpStartError(type:
                 .invalidUsername, message: "email \(username) is invalid"))
@@ -122,21 +122,21 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         username: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignUpOTPStartDelegate
+        delegate: SignUpCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .invalidUsername))
+            delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
             return
         }
         switch username {
-        case "exists@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .userAlreadyExists))
-        case "redirect@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .redirect))
-        case "invalidemail@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type:
+        case "exists@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .userAlreadyExists))
+        case "redirect@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .browserRequired))
+        case "invalidemail@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type:
                 .invalidUsername, message: "email \(username) is invalid"))
-        case "invalidattributes@contoso.com": delegate.onSignUpOTPError(error:
-                                                                        SignUpOTPStartError(type: .invalidAttributes))
-        case "generalerror@contoso.com": delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .generalError))
-        default: delegate.onSignUpOTPCodeSent(
+        case "invalidattributes@contoso.com": delegate.onSignUpCodeError(error:
+                                                                        SignUpCodeStartError(type: .invalidAttributes))
+        case "generalerror@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .generalError))
+        default: delegate.onSignUpCodeSent(
             newState: SignUpCodeSentState(flowToken: "signup_token"),
             displayName: username,
             codeLength: 4)
@@ -165,10 +165,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         username: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInOTPStartDelegate
+        delegate: SignInCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInOTPError(error: SignInOTPStartError(type: .invalidUsername))
+            delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
             return
         }
         // TODO: call signInController signIn
@@ -184,7 +184,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         switch username {
-        case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .redirect))
+        case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .browserRequired))
         case "nopassword@contoso.com": delegate.onResetPasswordError(
             error: ResetPasswordStartError(type: .userDoesNotHavePassword))
         case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
