@@ -30,5 +30,5 @@ enum Configuration {
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
     static let authorityURL = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
     // swiftlint:disable:next force_try
-    static var authority = try! MSALAuthority(url: URL(string: authorityURL)!)
+    static let authority = try! MSALAuthority(url: URL(string: authorityURL)!)
 }
