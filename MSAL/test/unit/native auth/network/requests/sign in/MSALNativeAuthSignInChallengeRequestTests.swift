@@ -39,8 +39,7 @@ final class MSALNativeAuthSignInChallengeRequestTests: XCTestCase {
             config: MSALNativeAuthConfigStubs.configuration,
             context: context,
             credentialToken: "Test Credential Token",
-            challengeTypes: [.otp],
-            challengeTarget: "phone"
+            challengeTypes: [.otp]
         )
     }
 
@@ -90,8 +89,7 @@ final class MSALNativeAuthSignInChallengeRequestTests: XCTestCase {
             config: MSALNativeAuthConfigStubs.configuration,
             context: context,
             credentialToken: params.credentialToken,
-            challengeTypes: nil,
-            challengeTarget: nil
+            challengeTypes: nil
         ))
 
         sut.configure(

@@ -37,15 +37,15 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
     private var params: MSALNativeAuthSignInTokenRequestParameters {
         .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            context: context,
+            scope: "oob",
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             credentialToken: "Test Credential Token",
             signInSLT: "Test SignIn SLT",
             grantType: .password,
             challengeTypes: [.password],
-            scope: "<scope-1>",
-            password: "password",
-            oobCode: "oob"
+            password: "<scope-1>",
+            oobCode: "password",
+            context: context
         )
     }
 
@@ -93,15 +93,15 @@ final class MSALNativeAuthSignInTokenRequestTests: XCTestCase {
 
         let sut = try MSALNativeAuthSignInTokenRequest(params: .init(
             config: MSALNativeAuthConfigStubs.configuration,
-            context: params.context,
+            scope: nil,
             username: nil,
             credentialToken: nil,
             signInSLT: nil,
             grantType: .password,
             challengeTypes: nil,
-            scope: nil,
             password: nil,
-            oobCode: nil
+            oobCode: nil,
+            context: params.context
         ))
 
         sut.configure(
