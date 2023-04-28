@@ -53,7 +53,6 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
 
         super.init(
             clientId: clientId,
-            context: context,
             responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
@@ -76,14 +75,16 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         parameters: MSALNativeAuthSignUpOTPParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignUp // TODO: Update local telemetry event id to differentiate sign-up with password and otp
+            telemetryApiId: .telemetryApiIdSignUp,
+            context: context
         )
-        startTelemetryEvent(telemetryEvent)
+        startTelemetryEvent(telemetryEvent, context: context)
 
-        guard let request = createRequest(with: parameters) else {
-            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, completion: completion)
+        guard let request = createRequest(with: parameters, context: context) else {
+            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, context: context, completion: completion)
             return
         }
 
@@ -104,14 +105,14 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
 
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
-                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
+                guard let tokenResult = handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, context: context, completion: completion)
                     return
                 }
 
                 telemetryEvent?.setUserInformation(tokenResult.account)
 
-                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
+                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
 
                 let response = factory.makeNativeAuthResponse(
                     stage: .completed,
@@ -119,7 +120,7 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
                     tokenResult: tokenResult
                 )
 
-                complete(telemetryEvent, response: response, completion: completion)
+                complete(telemetryEvent, response: response, context: context, completion: completion)
 
             case .failure(let error):
                 MSALLogger.log(
@@ -128,14 +129,14 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
                     format: "SignUp OTP request error: \(error)"
                 )
 
-                complete(telemetryEvent, error: error, completion: completion)
+                complete(telemetryEvent, error: error, context: context, completion: completion)
             }
         }
     }
 
     // MARK: - Private
 
-    private func createRequest(with parameters: MSALNativeAuthSignUpOTPParameters) -> MSALNativeAuthSignUpRequest? {
+    private func createRequest(with parameters: MSALNativeAuthSignUpOTPParameters, context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
         do {
             return try requestProvider.signUpOTPRequest(
                 parameters: parameters,

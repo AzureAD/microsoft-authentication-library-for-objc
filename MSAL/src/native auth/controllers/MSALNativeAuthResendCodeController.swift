@@ -44,14 +44,12 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
     init(
         clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
-        responseHandler: MSALNativeAuthResponseHandling,
-        context: MSIDRequestContext
+        responseHandler: MSALNativeAuthResponseHandling
     ) {
         self.requestProvider = requestProvider
 
         super.init(
             clientId: clientId,
-            context: context,
             responseHandler: responseHandler
         )
     }
@@ -60,8 +58,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),
-            responseHandler: MSALNativeAuthResponseHandler(),
-            context: context
+            responseHandler: MSALNativeAuthResponseHandler()
         )
     }
 
@@ -71,25 +68,26 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         parameters: MSALNativeAuthResendCodeParameters,
         completion: @escaping (String?, Error?) -> Void
     ) {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdResendCode
+            telemetryApiId: .telemetryApiIdResendCode, context: context
         )
-        startTelemetryEvent(telemetryEvent)
+        startTelemetryEvent(telemetryEvent, context: context)
 
         func completeWithTelemetry(_ response: String?, _ error: Error?) {
-            stopTelemetryEvent(telemetryEvent, error: error)
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
             completion(response, error)
         }
 
-        guard let request = createRequest(parameters: parameters) else {
+        guard let request = createRequest(parameters: parameters, context: context) else {
             return completeWithTelemetry(nil, MSALNativeAuthError.invalidRequest)
         }
 
-        performRequest(request) { [self] result in
+        performRequest(request, context: context) { [self] result in
             switch result {
             case .success(let resendCodeResponse):
-                guard verifyResponse(resendCodeResponse) else {
+                guard verifyResponse(resendCodeResponse, context: context) else {
                     return completeWithTelemetry(nil, MSALNativeAuthError.validationError)
                 }
                 completeWithTelemetry(resendCodeResponse.credentialToken, nil)
@@ -107,7 +105,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
 
     // MARK: - Private
 
-    private func createRequest(parameters: MSALNativeAuthResendCodeParameters) -> MSALNativeAuthResendCodeRequest? {
+    private func createRequest(parameters: MSALNativeAuthResendCodeParameters, context: MSALNativeAuthRequestContext) -> MSALNativeAuthResendCodeRequest? {
         do {
             return try requestProvider.resendCodeRequest(
                 parameters: parameters,
@@ -120,14 +118,15 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
     }
 
     private func performRequest(_ request: MSALNativeAuthResendCodeRequest,
+                                context: MSALNativeAuthRequestContext,
                                 completion: @escaping ResendCodeCompletionHandler) {
-        request.send { [self] response, error in
+        request.send { response, error in
             if let error = error {
                 return completion(.failure(error))
             }
             guard let response = response as? MSALNativeAuthResendCodeRequestResponse else {
                 MSALLogger.log(level: .error,
-                               context: self.context,
+                               context: context,
                                format: "Reponse was not decoded properly by the serializer")
                 return completion(.failure(MSALNativeAuthError.invalidResponse))
             }
@@ -135,7 +134,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         }
     }
 
-    private func verifyResponse(_ resendCodeResponse: MSALNativeAuthResendCodeRequestResponse) -> Bool {
+    private func verifyResponse(_ resendCodeResponse: MSALNativeAuthResendCodeRequestResponse, context: MSALNativeAuthRequestContext) -> Bool {
         do {
             return try responseHandler.handle(context: context, resendCodeReponse: resendCodeResponse)
         } catch {

@@ -48,7 +48,7 @@ final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControl
     }
 
     func makeSignInController(with context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignInControlling {
-        return MSALNativeAuthSignInController(config: config, context: context)
+        return MSALNativeAuthSignInController(config: config)
     }
 
     func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {

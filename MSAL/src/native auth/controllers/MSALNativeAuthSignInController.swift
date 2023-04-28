@@ -61,7 +61,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     ) {
         self.requestProvider = requestProvider
         self.factory = factory
-
+        self.responseValidator = responseValidator
         super.init(
             clientId: clientId,
             responseHandler: responseHandler,
