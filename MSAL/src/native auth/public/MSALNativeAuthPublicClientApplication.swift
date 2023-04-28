@@ -27,7 +27,7 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
-    private let controllerFactory: MSALNativeAuthRequestControllerBuildable
+    private let controllerFactory: MSALNativeAuthControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
@@ -47,7 +47,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             challengeTypes: internalChallengeTypes
         )
 
-        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
 
         try super.init(configuration: config)
@@ -70,7 +70,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             challengeTypes: internalChallengeTypes
         )
 
-        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
 
         let configuration = MSALPublicClientApplicationConfig(
@@ -83,7 +83,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     init(
-        controllerFactory: MSALNativeAuthRequestControllerBuildable,
+        controllerFactory: MSALNativeAuthControllerBuildable,
         inputValidator: MSALNativeAuthInputValidating,
         internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     ) {

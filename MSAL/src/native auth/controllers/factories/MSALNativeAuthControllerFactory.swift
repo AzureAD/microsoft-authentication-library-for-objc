@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRequestControllerBuildable {
+protocol MSALNativeAuthControllerBuildable {
     func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling
     func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling
     func makeSignInController(with context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignInControlling
@@ -32,7 +32,7 @@ protocol MSALNativeAuthRequestControllerBuildable {
     func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling
 }
 
-final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControllerBuildable {
+final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     private let config: MSALNativeAuthConfiguration
 
     init(config: MSALNativeAuthConfiguration) {
