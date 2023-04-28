@@ -54,7 +54,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
+    convenience init(config: MSALNativeAuthConfiguration) {
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),

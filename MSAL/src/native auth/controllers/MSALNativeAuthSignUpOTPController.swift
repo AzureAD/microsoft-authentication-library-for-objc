@@ -45,7 +45,6 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         requestProvider: MSALNativeAuthRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         responseHandler: MSALNativeAuthResponseHandling,
-        context: MSIDRequestContext,
         factory: MSALNativeAuthResultBuildable
     ) {
         self.requestProvider = requestProvider
@@ -58,13 +57,12 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
+    convenience init(config: MSALNativeAuthConfiguration) {
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             responseHandler: MSALNativeAuthResponseHandler(),
-            context: context,
             factory: MSALNativeAuthResultFactory(config: config)
         )
     }

@@ -166,8 +166,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
-        let controller = controllerFactory.makeSignInController(with:
-                                                                    MSALNativeAuthRequestContext(correlationId: correlationId))
+        let controller = controllerFactory.makeSignInController()
         controller.signIn(username: username, password: password, challengeTypes: internalChallengeTypes, correlationId: correlationId, scopes: scopes, delegate: delegate)
     }
 
