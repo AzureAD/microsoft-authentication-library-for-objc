@@ -24,25 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-enum MSALNativeAuthSignInTokenValidatedErrorType {
-    case generalError
-    case expiredToken
-    case invalidClient
-    case invalidRequest
-    case invalidServerResponse
-    case invalidGrant
-    case unsupportedChallengeType
-    case invalidScope
-    case authorizationPending
-    case slowDown
-}
-
-enum MSALNativeAuthSignInTokenValidatedResponse {
-    case success(MSIDTokenResult)
-    case credentialRequired(String)
-    case error(MSALNativeAuthSignInTokenValidatedErrorType)
-}
-
 protocol MSALNativeAuthSignInResponseValidating {
     func validateSignInTokenResponse(
         context: MSALNativeAuthRequestContext,
