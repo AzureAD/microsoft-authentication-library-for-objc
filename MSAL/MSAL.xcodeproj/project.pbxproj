@@ -2808,7 +2808,7 @@
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
-				E2AA770B292F972500113F04 /* native auth */,
+				E2AA770B292F972500113F04 /* native_auth */,
 				94E876C91E492D2800FB96ED /* instance */,
 				D65A6F7E1E3FF3D900C69FBA /* public */,
 				96D9A5461E4AB21400674A85 /* telemetry */,
@@ -3406,7 +3406,7 @@
 			path = telemetry;
 			sourceTree = "<group>";
 		};
-		E2AA770B292F972500113F04 /* native auth */ = {
+		E2AA770B292F972500113F04 /* native_auth */ = {
 			isa = PBXGroup;
 			children = (
 				E206FC5E296D65DE00AF4400 /* MSALNativeAuthError.swift */,
@@ -3420,7 +3420,7 @@
 				E26097C52948FC630060DD7C /* telemetry */,
 				E206FCFB297B01DF00AF4400 /* validation */,
 			);
-			path = "native auth";
+			path = native_auth;
 			sourceTree = "<group>";
 		};
 		E2BC027F29D7566F00041DBC /* sign up */ = {
