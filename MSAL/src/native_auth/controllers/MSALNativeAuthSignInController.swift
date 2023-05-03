@@ -138,7 +138,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         correlationId: UUID?,
         scopes: [String]?,
         delegate: SignInStartDelegate) {
-            
         }
 
     // MARK: - Private
@@ -166,11 +165,16 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func createChallengeRequest(credentialToken: String,
-                                    challengeTypes: [MSALNativeAuthInternalChallengeType],
-                                        context: MSIDRequestContext) -> MSALNativeAuthSignInChallengeRequest? {
+    private func createChallengeRequest(
+        credentialToken: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthSignInChallengeRequest? {
         do {
-            return try requestProvider.signInChallengeRequest(credentialToken: credentialToken, challengeTypes: challengeTypes, context: context)
+            return try requestProvider.signInChallengeRequest(
+                credentialToken: credentialToken,
+                challengeTypes: challengeTypes,
+                context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil

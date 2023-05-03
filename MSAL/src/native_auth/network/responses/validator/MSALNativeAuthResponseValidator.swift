@@ -30,6 +30,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType {
     case invalidClient
     case invalidRequest
     case invalidServerResponse
+    case invalidGrant
     case unsupportedChallengeType
     case invalidScope
     case authorizationPending
@@ -96,15 +97,56 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
     ) -> MSALNativeAuthSignInTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
-            guard let tokenResult = validateAndConvertTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+            guard let tokenResult = validateAndConvertTokenResponse(
+                tokenResponse,
+                context: context,
+                msidConfiguration: msidConfiguration
+            ) else {
                 return .error(.invalidServerResponse)
             }
             return .success(tokenResult)
         case .failure(let signInTokenResponseError):
-            guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
+            return handleFailedResult(signInTokenResponseError)
+        }
+        
+        func handleFailedResult(_ responseError: Error) -> MSALNativeAuthSignInTokenValidatedResponse {
+            guard let responseError =
+                    responseError as? MSALNativeAuthSignInTokenResponseError else {
+                MSALLogger.log(
+                    level: .verbose,
+                    context: context,
+                    format: "Error type not expected"
+                )
                 return .error(.invalidServerResponse)
             }
+            switch responseError.error {
+            case .credentialRequired:
+                guard let credentialToken = responseError.credentialToken else {
+                    MSALLogger.log(
+                        level: .verbose,
+                        context: context,
+                        format: "Expected credential token not empty"
+                    )
+                    return .error(.invalidServerResponse)
+                }
+                return .credentialRequired(credentialToken)
+            case .invalidRequest:
+                return .error(.invalidRequest)
+            case .invalidClient:
+                return .error(.invalidClient)
+            case .invalidGrant:
+                return .error(.invalidGrant)
+            case .expiredToken:
+                return .error(.expiredToken)
+            case .unsupportedChallengeType:
+                return .error(.unsupportedChallengeType)
+            case .invalidScope:
+                return .error(.invalidScope)
+            case .authorizationPending:
+                return .error(.authorizationPending)
+            case .slowDown:
+                return .error(.slowDown)
+            }
         }
-        return .error(.invalidServerResponse)
     }
 }
