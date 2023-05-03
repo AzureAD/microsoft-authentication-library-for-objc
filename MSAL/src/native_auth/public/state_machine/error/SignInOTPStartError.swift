@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,21 +24,21 @@
 
 import Foundation
 
-enum MSALNativeAuthRequestParametersKey: String {
-    case clientId = "client_id"
-    case challengeType = "challenge_type"
-    case grantType = "grant_type"
-    case username
-    case email
-    case password
-    case scope
-    case credentialToken = "credential_token"
-    case flowToken
-    case oobCode = "oob"
-    case otp
-    case customAttributes
-    case signInSLT = "signin_slt"
-    case attributes
-    case signUpToken = "signup_token"
-    case clientInfo = "client_info"
+@objc
+public class SignInCodeStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignInCodeStartErrorType
+
+    init(type: SignInCodeStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
+}
+
+@objc
+public enum SignInCodeStartErrorType: Int {
+    case browserRequired
+    case userNotFound
+    case invalidAuthenticationType
+    case invalidUsername
+    case generalError
 }

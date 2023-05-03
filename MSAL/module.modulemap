@@ -61,6 +61,7 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/network/request_configurator/MSIDAADRequestConfigurator.h"
     header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDAADTokenRequestServerTelemetry.h"
     header "IdentityCore/IdentityCore/src/oauth2/MSIDTokenResponse.h"
+    header "IdentityCore/IdentityCore/src/oauth2/MSIDExternalSSOContext.h"
     header "IdentityCore/IdentityCore/src/requests/result/MSIDTokenResult.h"
     header "IdentityCore/IdentityCore/src/configuration/MSIDConfiguration.h"
     header "IdentityCore/IdentityCore/src/validation/MSIDAuthority.h"

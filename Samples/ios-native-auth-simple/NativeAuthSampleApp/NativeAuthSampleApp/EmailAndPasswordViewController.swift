@@ -23,12 +23,120 @@
 // THE SOFTWARE.
 
 import UIKit
+import MSAL
 
 class EmailAndPasswordViewController: UIViewController {
 
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var resultTextView: UITextView!
+
+    @IBOutlet weak var signUpButton: UIButton!
+    @IBOutlet weak var signInButton: UIButton!
+    @IBOutlet weak var signOutButton: UIButton!
+
+    var appContext: MSALNativeAuthPublicClientApplication!
+
+    var otpViewController: OTPViewController?
+
+    var signedIn = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+        let authority = try! MSALAuthority(url: URL(string: Configuration.authority)!)
+
+        appContext = try! MSALNativeAuthPublicClientApplication(
+            configuration: MSALPublicClientApplicationConfig(
+                clientId: Configuration.clientId,
+                redirectUri: nil,
+                authority: authority),
+                challengeTypes: [.oob, .password])
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // TODO: Call appContext.getUserAccount() and update UI accordingly
+    }
+
+    @IBAction func signUpTapped(_ sender: Any) {
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "email or password not set"
+            return
+        }
+
+        print("Signing up with email \(email) and password \(password)")
+    }
+
+    @IBAction func signInTapped(_ sender: Any) {
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "email or password not set"
+            return
+        }
+
+        print("Signing in with email \(email) and password \(password)")
+
+        showOTPModal(submittedCallback: { [weak self] otp in
+            guard let self = self else { return }
+
+            showResultText("Submitted OTP: \(otp)")
+            dismiss(animated: true)
+        }, resendCodeCallback: { [weak self] in
+            self?.showResultText("Resending code")
+        })
+    }
+
+    @IBAction func signOutTapped(_ sender: Any) {
+        signedIn = false
+
+        showResultText("Signed out")
+
+        updateUI()
+    }
+
+    func showOTPModal(submittedCallback: @escaping ((_ otp: String) -> Void), resendCodeCallback: @escaping (() -> Void)) {
+        if otpViewController == nil {
+            otpViewController = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
+        }
+
+        guard let otpViewController = otpViewController else {
+            return
+        }
+
+        otpViewController.otpSubmittedCallback = { otp in
+            DispatchQueue.main.async {
+                submittedCallback(otp)
+            }
+        }
+
+        otpViewController.resendCodeCallback = {
+            DispatchQueue.main.async {
+                resendCodeCallback()
+            }
+        }
+
+        present(otpViewController, animated: true)
+    }
+
+    func showOTPErrorMessage(_ message: String) {
+        otpViewController?.errorLabel.text = message
+    }
+
+    func showResultText(_ text: String) {
+        resultTextView.text = text
+    }
+
+    func updateUI() {
+        if signedIn {
+            signUpButton.isEnabled = false
+            signInButton.isEnabled = false
+            signOutButton.isEnabled = true
+        } else {
+            signUpButton.isEnabled = true
+            signInButton.isEnabled = true
+            signOutButton.isEnabled = false
+        }
     }
 
 }

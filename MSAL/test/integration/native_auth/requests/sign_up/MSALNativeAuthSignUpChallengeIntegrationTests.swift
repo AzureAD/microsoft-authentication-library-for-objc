@@ -60,7 +60,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         XCTAssertEqual(response?.challengeType, .oob)
         XCTAssertNotNil(response?.signUpToken)
         XCTAssertNotNil(response?.bindingMethod)
-        XCTAssertNotNil(response?.displayName)
+        XCTAssertNotNil(response?.challengeTargetLabel)
         XCTAssertNotNil(response?.codeLength)
         XCTAssertNotNil(response?.interval)
     }

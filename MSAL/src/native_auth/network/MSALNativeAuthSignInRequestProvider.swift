@@ -110,18 +110,20 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
 
     // MARK: - SignIn Token
 
-    func signInTokenRequest(parameters: MSALNativeAuthSignInTokenRequestProviderParams) throws -> MSALNativeAuthSignInTokenRequest {
+    func signInTokenRequest(
+        parameters: MSALNativeAuthSignInTokenRequestProviderParams
+    ) throws -> MSALNativeAuthSignInTokenRequest {
         let parameters = MSALNativeAuthSignInTokenRequestParameters(
             config: config,
-            scope: formatScope(parameters.scopes),
+            context: parameters.context,
             username: parameters.username,
             credentialToken: parameters.credentialToken,
             signInSLT: parameters.signInSLT,
             grantType: parameters.grantType,
             challengeTypes: parameters.challengeTypes,
+            scope: formatScope(parameters.scopes),
             password: parameters.password,
-            oobCode: parameters.oobCode,
-            context: parameters.context)
+            oobCode: parameters.oobCode)
         let request = try MSALNativeAuthSignInTokenRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(

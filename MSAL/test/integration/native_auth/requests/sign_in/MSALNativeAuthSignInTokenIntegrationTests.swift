@@ -47,7 +47,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 challengeTypes: nil,
                 scope: nil,
                 password: nil,
-                oob: nil
+                oobCode: nil
             ),
             context: context
         )
@@ -88,7 +88,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                                                                     challengeTypes: nil,
                                                                     scope: "test & alt test",
                                                                     password: nil,
-                                                                    oob: nil)
+                                                                    oobCode: nil)
 
 
         let request = try! provider.signInTokenRequest(parameters: parameters,

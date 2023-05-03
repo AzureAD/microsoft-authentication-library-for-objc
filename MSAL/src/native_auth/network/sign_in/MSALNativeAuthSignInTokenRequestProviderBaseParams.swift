@@ -33,6 +33,7 @@ class MSALNativeAuthSignInTokenRequestProviderBaseParams {
     let password: String?
     let oobCode: String?
     let context: MSIDRequestContext
+    let clientInfo = true
     
     init(
         username: String?,

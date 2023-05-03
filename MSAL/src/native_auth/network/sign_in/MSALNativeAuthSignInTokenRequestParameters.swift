@@ -22,23 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-enum MSALNativeAuthRequestParametersKey: String {
-    case clientId = "client_id"
-    case challengeType = "challenge_type"
-    case grantType = "grant_type"
-    case username
-    case email
-    case password
-    case scope
-    case credentialToken = "credential_token"
-    case flowToken
-    case oobCode = "oob"
-    case otp
-    case customAttributes
-    case signInSLT = "signin_slt"
-    case attributes
-    case signUpToken = "signup_token"
-    case clientInfo = "client_info"
+// swiftlint:disable:next type_name
+struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
+
+    let config: MSALNativeAuthConfiguration
+    let endpoint: MSALNativeAuthEndpoint = .token
+    let context: MSIDRequestContext
+    let username: String?
+    let credentialToken: String?
+    let signInSLT: String?
+    let grantType: MSALNativeAuthGrantType
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
+    let scope: String?
+    let password: String?
+    let oobCode: String?
+    let clientInfo = true
 }

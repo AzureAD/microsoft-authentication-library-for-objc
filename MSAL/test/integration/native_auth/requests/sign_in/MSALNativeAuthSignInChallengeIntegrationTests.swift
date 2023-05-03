@@ -64,7 +64,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         XCTAssertTrue(response?.challengeType == .oob)
         XCTAssertNotNil(response?.credentialToken)
         XCTAssertNotNil(response?.bindingMethod)
-        XCTAssertNotNil(response?.displayName)
+        XCTAssertNotNil(response?.challengeTargetLabel)
         XCTAssertNotNil(response?.codeLength)
         XCTAssertNotNil(response?.interval)
     }

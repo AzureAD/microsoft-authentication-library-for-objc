@@ -20,25 +20,14 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-import Foundation
+#import "MSALOauth2Provider.h"
 
-enum MSALNativeAuthRequestParametersKey: String {
-    case clientId = "client_id"
-    case challengeType = "challenge_type"
-    case grantType = "grant_type"
-    case username
-    case email
-    case password
-    case scope
-    case credentialToken = "credential_token"
-    case flowToken
-    case oobCode = "oob"
-    case otp
-    case customAttributes
-    case signInSLT = "signin_slt"
-    case attributes
-    case signUpToken = "signup_token"
-    case clientInfo = "client_info"
-}
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALCIAMOauth2Provider : MSALOauth2Provider
+
+@end
+
+NS_ASSUME_NONNULL_END

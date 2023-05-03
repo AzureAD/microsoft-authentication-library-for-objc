@@ -79,6 +79,14 @@ NS_ASSUME_NONNULL_BEGIN
 */
 @property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
 
+#if TARGET_OS_OSX
+/**
+ Platform SSO status on macOS device
+*/
+@property (nonatomic, readonly) MSALPlatformSSOStatus platformSSOStatus;
+
+#endif
+
 @end
 
 NS_ASSUME_NONNULL_END

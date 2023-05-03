@@ -30,9 +30,11 @@
 #import "MSIDB2CAuthority.h"
 #import "MSIDADFSAuthority.h"
 #import "MSIDAADAuthority.h"
+#import "MSIDCIAMAuthority.h"
 #import "MSALAADAuthority.h"
 #import "MSALADFSAuthority.h"
 #import "MSALB2CAuthority.h"
+#import "MSALCIAMAuthority.h"
 #import "MSALOauth2Authority.h"
 #import "MSALB2CAuthority_Internal.h"
 
@@ -63,6 +65,12 @@
     {
         __auto_type aadAuthority = [[MSALAADAuthority alloc] initWithURL:url rawTenant:nil error:nil];
         if (aadAuthority) return aadAuthority;
+    }
+    
+    if ([MSIDCIAMAuthority isAuthorityFormatValid:url context:nil error:nil])
+    {
+        __auto_type ciamAuthority = [[MSALCIAMAuthority alloc] initWithURL:url error:nil];
+        if (ciamAuthority) return ciamAuthority;
     }
     
     return [[MSALOauth2Authority alloc] initWithURL:url error:error];

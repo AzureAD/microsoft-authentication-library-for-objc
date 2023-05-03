@@ -20,25 +20,39 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-import Foundation
+#import <Foundation/Foundation.h>
+#import "MSALCIAMAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDCIAMAuthority.h"
+#import "MSIDAuthority+Internal.h"
 
-enum MSALNativeAuthRequestParametersKey: String {
-    case clientId = "client_id"
-    case challengeType = "challenge_type"
-    case grantType = "grant_type"
-    case username
-    case email
-    case password
-    case scope
-    case credentialToken = "credential_token"
-    case flowToken
-    case oobCode = "oob"
-    case otp
-    case customAttributes
-    case signInSLT = "signin_slt"
-    case attributes
-    case signUpToken = "signup_token"
-    case clientInfo = "client_info"
+@implementation MSALCIAMAuthority
+
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError **)error
+{
+    return [self initWithURL:url validateFormat:NO error:error];
 }
+
+- (instancetype)initWithURL:(NSURL *)url
+             validateFormat:(BOOL)validateFormat
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDCIAMAuthority alloc] initWithURL:url validateFormat:validateFormat context:nil  error:error];
+        if (!self.msidAuthority) return nil;
+    }
+    
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
+
+@end

@@ -16,42 +16,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-// swiftlint:disable:next type_name
-class MSALNativeAuthSignInTokenRequestParameters:
-    MSALNativeAuthSignInTokenRequestProviderBaseParams, MSALNativeAuthRequestable {
+@objc
+public class SignUpCodeStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignUpCodeStartErrorType
 
-    let config: MSALNativeAuthConfiguration
-    let endpoint: MSALNativeAuthEndpoint = .token
-    let scope: String?
-
-    init(
-        config: MSALNativeAuthConfiguration,
-        scope: String?, username: String?,
-        credentialToken: String?,
-        signInSLT: String?,
-        grantType: MSALNativeAuthGrantType,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
-        password: String?,
-        oobCode: String?,
-        context: MSIDRequestContext) {
-        self.config = config
-        self.scope = scope
-        super.init(
-            username: username,
-            credentialToken: credentialToken,
-            signInSLT: signInSLT,
-            grantType: grantType,
-            challengeTypes: challengeTypes,
-            password: password,
-            oobCode: oobCode,
-            context: context)
+    init(type: SignUpCodeStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
     }
+}
+
+@objc
+public enum SignUpCodeStartErrorType: Int {
+    case browserRequired
+    case userAlreadyExists
+    case invalidUsername
+    case invalidAttributes
+    case generalError
 }

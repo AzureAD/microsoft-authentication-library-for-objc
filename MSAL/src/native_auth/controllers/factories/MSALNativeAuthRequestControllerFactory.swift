@@ -1,0 +1,66 @@
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+@_implementationOnly import MSAL_Private
+
+protocol MSALNativeAuthRequestControllerBuildable {
+    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling
+    func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling
+    func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling
+    func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling
+    func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling
+    func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling
+}
+
+final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControllerBuildable {
+    private let config: MSALNativeAuthConfiguration
+
+    init(config: MSALNativeAuthConfiguration) {
+        self.config = config
+    }
+
+    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
+        return MSALNativeAuthSignUpController(config: config, context: context)
+    }
+
+    func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling {
+        return MSALNativeAuthSignUpOTPController(config: config, context: context)
+    }
+
+    func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {
+        return MSALNativeAuthSignInController(config: config, context: context)
+    }
+
+    func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling {
+        return MSALNativeAuthSignInOTPController(config: config, context: context)
+    }
+
+    func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling {
+        return MSALNativeAuthResendCodeController(config: config, context: context)
+    }
+
+    func makeVerifyCodeController(with context: MSIDRequestContext) -> MSALNativeAuthVerifyCodeControlling {
+        return MSALNativeAuthVerifyCodeController(config: config, context: context)
+    }
+}

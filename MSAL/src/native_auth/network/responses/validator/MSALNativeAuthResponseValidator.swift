@@ -56,9 +56,9 @@ protocol MSALNativeAuthTokenRequestValidating {
 }
 
 class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, MSALNativeAuthTokenRequestValidating {
-    
+
     let responseHandler: MSALNativeAuthResponseHandling
-    
+
     init(responseHandler: MSALNativeAuthResponseHandling) {
         self.responseHandler = responseHandler
     }
@@ -85,9 +85,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             return nil
         }
     }
-    
-    
-    
+
     func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
@@ -96,7 +94,6 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
                 return .error(.invalidServerResponse)
             }
-            
         }
         return .error(.invalidServerResponse)
     }

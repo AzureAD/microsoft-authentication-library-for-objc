@@ -16,29 +16,37 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import UIKit
 
-enum MSALNativeAuthRequestParametersKey: String {
-    case clientId = "client_id"
-    case challengeType = "challenge_type"
-    case grantType = "grant_type"
-    case username
-    case email
-    case password
-    case scope
-    case credentialToken = "credential_token"
-    case flowToken
-    case oobCode = "oob"
-    case otp
-    case customAttributes
-    case signInSLT = "signin_slt"
-    case attributes
-    case signUpToken = "signup_token"
-    case clientInfo = "client_info"
+class NewPasswordViewController: UIViewController {
+
+    var passwordSubmittedCallback: ((_ otp: String) -> Void)?
+
+    @IBOutlet weak var errorLabel: UILabel!
+    @IBOutlet weak var passwordTextField: UITextField!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+    }
+
+    @IBAction func cancelPressed(_ sender: Any) {
+        dismiss(animated: true)
+    }
+
+    @IBAction func submitPressed(_ sender: Any) {
+        guard let password = passwordTextField.text else {
+            return
+        }
+
+        passwordSubmittedCallback?(password)
+    }
+
 }
