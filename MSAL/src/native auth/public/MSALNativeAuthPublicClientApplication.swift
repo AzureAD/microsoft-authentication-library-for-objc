@@ -40,7 +40,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         self.internalChallengeTypes =
             MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
-            
+
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: aadAuthority,

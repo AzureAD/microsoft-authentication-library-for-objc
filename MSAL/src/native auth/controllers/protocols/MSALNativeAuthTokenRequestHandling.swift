@@ -29,10 +29,7 @@ protocol MSALNativeAuthTokenRequestHandling where Self: MSALNativeAuthBaseContro
     typealias TokenRequestCompletionHandler = (Result<MSIDAADTokenResponse, Error>) -> Void
 
     func performRequest(_ request: MSIDHttpRequest, completion: @escaping TokenRequestCompletionHandler)
-    func handleResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration) -> MSIDTokenResult?
+    
     func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
@@ -61,29 +58,6 @@ extension MSALNativeAuthTokenRequestHandling {
             } catch {
                 completion(.failure(MSALNativeAuthError.invalidResponse))
             }
-        }
-    }
-
-    func handleResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            return try responseHandler.handle(
-                context: context,
-                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                validateAccount: true
-            )
-        } catch {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Response validation error: \(error)"
-            )
-            return nil
         }
     }
 

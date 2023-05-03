@@ -37,7 +37,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType {
 }
 
 enum MSALNativeAuthSignInTokenValidatedResponse {
-    case success(MSIDAADTokenResponse)
+    case success(MSIDTokenResult)
     case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
@@ -47,17 +47,57 @@ protocol MSALNativeAuthSignInResponseValidating {
     func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse
 }
 
-class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating {
+protocol MSALNativeAuthTokenRequestValidating {
+
+    func validateAndConvertTokenResponse(
+        _ tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration) -> MSIDTokenResult?
+}
+
+class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, MSALNativeAuthTokenRequestValidating {
+    
+    let responseHandler: MSALNativeAuthResponseHandling
+    
+    init(responseHandler: MSALNativeAuthResponseHandling) {
+        self.responseHandler = responseHandler
+    }
+
+    func validateAndConvertTokenResponse(
+        _ tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration
+    ) -> MSIDTokenResult? {
+        do {
+            return try responseHandler.handle(
+                context: context,
+                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
+                tokenResponse: tokenResponse,
+                configuration: msidConfiguration,
+                validateAccount: true
+            )
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Response validation error: \(error)"
+            )
+            return nil
+        }
+    }
+    
+    
     
     func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
-            
+            print("something")
         case .failure(let signInTokenResponseError):
             guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
                 return .error(.invalidServerResponse)
             }
             
         }
+        return .error(.invalidServerResponse)
     }
 }

@@ -38,6 +38,7 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
     private typealias ResendCodeCompletionHandler = (Result<MSALNativeAuthResendCodeRequestResponse, Error>) -> Void
 
     private let requestProvider: MSALNativeAuthRequestProviding
+    private let responseHandler: MSALNativeAuthResponseHandling
 
     // MARK: - Init
 
@@ -47,10 +48,9 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
         responseHandler: MSALNativeAuthResponseHandling
     ) {
         self.requestProvider = requestProvider
-
+        self.responseHandler = responseHandler
         super.init(
-            clientId: clientId,
-            responseHandler: responseHandler
+            clientId: clientId
         )
     }
 

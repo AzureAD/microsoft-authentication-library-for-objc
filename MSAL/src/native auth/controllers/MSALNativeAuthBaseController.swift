@@ -27,16 +27,13 @@
 class MSALNativeAuthBaseController {
 
     let clientId: String
-    let responseHandler: MSALNativeAuthResponseHandling
     let cacheAccessor: MSALNativeAuthCacheInterface?
 
     init(
         clientId: String,
-        responseHandler: MSALNativeAuthResponseHandling,
         cacheAccessor: MSALNativeAuthCacheInterface? = nil
     ) {
         self.clientId = clientId
-        self.responseHandler = responseHandler
         self.cacheAccessor = cacheAccessor
     }
 

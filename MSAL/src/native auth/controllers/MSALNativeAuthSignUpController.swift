@@ -40,7 +40,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling,
         factory: MSALNativeAuthResultBuildable
     ) {
         self.requestProvider = requestProvider
@@ -48,7 +47,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
         super.init(
             clientId: clientId,
-            responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
     }
@@ -58,7 +56,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
-            responseHandler: MSALNativeAuthResponseHandler(),
             factory: MSALNativeAuthResultFactory(config: config)
         )
     }
@@ -84,22 +81,22 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             case .success(let tokenResponse):
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
-                guard let tokenResult = handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
-                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, context: context, completion: completion)
-                    return
-                }
-
-                telemetryEvent?.setUserInformation(tokenResult.account)
-
-                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
-
-                let response = factory.makeNativeAuthResponse(
-                    stage: .completed,
-                    credentialToken: nil,
-                    tokenResult: tokenResult
-                )
-
-                complete(telemetryEvent, response: response, context: context, completion: completion)
+//                guard let tokenResult = handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+//                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, context: context, completion: completion)
+//                    return
+//                }
+//
+//                telemetryEvent?.setUserInformation(tokenResult.account)
+//
+//                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
+//
+//                let response = factory.makeNativeAuthResponse(
+//                    stage: .completed,
+//                    credentialToken: nil,
+//                    tokenResult: tokenResult
+//                )
+//
+//                complete(telemetryEvent, response: response, context: context, completion: completion)
 
             case .failure(let error):
                 MSALLogger.log(

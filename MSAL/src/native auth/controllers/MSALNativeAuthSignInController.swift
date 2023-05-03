@@ -26,28 +26,30 @@
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
     
-    // TODO: add ad-hoc method for OTP and pwd?
     // TODO: add parameter struct or class
     func signIn(
         username: String,
-        password: String?,
+        password: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType],
         correlationId: UUID?,
         scopes: [String]?,
-        delegate: SignInStartDelegate
-    )
+        delegate: SignInStartDelegate)
+    
+    func signIn(
+        username: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?,
+        delegate: SignInStartDelegate)
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
-
+    
     // MARK: - Variables
 
     private let requestProvider: MSALNativeAuthSignInRequestProvider
     private let factory: MSALNativeAuthResultBuildable
     private let responseValidator: MSALNativeAuthSignInResponseValidating
-    // TODO: is this the right place to keep the state? What if we add it to publicClientApplication class?
-    // add it to the super class?
-    private weak var currentState: MSALNativeAuthBaseState?
 
     // MARK: - Init
 
@@ -55,7 +57,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         clientId: String,
         requestProvider: MSALNativeAuthSignInRequestProvider,
         cacheAccessor: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling,
         factory: MSALNativeAuthResultBuildable,
         responseValidator: MSALNativeAuthSignInResponseValidating
     ) {
@@ -64,7 +65,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         self.responseValidator = responseValidator
         super.init(
             clientId: clientId,
-            responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
     }
@@ -74,15 +74,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             clientId: config.clientId,
             requestProvider: MSALNativeAuthSignInRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
-            responseHandler: MSALNativeAuthResponseHandler(),
             factory: MSALNativeAuthResultFactory(config: config),
-            responseValidator: MSALNativeAuthResponseValidator()
+            responseValidator: MSALNativeAuthResponseValidator(responseHandler: MSALNativeAuthResponseHandler())
         )
     }
 
     // MARK: - Internal
 
-    func signIn(username: String, password: String?, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
+    func signIn(username: String, password: String, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
@@ -99,15 +98,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
         performRequest(request) { [self] result in
             let result = responseValidator.validateSignInTokenResponse(result: result)
-            switch result {
-            case .success(let tokenResponse):
-                // create account from tokenResponse. it is already validated
-                delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(username: username, accessToken: tokenResponse.accessToken ?? "Access token"))
-            case .credentialRequired(let credentialToken):
-                <#code#>
-            case .error(let errorType):
-                <#code#>
-            }
+//            switch result {
+//            case .success(let tokenResponse):
+//                // create account from tokenResponse. it is already validated
+//                delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(username: username, accessToken: tokenResponse.accessToken ?? "Access token"))
+//            case .credentialRequired(let credentialToken):
+//
+//            case .error(let errorType):
+//
+//            }
             
             
             
@@ -124,6 +123,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 //                }
         }
     }
+    func signIn(
+        username: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?,
+        delegate: SignInStartDelegate) {
+            
+        }
+    
 
     // MARK: - Private
 

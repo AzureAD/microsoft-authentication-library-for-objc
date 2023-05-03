@@ -36,7 +36,7 @@ public class ResetPasswordCodeSentState: MSALNativeAuthBaseState {
         }
     }
 
-    public func verifyCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
+    public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         switch code {
         case "0000": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onResetPasswordVerifyCodeError(error:
