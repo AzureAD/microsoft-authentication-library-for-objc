@@ -81,7 +81,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Internal
 
-    func signIn(username: String, password: String, challengeTypes: [MSALNativeAuthInternalChallengeType], correlationId: UUID?, scopes: [String]?, delegate: SignInStartDelegate) {
+    func signIn(
+        username: String,
+        password: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?,
+        delegate: SignInStartDelegate
+    ) {
+        let scopes = scopes ?? defaultScopes()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
@@ -97,7 +105,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
 
         performRequest(request) { [self] result in
-            let result = responseValidator.validateSignInTokenResponse(result: result)
+            let config = factory.makeMSIDConfiguration(scope: scopes)
+            let result = responseValidator.validateSignInTokenResponse(context: context, msidConfiguration: config, result: result)
 //            switch result {
 //            case .success(let tokenResponse):
 //                // create account from tokenResponse. it is already validated
@@ -131,16 +140,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         delegate: SignInStartDelegate) {
             
         }
-    
 
     // MARK: - Private
 
     private func createTokenRequest(username: String,
                                     password: String?,
                                     challengeTypes: [MSALNativeAuthInternalChallengeType],
-                                    scopes: [String]?,
+                                    scopes: [String],
                                     context: MSIDRequestContext) -> MSALNativeAuthSignInTokenRequest? {
-        // TODO: do we need SDK default scope or we can omit it from the request?
         do {
             let params = MSALNativeAuthSignInTokenRequestProviderParams(
                 username: username,
@@ -148,7 +155,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 signInSLT: nil,
                 grantType: .password,
                 challengeTypes: challengeTypes,
-                scopes: scopes ?? [""],
+                scopes: scopes,
                 password: password,
                 oobCode: nil,
                 context: context)
@@ -168,5 +175,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil
         }
+    }
+
+    private func defaultScopes() -> [String] {
+        return (Array(MSALPublicClientApplication.defaultOIDCScopes()) as? [String]) ?? []
     }
 }

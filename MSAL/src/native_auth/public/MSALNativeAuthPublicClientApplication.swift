@@ -167,7 +167,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         let controller = controllerFactory.makeSignInController()
-        controller.signIn(username: username, password: password, challengeTypes: internalChallengeTypes, correlationId: correlationId, scopes: scopes, delegate: delegate)
+        controller.signIn(
+            username: username,
+            password: password,
+            challengeTypes: internalChallengeTypes,
+            correlationId: correlationId,
+            scopes: scopes,
+            delegate: delegate)
     }
 
     public func signIn(
@@ -207,7 +213,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
+    public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {
         return MSALNativeAuthUserAccount(
             username: "email@contoso.com",
             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"

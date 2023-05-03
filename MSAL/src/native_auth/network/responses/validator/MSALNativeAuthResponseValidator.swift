@@ -43,12 +43,14 @@ enum MSALNativeAuthSignInTokenValidatedResponse {
 }
 
 protocol MSALNativeAuthSignInResponseValidating {
-    // TODO: inject the response validator to validate the MSIDAADTokenResponse
-    func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse
+    func validateSignInTokenResponse(
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration,
+        result: Result<MSIDAADTokenResponse, Error>
+    ) -> MSALNativeAuthSignInTokenValidatedResponse
 }
 
 protocol MSALNativeAuthTokenRequestValidating {
-
     func validateAndConvertTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
@@ -69,6 +71,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         msidConfiguration: MSIDConfiguration
     ) -> MSIDTokenResult? {
         do {
+            //TODO: where we can retrieve real homeAccountId and displayableId?
             return try responseHandler.handle(
                 context: context,
                 accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
@@ -86,10 +89,17 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         }
     }
 
-    func validateSignInTokenResponse(result: Result<MSIDAADTokenResponse, Error>) -> MSALNativeAuthSignInTokenValidatedResponse {
+    func validateSignInTokenResponse(
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration,
+        result: Result<MSIDAADTokenResponse, Error>
+    ) -> MSALNativeAuthSignInTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
-            print("something")
+            guard let tokenResult = validateAndConvertTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+                return .error(.invalidServerResponse)
+            }
+            return .success(tokenResult)
         case .failure(let signInTokenResponseError):
             guard let signInTokenResponseError = signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
                 return .error(.invalidServerResponse)
