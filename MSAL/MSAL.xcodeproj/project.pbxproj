@@ -2244,19 +2244,19 @@
 		28D1D58129BF885500CE75F4 /* integration */ = {
 			isa = PBXGroup;
 			children = (
-				28D1D58229BF886000CE75F4 /* native auth */,
+				28D1D58229BF886000CE75F4 /* native_auth */,
 			);
 			path = integration;
 			sourceTree = "<group>";
 		};
-		28D1D58229BF886000CE75F4 /* native auth */ = {
+		28D1D58229BF886000CE75F4 /* native_auth */ = {
 			isa = PBXGroup;
 			children = (
 				DE0D65C429D344AC005798B1 /* requests */,
 				28D1D59A29C2265400CE75F4 /* common */,
 				28D1D59D29C2392000CE75F4 /* MockAPIHandlerTest.swift */,
 			);
-			path = "native auth";
+			path = native_auth;
 			sourceTree = "<group>";
 		};
 		28D1D59A29C2265400CE75F4 /* common */ = {
@@ -2969,7 +2969,7 @@
 		D65A6FDB1E3FF71000C69FBA /* unit */ = {
 			isa = PBXGroup;
 			children = (
-				DECC1FB029530FEB006D9FB1 /* native auth */,
+				DECC1FB029530FEB006D9FB1 /* native_auth */,
 				A0274CBD24B432B100BD198D /* MSALAuthSchemeTests.m */,
 				B295A15E22D0344B00FFB313 /* mac */,
 				B2725EBD22BF2805009B454A /* mocks */,
@@ -3188,7 +3188,7 @@
 			path = responses;
 			sourceTree = "<group>";
 		};
-		DECC1FB029530FEB006D9FB1 /* native auth */ = {
+		DECC1FB029530FEB006D9FB1 /* native_auth */ = {
 			isa = PBXGroup;
 			children = (
 				E25BC0902995559700588549 /* utils */,
@@ -3202,7 +3202,7 @@
 				28CA6F5E29689F3E004DB11D /* cache */,
 				DECC1FB129530FF6006D9FB1 /* logger */,
 			);
-			path = "native auth";
+			path = native_auth;
 			sourceTree = "<group>";
 		};
 		DECC1FB129530FF6006D9FB1 /* logger */ = {
