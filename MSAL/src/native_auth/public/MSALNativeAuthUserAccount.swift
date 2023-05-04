@@ -27,11 +27,24 @@ public final class MSALNativeAuthUserAccount: NSObject {
 
     @objc public let username: String
     @objc public let accessToken: String
+    @objc public let rawIdToken: String?
+    @objc public let scopes: [String]
+    @objc public let expiresOn: Date
     @objc public let attributes: [String: Any]
 
-    init(username: String, accessToken: String, attributes: [String: Any] = [:]) {
+    init(
+        username: String,
+        accessToken: String,
+        rawIdToken: String?,
+        scopes: [String],
+        expiresOn: Date,
+        attributes: [String: Any] = [:]
+    ) {
         self.username = username
         self.accessToken = accessToken
+        self.rawIdToken = rawIdToken
+        self.scopes = scopes
+        self.expiresOn = expiresOn
         self.attributes = attributes
     }
 }

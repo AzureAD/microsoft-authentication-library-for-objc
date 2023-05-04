@@ -26,7 +26,6 @@
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
     
-    // TODO: add parameter struct or class
     func signIn(
         username: String,
         password: String,
@@ -104,40 +103,33 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             return
         }
 
-        performRequest(request) { [self] result in
+        performRequest(request) { [self] aadTokenResponse in
             let config = factory.makeMSIDConfiguration(scope: scopes)
-            let result = responseValidator.validateSignInTokenResponse(context: context, msidConfiguration: config, result: result)
-//            switch result {
-//            case .success(let tokenResponse):
-//                // create account from tokenResponse. it is already validated
-//                delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(username: username, accessToken: tokenResponse.accessToken ?? "Access token"))
-//            case .credentialRequired(let credentialToken):
-//
-//            case .error(let errorType):
-//
-//            }
-            
-            
-            
-            
-                // TODO: return error to the delegate, parse the error description/code
-//                    //TODO: hit /challenge API
-//                    //TODO: create here a new state
-//                    let newState = SignInCodeSentState(flowToken: "parses flow token", signInController: self)
-//                    //TODO: this should be automated
-//                    currentState?.isActive = false
-//                    currentState = newState
-//                    // TODO: validate that all the required fields are there, and log meaningful error to the API
-//                    delegate.onSignInCodeSent(newState: newState, displayName: "parsedDisplayName", codeLength: 4)
-//                }
+            let result = responseValidator.validateSignInTokenResponse(context: context, msidConfiguration: config, result: aadTokenResponse)
+            switch result {
+            case .success(let validatedTokenResult, let tokenResponse):
+                telemetryEvent?.setUserInformation(validatedTokenResult.account)
+                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+                let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
+                delegate.onSignInCompleted(result: account)
+            case .credentialRequired(let credentialToken):
+                let challengeRequest = createChallengeRequest(credentialToken: credentialToken, challengeTypes: challengeTypes, context: context)
+                print("credential required")
+                //use the credential token to call /challenge API
+                //create the new state and return it to the delegate
+            case .error(let errorType):
+                delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
+            }
         }
     }
+
     func signIn(
         username: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType],
         correlationId: UUID?,
         scopes: [String]?,
         delegate: SignInStartDelegate) {
+            // call here /initiate
         }
 
     // MARK: - Private
@@ -181,7 +173,28 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
+    private func generateSignInStartErrorFrom(
+        signInTokenErrorType: MSALNativeAuthSignInTokenValidatedErrorType
+    ) -> SignInStartError {
+        switch signInTokenErrorType {
+        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+            return SignInStartError(type: .generalError)
+        case .invalidClient:
+            return SignInStartError(type: .generalError, message: "Invalid Client ID")
+        case .unsupportedChallengeType:
+            return SignInStartError(type: .generalError, message: "Unsupported challenge type")
+        case .invalidScope:
+            return SignInStartError(type: .generalError, message: "Invalid scope")
+        case .userNotFound:
+            return SignInStartError(type: .userNotFound)
+        case .invalidPassword:
+            return SignInStartError(type: .invalidPassword)
+        case .invalidAuthenticationType:
+            return SignInStartError(type: .invalidAuthenticationType)
+        }
+    }
+    
     private func defaultScopes() -> [String] {
-        return (Array(MSALPublicClientApplication.defaultOIDCScopes()) as? [String]) ?? []
+        return Array(_immutableCocoaArray: MSALPublicClientApplication.defaultOIDCScopes())
     }
 }

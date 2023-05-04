@@ -26,7 +26,7 @@
 
 // swiftlint:disable:next type_name
 enum MSALNativeAuthSignInTokenValidatedResponse {
-    case success(MSIDTokenResult)
+    case success(MSIDTokenResult, MSIDTokenResponse)
     case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
@@ -38,7 +38,9 @@ enum MSALNativeAuthSignInTokenValidatedErrorType {
     case invalidClient
     case invalidRequest
     case invalidServerResponse
-    case invalidGrant
+    case userNotFound
+    case invalidPassword
+    case invalidAuthenticationType
     case unsupportedChallengeType
     case invalidScope
     case authorizationPending

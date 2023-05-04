@@ -216,7 +216,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {
         return MSALNativeAuthUserAccount(
             username: "email@contoso.com",
-            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
+            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9",
+            rawIdToken: nil,
+            scopes: [],
+            expiresOn: Date()
         )
     }
 

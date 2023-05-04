@@ -32,14 +32,14 @@ protocol MSALNativeAuthSignInResponseValidating {
     ) -> MSALNativeAuthSignInTokenValidatedResponse
 }
 
-protocol MSALNativeAuthTokenRequestValidating {
+protocol MSALNativeAuthTokenResponseConverting {
     func validateAndConvertTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
         msidConfiguration: MSIDConfiguration) -> MSIDTokenResult?
 }
 
-class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, MSALNativeAuthTokenRequestValidating {
+class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, MSALNativeAuthTokenResponseConverting {
 
     let responseHandler: MSALNativeAuthResponseHandling
 
@@ -85,7 +85,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             ) else {
                 return .error(.invalidServerResponse)
             }
-            return .success(tokenResult)
+            return .success(tokenResult, tokenResponse)
         case .failure(let signInTokenResponseError):
             return handleFailedResult(signInTokenResponseError)
         }
@@ -116,7 +116,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             case .invalidClient:
                 return .error(.invalidClient)
             case .invalidGrant:
-                return .error(.invalidGrant)
+                return .error(convertErrorCodeToErrorType(responseError.errorCodes?.first))
             case .expiredToken:
                 return .error(.expiredToken)
             case .unsupportedChallengeType:
@@ -128,6 +128,20 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             case .slowDown:
                 return .error(.slowDown)
             }
+        }
+    }
+    
+    //TODO: create constants
+    private func convertErrorCodeToErrorType(_ errorCode: Int?) -> MSALNativeAuthSignInTokenValidatedErrorType {
+        switch errorCode {
+        case 50034:
+            return .userNotFound
+        case 50126:
+            return .invalidPassword
+        case 400002:
+            return .invalidAuthenticationType
+        default:
+            return .generalError
         }
     }
 }

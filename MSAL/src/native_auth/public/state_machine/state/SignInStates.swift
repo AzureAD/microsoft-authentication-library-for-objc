@@ -50,10 +50,13 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
         case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
         case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
-        default: delegate.onSignInCompleted(result:
-                                        MSALNativeAuthUserAccount(
-                                            username: "email@contoso.com",
-                                            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+        default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
+            username: "email@contoso.com",
+            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9",
+            rawIdToken: nil,
+            scopes: [],
+            expiresOn: Date()
+        ))
         }
     }
 }
