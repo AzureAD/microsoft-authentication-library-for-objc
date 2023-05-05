@@ -33,7 +33,7 @@ protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
         correlationId: UUID?,
         scopes: [String]?,
         delegate: SignInStartDelegate)
-    
+
     func signIn(
         username: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType],
@@ -43,7 +43,7 @@ protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
-    
+
     // MARK: - Variables
 
     private let requestProvider: MSALNativeAuthSignInRequestProvider
@@ -88,7 +88,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         scopes: [String]?,
         delegate: SignInStartDelegate
     ) {
-        let scopes = scopes ?? defaultScopes()
+        let scopes = intersectScopes(scopes)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
@@ -96,7 +96,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             context: context
         )
         startTelemetryEvent(telemetryEvent, context: context)
-        guard let request = createTokenRequest(username: username, password: password, challengeTypes: challengeTypes, scopes: scopes, context: context) else {
+        guard let request = createTokenRequest(
+            username: username,
+            password: password,
+            challengeTypes: challengeTypes,
+            scopes: scopes,
+            context: context
+        ) else {
 
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
             delegate.onSignInError(error: SignInStartError(type: .generalError))
@@ -105,7 +111,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
         performRequest(request) { [self] aadTokenResponse in
             let config = factory.makeMSIDConfiguration(scope: scopes)
-            let result = responseValidator.validateSignInTokenResponse(context: context, msidConfiguration: config, result: aadTokenResponse)
+            let result = responseValidator.validateSignInTokenResponse(
+                context: context,
+                msidConfiguration: config,
+                result: aadTokenResponse
+            )
             switch result {
             case .success(let validatedTokenResult, let tokenResponse):
                 telemetryEvent?.setUserInformation(validatedTokenResult.account)
@@ -113,7 +123,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
                 delegate.onSignInCompleted(result: account)
             case .credentialRequired(let credentialToken):
-                let challengeRequest = createChallengeRequest(credentialToken: credentialToken, challengeTypes: challengeTypes, context: context)
+                let challengeRequest = createChallengeRequest(
+                    credentialToken: credentialToken,
+                    challengeTypes: challengeTypes,
+                    context: context)
                 print("credential required")
                 //use the credential token to call /challenge API
                 //create the new state and return it to the delegate
@@ -193,8 +206,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             return SignInStartError(type: .invalidAuthenticationType)
         }
     }
-    
-    private func defaultScopes() -> [String] {
-        return Array(_immutableCocoaArray: MSALPublicClientApplication.defaultOIDCScopes())
+
+    private func intersectScopes(_ scopes: [String]?) -> [String] {
+        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes()
+        guard let scopes = scopes else {
+            return Array(_immutableCocoaArray: defaultOIDCScopes)
+        }
+        let intersectedScopes = NSOrderedSet(array: scopes)
+        intersectedScopes.intersects(defaultOIDCScopes)
+        return Array(_immutableCocoaArray: intersectedScopes)
     }
 }
