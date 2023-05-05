@@ -122,8 +122,7 @@ final class MSALNativeAuthSignInChallengeRequestTests: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "credential_token": "Test Credential Token",
-            "challenge_type": "otp",
-            "challenge_target_key": "phone"
+            "challenge_type": "otp"
         ]
 
         XCTAssertEqual(result, expectedBodyParams)
