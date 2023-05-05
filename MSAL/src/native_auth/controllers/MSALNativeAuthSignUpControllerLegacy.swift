@@ -24,21 +24,17 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthSignUpOTPControlling: MSALNativeAuthTokenRequestHandling {
+protocol MSALNativeAuthSignUpControllingLegacy: MSALNativeAuthTokenRequestHandling {
     func signUp(
-        parameters: MSALNativeAuthSignUpOTPParameters,
+        parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSALNativeAuthSignUpOTPControlling {
-
-    // MARK: - Variables
+final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, MSALNativeAuthSignUpControllingLegacy {
 
     private let requestProvider: MSALNativeAuthRequestProviding
     private let factory: MSALNativeAuthResultBuildable
-
-    // MARK: - Init
 
     init(
         clientId: String,
@@ -70,15 +66,13 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         )
     }
 
-    // MARK: - Internal
-
     func signUp(
-        parameters: MSALNativeAuthSignUpOTPParameters,
+        parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignUp // TODO: Update local telemetry event id to differentiate sign-up with password and otp
+            telemetryApiId: .telemetryApiIdSignUp
         )
         startTelemetryEvent(telemetryEvent)
 
@@ -90,18 +84,6 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         performRequest(request) { [self] result in
             switch result {
             case .success(let tokenResponse):
-
-                // Mock API v1 returns a tokenResponse when we send a SignUp with OTP
-                // TODO: Look for 403 error and return the following:
-
-                //                let response = MSALNativeAuthResponse(
-                //                    stage: .verificationRequired,
-                //                    credentialToken: "flow-token-here",
-                //                    authentication: nil
-                //                )
-                //
-                //                complete(telemetryEvent, response: response, completion: completion)
-
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
                 guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
@@ -125,24 +107,21 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "SignUp OTP request error: \(error)"
+                    format: "SignUp request error: \(error)"
                 )
-
                 complete(telemetryEvent, error: error, completion: completion)
             }
         }
     }
 
-    // MARK: - Private
-
-    private func createRequest(with parameters: MSALNativeAuthSignUpOTPParameters) -> MSALNativeAuthSignUpRequest? {
+    private func createRequest(with parameters: MSALNativeAuthSignUpParameters) -> MSALNativeAuthSignUpRequest? {
         do {
-            return try requestProvider.signUpOTPRequest(
+            return try requestProvider.signUpRequest(
                 parameters: parameters,
                 context: context
             )
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating SignUp OTP Request: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignUp Request: \(error)")
             return nil
         }
     }

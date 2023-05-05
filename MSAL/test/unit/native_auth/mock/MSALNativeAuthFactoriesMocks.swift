@@ -27,18 +27,21 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControllerBuildable {
+    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+        MSALNativeAuthSignUpController(clientId: "", context: MSALNativeAuthRequestContext(), responseHandler: MSALNativeAuthResponseHandler())
+    }
 
-    func makeSignUpController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpControlling {
+    func makeSignUpControllerLegacy(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpControllingLegacy {
         XCTFail("This method should not be called")
-        return MSALNativeAuthSignUpController(
+        return MSALNativeAuthSignUpControllerLegacy(
             config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
     }
 
-    func makeSignUpOTPController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpOTPControlling {
+    func makeSignUpOTPControllerLegacy(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpOTPControllingLegacy {
         XCTFail("This method should not be called")
-        return MSALNativeAuthSignUpOTPController(
+        return MSALNativeAuthSignUpOTPControllerLegacy(
             config: MSALNativeAuthConfigStubs.configuration,
             context: MSALNativeAuthRequestContextMock()
         )
