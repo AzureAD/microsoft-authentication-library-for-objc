@@ -29,7 +29,7 @@ protocol MSALNativeAuthTokenRequestHandling where Self: MSALNativeAuthBaseContro
     typealias TokenRequestCompletionHandler = (Result<MSIDAADTokenResponse, Error>) -> Void
 
     func performRequest(_ request: MSIDHttpRequest, completion: @escaping TokenRequestCompletionHandler)
-    
+
     func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,

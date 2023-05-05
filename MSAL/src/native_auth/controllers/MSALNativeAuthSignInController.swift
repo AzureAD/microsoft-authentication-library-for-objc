@@ -25,7 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
-    
+
     func signIn(
         username: String,
         password: String,

@@ -87,27 +87,20 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             }
             return .success(tokenResult, tokenResponse)
         case .failure(let signInTokenResponseError):
-            return handleFailedResult(signInTokenResponseError)
-        }
-        
-        func handleFailedResult(_ responseError: Error) -> MSALNativeAuthSignInTokenValidatedResponse {
-            guard let responseError =
-                    responseError as? MSALNativeAuthSignInTokenResponseError else {
-                MSALLogger.log(
-                    level: .verbose,
-                    context: context,
-                    format: "Error type not expected"
-                )
+            guard let signInTokenResponseError =
+                    signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
+                MSALLogger.log(level: .verbose, context: context, format: "Error type not expected")
                 return .error(.invalidServerResponse)
             }
+            return handleFailedResult(signInTokenResponseError)
+        }
+
+        func handleFailedResult(
+            _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
             switch responseError.error {
             case .credentialRequired:
                 guard let credentialToken = responseError.credentialToken else {
-                    MSALLogger.log(
-                        level: .verbose,
-                        context: context,
-                        format: "Expected credential token not empty"
-                    )
+                    MSALLogger.log(level: .verbose, context: context, format: "Expected credential token not empty")
                     return .error(.invalidServerResponse)
                 }
                 return .credentialRequired(credentialToken)
@@ -130,15 +123,14 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             }
         }
     }
-    
-    //TODO: create constants
+
     private func convertErrorCodeToErrorType(_ errorCode: Int?) -> MSALNativeAuthSignInTokenValidatedErrorType {
         switch errorCode {
-        case 50034:
+        case MSALAuthErrorCode.userNotFound.rawValue:
             return .userNotFound
-        case 50126:
+        case MSALAuthErrorCode.invalidPassword.rawValue:
             return .invalidPassword
-        case 400002:
+        case MSALAuthErrorCode.invalidAuthenticationType.rawValue:
             return .invalidAuthenticationType
         default:
             return .generalError
