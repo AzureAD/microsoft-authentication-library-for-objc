@@ -22,63 +22,282 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import MSAL
 import UIKit
 
 class ResetPasswordViewController: UIViewController {
-
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
+
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
+
+    var verifyCodeViewController: VerifyCodeViewController?
+    var newPasswordViewController: NewPasswordViewController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        do {
+            nativeAuth = try MSALNativeAuthPublicClientApplication(
+                configuration: MSALPublicClientApplicationConfig(
+                    clientId: Configuration.clientId,
+                    redirectUri: nil,
+                    authority: Configuration.authority
+                ),
+                challengeTypes: [.oob, .password]
+            )
+        } catch {
+            print("Unable to initialize MSAL \(error)")
+            showResultText("Unable to initialize MSAL")
+        }
     }
 
-    @IBAction func resetPasswordPressed(_ sender: Any) {
-        showOTPModal()
-    }
-
-    func showOTPModal() {
-        guard let otpViewController = storyboard?.instantiateViewController(
-            withIdentifier: "OTPViewController") as? OTPViewController else {
+    @IBAction func resetPasswordPressed(_: Any) {
+        guard let email = emailTextField.text, !email.isEmpty
+        else {
+            resultTextView.text = "Invalid email address"
             return
         }
 
-        otpViewController.otpSubmittedCallback = { [weak self] otp in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+        print("Resetting password for email \(email)")
 
-                showResultText("Submitted OTP: \(otp)")
-                
-                dismiss(animated: true) { [weak self] in
-                    self?.showNewPasswordModal()
-                }
-            }
-        }
+        showResultText("")
 
-        present(otpViewController, animated: true)
+        nativeAuth.resetPassword(username: email, delegate: self)
     }
 
-    func showNewPasswordModal() {
-        guard let newPasswordViewController = storyboard?.instantiateViewController(
-            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController else {
+    // MARK: - Verify Code modal methods
+
+    func showVerifyCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
             return
         }
 
-        newPasswordViewController.passwordSubmittedCallback = { [weak self] password in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
 
-                showResultText("Submitted new Password: \(password)")
-                dismiss(animated: true)
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeViewController else {
+            return
+        }
+
+        if let errorMessage {
+            verifyCodeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
             }
         }
+
+        verifyCodeViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+    }
+
+    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true, completion: completion)
+        verifyCodeViewController = nil
+    }
+
+    // MARK: - New Password modal methods
+
+    func showNewPasswordModal(submittedCallback: @escaping ((_ password: String) -> Void)) {
+        newPasswordViewController = storyboard?.instantiateViewController(
+            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController
+
+        guard let newPasswordViewController else {
+            print("Error creating password view controller")
+            return
+        }
+
+        newPasswordViewController.onSubmit = submittedCallback
 
         present(newPasswordViewController, animated: true)
     }
 
+    func updateNewPasswordModal(
+        errorMessage: String?,
+        submittedCallback: @escaping ((_ password: String) -> Void)
+    ) {
+        guard let newPasswordViewController else {
+            return
+        }
+
+        if let errorMessage {
+            newPasswordViewController.errorLabel.text = errorMessage
+        }
+
+        newPasswordViewController.onSubmit = { password in
+            DispatchQueue.main.async {
+                submittedCallback(password)
+            }
+        }
+    }
+
+    func dismissNewPasswordModal() {
+        guard newPasswordViewController != nil else {
+            print("Unexpected error: Password view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+
+        newPasswordViewController = nil
+    }
+
     func showResultText(_ text: String) {
         resultTextView.text = text
+    }
+}
+
+extension ResetPasswordViewController: ResetPasswordStartDelegate {
+    func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName _: String, codeLength _: Int) {
+        print("ResetPasswordStartDelegate: onResetPasswordCodeSent: \(newState)")
+
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self else { return }
+
+                                newState.verifyCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self else { return }
+
+                                newState.resendCode(delegate: self)
+                            })
+    }
+
+    func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
+        switch error.type {
+        case .invalidUsername, .userNotFound:
+            showResultText("Unable to reset password: The email is invalid")
+        case .userDoesNotHavePassword:
+            showResultText("Unable to reset password: No password associated with email address")
+        default:
+            showResultText("Unable to reset password. Error: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+}
+
+extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
+    func onResetPasswordResendCodeError(
+        error: MSAL.ResendCodeError,
+        newState _: MSAL.ResetPasswordCodeSentState
+    ) {
+        print("ResetPasswordResendCodeDelegate: onResetPasswordResendCodeError: \(error)")
+
+        showResultText("Unexpected error while requesting new code")
+        dismissVerifyCodeModal()
+    }
+
+    func onResetPasswordResendCodeSent(
+        newState: MSAL.ResetPasswordCodeSentState,
+        displayName _: String,
+        codeLength _: Int
+    ) {
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: { [weak self] code in
+                                  guard let self else { return }
+
+                                  newState.verifyCode(code: code, delegate: self)
+                              }, resendCallback: { [weak self] in
+                                  guard let self else { return }
+
+                                  newState.resendCode(delegate: self)
+                              })
+    }
+}
+
+extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
+    func onResetPasswordVerifyCodeError(
+        error: MSAL.VerifyCodeError,
+        newState: MSAL.ResetPasswordCodeSentState?
+    ) {
+        switch error.type {
+        case .invalidCode:
+            guard let newState else {
+                print("Unexpected state. Received invalidCode but newState is nil")
+
+                showResultText("Internal error verifying code")
+                return
+            }
+
+            updateVerifyCodeModal(errorMessage: "Check the code and try again",
+                                  submitCallback: { [weak self] code in
+                                      guard let self else { return }
+
+                                      newState.verifyCode(code: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self else { return }
+
+                                      newState.resendCode(delegate: self)
+                                  })
+        case .redirect:
+            showResultText("Unable to sign up: Web UX required")
+            dismissVerifyCodeModal()
+        default:
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+            dismissVerifyCodeModal()
+        }
+    }
+
+    func onPasswordRequired(newState: MSAL.ResetPasswordRequiredState) {
+        dismissVerifyCodeModal { [self] in
+            showNewPasswordModal { [weak self] password in
+                guard let self else { return }
+
+                newState.submitPassword(password: password, delegate: self)
+            }
+        }
+    }
+}
+
+extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
+    func onResetPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.ResetPasswordRequiredState?) {
+        switch error.type {
+        case .invalidPassword:
+            guard let newState else {
+                print("Unexpected state. Received invalidPassword but newState is nil")
+
+                showResultText("Internal error verifying password")
+                return
+            }
+
+            updateNewPasswordModal(errorMessage: "Invalid password",
+                                   submittedCallback: { password in
+                                       newState.submitPassword(password: password, delegate: self)
+                                   })
+        default:
+            showResultText("Error setting password: \(error.errorDescription ?? String(error.type.rawValue))")
+            dismissNewPasswordModal()
+        }
+    }
+
+    func onResetPasswordCompleted() {
+        showResultText("Password reset successfully")
+        dismissNewPasswordModal()
     }
 }

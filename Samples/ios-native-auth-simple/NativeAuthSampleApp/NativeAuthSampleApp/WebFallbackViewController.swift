@@ -22,11 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import UIKit
 import MSAL
+import UIKit
 
 class WebFallbackViewController: UIViewController {
-
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
@@ -34,32 +33,55 @@ class WebFallbackViewController: UIViewController {
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
 
-    fileprivate var appContext: MSALNativeAuthPublicClientApplication!
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
+    var webviewParams: MSALWebviewParameters!
 
-    fileprivate var msalAccount: MSALAccount?
-    fileprivate var webviewParams: MSALWebviewParameters!
+    var account: MSALNativeAuthUserAccount?
+    var msalAccount: MSALAccount?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let authority = try! MSALAuthority(url: URL(string: Configuration.authority)!)
-
-        appContext = try! MSALNativeAuthPublicClientApplication(
-            configuration: MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: authority),
-                challengeTypes: [.oob, .password])
+        do {
+            nativeAuth = try MSALNativeAuthPublicClientApplication(
+                configuration: MSALPublicClientApplicationConfig(
+                    clientId: Configuration.clientId,
+                    redirectUri: nil,
+                    authority: Configuration.authority
+                ),
+                challengeTypes: [.oob, .password]
+            )
+        } catch {
+            print("Unable to initialize MSAL \(error)")
+            showResultText("Unable to initialize MSAL")
+        }
 
         webviewParams = MSALWebviewParameters(authPresentationViewController: self)
     }
 
-    @IBAction func signInPressed(_ sender: Any) {
-        performMSALSignIn()
+    @IBAction func signInPressed(_: Any) {
+        guard let email = emailTextField.text, !email.isEmpty,
+              let password = passwordTextField.text, !password.isEmpty
+        else {
+            resultTextView.text = "Invalid email address or password"
+            return
+        }
+
+        print("Signing in with email \(email) and password")
+
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
-    @IBAction func signOutPressed(_ sender: Any) {
-        performMSALSignOut()
+    @IBAction func signOutPressed(_: Any) {
+        if msalAccount != nil {
+            signOutWithWebUX()
+        } else if account != nil {
+            account = nil
+
+            showResultText("Signed out")
+
+            updateUI()
+        }
     }
 
     fileprivate func showResultText(_ text: String) {
@@ -67,21 +89,16 @@ class WebFallbackViewController: UIViewController {
     }
 
     fileprivate func updateUI() {
-        let signedIn = msalAccount != nil
+        let signedIn = msalAccount != nil || account != nil
 
-        if signedIn {
-            signInButton.isEnabled = false
-            signOutButton.isEnabled = true
-        } else {
-            signInButton.isEnabled = true
-            signOutButton.isEnabled = false
-        }
+        signInButton.isEnabled = !signedIn
+        signOutButton.isEnabled = signedIn
     }
 
-    fileprivate func performMSALSignIn() {
+    fileprivate func signInWithWebUX() {
         let parameters = MSALInteractiveTokenParameters(scopes: ["User.Read"], webviewParameters: webviewParams)
 
-        appContext.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
+        nativeAuth.acquireToken(with: parameters) { [weak self] (result: MSALResult?, error: Error?) in
             guard let self = self else { return }
 
             if let error = error {
@@ -91,22 +108,25 @@ class WebFallbackViewController: UIViewController {
 
             msalAccount = result?.account
 
-            guard let msalAccount = msalAccount else {
+            guard let msalAccount else {
                 showResultText("Could not acquire token: No result or account returned")
                 return
             }
 
             updateUI()
 
-            showResultText("Signed in successfully: \( msalAccount.accountClaims!.description)")
+            showResultText("Signed in successfully with Web UX: \(msalAccount.accountClaims!.description)")
         }
     }
 
-    fileprivate func performMSALSignOut() {
+    fileprivate func signOutWithWebUX() {
         let parameters = MSALSignoutParameters(webviewParameters: webviewParams)
         parameters.signoutFromBrowser = true
 
-        appContext.signout(with: msalAccount!, signoutParameters: parameters) { [weak self] (result: Bool, error: Error?) in
+        nativeAuth.signout(
+            with: msalAccount!,
+            signoutParameters: parameters
+        ) { [weak self] (result: Bool, error: Error?) in
             guard let self = self else { return }
 
             if let error = error {
@@ -124,5 +144,34 @@ class WebFallbackViewController: UIViewController {
 
             updateUI()
         }
+    }
+}
+
+// MARK: - Sign In delegates
+
+extension WebFallbackViewController: SignInStartDelegate {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
+
+        account = result
+
+        updateUI()
+    }
+
+    func onSignInError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInError: \(error)")
+
+        switch error.type {
+        case .userNotFound, .invalidUsername:
+            showResultText("Invalid username or password")
+        case .redirect:
+            signInWithWebUX()
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
+        showResultText("Unexpected result while signing in: Verification required")
     }
 }
