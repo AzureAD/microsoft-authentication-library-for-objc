@@ -37,15 +37,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInInitiateRequest(
-            parameters: .init(
-                config: config,
-                context: context,
-                username: "test@contoso.com",
-                challengeTypes: [.otp]
-            ),
-            context: context
-        )
+        sut = try provider.signInInitiateRequest(context: context, username: "test@contoso.com", challengeTypes: [.otp])
     }
 
     func test_succeedRequest_initiateSuccess() async throws {

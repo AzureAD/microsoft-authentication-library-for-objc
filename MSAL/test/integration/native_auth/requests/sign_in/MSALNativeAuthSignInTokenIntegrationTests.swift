@@ -38,18 +38,16 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
 
         sut = try provider.signInTokenRequest(
             parameters: .init(
-                config: config,
-                context: context,
                 username: "test@contoso.com",
                 credentialToken: nil,
                 signInSLT: nil,
                 grantType: .otp,
                 challengeTypes: nil,
-                scope: nil,
+                scopes: [],
                 password: nil,
-                oobCode: nil
-            ),
-            context: context
+                oobCode: nil,
+                context: context
+            )
         )
     }
 
@@ -79,20 +77,19 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config,
-                                                                    context: context,
+        let parameters = MSALNativeAuthSignInTokenRequestProviderParams(
                                                                     username: "test@contoso.com",
                                                                     credentialToken: nil,
                                                                     signInSLT: nil,
                                                                     grantType: .otp,
                                                                     challengeTypes: nil,
-                                                                    scope: "test & alt test",
+                                                                    scopes: ["test", "alt test"],
                                                                     password: nil,
-                                                                    oobCode: nil)
+                                                                    oobCode: nil,
+                                                                    context: context)
 
 
-        let request = try! provider.signInTokenRequest(parameters: parameters,
-                                                       context: context)
+        let request = try! provider.signInTokenRequest(parameters: parameters)
 
         request.send { result, error in
             if let result = result as? [String: Any] {
@@ -198,6 +195,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     }
 
     private func createError(_ code: MSALNativeAuthSignInTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
     }
 }
