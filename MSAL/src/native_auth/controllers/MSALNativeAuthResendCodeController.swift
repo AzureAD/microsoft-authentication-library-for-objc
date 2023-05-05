@@ -105,7 +105,9 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
 
     // MARK: - Private
 
-    private func createRequest(parameters: MSALNativeAuthResendCodeParameters, context: MSALNativeAuthRequestContext) -> MSALNativeAuthResendCodeRequest? {
+    private func createRequest(
+        parameters: MSALNativeAuthResendCodeParameters,
+        context: MSALNativeAuthRequestContext) -> MSALNativeAuthResendCodeRequest? {
         do {
             return try requestProvider.resendCodeRequest(
                 parameters: parameters,
@@ -127,14 +129,16 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
             guard let response = response as? MSALNativeAuthResendCodeRequestResponse else {
                 MSALLogger.log(level: .error,
                                context: context,
-                               format: "Reponse was not decoded properly by the serializer")
+                               format: "Response was not decoded properly by the serializer")
                 return completion(.failure(MSALNativeAuthError.invalidResponse))
             }
             completion(.success(response))
         }
     }
 
-    private func verifyResponse(_ resendCodeResponse: MSALNativeAuthResendCodeRequestResponse, context: MSALNativeAuthRequestContext) -> Bool {
+    private func verifyResponse(
+        _ resendCodeResponse: MSALNativeAuthResendCodeRequestResponse,
+        context: MSALNativeAuthRequestContext) -> Bool {
         do {
             return try responseHandler.handle(context: context, resendCodeReponse: resendCodeResponse)
         } catch {
@@ -143,7 +147,6 @@ final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MS
                 context: context,
                 format: "Response validation error: \(error)"
             )
-
             return false
         }
     }

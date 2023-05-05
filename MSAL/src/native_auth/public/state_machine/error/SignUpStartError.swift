@@ -36,7 +36,6 @@ public class SignUpStartError: MSALNativeAuthBaseError {
 
 @objc
 public enum SignUpStartErrorType: Int {
-    //TODO: browserRequired?
     case browserRequired
     case userAlreadyExists
     case invalidPassword

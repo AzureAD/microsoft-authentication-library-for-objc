@@ -42,7 +42,9 @@ public class ResetPasswordCodeSentState: MSALNativeAuthBaseState {
         case "2222": delegate.onResetPasswordVerifyCodeError(error:
                                                                 VerifyCodeError(type: .generalError),
                                                                 newState: self)
-        case "3333": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
+        case "3333": delegate.onResetPasswordVerifyCodeError(
+            error: VerifyCodeError(type: .browserRequired),
+            newState: nil)
         default: delegate.onPasswordRequired(newState: ResetPasswordRequiredState(flowToken: flowToken))
         }
     }

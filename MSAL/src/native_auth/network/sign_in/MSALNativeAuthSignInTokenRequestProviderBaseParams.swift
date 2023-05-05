@@ -24,6 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable:next type_name
 class MSALNativeAuthSignInTokenRequestProviderBaseParams {
     let username: String?
     let credentialToken: String?
@@ -34,7 +35,7 @@ class MSALNativeAuthSignInTokenRequestProviderBaseParams {
     let oobCode: String?
     let context: MSIDRequestContext
     let clientInfo = true
-    
+
     init(
         username: String?,
         credentialToken: String?,

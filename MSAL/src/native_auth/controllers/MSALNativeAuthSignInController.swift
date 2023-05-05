@@ -26,20 +26,14 @@
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
 
-    func signIn(
-        username: String,
-        password: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
-        correlationId: UUID?,
-        scopes: [String]?,
-        delegate: SignInStartDelegate)
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters)
 
     func signIn(
         username: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType],
         correlationId: UUID?,
         scopes: [String]?,
-        delegate: SignInStartDelegate)
+        delegate: SignInCodeStartDelegate)
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
@@ -80,16 +74,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Internal
 
-    func signIn(
-        username: String,
-        password: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
-        correlationId: UUID?,
-        scopes: [String]?,
-        delegate: SignInStartDelegate
-    ) {
-        let scopes = intersectScopes(scopes)
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) {
+        let scopes = intersectScopes(params.scopes)
+        let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
             telemetryApiId: .telemetryApiIdSignIn,
@@ -97,15 +84,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         )
         startTelemetryEvent(telemetryEvent, context: context)
         guard let request = createTokenRequest(
-            username: username,
-            password: password,
-            challengeTypes: challengeTypes,
+            username: params.username,
+            password: params.password,
+            challengeTypes: params.challengeTypes,
             scopes: scopes,
             context: context
         ) else {
 
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
-            delegate.onSignInError(error: SignInStartError(type: .generalError))
+            params.delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
 
@@ -121,17 +108,17 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 telemetryEvent?.setUserInformation(validatedTokenResult.account)
                 cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
                 let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
-                delegate.onSignInCompleted(result: account)
+                params.delegate.onSignInCompleted(result: account)
             case .credentialRequired(let credentialToken):
                 let challengeRequest = createChallengeRequest(
                     credentialToken: credentialToken,
-                    challengeTypes: challengeTypes,
+                    challengeTypes: params.challengeTypes,
                     context: context)
                 print("credential required")
-                //use the credential token to call /challenge API
-                //create the new state and return it to the delegate
+                // use the credential token to call /challenge API
+                // create the new state and return it to the delegate
             case .error(let errorType):
-                delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
+                params.delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
             }
         }
     }
@@ -141,7 +128,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         challengeTypes: [MSALNativeAuthInternalChallengeType],
         correlationId: UUID?,
         scopes: [String]?,
-        delegate: SignInStartDelegate) {
+        delegate: SignInCodeStartDelegate) {
             // call here /initiate
         }
 

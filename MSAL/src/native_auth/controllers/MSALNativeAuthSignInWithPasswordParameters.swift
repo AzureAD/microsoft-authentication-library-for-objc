@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,29 +25,11 @@
 @_implementationOnly import MSAL_Private
 
 // swiftlint:disable:next type_name
-class MSALNativeAuthSignInTokenRequestProviderParams:
-    MSALNativeAuthSignInTokenRequestProviderBaseParams {
-    let scopes: [String]
-
-    init(
-        username: String?,
-        credentialToken: String?,
-        signInSLT: String?,
-        grantType: MSALNativeAuthGrantType,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
-        scopes: [String],
-        password: String?,
-        oobCode: String?,
-        context: MSIDRequestContext) {
-        self.scopes = scopes
-        super.init(
-            username: username,
-            credentialToken: credentialToken,
-            signInSLT: signInSLT,
-            grantType: grantType,
-            challengeTypes: challengeTypes,
-            password: password,
-            oobCode: oobCode,
-            context: context)
-    }
+struct MSALNativeAuthSignInWithPasswordParameters {
+    let username: String
+    let password: String
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    let correlationId: UUID?
+    let scopes: [String]?
+    let delegate: SignInStartDelegate
 }

@@ -72,7 +72,11 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         startTelemetryEvent(telemetryEvent, context: context)
 
         guard let request = createRequest(with: parameters, context: context) else {
-            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, context: context, completion: completion)
+            complete(
+                telemetryEvent,
+                error: MSALNativeAuthError.invalidRequest,
+                context: context,
+                completion: completion)
             return
         }
 
@@ -109,7 +113,9 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func createRequest(with parameters: MSALNativeAuthSignUpParameters, context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
+    private func createRequest(
+        with parameters: MSALNativeAuthSignUpParameters,
+        context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
         do {
             return try requestProvider.signUpRequest(
                 parameters: parameters,

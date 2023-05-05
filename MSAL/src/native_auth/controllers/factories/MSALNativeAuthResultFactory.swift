@@ -31,7 +31,7 @@ protocol MSALNativeAuthResultBuildable {
         credentialToken: String?,
         tokenResult: MSIDTokenResult
     ) -> MSALNativeAuthResponse
-    
+
     func makeUserAccount(tokenResult: MSIDTokenResult) -> MSALNativeAuthUserAccount
 
     func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration
@@ -62,7 +62,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             )
         )
     }
-    
+
     func makeUserAccount(tokenResult: MSIDTokenResult) -> MSALNativeAuthUserAccount {
         return .init(
             username: tokenResult.accessToken.accountIdentifier.displayableId,

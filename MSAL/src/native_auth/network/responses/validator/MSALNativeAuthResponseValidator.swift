@@ -53,7 +53,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         msidConfiguration: MSIDConfiguration
     ) -> MSIDTokenResult? {
         do {
-            //TODO: where we can retrieve real homeAccountId and displayableId?
+            // TODO: where can we retrieve real homeAccountId and displayableId?
             return try responseHandler.handle(
                 context: context,
                 accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),

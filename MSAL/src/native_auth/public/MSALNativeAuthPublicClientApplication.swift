@@ -167,13 +167,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         let controller = controllerFactory.makeSignInController()
-        controller.signIn(
+        let params = MSALNativeAuthSignInWithPasswordParameters(
             username: username,
             password: password,
             challengeTypes: internalChallengeTypes,
             correlationId: correlationId,
             scopes: scopes,
             delegate: delegate)
+        controller.signIn(params: params)
     }
 
     public func signIn(
@@ -186,7 +187,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
             return
         }
-        // TODO: call signInController signIn
+        let controller = controllerFactory.makeSignInController()
+        controller.signIn(
+            username: username,
+            challengeTypes: internalChallengeTypes,
+            correlationId: correlationId,
+            scopes: scopes,
+            delegate: delegate)
     }
 
     public func resetPassword(
@@ -199,7 +206,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         switch username {
-        case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .browserRequired))
+        case "redirect@contoso.com": delegate.onResetPasswordError(
+            error: ResetPasswordStartError(type: .browserRequired))
         case "nopassword@contoso.com": delegate.onResetPasswordError(
             error: ResetPasswordStartError(type: .userDoesNotHavePassword))
         case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))

@@ -131,7 +131,9 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
 
     // MARK: - Private
 
-    private func createRequest(with parameters: MSALNativeAuthSignUpOTPParameters, context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
+    private func createRequest(
+        with parameters: MSALNativeAuthSignUpOTPParameters,
+        context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
         do {
             return try requestProvider.signUpOTPRequest(
                 parameters: parameters,

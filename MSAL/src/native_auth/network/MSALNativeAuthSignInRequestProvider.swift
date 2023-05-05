@@ -66,8 +66,12 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
         username: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType]
     ) throws -> MSALNativeAuthSignInInitiateRequest {
-        let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config, context: context, username: username, challengeTypes: challengeTypes)
-        
+        let parameters = MSALNativeAuthSignInInitiateRequestParameters(
+            config: config,
+            context: context,
+            username: username,
+            challengeTypes: challengeTypes)
+
         let request = try MSALNativeAuthSignInInitiateRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
@@ -139,7 +143,7 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
 
         return request
     }
-    
+
     private func formatScope(_ scope: [String]) -> String {
         return scope.joined(separator: ",")
     }
