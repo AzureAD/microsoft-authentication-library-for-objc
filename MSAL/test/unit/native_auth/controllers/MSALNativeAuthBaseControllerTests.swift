@@ -42,8 +42,6 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         sut = MSALNativeAuthBaseController(
             clientId: clientId,
-            context: contextMock,
-            responseHandler: MSALNativeAuthResponseHandlerMock(),
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
     }
@@ -55,7 +53,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
     func test_makeTelemetryApiEvent() {
 
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignUp)!
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignUp, context: contextMock)!
         let properties = event.getProperties()!
 
         XCTAssertEqual(properties[MSID_TELEMETRY_KEY_EVENT_NAME] as? String, "anEvent")
@@ -67,7 +65,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_stopTelemetryEvent_with_no_error() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn, context: contextMock)
         let expectation = expectation(description: "Telemetry event test no error")
 
         dispatcher.setTestCallback { event in
@@ -87,14 +85,14 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
 
-        sut.startTelemetryEvent(event)
-        sut.stopTelemetryEvent(event)
+        sut.startTelemetryEvent(event, context: contextMock)
+        sut.stopTelemetryEvent(event, context: contextMock)
 
         wait(for: [expectation], timeout: 1)
     }
 
     func test_stopTelemetryEvent_withNegativeErrorCode() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: -1)
 
         let expectation = expectation(description: "Telemetry event test negative error code")
@@ -115,14 +113,14 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
 
-        sut.startTelemetryEvent(event)
-        sut.stopTelemetryEvent(event, error: error)
+        sut.startTelemetryEvent(event, context: contextMock)
+        sut.stopTelemetryEvent(event, context: contextMock, error: error)
 
         wait(for: [expectation], timeout: 1)
     }
 
     func test_stopTelemetryEvent_withPositiveErrorCode() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: 12)
 
         let expectation = expectation(description: "Telemetry event test positive error code")
@@ -143,14 +141,14 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
 
-        sut.startTelemetryEvent(event)
-        sut.stopTelemetryEvent(event, error: error)
+        sut.startTelemetryEvent(event, context: contextMock)
+        sut.stopTelemetryEvent(event, context: contextMock, error: error)
 
         wait(for: [expectation], timeout: 1)
     }
 
     func test_stopTelemetryEvent_with_OAuthErrorKey() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: 12, userInfo: ["MSIDOAuthErrorKey": "oauthErrorCode_mock"])
 
         let expectation = expectation(description: "Telemetry event test OAuthErrorKey")
@@ -172,14 +170,14 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
 
-        sut.startTelemetryEvent(event)
-        sut.stopTelemetryEvent(event, error: error)
+        sut.startTelemetryEvent(event, context: contextMock)
+        sut.stopTelemetryEvent(event, context: contextMock, error: error)
 
         wait(for: [expectation], timeout: 1)
     }
 
     func test_completeWithTelemetry_withInvalidParameters_shouldComplete() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignIn, context: contextMock)
 
         let exp1 = expectation(description: "Telemetry event")
         let exp2 = expectation(description: "Completion event")
@@ -193,11 +191,11 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
 
-        sut.startTelemetryEvent(event)
+        sut.startTelemetryEvent(event, context: contextMock)
 
         let responseNil: String? = nil
 
-        sut.complete(event, response: responseNil, error: nil) { _, _ in
+        sut.complete(event, response: responseNil, error: nil, context: contextMock) { _, _ in
             exp2.fulfill()
         }
 

@@ -65,8 +65,7 @@ final class MSALNativeAuthResendCodeControllerTests: MSALNativeAuthTestCase {
         sut = .init(
             clientId: DEFAULT_TEST_CLIENT_ID,
             requestProvider: requestProviderMock,
-            responseHandler: responseHandlerMock,
-            context: contextMock
+            responseHandler: responseHandlerMock
         )
 
         try super.setUpWithError()

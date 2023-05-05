@@ -98,8 +98,6 @@ final class MSALNativeAuthSignUpControllerLegacyTests: XCTestCase {
             clientId: DEFAULT_TEST_CLIENT_ID,
             requestProvider: requestProviderMock,
             cacheAccessor: cacheAccessorMock,
-            responseHandler: responseHandlerMock,
-            context: contextMock,
             factory: factoryMock
         )
     }

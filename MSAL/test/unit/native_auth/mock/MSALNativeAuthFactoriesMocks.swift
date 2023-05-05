@@ -26,56 +26,44 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthRequestControllerBuildable {
+class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuildable {
+
     func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
-        MSALNativeAuthSignUpController(clientId: "", context: MSALNativeAuthRequestContext(), responseHandler: MSALNativeAuthResponseHandler())
+        MSALNativeAuthSignUpController(clientId: "")
     }
 
-    func makeSignUpControllerLegacy(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpControllingLegacy {
+    func makeSignUpControllerLegacy() -> MSAL.MSALNativeAuthSignUpControllingLegacy {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignUpControllerLegacy(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
+            config: MSALNativeAuthConfigStubs.configuration
         )
     }
 
-    func makeSignUpOTPControllerLegacy(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignUpOTPControllingLegacy {
+    func makeSignUpOTPController() -> MSAL.MSALNativeAuthSignUpOTPControllingLegacy {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignUpOTPControllerLegacy(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
+            config: MSALNativeAuthConfigStubs.configuration
         )
     }
 
-    func makeSignInController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignInControlling {
+    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignInController(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
+            config: MSALNativeAuthConfigStubs.configuration
         )
     }
 
-    func makeSignInOTPController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthSignInOTPControlling {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthSignInOTPController(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
-        )
-    }
-
-    func makeResendCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthResendCodeControlling {
+    func makeResendCodeController() -> MSAL.MSALNativeAuthResendCodeControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthResendCodeController(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
+            config: MSALNativeAuthConfigStubs.configuration
         )
     }
 
-    func makeVerifyCodeController(with context: MSIDRequestContext) -> MSAL.MSALNativeAuthVerifyCodeControlling {
+    func makeVerifyCodeController() -> MSAL.MSALNativeAuthVerifyCodeControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthVerifyCodeController(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: MSALNativeAuthRequestContextMock()
+            config: MSALNativeAuthConfigStubs.configuration
         )
     }
 }
@@ -87,6 +75,15 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
 
     func mockMakeNativeAuthResponse(_ result: MSALNativeAuthResponse) {
         self.makeNativeAuthResponseResult = result
+    }
+    
+    func makeUserAccount(tokenResult: MSIDTokenResult) -> MSAL.MSALNativeAuthUserAccount {
+        return .init(
+            username: "username",
+            accessToken: "accessToken",
+            rawIdToken: "IdToken",
+            scopes: [],
+            expiresOn: Date())
     }
 
     func makeNativeAuthResponse(

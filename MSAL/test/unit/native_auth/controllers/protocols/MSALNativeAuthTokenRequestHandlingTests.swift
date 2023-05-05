@@ -35,12 +35,7 @@ final class MSALNativeAuthTokenRequestHandlingTests: XCTestCase {
     private class Sut: MSALNativeAuthBaseController, MSALNativeAuthTokenRequestHandling {
 
         init(responseHandler: MSALNativeAuthResponseHandling, cacheAccessor: MSALNativeAuthCacheInterface) {
-            super.init(
-                clientId: DEFAULT_TEST_CLIENT_ID,
-                context: MSALNativeAuthRequestContextMock(),
-                responseHandler: responseHandler,
-                cacheAccessor: cacheAccessor
-            )
+            super.init(clientId: DEFAULT_TEST_CLIENT_ID, cacheAccessor: cacheAccessor)
         }
     }
 
@@ -155,21 +150,5 @@ final class MSALNativeAuthTokenRequestHandlingTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: 1)
-    }
-
-    func test_handleResponse_callsResponseHandler() {
-        responseHandlerMock.mockHandleTokenFunc(result: .init())
-
-        XCTAssertNotNil(
-            sut.handleResponse(.init(), msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration)
-        )
-    }
-
-    func test_cacheTokenResponse_callsCacheAccessor() {
-        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
-
-        sut.cacheTokenResponse(.init(), msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration)
-
-        XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
     }
 }

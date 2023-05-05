@@ -40,7 +40,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         signUpStartPasswordCalled = true
     }
 
-    func signUpStart(username: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpOTPStartDelegate) {
+    func signUpStart(username: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpCodeStartDelegate) {
         self.context = context
         signUpStartCalled = true
     }
