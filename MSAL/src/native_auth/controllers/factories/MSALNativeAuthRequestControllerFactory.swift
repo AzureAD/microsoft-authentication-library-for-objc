@@ -25,8 +25,9 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestControllerBuildable {
-    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling
-    func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling
+    func makeSignUpController() -> MSALNativeAuthSignUpControlling
+    func makeSignUpControllerLegacy(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControllingLegacy
+    func makeSignUpOTPControllerLegacy(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControllingLegacy
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling
     func makeSignInOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignInOTPControlling
     func makeResendCodeController(with context: MSIDRequestContext) -> MSALNativeAuthResendCodeControlling
@@ -40,12 +41,16 @@ final class MSALNativeAuthRequestControllerFactory: MSALNativeAuthRequestControl
         self.config = config
     }
 
-    func makeSignUpController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(config: config, context: context)
+    func makeSignUpController() -> MSALNativeAuthSignUpControlling {
+        return MSALNativeAuthSignUpController(clientId: "", context: MSALNativeAuthRequestContext(), responseHandler: MSALNativeAuthResponseHandler())
     }
 
-    func makeSignUpOTPController(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControlling {
-        return MSALNativeAuthSignUpOTPController(config: config, context: context)
+    func makeSignUpControllerLegacy(with context: MSIDRequestContext) -> MSALNativeAuthSignUpControllingLegacy {
+        return MSALNativeAuthSignUpControllerLegacy(config: config, context: context)
+    }
+
+    func makeSignUpOTPControllerLegacy(with context: MSIDRequestContext) -> MSALNativeAuthSignUpOTPControllingLegacy {
+        return MSALNativeAuthSignUpOTPControllerLegacy(config: config, context: context)
     }
 
     func makeSignInController(with context: MSIDRequestContext) -> MSALNativeAuthSignInControlling {

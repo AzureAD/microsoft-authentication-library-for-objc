@@ -24,21 +24,17 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthSignUpOTPControlling: MSALNativeAuthTokenRequestHandling {
+protocol MSALNativeAuthSignUpControllingLegacy: MSALNativeAuthTokenRequestHandling {
     func signUp(
-        parameters: MSALNativeAuthSignUpOTPParameters,
+        parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSALNativeAuthSignUpOTPControlling {
-
-    // MARK: - Variables
+final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, MSALNativeAuthSignUpControllingLegacy {
 
     private let requestProvider: MSALNativeAuthRequestProviding
     private let factory: MSALNativeAuthResultBuildable
-
-    // MARK: - Init
 
     init(
         clientId: String,
@@ -64,40 +60,29 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
         )
     }
 
-    // MARK: - Internal
-
     func signUp(
-        parameters: MSALNativeAuthSignUpOTPParameters,
+        parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignUp,
-            context: context
+            telemetryApiId: .telemetryApiIdSignUp, context: context
         )
         startTelemetryEvent(telemetryEvent, context: context)
 
         guard let request = createRequest(with: parameters, context: context) else {
-            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, context: context, completion: completion)
+            complete(
+                telemetryEvent,
+                error: MSALNativeAuthError.invalidRequest,
+                context: context,
+                completion: completion)
             return
         }
 
         performRequest(request) { [self] result in
             switch result {
             case .success(let tokenResponse):
-
-                // Mock API v1 returns a tokenResponse when we send a SignUp with OTP
-                // TODO: Look for 403 error and return the following:
-
-                //                let response = MSALNativeAuthResponse(
-                //                    stage: .verificationRequired,
-                //                    credentialToken: "flow-token-here",
-                //                    authentication: nil
-                //                )
-                //
-                //                complete(telemetryEvent, response: response, completion: completion)
-
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
 //                guard let tokenResult = handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
@@ -121,26 +106,23 @@ final class MSALNativeAuthSignUpOTPController: MSALNativeAuthBaseController, MSA
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "SignUp OTP request error: \(error)"
+                    format: "SignUp request error: \(error)"
                 )
-
                 complete(telemetryEvent, error: error, context: context, completion: completion)
             }
         }
     }
 
-    // MARK: - Private
-
     private func createRequest(
-        with parameters: MSALNativeAuthSignUpOTPParameters,
+        with parameters: MSALNativeAuthSignUpParameters,
         context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
         do {
-            return try requestProvider.signUpOTPRequest(
+            return try requestProvider.signUpRequest(
                 parameters: parameters,
                 context: context
             )
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating SignUp OTP Request: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignUp Request: \(error)")
             return nil
         }
     }

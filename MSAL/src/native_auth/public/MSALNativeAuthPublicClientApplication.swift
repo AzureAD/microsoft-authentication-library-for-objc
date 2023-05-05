@@ -111,19 +111,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
             return
         }
-        switch username {
-        case "exists@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .userAlreadyExists))
-        case "redirect@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .browserRequired))
-        case "invalidpassword@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
-        case "invalidemail@contoso.com": delegate.onSignUpError(error: SignUpStartError(type:
-                .invalidUsername, message: "email \(username) is invalid"))
-        case "invalidattributes@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .invalidAttributes))
-        case "generalerror@contoso.com": delegate.onSignUpError(error: SignUpStartError(type: .generalError))
-        default: delegate.onSignUpCodeSent(
-            newState: SignUpCodeSentState(flowToken: "signup_token"),
-            displayName: username,
-            codeLength: 4)
-        }
+
+        let controller = controllerFactory.makeSignUpController()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        controller.signUpStart(
+            username: username,
+            password: password,
+            attributes: attributes,
+            context: context,
+            delegate: delegate
+        )
     }
 
     public func signUp(
@@ -136,19 +134,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
             return
         }
-        switch username {
-        case "exists@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .userAlreadyExists))
-        case "redirect@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .browserRequired))
-        case "invalidemail@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type:
-                .invalidUsername, message: "email \(username) is invalid"))
-        case "invalidattributes@contoso.com": delegate.onSignUpCodeError(error:
-                                                                        SignUpCodeStartError(type: .invalidAttributes))
-        case "generalerror@contoso.com": delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .generalError))
-        default: delegate.onSignUpCodeSent(
-            newState: SignUpCodeSentState(flowToken: "signup_token"),
-            displayName: username,
-            codeLength: 4)
-        }
+
+        let controller = controllerFactory.makeSignUpController()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        controller.signUpStart(
+            username: username,
+            attributes: attributes,
+            context: context,
+            delegate: delegate
+        )
     }
 
     public func signIn(

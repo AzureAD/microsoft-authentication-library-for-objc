@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthControllerBuildable {
     func makeSignUpController() -> MSALNativeAuthSignUpControlling
-    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControlling
+    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControllingLegacy
     func makeSignInController() -> MSALNativeAuthSignInControlling
     func makeResendCodeController() -> MSALNativeAuthResendCodeControlling
     func makeVerifyCodeController() -> MSALNativeAuthVerifyCodeControlling
@@ -40,11 +40,11 @@ final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     }
 
     func makeSignUpController() -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(config: config)
+        return MSALNativeAuthSignUpController(clientId: config.clientId)
     }
 
-    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControlling {
-        return MSALNativeAuthSignUpOTPController(config: config)
+    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControllingLegacy {
+        return MSALNativeAuthSignUpOTPControllerLegacy(config: config)
     }
 
     func makeSignInController() -> MSALNativeAuthSignInControlling {

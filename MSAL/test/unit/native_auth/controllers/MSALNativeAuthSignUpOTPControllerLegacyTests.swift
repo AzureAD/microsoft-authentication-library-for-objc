@@ -26,9 +26,9 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignUpOTPControllerTests: MSALNativeAuthTestCase {
+final class MSALNativeAuthSignUpOTPControllerLegacyTests: MSALNativeAuthTestCase {
 
-    private var sut: MSALNativeAuthSignUpOTPController!
+    private var sut: MSALNativeAuthSignUpOTPControllerLegacy!
     private var requestProviderMock: MSALNativeAuthRequestProviderMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!

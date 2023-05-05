@@ -25,70 +25,75 @@
 import Foundation
 
 @objcMembers
-public class SignUpCodeSentState: MSALNativeAuthBaseState {
+public class SignUpBaseState: MSALNativeAuthBaseState {
+    fileprivate weak var controller: MSALNativeAuthSignUpControlling?
+
+    init(controller: MSALNativeAuthSignUpControlling, flowToken: String) {
+        self.controller = controller
+        super.init(flowToken: flowToken)
+    }
+}
+
+@objcMembers
+public class SignUpCodeSentState: SignUpBaseState {
+
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
-//        guard isActive else {
-//            delegate.onSignUpResendCodeError(error: ResendCodeError(type: .generalError), newState: nil)
-//        }
-        if correlationId != nil {
-            delegate.onSignUpResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
-        } else {
-            delegate.onSignUpResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        guard let controller = controller else {
+            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
+            delegate.onSignUpResendCodeError(error: .init(type: .generalError), newState: nil)
+            return
         }
+
+        controller.resendCode(context: context, delegate: delegate)
     }
 
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
-        switch code {
-        case "0000": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-        case "2222": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-        case "3333": delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
-        case "5555": delegate.onPasswordRequired(newState: SignUpPasswordRequiredState(flowToken: flowToken))
-        case "6666": delegate.onSignUpAttributesRequired(newState: SignUpAttributesRequiredState(flowToken: flowToken))
-        default: delegate.onSignUpCompleted()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        guard let controller = controller else {
+            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
+            delegate.onSignUpVerifyCodeError(error: .init(type: .generalError), newState: nil)
+            return
         }
+
+        controller.submitCode(code, context: context, delegate: delegate)
     }
 }
 
 @objcMembers
-public class SignUpPasswordRequiredState: MSALNativeAuthBaseState {
+public class SignUpPasswordRequiredState: SignUpBaseState {
+
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        switch password {
-        case "redirect": delegate.onSignUpPasswordRequiredError(
-            error: PasswordRequiredError(type: .browserRequired), newState: nil)
-        case "generalerror": delegate.onSignUpPasswordRequiredError(
-            error: PasswordRequiredError(type: .generalError),
-            newState: self)
-        case "invalid": delegate.onSignUpPasswordRequiredError(
-            error: PasswordRequiredError(type: .invalidPassword),
-            newState: self)
-        case "attributesRequired": delegate.onSignUpAttributesRequired(newState:
-                                                                SignUpAttributesRequiredState(flowToken: flowToken)
-        )
-        default: delegate.onSignUpCompleted()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        guard let controller = controller else {
+            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
+            delegate.onSignUpPasswordRequiredError(error: .init(type: .generalError), newState: nil)
+            return
         }
+
+        controller.submitPassword(password, context: context, delegate: delegate)
     }
 }
 
 @objcMembers
-public class SignUpAttributesRequiredState: MSALNativeAuthBaseState {
+public class SignUpAttributesRequiredState: SignUpBaseState {
+
     public func submitAttributes(
         attributes: [String: Any],
         delegate: SignUpAttributesRequiredDelegate,
-        correlationId: UUID? = nil) {
-            guard let key = attributes.keys.first else {
-                delegate.onSignUpAttributesRequiredError(
-                    error: AttributesRequiredError(type: .invalidAttributes),
-                    newState: self)
-                return
-            }
-            switch key {
-            case "general": delegate.onSignUpAttributesRequiredError(
-                error: AttributesRequiredError(type: .generalError),
-                newState: self)
-            case "redirect": delegate.onSignUpAttributesRequiredError(
-                error: AttributesRequiredError(type: .browserRequired),
-                newState: nil)
-            default: delegate.onSignUpCompleted()
-            }
+        correlationId: UUID? = nil
+    ) {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        guard let controller = controller else {
+            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
+            delegate.onSignUpAttributesRequiredError(error: .init(type: .generalError), newState: nil)
+            return
+        }
+
+        controller.submitAttributes(attributes, context: context, delegate: delegate)
     }
 }
