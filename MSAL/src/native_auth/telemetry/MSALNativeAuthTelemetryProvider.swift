@@ -30,6 +30,8 @@ protocol MSALNativeAuthTelemetryProviding {
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForRefreshToken(
         type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry
+    func telemetryForResetPassword(
+        type: MSALNAtiveAuthResetPasswordType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForResetPasswordStart(
         type: MSALNativeAuthResetPasswordStartType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForResetPasswordComplete(
@@ -63,6 +65,13 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdRefreshToken,
+            operationType: type.rawValue,
+            platformFields: nil)
+    }
+
+    func telemetryForResetPassword(type: MSALNAtiveAuthResetPasswordType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .telemetryResetPassword,
             operationType: type.rawValue,
             platformFields: nil)
     }

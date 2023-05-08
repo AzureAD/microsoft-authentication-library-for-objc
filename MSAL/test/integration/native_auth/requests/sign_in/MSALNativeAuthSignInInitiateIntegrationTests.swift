@@ -37,7 +37,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInInitiateRequest(context: context, username: "test@contoso.com", challengeTypes: [.otp])
+        sut = try provider.signInInitiateRequest(context: context, username: "test@contoso.com", challengeTypes: [.redirect])
     }
 
     func test_succeedRequest_initiateSuccess() async throws {
@@ -62,7 +62,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -70,7 +70,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .userNotFound,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes:[.userNotFound], errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -78,7 +78,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 }

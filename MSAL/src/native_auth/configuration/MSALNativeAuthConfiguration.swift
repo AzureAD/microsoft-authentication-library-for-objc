@@ -25,6 +25,10 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthConfiguration {
+    var challengeTypesString: String {
+        return challengeTypes.map { $0.rawValue }.joined(separator: " ")
+    }
+
     let clientId: String
     let authority: MSIDAADAuthority
     let challengeTypes: [MSALNativeAuthInternalChallengeType]

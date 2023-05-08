@@ -13,9 +13,11 @@
 		9B08477B29969264003BA4B4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477929969264003BA4B4 /* Main.storyboard */; };
 		9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477C29969265003BA4B4 /* Assets.xcassets */; };
 		9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */; };
-		9B14AE4D29D204EA006F7C51 /* OTPViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */; };
+		9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */; };
 		9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */; };
 		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
+		9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */; };
+		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; };
 		9BB32E4C29A6750800BD7D89 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
@@ -153,9 +155,11 @@
 		9B08477C29969265003BA4B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B08477F29969265003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B08478129969265003BA4B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPViewController.swift; sourceTree = "<group>"; };
+		9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
 		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
 		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
+		9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAttributesViewController.swift; sourceTree = "<group>"; };
+		9BA1949529F820980023905D /* EmailAndCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAndCodeViewController.swift; sourceTree = "<group>"; };
 		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
@@ -195,21 +199,39 @@
 		9B08477229969264003BA4B4 /* NativeAuthSampleApp */ = {
 			isa = PBXGroup;
 			children = (
-				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477329969264003BA4B4 /* AppDelegate.swift */,
 				9B08477529969264003BA4B4 /* SceneDelegate.swift */,
 				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
-				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
-				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
-				9B14AE4C29D204EA006F7C51 /* OTPViewController.swift */,
-				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
-				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
+				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
+				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
 				9B08477929969264003BA4B4 /* Main.storyboard */,
 				9B08477C29969265003BA4B4 /* Assets.xcassets */,
 				9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */,
 				9B08478129969265003BA4B4 /* Info.plist */,
 			);
 			path = NativeAuthSampleApp;
+			sourceTree = "<group>";
+		};
+		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
+				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
+			);
+			name = "Modal View Controllers";
+			sourceTree = "<group>";
+		};
+		9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
+				9BA1949529F820980023905D /* EmailAndCodeViewController.swift */,
+				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
+				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
+				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+			);
+			name = "Scenario View Controllers";
 			sourceTree = "<group>";
 		};
 		9BB32E1029A674BB00BD7D89 /* Products */ = {
@@ -251,6 +273,7 @@
 				9B08476D29969264003BA4B4 /* Frameworks */,
 				9B08476E29969264003BA4B4 /* Resources */,
 				9BB32E4D29A6750800BD7D89 /* Embed Frameworks */,
+				9B2B490329EF034A00E586FA /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -415,18 +438,41 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		9B2B490329EF034A00E586FA /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		9B08476C29969264003BA4B4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
-				9B14AE4D29D204EA006F7C51 /* OTPViewController.swift in Sources */,
+				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
 				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
+				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
 				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
 				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,
+				9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */,
 				9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -511,7 +557,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -565,7 +611,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -589,8 +635,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -618,8 +664,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

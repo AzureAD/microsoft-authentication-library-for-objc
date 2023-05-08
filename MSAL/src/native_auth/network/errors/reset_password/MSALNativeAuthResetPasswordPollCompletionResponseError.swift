@@ -24,27 +24,38 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInInitiateResponse: Decodable {
+// swiftlint:disable:next type_name
+struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthResponseError {
 
-    // MARK: - Variables
-    let credentialToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
+    let error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode
+    let errorDescription: String?
+    let errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
+    let target: String?
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken
-        case challengeType
+    init(
+        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
     }
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decodeIfPresent(
-            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
-        if self.credentialToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-        if self.credentialToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorCodes = "error_codes"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+        case target
     }
 }

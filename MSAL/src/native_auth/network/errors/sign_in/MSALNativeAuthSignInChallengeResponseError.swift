@@ -29,6 +29,7 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignInChallengeOauth2ErrorCode
     let errorDescription: String?
+    var errorCodes: [MSALNativeAPIErrorCodes]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
 

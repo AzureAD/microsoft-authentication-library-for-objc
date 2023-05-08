@@ -22,10 +22,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-enum MSALAuthErrorCode: Int {
-    case userNotFound = 50034
-    case invalidPassword = 50126
-    case invalidAuthenticationType = 400002
+// swiftlint:disable:next type_name
+struct MSALNativeAuthResetPasswordStartRequestParameters: MSALNativeAuthRequestable {
+    let config: MSALNativeAuthConfiguration
+    let endpoint: MSALNativeAuthEndpoint = .resetPasswordStart
+    let context: MSIDRequestContext
+    let username: String
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.username.rawValue: username,
+            Key.challengeType.rawValue: config.challengeTypesString
+        ]
+
+    }
 }

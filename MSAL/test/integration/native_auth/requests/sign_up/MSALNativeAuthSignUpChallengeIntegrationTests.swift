@@ -36,6 +36,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
 
         provider = MSALNativeAuthSignUpRequestProvider(
             config: config,
+            requestConfigurator: MSALNativeAuthRequestConfigurator(),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 

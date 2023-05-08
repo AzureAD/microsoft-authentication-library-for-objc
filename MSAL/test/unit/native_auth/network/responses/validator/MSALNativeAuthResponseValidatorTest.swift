@@ -92,7 +92,7 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
     func test_credentialReqResponseDoesNotContainCredentialToken_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
-        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -103,7 +103,7 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
         let credentialToken = "credentialToken"
-        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: credentialToken, errorCodes: nil)
+        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: credentialToken)
         let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
         if case .credentialRequired(credentialToken) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -111,30 +111,30 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
     }
     
     func test_invalidGrantTokenResponse_isTranslatedToProperErrorResult() {
-        let userNotFoundError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [50034])
+        let userNotFoundError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.userNotFound], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
-        let invalidPasswordError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [50126])
+        let invalidPasswordError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
-        let invalidAuthTypeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [400002])
+        let invalidAuthTypeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidAuthenticationType], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
-        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [142521])
+        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
     }
     
     func test_errorTokenResponse_isTranslatedToProperErrorResult() {
-        let invalidReqError = MSALNativeAuthSignInTokenResponseError(error: .invalidRequest, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let invalidReqError = MSALNativeAuthSignInTokenResponseError(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidReqError, expectedError: .invalidRequest)
-        let invalidClientError = MSALNativeAuthSignInTokenResponseError(error: .invalidClient, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let invalidClientError = MSALNativeAuthSignInTokenResponseError(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidClientError, expectedError: .invalidClient)
-        let expiredTokenError = MSALNativeAuthSignInTokenResponseError(error: .expiredToken, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let expiredTokenError = MSALNativeAuthSignInTokenResponseError(error: .expiredToken, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: expiredTokenError, expectedError: .expiredToken)
-        let unsupportedChallengeTypeError = MSALNativeAuthSignInTokenResponseError(error: .unsupportedChallengeType, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let unsupportedChallengeTypeError = MSALNativeAuthSignInTokenResponseError(error: .unsupportedChallengeType, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: unsupportedChallengeTypeError, expectedError: .unsupportedChallengeType)
-        let invalidScopeError = MSALNativeAuthSignInTokenResponseError(error: .invalidScope, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let invalidScopeError = MSALNativeAuthSignInTokenResponseError(error: .invalidScope, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidScopeError, expectedError: .invalidScope)
-        let authPendingError = MSALNativeAuthSignInTokenResponseError(error: .authorizationPending, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let authPendingError = MSALNativeAuthSignInTokenResponseError(error: .authorizationPending, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: authPendingError, expectedError: .authorizationPending)
-        let slowDownError = MSALNativeAuthSignInTokenResponseError(error: .slowDown, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let slowDownError = MSALNativeAuthSignInTokenResponseError(error: .slowDown, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: slowDownError, expectedError: .slowDown)
     }
     

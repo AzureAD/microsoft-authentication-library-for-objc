@@ -29,14 +29,83 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
-    
+    let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+    var config: MSALNativeAuthConfiguration! = nil
+    private let context = MSALNativeAuthRequestContextMock(
+        correlationId: .init(uuidString: DEFAULT_TEST_UID)!
+    )
+
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-        var config: MSALNativeAuthConfiguration! = nil
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config, context: MSALNativeAuthRequestContextMock(), username: "username", credentialToken: "Test Credential Token", signInSLT: "Test SignIn SLT", grantType: .password, challengeTypes: [.password], scope: "scope", password: "password", oobCode: "code")
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(config:config,
+                                                                    context: MSALNativeAuthRequestContextMock(),
+                                                                    username: "username",
+                                                                    credentialToken: "Test Credential Token",
+                                                                    signInSLT: "Test SignIn SLT",
+                                                                    grantType: .password,
+                                                                    challengeTypes: [.redirect],
+                                                                    scope: "scope",
+                                                                    password: "password",
+                                                                    oobCode: "Test OTP Code")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth/v2.0/token")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/token")
+    }
+
+    func test_passwordParameters_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
+        let params = MSALNativeAuthSignInTokenRequestParameters(
+            config: config,
+            context: context,
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            credentialToken: "Test Credential Token",
+            signInSLT: "Test SignIn SLT",
+            grantType: .password,
+            challengeTypes: [.redirect],
+            scope: "<scope-1>",
+            password: "password",
+            oobCode: "oob"
+        )
+
+        let body = params.makeRequestBody()
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "credential_token": "Test Credential Token",
+            "signin_slt": "Test SignIn SLT",
+            "grant_type": "password",
+            "challenge_type": "password",
+            "scope": "<scope-1>",
+            "password": "password",
+            "oob": "oob"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
+
+    func test_nilParameters_shouldCreateCorrectParameters() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .redirect]))
+        let params = MSALNativeAuthSignInTokenRequestParameters(
+            config: config,
+            context: context,
+            username: nil,
+            credentialToken: nil,
+            signInSLT: nil,
+            grantType: .password,
+            challengeTypes: [.redirect],
+            scope: nil,
+            password: nil,
+            oobCode: nil
+        )
+
+        let body = params.makeRequestBody()
+
+        let expectedBodyParams = [
+            "client_id": params.config.clientId,
+            "grant_type": "password"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
     }
 }

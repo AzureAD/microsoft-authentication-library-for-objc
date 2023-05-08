@@ -30,6 +30,7 @@ protocol MSALNativeAuthRequestable {
     var context: MSIDRequestContext { get }
 
     func makeEndpointUrl() throws -> URL
+    func makeRequestBody() -> [String: String]
 }
 
 extension MSALNativeAuthRequestable {

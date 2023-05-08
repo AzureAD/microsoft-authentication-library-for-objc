@@ -1,0 +1,187 @@
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
+
+final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativeAuthIntegrationBaseTests {
+
+    private typealias Error = MSALNativeAuthResetPasswordPollCompletionResponseError
+    private var provider: MSALNativeAuthResetPasswordRequestProvider!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        provider = MSALNativeAuthResetPasswordRequestProvider(
+            config: config,
+            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            telemetryProvider: MSALNativeAuthTelemetryProvider()
+        )
+
+        sut = try provider.pollCompletion(
+            parameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters(config: config,
+                                                                                   context: context,
+                                                                                   passwordResetToken: "<password-reset-token"),
+            context: MSALNativeAuthRequestContext(correlationId: correlationId)
+        )
+    }
+
+    func test_whenResetPasswordPollCompletion_succeeds() async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: .resetPasswordPollCompletion,
+            correlationId: correlationId,
+            responses: [.ssprPollSuccess]
+        )
+
+        let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.status)
+        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.expiresIn)
+    }
+
+    func test_whenResetPasswordPollCompletion_inProgress() async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: .resetPasswordPollCompletion,
+            correlationId: correlationId,
+            responses: [.ssprPollInProgress]
+        )
+
+        let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.status)
+        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.expiresIn)
+    }
+
+    func test_whenResetPasswordPollCompletion_failed() async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: .resetPasswordPollCompletion,
+            correlationId: correlationId,
+            responses: [.ssprPollFailed]
+        )
+
+        let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.status)
+        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.expiresIn)
+    }
+
+    func test_whenResetPasswordPollCompletion_notStarted() async throws {
+        try await mockAPIHandler.addResponse(
+            endpoint: .resetPasswordPollCompletion,
+            correlationId: correlationId,
+            responses: [.ssprPollNotStarted]
+        )
+
+        let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.status)
+        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.expiresIn)
+    }
+
+    func test_resetPasswordPollCompletion_invalidClient() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .invalidClient,
+            expectedError: Error(error: .invalidClient)
+        )
+    }
+
+    func test_resetPasswordChallenge_invalidPurposeToken() async throws {
+        let response = try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .invalidPurposeToken,
+            expectedError: Error(error: .invalidRequest)
+        )
+
+        guard let innerError = response.innerErrors?.first else {
+            return XCTFail("There should be an inner error")
+        }
+
+        XCTAssertEqual(innerError.error, "invalid_purpose_token")
+        XCTAssertNotNil(innerError.errorDescription)
+    }
+
+    func test_resetPasswordPollCompletion_expiredToken() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .expiredToken,
+            expectedError: Error(error: .expiredToken)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_passwordTooWeak() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .passwordTooWeak,
+            expectedError: Error(error: .passwordTooWeak)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_passwordTooShort() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .passwordTooShort,
+            expectedError: Error(error: .passwordTooShort)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_passwordTooLong() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .passwordTooLong,
+            expectedError: Error(error: .passwordTooLong)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_passwordRecentlyUsed() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .passwordRecentlyUsed,
+            expectedError: Error(error: .passwordRecentlyUsed)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_passwordBanned() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .passwordBanned,
+            expectedError: Error(error: .passwordBanned)
+        )
+    }
+
+    func test_resetPasswordPollCompletion_userNotFound() async throws {
+        try await perform_testFail(
+            endpoint: .resetPasswordPollCompletion,
+            response: .explicityUserNotFound,
+            expectedError: Error(error: .userNotFound, errorURI: nil)
+        )
+    }
+}

@@ -127,13 +127,14 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         }
     }
 
-    private func convertErrorCodeToErrorType(_ errorCode: Int?) -> MSALNativeAuthSignInTokenValidatedErrorType {
+    private func convertErrorCodeToErrorType(
+        _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthSignInTokenValidatedErrorType {
         switch errorCode {
-        case MSALAuthErrorCode.userNotFound.rawValue:
+        case .userNotFound:
             return .userNotFound
-        case MSALAuthErrorCode.invalidPassword.rawValue:
+        case .invalidCredentials:
             return .invalidPassword
-        case MSALAuthErrorCode.invalidAuthenticationType.rawValue:
+        case .invalidAuthenticationType:
             return .invalidAuthenticationType
         default:
             return .generalError

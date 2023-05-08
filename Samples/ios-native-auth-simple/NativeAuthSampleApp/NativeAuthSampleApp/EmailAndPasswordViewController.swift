@@ -22,11 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import UIKit
 import MSAL
+import UIKit
 
 class EmailAndPasswordViewController: UIViewController {
-
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
@@ -35,92 +34,63 @@ class EmailAndPasswordViewController: UIViewController {
     @IBOutlet weak var signInButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
 
-    var appContext: MSALNativeAuthPublicClientApplication!
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
 
-    var otpViewController: OTPViewController?
+    var verifyCodeViewController: VerifyCodeViewController?
 
-    var signedIn = false
+    var account: MSALNativeAuthUserAccount?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let authority = try! MSALAuthority(url: URL(string: Configuration.authority)!)
-
-        appContext = try! MSALNativeAuthPublicClientApplication(
-            configuration: MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: authority),
-                challengeTypes: [.oob, .password])
+        do {
+            nativeAuth = try MSALNativeAuthPublicClientApplication(
+                configuration: MSALPublicClientApplicationConfig(
+                    clientId: Configuration.clientId,
+                    redirectUri: nil,
+                    authority: Configuration.authority
+                ),
+                challengeTypes: [.oob, .password]
+            )
+        } catch {
+            print("Unable to initialize MSAL \(error)")
+            showResultText("Unable to initialize MSAL")
+        }
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        // TODO: Call appContext.getUserAccount() and update UI accordingly
-    }
-
-    @IBAction func signUpTapped(_ sender: Any) {
+    @IBAction func signUpPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
-            resultTextView.text = "email or password not set"
+            resultTextView.text = "Email or password not set"
             return
         }
 
-        print("Signing up with email \(email) and password \(password)")
+        print("Signing up with email \(email) and password")
+
+        nativeAuth.signUp(username: email, password: password, delegate: self)
     }
 
-    @IBAction func signInTapped(_ sender: Any) {
+    @IBAction func signInPressed(_: Any) {
         guard let email = emailTextField.text, let password = passwordTextField.text else {
-            resultTextView.text = "email or password not set"
+            resultTextView.text = "Email or password not set"
             return
         }
 
-        print("Signing in with email \(email) and password \(password)")
+        print("Signing in with email \(email) and password")
 
-        showOTPModal(submittedCallback: { [weak self] otp in
-            guard let self = self else { return }
-
-            showResultText("Submitted OTP: \(otp)")
-            dismiss(animated: true)
-        }, resendCodeCallback: { [weak self] in
-            self?.showResultText("Resending code")
-        })
+        nativeAuth.signIn(username: email, password: password, delegate: self)
     }
 
-    @IBAction func signOutTapped(_ sender: Any) {
-        signedIn = false
+    @IBAction func signOutPressed(_: Any) {
+        guard account != nil else {
+            print("signOutPressed: Not currently signed in")
+            return
+        }
+
+        account = nil
 
         showResultText("Signed out")
 
         updateUI()
-    }
-
-    func showOTPModal(submittedCallback: @escaping ((_ otp: String) -> Void), resendCodeCallback: @escaping (() -> Void)) {
-        if otpViewController == nil {
-            otpViewController = storyboard?.instantiateViewController(withIdentifier: "OTPViewController") as? OTPViewController
-        }
-
-        guard let otpViewController = otpViewController else {
-            return
-        }
-
-        otpViewController.otpSubmittedCallback = { otp in
-            DispatchQueue.main.async {
-                submittedCallback(otp)
-            }
-        }
-
-        otpViewController.resendCodeCallback = {
-            DispatchQueue.main.async {
-                resendCodeCallback()
-            }
-        }
-
-        present(otpViewController, animated: true)
-    }
-
-    func showOTPErrorMessage(_ message: String) {
-        otpViewController?.errorLabel.text = message
     }
 
     func showResultText(_ text: String) {
@@ -128,15 +98,192 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func updateUI() {
-        if signedIn {
-            signUpButton.isEnabled = false
-            signInButton.isEnabled = false
-            signOutButton.isEnabled = true
-        } else {
-            signUpButton.isEnabled = true
-            signInButton.isEnabled = true
-            signOutButton.isEnabled = false
+        let signedIn = (account != nil)
+
+        signUpButton.isEnabled = !signedIn
+        signInButton.isEnabled = !signedIn
+        signOutButton.isEnabled = signedIn
+    }
+}
+
+// MARK: - Sign Up delegates
+
+extension EmailAndPasswordViewController: SignUpStartDelegate {
+    func onSignUpError(error: MSAL.SignUpStartError) {
+        switch error.type {
+        case .userAlreadyExists:
+            showResultText("Unable to sign up: User already exists")
+        case .invalidPassword:
+            showResultText("Unable to sign up: The password is invalid")
+        case .invalidUsername:
+            showResultText("Unable to sign up: The username is invalid")
+        default:
+            showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
         }
     }
 
+    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
+        print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
+
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self else { return }
+
+                                newState.submitCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self else { return }
+
+                                newState.resendCode(delegate: self)
+                            })
+    }
+}
+
+extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+        switch error.type {
+        case .invalidCode:
+            guard let newState else {
+                print("Unexpected state. Received invalidCode but newState is nil")
+
+                showResultText("Internal error verifying code")
+                return
+            }
+
+            updateVerifyCodeModal(errorMessage: "Invalid code",
+                                  submitCallback: { [weak self] code in
+                                      guard let self else { return }
+
+                                      newState.submitCode(code: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self else { return }
+
+                                      newState.resendCode(delegate: self)
+                                  })
+        default:
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+            dismissVerifyCodeModal()
+        }
+    }
+
+    func onSignUpCompleted() {
+        showResultText("Signed up successfully!")
+        dismissVerifyCodeModal()
+    }
+
+    func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
+        showResultText("Unexpected result while signing up: Attributes Required")
+        dismissVerifyCodeModal()
+    }
+
+    func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
+        showResultText("Unexpected result while signing up: Password Required")
+        dismissVerifyCodeModal()
+    }
+}
+
+extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeSentState?) {
+        print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
+
+        showResultText("Unexpected error while requesting new code")
+        dismissVerifyCodeModal()
+    }
+
+    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: { [weak self] code in
+                                  guard let self else { return }
+
+                                  newState.submitCode(code: code, delegate: self)
+                              }, resendCallback: { [weak self] in
+                                  guard let self else { return }
+
+                                  newState.resendCode(delegate: self)
+                              })
+    }
+}
+
+// MARK: - Sign In delegates
+
+extension EmailAndPasswordViewController: SignInStartDelegate {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
+
+        account = result
+
+        updateUI()
+    }
+
+    func onSignInError(error: MSAL.SignInStartError) {
+        print("SignInStartDelegate: onSignInError: \(error)")
+
+        switch error.type {
+        case .userNotFound, .invalidPassword, .invalidUsername:
+            showResultText("Invalid username or password")
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
+    }
+
+    func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
+        showResultText("Unexpected result while signing in: Verification required")
+    }
+}
+
+// MARK: - Verify Code modal methods
+extension EmailAndPasswordViewController {
+    func showVerifyCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeViewController else {
+            return
+        }
+
+        if let errorMessage {
+            verifyCodeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
+            }
+        }
+
+        verifyCodeViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+    }
+
+    func dismissVerifyCodeModal() {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        verifyCodeViewController = nil
+    }
 }

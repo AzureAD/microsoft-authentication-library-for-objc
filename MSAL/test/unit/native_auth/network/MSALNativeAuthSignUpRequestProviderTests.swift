@@ -36,7 +36,9 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         telemetryProvider = MSALNativeAuthTelemetryProvider()
         context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
-        sut = .init(config: MSALNativeAuthConfigStubs.configuration, telemetryProvider: telemetryProvider)
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration,
+                    requestConfigurator: MSALNativeAuthRequestConfigurator(),
+                    telemetryProvider: telemetryProvider)
     }
 
     func test_signUpStartRequest_is_created_successfully() throws {
@@ -75,7 +77,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             context: context
         )
 
-        let request = try sut.continue(params: parameters)
+        let request = try sut.continue(parameters: parameters, context: context)
 
         checkBodyParams(request.parameters, for: .signUpContinue)
         checkUrlRequest(request.urlRequest!, for: .signUpContinue)

@@ -36,19 +36,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         provider = MSALNativeAuthSignInRequestProvider(config: config)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInTokenRequest(
-            parameters: .init(
-                username: "test@contoso.com",
-                credentialToken: nil,
-                signInSLT: nil,
-                grantType: .otp,
-                challengeTypes: nil,
-                scopes: [],
-                password: nil,
-                oobCode: nil,
-                context: context
-            )
-        )
+        sut = try provider.signInTokenRequest(parameters: .init(username: "test@contoso.com", credentialToken: nil, signInSLT: nil, grantType: .otp, challengeTypes: [.redirect], scopes: [], password: nil, oobCode: nil, context: context))
     }
 
     func test_succeedRequest_tokenSuccess() async throws {
@@ -77,17 +65,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let parameters = MSALNativeAuthSignInTokenRequestProviderParams(
-                                                                    username: "test@contoso.com",
-                                                                    credentialToken: nil,
-                                                                    signInSLT: nil,
-                                                                    grantType: .otp,
-                                                                    challengeTypes: nil,
-                                                                    scopes: ["test", "alt test"],
-                                                                    password: nil,
-                                                                    oobCode: nil,
-                                                                    context: context)
-
+        let parameters = MSALNativeAuthSignInTokenRequestProviderParams(username: "test@contoso.com", credentialToken: nil, signInSLT: nil, grantType: .otp, challengeTypes: [.redirect], scopes: ["test", "alt test"], password: nil, oobCode: nil, context: context)
 
         let request = try! provider.signInTokenRequest(parameters: parameters)
 
@@ -124,33 +102,19 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     }
 
     func test_failRequest_invalidPasword() async throws {
-        let response = try await perform_testFail(
+        try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
-            expectedError: createError(.invalidGrant)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_password")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_failRequest_invalidOOBValue() async throws {
-        let response = try await perform_testFail(
+        try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: createError(.invalidGrant)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_oob_value")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_failRequest_invalidGrant() async throws {
@@ -195,6 +159,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     }
 
     private func createError(_ code: MSALNativeAuthSignInTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
     }
 }

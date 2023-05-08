@@ -33,6 +33,10 @@ struct MSALNativeAuthSignInRequestParameters: MSALNativeAuthRequestable {
     let password: String?
     let scope: String
     let grantType: MSALNativeAuthGrantType
+
+    func makeRequestBody() -> [String: String] {
+        return [:]
+    }
 }
 
 // MARK: - Convenience init

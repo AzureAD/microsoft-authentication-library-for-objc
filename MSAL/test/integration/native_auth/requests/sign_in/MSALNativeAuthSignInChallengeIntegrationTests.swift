@@ -37,7 +37,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInChallengeRequest(credentialToken: "Test Credential Token", challengeTypes: nil, context: context)
+        sut = try provider.signInChallengeRequest(credentialToken: "Test Credential Token", challengeTypes: [.redirect], context: context)
     }
 
     func test_succeedRequest_challengeTypePassword() async throws {
