@@ -29,10 +29,12 @@ open class SignInStartDelegateSpy: SignInStartDelegate {
     
     private let expectation: XCTestExpectation
     var expectedError: SignInStartError?
+    var expectedUserAccount: MSALNativeAuthUserAccount?
     
-    init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
+        self.expectedUserAccount = expectedUserAccount
     }
     
     public func onSignInError(error: MSAL.SignInStartError) {
@@ -52,6 +54,13 @@ open class SignInStartDelegateSpy: SignInStartDelegate {
     }
     
     public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        if let expectedUserAccount = expectedUserAccount {
+            XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
+            XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
+            XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+            expectation.fulfill()
+            return
+        }
         XCTFail("This method should not be called")
         expectation.fulfill()
     }

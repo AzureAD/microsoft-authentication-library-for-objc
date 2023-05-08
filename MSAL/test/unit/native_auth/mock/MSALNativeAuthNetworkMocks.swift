@@ -93,7 +93,10 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
             XCTAssertEqual(expectedConfiguration, msidConfiguration)
         }
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
-            XCTAssertEqual(successTokenResponse, expectedTokenResponse)
+            XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)
+            XCTAssertEqual(successTokenResponse.refreshToken, expectedTokenResponse.refreshToken)
+            XCTAssertEqual(successTokenResponse.idToken, expectedTokenResponse.idToken)
+            XCTAssertEqual(successTokenResponse.scope, expectedTokenResponse.scope)
         }
         if case .failure(let tokenResponseError) = result, let expectedTokenResponseError = expectedTokenResponseError {
             XCTAssertEqual(tokenResponseError.localizedDescription, expectedTokenResponseError.localizedDescription)

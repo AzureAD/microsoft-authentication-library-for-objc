@@ -107,6 +107,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 telemetryEvent?.setUserInformation(validatedTokenResult.account)
                 cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
                 let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
+                stopTelemetryEvent(telemetryEvent, context: context)
                 params.delegate.onSignInCompleted(result: account)
             case .credentialRequired(let credentialToken):
                 let challengeRequest = createChallengeRequest(
@@ -117,6 +118,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 // use the credential token to call /challenge API
                 // create the new state and return it to the delegate
             case .error(let errorType):
+                stopTelemetryEvent(telemetryEvent, context: context)
                 params.delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
             }
         }
