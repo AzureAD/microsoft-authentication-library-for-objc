@@ -37,22 +37,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private var tokenResult = MSIDTokenResult()
     private var tokenResponse = MSIDAADTokenResponse()
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
-
-    private var publicParametersStub: MSALNativeAuthSignInParameters {
-        .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
-    }
-
-    private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
-        .init(
-            config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signIn,
-            context: contextMock,
-            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            password: "strong-password",
-            scope: "<scope-1>",
-            grantType: .password
-        )
-    }
     
     private var requestSignInTokenParamsStub: MSALNativeAuthSignInTokenRequestParameters {
         .init(

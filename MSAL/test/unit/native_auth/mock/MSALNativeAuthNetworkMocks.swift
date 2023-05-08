@@ -354,6 +354,9 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
     private(set) var throwingError: Error?
     private(set) var handleTokenFuncResult: MSIDTokenResult?
     private(set) var handleResendCodeFuncResult: Bool?
+    var expectedAccountId: MSIDAccountIdentifier?
+    var expectedContext: MSIDRequestContext?
+    var expectedValidateAccount: Bool?
 
     func mockHandleTokenFunc(throwingError: Error? = nil, result: MSIDTokenResult? = nil) {
         self.throwingError = throwingError
@@ -369,6 +372,16 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
     ) throws -> MSIDTokenResult {
         if throwingError == nil && handleTokenFuncResult == nil {
             XCTFail("Both parameters are nil")
+        }
+        if let expectedContext = expectedContext {
+            XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
+        }
+        if let expectedAccountId = expectedAccountId {
+            XCTAssertEqual(expectedAccountId.displayableId, accountIdentifier.displayableId)
+            XCTAssertEqual(expectedAccountId.homeAccountId, accountIdentifier.homeAccountId)
+        }
+        if let expectedValidateAccount = expectedValidateAccount {
+            XCTAssertEqual(expectedValidateAccount, validateAccount)
         }
 
         if let error = throwingError {
