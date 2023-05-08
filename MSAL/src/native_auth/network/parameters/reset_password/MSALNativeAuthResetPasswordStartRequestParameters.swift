@@ -22,29 +22,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInInitiateResponse: Decodable {
+// swiftlint:disable:next type_name
+struct MSALNativeAuthResetPasswordStartRequestParameters: MSALNativeAuthRequestable {
+    let config: MSALNativeAuthConfiguration
+    let endpoint: MSALNativeAuthEndpoint = .resetPasswordStart
+    let context: MSIDRequestContext
+    let username: String
 
-    // MARK: - Variables
-    let credentialToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken
-        case challengeType
-    }
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.username.rawValue: username,
+            Key.challengeType.rawValue: config.challengeTypesString
+        ]
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decodeIfPresent(
-            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
-        if self.credentialToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
-        if self.credentialToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthError.responseSerializationError
-        }
     }
 }

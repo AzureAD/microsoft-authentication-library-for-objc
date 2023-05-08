@@ -28,6 +28,7 @@ struct MSALNativeAuthSignInTokenResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignInTokenOauth2ErrorCode
     let errorDescription: String?
+    var errorCodes: [MSALNativeAPIErrorCodes]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let credentialToken: String?
@@ -35,6 +36,7 @@ struct MSALNativeAuthSignInTokenResponseError: MSALNativeAuthResponseError {
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case credentialToken = "credential_token"

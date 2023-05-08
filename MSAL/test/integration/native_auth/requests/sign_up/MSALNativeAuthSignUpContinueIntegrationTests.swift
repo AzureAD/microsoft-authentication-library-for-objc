@@ -37,6 +37,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         provider = MSALNativeAuthSignUpRequestProvider(
             config: config,
+            requestConfigurator: MSALNativeAuthRequestConfigurator(),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
@@ -49,7 +50,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             context: context
         )
 
-        sut = try provider.continue(params: params)
+        sut = try provider.continue(parameters: params, context: context)
     }
 
     func test_signUpContinue_withPassword_succeeds() async throws {
@@ -192,7 +193,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
     func performSuccessfulTestCase(with params: MSALNativeAuthSignUpContinueRequestProviderParams) async throws {
         try await mockAPIHandler.addResponse(endpoint: .signUpContinue, correlationId: correlationId, responses: [])
-        sut = try provider.continue(params: params)
+        sut = try provider.continue(parameters: params, context: context)
 
         let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 

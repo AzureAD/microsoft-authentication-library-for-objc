@@ -29,19 +29,41 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignUpChallengeRequestParametersTest: XCTestCase {
+    let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+    var config: MSALNativeAuthConfiguration! = nil
+
+    private let context = MSALNativeAuthRequestContextMock(
+        correlationId: .init(uuidString: DEFAULT_TEST_UID)!
+    )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-        var config: MSALNativeAuthConfiguration! = nil
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.redirect]))
         let parameters = MSALNativeAuthSignUpChallengeRequestParameters(
             config: config,
             signUpToken: "token",
-            challengeTypes: [.redirect],
             context: MSALNativeAuthRequestContextMock()
         )
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/challenge")
+    }
+
+    func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .oob, .redirect]))
+        let params = MSALNativeAuthSignUpChallengeRequestParameters(
+            config: config,
+            signUpToken: "<sign-up-token>",
+            context: context
+        )
+
+        let body = params.makeRequestBody()
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "signup_token": "<sign-up-token>",
+            "challenge_type": "password oob redirect"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
     }
 }

@@ -28,25 +28,28 @@ import Foundation
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
+    var errorCodes: [MSALNativeAPIErrorCodes]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
-    let requiredAttributes: [[String: String]]?
+    let requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]?
     let unverifiedAttributes: [[String: String]]?
     let invalidAttributes: [[String: String]]?
 
     init(
         error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         errorDescription: String? = nil,
+        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
-        requiredAttributes: [[String: String]]? = nil,
+        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
         unverifiedAttributes: [[String: String]]? = nil,
         invalidAttributes: [[String: String]]? = nil
     ) {
         self.error = error
         self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
         self.errorURI = errorURI
         self.innerErrors = innerErrors
         self.signUpToken = signUpToken

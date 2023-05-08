@@ -29,21 +29,47 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
+    let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+    var config: MSALNativeAuthConfiguration! = nil
+
+    private let context = MSALNativeAuthRequestContextMock(
+        correlationId: .init(uuidString: DEFAULT_TEST_UID)!
+    )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-        var config: MSALNativeAuthConfiguration! = nil
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.redirect]))
         let parameters = MSALNativeAuthSignUpStartRequestParameters(
             config: config,
             username: "username",
             password: nil,
             attributes: nil,
-            challengeTypes: [.redirect],
             context: MSALNativeAuthRequestContextMock()
         )
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/start")
+    }
+
+    func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .oob, .redirect]))
+        let params = MSALNativeAuthSignUpStartRequestParameters(
+            config: config,
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "strong-password",
+            attributes: "<attribute1: value1>",
+            context: context
+        )
+
+        let body = params.makeRequestBody()
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "strong-password",
+            "attributes": "<attribute1: value1>",
+            "challenge_type": "password oob redirect"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
     }
 }

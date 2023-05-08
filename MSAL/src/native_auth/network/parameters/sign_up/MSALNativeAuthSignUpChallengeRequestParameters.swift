@@ -29,6 +29,15 @@ struct MSALNativeAuthSignUpChallengeRequestParameters: MSALNativeAuthRequestable
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signUpChallenge
     let signUpToken: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]
     let context: MSIDRequestContext
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.signUpToken.rawValue: signUpToken,
+            Key.challengeType.rawValue: config.challengeTypesString
+        ].compactMapValues { $0 }
+    }
 }

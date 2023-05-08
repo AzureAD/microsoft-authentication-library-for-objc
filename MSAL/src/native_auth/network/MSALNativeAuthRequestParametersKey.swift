@@ -41,5 +41,8 @@ enum MSALNativeAuthRequestParametersKey: String {
     case signInSLT = "signin_slt"
     case attributes
     case signUpToken = "signup_token"
+    case passwordResetToken = "password_reset_token"
+    case passwordSubmitToken = "password_submit_token"
+    case newPassword = "new_password"
     case clientInfo = "client_info"
 }

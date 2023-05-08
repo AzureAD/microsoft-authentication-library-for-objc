@@ -33,10 +33,11 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config,
+                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInTokenRequest(
+        sut = try provider.token(
             parameters: .init(
                 config: config,
                 context: context,
@@ -44,7 +45,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 credentialToken: nil,
                 signInSLT: nil,
                 grantType: .otp,
-                challengeTypes: nil,
                 scope: nil,
                 password: nil,
                 oobCode: nil
@@ -85,13 +85,12 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                                                                     credentialToken: nil,
                                                                     signInSLT: nil,
                                                                     grantType: .otp,
-                                                                    challengeTypes: nil,
                                                                     scope: "test & alt test",
                                                                     password: nil,
                                                                     oobCode: nil)
 
 
-        let request = try! provider.signInTokenRequest(parameters: parameters,
+        let request = try! provider.token(parameters: parameters,
                                                        context: context)
 
         request.send { result, error in
@@ -127,33 +126,19 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     }
 
     func test_failRequest_invalidPasword() async throws {
-        let response = try await perform_testFail(
+        try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
-            expectedError: createError(.invalidGrant)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_password")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_failRequest_invalidOOBValue() async throws {
-        let response = try await perform_testFail(
+        try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: createError(.invalidGrant)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_oob_value")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_failRequest_invalidGrant() async throws {

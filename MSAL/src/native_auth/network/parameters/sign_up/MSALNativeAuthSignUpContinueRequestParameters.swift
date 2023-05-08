@@ -34,4 +34,17 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
     let oobCode: String?
     let attributes: String?
     let context: MSIDRequestContext
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.grantType.rawValue: grantType.rawValue,
+            Key.signUpToken.rawValue: signUpToken,
+            Key.password.rawValue: password,
+            Key.oobCode.rawValue: oobCode,
+            Key.attributes.rawValue: attributes
+        ].compactMapValues { $0 }
+    }
 }

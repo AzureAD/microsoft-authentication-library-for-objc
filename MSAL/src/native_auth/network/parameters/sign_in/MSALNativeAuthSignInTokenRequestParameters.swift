@@ -26,7 +26,6 @@
 
 // swiftlint:disable:next type_name
 struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
-
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .token
     let context: MSIDRequestContext
@@ -34,9 +33,31 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let credentialToken: String?
     let signInSLT: String?
     let grantType: MSALNativeAuthGrantType
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
     let scope: String?
     let password: String?
     let oobCode: String?
     let clientInfo = true
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+        var parameters = [
+            Key.clientId.rawValue: config.clientId,
+            Key.username.rawValue: username,
+            Key.credentialToken.rawValue: credentialToken,
+            Key.signInSLT.rawValue: signInSLT,
+            Key.grantType.rawValue: grantType.rawValue,
+            Key.scope.rawValue: scope,
+            Key.password.rawValue: password,
+            Key.oobCode.rawValue: oobCode
+            // TODO: Do we send this parameter?
+            // Key.clientInfo: clientInfo
+        ]
+
+        // For ROPC case and only for that the challenge type should be present
+        if username != nil, password != nil {
+            parameters[Key.challengeType.rawValue] = config.challengeTypesString
+        }
+
+        return parameters.compactMapValues { $0 }
+    }
 }

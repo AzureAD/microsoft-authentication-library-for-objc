@@ -32,6 +32,10 @@ struct MSALNativeAuthVerifyCodeRequestParameters: MSALNativeAuthRequestable {
     let context: MSIDRequestContext
     let credentialToken: String
     let otp: String
+
+    func makeRequestBody() -> [String: String] {
+        return [:]
+    }
 }
 
 // MARK: - Convenience init

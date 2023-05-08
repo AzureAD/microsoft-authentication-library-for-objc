@@ -28,11 +28,14 @@ import Foundation
 
 // swiftlint:disable:next type_name
 struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
-
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let credentialToken: String
+
+    func makeRequestBody() -> [String: String] {
+        return [:]
+    }
 }
 
 // MARK: - Convenience init

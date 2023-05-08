@@ -26,10 +26,19 @@
 
 // swiftlint:disable:next type_name
 struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable {
-
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signInInitiate
     let context: MSIDRequestContext
     let username: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.username.rawValue: username,
+            Key.challengeType.rawValue: config.challengeTypesString
+        ]
+
+    }
 }

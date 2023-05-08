@@ -28,32 +28,37 @@ protocol MSALNativeAuthRequestSignUpProviding {
     func start(
         parameters: MSALNativeAuthSignUpParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpStartRequest
+    ) throws -> MSIDHttpRequest
 
     func challenge(
         token: String,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpChallengeRequest
+    ) throws -> MSIDHttpRequest
 
     func `continue`(
-        params: MSALNativeAuthSignUpContinueRequestProviderParams
-    ) throws -> MSALNativeAuthSignUpContinueRequest
+        parameters: MSALNativeAuthSignUpContinueRequestProviderParams,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest
 }
 
 final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProviding {
 
     private let config: MSALNativeAuthConfiguration
+    private let requestConfigurator: MSALNativeAuthRequestConfigurator
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
-    init(config: MSALNativeAuthConfiguration, telemetryProvider: MSALNativeAuthTelemetryProviding) {
+    init(config: MSALNativeAuthConfiguration,
+         requestConfigurator: MSALNativeAuthRequestConfigurator,
+         telemetryProvider: MSALNativeAuthTelemetryProviding) {
         self.config = config
+        self.requestConfigurator = requestConfigurator
         self.telemetryProvider = telemetryProvider
     }
 
     func start(
         parameters: MSALNativeAuthSignUpParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignUpStartRequest {
+    ) throws -> MSIDHttpRequest {
         guard let attributes = try formatAttributes(parameters.attributes) else {
             throw MSALNativeAuthError.invalidAttributes
         }
@@ -63,87 +68,50 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
             username: parameters.email,
             password: parameters.password,
             attributes: attributes,
-            challengeTypes: config.challengeTypes,
             context: context
         )
 
-        let request = MSALNativeAuthSignUpStartRequest()
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpStart),
-            context: context
-        )
-
-        try request.configure(
-            params: params,
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(
-                context: params.context,
-                encoding: .wwwFormUrlEncoded
-            ),
-            serverTelemetry: serverTelemetry
-        )
-
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signUp(.start(params)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
         return request
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSALNativeAuthSignUpChallengeRequest {
+    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
             config: config,
             signUpToken: token,
-            challengeTypes: config.challengeTypes,
             context: context
         )
 
-        let request = MSALNativeAuthSignUpChallengeRequest()
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpChallenge),
-            context: context
-        )
-
-        try request.configure(
-            params: params,
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(
-                context: params.context,
-                encoding: .wwwFormUrlEncoded
-            ),
-            serverTelemetry: serverTelemetry
-        )
-
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signUp(.challenge(params)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
         return request
     }
 
     func `continue`(
-        params: MSALNativeAuthSignUpContinueRequestProviderParams
-    ) throws -> MSALNativeAuthSignUpContinueRequest {
-        let attributesFormatted = try params.attributes.map { try formatAttributes($0) } ?? nil
+        parameters: MSALNativeAuthSignUpContinueRequestProviderParams,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest {
+        let attributesFormatted = try parameters.attributes.map { try formatAttributes($0) } ?? nil
 
-        let requestParameters = MSALNativeAuthSignUpContinueRequestParameters(
+        let params = MSALNativeAuthSignUpContinueRequestParameters(
             config: config,
-            grantType: params.grantType,
-            signUpToken: params.signUpToken,
-            password: params.password,
-            oobCode: params.oobCode,
+            grantType: parameters.grantType,
+            signUpToken: parameters.signUpToken,
+            password: parameters.password,
+            oobCode: parameters.oobCode,
             attributes: attributesFormatted,
-            context: params.context
+            context: parameters.context
         )
 
-        let request = MSALNativeAuthSignUpContinueRequest()
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpContinue),
-            context: params.context
-        )
-
-        try request.configure(
-            params: requestParameters,
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(
-                context: requestParameters.context,
-                encoding: .wwwFormUrlEncoded
-            ),
-            serverTelemetry: serverTelemetry
-        )
-
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signUp(.continue(params)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
         return request
     }
 

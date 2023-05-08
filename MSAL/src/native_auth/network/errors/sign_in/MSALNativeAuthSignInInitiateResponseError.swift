@@ -24,16 +24,19 @@
 
 import Foundation
 
+// swiftlint:disable:next type_name
 struct MSALNativeAuthSignInInitiateResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignInInitiateOauth2ErrorCode
     let errorDescription: String?
+    let errorCodes: [MSALNativeAPIErrorCodes]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
 
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
     }

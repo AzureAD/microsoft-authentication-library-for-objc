@@ -29,10 +29,14 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
+    let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
+    var config: MSALNativeAuthConfiguration! = nil
+
+    private let context = MSALNativeAuthRequestContextMock(
+        correlationId: .init(uuidString: DEFAULT_TEST_UID)!
+    )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-        var config: MSALNativeAuthConfiguration! = nil
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
         let parameters = MSALNativeAuthSignUpContinueRequestParameters(
             config: config,
@@ -46,5 +50,31 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/continue")
+    }
+
+    func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        let params = MSALNativeAuthSignUpContinueRequestParameters(
+            config: config,
+            grantType: .oobCode,
+            signUpToken: "<sign-up-token>",
+            password: "<strong-password>",
+            oobCode: "0000",
+            attributes: "<attributes>",
+            context: context
+        )
+
+        let body = params.makeRequestBody()
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "signup_token": "<sign-up-token>",
+            "password": "<strong-password>",
+            "oob": "0000",
+            "grant_type": "oob",
+            "attributes": "<attributes>"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
     }
 }

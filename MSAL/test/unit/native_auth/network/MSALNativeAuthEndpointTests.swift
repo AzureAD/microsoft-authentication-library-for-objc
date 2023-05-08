@@ -30,7 +30,7 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     private typealias sut = MSALNativeAuthEndpoint
 
     func test_allEndpoints_are_tested() {
-        XCTAssertEqual(sut.allCases.count, 14)
+        XCTAssertEqual(sut.allCases.count, 18)
     }
 
     func test_signUp_start() {
@@ -50,15 +50,15 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     }
 
     func test_signInInitiate_endpoint() {
-        XCTAssertEqual(sut.signInInitiate.rawValue, "/oauth/v2.0/initiate")
+        XCTAssertEqual(sut.signInInitiate.rawValue, "/oauth2/v2.0/initiate")
     }
 
     func test_signInChallenge_endpoint() {
-        XCTAssertEqual(sut.signInChallenge.rawValue, "/oauth/v2.0/challenge")
+        XCTAssertEqual(sut.signInChallenge.rawValue, "/oauth2/v2.0/challenge")
     }
 
     func test_signInToken_endpoint() {
-        XCTAssertEqual(sut.token.rawValue, "/oauth/v2.0/token")
+        XCTAssertEqual(sut.token.rawValue, "/oauth2/v2.0/token")
     }
 
     func test_signIn_endpoint() {
@@ -73,9 +73,23 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
         XCTAssertEqual(sut.resetPasswordStart.rawValue, "/resetpassword/start")
     }
 
+    func test_resetPasswordChallenge_endpoint() {
+        XCTAssertEqual(sut.resetPasswordChallenge.rawValue, "/resetpassword/challenge")
+    }
+
+    func test_resetPasswordContinue_endpoint() {
+        XCTAssertEqual(sut.resetPasswordContinue.rawValue, "/resetpassword/continue")
+    }
+
+    func test_resetPasswordSubmit_endpoint() {
+        XCTAssertEqual(sut.resetPasswordSubmit.rawValue, "/resetpassword/submit")
+    }
+
     func test_resetPasswordComplete_endpoint() {
         XCTAssertEqual(sut.resetPasswordComplete.rawValue, "/resetpassword/complete")
     }
+
+
 
     func test_resendCode_endpoint() {
         XCTAssertEqual(sut.resendCode.rawValue, "/resendcode")

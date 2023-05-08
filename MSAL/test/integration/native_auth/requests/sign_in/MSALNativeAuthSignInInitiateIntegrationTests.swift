@@ -33,16 +33,16 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config,
+                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInInitiateRequest(
+        sut = try provider.inititate(
             parameters: .init(
                 config: config,
                 context: context,
-                username: "test@contoso.com",
-                challengeTypes: [.otp]
+                username: "test@contoso.com"
             ),
             context: context
         )
@@ -70,7 +70,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -78,7 +78,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .userNotFound,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes:[.userNotFound], errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -86,7 +86,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 }

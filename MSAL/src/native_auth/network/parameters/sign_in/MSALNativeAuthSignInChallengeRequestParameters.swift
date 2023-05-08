@@ -26,11 +26,20 @@
 
 // swiftlint:disable:next type_name
 struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
-
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signInChallenge
     let context: MSIDRequestContext
     let credentialToken: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
     let challengeTarget: String?
+
+    func makeRequestBody() -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.credentialToken.rawValue: credentialToken,
+            Key.challengeType.rawValue: config.challengeTypesString,
+            Key.challengeTargetKey.rawValue: challengeTarget
+        ].compactMapValues { $0 }
+    }
 }

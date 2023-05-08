@@ -37,11 +37,11 @@ enum MockAPIEndpoint: String {
     case signUpStart = "SignUpStart"
     case signUpChallenge = "SignUpChallenge"
     case signUpContinue = "SignUpContinue"
-    case ssprStart = "SSPRStart"
-    case ssprChallenge = "SSPRChallenge"
-    case ssprContinue = "SSPRContinue"
-    case ssprSubmit = "SSPRSubmit"
-    case ssprPoll = "SSPRPoll"
+    case resetPasswordStart = "SSPRStart"
+    case resetPasswordChallenge = "SSPRChallenge"
+    case resetPasswordContinue = "SSPRContinue"
+    case resetPasswordSubmit = "SSPRSubmit"
+    case resetPasswordPollCompletion = "SSPRPoll"
 }
 
 enum MockAPIResponse: String {
@@ -55,6 +55,7 @@ enum MockAPIResponse: String {
     case authNotSupported = "AuthNotSupported"
     case userAlreadyExists = "UserAlreadyExists"
     case userNotFound = "UserNotFound"
+    case explicityUserNotFound = "ExplicityUserNotFound"
     case slowDown = "SlowDown"
     case invalidPassword = "InvalidPassword"
     case invalidOOBValue = "InvalidOOBValue"
@@ -80,6 +81,7 @@ enum MockAPIResponse: String {
     case ssprPollSuccess = "SSPRPollSuccess"
     case ssprPollInProgress = "SSPRPollInProgress"
     case ssprPollFailed = "SSPRPollFailed"
+    case ssprPollNotStarted = "SSPRPollNotStarted"
 }
 
 // MARK: request body

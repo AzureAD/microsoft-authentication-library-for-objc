@@ -33,16 +33,16 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config,
+                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInChallengeRequest(
+        sut = try provider.challenge(
             parameters: .init(
                 config: config,
                 context: context,
                 credentialToken: "Test Credential Token",
-                challengeTypes: nil,
                 challengeTarget: nil
             ),
             context: context
