@@ -421,7 +421,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorJITComplianceCheckResultTimeout    =   -42720,
     
     /**
-     JIT - Compliance Check - Device unknown
+     JIT - Compliance Check - Result unknown
      */
     MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
 
@@ -469,5 +469,20 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      JIT - Unexpected status received from webCP troubleshooting flow
      */
     MSALErrorJITUnknownStatusWebCP                      = -42730,
+
+    /**
+     JIT - Troubleshooting flow needed
+     */
+    MSALErrorJITTroubleshootingRequired                 = -42730,
+
+    /**
+     JIT - Troubleshooting - Could not create web view controller
+     */
+    MSALErrorJITTroubleshootingCreateController         = -42731,
+
+    /**
+     JIT - Troubleshooting - Result unknown
+     */
+    MSALErrorJITTroubleshootingResultUnknown         = -42731,
     
 };
