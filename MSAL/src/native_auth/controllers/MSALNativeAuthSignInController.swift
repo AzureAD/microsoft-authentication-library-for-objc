@@ -40,7 +40,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Variables
 
-    private let requestProvider: MSALNativeAuthSignInRequestProvider
+    private let requestProvider: MSALNativeAuthSignInRequestProviding
     private let factory: MSALNativeAuthResultBuildable
     private let responseValidator: MSALNativeAuthSignInResponseValidating
 
@@ -48,7 +48,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     init(
         clientId: String,
-        requestProvider: MSALNativeAuthSignInRequestProvider,
+        requestProvider: MSALNativeAuthSignInRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
         responseValidator: MSALNativeAuthSignInResponseValidating
@@ -90,7 +90,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             scopes: scopes,
             context: context
         ) else {
-
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
             params.delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
@@ -197,10 +196,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     private func intersectScopes(_ scopes: [String]?) -> [String] {
         let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes()
         guard let scopes = scopes else {
-            return Array(_immutableCocoaArray: defaultOIDCScopes)
+            return defaultOIDCScopes.array as? [String] ?? []
         }
         let intersectedScopes = NSOrderedSet(array: scopes)
         intersectedScopes.intersects(defaultOIDCScopes)
-        return Array(_immutableCocoaArray: intersectedScopes)
+        return intersectedScopes.array as? [String] ?? []
     }
 }

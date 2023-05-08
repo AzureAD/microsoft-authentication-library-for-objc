@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRequestSignInProviding {
+protocol MSALNativeAuthSignInRequestProviding {
     func signInInitiateRequest(
         context: MSIDRequestContext,
         username: String,
@@ -42,7 +42,7 @@ protocol MSALNativeAuthRequestSignInProviding {
     ) throws -> MSALNativeAuthSignInTokenRequest
 }
 
-final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProviding {
+final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProviding {
 
     // MARK: - Variables
 
@@ -95,7 +95,11 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthRequestSignInProv
         challengeTypes: [MSALNativeAuthInternalChallengeType]?,
         context: MSIDRequestContext
     ) throws -> MSALNativeAuthSignInChallengeRequest {
-        let parameters = MSALNativeAuthSignInChallengeRequestParameters(config: config, context: context, credentialToken: credentialToken, challengeTypes: challengeTypes)
+        let parameters = MSALNativeAuthSignInChallengeRequestParameters(
+            config: config,
+            context: context,
+            credentialToken: credentialToken,
+            challengeTypes: challengeTypes)
         let request = try MSALNativeAuthSignInChallengeRequest(params: parameters)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(

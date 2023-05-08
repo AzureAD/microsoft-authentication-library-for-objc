@@ -89,7 +89,10 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         case .failure(let signInTokenResponseError):
             guard let signInTokenResponseError =
                     signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
-                MSALLogger.log(level: .verbose, context: context, format: "Error type not expected")
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "Error type not expected, error: \(signInTokenResponseError)")
                 return .error(.invalidServerResponse)
             }
             return handleFailedResult(signInTokenResponseError)
@@ -100,7 +103,7 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
             switch responseError.error {
             case .credentialRequired:
                 guard let credentialToken = responseError.credentialToken else {
-                    MSALLogger.log(level: .verbose, context: context, format: "Expected credential token not empty")
+                    MSALLogger.log(level: .error, context: context, format: "Expected credential token not empty")
                     return .error(.invalidServerResponse)
                 }
                 return .credentialRequired(credentialToken)

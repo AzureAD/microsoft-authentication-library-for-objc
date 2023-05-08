@@ -1,115 +1,149 @@
-////
-//// Copyright (c) Microsoft Corporation.
-//// All rights reserved.
-////
-//// This code is licensed under the MIT License.
-////
-//// Permission is hereby granted, free of charge, to any person obtaining a copy
-//// of this software and associated documentation files(the "Software"), to deal
-//// in the Software without restriction, including without limitation the rights
-//// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-//// copies of the Software, and to permit persons to whom the Software is
-//// furnished to do so, subject to the following conditions :
-////
-//// The above copyright notice and this permission notice shall be included in
-//// all copies or substantial portions of the Software.
-////
-//// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//// THE SOFTWARE.
 //
-//import XCTest
-//@testable import MSAL
-//@_implementationOnly import MSAL_Private
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-//final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
+// This code is licensed under the MIT License.
 //
-//    private var sut: MSALNativeAuthSignInController!
-//    private var requestProviderMock: MSALNativeAuthRequestProviderMock!
-//    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
-//    private var responseHandlerMock: MSALNativeAuthResponseHandlerMock!
-//    private var contextMock: MSALNativeAuthRequestContextMock!
-//    private var factoryMock: MSALNativeAuthResultFactoryMock!
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
 //
-//    private var publicParametersStub: MSALNativeAuthSignInParameters {
-//        .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
-//    }
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
-//    private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
-//        .init(
-//            config: MSALNativeAuthConfigStubs.configuration,
-//            endpoint: .signIn,
-//            context: contextMock,
-//            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
-//            password: "strong-password",
-//            scope: "<scope-1>",
-//            grantType: .password
-//        )
-//    }
-//
-//    private let tokenResponseDict: [String: Any] = [
-//        "token_type": "Bearer",
-//        "scope": "openid profile email",
-//        "expires_in": 4141,
-//        "ext_expires_in": 4141,
-//        "access_token": "accessToken",
-//        "refresh_token": "refreshToken",
-//        "id_token": "idToken"
-//    ]
-//
-//    private var nativeAuthResponse: MSALNativeAuthResponse {
-//        .init(
-//            stage: .completed,
-//            credentialToken: nil,
-//            authentication: .init(
-//                accessToken: "<access_token>",
-//                idToken: "<id_token>",
-//                scopes: ["<scope_1>, <scope_2>"],
-//                expiresOn: Date(),
-//                tenantId: "myTenant"
-//            )
-//        )
-//    }
-//
-//    override func setUpWithError() throws {
-//        requestProviderMock = .init()
-//        cacheAccessorMock = .init()
-//        responseHandlerMock = .init()
-//        contextMock = .init()
-//        contextMock.mockTelemetryRequestId = "telemetry_request_id"
-//        factoryMock = .init()
-//
-//        sut = .init(
-//            clientId: DEFAULT_TEST_CLIENT_ID,
-//            requestProvider: requestProviderMock,
-//            cacheAccessor: cacheAccessorMock,
-//            responseHandler: responseHandlerMock,
-//            context: contextMock,
-//            factory: factoryMock
-//        )
-//
-//        try super.setUpWithError()
-//    }
-//
-//    func test_whenCreateRequestFails_shouldReturnError() throws {
-//        let expectation = expectation(description: "SignInController create request error")
-//
-//        requestProviderMock.mockSignInRequestFunc(throwingError: ErrorMock.error)
-//
-//        sut.signIn(parameters: publicParametersStub) { response, error in
-//            XCTAssertNil(response)
-//            XCTAssertEqual((error as? MSALNativeAuthError), .invalidRequest)
-//            self.checkTelemetryEventsForFailedResult(networkEventHappensBefore: false)
-//
-//            expectation.fulfill()
-//        }
-//
-//        wait(for: [expectation], timeout: 1)
-//    }
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
+
+final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
+
+    private var sut: MSALNativeAuthSignInController!
+    private var requestProviderMock: MSALNativeAuthSignInRequestProviderMock!
+    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    private var responseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
+    private var contextMock: MSALNativeAuthRequestContextMock!
+    private var factoryMock: MSALNativeAuthResultFactoryMock!
+
+    private var publicParametersStub: MSALNativeAuthSignInParameters {
+        .init(email: DEFAULT_TEST_ID_TOKEN_USERNAME, password: "strong-password")
+    }
+
+    private var requestParametersStub: MSALNativeAuthSignInRequestParameters {
+        .init(
+            config: MSALNativeAuthConfigStubs.configuration,
+            endpoint: .signIn,
+            context: contextMock,
+            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "strong-password",
+            scope: "<scope-1>",
+            grantType: .password
+        )
+    }
+
+    private let tokenResponseDict: [String: Any] = [
+        "token_type": "Bearer",
+        "scope": "openid profile email",
+        "expires_in": 4141,
+        "ext_expires_in": 4141,
+        "access_token": "accessToken",
+        "refresh_token": "refreshToken",
+        "id_token": "idToken"
+    ]
+
+    private var nativeAuthResponse: MSALNativeAuthResponse {
+        .init(
+            stage: .completed,
+            credentialToken: nil,
+            authentication: .init(
+                accessToken: "<access_token>",
+                idToken: "<id_token>",
+                scopes: ["<scope_1>, <scope_2>"],
+                expiresOn: Date(),
+                tenantId: "myTenant"
+            )
+        )
+    }
+
+    override func setUpWithError() throws {
+        requestProviderMock = .init()
+        cacheAccessorMock = .init()
+        responseValidatorMock = .init()
+        contextMock = .init()
+        contextMock.mockTelemetryRequestId = "telemetry_request_id"
+        factoryMock = .init()
+        
+
+        sut = .init(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            requestProvider: requestProviderMock,
+            cacheAccessor: cacheAccessorMock,
+            factory: factoryMock,
+            responseValidator: responseValidatorMock
+        )
+
+        try super.setUpWithError()
+    }
+    
+    open class SignInStartDelegateMock: SignInStartDelegate {
+        
+        private let expectation: XCTestExpectation
+        var expectedError: SignInStartError?
+        
+        init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil) {
+            self.expectation = expectation
+            self.expectedError = expectedError
+        }
+        
+        public func onSignInError(error: MSAL.SignInStartError) {
+            if let expectedError = expectedError {
+                XCTAssertEqual(error.type, expectedError.type)
+                XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+                expectation.fulfill()
+                return
+            }
+            XCTFail("This method should not be called")
+            expectation.fulfill()
+        }
+        
+        public func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+            XCTFail("This method should not be called")
+            expectation.fulfill()
+        }
+        
+        public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+            XCTFail("This method should not be called")
+            expectation.fulfill()
+        }
+    }
+
+    func test_whenCreateRequestFails_shouldReturnError() throws {
+        let expectation = expectation(description: "SignInController create request error")
+
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
+        let expectedContext = MSALNativeAuthRequestContextMock(correlationId: UUID())
+        let expectedScopes = ["openid", "profile", "offline_access"]
+        
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestProviderParams(username: expectedUsername, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, challengeTypes: expectedChallengeTypes, scopes: expectedScopes, password: expectedPassword, oobCode: nil, context: expectedContext)
+        requestProviderMock.throwingError = ErrorMock.error
+
+        let mockDelegate = SignInStartDelegateMock(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
+        wait(for: [expectation], timeout: 1)
+    }
 //
 //    func test_whenPerformRequestFails_shouldReturnError() throws {
 //        let baseUrl = URL(string: "https://www.contoso.com")!
@@ -290,7 +324,7 @@
 //        XCTAssertNotNil(telemetryEventDict["stop_time"])
 //        XCTAssertNotNil(telemetryEventDict["response_time"])
 //    }
-//    
+//
 //
 //    func test_whenCreateRequestFails_shouldReturnError() throws {
 //        let expectation = expectation(description: "SignInOTPController create request error")
@@ -487,5 +521,5 @@
 //        XCTAssertNotNil(telemetryEventDict["stop_time"])
 //        XCTAssertNotNil(telemetryEventDict["response_time"])
 //    }
-//    
-//}
+    
+}
