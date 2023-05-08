@@ -94,41 +94,9 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         try super.setUpWithError()
     }
-    
-    open class SignInStartDelegateMock: SignInStartDelegate {
-        
-        private let expectation: XCTestExpectation
-        var expectedError: SignInStartError?
-        
-        init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil) {
-            self.expectation = expectation
-            self.expectedError = expectedError
-        }
-        
-        public func onSignInError(error: MSAL.SignInStartError) {
-            if let expectedError = expectedError {
-                XCTAssertEqual(error.type, expectedError.type)
-                XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
-                expectation.fulfill()
-                return
-            }
-            XCTFail("This method should not be called")
-            expectation.fulfill()
-        }
-        
-        public func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
-            XCTFail("This method should not be called")
-            expectation.fulfill()
-        }
-        
-        public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-            XCTFail("This method should not be called")
-            expectation.fulfill()
-        }
-    }
 
     func test_whenCreateRequestFails_shouldReturnError() throws {
-        let expectation = expectation(description: "SignInController create request error")
+        let expectation = expectation(description: "SignInController")
 
         let expectedUsername = "username"
         let expectedPassword = "password"
@@ -139,11 +107,48 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestProviderParams(username: expectedUsername, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, challengeTypes: expectedChallengeTypes, scopes: expectedScopes, password: expectedPassword, oobCode: nil, context: expectedContext)
         requestProviderMock.throwingError = ErrorMock.error
 
-        let mockDelegate = SignInStartDelegateMock(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
         
         sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
         wait(for: [expectation], timeout: 1)
     }
+    
+    func test_whenUserSpecifiesScope_defaultScopesShouldBeIncluded() throws {
+        let expectation = expectation(description: "SignInController")
+
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
+        let expectedContext = MSALNativeAuthRequestContextMock(correlationId: UUID())
+        let expectedScopes = ["scope1", "scope2", "openid", "profile", "offline_access"]
+        
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestProviderParams(username: expectedUsername, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, challengeTypes: expectedChallengeTypes, scopes: expectedScopes, password: expectedPassword, oobCode: nil, context: expectedContext)
+        requestProviderMock.throwingError = ErrorMock.error
+
+        let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "scope2"], delegate: mockDelegate))
+        wait(for: [expectation], timeout: 1)
+    }
+    
+    func test_whenUserSpecifiesScope_NoRepeatedScopeShouldBeSent() throws {
+        let expectation = expectation(description: "SignInController")
+
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
+        let expectedContext = MSALNativeAuthRequestContextMock(correlationId: UUID())
+        let expectedScopes = ["scope1", "openid", "profile", "offline_access"]
+        
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestProviderParams(username: expectedUsername, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, challengeTypes: expectedChallengeTypes, scopes: expectedScopes, password: expectedPassword, oobCode: nil, context: expectedContext)
+        requestProviderMock.throwingError = ErrorMock.error
+
+        let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "openid", "profile"], delegate: mockDelegate))
+        wait(for: [expectation], timeout: 1)
+    }
+    
 //
 //    func test_whenPerformRequestFails_shouldReturnError() throws {
 //        let baseUrl = URL(string: "https://www.contoso.com")!

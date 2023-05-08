@@ -75,7 +75,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Internal
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters) {
-        let scopes = intersectScopes(params.scopes)
+        let scopes = joinScopes(params.scopes)
         let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
@@ -193,13 +193,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func intersectScopes(_ scopes: [String]?) -> [String] {
-        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes()
+    private func joinScopes(_ scopes: [String]?) -> [String] {
+        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
         guard let scopes = scopes else {
-            return defaultOIDCScopes.array as? [String] ?? []
+            return defaultOIDCScopes as? [String] ?? []
         }
-        let intersectedScopes = NSOrderedSet(array: scopes)
-        intersectedScopes.intersects(defaultOIDCScopes)
-        return intersectedScopes.array as? [String] ?? []
+        let joinedScopes = NSMutableOrderedSet(array: scopes)
+        joinedScopes.addObjects(from: defaultOIDCScopes)
+        return joinedScopes.array as? [String] ?? []
     }
 }
