@@ -57,4 +57,96 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
         responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
         XCTAssertNil(sut.validateAndConvertTokenResponse(tokenResponse, context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration))
     }
+    
+    func test_whenValidSignInTokenResponse_validationIsSuccessful() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let tokenResult = MSIDTokenResult()
+        let tokenResponse = MSIDAADTokenResponse()
+        responseHandler.mockHandleTokenFunc(result: tokenResult)
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
+        if case .success(tokenResult, tokenResponse) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenInvalidSignInTokenResponse_anErrorIsReturned() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        responseHandler.expectedContext = context
+        responseHandler.expectedValidateAccount = true
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDAADTokenResponse()))
+        if case .error(.invalidServerResponse) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthError.headerNotSerialized))
+        if case .error(.invalidServerResponse) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_credentialReqResponseDoesNotContainCredentialToken_anErrorIsReturned() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        if case .error(.invalidServerResponse) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_credentialReqResponseContainCredentialToken_credentialRequiredStateIsReturned() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        let credentialToken = "credentialToken"
+        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: credentialToken, errorCodes: nil)
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        if case .credentialRequired(credentialToken) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_invalidGrantTokenResponse_isTranslatedToProperErrorResult() {
+        let userNotFoundError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [50034])
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
+        let invalidPasswordError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [50126])
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
+        let invalidAuthTypeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [400002])
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
+        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: [142521])
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
+    }
+    
+    func test_errorTokenResponse_isTranslatedToProperErrorResult() {
+        let invalidReqError = MSALNativeAuthSignInTokenResponseError(error: .invalidRequest, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidReqError, expectedError: .invalidRequest)
+        let invalidClientError = MSALNativeAuthSignInTokenResponseError(error: .invalidClient, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidClientError, expectedError: .invalidClient)
+        let expiredTokenError = MSALNativeAuthSignInTokenResponseError(error: .expiredToken, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: expiredTokenError, expectedError: .expiredToken)
+        let unsupportedChallengeTypeError = MSALNativeAuthSignInTokenResponseError(error: .unsupportedChallengeType, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: unsupportedChallengeTypeError, expectedError: .unsupportedChallengeType)
+        let invalidScopeError = MSALNativeAuthSignInTokenResponseError(error: .invalidScope, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidScopeError, expectedError: .invalidScope)
+        let authPendingError = MSALNativeAuthSignInTokenResponseError(error: .authorizationPending, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: authPendingError, expectedError: .authorizationPending)
+        let slowDownError = MSALNativeAuthSignInTokenResponseError(error: .slowDown, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil, errorCodes: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: slowDownError, expectedError: .slowDown)
+    }
+    
+    private func checkRelationBetweenErrorResponseAndValidatedErrorResult(
+        responseError: MSALNativeAuthSignInTokenResponseError,
+        expectedError: MSALNativeAuthSignInTokenValidatedErrorType) {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        let result = sut.validateSignInTokenResponse(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(responseError))
+        if case .error(expectedError) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
 }
