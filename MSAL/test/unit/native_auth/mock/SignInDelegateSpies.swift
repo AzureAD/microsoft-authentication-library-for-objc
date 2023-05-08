@@ -65,3 +65,17 @@ open class SignInStartDelegateSpy: SignInStartDelegate {
         expectation.fulfill()
     }
 }
+
+open class SignInStartDelegateFailureSpy: SignInStartDelegate {
+    public func onSignInError(error: MSAL.SignInStartError) {
+        XCTFail("This method should not be called")
+    }
+    
+    public func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+        XCTFail("This method should not be called")
+    }
+    
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        XCTFail("This method should not be called")
+    }
+}

@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 // use the credential token to call /challenge API
                 // create the new state and return it to the delegate
             case .error(let errorType):
-                stopTelemetryEvent(telemetryEvent, context: context)
+                stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
                 params.delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
             }
         }

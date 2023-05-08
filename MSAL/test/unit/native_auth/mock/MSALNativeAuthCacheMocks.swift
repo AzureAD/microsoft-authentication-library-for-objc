@@ -45,7 +45,11 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     }
 
     func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
-        expectation?.fulfill()
+        if let expectation = expectation {
+            expectation.fulfill()
+        } else {
+            throw E.notImplemented
+        }
     }
 
     func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {

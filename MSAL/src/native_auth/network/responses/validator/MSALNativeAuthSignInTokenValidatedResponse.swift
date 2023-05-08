@@ -32,7 +32,7 @@ enum MSALNativeAuthSignInTokenValidatedResponse {
 }
 
 // swiftlint:disable:next type_name
-enum MSALNativeAuthSignInTokenValidatedErrorType {
+enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case generalError
     case expiredToken
     case invalidClient
