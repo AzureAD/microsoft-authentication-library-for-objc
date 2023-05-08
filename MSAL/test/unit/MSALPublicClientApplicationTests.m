@@ -2579,7 +2579,7 @@
 
 - (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
@@ -2621,7 +2621,7 @@
 
 - (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
@@ -2663,7 +2663,7 @@
 
 - (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil_wpjMetaDatanil API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
