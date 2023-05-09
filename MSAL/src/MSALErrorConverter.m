@@ -118,6 +118,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerUnauthorizedClient): @(MSALInternalErrorUnauthorizedClient),
                                    @(MSIDErrorServerAccessDenied): @(MSALErrorUserCanceled),
                                    @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
+                                   @(MSIDErrorServerError) : @(MSALErrorServerError),
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse)
