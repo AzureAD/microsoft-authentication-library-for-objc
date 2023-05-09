@@ -485,4 +485,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorJITTroubleshootingResultUnknown         = -42731,
     
+    /**
+     JIT - Troubleshooting - Acquire token error
+     */
+    MSALErrorJITTroubleshootingAcquireToken          = -42732,
+    
 };
