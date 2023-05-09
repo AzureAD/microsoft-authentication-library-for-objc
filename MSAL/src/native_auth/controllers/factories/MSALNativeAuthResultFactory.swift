@@ -25,6 +25,8 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthResultBuildable {
+    
+    var config: MSALNativeAuthConfiguration {get}
 
     func makeNativeAuthResponse(
         stage: MSALNativeAuthResponse.Stage,
@@ -39,7 +41,7 @@ protocol MSALNativeAuthResultBuildable {
 
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
-    private let config: MSALNativeAuthConfiguration
+    let config: MSALNativeAuthConfiguration
 
     init(config: MSALNativeAuthConfiguration) {
         self.config = config

@@ -33,11 +33,20 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config,
+                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
 
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInInitiateRequest(context: context, username: "test@contoso.com", challengeTypes: [.redirect])
+        sut = try provider.inititate(
+            parameters: .init(
+                config: config,
+                context: context,
+                username: "test@contoso.com",
+                challengeTypes: [.redirect, .oob, .password]
+            ),
+            context: context
+        )
     }
 
     func test_succeedRequest_initiateSuccess() async throws {

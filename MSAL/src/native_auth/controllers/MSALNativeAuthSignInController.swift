@@ -65,7 +65,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     convenience init(config: MSALNativeAuthConfiguration) {
         self.init(
             clientId: config.clientId,
-            requestProvider: MSALNativeAuthSignInRequestProvider(config: config),
+            requestProvider: MSALNativeAuthSignInRequestProvider(
+                config: config,
+                requestConfigurator: MSALNativeAuthRequestConfigurator()),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             factory: MSALNativeAuthResultFactory(config: config),
             responseValidator: MSALNativeAuthResponseValidator(responseHandler: MSALNativeAuthResponseHandler())
@@ -119,7 +121,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 // create the new state and return it to the delegate
             case .error(let errorType):
                 stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                params.delegate.onSignInError(error: generateSignInStartErrorFrom(signInTokenErrorType: errorType))
+                params.delegate.onSignInError(error: errorType.convertToSignInStartError())
             }
         }
     }
@@ -139,19 +141,22 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                                     password: String?,
                                     challengeTypes: [MSALNativeAuthInternalChallengeType],
                                     scopes: [String],
-                                    context: MSIDRequestContext) -> MSALNativeAuthSignInTokenRequest? {
+                                    context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
-            let params = MSALNativeAuthSignInTokenRequestProviderParams(
+            let config = factory.makeMSIDConfiguration(scope: scopes)
+            let params = MSALNativeAuthSignInTokenRequestParameters(
+                config: factory.config,
+                context: context,
                 username: username,
                 credentialToken: nil,
                 signInSLT: nil,
                 grantType: .password,
                 challengeTypes: challengeTypes,
-                scopes: scopes,
+                scope: scopes.joined(separator: ","),
                 password: password,
-                oobCode: nil,
-                context: context)
-            return try requestProvider.signInTokenRequest(parameters: params)
+                oobCode: nil)
+
+            return try requestProvider.token(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil
@@ -162,36 +167,18 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         credentialToken: String,
         challengeTypes: [MSALNativeAuthInternalChallengeType],
         context: MSIDRequestContext
-    ) -> MSALNativeAuthSignInChallengeRequest? {
+    ) -> MSIDHttpRequest? {
         do {
-            return try requestProvider.signInChallengeRequest(
+            let params = MSALNativeAuthSignInChallengeRequestParameters(
+                config: factory.config,
+                context: context,
                 credentialToken: credentialToken,
-                challengeTypes: challengeTypes,
-                context: context)
+                challengeTypes: challengeTypes
+            )
+            return try requestProvider.challenge(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil
-        }
-    }
-
-    private func generateSignInStartErrorFrom(
-        signInTokenErrorType: MSALNativeAuthSignInTokenValidatedErrorType
-    ) -> SignInStartError {
-        switch signInTokenErrorType {
-        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
-            return SignInStartError(type: .generalError)
-        case .invalidClient:
-            return SignInStartError(type: .generalError, message: "Invalid Client ID")
-        case .unsupportedChallengeType:
-            return SignInStartError(type: .generalError, message: "Unsupported challenge type")
-        case .invalidScope:
-            return SignInStartError(type: .generalError, message: "Invalid scope")
-        case .userNotFound:
-            return SignInStartError(type: .userNotFound)
-        case .invalidPassword:
-            return SignInStartError(type: .invalidPassword)
-        case .invalidAuthenticationType:
-            return SignInStartError(type: .invalidAuthenticationType)
         }
     }
 

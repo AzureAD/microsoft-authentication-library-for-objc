@@ -25,21 +25,20 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInRequestProviding {
-    func signInInitiateRequest(
-        context: MSIDRequestContext,
-        username: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]
-    ) throws -> MSALNativeAuthSignInInitiateRequest
-
-    func signInChallengeRequest(
-        credentialToken: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
+    func inititate(
+        parameters: MSALNativeAuthSignInInitiateRequestParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignInChallengeRequest
+    ) throws -> MSIDHttpRequest
 
-    func signInTokenRequest(
-        parameters: MSALNativeAuthSignInTokenRequestProviderParams
-    ) throws -> MSALNativeAuthSignInTokenRequest
+    func challenge(
+        parameters: MSALNativeAuthSignInChallengeRequestParameters,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest
+
+    func token(
+        parameters: MSALNativeAuthSignInTokenRequestParameters,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest
 }
 
 final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProviding {
@@ -47,108 +46,61 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProv
     // MARK: - Variables
 
     private let config: MSALNativeAuthConfiguration
+    private let requestConfigurator: MSALNativeAuthRequestConfigurator
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
     // MARK: - Init
 
     init(
         config: MSALNativeAuthConfiguration,
+        requestConfigurator: MSALNativeAuthRequestConfigurator,
         telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()
     ) {
         self.config = config
+        self.requestConfigurator = requestConfigurator
         self.telemetryProvider = telemetryProvider
     }
 
     // MARK: - SignIn Initiate
 
-    func signInInitiateRequest(
-        context: MSIDRequestContext,
-        username: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]
-    ) throws -> MSALNativeAuthSignInInitiateRequest {
-        let parameters = MSALNativeAuthSignInInitiateRequestParameters(
-            config: config,
-            context: context,
-            username: username,
-            challengeTypes: challengeTypes)
+    func inititate(
+        parameters: MSALNativeAuthSignInInitiateRequestParameters,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest {
 
-        let request = try MSALNativeAuthSignInInitiateRequest(params: parameters)
-
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInInitiate),
-            context: context
-        )
-
-        request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context,
-                                                                  encoding: .wwwFormUrlEncoded),
-            serverTelemetry: serverTelemetry
-        )
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signIn(.initiate(parameters)),
+                                          request: request,
+                                          telemetryProvider: telemetryProvider)
 
         return request
     }
 
     // MARK: - SignIn Challenge
 
-    func signInChallengeRequest(
-        credentialToken: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]?,
+    func challenge(
+        parameters: MSALNativeAuthSignInChallengeRequestParameters,
         context: MSIDRequestContext
-    ) throws -> MSALNativeAuthSignInChallengeRequest {
-        let parameters = MSALNativeAuthSignInChallengeRequestParameters(
-            config: config,
-            context: context,
-            credentialToken: credentialToken,
-            challengeTypes: challengeTypes)
-        let request = try MSALNativeAuthSignInChallengeRequest(params: parameters)
+    ) throws -> MSIDHttpRequest {
 
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInChallenge),
-            context: context
-        )
-
-        request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context,
-                                                                  encoding: .wwwFormUrlEncoded),
-            serverTelemetry: serverTelemetry
-        )
-
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signIn(.challenge(parameters)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
         return request
     }
 
     // MARK: - SignIn Token
 
-    func signInTokenRequest(
-        parameters: MSALNativeAuthSignInTokenRequestProviderParams
-    ) throws -> MSALNativeAuthSignInTokenRequest {
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(
-            config: config,
-            context: parameters.context,
-            username: parameters.username,
-            credentialToken: parameters.credentialToken,
-            signInSLT: parameters.signInSLT,
-            grantType: parameters.grantType,
-            challengeTypes: parameters.challengeTypes,
-            scope: formatScope(parameters.scopes),
-            password: parameters.password,
-            oobCode: parameters.oobCode)
-        let request = try MSALNativeAuthSignInTokenRequest(params: parameters)
+    func token(
+        parameters: MSALNativeAuthSignInTokenRequestParameters,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest {
 
-        let serverTelemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInChallenge),
-            context: parameters.context
-        )
-
-        request.configure(
-            requestSerializer: MSALNativeAuthUrlRequestSerializer(context: parameters.context,
-                                                                  encoding: .wwwFormUrlEncoded),
-            serverTelemetry: serverTelemetry
-        )
-
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signIn(.token(parameters)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
         return request
-    }
-
-    private func formatScope(_ scope: [String]) -> String {
-        return scope.joined(separator: ",")
     }
 }

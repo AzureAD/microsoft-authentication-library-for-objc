@@ -45,4 +45,23 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case invalidScope
     case authorizationPending
     case slowDown
+    
+    func convertToSignInStartError() -> SignInStartError {
+        switch self {
+        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+            return SignInStartError(type: .generalError)
+        case .invalidClient:
+            return SignInStartError(type: .generalError, message: "Invalid Client ID")
+        case .unsupportedChallengeType:
+            return SignInStartError(type: .generalError, message: "Unsupported challenge type")
+        case .invalidScope:
+            return SignInStartError(type: .generalError, message: "Invalid scope")
+        case .userNotFound:
+            return SignInStartError(type: .userNotFound)
+        case .invalidPassword:
+            return SignInStartError(type: .invalidPassword)
+        case .invalidAuthenticationType:
+            return SignInStartError(type: .invalidAuthenticationType)
+        }
+    }
 }

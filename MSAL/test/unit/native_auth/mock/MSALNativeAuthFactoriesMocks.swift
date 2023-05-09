@@ -69,7 +69,9 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuilda
 }
 
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
-
+    
+    var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
+    
     private(set) var makeNativeAuthResponseResult: MSALNativeAuthResponse!
     private(set) var makeMsidConfigurationResult: MSIDConfiguration!
 

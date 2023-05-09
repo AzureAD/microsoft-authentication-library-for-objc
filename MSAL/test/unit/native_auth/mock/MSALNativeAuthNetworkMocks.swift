@@ -107,56 +107,55 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
 }
 
 class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProviding {
+    
     var throwingError: Error?
-    var signInInitiateResult: MSALNativeAuthSignInInitiateRequest?
+    var result: MSIDHttpRequest?
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
     var expectedCredentialToken: String?
+    var expectedTokenParams: MSALNativeAuthSignInTokenRequestParameters?
     var expectedChallengeTypes: [MSAL.MSALNativeAuthInternalChallengeType]?
-    var signInChallengeResult: MSALNativeAuthSignInChallengeRequest?
-    var expectedTokenParams: MSALNativeAuthSignInTokenRequestProviderParams?
-    var signInTokenResult: MSALNativeAuthSignInTokenRequest?
     
-    func signInInitiateRequest(context: MSIDRequestContext, username: String, challengeTypes: [MSAL.MSALNativeAuthInternalChallengeType]) throws -> MSAL.MSALNativeAuthSignInInitiateRequest {
+    func inititate(parameters: MSAL.MSALNativeAuthSignInInitiateRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         if let expectedContext = expectedContext {
             XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
             XCTAssertEqual(expectedContext.telemetryRequestId(), context.telemetryRequestId())
         }
         if let expectedUsername = expectedUsername {
-            XCTAssertEqual(expectedUsername, username)
+            XCTAssertEqual(expectedUsername, parameters.username)
         }
         if let expectedChallengeTypes = expectedChallengeTypes {
-            XCTAssertEqual(expectedChallengeTypes, challengeTypes)
+            XCTAssertEqual(expectedChallengeTypes, parameters.challengeTypes)
         }
-        return try returnMockedResult(result: signInInitiateResult)
+        return try returnMockedResult(result: result)
     }
     
-    func signInChallengeRequest(credentialToken: String, challengeTypes: [MSAL.MSALNativeAuthInternalChallengeType]?, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthSignInChallengeRequest {
+    func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         if let expectedCredentialToken = expectedCredentialToken {
-            XCTAssertEqual(expectedCredentialToken, credentialToken)
+            XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
         }
         if let expectedChallengeTypes = expectedChallengeTypes {
-            XCTAssertEqual(expectedChallengeTypes, challengeTypes)
+            XCTAssertEqual(expectedChallengeTypes, parameters.challengeTypes)
         }
-        return try returnMockedResult(result: signInChallengeResult)
+        return try returnMockedResult(result: result)
     }
     
-    func signInTokenRequest(parameters: MSAL.MSALNativeAuthSignInTokenRequestProviderParams) throws -> MSAL.MSALNativeAuthSignInTokenRequest {
+    func token(parameters: MSAL.MSALNativeAuthSignInTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
             XCTAssertEqual(expectedTokenParams.credentialToken, parameters.credentialToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
             XCTAssertEqual(expectedTokenParams.challengeTypes, parameters.challengeTypes)
-            XCTAssertEqual(expectedTokenParams.scopes, parameters.scopes)
+            XCTAssertEqual(expectedTokenParams.scope, parameters.scope)
             XCTAssertEqual(expectedTokenParams.password, parameters.password)
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
         }
-        return try returnMockedResult(result: signInTokenResult)
+        return try returnMockedResult(result: result)
     }
     
-    private func returnMockedResult<T: MSIDHttpRequest>(result: T?) throws -> T  {
+    private func returnMockedResult(result: MSIDHttpRequest?) throws -> MSIDHttpRequest  {
         if let throwingError = throwingError {
             throw throwingError
         }

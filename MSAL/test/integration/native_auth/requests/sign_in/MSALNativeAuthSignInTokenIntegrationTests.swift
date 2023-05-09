@@ -33,10 +33,25 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config)
+        provider = MSALNativeAuthSignInRequestProvider(config: config,
+                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.signInTokenRequest(parameters: .init(username: "test@contoso.com", credentialToken: nil, signInSLT: nil, grantType: .otp, challengeTypes: [.redirect], scopes: [], password: nil, oobCode: nil, context: context))
+        sut = try provider.token(
+            parameters: .init(
+                config: config,
+                context: context,
+                username: "test@contoso.com",
+                credentialToken: nil,
+                signInSLT: nil,
+                grantType: .otp,
+                challengeTypes: [.redirect, .oob, .password],
+                scope: nil,
+                password: nil,
+                oobCode: nil
+            ),
+            context: context
+        )
     }
 
     func test_succeedRequest_tokenSuccess() async throws {
@@ -65,9 +80,20 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let parameters = MSALNativeAuthSignInTokenRequestProviderParams(username: "test@contoso.com", credentialToken: nil, signInSLT: nil, grantType: .otp, challengeTypes: [.redirect], scopes: ["test", "alt test"], password: nil, oobCode: nil, context: context)
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config,
+                                                                    context: context,
+                                                                    username: "test@contoso.com",
+                                                                    credentialToken: nil,
+                                                                    signInSLT: nil,
+                                                                    grantType: .otp,
+                                                                    challengeTypes: [.redirect, .oob, .password],
+                                                                    scope: "test & alt test",
+                                                                    password: nil,
+                                                                    oobCode: nil)
 
-        let request = try! provider.signInTokenRequest(parameters: parameters)
+
+        let request = try! provider.token(parameters: parameters,
+                                                       context: context)
 
         request.send { result, error in
             if let result = result as? [String: Any] {
