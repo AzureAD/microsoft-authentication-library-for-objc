@@ -26,7 +26,6 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable:next type_name
 struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint

@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 enum MSALNativeAuthResetPasswordPollCompletionStatus: String, Decodable {
     case succeeded
     case inProgress = "in_progress"

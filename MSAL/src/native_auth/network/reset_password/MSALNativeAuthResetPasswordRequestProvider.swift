@@ -24,7 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable:next type_name
 protocol MSALNativeAuthRequestResetPasswordProviding {
     func start(
         parameters: MSALNativeAuthResetPasswordStartRequestParameters,
@@ -52,7 +51,6 @@ protocol MSALNativeAuthRequestResetPasswordProviding {
     ) throws -> MSIDHttpRequest
 }
 
-// swiftlint:disable:next type_name
 final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthRequestResetPasswordProviding {
 
     // MARK: - Variables
