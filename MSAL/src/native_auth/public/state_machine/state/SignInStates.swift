@@ -36,6 +36,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
     }
 
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
+        // swiftlint:disable line_length
         switch code {
         case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
@@ -45,5 +46,6 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
                                             username: "email@contoso.com",
                                             accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
         }
+        // swiftlint:enable line_length
     }
 }

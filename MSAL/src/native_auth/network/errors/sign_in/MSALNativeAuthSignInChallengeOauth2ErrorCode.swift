@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable {
 
     case invalidRequest = "invalid_request"

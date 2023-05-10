@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode

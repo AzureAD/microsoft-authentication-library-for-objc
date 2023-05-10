@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 struct MSALNativeAuthSignInInitiateResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignInInitiateOauth2ErrorCode

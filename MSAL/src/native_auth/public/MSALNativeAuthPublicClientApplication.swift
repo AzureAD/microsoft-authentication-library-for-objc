@@ -27,6 +27,10 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
+    // TODO: Remove kMockAccessToken when mock functionality is no longer required in SDK
+    // swiftlint:disable:next line_length
+    private let kMockAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
+
     private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
 
@@ -167,7 +171,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 result:
                     MSALNativeAuthUserAccount(
                         username: username,
-                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+                        accessToken: kMockAccessToken))
         }
     }
 
@@ -194,7 +198,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 result:
                     MSALNativeAuthUserAccount(
                         username: username,
-                        accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"))
+                        accessToken: kMockAccessToken))
         }
     }
 
@@ -225,7 +229,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
         return MSALNativeAuthUserAccount(
             username: "email@contoso.com",
-            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
+            accessToken: kMockAccessToken
         )
     }
 
