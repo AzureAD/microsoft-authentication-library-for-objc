@@ -38,6 +38,5 @@ struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable 
             Key.username.rawValue: username,
             Key.challengeType.rawValue: config.challengeTypesString
         ]
-
     }
 }

@@ -44,8 +44,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         sut = try provider.challenge(
             parameters: MSALNativeAuthResetPasswordChallengeRequestParameters(config: config,
                                                                               context: context,
-                                                                              passwordResetToken: "<password-reset-token>",
-                                                                              challengeTarget: nil),
+                                                                              passwordResetToken: "<password-reset-token>"),
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }

@@ -22,23 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-@objc
-public class SignInOTPStartError: MSALNativeAuthBaseError {
-    @objc public let type: SignInOTPStartErrorType
+class MSALNativeAuthSignInWithPasswordParameters: MSALNativeAuthSignInWithCodeParameters {
+    let password: String
 
-    init(type: SignInOTPStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
+    init(
+        username: String,
+        password: String,
+        correlationId: UUID?,
+        scopes: [String]?) {
+        self.password = password
+        super.init(
+            username: username,
+            correlationId: correlationId,
+            scopes: scopes)
     }
-}
-
-@objc
-public enum SignInOTPStartErrorType: Int {
-    case redirect
-    case userNotFound
-    case invalidAuthenticationType
-    case invalidUsername
-    case generalError
 }

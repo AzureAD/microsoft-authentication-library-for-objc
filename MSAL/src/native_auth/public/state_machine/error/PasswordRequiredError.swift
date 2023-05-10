@@ -36,7 +36,7 @@ public class PasswordRequiredError: MSALNativeAuthBaseError {
 
 @objc
 public enum PasswordRequiredErrorType: Int {
-    case redirect
+    case browserRequired
     case generalError
     case invalidPassword
 }

@@ -25,18 +25,18 @@
 import Foundation
 
 @objc
-public class SignUpOTPStartError: MSALNativeAuthBaseError {
-    @objc public let type: SignUpOTPStartErrorType
+public class SignUpCodeStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignUpCodeStartErrorType
 
-    init(type: SignUpOTPStartErrorType, message: String? = nil) {
+    init(type: SignUpCodeStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 }
 
 @objc
-public enum SignUpOTPStartErrorType: Int {
-    case redirect
+public enum SignUpCodeStartErrorType: Int {
+    case browserRequired
     case userAlreadyExists
     case invalidUsername
     case invalidAttributes

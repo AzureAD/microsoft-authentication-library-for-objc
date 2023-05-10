@@ -41,8 +41,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         let parameters = MSALNativeAuthResetPasswordChallengeRequestParameters(
             config: config,
             context: MSALNativeAuthRequestContextMock(),
-            passwordResetToken: "<password-reset-token>",
-            challengeTarget: "phone"
+            passwordResetToken: "<password-reset-token>"
         )
 
         var resultUrl: URL? = nil
@@ -55,8 +54,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             config: config,
             context: MSALNativeAuthRequestContextMock(),
-            passwordResetToken: "<password-reset-token>",
-            challengeTarget: "phone"
+            passwordResetToken: "<password-reset-token>"
         )
 
         let body = params.makeRequestBody()
@@ -64,8 +62,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "password_reset_token": "<password-reset-token>",
-            "challenge_type": "password oob redirect",
-            "challenge_target_key": "phone"
+            "challenge_type": "password oob redirect"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)
@@ -76,8 +73,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             config: config,
             context: MSALNativeAuthRequestContextMock(),
-            passwordResetToken: "<password-reset-token>",
-            challengeTarget: nil
+            passwordResetToken: "<password-reset-token>"
         )
 
         let body = params.makeRequestBody()

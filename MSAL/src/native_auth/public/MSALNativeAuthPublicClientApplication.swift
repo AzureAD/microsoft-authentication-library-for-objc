@@ -27,12 +27,12 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
+    private let controllerFactory: MSALNativeAuthControllerBuildable
     // TODO: Remove kMockAccessToken when mock functionality is no longer required in SDK
     // swiftlint:disable:next line_length
     private let kMockAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
-
-    private let controllerFactory: MSALNativeAuthRequestControllerBuildable
     private let inputValidator: MSALNativeAuthInputValidating
+    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
     public init(
         configuration config: MSALPublicClientApplicationConfig,
@@ -41,13 +41,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             throw MSALNativeAuthError.invalidAuthority
         }
 
+        self.internalChallengeTypes =
+            MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: aadAuthority,
-            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+            challengeTypes: internalChallengeTypes
         )
 
-        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
 
         try super.init(configuration: config)
@@ -61,14 +64,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
             .authority(rawTenant: rawTenant)
 
+        self.internalChallengeTypes =
+                MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: aadAuthority,
             rawTenant: rawTenant,
-            challengeTypes: MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+            challengeTypes: internalChallengeTypes
         )
 
-        self.controllerFactory = MSALNativeAuthRequestControllerFactory(config: nativeConfiguration)
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
 
         let configuration = MSALPublicClientApplicationConfig(
@@ -81,11 +86,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     init(
-        controllerFactory: MSALNativeAuthRequestControllerBuildable,
-        inputValidator: MSALNativeAuthInputValidating
+        controllerFactory: MSALNativeAuthControllerBuildable,
+        inputValidator: MSALNativeAuthInputValidating,
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     ) {
         self.controllerFactory = controllerFactory
         self.inputValidator = inputValidator
+        self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
     }
@@ -124,10 +131,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         username: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignUpOTPStartDelegate
+        delegate: SignUpCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpOTPError(error: SignUpOTPStartError(type: .invalidUsername))
+            delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
             return
         }
 
@@ -145,6 +152,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public func signIn(
         username: String,
         password: String,
+        scopes: [String]? = nil,
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
@@ -156,50 +164,31 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
             return
         }
-        switch username {
-        case "notfound@contoso.com": delegate.onSignInError(error: SignInStartError(type: .userNotFound))
-        case "redirect@contoso.com": delegate.onSignInError(error: SignInStartError(type: .redirect))
-        case "invalidauth@contoso.com": delegate.onSignInError(
-            error: SignInStartError(type: .invalidAuthenticationType))
-        case "invalidpassword@contoso.com": delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
-        case "generalerror@contoso.com": delegate.onSignInError(error: SignInStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onSignInCodeSent(
-            newState: SignInCodeSentState(flowToken: "credential_token"),
-            displayName: username,
-            codeLength: 4)
-        default: delegate.onSignInCompleted(
-                result:
-                    MSALNativeAuthUserAccount(
-                        username: username,
-                        accessToken: kMockAccessToken))
-        }
+        let controller = controllerFactory.makeSignInController()
+        let params = MSALNativeAuthSignInWithPasswordParameters(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            scopes: scopes)
+        controller.signIn(params: params, delegate: delegate)
     }
 
     public func signIn(
         username: String,
+        scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInOTPStartDelegate
+        delegate: SignInCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInOTPError(error: SignInOTPStartError(type: .invalidUsername))
+            delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
             return
         }
-        switch username {
-        case "notfound@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .userNotFound))
-        case "redirect@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .redirect))
-        case "invalidauth@contoso.com": delegate.onSignInOTPError(
-            error: SignInOTPStartError(type: .invalidAuthenticationType))
-        case "generalerror@contoso.com": delegate.onSignInOTPError(error: SignInOTPStartError(type: .generalError))
-        case "oob@contoso.com": delegate.onSignInOTPCodeSent(
-            newState: SignInCodeSentState(flowToken: "credential_token"),
-            displayName: username,
-            codeLength: 4)
-        default: delegate.onSignInCompleted(
-                result:
-                    MSALNativeAuthUserAccount(
-                        username: username,
-                        accessToken: kMockAccessToken))
-        }
+        let controller = controllerFactory.makeSignInController()
+        let params = MSALNativeAuthSignInWithCodeParameters(
+            username: username,
+            correlationId: correlationId,
+            scopes: scopes)
+        controller.signIn(params: params, delegate: delegate)
     }
 
     public func resetPassword(
@@ -212,7 +201,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         switch username {
-        case "redirect@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .redirect))
+        case "redirect@contoso.com": delegate.onResetPasswordError(
+            error: ResetPasswordStartError(type: .browserRequired))
         case "nopassword@contoso.com": delegate.onResetPasswordError(
             error: ResetPasswordStartError(type: .userDoesNotHavePassword))
         case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
@@ -226,10 +216,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func getUserAccount() async throws -> MSALNativeAuthUserAccount {
+    public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {
         return MSALNativeAuthUserAccount(
             username: "email@contoso.com",
-            accessToken: kMockAccessToken
+            accessToken: kMockAccessToken,
+            rawIdToken: nil,
+            scopes: [],
+            expiresOn: Date()
         )
     }
 

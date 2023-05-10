@@ -27,25 +27,20 @@
 class MSALNativeAuthBaseController {
 
     let clientId: String
-    let context: MSIDRequestContext
-    let responseHandler: MSALNativeAuthResponseHandling
     let cacheAccessor: MSALNativeAuthCacheInterface?
 
     init(
         clientId: String,
-        context: MSIDRequestContext,
-        responseHandler: MSALNativeAuthResponseHandling,
         cacheAccessor: MSALNativeAuthCacheInterface? = nil
     ) {
         self.clientId = clientId
-        self.context = context
-        self.responseHandler = responseHandler
         self.cacheAccessor = cacheAccessor
     }
 
     func makeLocalTelemetryApiEvent(
         name: String,
-        telemetryApiId: MSALNativeAuthTelemetryApiId
+        telemetryApiId: MSALNativeAuthTelemetryApiId,
+        context: MSIDRequestContext
     ) -> MSIDTelemetryAPIEvent? {
         let event = MSIDTelemetryAPIEvent(
             name: name,
@@ -59,7 +54,7 @@ class MSALNativeAuthBaseController {
         return event
     }
 
-    func startTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?) {
+    func startTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, context: MSIDRequestContext) {
         guard let eventName = localEvent?.property(withName: MSID_TELEMETRY_KEY_EVENT_NAME) else {
             return MSALLogger.log(
                 level: .error,
@@ -74,7 +69,7 @@ class MSALNativeAuthBaseController {
         )
     }
 
-    func stopTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, error: Error? = nil) {
+    func stopTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, context: MSIDRequestContext, error: Error? = nil) {
         guard let event = localEvent else {
             return MSALLogger.log(
                 level: .error,
@@ -107,9 +102,10 @@ class MSALNativeAuthBaseController {
         _ telemetryEvent: MSIDTelemetryAPIEvent?,
         response: T? = nil,
         error: Error? = nil,
+        context: MSIDRequestContext,
         completion: @escaping (T?, Error?) -> Void
     ) {
-        stopTelemetryEvent(telemetryEvent, error: error)
+        stopTelemetryEvent(telemetryEvent, context: context, error: error)
         completion(response, error)
     }
 }

@@ -36,7 +36,7 @@ public class SignInStartError: MSALNativeAuthBaseError {
 
 @objc
 public enum SignInStartErrorType: Int {
-    case redirect
+    case browserRequired
     case userNotFound
     case invalidAuthenticationType
     case invalidPassword

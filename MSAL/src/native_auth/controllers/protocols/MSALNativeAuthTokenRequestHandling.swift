@@ -29,14 +29,17 @@ protocol MSALNativeAuthTokenRequestHandling where Self: MSALNativeAuthBaseContro
     typealias TokenRequestCompletionHandler = (Result<MSIDAADTokenResponse, Error>) -> Void
 
     func performRequest(_ request: MSIDHttpRequest, completion: @escaping TokenRequestCompletionHandler)
-    func handleResponse(_ tokenResponse: MSIDTokenResponse, msidConfiguration: MSIDConfiguration) -> MSIDTokenResult?
-    func cacheTokenResponse(_ tokenResponse: MSIDTokenResponse, msidConfiguration: MSIDConfiguration)
+
+    func cacheTokenResponse(
+        _ tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration)
 }
 
 extension MSALNativeAuthTokenRequestHandling {
 
     func performRequest(_ request: MSIDHttpRequest, completion: @escaping TokenRequestCompletionHandler) {
-        request.send { [self] response, error in
+        request.send { response, error in
 
             if let error = error {
                 completion(.failure(error))
@@ -50,7 +53,7 @@ extension MSALNativeAuthTokenRequestHandling {
 
             do {
                 let tokenResponse = try MSIDAADTokenResponse(jsonDictionary: responseDict)
-                tokenResponse.correlationId = context.correlationId().uuidString
+                tokenResponse.correlationId = request.context?.correlationId().uuidString
                 completion(.success(tokenResponse))
             } catch {
                 completion(.failure(MSALNativeAuthError.invalidResponse))
@@ -58,29 +61,10 @@ extension MSALNativeAuthTokenRequestHandling {
         }
     }
 
-    func handleResponse(
+    func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            return try responseHandler.handle(
-                context: context,
-                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                validateAccount: true
-            )
-        } catch {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Response validation error: \(error)"
-            )
-            return nil
-        }
-    }
-
-    func cacheTokenResponse(_ tokenResponse: MSIDTokenResponse, msidConfiguration: MSIDConfiguration) {
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration) {
         do {
             try cacheAccessor?.saveTokensAndAccount(
                 tokenResult: tokenResponse,

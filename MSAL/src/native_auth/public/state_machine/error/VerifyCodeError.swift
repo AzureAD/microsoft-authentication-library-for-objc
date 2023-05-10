@@ -36,7 +36,7 @@ public class VerifyCodeError: MSALNativeAuthBaseError {
 
 @objc
 public enum VerifyCodeErrorType: Int {
-    case redirect
+    case browserRequired
     case generalError
     case invalidCode
 }

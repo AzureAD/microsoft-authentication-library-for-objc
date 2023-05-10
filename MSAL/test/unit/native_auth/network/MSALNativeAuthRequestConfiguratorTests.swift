@@ -76,8 +76,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignInChallengeRequestParameters(config: config,
                                                                     context: context,
-                                                                    credentialToken: "Test Credential Token",
-                                                                    challengeTarget: "phone")
+                                                                    credentialToken: "Test Credential Token")
         let sut = MSALNativeAuthRequestConfigurator()
         try sut.configure(configuratorType: .signIn(.challenge(params)),
                           request: request,
@@ -86,8 +85,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "credential_token": "Test Credential Token",
-            "challenge_type": "otp",
-            "challenge_target_key": "phone"
+            "challenge_type": "otp"
         ]
 
         XCTAssertEqual(request.parameters, expectedBodyParams)
@@ -275,8 +273,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(config: config,
                                                                            context: context,
-                                                                           passwordResetToken: "<password-reset-token>",
-                                                                           challengeTarget: "phone")
+                                                                           passwordResetToken: "<password-reset-token>")
 
         let sut = MSALNativeAuthRequestConfigurator()
         try sut.configure(configuratorType: .resetPassword(.challenge(params)),
@@ -286,8 +283,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "password_reset_token": "<password-reset-token>",
-            "challenge_type": "password oob redirect",
-            "challenge_target_key": "phone"
+            "challenge_type": "password oob redirect"
         ]
 
         XCTAssertEqual(request.parameters, expectedBodyParams)

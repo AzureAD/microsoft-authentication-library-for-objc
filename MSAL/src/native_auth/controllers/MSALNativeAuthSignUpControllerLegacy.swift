@@ -40,8 +40,6 @@ final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, 
         clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling,
-        context: MSIDRequestContext,
         factory: MSALNativeAuthResultBuildable
     ) {
         self.requestProvider = requestProvider
@@ -49,19 +47,15 @@ final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, 
 
         super.init(
             clientId: clientId,
-            context: context,
-            responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
+    convenience init(config: MSALNativeAuthConfiguration) {
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
-            responseHandler: MSALNativeAuthResponseHandler(),
-            context: context,
             factory: MSALNativeAuthResultFactory(config: config)
         )
     }
@@ -70,14 +64,19 @@ final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, 
         parameters: MSALNativeAuthSignUpParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignUp
+            telemetryApiId: .telemetryApiIdSignUp, context: context
         )
-        startTelemetryEvent(telemetryEvent)
+        startTelemetryEvent(telemetryEvent, context: context)
 
-        guard let request = createRequest(with: parameters) else {
-            complete(telemetryEvent, error: MSALNativeAuthError.invalidRequest, completion: completion)
+        guard let request = createRequest(with: parameters, context: context) else {
+            complete(
+                telemetryEvent,
+                error: MSALNativeAuthError.invalidRequest,
+                context: context,
+                completion: completion)
             return
         }
 
@@ -86,22 +85,22 @@ final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, 
             case .success(let tokenResponse):
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: parameters.scopes)
 
-                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, completion: completion)
-                    return
-                }
-
-                telemetryEvent?.setUserInformation(tokenResult.account)
-
-                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
-
-                let response = factory.makeNativeAuthResponse(
-                    stage: .completed,
-                    credentialToken: nil,
-                    tokenResult: tokenResult
-                )
-
-                complete(telemetryEvent, response: response, completion: completion)
+//                guard let tokenResult = handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+//                    complete(telemetryEvent, error: MSALNativeAuthError.validationError, context: context, completion: completion)
+//                    return
+//                }
+//
+//                telemetryEvent?.setUserInformation(tokenResult.account)
+//
+//                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
+//
+//                let response = factory.makeNativeAuthResponse(
+//                    stage: .completed,
+//                    credentialToken: nil,
+//                    tokenResult: tokenResult
+//                )
+//
+//                complete(telemetryEvent, response: response, context: context, completion: completion)
 
             case .failure(let error):
                 MSALLogger.log(
@@ -109,12 +108,14 @@ final class MSALNativeAuthSignUpControllerLegacy: MSALNativeAuthBaseController, 
                     context: context,
                     format: "SignUp request error: \(error)"
                 )
-                complete(telemetryEvent, error: error, completion: completion)
+                complete(telemetryEvent, error: error, context: context, completion: completion)
             }
         }
     }
 
-    private func createRequest(with parameters: MSALNativeAuthSignUpParameters) -> MSALNativeAuthSignUpRequest? {
+    private func createRequest(
+        with parameters: MSALNativeAuthSignUpParameters,
+        context: MSALNativeAuthRequestContext) -> MSALNativeAuthSignUpRequest? {
         do {
             return try requestProvider.signUpRequest(
                 parameters: parameters,

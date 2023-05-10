@@ -38,7 +38,7 @@ protocol MSALNativeAuthSignUpControlling: AnyObject {
         username: String,
         attributes: [String: Any]?,
         context: MSIDRequestContext,
-        delegate: SignUpOTPStartDelegate
+        delegate: SignUpCodeStartDelegate
     )
 
     func resendCode(context: MSIDRequestContext, delegate: SignUpResendCodeDelegate)

@@ -36,7 +36,7 @@ public class ResetPasswordStartError: MSALNativeAuthBaseError {
 
 @objc
 public enum ResetPasswordStartErrorType: Int {
-    case redirect
+    case browserRequired
     case generalError
     case userDoesNotHavePassword
     case userNotFound

@@ -25,6 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
+
     let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .token
     let context: MSIDRequestContext

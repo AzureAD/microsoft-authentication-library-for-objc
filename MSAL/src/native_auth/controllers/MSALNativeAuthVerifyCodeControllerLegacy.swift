@@ -24,14 +24,14 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthVerifyCodeControlling: MSALNativeAuthTokenRequestHandling {
+protocol MSALNativeAuthVerifyCodeControllingLegacy: MSALNativeAuthTokenRequestHandling {
     func verifyCode(
         parameters: MSALNativeAuthVerifyCodeParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControlling {
+final class MSALNativeAuthVerifyCodeControllerLegacy: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControllingLegacy {
 
     // MARK: - Variables
 
@@ -44,8 +44,6 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
         clientId: String,
         requestProvider: MSALNativeAuthRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
-        responseHandler: MSALNativeAuthResponseHandling,
-        context: MSIDRequestContext,
         factory: MSALNativeAuthResultBuildable
     ) {
         self.requestProvider = requestProvider
@@ -53,19 +51,15 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
 
         super.init(
             clientId: clientId,
-            context: context,
-            responseHandler: responseHandler,
             cacheAccessor: cacheAccessor
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, context: MSIDRequestContext) {
+    convenience init(config: MSALNativeAuthConfiguration) {
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthRequestProvider(config: config),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
-            responseHandler: MSALNativeAuthResponseHandler(),
-            context: context,
             factory: MSALNativeAuthResultFactory(config: config)
         )
     }
@@ -76,42 +70,44 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
         parameters: MSALNativeAuthVerifyCodeParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     ) {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdVerifyCode
+            telemetryApiId: .telemetryApiIdVerifyCode,
+            context: context
         )
-        startTelemetryEvent(telemetryEvent)
+        startTelemetryEvent(telemetryEvent, context: context)
 
         func completeWithTelemetry(_ response: MSALNativeAuthResponse?, _ error: Error?) {
-            stopTelemetryEvent(telemetryEvent, error: error)
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
             completion(response, error)
         }
 
-        guard let request = createRequest(with: parameters) else {
+        guard let request = createRequest(with: parameters, context: context) else {
             return completeWithTelemetry(nil, MSALNativeAuthError.invalidRequest)
         }
 
         performRequest(request) { [self] result in
             switch result {
             case .success(let tokenResponse):
-                // TODO: Scopes need to be the same ones as the ones in SignUp or SignIn
                 let msidConfiguration = factory.makeMSIDConfiguration(scope: [""])
 
-                guard let tokenResult = handleResponse(tokenResponse, msidConfiguration: msidConfiguration) else {
-                    return completeWithTelemetry(nil, MSALNativeAuthError.validationError)
-                }
-
-                telemetryEvent?.setUserInformation(tokenResult.account)
-
-                cacheTokenResponse(tokenResponse, msidConfiguration: msidConfiguration)
-
-                let response = factory.makeNativeAuthResponse(
-                    stage: .completed,
-                    credentialToken: nil,
-                    tokenResult: tokenResult
-                )
-
-                completeWithTelemetry(response, nil)
+//                guard let tokenResult =
+//                        handleResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration) else {
+//                    return completeWithTelemetry(nil, MSALNativeAuthError.validationError)
+//                }
+//
+//                telemetryEvent?.setUserInformation(tokenResult.account)
+//
+//                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
+//
+//                let response = factory.makeNativeAuthResponse(
+//                    stage: .completed,
+//                    credentialToken: nil,
+//                    tokenResult: tokenResult
+//                )
+//
+//                completeWithTelemetry(response, nil)
 
             case .failure(let error):
                 MSALLogger.log(
@@ -127,7 +123,7 @@ final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MS
     // MARK: - Private
 
     private func createRequest(
-        with parameters: MSALNativeAuthVerifyCodeParameters
+        with parameters: MSALNativeAuthVerifyCodeParameters, context: MSALNativeAuthRequestContext
     ) -> MSALNativeAuthVerifyCodeRequest? {
         do {
             return try requestProvider.verifyCodeRequest(

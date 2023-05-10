@@ -36,13 +36,15 @@ public class ResetPasswordCodeSentState: MSALNativeAuthBaseState {
         }
     }
 
-    public func verifyCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
+    public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         switch code {
         case "0000": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onResetPasswordVerifyCodeError(error:
                                                                 VerifyCodeError(type: .generalError),
                                                                 newState: self)
-        case "3333": delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .redirect), newState: nil)
+        case "3333": delegate.onResetPasswordVerifyCodeError(
+            error: VerifyCodeError(type: .browserRequired),
+            newState: nil)
         default: delegate.onPasswordRequired(newState: ResetPasswordRequiredState(flowToken: flowToken))
         }
     }
@@ -56,7 +58,7 @@ public class ResetPasswordRequiredState: MSALNativeAuthBaseState {
         correlationId: UUID? = nil) {
             switch password {
             case "redirect": delegate.onResetPasswordRequiredError(
-                error: PasswordRequiredError(type: .redirect), newState: nil)
+                error: PasswordRequiredError(type: .browserRequired), newState: nil)
             case "generalerror": delegate.onResetPasswordRequiredError(
                 error: PasswordRequiredError(type: .generalError),
                 newState: self)

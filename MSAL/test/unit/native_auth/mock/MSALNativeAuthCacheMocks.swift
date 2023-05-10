@@ -27,7 +27,6 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
-
     enum E: Error {
         case notImplemented
     }

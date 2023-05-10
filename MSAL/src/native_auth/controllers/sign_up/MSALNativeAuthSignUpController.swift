@@ -42,7 +42,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         username: String,
         attributes: [String: Any]?,
         context: MSIDRequestContext,
-        delegate: SignUpOTPStartDelegate
+        delegate: SignUpCodeStartDelegate
     ) {
 
     }

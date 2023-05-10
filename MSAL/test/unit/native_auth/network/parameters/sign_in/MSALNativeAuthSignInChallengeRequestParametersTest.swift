@@ -40,8 +40,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
         let parameters = MSALNativeAuthSignInChallengeRequestParameters(config:config,
                                                                         context: MSALNativeAuthRequestContextMock(),
-                                                                        credentialToken: "Test Credential Token",
-                                                                        challengeTarget: "email")
+                                                                        credentialToken: "Test Credential Token")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/challenge")
@@ -52,8 +51,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthSignInChallengeRequestParameters(
             config: config,
             context: context,
-            credentialToken: "Test Credential Token",
-            challengeTarget: "phone"
+            credentialToken: "Test Credential Token"
         )
 
         let body = params.makeRequestBody()
@@ -61,8 +59,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "credential_token": "Test Credential Token",
-            "challenge_type": "otp",
-            "challenge_target_key": "phone"
+            "challenge_type": "otp"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)
@@ -73,8 +70,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthSignInChallengeRequestParameters(
             config: config,
             context: context,
-            credentialToken: "Test Credential Token",
-            challengeTarget: nil
+            credentialToken: "Test Credential Token"
         )
 
         let body = params.makeRequestBody()

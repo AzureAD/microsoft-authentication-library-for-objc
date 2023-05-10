@@ -26,18 +26,22 @@
 
 protocol MSALNativeAuthResultBuildable {
 
+    var config: MSALNativeAuthConfiguration {get}
+
     func makeNativeAuthResponse(
         stage: MSALNativeAuthResponse.Stage,
         credentialToken: String?,
         tokenResult: MSIDTokenResult
     ) -> MSALNativeAuthResponse
 
+    func makeUserAccount(tokenResult: MSIDTokenResult) -> MSALNativeAuthUserAccount
+
     func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration
 }
 
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
-    private let config: MSALNativeAuthConfiguration
+    let config: MSALNativeAuthConfiguration
 
     init(config: MSALNativeAuthConfiguration) {
         self.config = config
@@ -58,6 +62,16 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 expiresOn: tokenResult.accessToken.expiresOn,
                 tenantId: config.authority.tenant.rawTenant
             )
+        )
+    }
+
+    func makeUserAccount(tokenResult: MSIDTokenResult) -> MSALNativeAuthUserAccount {
+        return .init(
+            username: tokenResult.accessToken.accountIdentifier.displayableId,
+            accessToken: tokenResult.accessToken.accessToken,
+            rawIdToken: tokenResult.rawIdToken,
+            scopes: tokenResult.accessToken.scopes.compactMap(formatScope),
+            expiresOn: tokenResult.accessToken.expiresOn
         )
     }
 

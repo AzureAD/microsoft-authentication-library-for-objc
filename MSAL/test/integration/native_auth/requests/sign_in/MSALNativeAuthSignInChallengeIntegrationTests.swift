@@ -42,8 +42,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
             parameters: .init(
                 config: config,
                 context: context,
-                credentialToken: "Test Credential Token",
-                challengeTarget: nil
+                credentialToken: "Test Credential Token"
             ),
             context: context
         )

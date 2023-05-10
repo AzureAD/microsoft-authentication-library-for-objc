@@ -22,30 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-@objc
-public protocol SignInStartDelegate {
-    func onSignInError(error: SignInStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
-}
+class MSALNativeAuthSignInWithCodeParameters {
+    let username: String
+    let correlationId: UUID?
+    let scopes: [String]?
 
-@objc
-public protocol SignInCodeStartDelegate {
-    func onSignInCodeError(error: SignInCodeStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
-}
-
-@objc
-public protocol SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeSentState)
-    func onSignInResendCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-}
-
-@objc
-public protocol SignInVerifyCodeDelegate {
-    func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeSentState?)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
+    init(
+        username: String,
+        correlationId: UUID?,
+        scopes: [String]?) {
+        self.username = username
+        self.correlationId = correlationId
+        self.scopes = scopes
+    }
 }
