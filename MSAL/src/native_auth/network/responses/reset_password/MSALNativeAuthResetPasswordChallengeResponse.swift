@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 struct MSALNativeAuthResetPasswordChallengeResponse: Decodable {
 
     // MARK: - Variables

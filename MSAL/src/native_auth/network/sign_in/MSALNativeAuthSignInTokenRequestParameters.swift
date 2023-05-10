@@ -24,7 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable:next type_name
 struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
 
     let config: MSALNativeAuthConfiguration

@@ -1,2 +1,13 @@
 included:
   - src/native_auth
+
+
+line_length:
+  warning: 150
+    
+type_name:
+  max_length: 60
+
+disabled_rules:
+  - todo
+

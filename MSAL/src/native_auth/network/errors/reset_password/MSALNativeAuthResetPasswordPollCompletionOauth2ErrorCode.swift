@@ -24,7 +24,6 @@
 
 import Foundation
 
-// swiftlint:disable:next type_name
 enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"

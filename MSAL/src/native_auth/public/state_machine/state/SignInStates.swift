@@ -36,6 +36,7 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
     }
 
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
+        // swiftlint:disable line_length
         switch code {
         case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
         case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
@@ -48,5 +49,6 @@ public class SignInCodeSentState: MSALNativeAuthBaseState {
             expiresOn: Date()
         ))
         }
+        // swiftlint:enable line_length
     }
 }
