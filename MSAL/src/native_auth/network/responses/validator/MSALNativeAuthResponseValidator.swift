@@ -95,37 +95,39 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
                     format: "Error type not expected, error: \(signInTokenResponseError)")
                 return .error(.invalidServerResponse)
             }
-            return handleFailedResult(signInTokenResponseError)
-        }
-
-        func handleFailedResult(
-            _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
-            switch responseError.error {
-            case .credentialRequired:
-                guard let credentialToken = responseError.credentialToken else {
-                    MSALLogger.log(level: .error, context: context, format: "Expected credential token not empty")
-                    return .error(.invalidServerResponse)
-                }
-                return .credentialRequired(credentialToken)
-            case .invalidRequest:
-                return .error(.invalidRequest)
-            case .invalidClient:
-                return .error(.invalidClient)
-            case .invalidGrant:
-                return .error(convertErrorCodeToErrorType(responseError.errorCodes?.first))
-            case .expiredToken:
-                return .error(.expiredToken)
-            case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType)
-            case .invalidScope:
-                return .error(.invalidScope)
-            case .authorizationPending:
-                return .error(.authorizationPending)
-            case .slowDown:
-                return .error(.slowDown)
-            }
+            return handleFailedSignInTokenResult(context, signInTokenResponseError)
         }
     }
+
+    private func handleFailedSignInTokenResult(
+        _ context: MSALNativeAuthRequestContext,
+        _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
+        switch responseError.error {
+        case .credentialRequired:
+            guard let credentialToken = responseError.credentialToken else {
+                MSALLogger.log(level: .error, context: context, format: "Expected credential token not empty")
+                return .error(.invalidServerResponse)
+            }
+            return .credentialRequired(credentialToken)
+        case .invalidRequest:
+            return .error(.invalidRequest)
+        case .invalidClient:
+            return .error(.invalidClient)
+        case .invalidGrant:
+            return .error(convertErrorCodeToErrorType(responseError.errorCodes?.first))
+        case .expiredToken:
+            return .error(.expiredToken)
+        case .unsupportedChallengeType:
+            return .error(.unsupportedChallengeType)
+        case .invalidScope:
+            return .error(.invalidScope)
+        case .authorizationPending:
+            return .error(.authorizationPending)
+        case .slowDown:
+            return .error(.slowDown)
+        }
+    }
+
 
     private func convertErrorCodeToErrorType(
         _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthSignInTokenValidatedErrorType {
