@@ -189,8 +189,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         
         XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
-    //TODO: startTelemetryEvent is not recognised
-//        checkTelemetryEventsForSuccessfulResult()
+
+        checkTelemetryEventsForSuccessfulResult()
         wait(for: [expectation], timeout: 1)
     }
     
@@ -251,16 +251,13 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         
-        //TODO: startTelemetryEvent is not recognised
-//        checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
+        checkTelemetryEventsForFailedResult()
+        receivedEvents.removeAll()
         wait(for: [expectation], timeout: 1)
     }
     
     private func checkTelemetryEventsForSuccessfulResult() {
-        // There are two events: one from MSIDHttpRequest and other started by the controller
-        // We want to check the second
-
-        guard receivedEvents.count == 2, let telemetryEventDict = receivedEvents[1].propertyMap else {
+        guard receivedEvents.count == 1, let telemetryEventDict = receivedEvents[0].propertyMap else {
             return XCTFail("Telemetry test fail")
         }
 
@@ -276,13 +273,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertNotNil(telemetryEventDict["request_id"])
     }
 
-    private func checkTelemetryEventsForFailedResult(networkEventHappensBefore: Bool) {
-        // There are two events: one from MSIDHttpRequest and other started by the controller
-        // We want to test the event started by the controller
-
-        let indexEvent = networkEventHappensBefore ? 1 : 0
-
-        guard receivedEvents.count == (indexEvent + 1), let telemetryEventDict = receivedEvents[indexEvent].propertyMap else {
+    private func checkTelemetryEventsForFailedResult() {
+        guard receivedEvents.count == 1, let telemetryEventDict = receivedEvents[0].propertyMap else {
             return XCTFail("Telemetry test fail")
         }
 
