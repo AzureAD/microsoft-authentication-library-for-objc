@@ -53,16 +53,16 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuilda
         )
     }
 
-    func makeResendCodeController() -> MSAL.MSALNativeAuthResendCodeControlling {
+    func makeResendCodeController() -> MSAL.MSALNativeAuthResendCodeControllingLegacy {
         XCTFail("This method should not be called")
-        return MSALNativeAuthResendCodeController(
+        return MSALNativeAuthResendCodeControllerLegacy(
             config: MSALNativeAuthConfigStubs.configuration
         )
     }
 
-    func makeVerifyCodeController() -> MSAL.MSALNativeAuthVerifyCodeControlling {
+    func makeVerifyCodeController() -> MSAL.MSALNativeAuthVerifyCodeControllingLegacy {
         XCTFail("This method should not be called")
-        return MSALNativeAuthVerifyCodeController(
+        return MSALNativeAuthVerifyCodeControllerLegacy(
             config: MSALNativeAuthConfigStubs.configuration
         )
     }

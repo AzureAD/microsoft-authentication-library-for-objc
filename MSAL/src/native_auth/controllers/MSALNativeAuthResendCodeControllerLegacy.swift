@@ -24,14 +24,15 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthResendCodeControlling {
+protocol MSALNativeAuthResendCodeControllingLegacy {
     func resendCode(
         parameters: MSALNativeAuthResendCodeParameters,
         completion: @escaping (String?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthResendCodeController: MSALNativeAuthBaseController, MSALNativeAuthResendCodeControlling {
+final class MSALNativeAuthResendCodeControllerLegacy:
+    MSALNativeAuthBaseController, MSALNativeAuthResendCodeControllingLegacy {
 
     // MARK: - Variables
 

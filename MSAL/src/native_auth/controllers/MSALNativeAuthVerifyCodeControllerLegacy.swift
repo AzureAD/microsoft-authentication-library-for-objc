@@ -24,14 +24,14 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthVerifyCodeControlling: MSALNativeAuthTokenRequestHandling {
+protocol MSALNativeAuthVerifyCodeControllingLegacy: MSALNativeAuthTokenRequestHandling {
     func verifyCode(
         parameters: MSALNativeAuthVerifyCodeParameters,
         completion: @escaping (MSALNativeAuthResponse?, Error?) -> Void
     )
 }
 
-final class MSALNativeAuthVerifyCodeController: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControlling {
+final class MSALNativeAuthVerifyCodeControllerLegacy: MSALNativeAuthBaseController, MSALNativeAuthVerifyCodeControllingLegacy {
 
     // MARK: - Variables
 
