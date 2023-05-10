@@ -22,5 +22,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
+#import <XCTest/XCTest.h>
+#import "MSIDTestAutomationAppConfigurationRequest.h"
+#import "MSIDTestAutomationAccountConfigurationRequest.h"
+#import "MSALADFSBaseUITest.h"
+#import "MSALBaseAADUITest.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
-#import <Foundation/Foundation.h>
+@interface MSALCIAMAuthorityTests : MSALBaseAADUITest
+
+@property (nonatomic) NSString *testEnvironment;
+
+@end
+
+@implementation MSALCIAMAuthorityTests
+
+- (void)setUp
+{
+    [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAM;
+    accountConfigurationRequest.additionalQueryParameters = @{@"signInAudience": @"azureadmyorg",@"PublicClient": @"No"};
+    
+    [self loadTestAccount:accountConfigurationRequest];
+    
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMyOrg;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    appConfigurationRequest.appId = self.primaryAccount.associatedAppID;
+    
+    [self loadTestApp:appConfigurationRequest];
+}
+
+#pragma mark - Tests
+
+-
+    (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
+{
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = @"https://msidlabciam1.ciamlogin.com";
+    request.expectedResultAuthority = @"https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d";
+    request.cacheAuthority = @"https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d";
+    request.acquireTokenAuthority = request.cacheAuthority;
+    request.requestScopes = self.testApplication.defaultScopes.msidToString;
+    request.promptBehavior = @"force";
+    request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
+   
+    // 1. Do intevractive login
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountId);
+    
+    // 2. Now do silent login
+    request.testAccount = self.primaryAccount;
+    request.homeAccountIdentifier = homeAccountId;
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+@end
