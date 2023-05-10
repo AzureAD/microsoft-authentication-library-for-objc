@@ -43,7 +43,6 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
                                                                     credentialToken: "Test Credential Token",
                                                                     signInSLT: "Test SignIn SLT",
                                                                     grantType: .password,
-                                                                    challengeTypes: [.redirect],
                                                                     scope: "scope",
                                                                     password: "password",
                                                                     oobCode: "Test OTP Code")
@@ -61,7 +60,6 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             credentialToken: "Test Credential Token",
             signInSLT: "Test SignIn SLT",
             grantType: .password,
-            challengeTypes: [.redirect],
             scope: "<scope-1>",
             password: "password",
             oobCode: "oob"
@@ -93,7 +91,6 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             credentialToken: nil,
             signInSLT: nil,
             grantType: .password,
-            challengeTypes: [.redirect],
             scope: nil,
             password: nil,
             oobCode: nil

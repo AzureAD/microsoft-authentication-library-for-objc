@@ -27,7 +27,6 @@
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate)
-
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate)
 }
 
@@ -68,9 +67,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             responseValidator: MSALNativeAuthResponseValidator(responseHandler: MSALNativeAuthResponseHandler())
         )
     }
-
-    // MARK: - Internal
-
+    
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate) {
         let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn with email and password started")
@@ -84,7 +81,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         guard let request = createTokenRequest(
             username: params.username,
             password: params.password,
-            challengeTypes: params.challengeTypes,
             scopes: scopes,
             context: context
         ) else {
@@ -92,57 +88,67 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
-
         performRequest(request) { [self] aadTokenResponse in
-            let config = factory.makeMSIDConfiguration(scope: scopes)
-            let result = responseValidator.validateSignInTokenResponse(
+            handleSignInTokenResult(
+                aadTokenResponse,
+                scopes: scopes,
                 context: context,
-                msidConfiguration: config,
-                result: aadTokenResponse
-            )
-            switch result {
-            case .success(let validatedTokenResult, let tokenResponse):
-                telemetryEvent?.setUserInformation(validatedTokenResult.account)
-                cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-                let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
-                stopTelemetryEvent(telemetryEvent, context: context)
-                MSALLogger.log(
-                    level: .verbose,
-                    context: context,
-                    format: "SignIn with email and password completed successfully")
-                delegate.onSignInCompleted(result: account)
-            case .credentialRequired(let credentialToken):
-                let challengeRequest = createChallengeRequest(
-                    credentialToken: credentialToken,
-                    challengeTypes: params.challengeTypes,
-                    context: context)
-                print("credential required")
-                // use the credential token to call /challenge API
-                // create the new state and return it to the delegate
-            case .error(let errorType):
-                MSALLogger.log(
-                    level: .verbose,
-                    context: context,
-                    format: "SignIn with email and password completed with errorType: \(errorType)")
-                stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                delegate.onSignInError(error: errorType.convertToSignInStartError())
-            }
+                telemetryEvent: telemetryEvent,
+                delegate: delegate)
         }
     }
 
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) {
-            // call here /initiate
-        }
+        // call here /initiate
+    }
 
     // MARK: - Private
+    
+    private func handleSignInTokenResult(
+        _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
+        scopes: [String],
+        context: MSALNativeAuthRequestContext,
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        delegate: SignInStartDelegate) {
+        let config = factory.makeMSIDConfiguration(scope: scopes)
+        let result = responseValidator.validateSignInTokenResponse(
+            context: context,
+            msidConfiguration: config,
+            result: aadTokenResponse
+        )
+        switch result {
+        case .success(let validatedTokenResult, let tokenResponse):
+            telemetryEvent?.setUserInformation(validatedTokenResult.account)
+            cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+            let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
+            stopTelemetryEvent(telemetryEvent, context: context)
+            MSALLogger.log(
+                level: .verbose,
+                context: context,
+                format: "SignIn with email and password completed successfully")
+            delegate.onSignInCompleted(result: account)
+        case .credentialRequired(let credentialToken):
+            let challengeRequest = createChallengeRequest(
+                credentialToken: credentialToken,
+                context: context)
+            print("credential required")
+            // use the credential token to call /challenge API
+            // create the new state and return it to the delegate
+        case .error(let errorType):
+            MSALLogger.log(
+                level: .verbose,
+                context: context,
+                format: "SignIn with email and password completed with errorType: \(errorType)")
+            stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
+            delegate.onSignInError(error: errorType.convertToSignInStartError())
+        }
+    }
 
     private func createTokenRequest(username: String,
                                     password: String?,
-                                    challengeTypes: [MSALNativeAuthInternalChallengeType],
                                     scopes: [String],
                                     context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
-            let config = factory.makeMSIDConfiguration(scope: scopes)
             let params = MSALNativeAuthSignInTokenRequestParameters(
                 config: factory.config,
                 context: context,
@@ -150,11 +156,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 credentialToken: nil,
                 signInSLT: nil,
                 grantType: .password,
-                challengeTypes: challengeTypes,
                 scope: scopes.joined(separator: ","),
                 password: password,
                 oobCode: nil)
-
             return try requestProvider.token(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
@@ -164,15 +168,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     private func createChallengeRequest(
         credentialToken: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
         context: MSIDRequestContext
     ) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 config: factory.config,
                 context: context,
-                credentialToken: credentialToken,
-                challengeTypes: challengeTypes
+                credentialToken: credentialToken
             )
             return try requestProvider.challenge(parameters: params, context: context)
         } catch {

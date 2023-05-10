@@ -26,17 +26,14 @@
 
 class MSALNativeAuthSignInWithCodeParameters {
     let username: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]
     let correlationId: UUID?
     let scopes: [String]?
-    
+
     init(
         username: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
         correlationId: UUID?,
         scopes: [String]?) {
         self.username = username
-        self.challengeTypes = challengeTypes
         self.correlationId = correlationId
         self.scopes = scopes
     }

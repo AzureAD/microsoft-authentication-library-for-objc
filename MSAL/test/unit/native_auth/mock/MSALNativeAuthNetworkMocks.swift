@@ -114,7 +114,6 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     var expectedUsername: String?
     var expectedCredentialToken: String?
     var expectedTokenParams: MSALNativeAuthSignInTokenRequestParameters?
-    var expectedChallengeTypes: [MSAL.MSALNativeAuthInternalChallengeType]?
     
     func inititate(parameters: MSAL.MSALNativeAuthSignInInitiateRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         if let expectedContext = expectedContext {
@@ -124,18 +123,12 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
         if let expectedUsername = expectedUsername {
             XCTAssertEqual(expectedUsername, parameters.username)
         }
-        if let expectedChallengeTypes = expectedChallengeTypes {
-            XCTAssertEqual(expectedChallengeTypes, parameters.challengeTypes)
-        }
         return try returnMockedResult(result: result)
     }
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         if let expectedCredentialToken = expectedCredentialToken {
             XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
-        }
-        if let expectedChallengeTypes = expectedChallengeTypes {
-            XCTAssertEqual(expectedChallengeTypes, parameters.challengeTypes)
         }
         return try returnMockedResult(result: result)
     }
@@ -146,7 +139,6 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
             XCTAssertEqual(expectedTokenParams.credentialToken, parameters.credentialToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
-            XCTAssertEqual(expectedTokenParams.challengeTypes, parameters.challengeTypes)
             XCTAssertEqual(expectedTokenParams.scope, parameters.scope)
             XCTAssertEqual(expectedTokenParams.password, parameters.password)
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)

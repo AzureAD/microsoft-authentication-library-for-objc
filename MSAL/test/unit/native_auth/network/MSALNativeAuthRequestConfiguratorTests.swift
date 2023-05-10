@@ -76,8 +76,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignInChallengeRequestParameters(config: config,
                                                                     context: context,
-                                                                    credentialToken: "Test Credential Token",
-                                                                    challengeTypes: nil)
+                                                                    credentialToken: "Test Credential Token")
         let sut = MSALNativeAuthRequestConfigurator()
         try sut.configure(configuratorType: .signIn(.challenge(params)),
                           request: request,
@@ -109,7 +108,6 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                                 credentialToken: "Test Credential Token",
                                                                 signInSLT: "Test SignIn SLT",
                                                                 grantType: .password,
-                                                                challengeTypes: [.redirect],
                                                                 scope: "<scope-1>",
                                                                 password: "password",
                                                                 oobCode: "oob")

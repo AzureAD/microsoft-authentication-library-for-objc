@@ -45,7 +45,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 credentialToken: nil,
                 signInSLT: nil,
                 grantType: .otp,
-                challengeTypes: [.redirect, .oob, .password],
                 scope: nil,
                 password: nil,
                 oobCode: nil
@@ -86,7 +85,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                                                                     credentialToken: nil,
                                                                     signInSLT: nil,
                                                                     grantType: .otp,
-                                                                    challengeTypes: [.redirect, .oob, .password],
                                                                     scope: "test & alt test",
                                                                     password: nil,
                                                                     oobCode: nil)

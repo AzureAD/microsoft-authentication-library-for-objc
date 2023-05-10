@@ -30,7 +30,6 @@ struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable
     let endpoint: MSALNativeAuthEndpoint = .signInChallenge
     let context: MSIDRequestContext
     let credentialToken: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]?
 
     func makeRequestBody() -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
