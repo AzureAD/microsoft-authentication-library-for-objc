@@ -48,7 +48,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignInInitiateRequestParameters(config: config,
                                                                    context: context,
-                                                                   username: DEFAULT_TEST_ID_TOKEN_USERNAME, challengeTypes: [.redirect])
+                                                                   username: DEFAULT_TEST_ID_TOKEN_USERNAME)
         let sut = MSALNativeAuthRequestConfigurator()
         try sut.configure(configuratorType: .signIn(.initiate(params)),
                       request: request,

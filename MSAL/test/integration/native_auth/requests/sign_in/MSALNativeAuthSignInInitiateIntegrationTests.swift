@@ -42,8 +42,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
             parameters: .init(
                 config: config,
                 context: context,
-                username: "test@contoso.com",
-                challengeTypes: [.redirect, .oob, .password]
+                username: "test@contoso.com"
             ),
             context: context
         )

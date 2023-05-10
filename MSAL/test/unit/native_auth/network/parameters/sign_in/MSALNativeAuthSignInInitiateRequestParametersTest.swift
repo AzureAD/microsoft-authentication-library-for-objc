@@ -40,7 +40,7 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
         let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config,
                                                                        context: MSALNativeAuthRequestContextMock(),
-                                                                       username: "username", challengeTypes: [.redirect])
+                                                                       username: "username")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/initiate")
@@ -51,8 +51,7 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthSignInInitiateRequestParameters(
             config: config,
             context: context,
-            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            challengeTypes: [.redirect]
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME
         )
 
         let body = params.makeRequestBody()
@@ -71,8 +70,7 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthSignInInitiateRequestParameters(
             config: config,
             context: context,
-            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            challengeTypes: [.redirect]
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME
         )
 
         let body = params.makeRequestBody()

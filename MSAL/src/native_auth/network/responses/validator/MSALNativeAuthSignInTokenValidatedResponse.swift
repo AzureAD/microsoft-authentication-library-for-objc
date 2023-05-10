@@ -24,14 +24,12 @@
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable:next type_name
 enum MSALNativeAuthSignInTokenValidatedResponse {
     case success(MSIDTokenResult, MSIDTokenResponse)
     case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
 
-// swiftlint:disable:next type_name
 enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case generalError
     case expiredToken
@@ -45,7 +43,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case invalidScope
     case authorizationPending
     case slowDown
-    
+
     func convertToSignInStartError() -> SignInStartError {
         switch self {
         case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:

@@ -67,7 +67,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             responseValidator: MSALNativeAuthResponseValidator(responseHandler: MSALNativeAuthResponseHandler())
         )
     }
-    
+
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate) {
         let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn with email and password started")
@@ -103,7 +103,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     }
 
     // MARK: - Private
-    
+
     private func handleSignInTokenResult(
         _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
         scopes: [String],

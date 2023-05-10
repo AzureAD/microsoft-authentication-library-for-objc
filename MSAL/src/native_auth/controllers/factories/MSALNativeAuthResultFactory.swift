@@ -25,7 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthResultBuildable {
-    
+
     var config: MSALNativeAuthConfiguration {get}
 
     func makeNativeAuthResponse(
