@@ -1,3 +1,6 @@
+TBD
+* Support read device info when ecc is on. (#1714)
+
 ## [1.2.11]
 * Updated extraDeviceInfo to include platform sso status on macOS
 * Created CIAM authority for MSAL (#1682)
