@@ -42,7 +42,7 @@ final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
     
     func testTelemetryForSignIn_returnsCorrectApiId() {
         let result = sut.telemetryForSignIn(type: MSALNativeAuthSignInType.signInWithPassword)
-        XCTAssertEqual(result.apiId, .telemetryApiIdSignIn)
+        XCTAssertEqual(result.apiId, .telemetryApiIdSignInWithPassword)
     }
     
     func testTelemetryForRefreshToken_returnsCorrectApiId() {

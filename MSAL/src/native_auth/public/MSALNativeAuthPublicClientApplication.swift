@@ -167,9 +167,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             password: password,
             challengeTypes: internalChallengeTypes,
             correlationId: correlationId,
-            scopes: scopes,
-            delegate: delegate)
-        controller.signIn(params: params)
+            scopes: scopes)
+        controller.signIn(params: params, delegate: delegate)
     }
 
     public func signIn(
@@ -183,12 +182,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             return
         }
         let controller = controllerFactory.makeSignInController()
-        controller.signIn(
+        let params = MSALNativeAuthSignInWithCodeParameters(
             username: username,
             challengeTypes: internalChallengeTypes,
             correlationId: correlationId,
-            scopes: scopes,
-            delegate: delegate)
+            scopes: scopes)
+        controller.signIn(params: params, delegate: delegate)
     }
 
     public func resetPassword(

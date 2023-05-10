@@ -135,4 +135,27 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(result.clientId, DEFAULT_TEST_CLIENT_ID)
         XCTAssertEqual(result.target, "<scope_1>,<scope_2>")
     }
+    
+    func test_makeUserAccount_returnExpectedResult() {
+        let accessTokenString = "accessToken"
+        let idToken = "idToken"
+        let username = "username"
+        let scopes = ["scope1", "scope2"]
+        let expiresOn = Date()
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = accessTokenString
+        accessToken.accountIdentifier = MSIDAccountIdentifier(displayableId: username, homeAccountId: "")
+        accessToken.expiresOn = expiresOn
+        accessToken.scopes = NSOrderedSet(array: scopes)
+        guard let tokenResult = MSIDTokenResult(accessToken: accessToken, refreshToken: nil, idToken: idToken, account: MSIDAccount(), authority: MSALNativeAuthNetworkStubs.msidAuthority, correlationId: UUID(), tokenResponse: nil) else {
+            XCTFail("Unexpected nil token")
+            return
+        }
+        let account = sut.makeUserAccount(tokenResult: tokenResult)
+        XCTAssertEqual(account.accessToken, accessTokenString)
+        XCTAssertEqual(account.username, username)
+        XCTAssertEqual(account.rawIdToken, idToken)
+        XCTAssertEqual(account.expiresOn, expiresOn)
+        XCTAssertEqual(account.scopes, scopes)
+    }
 }

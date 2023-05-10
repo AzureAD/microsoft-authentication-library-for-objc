@@ -25,11 +25,20 @@
 @_implementationOnly import MSAL_Private
 
 // swiftlint:disable:next type_name
-struct MSALNativeAuthSignInWithPasswordParameters {
-    let username: String
+class MSALNativeAuthSignInWithPasswordParameters: MSALNativeAuthSignInWithCodeParameters {
     let password: String
-    let challengeTypes: [MSALNativeAuthInternalChallengeType]
-    let correlationId: UUID?
-    let scopes: [String]?
-    let delegate: SignInStartDelegate
+    
+    init(
+        username: String,
+        password: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?) {
+        self.password = password
+        super.init(
+            username: username,
+            challengeTypes: challengeTypes,
+            correlationId: correlationId,
+            scopes: scopes)
+    }
 }
