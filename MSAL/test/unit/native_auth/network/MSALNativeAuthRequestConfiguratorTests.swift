@@ -273,8 +273,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(config: config,
                                                                            context: context,
-                                                                           passwordResetToken: "<password-reset-token>",
-                                                                           challengeTarget: "phone")
+                                                                           passwordResetToken: "<password-reset-token>")
 
         let sut = MSALNativeAuthRequestConfigurator()
         try sut.configure(configuratorType: .resetPassword(.challenge(params)),

@@ -150,7 +150,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectedUsername = "username"
         let expectedPassword = "password"
-        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
         let expectedContext = MSALNativeAuthRequestContextMock(correlationId: defaultUUID)
         let expectedScopes = "scope1,openid,profile,offline_access"
         
@@ -169,7 +168,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedPassword = "password"
-        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
         let expectedContext = MSALNativeAuthRequestContextMock(correlationId: defaultUUID)
         
         HttpModuleMockConfigurator.configure(request: request, responseJson: tokenResponseDict)
@@ -182,9 +180,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         factoryMock.mockMakeMsidConfigurationFunc(MSALNativeAuthConfigStubs.msidConfiguration)
         factoryMock.mockMakeNativeAuthResponse(nativeAuthResponse)
-
-        let cacheExpectation = XCTestExpectation(description: "Cache expectation")
-        cacheAccessorMock.expectation = cacheExpectation
         
         let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedUserAccount: MSALNativeAuthUserAccount(username: "username", accessToken: "accessToken", rawIdToken: "IdToken", scopes: [], expiresOn: Date()))
         
@@ -193,9 +188,10 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         
+        XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
     //TODO: startTelemetryEvent is not recognised
 //        checkTelemetryEventsForSuccessfulResult()
-        wait(for: [expectation, cacheExpectation], timeout: 1)
+        wait(for: [expectation], timeout: 1)
     }
     
     func test_whenCredentialsAreRequired_checkCredentialTokenIsPassedToValidator() {
@@ -209,7 +205,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         let expectedUsername = "username"
         let expectedPassword = "password"
-        let expectedChallengeTypes = [MSALNativeAuthInternalChallengeType.redirect]
         let expectedContext = MSALNativeAuthRequestContextMock(correlationId: defaultUUID)
 
         let mockDelegate = SignInStartDelegateFailureSpy()

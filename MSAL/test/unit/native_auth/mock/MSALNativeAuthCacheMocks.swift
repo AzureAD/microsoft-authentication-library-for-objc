@@ -27,9 +27,6 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
-
-    var expectation: XCTestExpectation?
-    
     enum E: Error {
         case notImplemented
     }
@@ -45,11 +42,7 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     }
 
     func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
-        if let expectation = expectation {
-            expectation.fulfill()
-        } else {
-            throw E.notImplemented
-        }
+        saveTokenWasCalled = true
     }
 
     func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {

@@ -29,7 +29,6 @@ struct MSALNativeAuthResetPasswordChallengeRequestParameters: MSALNativeAuthRequ
     let endpoint: MSALNativeAuthEndpoint = .resetPasswordChallenge
     let context: MSIDRequestContext
     let passwordResetToken: String
-    let challengeTarget: String?
 
     func makeRequestBody() -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey

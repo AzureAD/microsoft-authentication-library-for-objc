@@ -72,7 +72,8 @@ final class MSALNativeAuthResendCodeControllerLegacy:
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdResendCode, context: context
+            telemetryApiId: .telemetryApiIdResendCode,
+            context: context
         )
         startTelemetryEvent(telemetryEvent, context: context)
 
