@@ -16,25 +16,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-enum MSALNativeAuthTelemetryApiId: Int {
-    // Until we know exactly how to define them,
-    // to prevent any clashes with existing id's
-    // a number that is unlikely to be used has been added
-    case telemetryApiIdSignUp = 75001
-    case telemetryApiIdSignInWithPassword = 75002
-    case telemetryApiIdRefreshToken = 75003
-    case telemetryApiIdResetPasswordStart = 75004
-    case telemetryApiIdResetPasswordComplete = 75005
-    case telemetryApiIdResendCode = 75006
-    case telemetryApiIdVerifyCode = 75007
-    case telemetryApiIdSignOut = 75008
-    case telemetryResetPassword = 75009
+class MSALNativeAuthSignInWithCodeParameters {
+    let username: String
+    let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    let correlationId: UUID?
+    let scopes: [String]?
+    
+    init(
+        username: String,
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        correlationId: UUID?,
+        scopes: [String]?) {
+        self.username = username
+        self.challengeTypes = challengeTypes
+        self.correlationId = correlationId
+        self.scopes = scopes
+    }
 }

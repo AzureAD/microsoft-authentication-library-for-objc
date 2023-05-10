@@ -32,43 +32,12 @@ protocol MSALNativeAuthSignInResponseValidating {
     ) -> MSALNativeAuthSignInTokenValidatedResponse
 }
 
-protocol MSALNativeAuthTokenResponseConverting {
-    func validateAndConvertTokenResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration) -> MSIDTokenResult?
-}
+final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating {
 
-class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, MSALNativeAuthTokenResponseConverting {
-
-    let responseHandler: MSALNativeAuthResponseHandling
+    private let responseHandler: MSALNativeAuthResponseHandling
 
     init(responseHandler: MSALNativeAuthResponseHandling) {
         self.responseHandler = responseHandler
-    }
-
-    func validateAndConvertTokenResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            // TODO: where can we retrieve real homeAccountId and displayableId?
-            return try responseHandler.handle(
-                context: context,
-                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                validateAccount: true
-            )
-        } catch {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Response validation error: \(error)"
-            )
-            return nil
-        }
     }
 
     func validateSignInTokenResponse(
@@ -99,6 +68,8 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         }
     }
 
+    // MARK: private methods
+
     private func handleFailedSignInTokenResult(
         _ context: MSALNativeAuthRequestContext,
         _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
@@ -128,6 +99,29 @@ class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating, M
         }
     }
 
+    private func validateAndConvertTokenResponse(
+        _ tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration
+    ) -> MSIDTokenResult? {
+        do {
+            // TODO: where can we retrieve real homeAccountId and displayableId?
+            return try responseHandler.handle(
+                context: context,
+                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
+                tokenResponse: tokenResponse,
+                configuration: msidConfiguration,
+                validateAccount: true
+            )
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Response validation error: \(error)"
+            )
+            return nil
+        }
+    }
 
     private func convertErrorCodeToErrorType(
         _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthSignInTokenValidatedErrorType {

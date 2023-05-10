@@ -125,7 +125,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
         
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
     
@@ -145,7 +145,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
         
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "scope2"], delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "scope2"]), delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
     
@@ -165,7 +165,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
         
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "openid", "profile"], delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: ["scope1", "openid", "profile"]), delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
     
@@ -196,7 +196,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         responseValidatorMock.tokenValidatesResponse = .success(tokenResult, tokenResponse)
         responseValidatorMock.expectedTokenResponse = tokenResponse
         
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         
     //TODO: startTelemetryEvent is not recognised
 //        checkTelemetryEventsForSuccessfulResult()
@@ -222,7 +222,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         responseValidatorMock.tokenValidatesResponse = .credentialRequired(requestSignInChallengeRequestParamsStub.credentialToken)
 
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
     }
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() {
@@ -261,7 +261,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockDelegate = SignInStartDelegateSpy(expectation: expectation, expectedError: delegateError)
         responseValidatorMock.tokenValidatesResponse = .error(validatorError)
         
-        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil, delegate: mockDelegate))
+        sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, challengeTypes: expectedChallengeTypes, correlationId: expectedContext.correlationId(), scopes: nil), delegate: mockDelegate)
         
         //TODO: startTelemetryEvent is not recognised
 //        checkTelemetryEventsForFailedResult(networkEventHappensBefore: true)
@@ -276,7 +276,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPassword.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
@@ -298,7 +298,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignIn.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPassword.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())

@@ -44,20 +44,6 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
         tokenResponse.refreshToken = "refreshToken"
     }
     
-    func test_validateAndConvert_handleSuccessfulResult() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(result: MSIDTokenResult())
-        responseHandler.expectedContext = context
-        responseHandler.expectedValidateAccount = true
-        XCTAssertNotNil(sut.validateAndConvertTokenResponse(tokenResponse, context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration))
-    }
-    
-    func test_validateAndConvert_returnNilWhenErrorOccurred() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
-        XCTAssertNil(sut.validateAndConvertTokenResponse(tokenResponse, context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration))
-    }
-    
     func test_whenValidSignInTokenResponse_validationIsSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let tokenResult = MSIDTokenResult()

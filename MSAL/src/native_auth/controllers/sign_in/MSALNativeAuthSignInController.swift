@@ -26,14 +26,9 @@
 
 protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
 
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters)
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate)
 
-    func signIn(
-        username: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
-        correlationId: UUID?,
-        scopes: [String]?,
-        delegate: SignInCodeStartDelegate)
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate)
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
@@ -76,12 +71,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Internal
 
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) {
-        let scopes = joinScopes(params.scopes)
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate) {
         let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn with email and password started")
+        let scopes = joinScopes(params.scopes)
         let telemetryEvent = makeLocalTelemetryApiEvent(
             name: MSID_TELEMETRY_EVENT_API_EVENT,
-            telemetryApiId: .telemetryApiIdSignIn,
+            telemetryApiId: .telemetryApiIdSignInWithPassword,
             context: context
         )
         startTelemetryEvent(telemetryEvent, context: context)
@@ -93,7 +89,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             context: context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
-            params.delegate.onSignInError(error: SignInStartError(type: .generalError))
+            delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
 
@@ -110,7 +106,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
                 let account = factory.makeUserAccount(tokenResult: validatedTokenResult)
                 stopTelemetryEvent(telemetryEvent, context: context)
-                params.delegate.onSignInCompleted(result: account)
+                MSALLogger.log(
+                    level: .verbose,
+                    context: context,
+                    format: "SignIn with email and password completed successfully")
+                delegate.onSignInCompleted(result: account)
             case .credentialRequired(let credentialToken):
                 let challengeRequest = createChallengeRequest(
                     credentialToken: credentialToken,
@@ -120,18 +120,17 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 // use the credential token to call /challenge API
                 // create the new state and return it to the delegate
             case .error(let errorType):
+                MSALLogger.log(
+                    level: .verbose,
+                    context: context,
+                    format: "SignIn with email and password completed with errorType: \(errorType)")
                 stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                params.delegate.onSignInError(error: errorType.convertToSignInStartError())
+                delegate.onSignInError(error: errorType.convertToSignInStartError())
             }
         }
     }
 
-    func signIn(
-        username: String,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
-        correlationId: UUID?,
-        scopes: [String]?,
-        delegate: SignInCodeStartDelegate) {
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) {
             // call here /initiate
         }
 
