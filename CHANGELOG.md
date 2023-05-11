@@ -1,4 +1,5 @@
 ## [TBD]
+* Support read device info when ecc is on. (#1714)
 * Add troubleshooting flow when doing Just in Time registration (#1646)
 
 ## [1.2.11]

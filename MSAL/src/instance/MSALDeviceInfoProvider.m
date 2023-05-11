@@ -132,7 +132,7 @@
 {
     MSALWPJMetaData *wpjMetaData = [MSALWPJMetaData new];
     
-    NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters tenantId:tenantId];
+    NSDictionary *deviceRegMetaDataInfo = [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:requestParameters tenantId:tenantId usePrimaryFormat:NO];
     if (deviceRegMetaDataInfo)
     {
         [wpjMetaData addRegisteredDeviceMetadataInformation:deviceRegMetaDataInfo];
