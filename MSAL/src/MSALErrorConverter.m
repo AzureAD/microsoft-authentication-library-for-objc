@@ -106,6 +106,10 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITWPJAcquireTokenError) : @(MSALErrorJITWPJAcquireTokenError),
                                    @(MSIDErrorJITRetryRequired) : @(MSALErrorJITRetryRequired),
                                    @(MSIDErrorJITUnknownStatusWebCP) : @(MSALErrorJITUnknownStatusWebCP),
+                                   @(MSIDErrorJITTroubleshootingRequired) : @(MSALErrorJITTroubleshootingRequired),
+                                   @(MSIDErrorJITTroubleshootingCreateController) : @(MSALErrorJITTroubleshootingCreateController),
+                                   @(MSIDErrorJITTroubleshootingResultUnknown) : @(MSALErrorJITTroubleshootingResultUnknown),
+                                   @(MSIDErrorJITTroubleshootingAcquireToken) : @(MSALErrorJITTroubleshootingAcquireToken),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
