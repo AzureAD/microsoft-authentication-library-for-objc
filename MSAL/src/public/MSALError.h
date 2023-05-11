@@ -421,7 +421,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorJITComplianceCheckResultTimeout    =   -42720,
     
     /**
-     JIT - Compliance Check - Device unknown
+     JIT - Compliance Check - Result unknown
      */
     MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
 
@@ -459,5 +459,35 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      JIT - WPJ - Failed to acquire broker token
      */
     MSALErrorJITWPJAcquireTokenError                    =   -42728,
+    
+    /**
+     JIT - Retry JIT process (WPJ or Link)
+     */
+    MSALErrorJITRetryRequired                           = -42729,
+    
+    /**
+     JIT - Unexpected status received from webCP troubleshooting flow
+     */
+    MSALErrorJITUnknownStatusWebCP                      = -42730,
+
+    /**
+     JIT - Troubleshooting flow needed
+     */
+    MSALErrorJITTroubleshootingRequired                 = -42730,
+
+    /**
+     JIT - Troubleshooting - Could not create web view controller
+     */
+    MSALErrorJITTroubleshootingCreateController         = -42731,
+
+    /**
+     JIT - Troubleshooting - Result unknown
+     */
+    MSALErrorJITTroubleshootingResultUnknown         = -42731,
+    
+    /**
+     JIT - Troubleshooting - Acquire token error
+     */
+    MSALErrorJITTroubleshootingAcquireToken          = -42732,
     
 };
