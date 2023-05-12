@@ -26,7 +26,7 @@ import Foundation
 
 @objcMembers
 public class ResetPasswordBaseState: MSALNativeAuthBaseState {
-    fileprivate weak var controller: MSALNativeAuthResetPasswordControlling?
+    fileprivate let controller: MSALNativeAuthResetPasswordControlling
 
     init(controller: MSALNativeAuthResetPasswordControlling, flowToken: String) {
         self.controller = controller
@@ -39,23 +39,11 @@ public class ResetPasswordCodeSentState: ResetPasswordBaseState {
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onResetPasswordResendCodeError(error: .init(type: .generalError), newState: nil)
-            return
-        }
-
         controller.resendCode(context: context, delegate: delegate)
     }
 
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onResetPasswordVerifyCodeError(error: .init(type: .generalError), newState: nil)
-            return
-        }
 
         controller.submitCode(code: code, context: context, delegate: delegate)
     }
@@ -65,12 +53,6 @@ public class ResetPasswordCodeSentState: ResetPasswordBaseState {
 public class ResetPasswordRequiredState: ResetPasswordBaseState {
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onResetPasswordRequiredError(error: .init(type: .generalError), newState: nil)
-            return
-        }
 
         controller.submitPassword(password: password, context: context, delegate: delegate)
     }
