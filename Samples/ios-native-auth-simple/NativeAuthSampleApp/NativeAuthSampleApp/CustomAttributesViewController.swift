@@ -202,7 +202,7 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .redirect:
+        case .browserRequired:
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
         default:

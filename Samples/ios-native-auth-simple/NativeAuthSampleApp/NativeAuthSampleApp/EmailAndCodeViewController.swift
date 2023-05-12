@@ -168,10 +168,10 @@ class EmailAndCodeViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-extension EmailAndCodeViewController: SignUpOTPStartDelegate {
-    func onSignUpOTPError(error: MSAL.SignUpOTPStartError) {
+extension EmailAndCodeViewController: SignUpCodeStartDelegate {
+    func onSignUpCodeError(error: MSAL.SignUpCodeStartError) {
         switch error.type {
-        case .redirect:
+        case .browserRequired:
             showResultText("Unable to sign up: Web UX required")
         case .userAlreadyExists:
             showResultText("Unable to sign up: User already exists")
@@ -182,7 +182,7 @@ extension EmailAndCodeViewController: SignUpOTPStartDelegate {
         }
     }
 
-    func onSignUpOTPCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
         print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
 
         showResultText("Email verification required")
@@ -221,7 +221,7 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .redirect:
+        case .browserRequired:
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
         default:
@@ -270,7 +270,7 @@ extension EmailAndCodeViewController: SignUpResendCodeDelegate {
 
 // MARK: - Sign In delegates
 
-extension EmailAndCodeViewController: SignInOTPStartDelegate {
+extension EmailAndCodeViewController: SignInCodeStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
         showResultText("Signed in successfully. Access Token: \(result.accessToken)")
 
@@ -279,8 +279,8 @@ extension EmailAndCodeViewController: SignInOTPStartDelegate {
         updateUI()
     }
 
-    func onSignInOTPError(error: MSAL.SignInOTPStartError) {
-        print("SignInStartDelegate: onSignInOTPError: \(error)")
+    func onSignInCodeError(error: MSAL.SignInCodeStartError) {
+        print("SignInStartDelegate: onSignInCodeError: \(error)")
 
         switch error.type {
         case .userNotFound, .invalidUsername:
@@ -290,7 +290,7 @@ extension EmailAndCodeViewController: SignInOTPStartDelegate {
         }
     }
 
-    func onSignInOTPCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }

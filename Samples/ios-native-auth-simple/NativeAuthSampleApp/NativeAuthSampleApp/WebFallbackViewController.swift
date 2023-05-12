@@ -164,7 +164,7 @@ extension WebFallbackViewController: SignInStartDelegate {
         switch error.type {
         case .userNotFound, .invalidUsername:
             showResultText("Invalid username or password")
-        case .redirect:
+        case .browserRequired:
             signInWithWebUX()
         default:
             showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")

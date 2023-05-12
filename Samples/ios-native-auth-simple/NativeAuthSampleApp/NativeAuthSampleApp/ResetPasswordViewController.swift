@@ -181,7 +181,7 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self else { return }
 
-                                newState.verifyCode(code: code, delegate: self)
+                                newState.submitCode(code: code, delegate: self)
                             },
                             resendCallback: { [weak self] in
                                 guard let self else { return }
@@ -222,7 +222,7 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
                               submitCallback: { [weak self] code in
                                   guard let self else { return }
 
-                                  newState.verifyCode(code: code, delegate: self)
+                                  newState.submitCode(code: code, delegate: self)
                               }, resendCallback: { [weak self] in
                                   guard let self else { return }
 
@@ -249,13 +249,13 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
                                   submitCallback: { [weak self] code in
                                       guard let self else { return }
 
-                                      newState.verifyCode(code: code, delegate: self)
+                                      newState.submitCode(code: code, delegate: self)
                                   }, resendCallback: { [weak self] in
                                       guard let self else { return }
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .redirect:
+        case .browserRequired:
             showResultText("Unable to sign up: Web UX required")
             dismissVerifyCodeModal()
         default:
