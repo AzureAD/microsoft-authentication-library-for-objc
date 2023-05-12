@@ -200,20 +200,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
             return
         }
-        switch username {
-        case "redirect@contoso.com": delegate.onResetPasswordError(
-            error: ResetPasswordStartError(type: .browserRequired))
-        case "nopassword@contoso.com": delegate.onResetPasswordError(
-            error: ResetPasswordStartError(type: .userDoesNotHavePassword))
-        case "notfound@contoso.com": delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
-        case "generalerror@contoso.com": delegate.onResetPasswordError(
-            error: ResetPasswordStartError(type: .generalError))
-        default: delegate.onResetPasswordCodeSent(newState:
-                                        ResetPasswordCodeSentState(
-                                            flowToken: "password_reset_token"),
-                                            displayName: username,
-                                            codeLength: 4)
-        }
+
+        let controller = controllerFactory.makeResetPasswordController()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        controller.resetPassword(username: username, context: context, delegate: delegate)
     }
 
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {
