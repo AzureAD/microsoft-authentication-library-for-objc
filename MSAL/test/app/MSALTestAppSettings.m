@@ -38,7 +38,7 @@
 // function named _addtionalProfiles() that returns an NSDictionary that will
 // be folded into the profiles list without you having to constantly alter your
 // github enlistment!
-static NSDictionary* _additionalProfiles()
+static NSDictionary* _additionalProfiles(void)
 {
     return nil;
 }
