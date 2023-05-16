@@ -485,3 +485,5 @@
 @property (nullable, class, readonly) NSString *sdkVersion;
 
 @end
+
+
