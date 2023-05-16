@@ -49,7 +49,7 @@ class EmailAndCodeViewController: UIViewController {
                     redirectUri: nil,
                     authority: Configuration.authority
                 ),
-                challengeTypes: [.oob]
+                challengeTypes: .OOB
             )
         } catch {
             print("Unable to initialize MSAL \(error)")

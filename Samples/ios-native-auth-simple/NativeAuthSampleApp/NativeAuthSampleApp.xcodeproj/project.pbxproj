@@ -17,6 +17,7 @@
 		9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */; };
 		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
 		9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */; };
+		9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B9DD5192A053E8700042B43 /* ObjCViewController.m */; };
 		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
 		9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; };
 		9BB32E4C29A6750800BD7D89 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -159,6 +160,9 @@
 		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
 		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
 		9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAttributesViewController.swift; sourceTree = "<group>"; };
+		9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NativeAuthSampleApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		9B9DD5182A053E8700042B43 /* ObjCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCViewController.h; sourceTree = "<group>"; };
+		9B9DD5192A053E8700042B43 /* ObjCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCViewController.m; sourceTree = "<group>"; };
 		9BA1949529F820980023905D /* EmailAndCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAndCodeViewController.swift; sourceTree = "<group>"; };
 		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
 		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
@@ -230,8 +234,19 @@
 				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
 				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
 				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+				9B9125012A0A90DB006F91E8 /* Objective-C Scenario */,
 			);
 			name = "Scenario View Controllers";
+			sourceTree = "<group>";
+		};
+		9B9125012A0A90DB006F91E8 /* Objective-C Scenario */ = {
+			isa = PBXGroup;
+			children = (
+				9B9DD5182A053E8700042B43 /* ObjCViewController.h */,
+				9B9DD5192A053E8700042B43 /* ObjCViewController.m */,
+				9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */,
+			);
+			name = "Objective-C Scenario";
 			sourceTree = "<group>";
 		};
 		9BB32E1029A674BB00BD7D89 /* Products */ = {
@@ -297,6 +312,7 @@
 				TargetAttributes = {
 					9B08476F29969264003BA4B4 = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1430;
 					};
 				};
 			};
@@ -467,6 +483,7 @@
 				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
 				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
 				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
+				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
 				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
 				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
 				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
@@ -626,6 +643,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -645,6 +663,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -655,6 +675,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -674,6 +695,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

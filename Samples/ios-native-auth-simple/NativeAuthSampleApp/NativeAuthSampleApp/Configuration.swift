@@ -24,7 +24,8 @@
 
 import MSAL
 
-enum Configuration {
+@objcMembers
+class Configuration: NSObject {
     // Update the below to your client ID you received in the portal. The below is for running the demo only
 
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"

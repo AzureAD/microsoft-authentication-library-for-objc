@@ -22,10 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+#ifndef MSALNativeAuthChallengeTypes_h
+#define MSALNativeAuthChallengeTypes_h
 
-@objc
-public enum MSALNativeAuthChallengeType: Int {
-    case oob
-    case password
-}
+typedef NS_OPTIONS(NSInteger, MSALNativeAuthChallengeTypes) {
+    MSALNativeAuthChallengeTypeOOB          = 1 << 0,
+    MSALNativeAuthChallengeTypePassword     = 1 << 1
+};
+
+#endif /* MSALNativeAuthChallengeTypes_h */

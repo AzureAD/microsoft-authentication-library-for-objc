@@ -51,7 +51,7 @@ class CustomAttributesViewController: UIViewController {
                     redirectUri: nil,
                     authority: Configuration.authority
                 ),
-                challengeTypes: [.oob, .password]
+                challengeTypes: [.OOB, .password]
             )
         } catch {
             print("Unable to initialize MSAL \(error)")
