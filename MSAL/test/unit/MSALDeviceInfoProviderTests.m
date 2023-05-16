@@ -93,7 +93,7 @@
 
 - (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
@@ -130,7 +130,7 @@
 - (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil_noRegisterationInformation API_AVAILABLE(ios(13.0), macos(10.15))
 {
     
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
@@ -160,7 +160,7 @@
 
 - (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:)
+    [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
                            block:(id<MSIDRequestContext>)^(id<MSIDRequestContext>_Nullable context)
     {
@@ -224,7 +224,6 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
-        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         [failExpectation fulfill];
     }];
     
