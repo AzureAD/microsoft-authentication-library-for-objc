@@ -36,7 +36,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     public init(
         configuration config: MSALPublicClientApplicationConfig,
-        challengeTypes: [MSALNativeAuthChallengeType]) throws {
+        challengeTypes: MSALNativeAuthChallengeTypes) throws {
         guard let aadAuthority = config.authority as? MSALAADAuthority else {
             throw MSALNativeAuthError.invalidAuthority
         }
@@ -58,7 +58,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     public init(
         clientId: String,
-        challengeTypes: [MSALNativeAuthChallengeType],
+        challengeTypes: MSALNativeAuthChallengeTypes,
         rawTenant: String? = nil,
         redirectUri: String? = nil) throws {
         let aadAuthority = try MSALNativeAuthAuthorityProvider()
@@ -227,10 +227,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     private static func getInternalChallengeTypes(
-        _ challengeTypes: [MSALNativeAuthChallengeType]) -> [MSALNativeAuthInternalChallengeType] {
-            var internalChallengeTypes = challengeTypes.map({
-                MSALNativeAuthInternalChallengeType.getChallengeType(type: $0)
-            })
+        _ challengeTypes: MSALNativeAuthChallengeTypes) -> [MSALNativeAuthInternalChallengeType] {
+            var internalChallengeTypes = [MSALNativeAuthInternalChallengeType]()
+
+            if challengeTypes.contains(.OOB) {
+                internalChallengeTypes.append(.oob)
+            }
+
+            if challengeTypes.contains(.password) {
+                internalChallengeTypes.append(.password)
+            }
+
             internalChallengeTypes.append(.redirect)
             return internalChallengeTypes
     }
