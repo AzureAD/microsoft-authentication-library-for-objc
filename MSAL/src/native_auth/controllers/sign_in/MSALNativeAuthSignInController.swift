@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthSignInControlling: MSALNativeAuthTokenRequestHandling {
+protocol MSALNativeAuthSignInControlling {
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate)
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate)
@@ -88,7 +88,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
-        performRequest(request) { [self] aadTokenResponse in
+        Task {
+            let aadTokenResponse: Result<MSIDAADTokenResponse, Error> = await performRequest(request, context: context, event: telemetryEvent)
             handleSignInTokenResult(
                 aadTokenResponse,
                 scopes: scopes,
@@ -128,10 +129,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 format: "SignIn with email and password completed successfully")
             delegate.onSignInCompleted(result: account)
         case .credentialRequired(let credentialToken):
-            let challengeRequest = createChallengeRequest(
-                credentialToken: credentialToken,
-                context: context)
+            guard let challengeRequest = createChallengeRequest(credentialToken: credentialToken,context: context) else {
+                stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
+                DispatchQueue.main.async {
+                    delegate.onSignInError(error: SignInStartError(type: .generalError))
+                }
+                return
+            }
             print("credential required")
+
             // use the credential token to call /challenge API
             // create the new state and return it to the delegate
         case .error(let errorType):
@@ -191,5 +197,25 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         let joinedScopes = NSMutableOrderedSet(array: scopes)
         joinedScopes.addObjects(from: defaultOIDCScopes)
         return joinedScopes.array as? [String] ?? []
+    }
+    
+    private func cacheTokenResponse(_ tokenResponse: MSIDTokenResponse, context: MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration) {
+        do {
+            try cacheAccessor?.saveTokensAndAccount(
+                tokenResult: tokenResponse,
+                configuration: msidConfiguration,
+                context: context
+            )
+        } catch {
+
+            // Note, if there's an error saving result, we log it, but we don't return an error
+            // This is by design because even if we fail to cache, we still should return tokens back to the app
+
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Error caching response: \(error) (ignoring)"
+            )
+        }
     }
 }
