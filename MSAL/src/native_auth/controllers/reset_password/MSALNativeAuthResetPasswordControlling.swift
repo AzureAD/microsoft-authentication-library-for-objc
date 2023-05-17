@@ -16,34 +16,24 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-@objc
-public protocol ResetPasswordStartDelegate {
-    func onResetPasswordError(error: ResetPasswordStartError)
-    func onResetPasswordCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
-}
+protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+    func resetPassword(
+        username: String,
+        context: MSIDRequestContext,
+        delegate: ResetPasswordStartDelegate
+    )
 
-@objc
-public protocol ResetPasswordVerifyCodeDelegate {
-    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeSentState?)
-    func onPasswordRequired(newState: ResetPasswordRequiredState)
-}
+    func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate)
 
-@objc
-public protocol ResetPasswordResendCodeDelegate {
-    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState?)
-    func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
-}
+    func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate)
 
-@objc
-public protocol ResetPasswordRequiredDelegate {
-    func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
-    func onResetPasswordCompleted()
+    func submitPassword(password: String, context: MSIDRequestContext, delegate: ResetPasswordRequiredDelegate)
 }
