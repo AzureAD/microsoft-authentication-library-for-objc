@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MSALBrokeredAvailability Enumeration Reference</title>
+    <title>MSALCIAMAuthority Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/objc/Enum/MSALBrokeredAvailability" class="dashAnchor"></a>
+    <a name="//apple_ref/objc/Class/MSALCIAMAuthority" class="dashAnchor"></a>
 
-    <a title="MSALBrokeredAvailability Enumeration Reference"></a>
+    <a title="MSALCIAMAuthority Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html"> Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      MSALBrokeredAvailability Enumeration Reference
+      MSALCIAMAuthority Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -371,17 +371,25 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>MSALBrokeredAvailability</h1>
+            <h1>MSALCIAMAuthority</h1>
               <div class="declaration">
                 <div class="language">
-                  
-                  <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALBrokeredAvailability</span> <span class="o">:</span> <span class="n">NSInteger</span> <span class="p">{}</span></code></pre>
+                  <p class="aside-title">Objective-C</p>
+                  <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALCIAMAuthority</span> <span class="p">:</span> <span class="nc"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span></code></pre>
+
+                </div>
+                <div class="language">
+                  <p class="aside-title">Swift</p>
+                  <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALCIAMAuthority</span> <span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span></code></pre>
 
                 </div>
               </div>
-            <p>Controls where would the credentials dialog reside.
-By default, when Microsoft Authenticator application is present on a device, MSAL will try to acquire a token through the Authenticator app
-To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailabilityNone</p>
+            <p>CIAM endpoint that MSAL will use to get a token and perform CIAM policies.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    By default, the CIAM authority url should be in the following format <a href="https://tenant.ciamlogin.com">https://tenant.ciamlogin.com</a>. However, MSAL also supports other arbitrary CIAM such as: <a href="https://tenant.ciamlogin.com/GUID">https://tenant.ciamlogin.com/GUID</a> and <a href="https://tenant.ciamlogin.com/aDomain">https://tenant.ciamlogin.com/aDomain</a>, where GUID is tenantID and aDomain and domainName
+
+</div>
 
           </div>
         </section>
@@ -389,13 +397,22 @@ To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailability
         <section class="section">
           <div class="section-content">
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Constructing%20a%20CIAM%20authority"></a>
+                <a name="//apple_ref/objc/Section/Constructing a CIAM authority" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Constructing%20a%20CIAM%20authority"></a>
+                  <h3 class="section-name"><span>Constructing a CIAM authority</span>
+</h3>
+                </div>
+              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityAuto"></a>
-                    <a name="//apple_ref/objc/Case/MSALBrokeredAvailabilityAuto" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityAuto">MSALBrokeredAvailabilityAuto</a>
+                    <a name="/c:objc(cs)MSALCIAMAuthority(im)initWithURL:error:"></a>
+                    <a name="//apple_ref/objc/Method/-initWithURL:error:" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALCIAMAuthority(im)initWithURL:error:">-initWithURL:<wbr>error:<wbr></a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -403,18 +420,54 @@ To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailability
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The SDK determines automatically the most suitable option, optimized for user experience.
-E.g. it may invoke another application for a single sign on (Microsoft Authenticator), if such application is present.
-This is the default option.</p>
+                        <p>Initializes MSALCIAMAuthority with NSURL.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALBrokeredAvailabilityAuto</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithURL</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">url</span>
+                               <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
 
                         </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>url</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Authority indicating a CIAM endpoint that MSAL can use to obtain tokens.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>error</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The error that occurred creating the authority object, if any, if you&rsquo;re not interested in the specific error pass in nil.
+//</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -422,9 +475,9 @@ This is the default option.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityNone"></a>
-                    <a name="//apple_ref/objc/Case/MSALBrokeredAvailabilityNone" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityNone">MSALBrokeredAvailabilityNone</a>
+                    <a name="/c:objc(cs)MSALCIAMAuthority(im)initWithURL:validateFormat:error:"></a>
+                    <a name="//apple_ref/objc/Method/-initWithURL:validateFormat:error:" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)MSALCIAMAuthority(im)initWithURL:validateFormat:error:">-initWithURL:<wbr>validateFormat:<wbr>error:<wbr></a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -432,14 +485,21 @@ This is the default option.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The SDK will present a webview within the application. It will not invoke external application.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALBrokeredAvailabilityNone</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithURL</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">url</span>
+                      <span class="nf">validateFormat</span><span class="p">:(</span><span class="n">BOOL</span><span class="p">)</span><span class="nv">validateFormat</span>
+                               <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span> <span class="n">_Nullable</span> <span class="n">__autoreleasing</span> <span class="o">*</span> <span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span> <span class="n">NS_DESIGNATED_INITIALIZER</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">validateFormat</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MSALBrokeredAvailability Enumeration Reference</title>
+    <title>MSALPlatformSSOStatus Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/objc/Enum/MSALBrokeredAvailability" class="dashAnchor"></a>
+    <a name="//apple_ref/objc/Enum/MSALPlatformSSOStatus" class="dashAnchor"></a>
 
-    <a title="MSALBrokeredAvailability Enumeration Reference"></a>
+    <a title="MSALPlatformSSOStatus Enumeration Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html"> Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      MSALBrokeredAvailability Enumeration Reference
+      MSALPlatformSSOStatus Enumeration Reference
     </p>
 
     <div class="content-wrapper">
@@ -371,17 +371,15 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>MSALBrokeredAvailability</h1>
+            <h1>MSALPlatformSSOStatus</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALBrokeredAvailability</span> <span class="o">:</span> <span class="n">NSInteger</span> <span class="p">{}</span></code></pre>
+                  <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALPlatformSSOStatus</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
 
                 </div>
               </div>
-            <p>Controls where would the credentials dialog reside.
-By default, when Microsoft Authenticator application is present on a device, MSAL will try to acquire a token through the Authenticator app
-To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailabilityNone</p>
+            <p>Platform SSO status on macOS device</p>
 
           </div>
         </section>
@@ -393,9 +391,9 @@ To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailability
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityAuto"></a>
-                    <a name="//apple_ref/objc/Case/MSALBrokeredAvailabilityAuto" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityAuto">MSALBrokeredAvailabilityAuto</a>
+                    <a name="/c:@E@MSALPlatformSSOStatus@MSALPlatformSSONotEnabled"></a>
+                    <a name="//apple_ref/objc/Case/MSALPlatformSSONotEnabled" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALPlatformSSOStatus@MSALPlatformSSONotEnabled">MSALPlatformSSONotEnabled</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -403,16 +401,14 @@ To disable this behavior, set MSALBrokerAvailability to MSALBrokeredAvailability
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The SDK determines automatically the most suitable option, optimized for user experience.
-E.g. it may invoke another application for a single sign on (Microsoft Authenticator), if such application is present.
-This is the default option.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALBrokeredAvailabilityAuto</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="n">MSALPlatformSSONotEnabled</span></code></pre>
 
                         </div>
                       </div>
@@ -422,9 +418,9 @@ This is the default option.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityNone"></a>
-                    <a name="//apple_ref/objc/Case/MSALBrokeredAvailabilityNone" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@E@MSALBrokeredAvailability@MSALBrokeredAvailabilityNone">MSALBrokeredAvailabilityNone</a>
+                    <a name="/c:@E@MSALPlatformSSOStatus@MSALPlatformSSOEnabledNotRegistered"></a>
+                    <a name="//apple_ref/objc/Case/MSALPlatformSSOEnabledNotRegistered" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALPlatformSSOStatus@MSALPlatformSSOEnabledNotRegistered">MSALPlatformSSOEnabledNotRegistered</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -432,14 +428,41 @@ This is the default option.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The SDK will present a webview within the application. It will not invoke external application.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="n">MSALBrokeredAvailabilityNone</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="n">MSALPlatformSSOEnabledNotRegistered</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALPlatformSSOStatus@MSALPlatformSSOEnabledAndRegistered"></a>
+                    <a name="//apple_ref/objc/Case/MSALPlatformSSOEnabledAndRegistered" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALPlatformSSOStatus@MSALPlatformSSOEnabledAndRegistered">MSALPlatformSSOEnabledAndRegistered</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALPlatformSSOEnabledAndRegistered</span></code></pre>
 
                         </div>
                       </div>
