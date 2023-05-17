@@ -30,6 +30,12 @@ protocol MSALNativeAuthSignInResponseValidating {
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDAADTokenResponse, Error>
     ) -> MSALNativeAuthSignInTokenValidatedResponse
+    
+    func validateSignInChallengeResponse(
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration,
+        result: Result<MSALNativeAuthSignInChallengeResponse, Error>
+    ) -> MSALNativeAuthSignInChallengeValidatedResponse
 }
 
 final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating {
@@ -61,14 +67,87 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "Error type not expected, error: \(signInTokenResponseError)")
+                    format: "SignIn Token: Error type not expected, error: \(signInTokenResponseError)")
                 return .error(.invalidServerResponse)
             }
             return handleFailedSignInTokenResult(context, signInTokenResponseError)
         }
     }
+    
+    func validateSignInChallengeResponse(
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration,
+        result: Result<MSALNativeAuthSignInChallengeResponse, Error>
+    ) -> MSALNativeAuthSignInChallengeValidatedResponse {
+        switch result {
+        case .success(let challengeResponse):
+            return handleSuccessfulSignInChallengeResult(context, response: challengeResponse)
+        case .failure(let signInChallengeResponseError):
+            guard let signInChallengeResponseError =
+                    signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "SignIn Challenge: Error type not expected, error: \(signInChallengeResponseError)")
+                return .error(.invalidServerResponse)
+            }
+            return handleFailedSignInChallengeResult(context, error: signInChallengeResponseError)
+        }
+    }
+
 
     // MARK: private methods
+    
+    private func handleSuccessfulSignInChallengeResult(_ context: MSALNativeAuthRequestContext, response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
+        switch response.challengeType {
+        case .otp:
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "SignIn Challenge: Received unexpected challenge type: \(response.challengeType)")
+            return .error(.invalidServerResponse)
+        case .oob:
+            guard let credentialToken = response.credentialToken,
+                    let targetLabel = response.challengeTargetLabel,
+                    let codeLength = response.codeLength,
+                    let channelType = response.challengeChannel else {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "SignIn Challenge: Invalid response with challenge type oob, response: \(response)")
+                return .error(.invalidServerResponse)
+            }
+            return .codeRequired(credentialToken: credentialToken, sentTo: targetLabel, channelType: channelType, codeLength: codeLength)
+        case .password:
+            guard let credentialToken = response.credentialToken else {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "SignIn Challenge: Expected credential token not nil with credential type password")
+                return .error(.invalidServerResponse)
+            }
+            return .passwordRequired(credentialToken: credentialToken)
+        case .redirect:
+            return .error(.redirect)
+        }
+    }
+    
+    private func handleFailedSignInChallengeResult(
+        _ context: MSALNativeAuthRequestContext,
+        error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
+            switch error.error {
+            case .invalidRequest:
+                return .error(.invalidRequest)
+            case .invalidClient:
+                return .error(.invalidClient)
+            case .invalidGrant:
+                return .error(.invalidToken)
+            case .expiredToken:
+                return .error(.expiredToken)
+            case .unsupportedChallengeType:
+                return .error(.unsupportedChallengeType)
+            }
+    }
 
     private func handleFailedSignInTokenResult(
         _ context: MSALNativeAuthRequestContext,

@@ -25,7 +25,17 @@
 import Foundation
 
 @objcMembers
-public class SignInCodeSentState: MSALNativeAuthBaseState {
+public class SignInBaseState: MSALNativeAuthBaseState {
+    fileprivate var controller: MSALNativeAuthSignInControlling
+
+    init(controller: MSALNativeAuthSignInControlling, flowToken: String) {
+        self.controller = controller
+        super.init(flowToken: flowToken)
+    }
+}
+
+@objcMembers
+public class SignInCodeSentState: SignInBaseState {
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {

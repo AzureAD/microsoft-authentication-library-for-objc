@@ -106,7 +106,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Private
 
     private func handleSignInTokenResult(
-        _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
+    _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -137,9 +137,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 return
             }
             print("credential required")
-
-            // use the credential token to call /challenge API
-            // create the new state and return it to the delegate
+            Task {
+                let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context, event: telemetryEvent)
+                handleSignInChallengeResponse(challengeResponse, context: context, config: config, telemetryEvent: telemetryEvent, delegate: delegate)
+            }
         case .error(let errorType):
             MSALLogger.log(
                 level: .verbose,
@@ -150,10 +151,25 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func createTokenRequest(username: String,
-                                    password: String?,
-                                    scopes: [String],
-                                    context: MSIDRequestContext) -> MSIDHttpRequest? {
+    private func handleSignInChallengeResponse(
+    _ challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error>,
+        context: MSALNativeAuthRequestContext,
+        config: MSIDConfiguration,
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        delegate: SignInStartDelegate) {
+            let result = responseValidator.validateSignInChallengeResponse(context: context, msidConfiguration: config, result: challengeResponse)
+            switch result {
+            case .passwordRequired(let credentialToken):
+                print("merge Silviu's PR to and handle PasswordRequired state \(credentialToken)")
+            case .error(let challengeError):
+                return delegate.onSignInError(error: challengeError.convertToSignInStartError())
+            case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
+                let state = SignInCodeSentState(controller: self, flowToken: credentialToken)
+                delegate.onSignInCodeSent(newState: state, displayName: sentTo, codeLength: codeLength)
+            }
+    }
+
+    private func createTokenRequest(username: String, password: String?, scopes: [String], context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInTokenRequestParameters(
                 config: factory.config,
@@ -201,21 +217,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     
     private func cacheTokenResponse(_ tokenResponse: MSIDTokenResponse, context: MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration) {
         do {
-            try cacheAccessor?.saveTokensAndAccount(
-                tokenResult: tokenResponse,
-                configuration: msidConfiguration,
-                context: context
-            )
+            try cacheAccessor?.saveTokensAndAccount(tokenResult: tokenResponse, configuration: msidConfiguration, context: context)
         } catch {
-
-            // Note, if there's an error saving result, we log it, but we don't return an error
-            // This is by design because even if we fail to cache, we still should return tokens back to the app
-
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Error caching response: \(error) (ignoring)"
-            )
+            MSALLogger.log(level: .error, context: context, format: "Error caching response: \(error) (ignoring)")
         }
     }
 }

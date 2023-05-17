@@ -22,12 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
-enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case expiredToken = "expired_token"
-    case unsupportedChallengeType = "unsupported_challenge_type"
+enum MSALNativeAuthChannelType: String, Decodable {
+    case phone
+    case email
 }
