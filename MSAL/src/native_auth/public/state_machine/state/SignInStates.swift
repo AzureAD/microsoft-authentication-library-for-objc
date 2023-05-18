@@ -26,10 +26,15 @@ import Foundation
 
 @objcMembers
 public class SignInBaseState: MSALNativeAuthBaseState {
-    fileprivate var controller: MSALNativeAuthSignInControlling
+    fileprivate let controller: MSALNativeAuthSignInControlling
+    fileprivate let inputValidator: MSALNativeAuthInputValidating
 
-    init(controller: MSALNativeAuthSignInControlling, flowToken: String) {
+    init(
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
         self.controller = controller
+        self.inputValidator = inputValidator
         super.init(flowToken: flowToken)
     }
 }
@@ -38,27 +43,18 @@ public class SignInBaseState: MSALNativeAuthBaseState {
 public class SignInCodeSentState: SignInBaseState {
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
-        if correlationId != nil {
-            delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
-        } else {
-            delegate.onSignInResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
-        }
+        controller.resendCode(credentialToken: flowToken, context: MSALNativeAuthRequestContext(correlationId: correlationId), delegate: delegate)
     }
 
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
-        // swiftlint:disable line_length
-        switch code {
-        case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-        case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-        case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
-        default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
-            username: "email@contoso.com",
-            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9",
-            rawIdToken: nil,
-            scopes: [],
-            expiresOn: Date()
-        ))
+        guard inputValidator.isInputValid(code) else {
+            delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            return
         }
-        // swiftlint:enable line_length
+        controller.submitCode(
+            code,
+            credentialToken: flowToken,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
+            delegate: delegate)
     }
 }

@@ -28,6 +28,8 @@ protocol MSALNativeAuthSignInControlling {
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate)
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate)
+    func submitCode(_ code: String, credentialToken: String, context: MSIDRequestContext, delegate: SignInVerifyCodeDelegate)
+    func resendCode(credentialToken: String, context: MSIDRequestContext, delegate: SignInResendCodeDelegate)
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
@@ -102,6 +104,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) {
         // call here /initiate
     }
+    
+    func submitCode(_ code: String, credentialToken: String, context: MSIDRequestContext, delegate: SignInVerifyCodeDelegate) {
+        
+    }
+    
+    func resendCode(credentialToken: String, context: MSIDRequestContext, delegate: SignInResendCodeDelegate) {
+        
+    }
 
     // MARK: - Private
 
@@ -129,7 +139,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 format: "SignIn with email and password completed successfully")
             delegate.onSignInCompleted(result: account)
         case .credentialRequired(let credentialToken):
-            guard let challengeRequest = createChallengeRequest(credentialToken: credentialToken,context: context) else {
+            guard let challengeRequest = createChallengeRequest(credentialToken: credentialToken, context: context) else {
                 stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
                 DispatchQueue.main.async {
                     delegate.onSignInError(error: SignInStartError(type: .generalError))
@@ -138,7 +148,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             }
             print("credential required")
             Task {
-                let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context, event: telemetryEvent)
+                let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> =
+                await performRequest(challengeRequest, context: context, event: telemetryEvent)
                 handleSignInChallengeResponse(challengeResponse, context: context, config: config, telemetryEvent: telemetryEvent, delegate: delegate)
             }
         case .error(let errorType):
