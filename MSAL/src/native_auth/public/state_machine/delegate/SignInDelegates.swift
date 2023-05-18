@@ -25,17 +25,20 @@
 import Foundation
 
 @objc
-public protocol SignInStartDelegate {
-    func onSignInError(error: SignInStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+public protocol SignInCompletedDelegate {
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
-public protocol SignInCodeStartDelegate {
+public protocol SignInStartDelegate: SignInCompletedDelegate {
+    func onSignInError(error: SignInStartError)
+    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+}
+
+@objc
+public protocol SignInCodeStartDelegate: SignInCompletedDelegate {
     func onSignInCodeError(error: SignInCodeStartError)
     func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
@@ -45,7 +48,6 @@ public protocol SignInResendCodeDelegate {
 }
 
 @objc
-public protocol SignInVerifyCodeDelegate {
+public protocol SignInVerifyCodeDelegate: SignInCompletedDelegate {
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeSentState?)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }

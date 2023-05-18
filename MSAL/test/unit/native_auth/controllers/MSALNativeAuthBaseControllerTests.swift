@@ -65,7 +65,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_stopTelemetryEvent_with_no_error() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPassword, context: contextMock)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPasswordStart, context: contextMock)
         let expectation = expectation(description: "Telemetry event test no error")
 
         dispatcher.setTestCallback { event in
@@ -92,7 +92,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_stopTelemetryEvent_withNegativeErrorCode() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPassword, context: contextMock)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPasswordStart, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: -1)
 
         let expectation = expectation(description: "Telemetry event test negative error code")
@@ -120,7 +120,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_stopTelemetryEvent_withPositiveErrorCode() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPassword, context: contextMock)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPasswordStart, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: 12)
 
         let expectation = expectation(description: "Telemetry event test positive error code")
@@ -148,7 +148,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_stopTelemetryEvent_with_OAuthErrorKey() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPassword, context: contextMock)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPasswordStart, context: contextMock)
         let error = NSError(domain: "com.microsoft", code: 12, userInfo: ["MSIDOAuthErrorKey": "oauthErrorCode_mock"])
 
         let expectation = expectation(description: "Telemetry event test OAuthErrorKey")
@@ -177,7 +177,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_completeWithTelemetry_withInvalidParameters_shouldComplete() {
-        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPassword, context: contextMock)
+        let event = sut.makeLocalTelemetryApiEvent(name: "anEvent", telemetryApiId: .telemetryApiIdSignInWithPasswordStart, context: contextMock)
 
         let exp1 = expectation(description: "Telemetry event")
         let exp2 = expectation(description: "Completion event")

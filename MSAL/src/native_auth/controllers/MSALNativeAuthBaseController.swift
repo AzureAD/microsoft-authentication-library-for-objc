@@ -36,6 +36,18 @@ class MSALNativeAuthBaseController {
         self.clientId = clientId
         self.cacheAccessor = cacheAccessor
     }
+    
+    func makeAndStartTelemetryEvent(id: MSALNativeAuthTelemetryApiId, context: MSIDRequestContext) -> MSIDTelemetryAPIEvent? {
+            let event = makeLocalTelemetryApiEvent(
+                name: MSID_TELEMETRY_EVENT_API_EVENT,
+                telemetryApiId: id,
+                context: context
+            )
+
+            startTelemetryEvent(event, context: context)
+
+            return event
+        }
 
     func makeLocalTelemetryApiEvent(
         name: String,

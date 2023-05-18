@@ -41,11 +41,24 @@ public class SignInBaseState: MSALNativeAuthBaseState {
 
 @objcMembers
 public class SignInCodeSentState: SignInBaseState {
+    
+    private let scopes: [String]
+    
+    init(
+        scopes: [String],
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
+        self.scopes = scopes
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+    }
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
-        controller.resendCode(credentialToken: flowToken, context: context, delegate: delegate)
+        Task {
+            await controller.resendCode(credentialToken: flowToken, context: context, delegate: delegate)
+        }
     }
 
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
@@ -56,6 +69,8 @@ public class SignInCodeSentState: SignInBaseState {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
             return
         }
-        controller.submitCode(code, credentialToken: flowToken, context: context, delegate: delegate)
+        Task {
+            await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
+        }
     }
 }

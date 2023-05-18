@@ -170,7 +170,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             password: password,
             correlationId: correlationId,
             scopes: scopes)
-        controller.signIn(params: params, delegate: delegate)
+        Task {
+            await controller.signIn(params: params, delegate: delegate)
+        }
     }
 
     public func signIn(
@@ -188,7 +190,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             username: username,
             correlationId: correlationId,
             scopes: scopes)
-        controller.signIn(params: params, delegate: delegate)
+        Task {
+            await controller.signIn(params: params, delegate: delegate)
+        }
     }
 
     public func resetPassword(

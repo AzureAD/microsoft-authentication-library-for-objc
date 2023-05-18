@@ -212,6 +212,8 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return .invalidPassword
         case .invalidAuthenticationType:
             return .invalidAuthenticationType
+        case .invalidOTP:
+            return .invalidOOBCode
         default:
             return .generalError
         }

@@ -261,7 +261,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPassword.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPasswordStart.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())
@@ -278,7 +278,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Telemetry test fail")
         }
 
-        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPassword.rawValue)
+        let expectedApiId = String(MSALNativeAuthTelemetryApiId.telemetryApiIdSignInWithPasswordStart.rawValue)
         XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
         XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event")
         XCTAssertEqual(telemetryEventDict["correlation_id"] as? String, DEFAULT_TEST_UID.uppercased())

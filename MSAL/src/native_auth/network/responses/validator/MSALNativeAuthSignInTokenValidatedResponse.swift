@@ -39,6 +39,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case userNotFound
     case invalidPassword
     case invalidAuthenticationType
+    case invalidOOBCode
     case unsupportedChallengeType
     case invalidScope
     case authorizationPending
@@ -46,7 +47,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
 
     func convertToSignInStartError() -> SignInStartError {
         switch self {
-        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse, .invalidOOBCode:
             return SignInStartError(type: .generalError)
         case .invalidClient:
             return SignInStartError(type: .generalError, message: "Invalid Client ID")
@@ -60,6 +61,15 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
             return SignInStartError(type: .invalidPassword)
         case .invalidAuthenticationType:
             return SignInStartError(type: .invalidAuthenticationType)
+        }
+    }
+    
+    func convertToVerifyCodeError() -> VerifyCodeError {
+        switch self {
+        case .invalidOOBCode:
+            return VerifyCodeError(type: .invalidCode)
+        default:
+            return VerifyCodeError(type: .generalError, message: self.localizedDescription)
         }
     }
 }
