@@ -95,10 +95,11 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
         }
     }
 
-
     // MARK: private methods
-    
-    private func handleSuccessfulSignInChallengeResult(_ context: MSALNativeAuthRequestContext, response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
+
+    private func handleSuccessfulSignInChallengeResult(
+        _ context: MSALNativeAuthRequestContext,
+        response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
         case .otp:
             MSALLogger.log(
@@ -131,7 +132,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return .error(.redirect)
         }
     }
-    
+
     private func handleFailedSignInChallengeResult(
         _ context: MSALNativeAuthRequestContext,
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {

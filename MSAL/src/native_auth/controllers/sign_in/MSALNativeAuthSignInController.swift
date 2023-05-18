@@ -25,7 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInControlling {
-
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate)
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate)
     func submitCode(_ code: String, credentialToken: String, context: MSIDRequestContext, delegate: SignInVerifyCodeDelegate)
@@ -104,19 +103,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) {
         // call here /initiate
     }
-    
+
     func submitCode(_ code: String, credentialToken: String, context: MSIDRequestContext, delegate: SignInVerifyCodeDelegate) {
-        
+
     }
-    
+
     func resendCode(credentialToken: String, context: MSIDRequestContext, delegate: SignInResendCodeDelegate) {
-        
+
     }
 
     // MARK: - Private
 
     private func handleSignInTokenResult(
-    _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
+        _ aadTokenResponse: Result<MSIDAADTokenResponse, Error>,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -163,7 +162,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     }
 
     private func handleSignInChallengeResponse(
-    _ challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error>,
+        _ challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error>,
         context: MSALNativeAuthRequestContext,
         config: MSIDConfiguration,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -225,7 +224,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         joinedScopes.addObjects(from: defaultOIDCScopes)
         return joinedScopes.array as? [String] ?? []
     }
-    
+
     private func cacheTokenResponse(_ tokenResponse: MSIDTokenResponse, context: MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration) {
         do {
             try cacheAccessor?.saveTokensAndAccount(tokenResult: tokenResponse, configuration: msidConfiguration, context: context)

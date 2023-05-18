@@ -43,18 +43,19 @@ public class SignInBaseState: MSALNativeAuthBaseState {
 public class SignInCodeSentState: SignInBaseState {
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
-        controller.resendCode(credentialToken: flowToken, context: MSALNativeAuthRequestContext(correlationId: correlationId), delegate: delegate)
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
+        controller.resendCode(credentialToken: flowToken, context: context, delegate: delegate)
     }
 
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
             delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
             return
         }
-        controller.submitCode(
-            code,
-            credentialToken: flowToken,
-            context: MSALNativeAuthRequestContext(correlationId: correlationId),
-            delegate: delegate)
+        controller.submitCode(code, credentialToken: flowToken, context: context, delegate: delegate)
     }
 }
