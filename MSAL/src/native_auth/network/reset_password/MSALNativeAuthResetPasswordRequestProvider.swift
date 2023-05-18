@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRequestResetPasswordProviding {
+protocol MSALNativeAuthResetPasswordRequestProviding {
     func start(
         parameters: MSALNativeAuthResetPasswordStartRequestParameters,
         context: MSIDRequestContext
@@ -51,7 +51,7 @@ protocol MSALNativeAuthRequestResetPasswordProviding {
     ) throws -> MSIDHttpRequest
 }
 
-final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthRequestResetPasswordProviding {
+final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPasswordRequestProviding {
 
     // MARK: - Variables
 
