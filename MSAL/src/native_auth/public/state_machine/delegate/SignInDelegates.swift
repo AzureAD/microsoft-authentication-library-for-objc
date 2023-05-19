@@ -36,9 +36,10 @@ public protocol SignInStartDelegate: SignInCompletedDelegate {
 }
 
 @objc
-public protocol SignInCodeStartDelegate: SignInCompletedDelegate {
+public protocol SignInCodeStartDelegate {
     func onSignInCodeError(error: SignInCodeStartError)
     func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    //TODO: add here passwordRequired
 }
 
 @objc

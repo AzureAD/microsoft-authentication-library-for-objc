@@ -42,7 +42,7 @@ public class SignUpCodeSentState: SignUpBaseState {
 
         guard let controller = controller else {
             MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onSignUpResendCodeError(error: .init(type: .generalError), newState: nil)
+            delegate.onSignUpResendCodeError(error: MSALNativeAuthGenericError(), newState: nil)
             return
         }
 

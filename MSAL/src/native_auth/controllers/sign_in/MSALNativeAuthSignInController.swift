@@ -75,33 +75,50 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     }
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate) async {
-        let context = MSALNativeAuthRequestContext(correlationId: params.correlationId)
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn with email and password started")
+        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn with email and password started")
         let scopes = joinScopes(params.scopes)
-        let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithPasswordStart, context: context)
+        let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithPasswordStart, context: params.context)
         guard let request = createTokenRequest(
             username: params.username,
             password: params.password,
             scopes: scopes,
             grantType: .password,
-            context: context
+            context: params.context
         ) else {
-            stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
+            stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
             delegate.onSignInError(error: SignInStartError(type: .generalError))
             return
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
-        let response = await performAndValidateTokenRequest(request, telemetryEvent: telemetryEvent, config: config, context: context)
+        let response = await performAndValidateTokenRequest(request, telemetryEvent: telemetryEvent, config: config, context: params.context)
         await handleSignInTokenROPCResult(
             response,
             scopes: scopes,
-            context: context,
+            context: params.context,
             telemetryEvent: telemetryEvent,
             delegate: delegate)
     }
 
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) {
-        // call here /initiate
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) async {
+        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn with email and code started")
+        let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithCodeStart, context: params.context)
+        guard let request = createInitiateRequest(username: params.username, context: params.context) else {
+            stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
+            delegate.onSignInCodeError(error: SignInCodeStartError(type: .generalError))
+            return
+        }
+        let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: params.context, event: telemetryEvent)
+        let validatedResponse = responseValidator.validateSignInInitiateResponse(context: params.context, result: initiateResponse)
+        switch validatedResponse {
+        case .success(credentialToken: let credentialToken):
+            print(credentialToken)
+            //call here /challenge API
+        case .error(let error):
+            MSALLogger.log(level: .error, context: params.context, format: "SignIn with code: an error occurred after calling /initiate API")
+            DispatchQueue.main.async {
+                delegate.onSignInCodeError(error: error.convertToSignInCodeStartError())
+            }
+        }
     }
 
     func submitCode(
@@ -303,6 +320,16 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             return try requestProvider.token(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
+            return nil
+        }
+    }
+    
+    private func createInitiateRequest(username: String, context: MSIDRequestContext) -> MSIDHttpRequest? {
+        let params = MSALNativeAuthSignInInitiateRequestParameters(config: factory.config, context: context, username: username)
+        do {
+            return try requestProvider.inititate(parameters: params, context: context)
+        } catch {
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Initiate Request: \(error)")
             return nil
         }
     }

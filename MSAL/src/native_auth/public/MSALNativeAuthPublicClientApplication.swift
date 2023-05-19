@@ -168,7 +168,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let params = MSALNativeAuthSignInWithPasswordParameters(
             username: username,
             password: password,
-            correlationId: correlationId,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
             scopes: scopes)
         Task {
             await controller.signIn(params: params, delegate: delegate)
@@ -188,7 +188,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeSignInController()
         let params = MSALNativeAuthSignInWithCodeParameters(
             username: username,
-            correlationId: correlationId,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
             scopes: scopes)
         Task {
             await controller.signIn(params: params, delegate: delegate)

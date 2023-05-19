@@ -38,7 +38,6 @@ public class SignInCodeStartError: MSALNativeAuthGenericError {
 public enum SignInCodeStartErrorType: Int {
     case browserRequired
     case userNotFound
-    case invalidAuthenticationType
     case invalidUsername
     case generalError
 }

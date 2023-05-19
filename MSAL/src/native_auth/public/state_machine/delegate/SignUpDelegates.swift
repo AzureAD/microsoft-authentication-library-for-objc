@@ -53,7 +53,7 @@ public protocol SignUpVerifyCodeDelegate {
 
 @objc
 public protocol SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeSentState?)
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState: SignUpCodeSentState?)
     func onSignUpResendCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
 }
 

@@ -24,21 +24,29 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInInitiateResponse: Decodable {
+enum MSALNativeAuthSignInInitiateValidatedResponse {
+    case success(credentialToken: String)
+    case error(MSALNativeAuthSignInInitiateValidatedErrorType)
+}
 
-    // MARK: - Variables
-    let credentialToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
+enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
+    case redirect
+    case invalidClient
+    case invalidRequest
+    case invalidServerResponse
+    case userNotFound
+    case unsupportedChallengeType
 
-    enum CodingKeys: String, CodingKey {
-        case credentialToken
-        case challengeType
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.credentialToken = try container.decodeIfPresent(String.self, forKey: .credentialToken)
-        self.challengeType = try container.decodeIfPresent(
-            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
+    func convertToSignInCodeStartError() -> SignInCodeStartError {
+        switch self {
+        case .redirect:
+            return .init(type: .browserRequired)
+        case .invalidClient:
+            return .init(type: .generalError, message: "Invalid Client ID")
+        case .userNotFound:
+            return .init(type: .userNotFound)
+        case .unsupportedChallengeType, .invalidRequest, .invalidServerResponse:
+            return .init(type: .generalError)
+        }
     }
 }
