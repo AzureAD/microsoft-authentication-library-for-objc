@@ -39,19 +39,33 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case invalidServerResponse
     case userNotFound
     case unsupportedChallengeType
-
-    func convertToSignInStartError() -> SignInStartError {
+    
+    func convertToSignInCodeStartError() -> SignInCodeStartError {
         switch self {
         case .redirect:
-            return SignInStartError(type: .browserRequired)
+            return .init(type: .browserRequired)
         case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
-            return SignInStartError(type: .generalError)
+            return .init(type: .generalError)
         case .invalidClient:
-           return SignInStartError(type: .generalError, message: "Invalid Client ID")
+            return .init(type: .generalError, message: "Invalid Client ID")
         case .userNotFound:
-            return SignInStartError(type: .userNotFound)
+            return .init(type: .userNotFound)
         case .unsupportedChallengeType:
-            return SignInStartError(type: .generalError, message: "Unsupported challenge type")
+            return .init(type: .generalError, message: "Unsupported challenge type")
+        }
+    }
+    
+    func convertToSignInStartError() -> SignInStartError {
+        let codeSignInError = convertToSignInCodeStartError()
+        switch codeSignInError.type {
+        case .browserRequired:
+            return .init(type: .browserRequired, message: codeSignInError.errorDescription)
+        case .userNotFound:
+            return .init(type: .userNotFound, message: codeSignInError.errorDescription)
+        case .invalidUsername:
+            return .init(type: .invalidUsername, message: codeSignInError.errorDescription)
+        case .generalError:
+            return .init(type: .generalError, message: codeSignInError.errorDescription)
         }
     }
 }
