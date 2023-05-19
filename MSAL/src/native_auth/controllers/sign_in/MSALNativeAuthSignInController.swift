@@ -27,8 +27,13 @@
 protocol MSALNativeAuthSignInControlling {
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInStartDelegate) async
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) async
-    func submitCode(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInVerifyCodeDelegate) async
-    func resendCode(credentialToken: String, context: MSIDRequestContext, delegate: SignInResendCodeDelegate) async
+    func submitCode(
+        _ code: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        delegate: SignInVerifyCodeDelegate) async
+    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
 }
 
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
@@ -109,14 +114,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         guard let request =
                 createTokenRequest(scopes: scopes, credentialToken: credentialToken, oobCode: code, grantType: .oobCode, context: context ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
-            delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
+            delegate.onSignInVerifyCodeError(
+                error: VerifyCodeError(type: .generalError),
+                newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
             return
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, telemetryEvent: telemetryEvent, config: config, context: context)
         switch response {
         case .success(let validatedTokenResult, let tokenResponse):
-            handleSuccessfulTokenResult(tokenResult: validatedTokenResult, tokenResponse: tokenResponse, telemetryEvent: telemetryEvent, context: context, config: config, delegate: delegate)
+            handleSuccessfulTokenResult(
+                tokenResult: validatedTokenResult,
+                tokenResponse: tokenResponse,
+                telemetryEvent: telemetryEvent, context: context, config: config, delegate: delegate)
         case .credentialRequired:
             MSALLogger.log(
                 level: .error,
@@ -130,12 +140,46 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 context: context,
                 format: "SignIn with email and password completed with errorType: \(errorType)")
             stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-            delegate.onSignInVerifyCodeError(error: errorType.convertToVerifyCodeError(), newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
+            delegate.onSignInVerifyCodeError(
+                error: errorType.convertToVerifyCodeError(),
+                newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
         }
     }
 
-    func resendCode(credentialToken: String, context: MSIDRequestContext, delegate: SignInResendCodeDelegate) {
-
+    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInResendCode, context: context)
+        guard let challengeRequest = createChallengeRequest(credentialToken: credentialToken, context: context) else {
+            MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: Cannot create Challenge request object")
+            let error = MSALNativeAuthGenericError()
+            stopTelemetryEvent(event, context: context, error: error)
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeError(error: error, newState: nil)
+            }
+            return
+        }
+        let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context, event: event)
+        let result = responseValidator.validateSignInChallengeResponse(context: context, result: challengeResponse)
+        var error: MSALNativeAuthGenericError? = nil
+        switch result {
+        case .passwordRequired:
+            error = MSALNativeAuthGenericError()
+            MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received unexpected password required API result")
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeError(error: MSALNativeAuthGenericError(), newState: nil)
+            }
+        case .error(let challengeError):
+            error = MSALNativeAuthGenericError()
+            MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received challenge error response: \(challengeError)")
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeError(error: MSALNativeAuthGenericError(), newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
+            }
+        case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
+            let state = SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken)
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeSent(newState: state, displayName: sentTo, codeLength: codeLength)
+            }
+        }
+        stopTelemetryEvent(event, context: context, error: error)
     }
 
     // MARK: - Private
@@ -169,7 +213,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 handleSignInChallengeResponse(
                     challengeResponse,
                     context: context,
-                    config: config,
                     telemetryEvent: telemetryEvent,
                     scopes: scopes,
                     delegate: delegate)
@@ -204,14 +247,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     private func handleSignInChallengeResponse(
         _ challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error>,
         context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         scopes: [String],
         delegate: SignInStartDelegate) {
-            let result = responseValidator.validateSignInChallengeResponse(context: context, msidConfiguration: config, result: challengeResponse)
+            let result = responseValidator.validateSignInChallengeResponse(context: context, result: challengeResponse)
             switch result {
             case .passwordRequired(let credentialToken):
                 print("merge Silviu's PR to and handle PasswordRequired state \(credentialToken)")
+                //TODO: can't happen here
             case .error(let challengeError):
                 DispatchQueue.main.async {
                     delegate.onSignInError(error: challengeError.convertToSignInStartError())

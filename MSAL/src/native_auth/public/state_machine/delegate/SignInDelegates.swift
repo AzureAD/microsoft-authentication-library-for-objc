@@ -43,7 +43,7 @@ public protocol SignInCodeStartDelegate: SignInCompletedDelegate {
 
 @objc
 public protocol SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeSentState)
+    func onSignInResendCodeError(error: MSALNativeAuthGenericError, newState: SignInCodeSentState?)
     func onSignInResendCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
 }
 

@@ -41,9 +41,9 @@ public class SignInBaseState: MSALNativeAuthBaseState {
 
 @objcMembers
 public class SignInCodeSentState: SignInBaseState {
-    
+
     private let scopes: [String]
-    
+
     init(
         scopes: [String],
         controller: MSALNativeAuthSignInControlling,
@@ -57,7 +57,7 @@ public class SignInCodeSentState: SignInBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
         Task {
-            await controller.resendCode(credentialToken: flowToken, context: context, delegate: delegate)
+            await controller.resendCode(credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
         }
     }
 

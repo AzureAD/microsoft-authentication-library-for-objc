@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class MSALNativeAuthBaseError: NSObject, LocalizedError {
+public class MSALNativeAuthGenericError: NSObject, LocalizedError {
     private let message: String?
 
     init(message: String? = nil) {

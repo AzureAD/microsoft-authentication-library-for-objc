@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class SignInStartError: MSALNativeAuthBaseError {
+public class SignInStartError: MSALNativeAuthGenericError {
     @objc public let type: SignInStartErrorType
 
     init(type: SignInStartErrorType, message: String? = nil) {

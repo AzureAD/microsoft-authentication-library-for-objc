@@ -33,7 +33,6 @@ protocol MSALNativeAuthSignInResponseValidating {
     
     func validateSignInChallengeResponse(
         context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
 }
@@ -73,10 +72,9 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return handleFailedSignInTokenResult(context, signInTokenResponseError)
         }
     }
-    
+
     func validateSignInChallengeResponse(
         context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch result {
