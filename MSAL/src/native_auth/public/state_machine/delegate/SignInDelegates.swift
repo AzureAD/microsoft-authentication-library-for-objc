@@ -45,7 +45,7 @@ public protocol SignInCodeStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
-    //TODO: add here passwordRequired
+    @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
 
 @objc
