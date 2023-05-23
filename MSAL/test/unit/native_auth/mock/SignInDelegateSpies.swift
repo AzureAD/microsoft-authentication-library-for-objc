@@ -25,19 +25,18 @@
 @testable import MSAL
 import XCTest
 
-open class SignInStartDelegateSpy: SignInStartDelegate {
-    
+open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     private let expectation: XCTestExpectation
-    var expectedError: SignInStartError?
+    var expectedError: SignInPasswordStartError?
     var expectedUserAccount: MSALNativeAuthUserAccount?
     
-    init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
         self.expectedUserAccount = expectedUserAccount
     }
     
-    public func onSignInError(error: MSAL.SignInStartError) {
+    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
             XCTAssertEqual(error.type, expectedError.type)
             XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
@@ -48,7 +47,7 @@ open class SignInStartDelegateSpy: SignInStartDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+    public func onSignInCodeRequired(newState: MSAL.SignInCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
         XCTFail("This method should not be called")
         expectation.fulfill()
     }
@@ -66,12 +65,37 @@ open class SignInStartDelegateSpy: SignInStartDelegate {
     }
 }
 
-open class SignInStartDelegateFailureSpy: SignInStartDelegate {
-    public func onSignInError(error: MSAL.SignInStartError) {
+class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
+
+    private(set) var error: PasswordRequiredError?
+    private(set) var newPasswordRequiredState: SignInPasswordRequiredState?
+    private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
+    private(set) var signInCompletedCalled = false
+
+    func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
+        self.error = error
+        newPasswordRequiredState = newState
+    }
+
+    func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                              sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int) {
+        newSignInCodeRequiredState = newState
+    }
+
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        signInCompletedCalled = true
+    }
+}
+
+open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
+
+    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
         XCTFail("This method should not be called")
     }
     
-    public func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+    public func onSignInCodeRequired(newState: MSAL.SignInCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
         XCTFail("This method should not be called")
     }
     

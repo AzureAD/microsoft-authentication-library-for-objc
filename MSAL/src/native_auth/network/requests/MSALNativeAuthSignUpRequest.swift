@@ -28,14 +28,14 @@ final class MSALNativeAuthSignUpRequest: MSIDHttpRequest {
 
     let telemetryApiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdSignUp
 
-    init(params: MSALNativeAuthSignUpRequestParameters) throws {
+    init(params: MSALNativeAuthSignUpRequestParameters, config: MSALNativeAuthConfiguration) throws {
         super.init()
 
         self.context = params.context
 
-        self.parameters = makeBodyRequestParameters(with: params)
+        self.parameters = makeBodyRequestParameters(with: params, config: config)
 
-        let url = try params.makeEndpointUrl()
+        let url = try params.makeEndpointUrl(config: config)
         self.urlRequest = URLRequest(url: url)
 
         self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
@@ -52,11 +52,14 @@ final class MSALNativeAuthSignUpRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignUpRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthSignUpRequestParameters,
+        config: MSALNativeAuthConfiguration
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.config.clientId,
+            Key.clientId.rawValue: config.clientId,
             Key.grantType.rawValue: params.grantType.rawValue,
             Key.email.rawValue: params.email,
             Key.password.rawValue: params.password,

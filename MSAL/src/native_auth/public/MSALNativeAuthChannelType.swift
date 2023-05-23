@@ -25,21 +25,7 @@
 import Foundation
 
 @objc
-public class SignInStartError: MSALNativeAuthBaseError {
-    @objc public let type: SignInStartErrorType
-
-    init(type: SignInStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
-}
-
-@objc
-public enum SignInStartErrorType: Int {
-    case browserRequired
-    case userNotFound
-    case invalidAuthenticationType
-    case invalidPassword
-    case invalidUsername
-    case generalError
+public enum MSALNativeAuthChannelType: Int {
+    case email
+    case phone
 }

@@ -25,30 +25,56 @@
 import Foundation
 
 @objcMembers
-public class SignInCodeSentState: MSALNativeAuthBaseState {
+public class SignInCodeRequiredState: MSALNativeAuthBaseState {
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         if correlationId != nil {
-            delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
+            }
         } else {
-            delegate.onSignInResendCodeSent(newState: self, displayName: "email@contoso.com", codeLength: 4)
+            DispatchQueue.main.async {
+                delegate.onSignInResendCodeCodeRequired(newState: self,
+                                                        sentTo: "email@contoso.com",
+                                                        channelTargetType: .email,
+                                                        codeLength: 4)
+            }
         }
     }
 
-    public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
-        // swiftlint:disable line_length
-        switch code {
-        case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-        case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-        case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
-        default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
-            username: "email@contoso.com",
-            accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9",
-            rawIdToken: nil,
-            scopes: [],
-            expiresOn: Date()
-        ))
+    public func submitCode(code: String, delegate: SignInCodeRequiredDelegate, correlationId: UUID? = nil) {
+        DispatchQueue.main.async {
+            switch code {
+            case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
+            case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
+            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
+                username: "email@contoso.com",
+                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
+                rawIdToken: nil,
+                scopes: [],
+                expiresOn: Date()
+            ))
+            }
         }
-        // swiftlint:enable line_length
+    }
+}
+
+@objcMembers
+public class SignInPasswordRequiredState: MSALNativeAuthBaseState {
+
+    public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
+        DispatchQueue.main.async {
+            switch password {
+            case "incorrect": delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
+                username: "email@contoso.com",
+                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
+                rawIdToken: nil,
+                scopes: [],
+                expiresOn: Date()
+            ))
+            }
+        }
     }
 }

@@ -26,30 +26,30 @@
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     private(set) var error: ResendCodeError?
-    private(set) var newState: ResetPasswordCodeSentState?
-    private(set) var displayName: String?
+    private(set) var newState: ResetPasswordCodeRequiredState?
+    private(set) var sentTo: String?
     private(set) var codeLength: Int?
 
-    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState?) {
+    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?) {
         self.error = error
         self.newState = newState
     }
 
-    func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
+    func onResetPasswordResendCodeRequired(newState: MSAL.ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
         self.newState = newState
-        self.displayName = displayName
+        self.sentTo = sentTo
         self.codeLength = codeLength
     }
 }
 
 class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
     private(set) var error: VerifyCodeError?
-    private(set) var newCodeSentState: ResetPasswordCodeSentState?
+    private(set) var newCodeRequiredState: ResetPasswordCodeRequiredState?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
 
-    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeSentState?) {
+    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?) {
         self.error = error
-        newCodeSentState = newState
+        newCodeRequiredState = newState
     }
 
     func onPasswordRequired(newState: ResetPasswordRequiredState) {

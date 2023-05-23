@@ -16,27 +16,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-struct MSALNativeAuthResetPasswordSubmitRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .resetPasswordSubmit
-    let context: MSIDRequestContext
-    let passwordSubmitToken: String
-    let newPassword: String
+@objc
+public class SignInPasswordStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignInPasswordStartErrorType
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
-        typealias Key = MSALNativeAuthRequestParametersKey
-
-        return [
-            Key.clientId.rawValue: config.clientId,
-            Key.passwordSubmitToken.rawValue: passwordSubmitToken,
-            Key.newPassword.rawValue: newPassword
-        ]
+    init(type: SignInPasswordStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
     }
+}
+
+@objc
+public enum SignInPasswordStartErrorType: Int {
+    case browserRequired
+    case userNotFound
+    case invalidPassword
+    case invalidUsername
+    case generalError
 }

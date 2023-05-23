@@ -25,27 +25,41 @@
 import Foundation
 
 @objc
-public protocol SignInStartDelegate {
-    func onSignInError(error: SignInStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+public protocol SignInPasswordStartDelegate {
+    func onSignInPasswordError(error: SignInPasswordStartError)
+    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                                             sentTo: String,
+                                             channelTargetType: MSALNativeAuthChannelType,
+                                             codeLength: Int)
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol SignInCodeStartDelegate {
     func onSignInCodeError(error: SignInCodeStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                              sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int)
+}
+
+@objc
+public protocol SignInPasswordRequiredDelegate {
+    func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeSentState)
-    func onSignInResendCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState)
+    func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState,
+                                        sentTo: String,
+                                        channelTargetType: MSALNativeAuthChannelType,
+                                        codeLength: Int)
 }
 
 @objc
-public protocol SignInVerifyCodeDelegate {
-    func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeSentState?)
+public protocol SignInCodeRequiredDelegate {
+    func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }

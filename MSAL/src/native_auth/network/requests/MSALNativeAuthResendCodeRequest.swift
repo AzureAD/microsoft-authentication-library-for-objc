@@ -26,14 +26,14 @@
 
 final class MSALNativeAuthResendCodeRequest: MSIDHttpRequest {
 
-    init(params: MSALNativeAuthResendCodeRequestParameters) throws {
+    init(params: MSALNativeAuthResendCodeRequestParameters, config: MSALNativeAuthConfiguration) throws {
         super.init()
 
         self.context = params.context
 
-        self.parameters = makeBodyRequestParameters(with: params)
+        self.parameters = makeBodyRequestParameters(with: params, config: config)
 
-        let url = try params.makeEndpointUrl()
+        let url = try params.makeEndpointUrl(config: config)
         self.urlRequest = URLRequest(url: url)
 
         self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
@@ -51,7 +51,8 @@ final class MSALNativeAuthResendCodeRequest: MSIDHttpRequest {
     }
 
     private func makeBodyRequestParameters(
-        with params: MSALNativeAuthResendCodeRequestParameters
+        with params: MSALNativeAuthResendCodeRequestParameters,
+        config: MSALNativeAuthConfiguration
     ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 

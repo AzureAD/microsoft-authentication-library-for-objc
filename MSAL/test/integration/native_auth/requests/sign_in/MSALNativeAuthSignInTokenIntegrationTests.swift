@@ -33,13 +33,11 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(config: config,
-                                                       requestConfigurator: MSALNativeAuthRequestConfigurator())
+        provider = MSALNativeAuthSignInRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: config))
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         sut = try provider.token(
             parameters: .init(
-                config: config,
                 context: context,
                 username: "test@contoso.com",
                 credentialToken: nil,
@@ -79,8 +77,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(config: config,
-                                                                    context: context,
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(context: context,
                                                                     username: "test@contoso.com",
                                                                     credentialToken: nil,
                                                                     signInSLT: nil,

@@ -39,24 +39,22 @@ final class MSALNativeAuthResetPasswordStartRequestParametersTest: XCTestCase {
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.redirect]))
         let parameters = MSALNativeAuthResetPasswordStartRequestParameters(
-            config: config,
             context: MSALNativeAuthRequestContextMock(),
             username: "username"
         )
         var resultUrl: URL? = nil
-        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/resetpassword/start")
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .oob, .redirect]))
         let params = MSALNativeAuthResetPasswordStartRequestParameters(
-            config: config,
             context: MSALNativeAuthRequestContextMock(),
             username: DEFAULT_TEST_ID_TOKEN_USERNAME
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,

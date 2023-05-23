@@ -53,6 +53,11 @@ enum MSALNativeAuthRequestConfiguratorType {
 }
 
 class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
+    let config: MSALNativeAuthConfiguration
+
+    init(config: MSALNativeAuthConfiguration) {
+        self.config = config
+    }
 
     func configure(configuratorType: MSALNativeAuthRequestConfiguratorType,
                    request: MSIDHttpRequest,
@@ -226,10 +231,10 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
     private func configureAllRequests(request: MSIDHttpRequest,
                                       parameters: MSALNativeAuthRequestable) throws {
         request.context = parameters.context
-        request.parameters = parameters.makeRequestBody()
+        request.parameters = parameters.makeRequestBody(config: config)
 
         do {
-            let endpointUrl = try parameters.makeEndpointUrl()
+            let endpointUrl = try parameters.makeEndpointUrl(config: config)
             request.urlRequest = URLRequest(url: endpointUrl)
             request.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
         } catch {

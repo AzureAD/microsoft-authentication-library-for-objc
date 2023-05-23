@@ -31,61 +31,70 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordStartDelegate
     ) {
-        switch username {
-        case "redirect@contoso.com":
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .browserRequired))
-        case "nopassword@contoso.com":
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userDoesNotHavePassword))
-        case "notfound@contoso.com":
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
-        case "generalerror@contoso.com":
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .generalError))
-        default:
-            delegate.onResetPasswordCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
-                                             displayName: username,
-                                             codeLength: 4)
+        DispatchQueue.main.async {
+            switch username {
+            case "redirect@contoso.com":
+                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .browserRequired))
+            case "nopassword@contoso.com":
+                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userDoesNotHavePassword))
+            case "notfound@contoso.com":
+                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .userNotFound))
+            case "generalerror@contoso.com":
+                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .generalError))
+            default:
+                delegate.onResetPasswordCodeRequired(newState: .init(controller: self, flowToken: "password_reset_token"),
+                                                     sentTo: username,
+                                                     channelTargetType: .email,
+                                                     codeLength: 4)
+            }
         }
     }
 
-    // 2. Called from ResetPasswordCodeSentState
+    // 2. Called from ResetPasswordCodeRequiredState
     func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate) {
-        delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
-                                               displayName: "email@contoso.com",
-                                               codeLength: 4)
+        DispatchQueue.main.async {
+            delegate.onResetPasswordResendCodeRequired(newState: .init(controller: self, flowToken: "password_reset_token"),
+                                                       sentTo: "email@contoso.com",
+                                                       channelTargetType: .email,
+                                                       codeLength: 4)
+        }
     }
 
-    // 3. Called from ResetPasswordCodeSentState
+    // 3. Called from ResetPasswordCodeRequiredState
     func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate) {
-        switch code {
-        case "0000":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "2222":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .generalError),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "3333":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .browserRequired),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        default:
-            delegate.onPasswordRequired(newState: ResetPasswordRequiredState(controller: self, flowToken: "password_reset_token"))
+        DispatchQueue.main.async {
+            switch code {
+            case "0000":
+                delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode),
+                                                        newState: .init(controller: self, flowToken: "password_reset_token"))
+            case "2222":
+                delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .generalError),
+                                                        newState: .init(controller: self, flowToken: "password_reset_token"))
+            case "3333":
+                delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .browserRequired),
+                                                        newState: .init(controller: self, flowToken: "password_reset_token"))
+            default:
+                delegate.onPasswordRequired(newState: ResetPasswordRequiredState(controller: self, flowToken: "password_reset_token"))
+            }
         }
     }
 
     // 4. Called from ResetPasswordRequiredState
     func submitPassword(password: String, context: MSIDRequestContext, delegate: ResetPasswordRequiredDelegate) {
-        switch password {
-        case "redirect":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .browserRequired),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "generalerror":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .generalError),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "invalid":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        default:
-            delegate.onResetPasswordCompleted()
+        DispatchQueue.main.async {
+            switch password {
+            case "redirect":
+                delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .browserRequired),
+                                                      newState: .init(controller: self, flowToken: "password_reset_token"))
+            case "generalerror":
+                delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .generalError),
+                                                      newState: .init(controller: self, flowToken: "password_reset_token"))
+            case "invalid":
+                delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword),
+                                                      newState: .init(controller: self, flowToken: "password_reset_token"))
+            default:
+                delegate.onResetPasswordCompleted()
+            }
         }
-
     }
 }
