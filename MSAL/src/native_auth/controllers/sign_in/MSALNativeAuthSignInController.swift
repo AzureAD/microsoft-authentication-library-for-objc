@@ -36,7 +36,7 @@ protocol MSALNativeAuthSignInControlling {
         delegate: SignInVerifyCodeDelegate) async
     func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
 }
-
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
 
     // MARK: - Variables
@@ -83,6 +83,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             password: params.password,
             scopes: scopes,
             grantType: .password,
+            isROPCCall: true,
             context: params.context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
@@ -322,6 +323,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         credentialToken: String? = nil,
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
+        isROPCCall: Bool = false,
         context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInTokenRequestParameters(
@@ -332,7 +334,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 grantType: .password,
                 scope: scopes.joined(separator: ","),
                 password: password,
-                oobCode: nil)
+                oobCode: nil,
+                isROPCCall: isROPCCall)
             return try requestProvider.token(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
