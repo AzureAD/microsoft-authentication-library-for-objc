@@ -36,7 +36,6 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthSignInRequestParameters {
         .init(
-            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .signIn,
             context: context,
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -55,7 +54,7 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthSignInRequest(params: params)
+        let sut = try MSALNativeAuthSignInRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         XCTAssertEqual(sut.context!.correlationId(), context.correlationId())
         checkBodyParams(sut.parameters)
@@ -69,7 +68,7 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthSignInRequest(params: params)
+        let sut = try MSALNativeAuthSignInRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
@@ -89,13 +88,12 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
         )!
 
         let sut = try MSALNativeAuthSignInRequest(params: .init(
-            config: MSALNativeAuthConfigStubs.configuration,
             email: params.email,
             password: nil,
             scope: params.scope,
             context: params.context,
             grantType: .otp
-        ))
+        ), config: MSALNativeAuthConfigStubs.configuration)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
@@ -103,7 +101,7 @@ final class MSALNativeAuthSignInRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "client_id": params.config.clientId,
+            "client_id": MSALNativeAuthConfigStubs.configuration.clientId,
             "grant_type": "passwordless_otp",
             "email": params.email,
             "scope": "<scope-1>"

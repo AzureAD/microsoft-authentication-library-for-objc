@@ -31,7 +31,7 @@ protocol MSALNativeAuthSignUpControlling: AnyObject {
         password: String,
         attributes: [String: Any]?,
         context: MSIDRequestContext,
-        delegate: SignUpStartDelegate
+        delegate: SignUpPasswordStartDelegate
     )
 
     func signUpStart(

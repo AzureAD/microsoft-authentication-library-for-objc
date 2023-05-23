@@ -36,7 +36,6 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdVerifyCode = 75007
     case telemetryApiIdSignOut = 75008
     case telemetryResetPassword = 75009
-    
     case telemetryApiIdSignInWithPasswordStart = 74001
     case telemetryApiIdSignInWithCodeStart = 74002
     case telemetryApiIdSignInSubmitCode = 74003

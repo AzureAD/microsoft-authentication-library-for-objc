@@ -37,14 +37,12 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         provider = MSALNativeAuthResetPasswordRequestProvider(
-            config: config,
-            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
         sut = try provider.pollCompletion(
-            parameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters(config: config,
-                                                                                   context: context,
+            parameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters(context: context,
                                                                                    passwordResetToken: "<password-reset-token"),
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )

@@ -32,7 +32,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         password: String,
         attributes: [String: Any]?,
         context: MSIDRequestContext,
-        delegate: SignUpStartDelegate
+        delegate: SignUpPasswordStartDelegate
     ) {
 
     }
@@ -47,12 +47,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     }
 
-    // 2a. Called from SignUpCodeSentState
+    // 2a. Called from SignUpCodeRequiredState
     func resendCode(context: MSIDRequestContext, delegate: SignUpResendCodeDelegate) {
 
     }
 
-    // 2b. Called from SignUpCodeSentState
+    // 2b. Called from SignUpCodeRequiredState
     func submitCode(_ code: String, context: MSIDRequestContext, delegate: SignUpVerifyCodeDelegate) {
 
     }

@@ -27,19 +27,25 @@ import Foundation
 @objc
 public protocol ResetPasswordStartDelegate {
     func onResetPasswordError(error: ResetPasswordStartError)
-    func onResetPasswordCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+    func onResetPasswordCodeRequired(newState: ResetPasswordCodeRequiredState,
+                                     sentTo: String,
+                                     channelTargetType: MSALNativeAuthChannelType,
+                                     codeLength: Int)
 }
 
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
-    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeSentState?)
+    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
     func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
 public protocol ResetPasswordResendCodeDelegate {
-    func onResetPasswordResendCodeError(error: MSALNativeAuthGenericError, newState: ResetPasswordCodeSentState?)
-    func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int)
+    func onResetPasswordResendCodeError(error: MSALNativeAuthGenericError, newState: ResetPasswordCodeRequiredState?)
+    func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState,
+                                           sentTo: String,
+                                           channelTargetType: MSALNativeAuthChannelType,
+                                           codeLength: Int)
 }
 
 @objc

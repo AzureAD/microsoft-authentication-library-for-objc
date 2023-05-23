@@ -36,8 +36,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try super.setUpWithError()
 
         provider = MSALNativeAuthSignUpRequestProvider(
-            config: config,
-            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
@@ -184,8 +183,8 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_validationFailed() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .validationFailed,
-            expectedError: Error(error: .validationFailed)
+            response: .attributeValidationFailed,
+            expectedError: Error(error: .attributeValidationFailed)
         )
 
         XCTAssertNotNil(response.signUpToken)

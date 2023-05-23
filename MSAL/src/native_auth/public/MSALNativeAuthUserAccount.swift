@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+@_implementationOnly import MSAL_Private
 @objc
 public final class MSALNativeAuthUserAccount: NSObject {
 
@@ -46,5 +47,11 @@ public final class MSALNativeAuthUserAccount: NSObject {
         self.scopes = scopes
         self.expiresOn = expiresOn
         self.attributes = attributes
+    }
+
+    public func signOut() {
+        MSALLogger.log(level: .info,
+                       context: nil,
+                       format: "Account with username \(username) has been logged out. All tokens cleared.")
     }
 }

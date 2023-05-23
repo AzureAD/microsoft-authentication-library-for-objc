@@ -33,9 +33,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
     )
 
     private var params: MSALNativeAuthSignUpRequestParameters {
-        .init(
-            config: MSALNativeAuthConfigStubs.configuration,
-            endpoint: .signUp,
+        .init(endpoint: .signUp,
             context: context,
             email: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "strong-password",
@@ -54,7 +52,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthSignUpRequest(params: params)
+        let sut = try MSALNativeAuthSignUpRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         XCTAssertEqual(sut.context!.correlationId(), context.correlationId())
         XCTAssertEqual(sut.telemetryApiId, .telemetryApiIdSignUp)
@@ -69,7 +67,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthSignUpRequest(params: params)
+        let sut = try MSALNativeAuthSignUpRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
@@ -89,14 +87,13 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         )!
 
         let sut = try MSALNativeAuthSignUpRequest(params: .init(
-            config: MSALNativeAuthConfigStubs.configuration,
             email: params.email,
             password: nil,
             attributes: "<attribute1: value1>",
             scope: params.scope,
             context: params.context,
             grantType: .otp
-        ))
+        ), config: MSALNativeAuthConfigStubs.configuration)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),
@@ -104,7 +101,7 @@ final class MSALNativeAuthSignUpRequestTests: XCTestCase {
         )
 
         let expectedBodyParams = [
-            "client_id": params.config.clientId,
+            "client_id": MSALNativeAuthConfigStubs.configuration.clientId,
             "grant_type": "passwordless_otp",
             "email": params.email,
             "customAttributes": "<attribute1: value1>",

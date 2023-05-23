@@ -25,7 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthBaseController {
-    
+
     let clientId: String
     let cacheAccessor: MSALNativeAuthCacheInterface?
 
@@ -36,7 +36,7 @@ class MSALNativeAuthBaseController {
         self.clientId = clientId
         self.cacheAccessor = cacheAccessor
     }
-    
+
     func makeAndStartTelemetryEvent(id: MSALNativeAuthTelemetryApiId, context: MSIDRequestContext) -> MSIDTelemetryAPIEvent? {
             let event = makeLocalTelemetryApiEvent(
                 name: MSID_TELEMETRY_EVENT_API_EVENT,
@@ -120,7 +120,7 @@ class MSALNativeAuthBaseController {
         stopTelemetryEvent(telemetryEvent, context: context, error: error)
         completion(response, error)
     }
-    
+
     func performRequest<T>(
             _ request: MSIDHttpRequest,
             context: MSIDRequestContext,

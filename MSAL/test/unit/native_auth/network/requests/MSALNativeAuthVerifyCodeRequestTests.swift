@@ -36,7 +36,6 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
 
     private var params: MSALNativeAuthVerifyCodeRequestParameters {
         .init(
-            config: MSALNativeAuthConfigStubs.configuration,
             endpoint: .verifyCode,
             context: context,
             credentialToken: "Test Credential Token",
@@ -53,7 +52,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
+        let sut = try MSALNativeAuthVerifyCodeRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         XCTAssertEqual(sut.context!.correlationId(), context.correlationId())
         checkBodyParams(sut.parameters)
@@ -67,7 +66,7 @@ final class MSALNativeAuthVerifyCodeRequestTests: XCTestCase {
             platformFields: ["ios"]
         )!
 
-        let sut = try MSALNativeAuthVerifyCodeRequest(params: params)
+        let sut = try MSALNativeAuthVerifyCodeRequest(params: params, config: MSALNativeAuthConfigStubs.configuration)
 
         sut.configure(
             requestSerializer: MSALNativeAuthUrlRequestSerializer(context: context, encoding: .json),

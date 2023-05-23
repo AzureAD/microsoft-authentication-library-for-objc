@@ -45,25 +45,25 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case authorizationPending
     case slowDown
 
-    func convertToSignInStartError() -> SignInStartError {
+    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
         switch self {
         case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse, .invalidOOBCode:
-            return SignInStartError(type: .generalError)
+            return SignInPasswordStartError(type: .generalError)
         case .invalidClient:
-            return SignInStartError(type: .generalError, message: "Invalid Client ID")
+            return SignInPasswordStartError(type: .generalError, message: "Invalid Client ID")
         case .unsupportedChallengeType:
-            return SignInStartError(type: .generalError, message: "Unsupported challenge type")
+            return SignInPasswordStartError(type: .generalError, message: "Unsupported challenge type")
         case .invalidScope:
-            return SignInStartError(type: .generalError, message: "Invalid scope")
+            return SignInPasswordStartError(type: .generalError, message: "Invalid scope")
         case .userNotFound:
-            return SignInStartError(type: .userNotFound)
+            return SignInPasswordStartError(type: .userNotFound)
         case .invalidPassword:
-            return SignInStartError(type: .invalidPassword)
+            return SignInPasswordStartError(type: .invalidPassword)
         case .invalidAuthenticationType:
-            return SignInStartError(type: .invalidAuthenticationType)
+            return SignInPasswordStartError(type: .invalidAuthenticationType, message: "Use signInUsingCode instead")
         }
     }
-    
+
     func convertToVerifyCodeError() -> VerifyCodeError {
         switch self {
         case .invalidOOBCode:

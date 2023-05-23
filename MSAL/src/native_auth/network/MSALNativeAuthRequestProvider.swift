@@ -85,7 +85,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         }
 
         let params = MSALNativeAuthSignUpRequestParameters(
-            config: config,
             email: parameters.email,
             password: parameters.password,
             attributes: attributes,
@@ -94,7 +93,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             grantType: .password
         )
 
-        let request = try MSALNativeAuthSignUpRequest(params: params)
+        let request = try MSALNativeAuthSignUpRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
@@ -121,7 +120,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
         }
 
         let params = MSALNativeAuthSignUpRequestParameters(
-            config: config,
             email: parameters.email,
             attributes: attributes,
             scope: formatScope(parameters.scopes),
@@ -129,7 +127,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             grantType: .otp
         )
 
-        let request = try MSALNativeAuthSignUpRequest(params: params)
+        let request = try MSALNativeAuthSignUpRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignUp(type: .signUpWithPassword),
@@ -152,7 +150,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthSignInRequest {
 
         let params = MSALNativeAuthSignInRequestParameters(
-            config: config,
             email: parameters.email,
             password: parameters.password,
             scope: formatScope(parameters.scopes),
@@ -160,7 +157,7 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
             grantType: .password
         )
 
-        let request = try MSALNativeAuthSignInRequest(params: params)
+        let request = try MSALNativeAuthSignInRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithPassword),
@@ -183,14 +180,13 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthSignInRequest {
 
         let params = MSALNativeAuthSignInRequestParameters(
-            config: config,
             email: parameters.email,
             scope: formatScope(parameters.scopes),
             context: context,
             grantType: .otp
         )
 
-        let request = try MSALNativeAuthSignInRequest(params: params)
+        let request = try MSALNativeAuthSignInRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInWithOTP),
@@ -213,12 +209,11 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthResendCodeRequest {
 
         let params = MSALNativeAuthResendCodeRequestParameters(
-            config: config,
             credentialToken: parameters.credentialToken,
             context: context
         )
 
-        let request = try MSALNativeAuthResendCodeRequest(params: params)
+        let request = try MSALNativeAuthResendCodeRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForResendCode(type: .resendCode),
@@ -241,13 +236,12 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     ) throws -> MSALNativeAuthVerifyCodeRequest {
 
         let params = MSALNativeAuthVerifyCodeRequestParameters(
-            config: config,
             credentialToken: parameters.credentialToken,
             otp: parameters.otp,
             context: context
         )
 
-        let request = try MSALNativeAuthVerifyCodeRequest(params: params)
+        let request = try MSALNativeAuthVerifyCodeRequest(params: params, config: config)
 
         let serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetryProvider.telemetryForVerifyCode(type: .verifyCode),

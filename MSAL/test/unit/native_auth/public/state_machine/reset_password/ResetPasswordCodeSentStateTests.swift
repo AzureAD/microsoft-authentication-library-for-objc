@@ -26,18 +26,18 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class ResetPasswordCodeSentStateTests: XCTestCase {
+final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
     private var correlationId: UUID!
     private var controller: MSALNativeAuthResetPasswordControllerSpy!
-    private var sut: ResetPasswordCodeSentState!
+    private var sut: ResetPasswordCodeRequiredState!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         correlationId = UUID()
         controller = MSALNativeAuthResetPasswordControllerSpy()
-        sut = ResetPasswordCodeSentState(controller: controller, flowToken: "<token>")
+        sut = ResetPasswordCodeRequiredState(controller: controller, flowToken: "<token>")
     }
 
     func test_resendCode_usesControllerSuccessfully() {

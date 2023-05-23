@@ -25,40 +25,41 @@
 @testable import MSAL
 
 class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
+
     private(set) var error: ResendCodeError?
-    private(set) var newState: SignUpCodeSentState?
-    private(set) var displayName: String?
+    private(set) var newState: SignUpCodeRequiredState?
+    private(set) var sentTo: String?
     private(set) var codeLength: Int?
 
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         self.error = error
         self.newState = newState
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+    func onSignUpResendCodeRequired(newState: MSAL.SignUpCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
         self.newState = newState
-        self.displayName = displayName
+        self.sentTo = sentTo
         self.codeLength = codeLength
     }
 }
 
 class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
     private(set) var error: VerifyCodeError?
-    private(set) var newCodeSentState: SignUpCodeSentState?
+    private(set) var newCodeRequiredState: SignUpCodeRequiredState?
     private(set) var newAttributesRequiredState: SignUpAttributesRequiredState?
     private(set) var newPasswordRequiredState: SignUpPasswordRequiredState?
     private(set) var signUpCompletedCalled = false
 
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         self.error = error
-        newCodeSentState = newState
+        newCodeRequiredState = newState
     }
 
     func onSignUpAttributesRequired(newState: MSAL.SignUpAttributesRequiredState) {
         newAttributesRequiredState = newState
     }
 
-    func onPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
+    func onSignUpPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
         newPasswordRequiredState = newState
     }
 

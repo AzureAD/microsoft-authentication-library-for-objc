@@ -99,19 +99,23 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
-    public func signUp(
+    public func signUpUsingPassword(
         username: String,
         password: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignUpStartDelegate
+        delegate: SignUpPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
+            }
             return
         }
         guard inputValidator.isInputValid(password) else {
-            delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
+            DispatchQueue.main.async {
+                delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
+            }
             return
         }
 
@@ -127,14 +131,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
     }
 
-    public func signUp(
+    public func signUpUsingCode(
         username: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
+            }
             return
         }
 
@@ -149,19 +155,23 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
     }
 
-    public func signIn(
+    public func signInUsingPassword(
         username: String,
         password: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInStartDelegate
+        delegate: SignInPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignInError(error: SignInPasswordStartError(type: .invalidUsername))
+            }
             return
         }
         guard inputValidator.isInputValid(password) else {
-            delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
+            DispatchQueue.main.async {
+                delegate.onSignInError(error: SignInPasswordStartError(type: .invalidPassword))
+            }
             return
         }
         let controller = controllerFactory.makeSignInController()
@@ -175,14 +185,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func signIn(
+    public func signInUsingCode(
         username: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
         delegate: SignInCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
+            }
             return
         }
         let controller = controllerFactory.makeSignInController()
@@ -201,7 +213,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
+            }
             return
         }
 

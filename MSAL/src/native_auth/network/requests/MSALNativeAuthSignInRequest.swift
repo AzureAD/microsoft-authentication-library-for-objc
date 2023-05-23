@@ -26,14 +26,14 @@
 
 final class MSALNativeAuthSignInRequest: MSIDHttpRequest {
 
-    init(params: MSALNativeAuthSignInRequestParameters) throws {
+    init(params: MSALNativeAuthSignInRequestParameters, config: MSALNativeAuthConfiguration) throws {
         super.init()
 
         self.context = params.context
 
-        self.parameters = makeBodyRequestParameters(with: params)
+        self.parameters = makeBodyRequestParameters(with: params, config: config)
 
-        let url = try params.makeEndpointUrl()
+        let url = try params.makeEndpointUrl(config: config)
         self.urlRequest = URLRequest(url: url)
 
         self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
@@ -49,11 +49,14 @@ final class MSALNativeAuthSignInRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthSignInRequestParameters,
+        config: MSALNativeAuthConfiguration
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.config.clientId,
+            Key.clientId.rawValue: config.clientId,
             Key.grantType.rawValue: params.grantType.rawValue,
             Key.email.rawValue: params.email,
             Key.password.rawValue: params.password,

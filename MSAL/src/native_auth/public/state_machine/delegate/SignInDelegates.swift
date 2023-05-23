@@ -30,22 +30,36 @@ public protocol SignInCompletedDelegate {
 }
 
 @objc
-public protocol SignInStartDelegate: SignInCompletedDelegate {
-    func onSignInError(error: SignInStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+public protocol SignInPasswordStartDelegate: SignInCompletedDelegate {
+    func onSignInError(error: SignInPasswordStartError)
+    @objc optional func onSignInCodeRequired(newState: SignInCodeSentState,
+                                             sentTo: String,
+                                             channelTargetType: MSALNativeAuthChannelType,
+                                             codeLength: Int)
 }
 
 @objc
 public protocol SignInCodeStartDelegate {
     func onSignInCodeError(error: SignInCodeStartError)
-    func onSignInCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInCodeRequired(newState: SignInCodeSentState,
+                              sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int)
     //TODO: add here passwordRequired
+}
+
+@objc
+public protocol SignInPasswordRequiredDelegate: SignInCompletedDelegate {
+    func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 }
 
 @objc
 public protocol SignInResendCodeDelegate {
     func onSignInResendCodeError(error: MSALNativeAuthGenericError, newState: SignInCodeSentState?)
-    func onSignInResendCodeSent(newState: SignInCodeSentState, displayName: String, codeLength: Int)
+    func onSignInResendCodeCodeRequired(newState: SignInCodeSentState,
+                                        sentTo: String,
+                                        channelTargetType: MSALNativeAuthChannelType,
+                                        codeLength: Int)
 }
 
 @objc

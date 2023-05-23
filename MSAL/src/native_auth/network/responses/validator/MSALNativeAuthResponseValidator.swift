@@ -35,7 +35,7 @@ protocol MSALNativeAuthSignInResponseValidating {
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
-    
+
     func validateSignInInitiateResponse(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
@@ -97,14 +97,14 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return handleFailedSignInChallengeResult(context, error: signInChallengeResponseError)
         }
     }
-    
+
     func validateSignInInitiateResponse(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse {
         switch result {
         case .success(let initiateResponse):
-            if (initiateResponse.challengeType == .redirect) {
+            if initiateResponse.challengeType == .redirect {
                 return .error(.redirect)
             }
             if let credentialToken = initiateResponse.credentialToken {
@@ -147,7 +147,11 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
                     format: "SignIn Challenge: Invalid response with challenge type oob, response: \(response)")
                 return .error(.invalidServerResponse)
             }
-            return .codeRequired(credentialToken: credentialToken, sentTo: targetLabel, channelType: channelType, codeLength: codeLength)
+            return .codeRequired(
+                credentialToken: credentialToken,
+                sentTo: targetLabel,
+                channelType: channelType.toPublicChannelType(),
+                codeLength: codeLength)
         case .password:
             guard let credentialToken = response.credentialToken else {
                 MSALLogger.log(
@@ -207,7 +211,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return .error(.slowDown)
         }
     }
-    
+
     private func handleFailedSignInInitiateResult(
         _ context: MSALNativeAuthRequestContext,
         error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {

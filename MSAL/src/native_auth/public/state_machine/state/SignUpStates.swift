@@ -35,14 +35,16 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
 }
 
 @objcMembers
-public class SignUpCodeSentState: SignUpBaseState {
+public class SignUpCodeRequiredState: SignUpBaseState {
 
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard let controller = controller else {
             MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onSignUpResendCodeError(error: MSALNativeAuthGenericError(), newState: nil)
+            DispatchQueue.main.async {
+                delegate.onSignUpResendCodeError(error: MSALNativeAuthGenericError(), newState: nil)
+            }
             return
         }
 
@@ -54,7 +56,9 @@ public class SignUpCodeSentState: SignUpBaseState {
 
         guard let controller = controller else {
             MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onSignUpVerifyCodeError(error: .init(type: .generalError), newState: nil)
+            DispatchQueue.main.async {
+                delegate.onSignUpVerifyCodeError(error: .init(type: .generalError), newState: nil)
+            }
             return
         }
 
@@ -70,7 +74,9 @@ public class SignUpPasswordRequiredState: SignUpBaseState {
 
         guard let controller = controller else {
             MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onSignUpPasswordRequiredError(error: .init(type: .generalError), newState: nil)
+            DispatchQueue.main.async {
+                delegate.onSignUpPasswordRequiredError(error: .init(type: .generalError), newState: nil)
+            }
             return
         }
 
@@ -90,7 +96,9 @@ public class SignUpAttributesRequiredState: SignUpBaseState {
 
         guard let controller = controller else {
             MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            delegate.onSignUpAttributesRequiredError(error: .init(type: .generalError), newState: nil)
+            DispatchQueue.main.async {
+                delegate.onSignUpAttributesRequiredError(error: .init(type: .generalError), newState: nil)
+            }
             return
         }
 

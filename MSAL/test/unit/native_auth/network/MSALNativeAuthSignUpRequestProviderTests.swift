@@ -36,8 +36,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         telemetryProvider = MSALNativeAuthTelemetryProvider()
         context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
-        sut = .init(config: MSALNativeAuthConfigStubs.configuration,
-                    requestConfigurator: MSALNativeAuthRequestConfigurator(),
+        sut = .init(requestConfigurator: MSALNativeAuthRequestConfigurator(config: MSALNativeAuthConfigStubs.configuration),
                     telemetryProvider: telemetryProvider)
     }
 

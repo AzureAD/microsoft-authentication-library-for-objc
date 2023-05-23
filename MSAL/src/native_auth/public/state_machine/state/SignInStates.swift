@@ -74,3 +74,22 @@ public class SignInCodeSentState: SignInBaseState {
         }
     }
 }
+
+@objcMembers
+public class SignInPasswordRequiredState: MSALNativeAuthBaseState {
+
+    public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
+        DispatchQueue.main.async {
+            switch password {
+            case "incorrect": delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
+                username: "email@contoso.com",
+                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
+                rawIdToken: nil,
+                scopes: [],
+                expiresOn: Date()
+            ))
+            }
+        }
+    }
+}

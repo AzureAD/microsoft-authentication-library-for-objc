@@ -39,7 +39,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case invalidServerResponse
     case userNotFound
     case unsupportedChallengeType
-    
+
     func convertToSignInCodeStartError() -> SignInCodeStartError {
         switch self {
         case .redirect:
@@ -54,8 +54,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             return .init(type: .generalError, message: "Unsupported challenge type")
         }
     }
-    
-    func convertToSignInStartError() -> SignInStartError {
+
+    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
         let codeSignInError = convertToSignInCodeStartError()
         switch codeSignInError.type {
         case .browserRequired:

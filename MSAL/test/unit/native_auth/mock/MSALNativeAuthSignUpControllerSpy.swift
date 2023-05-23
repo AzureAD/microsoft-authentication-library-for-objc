@@ -35,7 +35,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     private(set) var submitAttributesCalled = false
 
 
-    func signUpStart(username: String, password: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpStartDelegate) {
+    func signUpStart(username: String, password: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpPasswordStartDelegate) {
         self.context = context
         signUpStartPasswordCalled = true
     }

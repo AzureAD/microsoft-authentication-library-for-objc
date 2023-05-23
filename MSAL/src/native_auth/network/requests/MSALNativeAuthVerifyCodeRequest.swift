@@ -26,14 +26,14 @@
 
 final class MSALNativeAuthVerifyCodeRequest: MSIDHttpRequest {
 
-    init(params: MSALNativeAuthVerifyCodeRequestParameters) throws {
+    init(params: MSALNativeAuthVerifyCodeRequestParameters, config: MSALNativeAuthConfiguration) throws {
         super.init()
 
         self.context = params.context
 
-        self.parameters = makeBodyRequestParameters(with: params)
+        self.parameters = makeBodyRequestParameters(with: params, config: config)
 
-        let url = try params.makeEndpointUrl()
+        let url = try params.makeEndpointUrl(config: config)
         self.urlRequest = URLRequest(url: url)
 
         self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
@@ -49,11 +49,14 @@ final class MSALNativeAuthVerifyCodeRequest: MSIDHttpRequest {
         requestConfigurator.configure(self)
     }
 
-    private func makeBodyRequestParameters(with params: MSALNativeAuthVerifyCodeRequestParameters) -> [String: String] {
+    private func makeBodyRequestParameters(
+        with params: MSALNativeAuthVerifyCodeRequestParameters,
+        config: MSALNativeAuthConfiguration
+    ) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
-            Key.clientId.rawValue: params.config.clientId,
+            Key.clientId.rawValue: config.clientId,
             Key.flowToken.rawValue: params.credentialToken,
             Key.otp.rawValue: params.otp
         ]

@@ -25,17 +25,16 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthRequestable {
-    var config: MSALNativeAuthConfiguration { get }
     var endpoint: MSALNativeAuthEndpoint { get }
     var context: MSIDRequestContext { get }
 
-    func makeEndpointUrl() throws -> URL
-    func makeRequestBody() -> [String: String]
+    func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String]
 }
 
 extension MSALNativeAuthRequestable {
 
-    func makeEndpointUrl() throws -> URL {
+    func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL {
         let endpointUrl = config.authority.url.absoluteString + endpoint.rawValue
 
         guard let url = URL(string: endpointUrl) else {

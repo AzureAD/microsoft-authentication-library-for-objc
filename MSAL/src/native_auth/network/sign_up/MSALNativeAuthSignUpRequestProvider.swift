@@ -43,14 +43,11 @@ protocol MSALNativeAuthRequestSignUpProviding {
 
 final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProviding {
 
-    private let config: MSALNativeAuthConfiguration
     private let requestConfigurator: MSALNativeAuthRequestConfigurator
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
-    init(config: MSALNativeAuthConfiguration,
-         requestConfigurator: MSALNativeAuthRequestConfigurator,
+    init(requestConfigurator: MSALNativeAuthRequestConfigurator,
          telemetryProvider: MSALNativeAuthTelemetryProviding) {
-        self.config = config
         self.requestConfigurator = requestConfigurator
         self.telemetryProvider = telemetryProvider
     }
@@ -64,7 +61,6 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
         }
 
         let params = MSALNativeAuthSignUpStartRequestParameters(
-            config: config,
             username: parameters.email,
             password: parameters.password,
             attributes: attributes,
@@ -80,7 +76,6 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
 
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
-            config: config,
             signUpToken: token,
             context: context
         )
@@ -99,7 +94,6 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthRequestSignUpProv
         let attributesFormatted = try parameters.attributes.map { try formatAttributes($0) } ?? nil
 
         let params = MSALNativeAuthSignUpContinueRequestParameters(
-            config: config,
             grantType: parameters.grantType,
             signUpToken: parameters.signUpToken,
             password: parameters.password,

@@ -39,24 +39,22 @@ final class MSALNativeAuthSignUpChallengeRequestParametersTest: XCTestCase {
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.redirect]))
         let parameters = MSALNativeAuthSignUpChallengeRequestParameters(
-            config: config,
             signUpToken: "token",
             context: MSALNativeAuthRequestContextMock()
         )
         var resultUrl: URL? = nil
-        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/challenge")
     }
 
     func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .oob, .redirect]))
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
-            config: config,
             signUpToken: "<sign-up-token>",
             context: context
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,

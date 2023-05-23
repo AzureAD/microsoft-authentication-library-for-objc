@@ -25,8 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
-
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .token
     let context: MSIDRequestContext
     let username: String?
@@ -38,7 +36,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let oobCode: String?
     let clientInfo = true
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
         var parameters = [
             Key.clientId.rawValue: config.clientId,

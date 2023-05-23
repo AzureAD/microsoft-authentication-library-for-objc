@@ -22,16 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+enum MSALNativeAuthInternalChannelType: String, Decodable {
+    case phone
+    case email
 
-struct MSALNativeAuthSignInChallengeResponse: Decodable {
-
-    // MARK: - Variables
-    let credentialToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let bindingMethod: String?
-    let challengeTargetLabel: String?
-    let challengeChannel: MSALNativeAuthInternalChannelType?
-    let codeLength: Int?
-    let interval: Int?
+    func toPublicChannelType() -> MSALNativeAuthChannelType {
+        switch self {
+        case .phone:
+            return .phone
+        case .email:
+            return .email
+        }
+    }
 }

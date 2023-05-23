@@ -79,10 +79,10 @@ class CustomAttributesViewController: UIViewController {
 
         print("Signing up with email \(email), password and attributes: \(attributes)")
 
-        appContext.signUp(username: email,
-                          password: password,
-                          attributes: attributes,
-                          delegate: self)
+        appContext.signUpUsingPassword(username: email,
+                                       password: password,
+                                       attributes: attributes,
+                                       delegate: self)
     }
 
     // MARK: - Verify Code modal methods
@@ -147,7 +147,7 @@ class CustomAttributesViewController: UIViewController {
     }
 }
 
-extension CustomAttributesViewController: SignUpStartDelegate {
+extension CustomAttributesViewController: SignUpPasswordStartDelegate {
     func onSignUpError(error: MSAL.SignUpStartError) {
         switch error.type {
         case .userAlreadyExists:
@@ -163,8 +163,12 @@ extension CustomAttributesViewController: SignUpStartDelegate {
         }
     }
 
-    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
-        print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
+    func onSignUpCodeRequired(
+        newState: MSAL.SignUpCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int) {
+        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showResultText("Email verification required")
 
@@ -182,7 +186,7 @@ extension CustomAttributesViewController: SignUpStartDelegate {
 }
 
 extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         switch error.type {
         case .invalidCode:
             guard let newState else {
@@ -216,7 +220,7 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
         dismissVerifyCodeModal()
     }
 
-    func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
+    func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
         dismissVerifyCodeModal()
     }
@@ -228,14 +232,18 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 }
 
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeSentState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
+    func onSignUpResendCodeRequired(
+        newState: MSAL.SignUpCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
                                   guard let self else { return }
