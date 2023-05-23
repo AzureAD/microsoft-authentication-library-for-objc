@@ -53,7 +53,7 @@ final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     }
 
     func makeResetPasswordController() -> MSALNativeAuthResetPasswordControlling {
-        return MSALNativeAuthResetPasswordController(clientId: config.clientId)
+        return MSALNativeAuthResetPasswordController(config: config)
     }
 
     func makeResendCodeController() -> MSALNativeAuthResendCodeControllingLegacy {

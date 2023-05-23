@@ -25,6 +25,36 @@
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController, MSALNativeAuthResetPasswordControlling {
+    private let requestProvider: MSALNativeAuthResetPasswordRequestProviding
+    private let responseValidator: MSALNativeAuthResetPasswordResponseValidating
+    private let config: MSALNativeAuthConfiguration
+
+    init(
+        config: MSALNativeAuthConfiguration,
+        requestProvider: MSALNativeAuthResetPasswordRequestProviding,
+        responseValidator: MSALNativeAuthResetPasswordResponseValidating,
+        cacheAccessor: MSALNativeAuthCacheInterface
+    ) {
+        self.requestProvider = requestProvider
+        self.responseValidator = responseValidator
+        self.config = config
+
+        super.init(clientId: config.clientId)
+    }
+
+    convenience init(config: MSALNativeAuthConfiguration) {
+            self.init(
+                config: config,
+                requestProvider: MSALNativeAuthResetPasswordRequestProvider(
+                    config: config,
+                    requestConfigurator: MSALNativeAuthRequestConfigurator(),
+                    telemetryProvider: MSALNativeAuthTelemetryProvider()
+                ),
+                responseValidator: MSALNativeAuthResetPasswordResponseValidator(),
+                cacheAccessor: MSALNativeAuthCacheAccessor()
+            )
+        }
+    
     // 1. Called from Public Interface. Entry Point
     func resetPassword(
         username: String,

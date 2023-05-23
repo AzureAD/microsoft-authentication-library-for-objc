@@ -23,6 +23,39 @@
 // THE SOFTWARE.
 
 @testable import MSAL
+import XCTest
+
+class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
+    private let expectation: XCTestExpectation
+    var expectedError: ResetPasswordStartError?
+
+    init(expectation: XCTestExpectation, expectedError: ResetPasswordStartError? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+
+    func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
+        if let expectedError = expectedError {
+            XCTAssertEqual(error.type, expectedError.type)
+            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            expectation.fulfill()
+            return
+        }
+
+        XCTFail("This method should not be called")
+        expectation.fulfill()
+    }
+
+    func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
+        if expectedError == nil {
+            expectation.fulfill()
+            return
+        }
+
+        XCTFail("This method should not be called")
+        expectation.fulfill()
+    }
+}
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     private(set) var error: ResendCodeError?

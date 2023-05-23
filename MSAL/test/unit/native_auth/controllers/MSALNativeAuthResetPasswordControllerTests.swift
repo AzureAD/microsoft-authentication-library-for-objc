@@ -30,6 +30,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthResetPasswordController!
     private var requestProviderMock: MSALNativeAuthResetPasswordRequestProviderMock!
+    private var responseValidatorMock: MSALNativeAuthResetPasswordResponseValidatorMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var factoryMock: MSALNativeAuthResultFactoryMock!
@@ -52,7 +53,10 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         contextMock.mockTelemetryRequestId = "telemetry_request_id"
         factoryMock = .init()
 
-        sut = .init(clientId: MSALNativeAuthConfigStubs.configuration.clientId, cacheAccessor: cacheAccessorMock)
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration,
+                    requestProvider: requestProviderMock,
+                    responseValidator: responseValidatorMock,
+                    cacheAccessor: cacheAccessorMock)
 
         try super.setUpWithError()
     }
