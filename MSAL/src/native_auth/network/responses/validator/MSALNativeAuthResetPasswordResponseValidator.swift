@@ -26,21 +26,17 @@
 
 protocol MSALNativeAuthResetPasswordResponseValidating {
     func validate(_ result: Result<MSALNativeAuthResetPasswordStartResponse, Error>,
-                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordResponseValidator.ResetPasswordStartValidatedResponse
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse
+    func validate(_ result: Result<MSALNativeAuthResetPasswordChallengeResponse, Error>,
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse
 }
 
 final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPasswordResponseValidating {
 
     // MARK: - Start Request
 
-    enum ResetPasswordStartValidatedResponse {
-        case success(passwordResetToken: String)
-        case redirect
-        case error(MSALNativeAuthResetPasswordStartOauth2ErrorCode)
-        case unexpectedError
-    }
-
-    func validate(_ result: Result<MSALNativeAuthResetPasswordStartResponse, Error>, with context: MSIDRequestContext) -> ResetPasswordStartValidatedResponse {
+    func validate(_ result: Result<MSALNativeAuthResetPasswordStartResponse, Error>,
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         switch result {
         case .success(let response):
             return handleStartSuccess(response, with: context)
@@ -49,7 +45,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
     }
 
-    private func handleStartSuccess(_ response: MSALNativeAuthResetPasswordStartResponse, with context: MSIDRequestContext) -> ResetPasswordStartValidatedResponse {
+    private func handleStartSuccess(_ response: MSALNativeAuthResetPasswordStartResponse,
+                                    with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         if response.challengeType == .redirect {
             return .redirect
         } else if let passwordResetToken = response.passwordResetToken {
@@ -66,7 +63,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
     }
 
-    private func handleStartFailed(_ error: Error, with context: MSIDRequestContext) -> ResetPasswordStartValidatedResponse {
+    private func handleStartFailed(_ error: Error,
+                                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordStartResponseError else {
             MSALLogger.log(level: .error,
                            context: context,
@@ -74,11 +72,58 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                            lineNumber: #line,
                            function: #function,
                            format: "Error type not expected")
-            
+
             return .unexpectedError
         }
 
-        return .error(apiError.error)
+        return .error(apiError)
+    }
+
+    // MARK: - Challenge Request
+
+    func validate(
+        _ result: Result<MSALNativeAuthResetPasswordChallengeResponse, Error>,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
+        switch result {
+        case .success(let response):
+            return handleChallengeSuccess(response, with: context)
+        case .failure(let error):
+            return handleChallengeError(error, with: context)
+        }
+    }
+
+    private func handleChallengeSuccess(
+        _ response: MSALNativeAuthResetPasswordChallengeResponse,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
+        switch response.challengeType {
+        case .redirect:
+            return .redirect
+        case .password,
+             .oob:
+            if let displayName = response.challengeTargetLabel,
+               let displayType = response.challengeChannel,
+               let codeLength = response.codeLength,
+               let passwordResetToken = response.passwordResetToken {
+                return .success(displayName, displayType, codeLength, passwordResetToken)
+            } else {
+                MSALLogger.log(level: .info, context: context, format: "Missing expected fields from backend")
+                return .unexpectedError
+            }
+        case .otp:
+            MSALLogger.log(level: .info, context: context, format: "ChallengeType not expected")
+            return .unexpectedError
+        }
+    }
+
+    private func handleChallengeError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
+        guard let apiError = error as? MSALNativeAuthResetPasswordChallengeResponseError else {
+            MSALLogger.log(level: .info, context: context, format: "Error type not expected")
+            return .unexpectedError
+        }
+
+        return .error(apiError)
     }
 
 }

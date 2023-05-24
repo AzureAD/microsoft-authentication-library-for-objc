@@ -37,6 +37,21 @@ class MSALNativeAuthBaseController {
         self.cacheAccessor = cacheAccessor
     }
 
+    func makeAndStartTelemetryEvent(
+        id: MSALNativeAuthTelemetryApiId,
+        context: MSIDRequestContext
+    ) -> MSIDTelemetryAPIEvent? {
+        let event = makeLocalTelemetryApiEvent(
+            name: MSID_TELEMETRY_EVENT_API_EVENT,
+            telemetryApiId: id,
+            context: context
+        )
+
+        startTelemetryEvent(event, context: context)
+
+        return event
+    }
+
     func makeLocalTelemetryApiEvent(
         name: String,
         telemetryApiId: MSALNativeAuthTelemetryApiId,
@@ -108,4 +123,20 @@ class MSALNativeAuthBaseController {
         stopTelemetryEvent(telemetryEvent, context: context, error: error)
         completion(response, error)
     }
+
+    func performRequest<T>(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<T, Error> {
+        return await withCheckedContinuation { continuation in
+            request.send { result, error in
+                if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else if let response = result as? T {
+                    continuation.resume(returning: .success(response))
+                } else {
+                    MSALLogger.log(level: .error, context: context, format: "performRequest: Unexpected response \(result ?? "<nil>")")
+                    continuation.resume(returning: .failure(MSALNativeAuthError.invalidResponse))
+                }
+            }
+        }
+    }
+
 }

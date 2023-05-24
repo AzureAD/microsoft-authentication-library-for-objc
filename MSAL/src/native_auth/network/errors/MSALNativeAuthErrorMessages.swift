@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,25 +24,14 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordChallengeOauth2ErrorCode: String, Decodable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case expiredToken = "expired_token"
-    case unsupportedChallengeType = "unsupported_challenge_type"
-}
-
-extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
-        switch self {
-
-        case .invalidRequest:
-            return .init(type: .generalError)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
-        case .unsupportedChallengeType:
-            return .init(type: .userDoesNotHavePassword)
-        case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
-        }
-    }
+enum MSALNativeAuthErrorMessages {
+    static let invalidClient = "Invalid Client ID"
+    static let unsupportedChallengeType = "Unsupported challenge type"
+    static let unsupportedAuthMethod = "Authentication method not supported"
+    static let expiredToken = "Flow token has expired. Please start the flow again"
+    static let passwordTooWeak = "Password too weak"
+    static let passwordTooShort = "Password too short"
+    static let passwordTooLong = "Password too long"
+    static let passwordRecentlyUsed = "Password recently used"
+    static let passwordBanned = "Password banned"
 }

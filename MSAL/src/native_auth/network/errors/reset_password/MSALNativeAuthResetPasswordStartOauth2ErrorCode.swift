@@ -30,3 +30,18 @@ enum MSALNativeAuthResetPasswordStartOauth2ErrorCode: String, Decodable {
     case userNotFound = "user_not_found"
     case unsupportedChallengeType = "unsupported_challenge_type"
 }
+
+extension MSALNativeAuthResetPasswordStartOauth2ErrorCode {
+    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+        switch self {
+        case .userNotFound:
+            return .init(type: .userNotFound)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(type: .userDoesNotHavePassword)
+        }
+    }
+}
