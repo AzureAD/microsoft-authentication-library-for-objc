@@ -80,7 +80,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing in with email \(email)")
 
-        nativeAuth.signUpUsingCode(username: email, delegate: self)
+        nativeAuth.signInUsingCode(username: email, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {

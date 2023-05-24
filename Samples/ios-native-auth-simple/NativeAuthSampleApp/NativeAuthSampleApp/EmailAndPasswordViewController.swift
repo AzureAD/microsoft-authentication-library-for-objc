@@ -77,7 +77,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
