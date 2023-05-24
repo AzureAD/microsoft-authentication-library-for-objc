@@ -66,7 +66,7 @@ jobs:
           -workspace MSAL.xcworkspace \
           -scheme "MSAL Test Automation (iOS)" \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.5' \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
@@ -80,10 +80,11 @@ jobs:
         ls build/Build/Products/
         xcodebuild test-without-building \
             -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.2-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.5' \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
+
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
@@ -91,12 +92,15 @@ jobs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
       publishLocation: 'pipeline'
+
   - task: UsePythonVersion@0
     condition: failed()
     displayName: Use Python 3.x
+
   - bash: python3 -m pip install github3.py==2.0.0
     condition: failed()
     displayName: Install the github3.py REST API client for Python
+
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
     condition: failed()
