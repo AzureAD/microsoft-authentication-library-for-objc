@@ -102,19 +102,28 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             handleChallengeResponse(challengeResponse, event: event, context: context, delegate: delegate)
         case .redirect:
             stopTelemetryEvent(event, context: context)
-            delegate.onResetPasswordError(error: .init(type: .browserRequired))
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: .init(type: .browserRequired))
+            }
         case .error(let apiError):
             stopTelemetryEvent(event, context: context, error: apiError)
-            delegate.onResetPasswordError(error: apiError.error.toResetPasswordStartPublicError())
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: apiError.error.toResetPasswordStartPublicError())
+            }
         case .unexpectedError:
             stopTelemetryEvent(event, context: context)
-            delegate.onResetPasswordError(error: .init(type: .generalError))
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: .init(type: .generalError))
+            }
         }
     }
 
     // MARK: - Challenge Request handling
 
-    private func performChallengeRequest(flowToken: String, context: MSIDRequestContext) async -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
+    private func performChallengeRequest(
+        flowToken: String,
+        context: MSIDRequestContext
+    ) async -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         let request: MSIDHttpRequest
 
         do {
@@ -141,25 +150,35 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         switch response {
         case .success(let displayName, let displayType, let codeLength, let challengeToken):
-            delegate.onResetPasswordCodeSent(
-                newState: ResetPasswordCodeSentState(controller: self, flowToken: challengeToken),
-                displayName: displayName,
-                codeLength: codeLength
-            )
+            DispatchQueue.main.async {
+                delegate.onResetPasswordCodeSent(
+                    newState: ResetPasswordCodeSentState(controller: self, flowToken: challengeToken),
+                    displayName: displayName,
+                    codeLength: codeLength
+                )
+            }
         case .error(let apiError):
-            delegate.onResetPasswordError(error: apiError.error.toResetPasswordStartPublicError())
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: apiError.error.toResetPasswordStartPublicError())
+            }
         case .redirect:
-            delegate.onResetPasswordError(error: .init(type: .browserRequired))
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: .init(type: .browserRequired, message: "Browser required"))
+            }
         case .unexpectedError:
-            delegate.onResetPasswordError(error: .init(type: .generalError))
+            DispatchQueue.main.async {
+                delegate.onResetPasswordError(error: .init(type: .generalError))
+            }
         }
     }
 
     // 2. Called from ResetPasswordCodeSentState
     func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate) {
-        delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
-                                               displayName: "email@contoso.com",
-                                               codeLength: 4)
+        DispatchQueue.main.async {
+            delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
+                                                   displayName: "email@contoso.com",
+                                                   codeLength: 4)
+        }
     }
 
     // 3. Called from ResetPasswordCodeSentState
