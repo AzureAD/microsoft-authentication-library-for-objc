@@ -37,9 +37,10 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
 @objcMembers
 public class ResetPasswordCodeSentState: ResetPasswordBaseState {
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        controller.resendCode(context: context, delegate: delegate)
+        Task {
+            let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+            await controller.resendCode(context: context, flowToken: flowToken, delegate: delegate)
+        }
     }
 
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {

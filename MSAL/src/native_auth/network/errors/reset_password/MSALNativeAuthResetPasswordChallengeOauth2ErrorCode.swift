@@ -45,4 +45,18 @@ extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
             return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
         }
     }
+
+    func toResendCodePublicError() -> ResendCodeError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.unsupportedChallengeType)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        }
+    }
+
 }

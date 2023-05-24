@@ -25,6 +25,7 @@
 import Foundation
 
 enum MSALNativeAuthTelemetryApiId: Int {
+    // TODO: Resolve the below comment about the correct definitions of these constants:
     // Until we know exactly how to define them,
     // to prevent any clashes with existing id's
     // a number that is unlikely to be used has been added
@@ -33,8 +34,10 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdRefreshToken = 75003
     case telemetryApiIdResetPasswordStart = 75004
     case telemetryApiIdResetPasswordComplete = 75005
-    case telemetryApiIdResendCode = 75006
-    case telemetryApiIdVerifyCode = 75007
+    case telemetryApiIdResetPasswordResendCode = 75006
+    case telemetryApiIdResetPasswordVerifyCode = 75007
+    case telemetryApiIdResendCode = 75906 // TODO: Remove me and all related legacy code
+    case telemetryApiIdVerifyCode = 75907 // TODO: Remove me and all related legacy code
     case telemetryApiIdSignOut = 75008
     case telemetryResetPassword = 75009
 }

@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 struct MSALNativeAuthResetPasswordStartRequestProviderParameters {
     let username: String
     let context: MSALNativeAuthRequestContext

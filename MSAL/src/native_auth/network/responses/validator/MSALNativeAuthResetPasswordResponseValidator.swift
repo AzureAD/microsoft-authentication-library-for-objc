@@ -123,7 +123,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .unexpectedError
         }
 
-        return .error(apiError)
+        return .error(apiError.error)
     }
 
 }

@@ -69,12 +69,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         }
     }
 
-    func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate) {
-        DispatchQueue.main.async {
-            delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
-                                                   displayName: "email@contoso.com",
-                                                   codeLength: 4)
-        }
+    func resendCode(context: MSIDRequestContext, flowToken: String, delegate: ResetPasswordResendCodeDelegate) async {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordStart, context: context)
+        let response = await performChallengeRequest(flowToken: flowToken, context: context)
+        handleResendCodeChallengeResponse(response, event: event, context: context, delegate: delegate)
     }
 
     func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate) {
@@ -198,9 +196,9 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                     codeLength: codeLength
                 )
             }
-        case .error(let apiError):
+        case .error(let error):
             DispatchQueue.main.async {
-                delegate.onResetPasswordError(error: apiError.error.toResetPasswordStartPublicError())
+                delegate.onResetPasswordError(error: error.toResetPasswordStartPublicError())
             }
         case .redirect:
             DispatchQueue.main.async {
@@ -209,6 +207,39 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .unexpectedError:
             DispatchQueue.main.async {
                 delegate.onResetPasswordError(error: .init(type: .generalError))
+            }
+        }
+    }
+
+    private func handleResendCodeChallengeResponse(
+        _ response: MSALNativeAuthResetPasswordChallengeValidatedResponse,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        delegate: ResetPasswordResendCodeDelegate
+    ) {
+        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/challenge request with response: \(response)")
+        stopTelemetryEvent(event, context: context)
+
+        switch response {
+        case .success(let displayName, let displayType, let codeLength, let challengeToken):
+            DispatchQueue.main.async {
+                delegate.onResetPasswordResendCodeSent(
+                    newState: ResetPasswordCodeSentState(controller: self, flowToken: challengeToken),
+                    displayName: displayName,
+                    codeLength: codeLength
+                )
+            }
+        case .error(let error):
+            let error = error.toResendCodePublicError()
+            stopTelemetryEvent(event, context: context, error: error)
+            DispatchQueue.main.async {
+                delegate.onResetPasswordResendCodeError(error: error, newState: nil)
+            }
+        case .redirect,
+             .unexpectedError:
+            let error = ResendCodeError(type: .generalError)
+            DispatchQueue.main.async {
+                delegate.onResetPasswordResendCodeError(error: error, newState: nil)
             }
         }
     }

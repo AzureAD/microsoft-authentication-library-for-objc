@@ -30,7 +30,7 @@ protocol MSALNativeAuthResetPasswordControlling: AnyObject {
         delegate: ResetPasswordStartDelegate
     )
 
-    func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate)
+    func resendCode(context: MSIDRequestContext, flowToken: String, delegate: ResetPasswordResendCodeDelegate) async
 
     func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate)
 
