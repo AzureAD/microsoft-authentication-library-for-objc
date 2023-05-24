@@ -76,20 +76,30 @@ public class SignInCodeSentState: SignInBaseState {
 }
 
 @objcMembers
-public class SignInPasswordRequiredState: MSALNativeAuthBaseState {
+public class SignInPasswordRequiredState: SignInBaseState {
+    
+    private let scopes: [String]
+    
+    init(
+        scopes: [String],
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
+        self.scopes = scopes
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+    }
 
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        DispatchQueue.main.async {
-            switch password {
-            case "incorrect": delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
-            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
-                username: "email@contoso.com",
-                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
-                rawIdToken: nil,
-                scopes: [],
-                expiresOn: Date()
-            ))
-            }
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
+        
+        guard inputValidator.isInputValid(password) else {
+            delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
+            return
+        }
+        Task {
+            await controller.submitPassword(password, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
         }
     }
 }

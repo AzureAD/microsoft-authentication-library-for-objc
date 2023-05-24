@@ -33,6 +33,12 @@ protocol MSALNativeAuthSignInControlling {
         context: MSALNativeAuthRequestContext,
         scopes: [String],
         delegate: SignInVerifyCodeDelegate) async
+    func submitPassword(
+        _ code: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        delegate: SignInPasswordRequiredDelegate) async
     func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
 }
 // swiftlint:disable:next type_body_length
@@ -175,6 +181,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 error: errorType.convertToVerifyCodeError(),
                 newState: SignInCodeSentState(scopes: scopes, controller: self, flowToken: credentialToken))
         }
+    }
+    
+    func submitPassword(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInPasswordRequiredDelegate) async {
+        
     }
 
     func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async {
