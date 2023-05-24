@@ -55,7 +55,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
         }
 
-    // 1. Called from Public Interface. Entry Point
+    // Internal interface methods
 
     func resetPassword(
         parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters,
@@ -67,6 +67,47 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             let response = await performStartRequest(parameters: parameters)
             await handleStartResponse(response, event: event, context: parameters.context, delegate: delegate)
         }
+    }
+
+    func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate) {
+        DispatchQueue.main.async {
+            delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
+                                                   displayName: "email@contoso.com",
+                                                   codeLength: 4)
+        }
+    }
+
+    func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate) {
+        switch code {
+        case "0000":
+            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode),
+                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
+        case "2222":
+            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .generalError),
+                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
+        case "3333":
+            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .browserRequired),
+                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
+        default:
+            delegate.onPasswordRequired(newState: ResetPasswordRequiredState(controller: self, flowToken: "password_reset_token"))
+        }
+    }
+
+    func submitPassword(password: String, context: MSIDRequestContext, delegate: ResetPasswordRequiredDelegate) {
+        switch password {
+        case "redirect":
+            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .browserRequired),
+                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
+        case "generalerror":
+            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .generalError),
+                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
+        case "invalid":
+            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword),
+                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
+        default:
+            delegate.onResetPasswordCompleted()
+        }
+
     }
 
     // MARK: - Start Request handling
@@ -172,47 +213,4 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         }
     }
 
-    // 2. Called from ResetPasswordCodeSentState
-    func resendCode(context: MSIDRequestContext, delegate: ResetPasswordResendCodeDelegate) {
-        DispatchQueue.main.async {
-            delegate.onResetPasswordResendCodeSent(newState: .init(controller: self, flowToken: "password_reset_token"),
-                                                   displayName: "email@contoso.com",
-                                                   codeLength: 4)
-        }
-    }
-
-    // 3. Called from ResetPasswordCodeSentState
-    func submitCode(code: String, context: MSIDRequestContext, delegate: ResetPasswordVerifyCodeDelegate) {
-        switch code {
-        case "0000":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "2222":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .generalError),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "3333":
-            delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .browserRequired),
-                                                    newState: .init(controller: self, flowToken: "password_reset_token"))
-        default:
-            delegate.onPasswordRequired(newState: ResetPasswordRequiredState(controller: self, flowToken: "password_reset_token"))
-        }
-    }
-
-    // 4. Called from ResetPasswordRequiredState
-    func submitPassword(password: String, context: MSIDRequestContext, delegate: ResetPasswordRequiredDelegate) {
-        switch password {
-        case "redirect":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .browserRequired),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "generalerror":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .generalError),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        case "invalid":
-            delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword),
-                                                  newState: .init(controller: self, flowToken: "password_reset_token"))
-        default:
-            delegate.onResetPasswordCompleted()
-        }
-
-    }
 }
