@@ -34,7 +34,8 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let scope: String?
     let password: String?
     let oobCode: String?
-    let isROPCCall: Bool
+    let addNcaFlag: Bool
+    let includeChallengeType: Bool
     let clientInfo = true
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
@@ -52,8 +53,11 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
             // Key.clientInfo: clientInfo
         ]
 
-        if isROPCCall {
+        if includeChallengeType {
             parameters[Key.challengeType.rawValue] = config.challengeTypesString
+        }
+        
+        if addNcaFlag {
             parameters[Key.nca.rawValue] = "1"
         }
 

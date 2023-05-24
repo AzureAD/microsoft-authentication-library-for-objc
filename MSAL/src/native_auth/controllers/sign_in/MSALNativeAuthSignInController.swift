@@ -1,5 +1,4 @@
 //
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -83,7 +82,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             password: params.password,
             scopes: scopes,
             grantType: .password,
-            isROPCCall: true,
+            addNcaFlag: true,
             context: params.context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
@@ -142,7 +141,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         delegate: SignInVerifyCodeDelegate) async {
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitCode, context: context)
         guard let request =
-                createTokenRequest(scopes: scopes, credentialToken: credentialToken, oobCode: code, grantType: .oobCode, context: context ) else {
+                createTokenRequest(scopes: scopes, credentialToken: credentialToken, oobCode: code, grantType: .oobCode, includeChallengeType: false, context: context) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthError.invalidRequest)
             delegate.onSignInVerifyCodeError(
                 error: VerifyCodeError(type: .generalError),
@@ -323,7 +322,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         credentialToken: String? = nil,
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
-        isROPCCall: Bool = false,
+        addNcaFlag: Bool = false,
+        includeChallengeType: Bool = true,
         context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInTokenRequestParameters(
@@ -335,7 +335,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 scope: scopes.joined(separator: ","),
                 password: password,
                 oobCode: nil,
-                isROPCCall: isROPCCall)
+                addNcaFlag: addNcaFlag,
+                includeChallengeType: includeChallengeType)
             return try requestProvider.token(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
