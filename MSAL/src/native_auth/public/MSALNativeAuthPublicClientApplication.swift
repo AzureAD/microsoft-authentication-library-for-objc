@@ -204,13 +204,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeResetPasswordController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.resetPassword(
-            parameters: .init(
-                username: username,
-                context: context
-            ),
-            delegate: delegate
-        )
+        Task {
+            await controller.resetPassword(
+                parameters: .init(
+                    username: username,
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {

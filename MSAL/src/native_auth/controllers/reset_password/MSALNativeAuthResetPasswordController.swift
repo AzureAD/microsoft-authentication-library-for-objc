@@ -60,13 +60,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     func resetPassword(
         parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters,
         delegate: ResetPasswordStartDelegate
-    ) {
+    ) async {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordStart, context: parameters.context)
-
-        Task {
-            let response = await performStartRequest(parameters: parameters)
-            await handleStartResponse(response, event: event, context: parameters.context, delegate: delegate)
-        }
+        let response = await performStartRequest(parameters: parameters)
+        await handleStartResponse(response, event: event, context: parameters.context, delegate: delegate)
     }
 
     func resendCode(context: MSIDRequestContext, flowToken: String, delegate: ResetPasswordResendCodeDelegate) async {
