@@ -31,6 +31,8 @@ protocol MSALNativeAuthResetPasswordResponseValidating {
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse
     func validate(_ result: Result<MSALNativeAuthResetPasswordContinueResponse, Error>,
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse
+    func validate(_ result: Result<MSALNativeAuthResetPasswordSubmitResponse, Error>,
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse
 }
 
 final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPasswordResponseValidating {
@@ -174,4 +176,47 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
     }
 
+    // MARK: - Submit Request
+
+    func validate(
+        _ result: Result<MSALNativeAuthResetPasswordSubmitResponse, Error>,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
+        switch result {
+        case .success(let response):
+            return handleSubmitSuccess(response, with: context)
+        case .failure(let error):
+            return handleSubmitError(error, with: context)
+        }
+    }
+
+    private func handleSubmitSuccess(
+        _ response: MSALNativeAuthResetPasswordSubmitResponse,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
+        return .success(
+            passwordResetToken: response.passwordResetToken,
+            pollInterval: response.pollInterval
+        )
+    }
+
+    private func handleSubmitError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
+        guard let apiError = error as? MSALNativeAuthResetPasswordSubmitResponseError else {
+            MSALLogger.log(level: .error, context: context, format: "submit returned unexpected error type")
+            return .unexpectedError
+        }
+
+        switch apiError.error {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .passwordError(error: apiError.error, passwordSubmitToken: nil) // TODO: pass passwordSubmitToken when it is available
+        case .invalidRequest,
+             .invalidClient,
+             .expiredToken:
+            return .error(apiError.error)
+        }
+    }
 }

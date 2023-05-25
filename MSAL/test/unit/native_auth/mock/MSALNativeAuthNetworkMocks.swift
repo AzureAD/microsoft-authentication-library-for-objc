@@ -167,6 +167,7 @@ class MSALNativeAuthResetPasswordResponseValidatorMock: MSALNativeAuthResetPassw
     var validatedStartResponse: MSALNativeAuthResetPasswordStartValidatedResponse = .unexpectedError
     var validatedChallengeResponse: MSALNativeAuthResetPasswordChallengeValidatedResponse = .unexpectedError
     var validatedContinueResponse: MSALNativeAuthResetPasswordContinueValidatedResponse = .unexpectedError
+    var validatedSubmitResponse: MSALNativeAuthResetPasswordSubmitValidatedResponse = .unexpectedError
 
     func validate(_ result: Result<MSAL.MSALNativeAuthResetPasswordStartResponse, Error>, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
 
@@ -207,6 +208,20 @@ class MSALNativeAuthResetPasswordResponseValidatorMock: MSALNativeAuthResetPassw
 
         return validatedContinueResponse
     }
+
+    func validate(_ result: Result<MSAL.MSALNativeAuthResetPasswordSubmitResponse, Error>, with context: MSIDRequestContext) -> MSAL.MSALNativeAuthResetPasswordSubmitValidatedResponse {
+        if let expectedRequestContext = expectedRequestContext {
+            XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
+            XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
+        }
+
+//        if case .success(let successResponse) = result, let expe {
+//            success
+//        }
+
+        return validatedSubmitResponse
+    }
+
 }
 
 class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswordRequestProviding {

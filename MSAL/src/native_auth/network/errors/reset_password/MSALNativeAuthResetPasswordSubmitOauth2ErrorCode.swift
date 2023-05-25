@@ -34,3 +34,26 @@ enum MSALNativeAuthResetPasswordSubmitOauth2ErrorCode: String, Decodable {
     case passwordRecentlyUsed = "password_recently_used"
     case passwordBanned = "password_banned"
 }
+
+extension MSALNativeAuthResetPasswordSubmitOauth2ErrorCode {
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+        case .passwordTooWeak:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooWeak)
+        case .passwordTooShort:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooShort)
+        case .passwordTooLong:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooLong)
+        case .passwordRecentlyUsed:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordRecentlyUsed)
+        case .passwordBanned:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordBanned)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        }
+    }
+}

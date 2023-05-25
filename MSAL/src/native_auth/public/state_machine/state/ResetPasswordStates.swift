@@ -58,6 +58,8 @@ public class ResetPasswordRequiredState: ResetPasswordBaseState {
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.submitPassword(password: password, context: context, delegate: delegate)
+        Task {
+            await controller.submitPassword(password: password, flowToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }

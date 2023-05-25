@@ -46,8 +46,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
             parameters: MSALNativeAuthResetPasswordSubmitRequestParameters(config: config,
                                                                            context: context,
                                                                            passwordSubmitToken: "<password-submit-token>",
-                                                                           newPassword:"new-password"),
-            context: MSALNativeAuthRequestContext(correlationId: correlationId)
+                                                                           newPassword:"new-password")
         )
     }
 
