@@ -72,4 +72,8 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
             return VerifyCodeError(type: .generalError, message: self.localizedDescription)
         }
     }
+    
+    func convertToPasswordRequiredError() -> PasswordRequiredError {
+        return PasswordRequiredError(signInPasswordError: convertToSignInPasswordStartError())
+    }
 }

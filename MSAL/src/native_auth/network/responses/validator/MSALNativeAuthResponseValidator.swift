@@ -166,6 +166,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
         }
     }
 
+    // TODO: do we need it?
     private func handleFailedSignInChallengeResult(
         _ context: MSALNativeAuthRequestContext,
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {

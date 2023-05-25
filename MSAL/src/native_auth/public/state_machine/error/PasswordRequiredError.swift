@@ -32,6 +32,18 @@ public class PasswordRequiredError: MSALNativeAuthGenericError {
         self.type = type
         super.init(message: message)
     }
+    
+    init(signInPasswordError: SignInPasswordStartError) {
+        switch signInPasswordError.type {
+        case .browserRequired:
+            self.type = .browserRequired
+        case .invalidPassword:
+            self.type = .invalidPassword
+        default:
+            self.type = .generalError
+        }
+        super.init(message: signInPasswordError.errorDescription)
+    }
 }
 
 @objc

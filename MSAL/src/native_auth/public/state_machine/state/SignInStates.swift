@@ -77,29 +77,32 @@ public class SignInCodeSentState: SignInBaseState {
 
 @objcMembers
 public class SignInPasswordRequiredState: SignInBaseState {
-    
+
     private let scopes: [String]
-    
+    private let username: String
+
     init(
         scopes: [String],
+        username: String,
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         flowToken: String) {
         self.scopes = scopes
+        self.username = username
         super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
     }
 
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
-        
+
         guard inputValidator.isInputValid(password) else {
             delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
             return
         }
         Task {
-            await controller.submitPassword(password, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
+            await controller.submitPassword(password, username: username, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
         }
     }
 }
