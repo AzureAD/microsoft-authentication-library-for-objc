@@ -30,4 +30,22 @@ enum MSALNativeAuthResetPasswordContinueOauth2ErrorCode: String, Decodable {
     case invalidGrant = "invalid_grant"
     case expiredToken = "expired_token"
     case verificationRequired = "verification_required"
+    case invalidOOBValue = "invalid_oob_value"
+}
+
+extension MSALNativeAuthResetPasswordContinueOauth2ErrorCode {
+    func toVerifyCodePublicError() -> VerifyCodeError {
+        switch self {
+        case .invalidOOBValue:
+            return .init(type: .invalidCode)
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+        case .invalidRequest,
+             .invalidGrant,
+             .verificationRequired:
+            return .init(type: .generalError)
+        }
+     }
 }

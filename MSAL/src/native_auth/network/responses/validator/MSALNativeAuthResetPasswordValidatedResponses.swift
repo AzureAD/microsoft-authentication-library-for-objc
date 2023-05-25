@@ -35,3 +35,10 @@ enum MSALNativeAuthResetPasswordChallengeValidatedResponse {
     case error(MSALNativeAuthResetPasswordChallengeOauth2ErrorCode)
     case unexpectedError
 }
+
+enum MSALNativeAuthResetPasswordContinueValidatedResponse {
+    case success(passwordSubmitToken: String)
+    case invalidOOB(passwordResetToken: String)
+    case error(MSALNativeAuthResetPasswordContinueResponseError)
+    case unexpectedError
+}

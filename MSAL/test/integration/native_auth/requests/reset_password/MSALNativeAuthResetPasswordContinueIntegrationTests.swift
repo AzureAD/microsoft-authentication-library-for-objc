@@ -47,8 +47,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
                                                                              context: context,
                                                                              passwordResetToken: "<password-reset-token>",
                                                                              grantType: .oobCode,
-                                                                             oobCode: "0000"),
-            context: MSALNativeAuthRequestContext(correlationId: correlationId)
+                                                                             oobCode: "0000")
         )
     }
 
@@ -101,7 +100,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .invalidOOBValue,
-            expectedError: Error(error: .invalidGrant, errorCodes: [.invalidOTP])
+            expectedError: Error(error: .invalidOOBValue, errorCodes: [.invalidOTP])
         )
     }
 

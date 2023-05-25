@@ -29,6 +29,8 @@ protocol MSALNativeAuthResetPasswordResponseValidating {
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse
     func validate(_ result: Result<MSALNativeAuthResetPasswordChallengeResponse, Error>,
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse
+    func validate(_ result: Result<MSALNativeAuthResetPasswordContinueResponse, Error>,
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse
 }
 
 final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPasswordResponseValidating {
@@ -124,6 +126,52 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
 
         return .error(apiError.error)
+    }
+
+    // MARK: - Continue Request
+
+    func validate(
+        _ result: Result<MSALNativeAuthResetPasswordContinueResponse, Error>,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
+        switch result {
+        case .success(let response):
+            return handleContinueSuccess(response, with: context)
+        case .failure(let error):
+            return handleContinueError(error, with: context)
+        }
+    }
+
+    private func handleContinueSuccess(
+        _ response: MSALNativeAuthResetPasswordContinueResponse,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
+        return .success(passwordSubmitToken: response.passwordSubmitToken)
+    }
+
+    private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
+        guard let apiError = error as? MSALNativeAuthResetPasswordContinueResponseError else {
+            MSALLogger.log(level: .error, context: context, format: "continue returned unexpected error type")
+            return .unexpectedError
+        }
+
+        switch apiError.error {
+        case .invalidOOBValue:
+            guard let passwordResetToken = apiError.passwordResetToken else {
+                MSALLogger.log(level: .error, context: context, format: "password reset token is missing")
+                return .unexpectedError
+            }
+
+            return .invalidOOB(passwordResetToken: passwordResetToken)
+        case .invalidClient,
+             .invalidGrant,
+             .expiredToken,
+             .invalidRequest:
+            return .error(apiError)
+        case .verificationRequired:
+            MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
+            return .unexpectedError
+        }
     }
 
 }
