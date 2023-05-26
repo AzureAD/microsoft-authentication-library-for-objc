@@ -26,18 +26,31 @@
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters, delegate: MSAL.ResetPasswordStartDelegate) async {
+        <#code#>
+    }
+
+
+    func submitCode(code: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) async {
+        <#code#>
+    }
+
+    func submitPassword(password: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) async {
+        <#code#>
+    }
+
     private(set) var context: MSIDRequestContext?
     private(set) var resetPasswordCalled = false
     private(set) var resendCodeCalled = false
     private(set) var submitCodeCalled = false
     private(set) var submitPasswordCalled = false
 
-    func resetPassword(username: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordStartDelegate) {
-        self.context = context
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters, delegate: MSAL.ResetPasswordStartDelegate) {
+        self.context = parameters.context
         resetPasswordCalled = true
     }
 
-    func resendCode(context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+    func resendCode(flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
         self.context = context
         resendCodeCalled = true
     }

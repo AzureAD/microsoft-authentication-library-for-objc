@@ -33,6 +33,8 @@ protocol MSALNativeAuthResetPasswordResponseValidating {
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse
     func validate(_ result: Result<MSALNativeAuthResetPasswordSubmitResponse, Error>,
                   with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse
+    func validate(_ result: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error>,
+                  with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse
 }
 
 final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPasswordResponseValidating {
@@ -214,6 +216,48 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .passwordBanned:
             return .passwordError(error: apiError.error, passwordSubmitToken: nil) // TODO: pass passwordSubmitToken when it is available
         case .invalidRequest,
+             .invalidClient,
+             .expiredToken:
+            return .error(apiError.error)
+        }
+    }
+
+    // MARK: - Poll Completion Request
+
+    func validate(
+        _ result: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error>,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+        switch result {
+        case .success(let response):
+            return handlePollCompletionSuccess(response, with: context)
+        case .failure(let error):
+            return handlePollCompletionError(error, with: context)
+        }
+    }
+
+    private func handlePollCompletionSuccess(
+        _ response: MSALNativeAuthResetPasswordPollCompletionResponse,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+        return .success(status: response.status)
+    }
+
+    private func handlePollCompletionError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+        guard let apiError = error as? MSALNativeAuthResetPasswordPollCompletionResponseError else {
+            MSALLogger.log(level: .error, context: context, format: "Poll Completion returned unexpected error type")
+            return .unexpectedError
+        }
+
+        switch apiError.error {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .passwordError(error: apiError.error, passwordSubmitToken: nil) // TODO: pass passwordSubmitToken when it is available
+        case .userNotFound,
+             .invalidRequest,
              .invalidClient,
              .expiredToken:
             return .error(apiError.error)

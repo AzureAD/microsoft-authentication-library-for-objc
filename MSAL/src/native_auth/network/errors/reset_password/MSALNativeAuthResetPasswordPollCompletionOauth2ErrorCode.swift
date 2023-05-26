@@ -35,3 +35,28 @@ enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable
     case passwordBanned = "password_banned"
     case userNotFound = "user_not_found"
 }
+
+extension MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode {
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+        case .passwordTooWeak:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooWeak)
+        case .passwordTooShort:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooShort)
+        case .passwordTooLong:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordTooLong)
+        case .passwordRecentlyUsed:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordRecentlyUsed)
+        case .passwordBanned:
+            return .init(type: .invalidPassword, message: MSALNativeAuthErrorMessages.passwordBanned)
+        case .invalidRequest,
+             .userNotFound:
+            return .init(type: .generalError)
+        }
+    }
+}
+

@@ -24,6 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController, MSALNativeAuthResetPasswordControlling {
     private let requestProvider: MSALNativeAuthResetPasswordRequestProviding
     private let responseValidator: MSALNativeAuthResetPasswordResponseValidating
@@ -351,9 +352,13 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         switch response {
         case .success(let passwordResetToken, let pollInterval):
-            stopTelemetryEvent(event, context: context)
-
-            // TODO: call poll completion
+            doPollCompletionLoop(
+                passwordResetToken: passwordResetToken,
+                pollInterval: pollInterval,
+                event: event,
+                context: context,
+                delegate: delegate
+            )
         case .passwordError(let apiError, let passwordSubmitToken):
             let error = apiError.toPasswordRequiredPublicError()
             self.stopTelemetryEvent(event, context: context, error: error)
@@ -388,6 +393,148 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error, context: context, format: "Error calling resetpassword/submit \(error)")
+
+            DispatchQueue.main.async {
+                delegate.onResetPasswordRequiredError(error: error, newState: nil)
+            }
+        }
+    }
+
+    // MARK: - Poll Completion Request handling
+
+    private func doPollCompletionLoop(
+        passwordResetToken: String,
+        pollInterval: Int,
+        retriesRemaining: Int = 5,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        delegate: ResetPasswordRequiredDelegate
+    ) {
+        Task {
+            MSALLogger.log(level: .verbose, context: context, format: "🐛🐛🐛 performing poll completion request...")
+
+            let pollCompletionResponse = await performPollCompletionRequest(
+                passwordResetToken: passwordResetToken,
+                context: context
+            )
+
+            MSALLogger.log(level: .verbose, context: context, format: "🦋🦋🦋 handling poll completion response...")
+
+            await handlePollCompletionResponse(
+                pollCompletionResponse,
+                pollInterval: pollInterval,
+                retriesRemaining: retriesRemaining,
+                event: event,
+                context: context,
+                delegate: delegate
+            )
+        }
+    }
+
+    private func performPollCompletionRequest(
+        passwordResetToken: String,
+        context: MSIDRequestContext
+    ) async -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+        let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
+            config: config,
+            context: context,
+            passwordResetToken: passwordResetToken
+        )
+        let request: MSIDHttpRequest
+
+        do {
+            request = try requestProvider.pollCompletion(parameters: parameters)
+        } catch {
+            MSALLogger.log(level: .error, context: parameters.context, format: "Error creating Poll Completion Request: \(error)")
+            return .unexpectedError
+        }
+
+        MSALLogger.log(level: .info, context: parameters.context, format: "Performing resetpassword/poll_completion request")
+
+        let result: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = await performRequest(
+            request,
+            context: parameters.context
+        )
+        return responseValidator.validate(result, with: parameters.context)
+    }
+
+    private func handlePollCompletionResponse(
+            _ response: MSALNativeAuthResetPasswordPollCompletionValidatedResponse,
+            pollInterval: Int,
+            retriesRemaining: Int,
+            event: MSIDTelemetryAPIEvent?,
+            context: MSIDRequestContext,
+            delegate: ResetPasswordRequiredDelegate
+    ) async {
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/poll_completion with response: \(response)")
+
+        switch response {
+        case .success(let status):
+            switch status {
+            case .inProgress,
+                 .notStarted:
+
+                // TODO: Add delay before retry
+
+                // TODO: Check that retries remaining > 0
+
+                doPollCompletionLoop(
+                    passwordResetToken: "token",
+                    pollInterval: pollInterval,
+                    retriesRemaining: retriesRemaining - 1,
+                    event: event,
+                    context: context,
+                    delegate: delegate)
+
+            case .succeeded:
+                stopTelemetryEvent(event, context: context)
+
+                DispatchQueue.main.async {
+                    delegate.onResetPasswordCompleted()
+                }
+            case .failed:
+                let error = PasswordRequiredError(type: .generalError)
+                self.stopTelemetryEvent(event, context: context, error: error)
+                MSALLogger.log(level: .error, context: context, format: "password poll success returned status 'failed'")
+
+                DispatchQueue.main.async {
+                    delegate.onResetPasswordRequiredError(error: error, newState: nil)
+                }
+            }
+        case .passwordError(let apiError, let passwordSubmitToken):
+            let error = apiError.toPasswordRequiredPublicError()
+            self.stopTelemetryEvent(event, context: context, error: error)
+
+            guard let passwordSubmitToken = passwordSubmitToken else {
+                MSALLogger.log(level: .error, context: context, format: "password submit token is missing")
+
+                DispatchQueue.main.async {
+                    delegate.onResetPasswordRequiredError(error: .init(type: .generalError), newState: nil)
+                }
+
+                return
+            }
+
+            DispatchQueue.main.async {
+                delegate.onResetPasswordRequiredError(
+                    error: error,
+                    newState: ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken)
+                )
+            }
+        case .error(let apiError):
+            let error = apiError.toPasswordRequiredPublicError()
+            self.stopTelemetryEvent(event, context: context, error: error)
+
+            MSALLogger.log(level: .error, context: context, format: "Error calling resetpassword/poll_completion \(error)")
+
+            DispatchQueue.main.async {
+                delegate.onResetPasswordRequiredError(error: error, newState: nil)
+            }
+        case .unexpectedError:
+            let error = PasswordRequiredError(type: .generalError)
+            self.stopTelemetryEvent(event, context: context, error: error)
+
+            MSALLogger.log(level: .error, context: context, format: "Error calling resetpassword/poll_completion \(error)")
 
             DispatchQueue.main.async {
                 delegate.onResetPasswordRequiredError(error: error, newState: nil)
