@@ -362,14 +362,17 @@
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
         deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
+#if TARGET_OS_IPHONE
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
         extraDeviceInfoDict[MSID_IS_CALLER_MANAGED_KEY] = @"1";
+        deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
+#endif
 #if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
         deviceInfo.platformSSOStatus = MSIDPlatformSSOEnabledAndRegistered;
 #endif
-        deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
+
         
         callback(deviceInfo, nil);
     }];
@@ -386,9 +389,11 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
+#if TARGET_OS_IPHONE
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_IS_CALLER_MANAGED_KEY], @"1");
+#endif
 #if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
         XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSOEnabledAndRegistered);
 #endif
@@ -421,7 +426,11 @@
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
         deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
-        
+#if TARGET_OS_IPHONE
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSID_IS_CALLER_MANAGED_KEY] = @"1";
+        deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
+#endif
         callback(deviceInfo, nil);
     }];
     
@@ -437,9 +446,12 @@
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
-        XCTAssertNotNil(deviceInformation.extraDeviceInformation[MSID_IS_CALLER_MANAGED_KEY]);
+#if TARGET_OS_IPHONE
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_IS_CALLER_MANAGED_KEY], @"1");
+#endif
         XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY]);
         XCTAssertNil(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY]);
+
         [successExpectation fulfill];
     }];
     
