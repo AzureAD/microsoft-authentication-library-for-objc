@@ -25,24 +25,24 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInResponseValidating {
-    func validateSignInTokenResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDAADTokenResponse, Error>
     ) -> MSALNativeAuthSignInTokenValidatedResponse
 
-    func validateSignInChallengeResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
 
-    func validateSignInInitiateResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse
 }
 
-final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidating {
+final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
     private let responseHandler: MSALNativeAuthResponseHandling
 
@@ -50,7 +50,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
         self.responseHandler = responseHandler
     }
 
-    func validateSignInTokenResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDAADTokenResponse, Error>
@@ -78,7 +78,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
         }
     }
 
-    func validateSignInChallengeResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse {
@@ -98,7 +98,7 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
         }
     }
 
-    func validateSignInInitiateResponse(
+    func validate(
         context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse {
