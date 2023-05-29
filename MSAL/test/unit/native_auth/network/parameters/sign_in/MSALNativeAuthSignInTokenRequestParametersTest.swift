@@ -78,7 +78,8 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             "challenge_type": "password",
             "scope": "<scope-1>",
             "password": "password",
-            "oob": "oob"
+            "oob": "oob",
+            "nca": "1"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)

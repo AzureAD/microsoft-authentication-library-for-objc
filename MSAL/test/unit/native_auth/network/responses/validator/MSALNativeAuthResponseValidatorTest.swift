@@ -101,7 +101,9 @@ final class MSALNativeAuthResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
         let invalidPasswordError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
-        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let invalidOTPCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidOTPCodeError, expectedError: .invalidOOBCode)
+        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
     }
     
