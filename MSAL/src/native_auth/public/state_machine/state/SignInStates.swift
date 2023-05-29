@@ -40,7 +40,7 @@ public class SignInBaseState: MSALNativeAuthBaseState {
 }
 
 @objcMembers
-public class SignInCodeSentState: SignInBaseState {
+public class SignInCodeRequiredState: SignInBaseState {
 
     private let scopes: [String]
 

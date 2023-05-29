@@ -26,12 +26,12 @@
 
 class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
 
-    private(set) var error: ResendCodeError?
+    private(set) var error: MSALNativeAuthGenericError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var codeLength: Int?
 
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState: MSAL.SignUpCodeRequiredState?) {
         self.error = error
         self.newState = newState
     }

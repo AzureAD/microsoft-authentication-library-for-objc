@@ -107,7 +107,9 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                                 grantType: .password,
                                                                 scope: "<scope-1>",
                                                                 password: "password",
-                                                                oobCode: "oob")
+                                                                oobCode: "oob",
+                                                                addNcaFlag: false,
+                                                                includeChallengeType: false)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.token(params)),

@@ -164,13 +164,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ) {
         guard inputValidator.isInputValid(username) else {
             DispatchQueue.main.async {
-                delegate.onSignInError(error: SignInPasswordStartError(type: .invalidUsername))
+                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidUsername))
             }
             return
         }
         guard inputValidator.isInputValid(password) else {
             DispatchQueue.main.async {
-                delegate.onSignInError(error: SignInPasswordStartError(type: .invalidPassword))
+                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidPassword))
             }
             return
         }

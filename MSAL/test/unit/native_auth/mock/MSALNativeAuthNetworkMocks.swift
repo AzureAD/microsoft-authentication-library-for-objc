@@ -77,14 +77,14 @@ class MSALNativeAuthRequestContextMock: MSIDRequestContext {
 }
 
 class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseValidating {
-    
+
     var expectedRequestContext: MSALNativeAuthRequestContext?
     var expectedConfiguration: MSIDConfiguration?
     var expectedTokenResponse: MSIDAADTokenResponse?
     var expectedTokenResponseError: Error?
     var tokenValidatesResponse: MSALNativeAuthSignInTokenValidatedResponse = .error(.generalError)
     
-    func validateSignInTokenResponse(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDAADTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
+    func validate(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDAADTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
         if let expectedRequestContext = expectedRequestContext {
             XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
             XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
@@ -102,6 +102,16 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
             XCTAssertEqual(tokenResponseError.localizedDescription, expectedTokenResponseError.localizedDescription)
         }
         return tokenValidatesResponse
+    }
+    
+    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
+        // TODO: add implementation here
+        return .error(.expiredToken)
+    }
+    
+    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
+        // TODO: add implementation here
+        return .error(.invalidClient)
     }
     
 }
