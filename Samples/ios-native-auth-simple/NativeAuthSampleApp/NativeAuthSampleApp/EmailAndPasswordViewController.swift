@@ -77,7 +77,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
+        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -185,7 +185,7 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 }
 
 extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")

@@ -232,7 +232,7 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 }
 
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")

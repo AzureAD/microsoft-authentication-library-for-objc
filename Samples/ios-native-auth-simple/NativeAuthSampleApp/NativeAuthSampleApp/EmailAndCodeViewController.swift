@@ -80,7 +80,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing in with email \(email)")
 
-        nativeAuth.signUpUsingCode(username: email, delegate: self)
+        nativeAuth.signInUsingCode(username: email, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -252,7 +252,7 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 }
 
 extension EmailAndCodeViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")

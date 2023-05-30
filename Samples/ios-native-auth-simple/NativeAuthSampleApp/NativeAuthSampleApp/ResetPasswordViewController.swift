@@ -209,7 +209,7 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
 
 extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
     func onResetPasswordResendCodeError(
-        error: MSAL.ResendCodeError,
+        error: MSALNativeAuthGenericError,
         newState _: MSAL.ResetPasswordCodeRequiredState?
     ) {
         print("ResetPasswordResendCodeDelegate: onResetPasswordResendCodeError: \(error)")
