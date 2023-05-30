@@ -29,6 +29,7 @@ import XCTest
 
 final class SignUpPasswordRequiredStateTests: XCTestCase {
 
+    private var exp: XCTestExpectation!
     private var correlationId: UUID!
     private var controller: MSALNativeAuthSignUpControllerSpy!
     private var sut: SignUpPasswordRequiredState!
@@ -37,7 +38,8 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         correlationId = UUID()
-        controller = MSALNativeAuthSignUpControllerSpy()
+        exp = expectation(description: "SignUpPasswordRequiredState expectation")
+        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
         sut = SignUpPasswordRequiredState(controller: controller, flowToken: "<token>")
     }
 
@@ -47,6 +49,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
         sut.submitPassword(password: "1234", delegate: SignUpPasswordRequiredDelegateSpy(), correlationId: correlationId)
 
+        wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)
         XCTAssertTrue(controller.submitPasswordCalled)
     }

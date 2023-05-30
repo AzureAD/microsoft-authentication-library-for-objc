@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,24 +24,22 @@
 
 import Foundation
 
-enum MSALNativeAuthTelemetryApiId: Int {
-    // Until we know exactly how to define them,
-    // to prevent any clashes with existing id's
-    // a number that is unlikely to be used has been added
-    case telemetryApiIdSignUp = 75001
-    case telemetryApiIdSignInWithPassword = 75002
-    case telemetryApiIdRefreshToken = 75003
-    case telemetryApiIdResetPasswordStart = 75004
-    case telemetryApiIdResetPasswordComplete = 75005
-    case telemetryApiIdResendCode = 75006
-    case telemetryApiIdVerifyCode = 75007
-    case telemetryApiIdSignOut = 75008
-    case telemetryResetPassword = 75009
-    case telemetryApiIdSignUpPasswordStart = 75019
-    case telemetryApiIdSignUpPasswordChallenge = 75015
-    case telemetryApiIdSignUpCodeStart = 75010
-    case telemetryApiIdSignUpResendCode = 75011
-    case telemetryApiIdSignUpSubmitCode = 75012
-    case telemetryApiIdSignUpSubmitPassword = 75013
-    case telemetryApiIdSignUpSubmitAttributes = 75014
+@objc
+public class SignUpPasswordStartError: MSALNativeAuthBaseError {
+    @objc public let type: SignUpPasswordStartErrorType
+
+    init(type: SignUpPasswordStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
+}
+
+@objc
+public enum SignUpPasswordStartErrorType: Int {
+    case browserRequired
+    case userAlreadyExists
+    case invalidPassword
+    case invalidUsername
+    case invalidAttributes
+    case generalError
 }

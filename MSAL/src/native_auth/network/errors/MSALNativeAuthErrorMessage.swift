@@ -16,30 +16,21 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
-@objc
-public class SignUpStartError: MSALNativeAuthBaseError {
-    @objc public let type: SignUpStartErrorType
-
-    init(type: SignUpStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
-}
-
-@objc
-public enum SignUpStartErrorType: Int {
-    case browserRequired
-    case userAlreadyExists
-    case invalidPassword
-    case invalidUsername
-    case invalidAttributes
-    case generalError
+enum MSALNativeAuthErrorMessage {
+    static let invalidClient = "Invalid Client ID"
+    static let unsupportedChallengeType = "Unsupported challenge type"
+    static let unsupportedAuthMethod = "Authentication method not supported"
+    static let expiredToken = "Flow token has expired. Please start the flow again"
+    static let passwordTooWeak = "Password too weak"
+    static let passwordTooShort = "Password too short"
+    static let passwordTooLong = "Password too long"
+    static let passwordRecentlyUsed = "Password recently used"
+    static let passwordBanned = "Password banned"
+    static let delegateNotImplemented = "MSALNativeAuth has called an optional delegate method that has not been implemented"
 }

@@ -26,7 +26,7 @@ import Foundation
 
 @objc
 public protocol SignUpPasswordStartDelegate {
-    func onSignUpError(error: SignUpStartError)
+    func onSignUpPasswordError(error: SignUpPasswordStartError)
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -43,13 +43,6 @@ public protocol SignUpCodeStartDelegate {
 }
 
 @objc
-public protocol SignUpCodeVerifyCodeDelegate {
-    func onSignUpCodeVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
-    @objc optional func onSignUpCodeAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onSignUpCodeCompleted()
-}
-
-@objc
 public protocol SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
@@ -59,11 +52,13 @@ public protocol SignUpVerifyCodeDelegate {
 
 @objc
 public protocol SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeRequiredState?)
-    func onSignUpResendCodeRequired(newState: SignUpCodeRequiredState,
-                                    sentTo: String,
-                                    channelTargetType: MSALNativeAuthChannelType,
-                                    codeLength: Int)
+    func onSignUpResendCodeError(error: ResendCodeError)
+    func onSignUpResendCodeCodeRequired(
+        newState: SignUpCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc

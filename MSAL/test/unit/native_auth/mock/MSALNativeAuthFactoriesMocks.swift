@@ -29,40 +29,12 @@ import XCTest
 class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuildable {
 
     func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
-        MSALNativeAuthSignUpController(clientId: "")
-    }
-
-    func makeSignUpControllerLegacy() -> MSAL.MSALNativeAuthSignUpControllingLegacy {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthSignUpControllerLegacy(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-
-    func makeSignUpOTPController() -> MSAL.MSALNativeAuthSignUpOTPControllingLegacy {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthSignUpOTPControllerLegacy(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
+        MSALNativeAuthSignUpController(config: MSALNativeAuthConfigStubs.configuration)
     }
 
     func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
         XCTFail("This method should not be called")
         return MSALNativeAuthSignInController(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-
-    func makeResendCodeController() -> MSAL.MSALNativeAuthResendCodeControllingLegacy {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthResendCodeControllerLegacy(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-
-    func makeVerifyCodeController() -> MSAL.MSALNativeAuthVerifyCodeControllingLegacy {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthVerifyCodeControllerLegacy(
             config: MSALNativeAuthConfigStubs.configuration
         )
     }
