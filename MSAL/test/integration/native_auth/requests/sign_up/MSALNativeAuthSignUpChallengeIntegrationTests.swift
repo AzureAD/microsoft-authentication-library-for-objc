@@ -81,21 +81,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         )
     }
 
-    func test_signUpChallenge_invalidPurposeToken() async throws {
-        let response = try await perform_testFail(
-            endpoint: .signUpChallenge,
-            response: .invalidPurposeToken,
-            expectedError: Error(error: .invalidRequest)
-        )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
-    }
-
     func test_signUpChallenge_expiredToken() async throws {
         try await perform_testFail(
             endpoint: .signUpChallenge,
@@ -109,6 +94,14 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
             endpoint: .signUpChallenge,
             response: .unsupportedChallengeType,
             expectedError: Error(error: .unsupportedChallengeType)
+        )
+    }
+
+    func test_signUpChallenge_invalidSignUpToken() async throws {
+        try await perform_testFail(
+            endpoint: .signUpChallenge,
+            response: .invalidSignUpToken,
+            expectedError: Error(error: .invalidRequest)
         )
     }
 }

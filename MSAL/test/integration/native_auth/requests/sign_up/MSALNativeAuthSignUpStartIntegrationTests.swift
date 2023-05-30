@@ -44,7 +44,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
                 username: DEFAULT_TEST_ID_TOKEN_USERNAME,
                 password: "1234",
                 attributes: [:],
-                context: MSALNativeAuthRequestContext()
+                context: MSALNativeAuthRequestContext(correlationId: correlationId)
             )
         )
     }
@@ -147,16 +147,6 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             endpoint: .signUpStart,
             response: .attributeValidationFailed,
             expectedError: Error(error: .attributeValidationFailed)
-        )
-
-        XCTAssertNotNil(response.signUpToken)
-    }
-
-    func test_signUpStart_invalidAttributes() async throws {
-        let response = try await perform_testFail(
-            endpoint: .signUpStart,
-            response: .invalidAttributes,
-            expectedError: Error(error: .invalidAttributes)
         )
 
         XCTAssertNotNil(response.signUpToken)

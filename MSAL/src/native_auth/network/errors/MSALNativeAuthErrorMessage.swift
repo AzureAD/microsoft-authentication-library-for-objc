@@ -39,4 +39,5 @@ enum MSALNativeAuthErrorMessage {
     static let browserRequired = "Browser required. Use acquireTokenInteractively instead"
     static let userDoesNotHavePassword = "User does not have password associated with account"
     static let userNotFound = "User does not exist"
+    static let attributeValidationFailedSignUpStart = "Please check the invalid attributes and start again the sign-up flow. Invalid attributes: "
 }
