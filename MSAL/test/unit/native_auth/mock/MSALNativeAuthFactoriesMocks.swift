@@ -68,7 +68,9 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuilda
     }
 
     func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
-        MSALNativeAuthResetPasswordController(clientId: "")
+        MSALNativeAuthResetPasswordController(
+            config: MSALNativeAuthConfigStubs.configuration
+        )
     }
 }
 

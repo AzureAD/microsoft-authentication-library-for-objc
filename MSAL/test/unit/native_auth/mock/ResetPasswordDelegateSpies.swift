@@ -26,34 +26,32 @@
 import XCTest
 
 class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
-    private let expectation: XCTestExpectation
-    var expectedError: ResetPasswordStartError?
+    private let expectation: XCTestExpectation?
+    private(set) var onResetPasswordErrorCalled = false
+    private(set) var onResetPasswordCodeSentCalled = false
+    private(set) var error: ResetPasswordStartError?
+    private(set) var newState: ResetPasswordCodeSentState?
+    private(set) var displayName: String?
+    private(set) var codeLength: Int?
 
-    init(expectation: XCTestExpectation, expectedError: ResetPasswordStartError? = nil) {
+    init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
-        self.expectedError = expectedError
     }
 
     func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
-        if let expectedError = expectedError {
-            XCTAssertEqual(error.type, expectedError.type)
-            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
-            expectation.fulfill()
-            return
-        }
+        onResetPasswordErrorCalled = true
+        self.error = error
 
-        XCTFail("This method should not be called")
-        expectation.fulfill()
+        self.expectation?.fulfill()
     }
 
     func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
-        if expectedError == nil {
-            expectation.fulfill()
-            return
-        }
+        onResetPasswordCodeSentCalled = true
+        self.newState = newState
+        self.displayName = displayName
+        self.codeLength = codeLength
 
-        XCTFail("This method should not be called")
-        expectation.fulfill()
+        self.expectation?.fulfill()
     }
 }
 

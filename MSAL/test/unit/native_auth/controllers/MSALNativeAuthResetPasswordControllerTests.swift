@@ -29,51 +29,82 @@ import XCTest
 final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthResetPasswordController!
+    private var contextMock: MSALNativeAuthRequestContext!
     private var requestProviderMock: MSALNativeAuthResetPasswordRequestProviderMock!
-    private var responseValidatorMock: MSALNativeAuthResetPasswordResponseValidatorMock!
-    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
-    private var contextMock: MSALNativeAuthRequestContextMock!
-    private var factoryMock: MSALNativeAuthResultFactoryMock!
-    private var tokenResult = MSIDTokenResult()
-    private var tokenResponse = MSIDAADTokenResponse()
-    private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
+    private var validatorMock: MSALNativeAuthResetPasswordResponseValidatorMock!
 
-    private var resetPasswordStartRequestParamsStub: MSALNativeAuthResetPasswordStartRequestParameters {
+
+    private var resetPasswordStartParams: MSALNativeAuthResetPasswordStartRequestProviderParameters {
         .init(
-            config: MSALNativeAuthConfigStubs.configuration,
-            context: contextMock,
-            username: "username"
+            username: "user@contoso.com",
+            context: contextMock
         )
     }
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
+
+        contextMock = .init(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
         requestProviderMock = .init()
-        cacheAccessorMock = .init()
-        contextMock = .init()
-        contextMock.mockTelemetryRequestId = "telemetry_request_id"
-        factoryMock = .init()
+        validatorMock = .init()
 
         sut = .init(config: MSALNativeAuthConfigStubs.configuration,
                     requestProvider: requestProviderMock,
-                    responseValidator: responseValidatorMock,
-                    cacheAccessor: cacheAccessorMock)
-
-        try super.setUpWithError()
+                    responseValidator: validatorMock,
+                    cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
     }
-//
-//    func test_resetPasswordController_Start() throws {
-//        let expectation = expectation(description: "ResetPasswordController")
-//
-//        let username = "test@contoso.com"
-//        let context = MSALNativeAuthRequestContextMock(correlationId: defaultUUID)
-//
-//        let mockDelegate = ResetPasswordStartDelegateSpy(expectation: expectation)
-//
-//        sut.resetPassword(parameters: .init(username: username, context: context), delegate: mockDelegate)
-//
-//        wait(for: [expectation], timeout: 1)
-//    }
 
+    func test_whenResetPasswordStart_cantCreateRequest_it_returns_unexpectedError() async {
+        requestProviderMock.mockStartRequestFunc(nil, throwError: true)
 
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordStartDelegateSpy(exp)
+
+        await sut.resetPassword(parameters: resetPasswordStartParams, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(delegate.onResetPasswordErrorCalled)
+        XCTAssertNil(delegate.newState)
+        XCTAssertNil(delegate.displayName)
+        XCTAssertNil(delegate.codeLength)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
+    }
+
+    // MARK: - Common Methods
+
+    //TODO: Reuse function from Sign Up tests
+    private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
+        XCTAssertEqual(receivedEvents.count, 1)
+
+        guard let telemetryEventDict = receivedEvents.first?.propertyMap else {
+            return XCTFail("Telemetry test fail")
+        }
+
+        let expectedApiId = String(id.rawValue)
+        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
+        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event" )
+        XCTAssertEqual(telemetryEventDict["correlation_id" ] as? String, DEFAULT_TEST_UID.uppercased())
+        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, isSuccessful ? "yes" : "no")
+        XCTAssertEqual(telemetryEventDict["status"] as? String, isSuccessful ? "succeeded" : "failed")
+        XCTAssertNotNil(telemetryEventDict["start_time"])
+        XCTAssertNotNil(telemetryEventDict["stop_time"])
+        XCTAssertNotNil(telemetryEventDict["response_time"])
+    }
+
+    private func prepareResetPasswordStartDelegateSpy(_ expectation: XCTestExpectation? = nil) -> ResetPasswordStartDelegateSpy {
+        let delegate = ResetPasswordStartDelegateSpy(expectation: expectation)
+        XCTAssertFalse(delegate.onResetPasswordErrorCalled)
+        XCTAssertFalse(delegate.onResetPasswordCodeSentCalled)
+        XCTAssertNil(delegate.newState)
+        XCTAssertNil(delegate.displayName)
+        XCTAssertNil(delegate.codeLength)
+        XCTAssertNil(delegate.error)
+
+        return delegate
+    }
 
 }

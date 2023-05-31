@@ -26,20 +26,8 @@
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
-    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters, delegate: MSAL.ResetPasswordStartDelegate) async {
-        <#code#>
-    }
-
-
-    func submitCode(code: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) async {
-        <#code#>
-    }
-
-    func submitPassword(password: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) async {
-        <#code#>
-    }
-
     private(set) var context: MSIDRequestContext?
+    private(set) var flowToken: String?
     private(set) var resetPasswordCalled = false
     private(set) var resendCodeCalled = false
     private(set) var submitCodeCalled = false
@@ -51,16 +39,19 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
     }
 
     func resendCode(flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+        self.flowToken = flowToken
         self.context = context
         resendCodeCalled = true
     }
 
-    func submitCode(code: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+    func submitCode(code: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+        self.flowToken = flowToken
         self.context = context
         submitCodeCalled = true
     }
 
-    func submitPassword(password: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+    func submitPassword(password: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+        self.flowToken = flowToken
         self.context = context
         submitPasswordCalled = true
     }
