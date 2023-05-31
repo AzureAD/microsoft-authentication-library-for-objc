@@ -22,19 +22,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
+    case verificationRequired(signUpToken: String)
+    case redirect
+    case error(MSALNativeAuthSignUpStartOauth2ErrorCode)
+    case unexpectedError
+}
 
-@objcMembers
-final public class MSALNativeAuthSignUpOTPParameters: MSALNativeAuthParameters {
+enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
+    case successOOB(_ sentTo: String, _ channelType: MSALNativeAuthApiChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
+    case successPassword(_ signUpChallengeToken: String)
+    case redirect
+    case error(MSALNativeAuthSignUpChallengeOauth2ErrorCode)
+    case unexpectedError
+}
 
-    public let email: String
-    public let attributes: [String: Any]
-    public let scopes: [String]
-
-    public init(email: String, attributes: [String: Any] = [:], scopes: [String] = [], correlationId: UUID? = nil) {
-        self.email = email
-        self.attributes = attributes
-        self.scopes = scopes
-        super.init(correlationId: correlationId)
-    }
+enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
+    case success(_ signInSLT: String)
+    /// error that represents invalidOOB, invalidPassword and invalidAttributes, depending on which State the input comes from
+    case invalidUserInput(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode, _ signUpToken: String)
+    case credentialRequired(_ signUpToken: String)
+    case attributesRequired(_ signUpToken: String)
+    case error(MSALNativeAuthSignUpContinueOauth2ErrorCode)
+    case unexpectedError
 }

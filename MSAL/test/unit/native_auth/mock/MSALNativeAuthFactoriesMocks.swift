@@ -29,7 +29,7 @@ import XCTest
 class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuildable {
 
     func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
-        MSALNativeAuthSignUpController(clientId: "")
+        MSALNativeAuthSignUpController(config: MSALNativeAuthConfigStubs.configuration)
     }
 
     func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {

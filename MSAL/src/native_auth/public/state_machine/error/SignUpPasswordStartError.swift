@@ -22,35 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import Foundation
+
 @objc
-public final class MSALNativeAuthUserAccount: NSObject {
+public class SignUpPasswordStartError: MSALNativeAuthGenericError {
+    @objc public let type: SignUpPasswordStartErrorType
 
-    @objc public let username: String
-    @objc public let accessToken: String
-    @objc public let rawIdToken: String?
-    @objc public let scopes: [String]
-    @objc public let expiresOn: Date
-    @objc public let attributes: [String: Any]
-
-    init(
-        username: String,
-        accessToken: String,
-        rawIdToken: String?,
-        scopes: [String],
-        expiresOn: Date,
-        attributes: [String: Any] = [:]
-    ) {
-        self.username = username
-        self.accessToken = accessToken
-        self.rawIdToken = rawIdToken
-        self.scopes = scopes
-        self.expiresOn = expiresOn
-        self.attributes = attributes
+    init(type: SignUpPasswordStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
     }
+}
 
-    public func signOut() {
-        MSALLogger.log(level: .info,
-                       context: nil,
-                       format: "Account with username \(username) has been logged out. All tokens cleared.")
-    }
+@objc
+public enum SignUpPasswordStartErrorType: Int {
+    case browserRequired
+    case userAlreadyExists
+    case invalidPassword
+    case invalidUsername
+    case invalidAttributes
+    case generalError
 }

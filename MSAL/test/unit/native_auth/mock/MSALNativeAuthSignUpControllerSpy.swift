@@ -22,10 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
+    private let expectation: XCTestExpectation
     private(set) var context: MSIDRequestContext?
     private(set) var signUpStartPasswordCalled = false
     private(set) var signUpStartCalled = false
@@ -34,34 +36,65 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     private(set) var submitPasswordCalled = false
     private(set) var submitAttributesCalled = false
 
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
 
-    func signUpStart(username: String, password: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpPasswordStartDelegate) {
-        self.context = context
+
+    func signUpStartPassword(
+        parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
+        delegate: SignUpPasswordStartDelegate
+    ) {
+        self.context = parameters.context
         signUpStartPasswordCalled = true
+        expectation.fulfill()
     }
 
-    func signUpStart(username: String, attributes: [String : Any]?, context: MSIDRequestContext, delegate: MSAL.SignUpCodeStartDelegate) {
-        self.context = context
+    func signUpStartCode(
+        parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
+        delegate: SignUpCodeStartDelegate
+    ) {
+        self.context = parameters.context
         signUpStartCalled = true
+        expectation.fulfill()
     }
 
-    func resendCode(context: MSIDRequestContext, delegate: MSAL.SignUpResendCodeDelegate) {
+    func resendCode(context: MSIDRequestContext, signUpToken: String, delegate: MSAL.SignUpResendCodeDelegate) {
         self.context = context
         resendCodeCalled = true
+        expectation.fulfill()
     }
 
-    func submitCode(_ code: String, context: MSIDRequestContext, delegate: MSAL.SignUpVerifyCodeDelegate) {
+    func submitCode(
+        _ code: String,
+        signUpToken: String,
+        context: MSIDRequestContext,
+        delegate: SignUpVerifyCodeDelegate
+    ) {
         self.context = context
         submitCodeCalled = true
+        expectation.fulfill()
     }
 
-    func submitPassword(_ password: String, context: MSIDRequestContext, delegate: MSAL.SignUpPasswordRequiredDelegate) {
+    func submitPassword(
+        _ password: String,
+        signUpToken: String,
+        context: MSIDRequestContext,
+        delegate: SignUpPasswordRequiredDelegate
+    ) {
         self.context = context
         submitPasswordCalled = true
+        expectation.fulfill()
     }
 
-    func submitAttributes(_ attributes: [String : Any], context: MSIDRequestContext, delegate: MSAL.SignUpAttributesRequiredDelegate) {
+    func submitAttributes(
+        _ attributes: [String: Any],
+        signUpToken: String,
+        context: MSIDRequestContext,
+        delegate: SignUpAttributesRequiredDelegate
+    ) {
         self.context = context
         submitAttributesCalled = true
+        expectation.fulfill()
     }
 }

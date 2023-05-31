@@ -26,10 +26,16 @@ import Foundation
 
 @objcMembers
 public class SignUpBaseState: MSALNativeAuthBaseState {
-    fileprivate weak var controller: MSALNativeAuthSignUpControlling?
+    fileprivate let controller: MSALNativeAuthSignUpControlling
+    fileprivate let inputValidator: MSALNativeAuthInputValidating
 
-    init(controller: MSALNativeAuthSignUpControlling, flowToken: String) {
+    init(
+        controller: MSALNativeAuthSignUpControlling,
+        flowToken: String,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
+    ) {
         self.controller = controller
+        self.inputValidator = inputValidator
         super.init(flowToken: flowToken)
     }
 }
@@ -39,30 +45,23 @@ public class SignUpCodeRequiredState: SignUpBaseState {
 
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            DispatchQueue.main.async {
-                delegate.onSignUpResendCodeError(error: MSALNativeAuthGenericError(), newState: nil)
-            }
-            return
+        Task {
+            await controller.resendCode(context: context, signUpToken: flowToken, delegate: delegate)
         }
-
-        controller.resendCode(context: context, delegate: delegate)
     }
 
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            DispatchQueue.main.async {
-                delegate.onSignUpVerifyCodeError(error: .init(type: .generalError), newState: nil)
-            }
+        guard inputValidator.isInputValid(code) else {
+            delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid code")
             return
         }
 
-        controller.submitCode(code, context: context, delegate: delegate)
+        Task {
+            await controller.submitCode(code, signUpToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }
 
@@ -72,15 +71,15 @@ public class SignUpPasswordRequiredState: SignUpBaseState {
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            DispatchQueue.main.async {
-                delegate.onSignUpPasswordRequiredError(error: .init(type: .generalError), newState: nil)
-            }
+        guard inputValidator.isInputValid(password) else {
+            delegate.onSignUpPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid password")
             return
         }
 
-        controller.submitPassword(password, context: context, delegate: delegate)
+        Task {
+            await controller.submitPassword(password, signUpToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }
 
@@ -94,14 +93,14 @@ public class SignUpAttributesRequiredState: SignUpBaseState {
     ) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        guard let controller = controller else {
-            MSALLogger.log(level: .error, context: context, format: "Error - Controller is nil")
-            DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(error: .init(type: .generalError), newState: nil)
-            }
+        guard inputValidator.isInputValid(attributes) else {
+            delegate.onSignUpAttributesRequiredError(error: AttributesRequiredError(type: .invalidAttributes), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid attributes")
             return
         }
 
-        controller.submitAttributes(attributes, context: context, delegate: delegate)
+        Task {
+            await controller.submitAttributes(attributes, signUpToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }

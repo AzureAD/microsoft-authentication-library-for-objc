@@ -24,9 +24,64 @@
 
 import Foundation
 
-enum MSALNativeAuthSignUpChallengeOauth2ErrorCode: String, Decodable {
+enum MSALNativeAuthSignUpChallengeOauth2ErrorCode: String, Decodable, CaseIterable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case unsupportedChallengeType = "unsupported_challenge_type"
     case expiredToken = "expired_token"
+}
+
+extension MSALNativeAuthSignUpChallengeOauth2ErrorCode {
+
+    func toSignUpPasswordStartPublicError() -> SignUpPasswordStartError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        }
+    }
+
+    func toSignUpCodeStartPublicError() -> SignUpCodeStartError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        }
+    }
+
+    func toResendCodePublicError() -> MSALNativeAuthGenericError {
+        switch self {
+        case .invalidClient:
+            return .init(message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .expiredToken:
+            return .init(message: MSALNativeAuthErrorMessage.expiredToken)
+        case .invalidRequest:
+            return .init()
+        }
+    }
+
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch self {
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .expiredToken:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
+        case .invalidRequest:
+            return .init(type: .generalError)
+        }
+    }
 }

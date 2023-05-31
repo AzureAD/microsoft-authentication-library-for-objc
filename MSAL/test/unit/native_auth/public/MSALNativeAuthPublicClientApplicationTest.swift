@@ -58,10 +58,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     }
     
     private class SignUpStartCompletionErrorDelegate: SignUpPasswordStartDelegate, SignUpCodeStartDelegate {
-        var expectedErrorType = SignUpStartErrorType.invalidUsername
+        var expectedErrorType = SignUpPasswordStartErrorType.invalidUsername
         var expectedOTPErrorType = SignUpCodeStartErrorType.invalidUsername
         
-        func onSignUpError(error: MSAL.SignUpStartError) {
+        func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
             XCTAssertEqual(error.type, expectedErrorType)
             expectation.fulfill()
         }

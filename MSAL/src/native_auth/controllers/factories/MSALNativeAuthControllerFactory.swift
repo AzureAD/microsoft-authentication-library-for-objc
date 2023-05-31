@@ -22,8 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
-
 protocol MSALNativeAuthControllerBuildable {
     func makeSignUpController() -> MSALNativeAuthSignUpControlling
     func makeSignInController() -> MSALNativeAuthSignInControlling
@@ -38,7 +36,7 @@ final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     }
 
     func makeSignUpController() -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(clientId: config.clientId)
+        return MSALNativeAuthSignUpController(config: config)
     }
 
     func makeSignInController() -> MSALNativeAuthSignInControlling {

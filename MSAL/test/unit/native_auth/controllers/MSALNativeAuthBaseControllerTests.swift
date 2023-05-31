@@ -201,4 +201,70 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         wait(for: [exp1, exp2], timeout: 1)
     }
+
+    func test_performRequest_withError() async {
+        let baseUrl = URL(string: "https://www.contoso.com")!
+
+        let parameters = ["p1": "v1"]
+
+        let httpResponse = HTTPURLResponse(
+            url: baseUrl,
+            statusCode: 500,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        var urlRequest = URLRequest(url: baseUrl)
+        urlRequest.httpMethod = "POST"
+
+        let testUrlResponse = MSIDTestURLResponse.request(baseUrl, reponse: httpResponse)
+
+        testUrlResponse?.setError(ErrorMock.error)
+
+        testUrlResponse?.setUrlFormEncodedBody(parameters)
+        testUrlResponse?.setResponseJSON([""])
+        MSIDTestURLSession.add(testUrlResponse)
+
+        let request = MSIDHttpRequest()
+
+        request.urlRequest = urlRequest
+        request.parameters = parameters
+
+        let result: Result<String, Error> = await sut.performRequest(request, context: contextMock)
+
+        switch result {
+        case .failure(let error):
+            XCTAssertEqual(error as? ErrorMock, ErrorMock.error)
+        case .success:
+            XCTFail("Unexpected response")
+        }
+    }
+
+    func test_performRequest_withSuccess() async {
+        let request = MSIDHttpRequest()
+        HttpModuleMockConfigurator.configure(request: request, responseJson: ["response"])
+
+        let result: Result<[String], Error> = await sut.performRequest(request, context: contextMock)
+
+        switch result {
+        case .failure:
+            XCTFail("Unexpected response")
+        case .success(let response):
+            XCTAssertEqual(response.first, "response")
+        }
+    }
+
+    func test_performRequest_withUnexpectedError() async {
+        let request = MSIDHttpRequest()
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [nil] as [Any?])
+
+        let result: Result<[String], Error> = await sut.performRequest(request, context: contextMock)
+
+        switch result {
+        case .failure(let error):
+            XCTAssertEqual(error as? MSALNativeAuthError, .invalidResponse)
+        case .success:
+            XCTFail("Unexpected response")
+        }
+    }
 }

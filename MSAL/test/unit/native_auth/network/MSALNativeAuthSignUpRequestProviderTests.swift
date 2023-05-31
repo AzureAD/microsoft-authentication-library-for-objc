@@ -41,13 +41,14 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     }
 
     func test_signUpStartRequest_is_created_successfully() throws {
-        let parameters = MSALNativeAuthSignUpParameters(
-            email: DEFAULT_TEST_ID_TOKEN_USERNAME,
+        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "1234",
-            attributes: ["city": "dublin"]
+            attributes: ["city": "dublin"],
+            context: MSALNativeAuthRequestContext(correlationId: context.correlationId())
         )
 
-        let request = try sut.start(parameters: parameters, context: context)
+        let request = try sut.start(parameters: parameters)
 
         checkBodyParams(request.parameters, for: .signUpStart)
         checkUrlRequest(request.urlRequest!, for: .signUpStart)
@@ -76,7 +77,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             context: context
         )
 
-        let request = try sut.continue(parameters: parameters, context: context)
+        let request = try sut.continue(parameters: parameters)
 
         checkBodyParams(request.parameters, for: .signUpContinue)
         checkUrlRequest(request.urlRequest!, for: .signUpContinue)

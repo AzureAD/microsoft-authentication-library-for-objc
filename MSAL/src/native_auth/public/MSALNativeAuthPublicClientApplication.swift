@@ -108,13 +108,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ) {
         guard inputValidator.isInputValid(username) else {
             DispatchQueue.main.async {
-                delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
+                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidUsername))
             }
             return
         }
         guard inputValidator.isInputValid(password) else {
             DispatchQueue.main.async {
-                delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
+                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidPassword))
             }
             return
         }
@@ -122,13 +122,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeSignUpController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.signUpStart(
-            username: username,
-            password: password,
-            attributes: attributes,
-            context: context,
-            delegate: delegate
-        )
+        Task {
+            await controller.signUpStartPassword(
+                parameters: .init(
+                    username: username,
+                    password: password,
+                    attributes: attributes ?? [:],
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
     public func signUpUsingCode(
@@ -147,12 +151,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeSignUpController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.signUpStart(
-            username: username,
-            attributes: attributes,
-            context: context,
-            delegate: delegate
-        )
+        Task {
+            await controller.signUpStartCode(
+                parameters: .init(
+                    username: username,
+                    password: nil,
+                    attributes: attributes ?? [:],
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
     public func signInUsingPassword(

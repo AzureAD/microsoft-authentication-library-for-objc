@@ -102,7 +102,13 @@ public class SignInPasswordRequiredState: SignInBaseState {
             return
         }
         Task {
-            await controller.submitPassword(password, username: username, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
+            await controller.submitPassword(
+                password,
+                username: username,
+                credentialToken: flowToken,
+                context: context,
+                scopes: scopes,
+                delegate: delegate)
         }
     }
 }

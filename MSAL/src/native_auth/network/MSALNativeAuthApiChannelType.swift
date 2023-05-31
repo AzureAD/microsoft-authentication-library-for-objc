@@ -24,33 +24,19 @@
 
 import Foundation
 
-import XCTest
-@testable import MSAL
+enum MSALNativeAuthApiChannelType: String {
+    case email
+    case phone
+}
 
-final class SignUpAttributesRequiredStateTests: XCTestCase {
+extension MSALNativeAuthApiChannelType {
 
-    private var exp: XCTestExpectation!
-    private var correlationId: UUID!
-    private var controller: MSALNativeAuthSignUpControllerSpy!
-    private var sut: SignUpAttributesRequiredState!
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-
-        correlationId = UUID()
-        exp = expectation(description: "SignUpAttributesRequiredState expectation")
-        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
-        sut = SignUpAttributesRequiredState(controller: controller, flowToken: "<token>")
-    }
-
-    func test_submitAttributes_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitAttributesCalled)
-
-        sut.submitAttributes(attributes: ["city": "Dublin"], delegate: SignUpAttributesRequiredDelegateSpy(), correlationId: correlationId)
-
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitAttributesCalled)
+    func toDomain() -> MSALNativeAuthChannelType {
+        switch self {
+        case .email:
+            return .email
+        case .phone:
+            return .phone
+        }
     }
 }
