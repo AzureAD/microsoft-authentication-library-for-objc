@@ -32,7 +32,7 @@ public class PasswordRequiredError: MSALNativeAuthGenericError {
         self.type = type
         super.init(message: message)
     }
-    
+
     init(signInPasswordError: SignInPasswordStartError) {
         switch signInPasswordError.type {
         case .browserRequired:

@@ -42,7 +42,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
         case .redirect:
             return .init(type: .browserRequired)
         case .invalidClient:
-            return .init(type: .generalError, message: "Invalid Client ID")
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .userNotFound:
             return .init(type: .userNotFound)
         case .unsupportedChallengeType, .invalidRequest, .invalidServerResponse:

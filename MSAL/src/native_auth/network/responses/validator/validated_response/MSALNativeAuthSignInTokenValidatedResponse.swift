@@ -50,17 +50,17 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
         case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse, .invalidOOBCode:
             return SignInPasswordStartError(type: .generalError)
         case .invalidClient:
-            return SignInPasswordStartError(type: .generalError, message: "Invalid Client ID")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return SignInPasswordStartError(type: .generalError, message: "Unsupported challenge type")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         case .invalidScope:
-            return SignInPasswordStartError(type: .generalError, message: "Invalid scope")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
         case .userNotFound:
             return SignInPasswordStartError(type: .userNotFound)
         case .invalidPassword:
             return SignInPasswordStartError(type: .invalidPassword)
         case .invalidAuthenticationType:
-            return SignInPasswordStartError(type: .invalidAuthenticationType, message: "Use signInUsingCode instead")
+            return SignInPasswordStartError(type: .invalidAuthenticationType, message: MSALNativeAuthErrorMessage.useSignInCode)
         }
     }
 
@@ -72,7 +72,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
             return VerifyCodeError(type: .generalError, message: self.localizedDescription)
         }
     }
-    
+
     func convertToPasswordRequiredError() -> PasswordRequiredError {
         return PasswordRequiredError(signInPasswordError: convertToSignInPasswordStartError())
     }

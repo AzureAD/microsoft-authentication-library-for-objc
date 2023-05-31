@@ -47,11 +47,11 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
         case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
             return .init(type: .generalError)
         case .invalidClient:
-            return .init(type: .generalError, message: "Invalid Client ID")
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .userNotFound:
             return .init(type: .userNotFound)
         case .unsupportedChallengeType:
-            return .init(type: .generalError, message: "Unsupported challenge type")
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         }
     }
 

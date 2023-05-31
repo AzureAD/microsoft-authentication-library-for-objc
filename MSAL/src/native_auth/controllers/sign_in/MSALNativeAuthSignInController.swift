@@ -24,7 +24,8 @@
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable:next type_body_length file_length
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
 
     // MARK: - Variables
