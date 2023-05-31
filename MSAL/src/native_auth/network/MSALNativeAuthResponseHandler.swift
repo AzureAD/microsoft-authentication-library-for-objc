@@ -109,7 +109,7 @@ final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
             format: "Validated account with result %d, old account %@, new account %@",
             accountChecked,
             MSALLogMask.maskTrackablePII(accountIdentifier.uid),
-            MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier.uid)
+            MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier?.uid)
         )
     }
 }

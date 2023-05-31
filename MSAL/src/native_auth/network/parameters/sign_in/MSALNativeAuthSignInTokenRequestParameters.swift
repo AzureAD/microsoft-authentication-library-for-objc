@@ -56,7 +56,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
         if includeChallengeType {
             parameters[Key.challengeType.rawValue] = config.challengeTypesString
         }
-        
+
         if addNcaFlag {
             parameters[Key.nca.rawValue] = "1"
         }

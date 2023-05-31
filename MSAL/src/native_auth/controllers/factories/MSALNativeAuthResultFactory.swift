@@ -80,7 +80,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             authority: config.authority,
             redirectUri: nil,
             clientId: config.clientId,
-            target: scope.joined(separator: ",")
+            target: scope.joined(separator: " ")
         )
     }
 
@@ -89,6 +89,6 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             return nil
         }
 
-        return stringElement.replacingOccurrences(of: ",", with: "")
+        return stringElement.replacingOccurrences(of: " ", with: "")
     }
 }

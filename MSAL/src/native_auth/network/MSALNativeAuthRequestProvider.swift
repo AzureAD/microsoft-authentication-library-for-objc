@@ -261,6 +261,6 @@ final class MSALNativeAuthRequestProvider: MSALNativeAuthRequestProviding {
     }
 
     private func formatScope(_ scope: [String]) -> String {
-        return scope.joined(separator: ",")
+        return scope.joined(separator: " ")
     }
 }

@@ -121,28 +121,18 @@ class MSALNativeAuthBaseController {
         completion(response, error)
     }
 
-    func performRequest<T>(
-            _ request: MSIDHttpRequest,
-            context: MSIDRequestContext,
-            event: MSIDTelemetryAPIEvent?
-        ) async -> Result<T, Error> {
-            return await withCheckedContinuation { continuation in
-                request.send { [weak self] result, error in
-                    guard let self = self else {
-                        MSALLogger.log(level: .error, context: context, format: "Controller was deallocated")
-                        return
-                    }
-
-                    self.stopTelemetryEvent(event, context: context)
-
-                    if let error = error {
-                        continuation.resume(returning: .failure(error))
-                    } else if let response = result as? T {
-                        continuation.resume(returning: .success(response))
-                    } else {
-                        continuation.resume(returning: .failure(MSALNativeAuthError.invalidResponse))
-                    }
+    func performRequest<T>(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<T, Error> {
+        return await withCheckedContinuation { continuation in
+            request.send { result, error in
+                if let error = error {
+                    continuation.resume(returning: .failure(error))
+                } else if let response = result as? T {
+                    continuation.resume(returning: .success(response))
+                } else {
+                    MSALLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
+                    continuation.resume(returning: .failure(MSALNativeAuthError.invalidResponse))
                 }
             }
         }
+    }
 }
