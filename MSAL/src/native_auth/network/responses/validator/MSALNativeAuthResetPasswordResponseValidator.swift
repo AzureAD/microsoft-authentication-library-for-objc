@@ -82,7 +82,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .unexpectedError
         }
 
-        return .error(apiError)
+        return .error(apiError.error)
     }
 
     // MARK: - Challenge Request
@@ -171,7 +171,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .invalidGrant,
              .expiredToken,
              .invalidRequest:
-            return .error(apiError)
+            return .error(apiError.error)
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError
