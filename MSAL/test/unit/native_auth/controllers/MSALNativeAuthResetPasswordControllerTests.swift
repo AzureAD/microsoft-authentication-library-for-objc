@@ -74,6 +74,37 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
     }
 
+    func test_whenResetPasswordStart_returnsSuccess_it_callsChallenge() async {
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordStartFunc(.success(passwordResetToken: ""))
+        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordChallengeFunc(.unexpectedError)
+        let delegate = prepareResetPasswordStartDelegateSpy()
+
+        await sut.resetPassword(parameters: resetPasswordStartParams, delegate: delegate)
+
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+    }
+
+    func test_whenResetPasswordStartPassword_returns_redirect_it_callsDelegateError() async {
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordStartFunc(.redirect)
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordStartDelegateSpy(exp)
+
+        await sut.resetPassword(parameters: resetPasswordStartParams, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordErrorCalled)
+        XCTAssertNil(delegate.newState)
+        XCTAssertNil(delegate.displayName)
+        XCTAssertNil(delegate.codeLength)
+        XCTAssertEqual(delegate.error?.type, .browserRequired)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
+    }
+
     // MARK: - Common Methods
 
     //TODO: Reuse function from Sign Up tests
@@ -105,6 +136,14 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.error)
 
         return delegate
+    }
+
+    //TODO: Reuse function from Sign Up tests
+    private func prepareMockRequest() -> MSIDHttpRequest {
+        let request = MSIDHttpRequest()
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+
+        return request
     }
 
 }
