@@ -26,7 +26,6 @@
 
 enum MSALNativeAuthSignInTokenValidatedResponse {
     case success(MSIDTokenResult, MSIDTokenResponse)
-    case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
 
@@ -41,6 +40,7 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case invalidAuthenticationType
     case invalidOOBCode
     case unsupportedChallengeType
+    case strongAuthRequired
     case invalidScope
     case authorizationPending
     case slowDown
@@ -61,6 +61,8 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
             return SignInPasswordStartError(type: .invalidPassword)
         case .invalidAuthenticationType:
             return SignInPasswordStartError(type: .invalidAuthenticationType, message: MSALNativeAuthErrorMessage.useSignInCode)
+        case .strongAuthRequired:
+            return SignInPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
         }
     }
 

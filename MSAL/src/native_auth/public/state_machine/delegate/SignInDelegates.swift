@@ -32,10 +32,6 @@ public protocol SignInCompletedDelegate {
 @objc
 public protocol SignInPasswordStartDelegate: SignInCompletedDelegate {
     func onSignInPasswordError(error: SignInPasswordStartError)
-    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                             sentTo: String,
-                                             channelTargetType: MSALNativeAuthChannelType,
-                                             codeLength: Int)
 }
 
 @objc
@@ -51,10 +47,6 @@ public protocol SignInCodeStartDelegate {
 @objc
 public protocol SignInPasswordRequiredDelegate: SignInCompletedDelegate {
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
-    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                             sentTo: String,
-                                             channelTargetType: MSALNativeAuthChannelType,
-                                             codeLength: Int)
 }
 
 @objc

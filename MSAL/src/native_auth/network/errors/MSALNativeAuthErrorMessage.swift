@@ -35,4 +35,5 @@ enum MSALNativeAuthErrorMessage {
     static let passwordBanned = "Password banned"
     static let delegateNotImplemented = "MSALNativeAuth has called an optional delegate method that has not been implemented"
     static let useSignInCode = "Use signInUsingCode instead"
+    static let unsupportedMFA = "MFA currently not supported. Use the browser instead"
 }

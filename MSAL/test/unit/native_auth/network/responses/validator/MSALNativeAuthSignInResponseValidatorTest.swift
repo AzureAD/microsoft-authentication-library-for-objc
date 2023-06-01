@@ -77,27 +77,6 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         }
     }
     
-    func test_credentialReqResponseDoesNotContainCredentialToken_anErrorIsReturned() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
-        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
-        if case .error(.invalidServerResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    func test_credentialReqResponseContainCredentialToken_credentialRequiredStateIsReturned() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
-        let credentialToken = "credentialToken"
-        let error = MSALNativeAuthSignInTokenResponseError(error: .credentialRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: credentialToken)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
-        if case .credentialRequired(credentialToken) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
     func test_invalidGrantTokenResponse_isTranslatedToProperErrorResult() {
         let userNotFoundError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.userNotFound], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
@@ -109,6 +88,8 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
         let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
+        let strongAuthRequiredError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.strongAuthRequired], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: strongAuthRequiredError, expectedError: .strongAuthRequired)
     }
     
     func test_errorTokenResponse_isTranslatedToProperErrorResult() {

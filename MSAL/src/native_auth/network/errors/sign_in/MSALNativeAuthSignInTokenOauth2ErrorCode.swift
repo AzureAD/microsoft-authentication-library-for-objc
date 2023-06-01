@@ -34,5 +34,4 @@ enum MSALNativeAuthSignInTokenOauth2ErrorCode: String, Decodable {
     case invalidScope = "invalid_scope"
     case authorizationPending = "authorization_pending"
     case slowDown = "slow_down"
-    case credentialRequired = "credential_required"
 }

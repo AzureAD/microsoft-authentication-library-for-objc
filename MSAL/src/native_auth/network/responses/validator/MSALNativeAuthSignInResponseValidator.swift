@@ -187,12 +187,6 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         _ context: MSALNativeAuthRequestContext,
         _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
         switch responseError.error {
-        case .credentialRequired:
-            guard let credentialToken = responseError.credentialToken else {
-                MSALLogger.log(level: .error, context: context, format: "Expected credential token not empty")
-                return .error(.invalidServerResponse)
-            }
-            return .credentialRequired(credentialToken)
         case .invalidRequest:
             return .error(.invalidRequest)
         case .invalidClient:
@@ -262,6 +256,8 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             return .invalidAuthenticationType
         case .invalidOTP:
             return .invalidOOBCode
+        case .strongAuthRequired:
+            return .strongAuthRequired
         default:
             return .generalError
         }
