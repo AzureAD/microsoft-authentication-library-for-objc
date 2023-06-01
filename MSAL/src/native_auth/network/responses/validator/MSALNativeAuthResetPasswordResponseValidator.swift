@@ -198,7 +198,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
             passwordResetToken: response.passwordResetToken,
-            pollInterval: response.pollInterval
+            pollInterval: response.pollInterval == 300 ? 2 : response.pollInterval // TODO: Remove this when mock API is fixed
         )
     }
 
@@ -243,7 +243,10 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         return .success(status: response.status)
     }
 
-    private func handlePollCompletionError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+    private func handlePollCompletionError(
+        _ error: Error,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordPollCompletionResponseError else {
             MSALLogger.log(level: .error, context: context, format: "Poll Completion returned unexpected error type")
             return .unexpectedError

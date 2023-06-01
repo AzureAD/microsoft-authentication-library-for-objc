@@ -474,9 +474,21 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             case .inProgress,
                  .notStarted:
 
-                // TODO: Add delay before retry
+                guard retriesRemaining > 0 else {
+                    let error = PasswordRequiredError(type: .generalError)
+                    self.stopTelemetryEvent(event, context: context, error: error)
+                    MSALLogger.log(level: .error, context: context, format: "password poll completion did not complete in time")
 
-                // TODO: Check that retries remaining > 0
+                    DispatchQueue.main.async {
+                        delegate.onResetPasswordRequiredError(error: error, newState: nil)
+                    }
+
+                    return
+                }
+
+                MSALLogger.log(level: .info, context: context, format: "resetpassword/poll_completion: ⏱️ waiting for \(pollInterval) seconds before retrying")
+                try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
+                MSALLogger.log(level: .info, context: context, format: "resetpassword/poll_completion: 🚦 Wait over. Retrying now")
 
                 doPollCompletionLoop(
                     passwordResetToken: "token",

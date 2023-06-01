@@ -528,6 +528,139 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
 
+    // MARK: - SubmitPassword - poll completion tests
+
+    func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegate() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.unexpectedError)
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertNotNil(delegate.error)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+    func test_whenSubmitPassword_pollCompletion_returns_unexpectedError_it_callsDelegateError() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.unexpectedError)
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+    func test_whenSubmitPassword_pollCompletion_returns_passwordError_it_callsDelegateError() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.passwordError(error: .passwordBanned, passwordSubmitToken: "flowToken"))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.error?.type, .invalidPassword)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.passwordBanned)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+    func test_whenSubmitPassword_pollCompletion_returns_error_it_callsDelegateError() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.error(.expiredToken))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+
+    func test_whenSubmitPassword_pollCompletion_returns_notStarted_it_callsDelegateErrorAfterRetries() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .notStarted))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+    func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegateError() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .failed))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+    func test_whenSubmitPassword_pollCompletion_returns_inProgress_it_callsDelegateErrorAfterRetries() async {
+        requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .inProgress))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let delegate = prepareResetPasswordSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+
+
     // MARK: - Common Methods
 
     // TODO: Reuse function from Sign Up tests
