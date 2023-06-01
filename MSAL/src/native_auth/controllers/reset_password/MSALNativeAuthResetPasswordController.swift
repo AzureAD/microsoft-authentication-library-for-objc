@@ -72,7 +72,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordResendCodeDelegate
     ) async {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordStart, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
         let response = await performChallengeRequest(flowToken: flowToken, context: context)
         handleResendCodeChallengeResponse(response, event: event, context: context, delegate: delegate)
     }
@@ -248,6 +248,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .redirect,
              .unexpectedError:
             let error = ResendCodeError(type: .generalError)
+            stopTelemetryEvent(event, context: context, error: error)
             DispatchQueue.main.async {
                 delegate.onResetPasswordResendCodeError(error: error, newState: nil)
             }

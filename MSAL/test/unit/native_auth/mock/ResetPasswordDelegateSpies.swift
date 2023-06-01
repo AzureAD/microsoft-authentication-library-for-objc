@@ -56,20 +56,35 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
 }
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onResetPasswordResendCodeErrorCalled = false
+    private(set) var onResetPasswordResendCodeSentCalled = false
     private(set) var error: ResendCodeError?
     private(set) var newState: ResetPasswordCodeSentState?
     private(set) var displayName: String?
     private(set) var codeLength: Int?
 
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
     func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeSentState?) {
+        onResetPasswordResendCodeErrorCalled = true
+
         self.error = error
         self.newState = newState
+
+        expectation?.fulfill()
     }
 
     func onResetPasswordResendCodeSent(newState: ResetPasswordCodeSentState, displayName: String, codeLength: Int) {
+        onResetPasswordResendCodeSentCalled = true
+
         self.newState = newState
         self.displayName = displayName
         self.codeLength = codeLength
+
+        expectation?.fulfill()
     }
 }
 
