@@ -39,7 +39,7 @@ extension MSALNativeAuthResetPasswordStartOauth2ErrorCode {
         case .invalidRequest:
             return .init(type: .generalError)
         case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
             return .init(type: .userDoesNotHavePassword)
         }

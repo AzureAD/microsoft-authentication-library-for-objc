@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthErrorMessages {
+enum MSALNativeAuthErrorMessage {
     static let invalidClient = "Invalid Client ID"
     static let unsupportedChallengeType = "Unsupported challenge type"
     static let unsupportedAuthMethod = "Authentication method not supported"
@@ -34,4 +34,5 @@ enum MSALNativeAuthErrorMessages {
     static let passwordTooLong = "Password too long"
     static let passwordRecentlyUsed = "Password recently used"
     static let passwordBanned = "Password banned"
+    static let browserRequired = " Browser required"
 }

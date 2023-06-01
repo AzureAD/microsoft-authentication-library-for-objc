@@ -39,9 +39,9 @@ extension MSALNativeAuthResetPasswordContinueOauth2ErrorCode {
         case .invalidOOBValue:
             return .init(type: .invalidCode)
         case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
         case .invalidRequest,
              .invalidGrant,
              .verificationRequired:

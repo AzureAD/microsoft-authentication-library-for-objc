@@ -38,22 +38,22 @@ extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
         case .invalidRequest:
             return .init(type: .generalError)
         case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
             return .init(type: .userDoesNotHavePassword)
         case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
         }
     }
 
     func toResendCodePublicError() -> ResendCodeError {
         switch self {
         case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.invalidClient)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.unsupportedChallengeType)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessages.expiredToken)
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
         case .invalidRequest:
             return .init(type: .generalError)
         }
