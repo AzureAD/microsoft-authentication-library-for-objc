@@ -264,8 +264,6 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(errorCode: .unsupportedChallengeType, expectedValidatedError: .unsupportedChallengeType)
     }
     
-    
-    
     // MARK: private methods
     
     private func checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(

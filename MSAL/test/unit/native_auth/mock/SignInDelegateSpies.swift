@@ -38,6 +38,7 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     
     public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
+            XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
             XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
             expectation.fulfill()
@@ -54,6 +55,7 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     
     public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
         if let expectedUserAccount = expectedUserAccount {
+            XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
             XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
             XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
@@ -121,10 +123,13 @@ open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
         self.expectedChannelTargetType = expectedChannelTargetType
         self.expectedCodeLength = expectedCodeLength
         self.correlationId = correlationId
+        self.expectedError = expectedError
     }
     
     public func onSignInCodeError(error: SignInCodeStartError) {
-        XCTAssertEqual(error, expectedError)
+        XCTAssertEqual(error.type, expectedError?.type)
+        XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
     
@@ -132,6 +137,7 @@ open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
         XCTAssertEqual(sentTo, expectedSentTo)
         XCTAssertEqual(channelTargetType, expectedChannelTargetType)
         XCTAssertEqual(codeLength, expectedCodeLength)
+        XCTAssertTrue(Thread.isMainThread)
         if let verifyCodeDelegate = verifyCodeDelegate {
             newState.submitCode(code: "code", delegate: verifyCodeDelegate, correlationId: correlationId)
         } else {
@@ -154,6 +160,7 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
     
     public func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?) {
         XCTAssertEqual(error, expectedError)
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
     
@@ -166,6 +173,7 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
         XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
         XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
         XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
 }

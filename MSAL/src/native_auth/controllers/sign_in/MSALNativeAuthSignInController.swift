@@ -332,7 +332,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         _ request: MSIDHttpRequest,
         config: MSIDConfiguration,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthSignInTokenValidatedResponse {
-        let aadTokenResponse: Result<MSIDAADTokenResponse, Error> = await performRequest(request, context: context)
+        let aadTokenResponse: Result<MSIDAADTokenResponse, Error> = await performTokenRequest(request, context: context)
         return responseValidator.validate(
             context: context,
             msidConfiguration: config,
