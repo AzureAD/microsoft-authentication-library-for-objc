@@ -559,19 +559,18 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     // MARK: - SubmitPassword - poll completion tests
 
     func test_whenSubmitPassword_pollCompletion_correctParamsArePassedToRequestProvider() async {
+        let passwordResetToken = "passwordResetToken"
+
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: passwordResetToken, pollInterval: 5))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.unexpectedError)
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        let password = "password"
-        let flowToken = "flowToken"
+        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
 
-        await sut.submitPassword(password: password, flowToken: flowToken, context: contextMock, delegate: delegate)
-
-        XCTAssertEqual(requestProviderMock.pollCompletionParameters?.passwordResetToken, flowToken)
+        XCTAssertEqual(requestProviderMock.pollCompletionParameters?.passwordResetToken, passwordResetToken)
         XCTAssertEqual(requestProviderMock.pollCompletionParameters?.context.correlationId(), contextMock.correlationId())
         XCTAssertEqual(requestProviderMock.pollCompletionParameters?.context.telemetryRequestId(), contextMock.telemetryRequestId())
     }
