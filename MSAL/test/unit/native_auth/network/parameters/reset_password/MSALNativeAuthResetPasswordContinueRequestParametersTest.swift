@@ -39,7 +39,6 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordContinueRequestParameters(
-            config: config,
             context: context,
             passwordResetToken: "<password-reset-token>",
             grantType: .oobCode,
@@ -47,21 +46,20 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
         )
 
         var resultUrl: URL? = nil
-        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/resetpassword/continue")
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
-            config: config,
             context: context,
             passwordResetToken: "<password-reset-token>",
             grantType: .oobCode,
             oobCode: "0000"
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
@@ -76,14 +74,13 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     func test_allOptionalNil_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
-            config: config,
             context: context,
             passwordResetToken: "<password-reset-token>",
             grantType: .oobCode,
             oobCode: nil
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,

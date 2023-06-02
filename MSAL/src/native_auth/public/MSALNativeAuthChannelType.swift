@@ -24,17 +24,8 @@
 
 import Foundation
 
-@objcMembers
-final public class MSALNativeAuthSignUpOTPParameters: MSALNativeAuthParameters {
-
-    public let email: String
-    public let attributes: [String: Any]
-    public let scopes: [String]
-
-    public init(email: String, attributes: [String: Any] = [:], scopes: [String] = [], correlationId: UUID? = nil) {
-        self.email = email
-        self.attributes = attributes
-        self.scopes = scopes
-        super.init(correlationId: correlationId)
-    }
+@objc
+public enum MSALNativeAuthChannelType: Int {
+    case email
+    case phone
 }

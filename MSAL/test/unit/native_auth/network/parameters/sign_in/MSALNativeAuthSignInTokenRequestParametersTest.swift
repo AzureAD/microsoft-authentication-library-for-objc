@@ -37,8 +37,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(config:config,
-                                                                    context: MSALNativeAuthRequestContextMock(),
+        let parameters = MSALNativeAuthSignInTokenRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                     username: "username",
                                                                     credentialToken: "Test Credential Token",
                                                                     signInSLT: "Test SignIn SLT",
@@ -47,14 +46,13 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
                                                                     password: "password",
                                                                     oobCode: "Test OTP Code")
         var resultUrl: URL? = nil
-        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/token")
     }
 
     func test_passwordParameters_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
         let params = MSALNativeAuthSignInTokenRequestParameters(
-            config: config,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             credentialToken: "Test Credential Token",
@@ -65,7 +63,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             oobCode: "oob"
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
@@ -85,7 +83,6 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
     func test_nilParameters_shouldCreateCorrectParameters() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .redirect]))
         let params = MSALNativeAuthSignInTokenRequestParameters(
-            config: config,
             context: context,
             username: nil,
             credentialToken: nil,
@@ -96,10 +93,10 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             oobCode: nil
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
-            "client_id": params.config.clientId,
+            "client_id": config.clientId,
             "grant_type": "password"
         ]
 

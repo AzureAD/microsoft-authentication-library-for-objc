@@ -22,25 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
-@objcMembers
-final public class MSALNativeAuthSignUpParameters: MSALNativeAuthParameters {
-
-    public let email: String
-    public let password: String
-    public let attributes: [String: Any]
-    public let scopes: [String]
-
-    public init(email: String,
-                password: String,
-                attributes: [String: Any] = [:],
-                scopes: [String] = [],
-                correlationId: UUID? = nil) {
-        self.email = email
-        self.password = password
-        self.attributes = attributes
-        self.scopes = scopes
-        super.init(correlationId: correlationId)
-    }
+struct MSALNativeAuthSignUpStartRequestProviderParameters {
+    let username: String
+    let password: String?
+    let attributes: [String: Any]
+    let context: MSALNativeAuthRequestContext
 }

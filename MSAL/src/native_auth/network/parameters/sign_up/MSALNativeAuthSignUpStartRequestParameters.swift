@@ -25,14 +25,13 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpStartRequestParameters: MSALNativeAuthRequestable {
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signUpStart
     let username: String
     let password: String?
     let attributes: String?
     let context: MSIDRequestContext
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [

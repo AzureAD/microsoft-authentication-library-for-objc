@@ -50,19 +50,15 @@ protocol MSALNativeAuthResetPasswordRequestProviding {
 final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPasswordRequestProviding {
 
     // MARK: - Variables
-
-    private let config: MSALNativeAuthConfiguration
     private let requestConfigurator: MSALNativeAuthRequestConfigurator
     private let telemetryProvider: MSALNativeAuthTelemetryProviding
 
     // MARK: - Init
 
     init(
-        config: MSALNativeAuthConfiguration,
         requestConfigurator: MSALNativeAuthRequestConfigurator,
         telemetryProvider: MSALNativeAuthTelemetryProviding = MSALNativeAuthTelemetryProvider()
     ) {
-        self.config = config
         self.requestConfigurator = requestConfigurator
         self.telemetryProvider = telemetryProvider
     }

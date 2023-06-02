@@ -22,15 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
-
 protocol MSALNativeAuthControllerBuildable {
     func makeSignUpController() -> MSALNativeAuthSignUpControlling
-    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControllingLegacy
     func makeSignInController() -> MSALNativeAuthSignInControlling
     func makeResetPasswordController() -> MSALNativeAuthResetPasswordControlling
-    func makeResendCodeController() -> MSALNativeAuthResendCodeControllingLegacy
-    func makeVerifyCodeController() -> MSALNativeAuthVerifyCodeControllingLegacy
 }
 
 final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
@@ -41,11 +36,7 @@ final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     }
 
     func makeSignUpController() -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(clientId: config.clientId)
-    }
-
-    func makeSignUpOTPController() -> MSALNativeAuthSignUpOTPControllingLegacy {
-        return MSALNativeAuthSignUpOTPControllerLegacy(config: config)
+        return MSALNativeAuthSignUpController(config: config)
     }
 
     func makeSignInController() -> MSALNativeAuthSignInControlling {
@@ -54,13 +45,5 @@ final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
 
     func makeResetPasswordController() -> MSALNativeAuthResetPasswordControlling {
         return MSALNativeAuthResetPasswordController(config: config)
-    }
-
-    func makeResendCodeController() -> MSALNativeAuthResendCodeControllingLegacy {
-        return MSALNativeAuthResendCodeControllerLegacy(config: config)
-    }
-
-    func makeVerifyCodeController() -> MSALNativeAuthVerifyCodeControllingLegacy {
-        return MSALNativeAuthVerifyCodeControllerLegacy(config: config)
     }
 }

@@ -99,69 +99,88 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
-    public func signUp(
+    public func signUpUsingPassword(
         username: String,
         password: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignUpStartDelegate
+        delegate: SignUpPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidUsername))
+            }
             return
         }
         guard inputValidator.isInputValid(password) else {
-            delegate.onSignUpError(error: SignUpStartError(type: .invalidPassword))
+            DispatchQueue.main.async {
+                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidPassword))
+            }
             return
         }
 
         let controller = controllerFactory.makeSignUpController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.signUpStart(
-            username: username,
-            password: password,
-            attributes: attributes,
-            context: context,
-            delegate: delegate
-        )
+        Task {
+            await controller.signUpStartPassword(
+                parameters: .init(
+                    username: username,
+                    password: password,
+                    attributes: attributes ?? [:],
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
-    public func signUp(
+    public func signUpUsingCode(
         username: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
+            }
             return
         }
 
         let controller = controllerFactory.makeSignUpController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.signUpStart(
-            username: username,
-            attributes: attributes,
-            context: context,
-            delegate: delegate
-        )
+        Task {
+            await controller.signUpStartCode(
+                parameters: .init(
+                    username: username,
+                    password: nil,
+                    attributes: attributes ?? [:],
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
-    public func signIn(
+    public func signInUsingPassword(
         username: String,
         password: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInStartDelegate
+        delegate: SignInPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidUsername))
+            }
             return
         }
         guard inputValidator.isInputValid(password) else {
-            delegate.onSignInError(error: SignInStartError(type: .invalidPassword))
+            DispatchQueue.main.async {
+                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidPassword))
+            }
             return
         }
         let controller = controllerFactory.makeSignInController()
@@ -173,14 +192,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         controller.signIn(params: params, delegate: delegate)
     }
 
-    public func signIn(
+    public func signInUsingCode(
         username: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
         delegate: SignInCodeStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
+            DispatchQueue.main.async {
+                delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
+            }
             return
         }
         let controller = controllerFactory.makeSignInController()

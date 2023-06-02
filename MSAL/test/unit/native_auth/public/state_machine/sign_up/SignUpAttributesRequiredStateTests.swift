@@ -29,6 +29,7 @@ import XCTest
 
 final class SignUpAttributesRequiredStateTests: XCTestCase {
 
+    private var exp: XCTestExpectation!
     private var correlationId: UUID!
     private var controller: MSALNativeAuthSignUpControllerSpy!
     private var sut: SignUpAttributesRequiredState!
@@ -37,7 +38,8 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         correlationId = UUID()
-        controller = MSALNativeAuthSignUpControllerSpy()
+        exp = expectation(description: "SignUpAttributesRequiredState expectation")
+        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
         sut = SignUpAttributesRequiredState(controller: controller, flowToken: "<token>")
     }
 
@@ -45,8 +47,9 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         XCTAssertNil(controller.context)
         XCTAssertFalse(controller.submitAttributesCalled)
 
-        sut.submitAttributes(attributes: [:], delegate: SignUpAttributesRequiredDelegateSpy(), correlationId: correlationId)
+        sut.submitAttributes(attributes: ["city": "Dublin"], delegate: SignUpAttributesRequiredDelegateSpy(), correlationId: correlationId)
 
+        wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)
         XCTAssertTrue(controller.submitAttributesCalled)
     }

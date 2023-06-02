@@ -22,24 +22,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
-@objc
-public class SignUpStartError: MSALNativeAuthBaseError {
-    @objc public let type: SignUpStartErrorType
-
-    init(type: SignUpStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
+enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
+    case verificationRequired(signUpToken: String)
+    case redirect
+    case error(MSALNativeAuthSignUpStartOauth2ErrorCode)
+    case unexpectedError
 }
 
-@objc
-public enum SignUpStartErrorType: Int {
-    case browserRequired
-    case userAlreadyExists
-    case invalidPassword
-    case invalidUsername
-    case invalidAttributes
-    case generalError
+enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
+    case successOOB(_ sentTo: String, _ channelType: MSALNativeAuthApiChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
+    case successPassword(_ signUpChallengeToken: String)
+    case redirect
+    case error(MSALNativeAuthSignUpChallengeOauth2ErrorCode)
+    case unexpectedError
+}
+
+enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
+    case success(_ signInSLT: String)
+    /// error that represents invalidOOB, invalidPassword and invalidAttributes, depending on which State the input comes from
+    case invalidUserInput(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode, _ signUpToken: String)
+    case credentialRequired(_ signUpToken: String)
+    case attributesRequired(_ signUpToken: String)
+    case error(MSALNativeAuthSignUpContinueOauth2ErrorCode)
+    case unexpectedError
 }

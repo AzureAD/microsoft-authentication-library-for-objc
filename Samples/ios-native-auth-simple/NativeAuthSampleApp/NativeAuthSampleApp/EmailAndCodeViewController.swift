@@ -69,7 +69,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing up with email \(email)")
 
-        nativeAuth.signUp(username: email, delegate: self)
+        nativeAuth.signUpUsingCode(username: email, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -80,7 +80,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing in with email \(email)")
 
-        nativeAuth.signIn(username: email, delegate: self)
+        nativeAuth.signInUsingCode(username: email, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -182,8 +182,13 @@ extension EmailAndCodeViewController: SignUpCodeStartDelegate {
         }
     }
 
-    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
-        print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
+    func onSignUpCodeRequired(
+        newState: MSAL.SignUpCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    ) {
+        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showResultText("Email verification required")
 
@@ -201,7 +206,7 @@ extension EmailAndCodeViewController: SignUpCodeStartDelegate {
 }
 
 extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         switch error.type {
         case .invalidCode:
             guard let newState else {
@@ -235,7 +240,7 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
         dismissVerifyCodeModal()
     }
 
-    func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
+    func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
         dismissVerifyCodeModal()
     }
@@ -247,14 +252,18 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 }
 
 extension EmailAndCodeViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeSentState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
+    func onSignUpResendCodeRequired(
+        newState: MSAL.SignUpCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
                                   guard let self else { return }
@@ -271,16 +280,9 @@ extension EmailAndCodeViewController: SignUpResendCodeDelegate {
 // MARK: - Sign In delegates
 
 extension EmailAndCodeViewController: SignInCodeStartDelegate {
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
-
-        account = result
-
-        updateUI()
-    }
 
     func onSignInCodeError(error: MSAL.SignInCodeStartError) {
-        print("SignInStartDelegate: onSignInCodeError: \(error)")
+        print("SignInCodeStartDelegate: onSignInCodeError: \(error)")
 
         switch error.type {
         case .userNotFound, .invalidUsername:
@@ -290,7 +292,12 @@ extension EmailAndCodeViewController: SignInCodeStartDelegate {
         }
     }
 
-    func onSignInCodeSent(newState: MSAL.SignInCodeSentState, displayName: String, codeLength: Int) {
+    func onSignInCodeRequired(
+        newState: MSAL.SignInCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSAL.MSALNativeAuthChannelType,
+        codeLength: Int
+    ) {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }

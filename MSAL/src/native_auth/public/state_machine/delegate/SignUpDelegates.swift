@@ -25,42 +25,46 @@
 import Foundation
 
 @objc
-public protocol SignUpStartDelegate {
-    func onSignUpError(error: SignUpStartError)
-    func onSignUpCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+public protocol SignUpPasswordStartDelegate {
+    func onSignUpPasswordError(error: SignUpPasswordStartError)
+    func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
+                              sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int)
 }
 
 @objc
 public protocol SignUpCodeStartDelegate {
     func onSignUpCodeError(error: SignUpCodeStartError)
-    func onSignUpCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
-}
-
-@objc
-public protocol SignUpCodeVerifyCodeDelegate {
-    func onSignUpCodeVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
-    func onSignUpCodeAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onSignUpCodeCompleted()
+    func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
+                              sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int)
 }
 
 @objc
 public protocol SignUpVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeSentState?)
-    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onPasswordRequired(newState: SignUpPasswordRequiredState)
+    func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
+    @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+    @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
     func onSignUpCompleted()
 }
 
 @objc
 public protocol SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeSentState?)
-    func onSignUpResendCodeSent(newState: SignUpCodeSentState, displayName: String, codeLength: Int)
+    func onSignUpResendCodeError(error: ResendCodeError)
+    func onSignUpResendCodeCodeRequired(
+        newState: SignUpCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc
 public protocol SignUpPasswordRequiredDelegate {
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
-    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+    @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
     func onSignUpCompleted()
 }
 

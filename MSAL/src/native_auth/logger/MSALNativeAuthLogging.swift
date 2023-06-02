@@ -28,7 +28,7 @@ protocol MSALLogging {
     // swiftlint:disable function_parameter_count
     static func log(
         level: MSIDLogLevel,
-        context: MSIDRequestContext,
+        context: MSIDRequestContext?,
         filename: String,
         lineNumber: Int,
         function: String,
@@ -36,7 +36,7 @@ protocol MSALLogging {
         _ args: CVarArg...)
     static func logPII(
         level: MSIDLogLevel,
-        context: MSIDRequestContext,
+        context: MSIDRequestContext?,
         filename: String,
         lineNumber: Int,
         function: String,
@@ -44,7 +44,7 @@ protocol MSALLogging {
         _ args: CVarArg...)
     static func log(
         level: MSIDLogLevel,
-        correlationId: UUID,
+        correlationId: UUID?,
         filename: String,
         lineNumber: Int,
         function: String,
@@ -52,7 +52,7 @@ protocol MSALLogging {
         _ args: CVarArg...)
     static func logPII(
         level: MSIDLogLevel,
-        correlationId: UUID,
+        correlationId: UUID?,
         filename: String,
         lineNumber: Int,
         function: String,
@@ -83,7 +83,7 @@ extension MSALLogger: MSALLogging {
     }
 
     static func log(level: MSIDLogLevel,
-                    context: MSIDRequestContext,
+                    context: MSIDRequestContext?,
                     filename: String = #fileID,
                     lineNumber: Int = #line,
                     function: String = #function,
@@ -100,7 +100,7 @@ extension MSALLogger: MSALLogging {
     }
 
     static func logPII(level: MSIDLogLevel,
-                       context: MSIDRequestContext,
+                       context: MSIDRequestContext?,
                        filename: String = #fileID,
                        lineNumber: Int = #line,
                        function: String = #function,
@@ -117,7 +117,7 @@ extension MSALLogger: MSALLogging {
     }
 
     static func log(level: MSIDLogLevel,
-                    correlationId: UUID,
+                    correlationId: UUID?,
                     filename: String = #fileID,
                     lineNumber: Int = #line,
                     function: String = #function,
@@ -134,7 +134,7 @@ extension MSALLogger: MSALLogging {
     }
 
     static func logPII(level: MSIDLogLevel,
-                       correlationId: UUID,
+                       correlationId: UUID?,
                        filename: String = #fileID,
                        lineNumber: Int = #line,
                        function: String = #function,

@@ -69,7 +69,7 @@ class WebFallbackViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signIn(username: email, password: password, delegate: self)
+        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -149,7 +149,8 @@ class WebFallbackViewController: UIViewController {
 
 // MARK: - Sign In delegates
 
-extension WebFallbackViewController: SignInStartDelegate {
+extension WebFallbackViewController: SignInPasswordStartDelegate {
+
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
         showResultText("Signed in successfully. Access Token: \(result.accessToken)")
 
@@ -158,8 +159,8 @@ extension WebFallbackViewController: SignInStartDelegate {
         updateUI()
     }
 
-    func onSignInError(error: MSAL.SignInStartError) {
-        print("SignInStartDelegate: onSignInError: \(error)")
+    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+        print("SignInPasswordStartDelegate: onSignInPasswordError: \(error)")
 
         switch error.type {
         case .userNotFound, .invalidUsername:
@@ -171,7 +172,12 @@ extension WebFallbackViewController: SignInStartDelegate {
         }
     }
 
-    func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
+    func onSignInCodeRequired(
+        newState: MSAL.SignInCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSAL.MSALNativeAuthChannelType,
+        codeLength: Int
+    ) {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }

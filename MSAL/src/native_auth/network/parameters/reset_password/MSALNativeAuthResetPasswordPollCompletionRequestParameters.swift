@@ -25,12 +25,11 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResetPasswordPollCompletionRequestParameters: MSALNativeAuthRequestable {
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .resetpasswordPollCompletion
     let context: MSIDRequestContext
     let passwordResetToken: String
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [

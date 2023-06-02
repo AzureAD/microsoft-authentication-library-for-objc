@@ -175,8 +175,13 @@ class ResetPasswordViewController: UIViewController {
 }
 
 extension ResetPasswordViewController: ResetPasswordStartDelegate {
-    func onResetPasswordCodeSent(newState: MSAL.ResetPasswordCodeSentState, displayName _: String, codeLength _: Int) {
-        print("ResetPasswordStartDelegate: onResetPasswordCodeSent: \(newState)")
+    func onResetPasswordCodeRequired(
+        newState: MSAL.ResetPasswordCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSALNativeAuthChannelType,
+        codeLength _: Int
+    ) {
+        print("ResetPasswordStartDelegate: onResetPasswordCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self else { return }
@@ -205,7 +210,7 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
 extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
     func onResetPasswordResendCodeError(
         error: MSAL.ResendCodeError,
-        newState _: MSAL.ResetPasswordCodeSentState?
+        newState _: MSAL.ResetPasswordCodeRequiredState?
     ) {
         print("ResetPasswordResendCodeDelegate: onResetPasswordResendCodeError: \(error)")
 
@@ -213,9 +218,10 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
         dismissVerifyCodeModal()
     }
 
-    func onResetPasswordResendCodeSent(
-        newState: MSAL.ResetPasswordCodeSentState,
-        displayName _: String,
+    func onResetPasswordResendCodeRequired(
+        newState: MSAL.ResetPasswordCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSALNativeAuthChannelType,
         codeLength _: Int
     ) {
         updateVerifyCodeModal(errorMessage: nil,
@@ -234,7 +240,7 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
 extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
     func onResetPasswordVerifyCodeError(
         error: MSAL.VerifyCodeError,
-        newState: MSAL.ResetPasswordCodeSentState?
+        newState: MSAL.ResetPasswordCodeRequiredState?
     ) {
         switch error.type {
         case .invalidCode:

@@ -37,14 +37,12 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         provider = MSALNativeAuthResetPasswordRequestProvider(
-            config: config,
-            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
         sut = try provider.submit(
-            parameters: MSALNativeAuthResetPasswordSubmitRequestParameters(config: config,
-                                                                           context: context,
+            parameters: MSALNativeAuthResetPasswordSubmitRequestParameters(context: context,
                                                                            passwordSubmitToken: "<password-submit-token>",
                                                                            newPassword:"new-password")
         )

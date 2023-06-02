@@ -46,10 +46,9 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignInInitiateRequestParameters(config: config,
-                                                                   context: context,
+        let params = MSALNativeAuthSignInInitiateRequestParameters(context: context,
                                                                    username: DEFAULT_TEST_ID_TOKEN_USERNAME)
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.initiate(params)),
                       request: request,
                       telemetryProvider: telemetryProvider)
@@ -74,10 +73,9 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignInChallengeRequestParameters(config: config,
-                                                                    context: context,
+        let params = MSALNativeAuthSignInChallengeRequestParameters(context: context,
                                                                     credentialToken: "Test Credential Token")
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.challenge(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -102,8 +100,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignInTokenRequestParameters(config: config,
-                                                                context: context,
+        let params = MSALNativeAuthSignInTokenRequestParameters(context: context,
                                                                 username: DEFAULT_TEST_ID_TOKEN_USERNAME,
                                                                 credentialToken: "Test Credential Token",
                                                                 signInSLT: "Test SignIn SLT",
@@ -112,7 +109,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                                 password: "password",
                                                                 oobCode: "oob")
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.token(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -143,13 +140,12 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignUpStartRequestParameters(config: config,
-                                                                username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+        let params = MSALNativeAuthSignUpStartRequestParameters(username: DEFAULT_TEST_ID_TOKEN_USERNAME,
                                                                 password: "strong-password",
                                                                 attributes: "<attribute1: value1>",
                                                                 context: context)
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signUp(.start(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -176,11 +172,10 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignUpChallengeRequestParameters(config: config,
-                                                                    signUpToken: "<sign-up-token>",
+        let params = MSALNativeAuthSignUpChallengeRequestParameters(signUpToken: "<sign-up-token>",
                                                                     context: context)
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signUp(.challenge(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -205,15 +200,14 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignUpContinueRequestParameters(config: config,
-                                                                   grantType: .oobCode,
+        let params = MSALNativeAuthSignUpContinueRequestParameters(grantType: .oobCode,
                                                                    signUpToken: "<sign-up-token>",
                                                                    password: "<strong-password>",
                                                                    oobCode: "0000",
                                                                    attributes: "<attributes>",
                                                                    context: context)
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signUp(.continue(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -242,11 +236,10 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthResetPasswordStartRequestParameters(config: config,
-                                                                       context: context,
+        let params = MSALNativeAuthResetPasswordStartRequestParameters(context: context,
                                                                        username: DEFAULT_TEST_ID_TOKEN_USERNAME)
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.start(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -271,11 +264,10 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthResetPasswordChallengeRequestParameters(config: config,
-                                                                           context: context,
+        let params = MSALNativeAuthResetPasswordChallengeRequestParameters(context: context,
                                                                            passwordResetToken: "<password-reset-token>")
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.challenge(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -300,13 +292,12 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthResetPasswordContinueRequestParameters(config: config,
-                                                                          context: context,
+        let params = MSALNativeAuthResetPasswordContinueRequestParameters(context: context,
                                                                           passwordResetToken: "<password-reset-token>",
                                                                           grantType: .oobCode,
                                                                           oobCode: "0000")
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.continue(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -332,12 +323,11 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthResetPasswordSubmitRequestParameters(config: config,
-                                                                        context: context,
+        let params = MSALNativeAuthResetPasswordSubmitRequestParameters(context: context,
                                                                         passwordSubmitToken: "<password-submit-token>",
                                                                         newPassword:"new-password")
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.submit(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
@@ -362,11 +352,10 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(config: config,
-                                                                        context: context,
-                                                                        passwordResetToken: "<password-reset-token")
+        let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(context: context,
+                                                                                passwordResetToken: "<password-reset-token")
 
-        let sut = MSALNativeAuthRequestConfigurator()
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.pollCompletion(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)

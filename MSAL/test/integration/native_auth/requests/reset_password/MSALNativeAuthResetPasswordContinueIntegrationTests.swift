@@ -37,14 +37,12 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         provider = MSALNativeAuthResetPasswordRequestProvider(
-            config: config,
-            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
         sut = try provider.continue(
-            parameters: MSALNativeAuthResetPasswordContinueRequestParameters(config: config,
-                                                                             context: context,
+            parameters: MSALNativeAuthResetPasswordContinueRequestParameters(context: context,
                                                                              passwordResetToken: "<password-reset-token>",
                                                                              grantType: .oobCode,
                                                                              oobCode: "0000")

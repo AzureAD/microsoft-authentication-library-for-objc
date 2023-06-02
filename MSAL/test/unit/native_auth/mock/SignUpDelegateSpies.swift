@@ -22,82 +22,238 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
 @testable import MSAL
 
-class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
-    private(set) var error: ResendCodeError?
-    private(set) var newState: SignUpCodeSentState?
-    private(set) var displayName: String?
+class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpPasswordErrorCalled = false
+    private(set) var onSignUpCodeRequiredCalled = false
+    private(set) var error: SignUpPasswordStartError?
+    private(set) var newState: SignUpCodeRequiredState?
+    private(set) var sentTo: String?
+    private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
 
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeSentState?) {
-        self.error = error
-        self.newState = newState
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName: String, codeLength: Int) {
+    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+        onSignUpPasswordErrorCalled = true
+        self.error = error
+
+        self.expectation?.fulfill()
+    }
+
+    func onSignUpCodeRequired(newState: SignUpCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+        onSignUpCodeRequiredCalled = true
         self.newState = newState
-        self.displayName = displayName
+        self.sentTo = sentTo
+        self.channelTargetType = channelTargetType
         self.codeLength = codeLength
+
+        self.expectation?.fulfill()
+    }
+}
+
+class SignUpCodeStartDelegateSpy: SignUpCodeStartDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpCodeErrorCalled = false
+    private(set) var onSignUpCodeRequiredCalled = false
+    private(set) var error: SignUpCodeStartError?
+    private(set) var newState: SignUpCodeRequiredState?
+    private(set) var sentTo: String?
+    private(set) var channelTargetType: MSALNativeAuthChannelType?
+    private(set) var codeLength: Int?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
+    func onSignUpCodeError(error: MSAL.SignUpCodeStartError) {
+        onSignUpCodeErrorCalled = true
+        self.error = error
+
+        expectation?.fulfill()
+    }
+
+    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
+        onSignUpCodeRequiredCalled = true
+        self.newState = newState
+        self.sentTo = sentTo
+        self.channelTargetType = channelTargetType
+        self.codeLength = codeLength
+
+        expectation?.fulfill()
+    }
+}
+
+class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpResendCodeErrorCalled = false
+    private(set) var onSignUpResendCodeCodeRequiredCalled = false
+    private(set) var error: ResendCodeError?
+    private(set) var newState: SignUpCodeRequiredState?
+    private(set) var sentTo: String?
+    private(set) var codeLength: Int?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
+        onSignUpResendCodeErrorCalled = true
+        self.error = error
+
+        expectation?.fulfill()
+    }
+
+    func onSignUpResendCodeCodeRequired(newState: MSAL.SignUpCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
+        onSignUpResendCodeCodeRequiredCalled = true
+        self.newState = newState
+        self.sentTo = sentTo
+        self.codeLength = codeLength
+
+        expectation?.fulfill()
     }
 }
 
 class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpVerifyCodeErrorCalled = false
+    private(set) var onSignUpAttributesRequiredCalled = false
+    private(set) var onSignUpPasswordRequiredCalled = false
+    private(set) var onSignUpCompletedCalled = false
     private(set) var error: VerifyCodeError?
-    private(set) var newCodeSentState: SignUpCodeSentState?
+    private(set) var newCodeRequiredState: SignUpCodeRequiredState?
     private(set) var newAttributesRequiredState: SignUpAttributesRequiredState?
     private(set) var newPasswordRequiredState: SignUpPasswordRequiredState?
-    private(set) var signUpCompletedCalled = false
 
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+        onSignUpVerifyCodeErrorCalled = true
         self.error = error
-        newCodeSentState = newState
+        newCodeRequiredState = newState
+
+        expectation?.fulfill()
     }
 
     func onSignUpAttributesRequired(newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredCalled = true
         newAttributesRequiredState = newState
+
+        expectation?.fulfill()
     }
 
-    func onPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
+    func onSignUpPasswordRequired(newState: MSAL.SignUpPasswordRequiredState) {
+        onSignUpPasswordRequiredCalled = true
         newPasswordRequiredState = newState
+
+        expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
-        signUpCompletedCalled = true
+        onSignUpCompletedCalled = true
+
+        expectation?.fulfill()
     }
 }
 
 class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpPasswordRequiredErrorCalled = false
+    private(set) var onSignUpAttributesRequiredCalled = false
+    private(set) var onSignUpCompletedCalled = false
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: SignUpPasswordRequiredState?
     private(set) var newAttributesRequiredState: SignUpAttributesRequiredState?
-    private(set) var signUpCompletedCalled = false
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
 
     func onSignUpPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignUpPasswordRequiredState?) {
+        onSignUpPasswordRequiredErrorCalled = true
         self.error = error
         newPasswordRequiredState = newState
+
+        expectation?.fulfill()
     }
 
     func onSignUpAttributesRequired(newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredCalled = true
         newAttributesRequiredState = newState
+
+        expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
-        signUpCompletedCalled = true
+        onSignUpCompletedCalled = true
+
+        expectation?.fulfill()
     }
 }
 
 class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpAttributesRequiredErrorCalled = false
+    private(set) var onSignUpCompletedCalled = false
     private(set) var error: AttributesRequiredError?
     private(set) var newState: SignUpAttributesRequiredState?
-    private(set) var signUpCompletedCalled = false
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
 
     func onSignUpAttributesRequiredError(error: MSAL.AttributesRequiredError, newState: MSAL.SignUpAttributesRequiredState?) {
+        onSignUpAttributesRequiredErrorCalled = true
         self.error = error
         self.newState = newState
+
+        expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
-        self.signUpCompletedCalled = true
+        onSignUpCompletedCalled = true
+
+        expectation?.fulfill()
+    }
+}
+
+class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDelegate {
+    private let expectation: XCTestExpectation
+    private(set) var error: VerifyCodeError?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
+        self.error = error
+        expectation.fulfill()
+    }
+
+    func onSignUpCompleted() {
+    }
+}
+
+class SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented: SignUpPasswordRequiredDelegate {
+    private let expectation: XCTestExpectation
+    private(set) var error: PasswordRequiredError?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignUpPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignUpPasswordRequiredState?) {
+        self.error = error
+        expectation.fulfill()
+    }
+
+    func onSignUpCompleted() {
     }
 }

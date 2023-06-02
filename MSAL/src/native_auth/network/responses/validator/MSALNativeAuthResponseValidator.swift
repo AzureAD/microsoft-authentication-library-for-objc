@@ -130,8 +130,6 @@ final class MSALNativeAuthResponseValidator: MSALNativeAuthSignInResponseValidat
             return .userNotFound
         case .invalidCredentials:
             return .invalidPassword
-        case .invalidAuthenticationType:
-            return .invalidAuthenticationType
         default:
             return .generalError
         }

@@ -66,7 +66,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing up with email \(email) and password")
 
-        nativeAuth.signUp(username: email, password: password, delegate: self)
+        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -77,7 +77,7 @@ class EmailAndPasswordViewController: UIViewController {
 
         print("Signing in with email \(email) and password")
 
-        nativeAuth.signIn(username: email, password: password, delegate: self)
+        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -108,7 +108,7 @@ class EmailAndPasswordViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-extension EmailAndPasswordViewController: SignUpStartDelegate {
+extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
     func onSignUpError(error: MSAL.SignUpStartError) {
         switch error.type {
         case .userAlreadyExists:
@@ -122,8 +122,11 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
         }
     }
 
-    func onSignUpCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
-        print("SignUpStartDelegate: onSignUpCodeSent: \(newState)")
+    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState,
+                              sentTo _: String,
+                              channelTargetType _: MSAL.MSALNativeAuthChannelType,
+                              codeLength _: Int) {
+        print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self else { return }
@@ -139,7 +142,7 @@ extension EmailAndPasswordViewController: SignUpStartDelegate {
 }
 
 extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
-    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeSentState?) {
+    func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         switch error.type {
         case .invalidCode:
             guard let newState else {
@@ -175,21 +178,25 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
         dismissVerifyCodeModal()
     }
 
-    func onPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
+    func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
         dismissVerifyCodeModal()
     }
 }
 
 extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeSentState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeSent(newState: MSAL.SignUpCodeSentState, displayName _: String, codeLength _: Int) {
+    func onSignUpResendCodeRequired(
+        newState: MSAL.SignUpCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
                                   guard let self else { return }
@@ -205,7 +212,8 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
 
 // MARK: - Sign In delegates
 
-extension EmailAndPasswordViewController: SignInStartDelegate {
+extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
+
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
         showResultText("Signed in successfully. Access Token: \(result.accessToken)")
 
@@ -214,8 +222,8 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
         updateUI()
     }
 
-    func onSignInError(error: MSAL.SignInStartError) {
-        print("SignInStartDelegate: onSignInError: \(error)")
+    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+        print("SignInPasswordStartDelegate: onSignInPasswordError: \(error)")
 
         switch error.type {
         case .userNotFound, .invalidPassword, .invalidUsername:
@@ -225,7 +233,12 @@ extension EmailAndPasswordViewController: SignInStartDelegate {
         }
     }
 
-    func onSignInCodeSent(newState _: MSAL.SignInCodeSentState, displayName _: String, codeLength _: Int) {
+    func onSignInCodeRequired(
+        newState _: MSAL.SignInCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int
+    ) {
         showResultText("Unexpected result while signing in: Verification required")
     }
 }

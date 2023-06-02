@@ -36,8 +36,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try super.setUpWithError()
 
         provider = MSALNativeAuthSignUpRequestProvider(
-            config: config,
-            requestConfigurator: MSALNativeAuthRequestConfigurator(),
+            requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
         )
 
@@ -50,7 +49,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             context: context
         )
 
-        sut = try provider.continue(parameters: params, context: context)
+        sut = try provider.continue(parameters: params)
     }
 
     func test_signUpContinue_withPassword_succeeds() async throws {
@@ -94,9 +93,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    // TODO: Remove Skip when mock api fixes it
     func test_signUpContinue_invalidGrant() async throws {
-        try XCTSkipIf(true, "Skipping this test until mock api fixes it")
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .invalidGrant,
@@ -184,8 +181,28 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_validationFailed() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .validationFailed,
-            expectedError: Error(error: .validationFailed)
+            response: .attributeValidationFailed,
+            expectedError: Error(error: .attributeValidationFailed)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
+    }
+
+    func test_signUpContinue_credentialRequired() async throws {
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .credentialRequired,
+            expectedError: Error(error: .credentialRequired)
+        )
+
+        XCTAssertNotNil(response.signUpToken)
+    }
+
+    func test_signUpContinue_invalidAttributes() async throws {
+        let response = try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .invalidAttributes,
+            expectedError: Error(error: .invalidAttributes)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -193,7 +210,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
     func performSuccessfulTestCase(with params: MSALNativeAuthSignUpContinueRequestProviderParams) async throws {
         try await mockAPIHandler.addResponse(endpoint: .signUpContinue, correlationId: correlationId, responses: [])
-        sut = try provider.continue(parameters: params, context: context)
+        sut = try provider.continue(parameters: params)
 
         let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 

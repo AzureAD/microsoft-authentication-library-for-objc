@@ -28,7 +28,7 @@
 
 
 
-@interface ObjCViewController () <SignInStartDelegate>
+@interface ObjCViewController () <SignInPasswordStartDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *emailTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
@@ -66,11 +66,11 @@
     NSString *email = self.emailTextField.text;
     NSString *password = self.passwordTextField.text;
 
-    [self.nativeAuth signInUsername:email
-                           password:password
-                             scopes:nil
-                      correlationId:nil
-                           delegate:self];
+    [self.nativeAuth signInUsingPasswordWithUsername:email
+                                            password:password
+                                              scopes:nil
+                                       correlationId:nil
+                                            delegate:self];
 }
 
 - (IBAction)signOutPressed:(id)sender {
@@ -99,8 +99,8 @@
 
 #pragma mark - Sign In Delegate methods
 
-- (void)onSignInCodeSentWithNewState:(SignInCodeSentState * _Nonnull)newState displayName:(NSString * _Nonnull)displayName codeLength:(NSInteger)codeLength {
-    NSLog(@"Unexpected state while signing in: Code Sent");
+- (void)onSignInCodeRequiredWithNewState:(SignInCodeRequiredState *)newState sentTo:(NSString *)sentTo channelTargetType:(enum MSALNativeAuthChannelType)channelTargetType codeLength:(NSInteger)codeLength {
+    NSLog(@"Unexpected state while signing in: Code Required");
 }
 
 - (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccount * _Nonnull)result {
@@ -111,13 +111,13 @@
     [self updateUI];
 }
 
-- (void)onSignInErrorWithError:(SignInStartError * _Nonnull)error {
+- (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {
     switch (error.type) {
-        case SignInStartErrorTypeInvalidUsername:
+        case SignInPasswordStartErrorTypeInvalidUsername:
             [self showResultText:@"Invalid username."];
             break;
 
-        case SignInStartErrorTypeInvalidPassword:
+        case SignInPasswordStartErrorTypeInvalidPassword:
             [self showResultText:@"Invalid password."];
             break;
 

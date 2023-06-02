@@ -132,11 +132,10 @@ class MSALNativeAuthBaseController {
                 } else if let response = result as? T {
                     continuation.resume(returning: .success(response))
                 } else {
-                    MSALLogger.log(level: .error, context: context, format: "performRequest: Unexpected response \(result ?? "<nil>")")
+                    MSALLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
                     continuation.resume(returning: .failure(MSALNativeAuthError.invalidResponse))
                 }
             }
         }
     }
-
 }

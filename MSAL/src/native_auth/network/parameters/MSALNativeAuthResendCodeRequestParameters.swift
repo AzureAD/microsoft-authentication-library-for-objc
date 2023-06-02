@@ -27,12 +27,11 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let credentialToken: String
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         return [:]
     }
 }
@@ -42,12 +41,10 @@ struct MSALNativeAuthResendCodeRequestParameters: MSALNativeAuthRequestable {
 extension MSALNativeAuthResendCodeRequestParameters {
 
     init(
-        config: MSALNativeAuthConfiguration,
         credentialToken: String,
         context: MSIDRequestContext
     ) {
         self.init(
-            config: config,
             endpoint: .resendCode,
             context: context,
             credentialToken: credentialToken

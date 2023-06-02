@@ -26,18 +26,20 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class SignUpCodeSentStateTests: XCTestCase {
+final class SignUpCodeRequiredStateTests: XCTestCase {
 
     private var correlationId: UUID!
+    private var exp: XCTestExpectation!
     private var controller: MSALNativeAuthSignUpControllerSpy!
-    private var sut: SignUpCodeSentState!
+    private var sut: SignUpCodeRequiredState!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         correlationId = UUID()
-        controller = MSALNativeAuthSignUpControllerSpy()
-        sut = SignUpCodeSentState(controller: controller, flowToken: "<token>")
+        exp = expectation(description: "SignUpCodeSentState expectation")
+        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
+        sut = SignUpCodeRequiredState(controller: controller, flowToken: "<token>")
     }
 
     func test_resendCode_usesControllerSuccessfully() {
@@ -46,6 +48,7 @@ final class SignUpCodeSentStateTests: XCTestCase {
 
         sut.resendCode(delegate: SignUpResendCodeDelegateSpy(), correlationId: correlationId)
 
+        wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)
         XCTAssertTrue(controller.resendCodeCalled)
     }
@@ -56,6 +59,7 @@ final class SignUpCodeSentStateTests: XCTestCase {
 
         sut.submitCode(code: "1234", delegate: SignUpVerifyCodeDelegateSpy(), correlationId: correlationId)
 
+        wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)
         XCTAssertTrue(controller.submitCodeCalled)
     }

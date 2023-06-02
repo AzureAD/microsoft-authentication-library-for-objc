@@ -38,26 +38,24 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
     
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
-        let parameters = MSALNativeAuthSignInInitiateRequestParameters(config: config,
-                                                                       context: MSALNativeAuthRequestContextMock(),
+        let parameters = MSALNativeAuthSignInInitiateRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                        username: "username")
         var resultUrl: URL? = nil
-        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl())
+        XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/initiate")
     }
 
     func test_passwordChallengeType_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
         let params = MSALNativeAuthSignInInitiateRequestParameters(
-            config: config,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
-            "client_id": params.config.clientId,
+            "client_id": config.clientId,
             "username": params.username,
             "challenge_type": "password",
         ]
@@ -68,15 +66,14 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
     func test_otpChallenge_shouldCreateCorrectBodyRequest() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.oob]))
         let params = MSALNativeAuthSignInInitiateRequestParameters(
-            config: config,
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME
         )
 
-        let body = params.makeRequestBody()
+        let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
-            "client_id": params.config.clientId,
+            "client_id": config.clientId,
             "username": params.username,
             "challenge_type": "oob",
         ]

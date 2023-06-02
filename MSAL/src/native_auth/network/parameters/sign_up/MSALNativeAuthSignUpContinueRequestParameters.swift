@@ -25,7 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable {
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint = .signUpContinue
     let grantType: MSALNativeAuthGrantType
     let signUpToken: String
@@ -34,7 +33,7 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
     let attributes: String?
     let context: MSIDRequestContext
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [

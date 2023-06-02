@@ -25,8 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpRequestParameters: MSALNativeAuthRequestable {
-
-    let config: MSALNativeAuthConfiguration
     let endpoint: MSALNativeAuthEndpoint
     let context: MSIDRequestContext
     let email: String
@@ -35,7 +33,7 @@ struct MSALNativeAuthSignUpRequestParameters: MSALNativeAuthRequestable {
     let scope: String
     let grantType: MSALNativeAuthGrantType
 
-    func makeRequestBody() -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         return [:]
     }
 }
@@ -45,7 +43,6 @@ struct MSALNativeAuthSignUpRequestParameters: MSALNativeAuthRequestable {
 extension MSALNativeAuthSignUpRequestParameters {
 
     init(
-        config: MSALNativeAuthConfiguration,
         email: String,
         password: String? = nil,
         attributes: String,
@@ -54,7 +51,6 @@ extension MSALNativeAuthSignUpRequestParameters {
         grantType: MSALNativeAuthGrantType
     ) {
         self.init(
-            config: config,
             endpoint: .signUp,
             context: context,
             email: email,

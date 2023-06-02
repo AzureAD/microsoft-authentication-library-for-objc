@@ -24,40 +24,38 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthSignInRequest: MSIDHttpRequest {
+struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
+    let endpoint: MSALNativeAuthEndpoint = .token
+    let context: MSIDRequestContext
+    let username: String?
+    let credentialToken: String?
+    let signInSLT: String?
+    let grantType: MSALNativeAuthGrantType
+    let scope: String?
+    let password: String?
+    let oobCode: String?
+    let clientInfo = true
 
-    init(params: MSALNativeAuthSignInRequestParameters) throws {
-        super.init()
-
-        self.context = params.context
-
-        self.parameters = makeBodyRequestParameters(with: params)
-
-        let url = try params.makeEndpointUrl()
-        self.urlRequest = URLRequest(url: url)
-
-        self.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
-    }
-
-    func configure(
-        requestConfigurator: MSIDHttpRequestConfiguratorProtocol = MSIDAADRequestConfigurator(),
-        requestSerializer: MSIDRequestSerialization,
-        serverTelemetry: MSIDHttpRequestServerTelemetryHandling
-    ) {
-        self.serverTelemetry = serverTelemetry
-        self.requestSerializer = requestSerializer
-        requestConfigurator.configure(self)
-    }
-
-    private func makeBodyRequestParameters(with params: MSALNativeAuthSignInRequestParameters) -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
+        var parameters = [
+            Key.clientId.rawValue: config.clientId,
+            Key.username.rawValue: username,
+            Key.credentialToken.rawValue: credentialToken,
+            Key.signInSLT.rawValue: signInSLT,
+            Key.grantType.rawValue: grantType.rawValue,
+            Key.scope.rawValue: scope,
+            Key.password.rawValue: password,
+            Key.oobCode.rawValue: oobCode
+            // TODO: Do we send this parameter?
+            // Key.clientInfo: clientInfo
+        ]
 
-        return [
-            Key.clientId.rawValue: params.config.clientId,
-            Key.grantType.rawValue: params.grantType.rawValue,
-            Key.email.rawValue: params.email,
-            Key.password.rawValue: params.password,
-            Key.scope.rawValue: params.scope
-        ].compactMapValues { $0 }
+        // For ROPC case and only for that the challenge type should be present
+        if username != nil, password != nil {
+            parameters[Key.challengeType.rawValue] = config.challengeTypesString
+        }
+
+        return parameters.compactMapValues { $0 }
     }
 }
