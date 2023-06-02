@@ -286,9 +286,56 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType), validatorError: .unsupportedChallengeType)
     }
     
+    func test_whenSignInWithCodePasswordIsRequired_newStateIsPropagatedToUser() async {
+        let request = MSIDHttpRequest()
+        let expectedUsername = "username"
+        let expectedCredentialToken = "credentialToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+
+        let expectation = expectation(description: "SignInController")
+
+        requestProviderMock.result = request
+        responseValidatorMock.initiateValidatedResponse = .success(credentialToken: expectedCredentialToken)
+        responseValidatorMock.challengeValidatedResponse = .passwordRequired(credentialToken: expectedCredentialToken)
+        
+        let mockCodeStartDelegate = SignInCodeStartDelegateWithPasswordRequiredSpy(expectation: expectation)
+
+        await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: true)
+        XCTAssertEqual(mockCodeStartDelegate.passwordRequiredState?.flowToken, expectedCredentialToken)
+    }
+    
+    func test_whenSignInWithCodePasswordRequiredMethodIsMissing_errorIsReturned() async {
+        let request = MSIDHttpRequest()
+        let expectedUsername = "username"
+        let expectedCredentialToken = "credentialToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+
+        let expectation = expectation(description: "SignInController")
+
+        requestProviderMock.result = request
+        responseValidatorMock.initiateValidatedResponse = .success(credentialToken: expectedCredentialToken)
+        responseValidatorMock.challengeValidatedResponse = .passwordRequired(credentialToken: expectedCredentialToken)
+        
+        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInCodeStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
+
+        await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
+    }
+    
     // MARK: private methods
     
-    func checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInChallengeValidatedErrorType) async {
+    private func checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInChallengeValidatedErrorType) async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -311,7 +358,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         receivedEvents.removeAll()
     }
     
-    func checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInInitiateValidatedErrorType) async {
+    private func checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInInitiateValidatedErrorType) async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)

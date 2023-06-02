@@ -313,12 +313,17 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             case .passwordRequired(let credentialToken):
                 DispatchQueue.main.async {
                     if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
-                        passwordRequiredMethod(SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, flowToken: credentialToken))
                         self.stopTelemetryEvent(telemetryEvent, context: context)
+                        passwordRequiredMethod(SignInPasswordRequiredState(
+                            scopes: scopes,
+                            username: username,
+                            controller: self,
+                            flowToken: credentialToken)
+                        )
                     } else {
+                        self.stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
                         delegate.onSignInCodeError(
                             error: SignInCodeStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
-                        self.stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
                     }
                 }
             case .error(let challengeError):

@@ -108,7 +108,7 @@ open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
 
 open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
     
-    private let expectation: XCTestExpectation
+    fileprivate let expectation: XCTestExpectation
     var expectedError: SignInCodeStartError?
     var expectedSentTo: String?
     var expectedChannelTargetType: MSALNativeAuthChannelType?
@@ -143,6 +143,15 @@ open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
         } else {
             expectation.fulfill()
         }
+    }
+}
+
+class SignInCodeStartDelegateWithPasswordRequiredSpy: SignInCodeStartDelegateSpy {
+    var passwordRequiredState: SignInPasswordRequiredState?
+
+    public func onSignInPasswordRequired(newState: SignInPasswordRequiredState) {
+        passwordRequiredState = newState
+        expectation.fulfill()
     }
 }
 
