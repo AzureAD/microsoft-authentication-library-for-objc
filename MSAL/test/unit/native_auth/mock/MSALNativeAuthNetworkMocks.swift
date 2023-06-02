@@ -143,7 +143,9 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
 
 class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProviding {
     
-    var throwingError: Error?
+    var throwingInitError: Error?
+    var throwingChallengeError: Error?
+    var throwingTokenError: Error?
     var result: MSIDHttpRequest?
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
@@ -155,7 +157,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
         if let expectedUsername = expectedUsername {
             XCTAssertEqual(expectedUsername, parameters.username)
         }
-        return try returnMockedResult()
+        return try returnMockedResult(throwingInitError)
     }
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
@@ -163,7 +165,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
         if let expectedCredentialToken = expectedCredentialToken {
             XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
         }
-        return try returnMockedResult()
+        return try returnMockedResult(throwingChallengeError)
     }
     
     func token(parameters: MSAL.MSALNativeAuthSignInTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
@@ -178,7 +180,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
         }
-        return try returnMockedResult()
+        return try returnMockedResult(throwingTokenError)
     }
     
     fileprivate func checkContext(_ context: MSIDRequestContext) {
@@ -187,8 +189,8 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
         }
     }
     
-    private func returnMockedResult() throws -> MSIDHttpRequest  {
-        if let throwingError = throwingError {
+    private func returnMockedResult(_ error: Error?) throws -> MSIDHttpRequest  {
+        if let throwingError = error {
             throw throwingError
         }
         if let result = result {
