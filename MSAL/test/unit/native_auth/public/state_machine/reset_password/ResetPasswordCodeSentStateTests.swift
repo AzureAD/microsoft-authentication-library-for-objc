@@ -38,7 +38,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
         correlationId = UUID()
         exp = expectation(description: "ResetPasswordCodeSentState expectation")
-        controller = MSALNativeAuthResetPasswordControllerSpy()
+        controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
         sut = ResetPasswordCodeRequiredState(controller: controller, flowToken: "<token>")
     }
 

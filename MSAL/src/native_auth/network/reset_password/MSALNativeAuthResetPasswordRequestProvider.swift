@@ -69,9 +69,10 @@ final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPassw
         parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters
     ) throws -> MSIDHttpRequest {
 
-        let requestParams = MSALNativeAuthResetPasswordStartRequestParameters(config: config,
-                                                                       context: parameters.context,
-                                                                       username: parameters.username)
+        let requestParams = MSALNativeAuthResetPasswordStartRequestParameters(
+            context: parameters.context,
+            username: parameters.username
+        )
 
         let request = MSIDHttpRequest()
         try requestConfigurator.configure(configuratorType: .resetPassword(.start(requestParams)),
@@ -84,7 +85,6 @@ final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPassw
 
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         let requestParams = MSALNativeAuthResetPasswordChallengeRequestParameters(
-            config: config,
             context: context,
             passwordResetToken: token
         )

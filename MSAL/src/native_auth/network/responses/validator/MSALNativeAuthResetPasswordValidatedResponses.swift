@@ -30,7 +30,7 @@ enum MSALNativeAuthResetPasswordStartValidatedResponse {
 }
 
 enum MSALNativeAuthResetPasswordChallengeValidatedResponse {
-    case success(_ displayName: String, _ displayType: String, _ codeLength: Int, _ resetPasswordChallengeToken: String)
+    case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ resetPasswordChallengeToken: String)
     case redirect
     case error(MSALNativeAuthResetPasswordChallengeOauth2ErrorCode)
     case unexpectedError

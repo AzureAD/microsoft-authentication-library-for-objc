@@ -108,11 +108,16 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .redirect
         case .password,
              .oob:
-            if let displayName = response.challengeTargetLabel,
-               let displayType = response.challengeChannel,
+            if let sentTo = response.challengeTargetLabel,
+               let channelTargetType = MSALNativeAuthApiChannelType(rawValue: response.challengeChannel ?? ""),
                let codeLength = response.codeLength,
                let passwordResetToken = response.passwordResetToken {
-                return .success(displayName, displayType, codeLength, passwordResetToken)
+                return .success(
+                    sentTo,
+                    channelTargetType.toDomain(),
+                    codeLength,
+                    passwordResetToken
+                )
             } else {
                 MSALLogger.log(level: .info, context: context, format: "Missing expected fields from backend")
                 return .unexpectedError

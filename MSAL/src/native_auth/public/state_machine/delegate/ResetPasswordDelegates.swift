@@ -27,10 +27,12 @@ import Foundation
 @objc
 public protocol ResetPasswordStartDelegate {
     @MainActor func onResetPasswordError(error: ResetPasswordStartError)
-    @MainActor func onResetPasswordCodeRequired(newState: ResetPasswordCodeRequiredState,
-                                                sentTo: String,
-                                		        channelTargetType: MSALNativeAuthChannelType,
-                             			        codeLength: Int)
+    @MainActor func onResetPasswordCodeRequired(
+        newState: ResetPasswordCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc
@@ -42,10 +44,12 @@ public protocol ResetPasswordVerifyCodeDelegate {
 @objc
 public protocol ResetPasswordResendCodeDelegate {
     @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
-    @MainActor func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState,
-                                                     sentTo: String,
-                                                     channelTargetType: MSALNativeAuthChannelType,
-                                                     codeLength: Int)
+    @MainActor func onResetPasswordResendCodeRequired(
+        newState: ResetPasswordCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc
