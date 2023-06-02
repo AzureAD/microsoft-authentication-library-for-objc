@@ -197,7 +197,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
+            Task {
+                await delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
+            }
             return
         }
 
