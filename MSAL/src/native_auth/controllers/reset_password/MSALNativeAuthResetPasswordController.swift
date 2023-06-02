@@ -227,10 +227,9 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     ) async {
         MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/challenge request with response: \(response)")
         stopTelemetryEvent(event, context: context)
-        
+
         switch response {
         case .success(let displayName, let displayType, let codeLength, let challengeToken):
-            
             await delegate.onResetPasswordResendCodeSent(
                 newState: ResetPasswordCodeSentState(controller: self, flowToken: challengeToken),
                 displayName: displayName,
@@ -461,9 +460,13 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                     return
                 }
 
-                MSALLogger.log(level: .info, context: context, format: "resetpassword/poll_completion: ⏱️ waiting for \(pollInterval) seconds before retrying")
+                MSALLogger.log(
+                    level: .info,
+                    context: context,
+                    format: "resetpassword: waiting for \(pollInterval) seconds before retrying"
+                )
+
                 try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
-                MSALLogger.log(level: .info, context: context, format: "resetpassword/poll_completion: 🚦 Wait over. Retrying now")
 
                 await doPollCompletionLoop(
                     passwordResetToken: "token",

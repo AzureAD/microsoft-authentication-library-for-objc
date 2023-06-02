@@ -59,4 +59,3 @@ extension MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode {
         }
     }
 }
-
