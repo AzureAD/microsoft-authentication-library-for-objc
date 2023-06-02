@@ -103,3 +103,69 @@ open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
         XCTFail("This method should not be called")
     }
 }
+
+open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
+    
+    private let expectation: XCTestExpectation
+    var expectedError: SignInCodeStartError?
+    var expectedSentTo: String?
+    var expectedChannelTargetType: MSALNativeAuthChannelType?
+    var expectedCodeLength: Int?
+    var verifyCodeDelegate: SignInVerifyCodeDelegate?
+    var correlationId: UUID?
+    
+    init(expectation: XCTestExpectation, correlationId: UUID? = nil, verifyCodeDelegate: SignInVerifyCodeDelegate? = nil, expectedError: SignInCodeStartError? = nil, expectedSentTo: String? = nil, expectedChannelTargetType: MSALNativeAuthChannelType? = nil, expectedCodeLength: Int? = nil) {
+        self.expectation = expectation
+        self.verifyCodeDelegate = verifyCodeDelegate
+        self.expectedSentTo = expectedSentTo
+        self.expectedChannelTargetType = expectedChannelTargetType
+        self.expectedCodeLength = expectedCodeLength
+        self.correlationId = correlationId
+    }
+    
+    public func onSignInCodeError(error: SignInCodeStartError) {
+        XCTAssertEqual(error, expectedError)
+        expectation.fulfill()
+    }
+    
+    public func onSignInCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+        XCTAssertEqual(sentTo, expectedSentTo)
+        XCTAssertEqual(channelTargetType, expectedChannelTargetType)
+        XCTAssertEqual(codeLength, expectedCodeLength)
+        if let verifyCodeDelegate = verifyCodeDelegate {
+            newState.submitCode(code: "code", delegate: verifyCodeDelegate, correlationId: correlationId)
+        } else {
+            expectation.fulfill()
+        }
+    }
+}
+
+open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
+    
+    private let expectation: XCTestExpectation
+    var expectedError: VerifyCodeError?
+    var expectedUserAccount: MSALNativeAuthUserAccount?
+    
+    init(expectation: XCTestExpectation, expectedError: VerifyCodeError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedUserAccount = expectedUserAccount
+    }
+    
+    public func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?) {
+        XCTAssertEqual(error, expectedError)
+        expectation.fulfill()
+    }
+    
+    public func onSignInCompleted(result: MSALNativeAuthUserAccount) {
+        guard let expectedUserAccount = expectedUserAccount else {
+            XCTFail("expectedUserAccount expected not nil")
+            expectation.fulfill()
+            return
+        }
+        XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
+        XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
+        XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        expectation.fulfill()
+    }
+}

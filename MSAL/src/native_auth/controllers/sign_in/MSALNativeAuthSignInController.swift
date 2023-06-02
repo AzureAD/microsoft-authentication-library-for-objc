@@ -369,12 +369,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             let params = MSALNativeAuthSignInTokenRequestParameters(
                 context: context,
                 username: username,
-                credentialToken: nil,
+                credentialToken: credentialToken,
                 signInSLT: nil,
-                grantType: .password,
+                grantType: grantType,
                 scope: scopes.joined(separator: " "),
                 password: password,
-                oobCode: nil,
+                oobCode: oobCode,
                 addNcaFlag: addNcaFlag,
                 includeChallengeType: includeChallengeType)
             return try requestProvider.token(parameters: params, context: context)
