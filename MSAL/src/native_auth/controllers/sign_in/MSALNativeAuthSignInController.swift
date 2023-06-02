@@ -280,31 +280,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     private func handleSignInChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        codeRequiredMethod: ((SignInCodeRequiredState, String, MSALNativeAuthChannelType, Int) -> Void)?) -> SignInPasswordStartError? {
-        switch validatedResponse {
-        case .passwordRequired:
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "SignIn with password: unexpected password required result")
-                return SignInPasswordStartError(type: .generalError)
-        case .error(let challengeError):
-            return challengeError.convertToSignInPasswordStartError()
-        case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
-            let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)
-            if let codeRequiredMethod = codeRequiredMethod {
-                DispatchQueue.main.async { codeRequiredMethod(state, sentTo, channelType, codeLength) }
-                return nil
-            } else {
-                return SignInPasswordStartError(type: .generalError, message: "Implementation of onSignInCodeRequired required")
-            }
-        }
-    }
-
-    private func handleSignInChallengeResponse(
-        _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
-        context: MSALNativeAuthRequestContext,
         username: String,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         scopes: [String],

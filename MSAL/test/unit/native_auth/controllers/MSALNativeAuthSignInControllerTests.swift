@@ -220,7 +220,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let state = SignInCodeRequiredState(scopes: ["openid","profile","offline_access"], controller: sut, inputValidator: MSALNativeAuthInputValidator(), flowToken: credentialToken)
         responseValidatorMock.tokenValidatedResponse = .success(tokenResult, tokenResponse)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedUserAccount: MSALNativeAuthUserAccount(username: "username", accessToken: "accessToken", rawIdToken: "IdToken", scopes: [], expiresOn: Date())), correlationId: UUID(uuidString: DEFAULT_TEST_UID)!)
+        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedUserAccount: MSALNativeAuthUserAccount(username: "username", accessToken: "accessToken", rawIdToken: "IdToken", scopes: [], expiresOn: Date())), correlationId: defaultUUID)
 
         wait(for: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
@@ -333,7 +333,103 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
     }
     
+    func test_whenSignInWithCodeSubmitPassword_signInIsCompletedSuccessfully() {
+        let request = MSIDHttpRequest()
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedCredentialToken = "credentialToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        
+        let exp = expectation(description: "SignInController")
+        
+        requestProviderMock.result = request
+        requestProviderMock.expectedContext = expectedContext
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, addNcaFlag: false, includeChallengeType: true)
+        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedUserAccount: MSALNativeAuthUserAccount(username: expectedUsername, accessToken: "accessToken", rawIdToken: "IdToken", scopes: [], expiresOn: Date()))
+        responseValidatorMock.tokenValidatedResponse = .success(tokenResult, tokenResponse)
+        responseValidatorMock.expectedTokenResponse = tokenResponse
+
+        let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
+        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitPassword, isSuccessful: true)
+    }
+    
+    func test_whenSignInWithCodeSubmitPasswordTokenRequestCreationFail_errorShouldBeReturned() {
+        let request = MSIDHttpRequest()
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedCredentialToken = "credentialToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        
+        let exp = expectation(description: "SignInController")
+        
+        requestProviderMock.throwingTokenError = MSALNativeAuthGenericError()
+        requestProviderMock.expectedContext = expectedContext
+        
+        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError))
+
+        let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
+        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+        
+        wait(for: [exp], timeout: 1)
+        XCTAssertNotNil(mockDelegate.newPasswordRequiredState)
+        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitPassword, isSuccessful: false)
+    }
+    
+    func test_whenSignInWithCodeSubmitPasswordTokenAPIReturnError_correctErrorShouldBeReturned()  {
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .generalError)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .expiredToken)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidClient)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidRequest)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidServerResponse)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .userNotFound)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidAuthenticationType)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidOOBCode)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .unsupportedChallengeType)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .browserRequired), validatorError: .strongAuthRequired)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .invalidScope)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .authorizationPending)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .generalError), validatorError: .slowDown)
+        checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError(type: .invalidPassword), validatorError: .invalidPassword)
+    }
+    
+    
+    
     // MARK: private methods
+    
+    private func checkSubmitPasswordDelegateErrorWithTokenValidatorError(delegateError: PasswordRequiredError, validatorError: MSALNativeAuthSignInTokenValidatedErrorType) {
+        let request = MSIDHttpRequest()
+        let expectedUsername = "username"
+        let expectedPassword = "password"
+        let expectedCredentialToken = "credentialToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        
+        let exp = expectation(description: "SignInController")
+        
+        requestProviderMock.result = request
+        requestProviderMock.expectedContext = expectedContext
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, addNcaFlag: false, includeChallengeType: true)
+        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: delegateError)
+        responseValidatorMock.tokenValidatedResponse = .error(validatorError)
+
+        let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
+        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitPassword, isSuccessful: false)
+        receivedEvents.removeAll()
+    }
     
     private func checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInChallengeValidatedErrorType) async {
         let request = MSIDHttpRequest()

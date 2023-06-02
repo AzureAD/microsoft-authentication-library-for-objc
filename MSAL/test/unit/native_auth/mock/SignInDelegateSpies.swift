@@ -59,35 +59,52 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
             XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
             XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
             XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
-            expectation.fulfill()
-            return
+        } else {
+            XCTFail("This method should not be called")
         }
-        XCTFail("This method should not be called")
         expectation.fulfill()
     }
 }
 
 class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
 
-    private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: SignInPasswordRequiredState?
     private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
-    private(set) var signInCompletedCalled = false
+    fileprivate let expectation: XCTestExpectation
+    var expectedError: PasswordRequiredError?
+    var expectedUserAccount: MSALNativeAuthUserAccount?
+    
+    init(expectation: XCTestExpectation, expectedError: PasswordRequiredError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedUserAccount = expectedUserAccount
+    }
 
     func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
-        self.error = error
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertEqual(error.type, expectedError?.type)
         newPasswordRequiredState = newState
+        expectation.fulfill()
     }
 
     func onSignInCodeRequired(newState: SignInCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int) {
+        XCTAssertTrue(Thread.isMainThread)
         newSignInCodeRequiredState = newState
     }
 
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        signInCompletedCalled = true
+        XCTAssertTrue(Thread.isMainThread)
+        if let expectedUserAccount = expectedUserAccount {
+            XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
+            XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
+            XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        } else {
+            XCTFail("This method should not be called")
+        }
+        expectation.fulfill()
     }
 }
 
