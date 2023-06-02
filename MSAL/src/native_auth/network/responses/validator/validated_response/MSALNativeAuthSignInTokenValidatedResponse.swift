@@ -70,6 +70,8 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
         switch self {
         case .invalidOOBCode:
             return VerifyCodeError(type: .invalidCode)
+        case.strongAuthRequired:
+            return VerifyCodeError(type: .browserRequired)
         default:
             return VerifyCodeError(type: .generalError, message: self.localizedDescription)
         }

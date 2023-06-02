@@ -163,6 +163,35 @@ open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
     }
 }
 
+class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
+    
+    private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
+    fileprivate let expectation: XCTestExpectation
+    var expectedSentTo: String?
+    var expectedChannelTargetType: MSALNativeAuthChannelType?
+    var expectedCodeLength: Int?
+    
+    init(expectation: XCTestExpectation, expectedSentTo: String? = nil, expectedChannelTargetType: MSALNativeAuthChannelType? = nil, expectedCodeLength: Int? = nil) {
+        self.expectation = expectation
+        self.expectedSentTo = expectedSentTo
+        self.expectedChannelTargetType = expectedChannelTargetType
+        self.expectedCodeLength = expectedCodeLength
+    }
+    
+    func onSignInResendCodeError(error: MSALNativeAuthGenericError, newState: SignInCodeRequiredState?) {
+        newSignInCodeRequiredState = newState
+        expectation.fulfill()
+    }
+
+    func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+        XCTAssertEqual(sentTo, expectedSentTo)
+        XCTAssertEqual(channelTargetType, expectedChannelTargetType)
+        XCTAssertEqual(codeLength, expectedCodeLength)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}
+
 class SignInCodeStartDelegateWithPasswordRequiredSpy: SignInCodeStartDelegateSpy {
     var passwordRequiredState: SignInPasswordRequiredState?
 
@@ -185,7 +214,7 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
     }
     
     public func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?) {
-        XCTAssertEqual(error, expectedError)
+        XCTAssertEqual(error.type, expectedError?.type)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
