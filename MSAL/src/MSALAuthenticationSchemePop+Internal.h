@@ -23,7 +23,6 @@
 // THE SOFTWARE.  
 
 
-#import <MSAL/MSAL.h>
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALAuthenticationSchemeProtocolInternal.h"
 
