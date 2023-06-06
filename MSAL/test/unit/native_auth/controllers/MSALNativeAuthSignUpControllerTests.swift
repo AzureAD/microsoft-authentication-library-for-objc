@@ -571,6 +571,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }
