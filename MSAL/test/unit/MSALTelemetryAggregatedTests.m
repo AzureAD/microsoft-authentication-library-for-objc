@@ -351,7 +351,7 @@
     XCTAssertNotNil(self.receivedEvent);
     NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
-    XCTAssertEqual(eventInfo.count, 14);
+    XCTAssertEqual(eventInfo.count, 13);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.application_version"]);
 #else
@@ -368,7 +368,9 @@
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
     XCTAssertNotNil(eventInfo[@"msal.application_name"]);
+#if !TARGET_OS_IPHONE
     XCTAssertNotNil(eventInfo[@"msal.device_id"]);
+#endif
 }
 
 - (void)testFlush_whenThereIsOneBrokerEvent_shouldSendAggregatedEvent
@@ -480,7 +482,7 @@
     XCTAssertNotNil(self.receivedEvent);
     NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
-    XCTAssertEqual(eventInfo.count, 13);
+    XCTAssertEqual(eventInfo.count, 12);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.application_version"]);
 #else
@@ -496,7 +498,9 @@
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
     XCTAssertNotNil(eventInfo[@"msal.application_name"]);
+#if !TARGET_OS_IPHONE
     XCTAssertNotNil(eventInfo[@"msal.device_id"]);
+#endif
 }
 
 - (void)testFlush_whenThereIsEventAndObserverRemoved_shouldNotSendEvents
