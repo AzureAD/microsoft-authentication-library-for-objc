@@ -203,7 +203,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
             passwordResetToken: response.passwordResetToken,
-            pollInterval: response.pollInterval == 300 ? 2 : response.pollInterval // TODO: Remove this when mock API is fixed
+            pollInterval: response.pollInterval
         )
     }
 
