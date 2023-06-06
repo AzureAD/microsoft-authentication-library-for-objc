@@ -109,7 +109,7 @@ class EmailAndPasswordViewController: UIViewController {
 // MARK: - Sign Up delegates
 
 extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
-    func onSignUpError(error: MSAL.SignUpStartError) {
+    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
         switch error.type {
         case .userAlreadyExists:
             showResultText("Unable to sign up: User already exists")
@@ -184,15 +184,15 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     }
 }
 
-extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSALNativeAuthGenericError, newState _: MSAL.SignUpCodeRequiredState?) {
+extension EmailAndPasswordViewController: SignUpResendCodeDelegate {    
+    func onSignUpResendCodeError(error: MSALNativeAuthGenericError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeRequired(
+    func onSignUpResendCodeCodeRequired(
         newState: MSAL.SignUpCodeRequiredState,
         sentTo _: String,
         channelTargetType _: MSAL.MSALNativeAuthChannelType,

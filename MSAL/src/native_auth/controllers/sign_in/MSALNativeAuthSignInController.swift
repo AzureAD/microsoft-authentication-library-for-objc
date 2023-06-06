@@ -355,7 +355,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 credentialToken: credentialToken,
                 signInSLT: nil,
                 grantType: grantType,
-                scope: scopes.joined(separator: " "),
+                scope: scopes.joinScopes(),
                 password: password,
                 oobCode: oobCode,
                 addNcaFlag: addNcaFlag,

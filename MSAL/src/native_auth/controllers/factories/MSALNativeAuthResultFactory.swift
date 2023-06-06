@@ -80,7 +80,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             authority: config.authority,
             redirectUri: nil,
             clientId: config.clientId,
-            target: scope.joined(separator: " ")
+            target: scope.joinScopes()
         )
     }
 }
