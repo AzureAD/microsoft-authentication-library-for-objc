@@ -82,7 +82,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     func test_makeResponse_withCorrectScopes() {
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "<access_token>"
-        accessToken.scopes = ["<scope_1>", "<scope_2>"]
+        accessToken.scopes = ["User.Read", "profile", "offline_access"]
         accessToken.expiresOn = Date()
 
         let tokenResult = MSIDTokenResult(
@@ -100,7 +100,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             credentialToken: nil,
             tokenResult: tokenResult
         )
-        XCTAssertEqual(result.authentication?.scopes, ["<scope_1>", "<scope_2>"])
+        XCTAssertEqual(result.authentication?.scopes, ["User.Read", "profile", "offline_access"])
     }
 
     func test_makeMsidConfiguration() {
