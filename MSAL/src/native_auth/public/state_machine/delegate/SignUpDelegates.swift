@@ -34,8 +34,8 @@ public protocol SignUpPasswordStartDelegate {
 }
 
 @objc
-public protocol SignUpCodeStartDelegate {
-    func onSignUpCodeError(error: SignUpCodeStartError)
+public protocol SignUpStartDelegate {
+    func onSignUpError(error: SignUpStartError)
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,

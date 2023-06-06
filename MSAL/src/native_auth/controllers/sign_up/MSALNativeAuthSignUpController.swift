@@ -66,7 +66,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         await handleSignUpStartPasswordResult(result, event: event, context: parameters.context, delegate: delegate)
     }
 
-    func signUpStartCode(parameters: MSALNativeAuthSignUpStartRequestProviderParameters, delegate: SignUpCodeStartDelegate) async {
+    func signUpStartCode(parameters: MSALNativeAuthSignUpStartRequestProviderParameters, delegate: SignUpStartDelegate) async {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpCodeStart, context: parameters.context)
         let result = await performAndValidateStartRequest(parameters: parameters)
         await handleSignUpStartCodeResult(result, event: event, context: parameters.context, delegate: delegate)
@@ -179,7 +179,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ result: MSALNativeAuthSignUpStartValidatedResponse,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
-        delegate: SignUpCodeStartDelegate
+        delegate: SignUpStartDelegate
     ) async {
         switch result {
         case .verificationRequired(let signUpToken):
@@ -191,20 +191,20 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
             handleSignUpCodeChallengeResult(challengeResult, event: event, context: context, delegate: delegate)
         case .redirect:
-            let error = SignUpCodeStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/start with code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .error(let apiError):
             let error = apiError.toSignUpStartCodePublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Error in signup/start with code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError:
-            let error = SignUpCodeStartError(type: .generalError)
+            let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/start with code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         }
     }
 
@@ -270,7 +270,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
-        delegate: SignUpCodeStartDelegate
+        delegate: SignUpStartDelegate
     ) {
         switch result {
         case .successOOB(let sentTo, let challengeType, let codeLength, let challengeToken):
@@ -288,18 +288,18 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let error = apiError.toSignUpCodeStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Error in signup/challenge code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .redirect:
-            let error = SignUpCodeStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError,
              .successPassword:
-            let error = SignUpCodeStartError(type: .generalError)
+            let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge code request \(error)")
-            DispatchQueue.main.async { delegate.onSignUpCodeError(error: error) }
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         }
     }
 

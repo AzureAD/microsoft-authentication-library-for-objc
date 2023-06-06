@@ -26,7 +26,7 @@ import Foundation
 
 protocol MSALNativeAuthSignInControlling {
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) async
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async
     func submitCode(
         _ code: String,
         credentialToken: String,

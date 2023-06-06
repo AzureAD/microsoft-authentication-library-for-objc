@@ -135,15 +135,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func signUpUsingCode(
+    public func signUp(
         username: String,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignUpCodeStartDelegate
+        delegate: SignUpStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
             DispatchQueue.main.async {
-                delegate.onSignUpCodeError(error: SignUpCodeStartError(type: .invalidUsername))
+                delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
             }
             return
         }
@@ -194,15 +194,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func signInUsingCode(
+    public func signIn(
         username: String,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInCodeStartDelegate
+        delegate: SignInStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
             DispatchQueue.main.async {
-                delegate.onSignInCodeError(error: SignInCodeStartError(type: .invalidUsername))
+                delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
             }
             return
         }

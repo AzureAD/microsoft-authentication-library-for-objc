@@ -91,12 +91,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             delegate: delegate)
     }
 
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) async {
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async {
         MSALLogger.log(level: .verbose, context: params.context, format: "SignIn using code started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithCodeStart, context: params.context)
         guard let request = createInitiateRequest(username: params.username, context: params.context) else {
             stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
-            DispatchQueue.main.async {  delegate.onSignInCodeError(error: SignInCodeStartError(type: .generalError)) }
+            DispatchQueue.main.async {  delegate.onSignInError(error: SignInStartError(type: .generalError)) }
             return
         }
         let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: params.context)
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         case .error(let error):
             MSALLogger.log(level: .error, context: params.context, format: "SignIn using code: an error occurred after calling /initiate API")
             stopTelemetryEvent(telemetryEvent, context: params.context, error: error)
-            DispatchQueue.main.async { delegate.onSignInCodeError(error: error.convertToSignInCodeStartError()) }
+            DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInCodeStartError()) }
         }
     }
 
@@ -284,7 +284,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         username: String,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         scopes: [String],
-        delegate: SignInCodeStartDelegate) {
+        delegate: SignInStartDelegate) {
             switch validatedResponse {
             case .passwordRequired(let credentialToken):
                 DispatchQueue.main.async {
@@ -298,12 +298,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                         )
                     } else {
                         self.stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
-                        delegate.onSignInCodeError(
-                            error: SignInCodeStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
+                        delegate.onSignInError(
+                            error: SignInStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
                     }
                 }
             case .error(let challengeError):
-                DispatchQueue.main.async { delegate.onSignInCodeError(error: challengeError.convertToSignInCodeStartError()) }
+                DispatchQueue.main.async { delegate.onSignInError(error: challengeError.convertToSignInCodeStartError()) }
                 stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
             case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
                 let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)

@@ -123,17 +123,17 @@ open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
     }
 }
 
-open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
+open class SignInCodeStartDelegateSpy: SignInStartDelegate {
     
     fileprivate let expectation: XCTestExpectation
-    var expectedError: SignInCodeStartError?
+    var expectedError: SignInStartError?
     var expectedSentTo: String?
     var expectedChannelTargetType: MSALNativeAuthChannelType?
     var expectedCodeLength: Int?
     var verifyCodeDelegate: SignInVerifyCodeDelegate?
     var correlationId: UUID?
     
-    init(expectation: XCTestExpectation, correlationId: UUID? = nil, verifyCodeDelegate: SignInVerifyCodeDelegate? = nil, expectedError: SignInCodeStartError? = nil, expectedSentTo: String? = nil, expectedChannelTargetType: MSALNativeAuthChannelType? = nil, expectedCodeLength: Int? = nil) {
+    init(expectation: XCTestExpectation, correlationId: UUID? = nil, verifyCodeDelegate: SignInVerifyCodeDelegate? = nil, expectedError: SignInStartError? = nil, expectedSentTo: String? = nil, expectedChannelTargetType: MSALNativeAuthChannelType? = nil, expectedCodeLength: Int? = nil) {
         self.expectation = expectation
         self.verifyCodeDelegate = verifyCodeDelegate
         self.expectedSentTo = expectedSentTo
@@ -143,7 +143,7 @@ open class SignInCodeStartDelegateSpy: SignInCodeStartDelegate {
         self.expectedError = expectedError
     }
     
-    public func onSignInCodeError(error: SignInCodeStartError) {
+    public func onSignInError(error: SignInStartError) {
         XCTAssertEqual(error.type, expectedError?.type)
         XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
         XCTAssertTrue(Thread.isMainThread)
