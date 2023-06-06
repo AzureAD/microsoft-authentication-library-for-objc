@@ -59,7 +59,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             factory: MSALNativeAuthResultFactory(config: config),
-            responseValidator: MSALNativeAuthSignInResponseValidator(responseHandler: MSALNativeAuthResponseHandler())
+            responseValidator: MSALNativeAuthSignInResponseValidator(tokenResponseHandler: MSALNativeAuthTokenResponseHandler())
         )
     }
 
@@ -83,7 +83,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: params.context)
-        await handleSignInTokenResult(
+        await handleTokenResponse(
             response,
             scopes: scopes,
             context: params.context,
@@ -107,7 +107,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             let validatedResponse =
             await performAndValidateChallengeRequest(credentialToken: credentialToken, telemetryEvent: telemetryEvent, context: params.context)
             let scopes = joinScopes(params.scopes)
-            handleSignInChallengeResponse(
+            handleChallengeResponse(
                 validatedResponse,
                 context: params.context,
                 username: params.username,
@@ -233,7 +233,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Private
 
-    private func handleSignInTokenResult(
+    private func handleTokenResponse(
         _ response: MSALNativeAuthSignInTokenValidatedResponse,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
@@ -277,7 +277,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         DispatchQueue.main.async { delegate.onSignInCompleted(result: account) }
     }
 
-    private func handleSignInChallengeResponse(
+    private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         context: MSALNativeAuthRequestContext,
         username: String,

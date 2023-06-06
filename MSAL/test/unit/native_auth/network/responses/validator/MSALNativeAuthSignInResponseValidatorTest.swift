@@ -29,15 +29,15 @@ import XCTest
 final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     private var sut: MSALNativeAuthSignInResponseValidator!
-    private var responseHandler: MSALNativeAuthResponseHandlerMock!
+    private var responseHandler: MSALNativeAuthTokenResponseHandlerMock!
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private var tokenResponse = MSIDTokenResponse()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         
-        responseHandler = MSALNativeAuthResponseHandlerMock()
-        sut = MSALNativeAuthSignInResponseValidator(responseHandler: responseHandler)
+        responseHandler = MSALNativeAuthTokenResponseHandlerMock()
+        sut = MSALNativeAuthSignInResponseValidator(tokenResponseHandler: responseHandler)
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"

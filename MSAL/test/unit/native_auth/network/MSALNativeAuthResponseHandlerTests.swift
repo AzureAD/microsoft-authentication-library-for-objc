@@ -30,7 +30,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
 
     // MARK: - Variables
 
-    private var sut: MSALNativeAuthResponseHandler!
+    private var sut: MSALNativeAuthTokenResponseHandler!
 
     private var tokenResponseValidatorMock: MSALNativeTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
@@ -43,7 +43,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
         try super.setUpWithError()
         tokenResponseValidatorMock = MSALNativeTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
 
-        sut = MSALNativeAuthResponseHandler(
+        sut = MSALNativeAuthTokenResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock
         )
     }

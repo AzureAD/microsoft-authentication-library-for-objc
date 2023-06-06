@@ -201,11 +201,10 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     }
 }
 
-class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
+class MSALNativeAuthTokenResponseHandlerMock: MSALNativeAuthTokenResponseHandling {
 
     private(set) var throwingError: Error?
     private(set) var handleTokenFuncResult: MSIDTokenResult?
-    private(set) var handleResendCodeFuncResult: Bool?
     var expectedAccountId: MSIDAccountIdentifier?
     var expectedContext: MSIDRequestContext?
     var expectedValidateAccount: Bool?
@@ -250,28 +249,8 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
 
     func mockHandleResendCodeFunc(throwingError: Error? = nil, result: Bool? = nil) {
         self.throwingError = throwingError
-        self.handleResendCodeFuncResult = result
     }
 
-    func handle(
-        context: MSIDRequestContext,
-        resendCodeReponse: MSAL.MSALNativeAuthResendCodeRequestResponse
-    ) throws -> Bool {
-        if throwingError == nil && handleResendCodeFuncResult == nil {
-            XCTFail("Both parameters are nil")
-        }
-
-        if let error = throwingError {
-            throw error
-        }
-
-        if let handleResendCodeFuncResult = handleResendCodeFuncResult {
-            return handleResendCodeFuncResult
-        }
-
-        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
-        return handleResendCodeFuncResult!
-    }
 }
 
 class HttpModuleMockConfigurator {

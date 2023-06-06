@@ -44,10 +44,10 @@ protocol MSALNativeAuthSignInResponseValidating {
 
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
-    private let responseHandler: MSALNativeAuthResponseHandling
+    private let tokenResponseHandler: MSALNativeAuthTokenResponseHandling
 
-    init(responseHandler: MSALNativeAuthResponseHandling) {
-        self.responseHandler = responseHandler
+    init(tokenResponseHandler: MSALNativeAuthTokenResponseHandling) {
+        self.tokenResponseHandler = tokenResponseHandler
     }
 
     func validate(
@@ -228,7 +228,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
     ) -> MSIDTokenResult? {
         do {
             // TODO: where can we retrieve real homeAccountId and displayableId?
-            return try responseHandler.handle(
+            return try tokenResponseHandler.handle(
                 context: context,
                 accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
                 tokenResponse: tokenResponse,
