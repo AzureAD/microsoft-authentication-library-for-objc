@@ -99,13 +99,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async {  delegate.onSignInCodeError(error: SignInCodeStartError(type: .generalError)) }
             return
         }
-        let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> =
-        await performRequest(request, context: params.context)
+        let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: params.context)
         let validatedResponse = responseValidator.validate(context: params.context, result: initiateResponse)
         switch validatedResponse {
         case .success(credentialToken: let credentialToken):
-            let validatedResponse =
-            await performAndValidateChallengeRequest(credentialToken: credentialToken, telemetryEvent: telemetryEvent, context: params.context)
+            let validatedResponse = await performAndValidateChallengeRequest(
+                credentialToken: credentialToken,
+                telemetryEvent: telemetryEvent,
+                context: params.context)
             let scopes = joinScopes(params.scopes)
             handleChallengeResponse(
                 validatedResponse,
@@ -333,8 +334,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: Cannot create Challenge request object")
                 return .error(.invalidRequest)
             }
-            let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> =
-            await performRequest(challengeRequest, context: context)
+            let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
             return responseValidator.validate(context: context, result: challengeResponse)
     }
 
