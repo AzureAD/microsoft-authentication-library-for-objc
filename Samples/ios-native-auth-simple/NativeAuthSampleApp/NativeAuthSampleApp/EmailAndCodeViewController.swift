@@ -252,14 +252,14 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 }
 
 extension EmailAndCodeViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeRequired(
+    func onSignUpResendCodeCodeRequired(
         newState: MSAL.SignUpCodeRequiredState,
         sentTo _: String,
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
