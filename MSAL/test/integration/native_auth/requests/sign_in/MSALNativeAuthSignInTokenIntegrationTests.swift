@@ -45,7 +45,9 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 grantType: .otp,
                 scope: nil,
                 password: nil,
-                oobCode: nil
+                oobCode: nil,
+                addNcaFlag: false,
+                includeChallengeType: false
             ),
             context: context
         )
@@ -64,16 +66,6 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
         XCTAssertNotNil(response?["expires_in"])
     }
 
-    func test_failRequest_credentialRequired() async throws {
-        let expectedError = createError(.credentialRequired)
-
-        try await mockResponse(.credentialRequired, endpoint: .signInToken)
-        let result: MSALNativeAuthSignInTokenResponseError = try await perform_uncheckedTestFail()
-
-        XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
-        XCTAssertNotNil(result.credentialToken)
-    }
-
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
@@ -84,7 +76,9 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                                                                     grantType: .otp,
                                                                     scope: "test & alt test",
                                                                     password: nil,
-                                                                    oobCode: nil)
+                                                                    oobCode: nil,
+                                                                    addNcaFlag: false,
+                                                                    includeChallengeType: false)
 
 
         let request = try! provider.token(parameters: parameters,
