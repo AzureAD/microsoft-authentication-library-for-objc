@@ -30,7 +30,7 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
 }
 
 enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
-    case successOOB(_ sentTo: String, _ channelType: MSALNativeAuthApiChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
+    case successOOB(_ sentTo: String, _ channelType: MSALNativeAuthChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
     case successPassword(_ signUpChallengeToken: String)
     case redirect
     case error(MSALNativeAuthSignUpChallengeOauth2ErrorCode)

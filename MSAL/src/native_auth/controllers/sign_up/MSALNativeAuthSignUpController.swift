@@ -243,7 +243,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
@@ -280,7 +280,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
@@ -317,7 +317,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpResendCodeCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
