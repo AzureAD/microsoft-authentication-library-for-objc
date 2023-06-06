@@ -196,7 +196,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/start with code request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .error(let apiError):
-            let error = apiError.toSignUpStartCodePublicError()
+            let error = apiError.toSignUpStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Error in signup/start with code request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
@@ -285,7 +285,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 )
             }
         case .error(let apiError):
-            let error = apiError.toSignUpCodeStartPublicError()
+            let error = apiError.toSignUpStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Error in signup/challenge code request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }

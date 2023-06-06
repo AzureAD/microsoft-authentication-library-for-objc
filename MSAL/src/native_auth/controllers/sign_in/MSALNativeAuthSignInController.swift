@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         case .error(let error):
             MSALLogger.log(level: .error, context: params.context, format: "SignIn using code: an error occurred after calling /initiate API")
             stopTelemetryEvent(telemetryEvent, context: params.context, error: error)
-            DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInCodeStartError()) }
+            DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInStartError()) }
         }
     }
 
@@ -303,7 +303,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     }
                 }
             case .error(let challengeError):
-                DispatchQueue.main.async { delegate.onSignInError(error: challengeError.convertToSignInCodeStartError()) }
+                DispatchQueue.main.async { delegate.onSignInError(error: challengeError.convertToSignInStartError()) }
                 stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
             case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
                 let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)

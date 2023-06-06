@@ -46,7 +46,7 @@ extension MSALNativeAuthSignUpChallengeOauth2ErrorCode {
         }
     }
 
-    func toSignUpCodeStartPublicError() -> SignUpStartError {
+    func toSignUpStartPublicError() -> SignUpStartError {
         switch self {
         case .invalidClient:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)

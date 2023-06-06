@@ -37,7 +37,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     case userNotFound
     case unsupportedChallengeType
 
-    func convertToSignInCodeStartError() -> SignInStartError {
+    func convertToSignInStartError() -> SignInStartError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)
