@@ -779,7 +779,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         return delegate
     }
 
-    //TODO: Reuse function from Sign Up tests
     private func prepareMockRequest() -> MSIDHttpRequest {
         let request = MSIDHttpRequest()
         HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
