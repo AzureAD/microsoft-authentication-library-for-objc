@@ -93,6 +93,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: ["scope1", "scope2"]), delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
     
     func test_whenUserSpecifiesScopes_NoDuplicatedScopeShouldBeSent() async throws {

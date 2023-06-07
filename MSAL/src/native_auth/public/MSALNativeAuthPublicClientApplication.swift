@@ -37,7 +37,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
-        guard let aadAuthority = config.authority as? MSALAADAuthority else {
+        guard let ciamAuthority = config.authority as? MSALCIAMAuthority else {
             throw MSALNativeAuthInternalError.invalidAuthority
         }
 
@@ -46,7 +46,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
-            authority: aadAuthority,
+            authority: ciamAuthority,
             challengeTypes: internalChallengeTypes
         )
 
