@@ -43,7 +43,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
 
     func start(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) throws -> MSIDHttpRequest {
         guard let attributes = try formatAttributes(parameters.attributes) else {
-            throw MSALNativeAuthError.invalidAttributes
+            throw MSALNativeAuthInternalError.invalidAttributes
         }
 
         let params = MSALNativeAuthSignUpStartRequestParameters(

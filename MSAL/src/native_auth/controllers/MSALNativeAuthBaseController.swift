@@ -133,7 +133,7 @@ class MSALNativeAuthBaseController {
                     continuation.resume(returning: .success(response))
                 } else {
                     MSALLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
-                    continuation.resume(returning: .failure(MSALNativeAuthError.invalidResponse))
+                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
                 }
             }
         }

@@ -262,7 +262,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
         switch result {
         case .failure(let error):
-            XCTAssertEqual(error as? MSALNativeAuthError, .invalidResponse)
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidResponse)
         case .success:
             XCTFail("Unexpected response")
         }

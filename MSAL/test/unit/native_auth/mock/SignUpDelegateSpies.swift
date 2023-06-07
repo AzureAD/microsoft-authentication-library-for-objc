@@ -93,7 +93,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
     private let expectation: XCTestExpectation?
     private(set) var onSignUpResendCodeErrorCalled = false
     private(set) var onSignUpResendCodeCodeRequiredCalled = false
-    private(set) var error: MSALNativeAuthGenericError?
+    private(set) var error: ResendCodeError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var codeLength: Int?
@@ -102,7 +102,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpResendCodeError(error: MSALNativeAuthGenericError) {
+    func onSignUpResendCodeError(error: ResendCodeError) {
         onSignUpResendCodeErrorCalled = true
         self.error = error
 

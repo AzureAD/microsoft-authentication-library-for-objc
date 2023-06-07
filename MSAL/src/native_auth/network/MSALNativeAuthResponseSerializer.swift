@@ -28,7 +28,7 @@ final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDRespon
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         guard let data = data else {
-            throw MSALNativeAuthError.responseSerializationError
+            throw MSALNativeAuthInternalError.responseSerializationError
         }
 
         let decoder = JSONDecoder()

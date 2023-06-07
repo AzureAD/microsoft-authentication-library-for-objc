@@ -184,8 +184,8 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     }
 }
 
-extension EmailAndPasswordViewController: SignUpResendCodeDelegate {    
-    func onSignUpResendCodeError(error: MSALNativeAuthGenericError) {
+extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
+    func onSignUpResendCodeError(error: ResendCodeError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")

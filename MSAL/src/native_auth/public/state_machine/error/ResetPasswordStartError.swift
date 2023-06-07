@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class ResetPasswordStartError: MSALNativeAuthGenericError {
+public class ResetPasswordStartError: MSALNativeAuthError {
     @objc public let type: ResetPasswordStartErrorType
 
     init(type: ResetPasswordStartErrorType, message: String? = nil) {
