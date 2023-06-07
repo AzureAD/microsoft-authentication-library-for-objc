@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class PasswordRequiredError: MSALNativeAuthGenericError {
+public class PasswordRequiredError: MSALNativeAuthError {
     @objc public let type: PasswordRequiredErrorType
 
     init(type: PasswordRequiredErrorType, message: String? = nil) {

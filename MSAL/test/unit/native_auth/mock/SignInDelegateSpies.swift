@@ -178,7 +178,7 @@ class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
         self.expectedCodeLength = expectedCodeLength
     }
     
-    func onSignInResendCodeError(error: MSALNativeAuthGenericError, newState: SignInCodeRequiredState?) {
+    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?) {
         newSignInCodeRequiredState = newState
         expectation.fulfill()
     }

@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class VerifyCodeError: MSALNativeAuthGenericError {
+public class VerifyCodeError: MSALNativeAuthError {
     @objc public let type: VerifyCodeErrorType
 
     init(type: VerifyCodeErrorType, message: String? = nil) {

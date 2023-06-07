@@ -41,7 +41,7 @@ public protocol ResetPasswordVerifyCodeDelegate {
 
 @objc
 public protocol ResetPasswordResendCodeDelegate {
-    func onResetPasswordResendCodeError(error: MSALNativeAuthGenericError, newState: ResetPasswordCodeRequiredState?)
+    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
     func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState,
                                            sentTo: String,
                                            channelTargetType: MSALNativeAuthChannelType,

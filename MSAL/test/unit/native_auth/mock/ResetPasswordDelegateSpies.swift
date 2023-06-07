@@ -25,12 +25,12 @@
 @testable import MSAL
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
-    private(set) var error: MSALNativeAuthGenericError?
+    private(set) var error: ResendCodeError?
     private(set) var newState: ResetPasswordCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var codeLength: Int?
 
-    func onResetPasswordResendCodeError(error: MSALNativeAuthGenericError, newState: ResetPasswordCodeRequiredState?) {
+    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?) {
         self.error = error
         self.newState = newState
     }

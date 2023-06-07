@@ -59,7 +59,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenInvalidSignInTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
         responseHandler.expectedContext = context
         responseHandler.expectedValidateAccount = true
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDAADTokenResponse()))
@@ -70,8 +70,8 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthError.headerNotSerialized))
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
@@ -191,7 +191,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeErrorResponse_errorShouldBeMappedCorrectly() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let genericError = MSALNativeAuthError.generalError
+        let genericError = MSALNativeAuthInternalError.generalError
         let result: MSALNativeAuthSignInChallengeValidatedResponse = sut.validate(context: context, result: .failure(genericError))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -254,7 +254,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenInitiateErrorResponse_errorShouldBeMappedCorrectly() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let result: MSALNativeAuthSignInInitiateValidatedResponse = sut.validate(context: context, result: .failure(MSALNativeAuthError.generalError))
+        let result: MSALNativeAuthSignInInitiateValidatedResponse = sut.validate(context: context, result: .failure(MSALNativeAuthInternalError.generalError))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
@@ -290,7 +290,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         responseError: MSALNativeAuthSignInTokenResponseError,
         expectedError: MSALNativeAuthSignInTokenValidatedErrorType) {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthError.generalError)
+        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(responseError))
         if case .error(expectedError) = result {} else {
             XCTFail("Unexpected result: \(result)")

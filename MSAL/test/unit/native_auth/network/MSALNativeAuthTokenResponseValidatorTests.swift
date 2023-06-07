@@ -62,7 +62,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
         defaultValidatorMock.shouldReturnServerProtectionPoliciesRequiredError = true
 
         XCTAssertThrowsError(try sut.validateResponse(tokenResponse: response, context: context, configuration: configuration, accountIdentifier: accountIdentifier)) {
-            XCTAssertEqual($0 as? MSALNativeAuthError, .serverProtectionPoliciesRequired(homeAccountId: "home.account.id"))
+            XCTAssertEqual($0 as? MSALNativeAuthInternalError, .serverProtectionPoliciesRequired(homeAccountId: "home.account.id"))
         }
     }
 
@@ -71,7 +71,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
         defaultValidatorMock.shouldThrowGenericError = true
 
         XCTAssertThrowsError(try sut.validateResponse(tokenResponse: response, context: context, configuration: configuration, accountIdentifier: accountIdentifier)) {
-            XCTAssertEqual($0 as? MSALNativeAuthError, .validationError)
+            XCTAssertEqual($0 as? MSALNativeAuthInternalError, .validationError)
         }
     }
 

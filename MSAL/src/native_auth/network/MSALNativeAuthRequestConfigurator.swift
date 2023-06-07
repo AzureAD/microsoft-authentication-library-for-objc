@@ -243,7 +243,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
                 context: parameters.context,
                 format: "Endpoint could not be created: \(error)"
             )
-            throw MSALNativeAuthError.invalidRequest
+            throw MSALNativeAuthInternalError.invalidRequest
         }
         // TODO: Until we are clear on how the Authority looks like we assume it's AAD
         // Once it's clarified we might need to create a new Authority to use with the new API

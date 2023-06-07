@@ -329,7 +329,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .redirect,
              .unexpectedError,
              .successPassword:
-            let error = MSALNativeAuthGenericError()
+            let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge resendCode request \(error)")
             DispatchQueue.main.async { delegate.onSignUpResendCodeError(error: error) }

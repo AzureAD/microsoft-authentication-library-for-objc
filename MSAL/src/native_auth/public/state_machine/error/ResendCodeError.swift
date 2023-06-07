@@ -20,20 +20,9 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-enum MSALNativeAuthError: Error, Equatable {
-    case invalidInput
-    case validationError
-    case tokenResultNotPresent
-    case serverProtectionPoliciesRequired(homeAccountId: String?)
-    case headerNotSerialized
-    case invalidAuthority
-    case invalidUrl
-    case missingResponseSerializer
-    case responseSerializationError
-    case invalidResponse
-    case invalidRequest
-    case generalError
-    case invalidAttributes
-}
+import Foundation
+
+@objc
+public class ResendCodeError: MSALNativeAuthError {}

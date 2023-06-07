@@ -38,7 +38,7 @@ extension MSALNativeAuthRequestable {
         let endpointUrl = config.authority.url.absoluteString + endpoint.rawValue
 
         guard let url = URL(string: endpointUrl) else {
-            throw MSALNativeAuthError.invalidUrl
+            throw MSALNativeAuthInternalError.invalidUrl
         }
 
         return url

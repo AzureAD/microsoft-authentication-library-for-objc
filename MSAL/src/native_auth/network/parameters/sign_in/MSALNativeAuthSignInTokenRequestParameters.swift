@@ -34,7 +34,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let scope: String?
     let password: String?
     let oobCode: String?
-    let addNcaFlag: Bool
+    let addNCAFlag: Bool
     let includeChallengeType: Bool
     let clientInfo = true
 
@@ -57,7 +57,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
             parameters[Key.challengeType.rawValue] = config.challengeTypesString
         }
 
-        if addNcaFlag {
+        if addNCAFlag {
             parameters[Key.nca.rawValue] = "1"
         }
 

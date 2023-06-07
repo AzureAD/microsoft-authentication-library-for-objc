@@ -58,7 +58,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             authentication: .init(
                 accessToken: tokenResult.accessToken.accessToken,
                 idToken: tokenResult.rawIdToken,
-                scopes: tokenResult.accessToken.scopes.array as? [String] ?? [],
+                scopes: tokenResult.accessToken.scopes.compactMap({$0 as? String}),
                 expiresOn: tokenResult.accessToken.expiresOn,
                 tenantId: config.authority.tenant.rawTenant
             )
@@ -70,7 +70,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             username: tokenResult.accessToken.accountIdentifier.displayableId,
             accessToken: tokenResult.accessToken.accessToken,
             rawIdToken: tokenResult.rawIdToken,
-            scopes: tokenResult.accessToken.scopes.array as? [String] ?? [],
+            scopes: tokenResult.accessToken.scopes.compactMap({$0 as? String}),
             expiresOn: tokenResult.accessToken.expiresOn
         )
     }

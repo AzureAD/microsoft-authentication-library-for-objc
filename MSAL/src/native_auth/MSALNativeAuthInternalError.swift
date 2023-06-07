@@ -22,30 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
-struct MSALNativeAuthResetPasswordStartResponse: Decodable {
-
-    // MARK: - Variables
-    let passwordResetToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
-
-    enum CodingKeys: String, CodingKey {
-        case passwordResetToken
-        case challengeType
-    }
-
-    // TODO: Move to validator class
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.passwordResetToken = try container.decodeIfPresent(String.self, forKey: .passwordResetToken)
-        self.challengeType = try container.decodeIfPresent(
-            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
-        if self.passwordResetToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthInternalError.responseSerializationError
-        }
-        if self.passwordResetToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthInternalError.responseSerializationError
-        }
-    }
+enum MSALNativeAuthInternalError: Error, Equatable {
+    case invalidInput
+    case validationError
+    case tokenResultNotPresent
+    case serverProtectionPoliciesRequired(homeAccountId: String?)
+    case headerNotSerialized
+    case invalidAuthority
+    case invalidUrl
+    case missingResponseSerializer
+    case responseSerializationError
+    case invalidResponse
+    case invalidRequest
+    case generalError
+    case invalidAttributes
 }

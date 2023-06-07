@@ -78,12 +78,12 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
         if let error = validationError, error.code == MSIDErrorCode.serverProtectionPoliciesRequired.rawValue {
             MSALLogger.log(level: .warning, context: context, format: "Received Protection Policy Required error.")
-            throw MSALNativeAuthError.serverProtectionPoliciesRequired(homeAccountId: accountIdentifier.homeAccountId)
+            throw MSALNativeAuthInternalError.serverProtectionPoliciesRequired(homeAccountId: accountIdentifier.homeAccountId)
         }
 
         guard let tokenResult = tokenResult else {
             MSALLogger.log(level: .error, context: context, format: "TokenResult is nil after validation.")
-            throw MSALNativeAuthError.validationError
+            throw MSALNativeAuthInternalError.validationError
         }
 
         return tokenResult
