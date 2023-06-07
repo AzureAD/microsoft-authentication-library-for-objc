@@ -87,25 +87,21 @@ final class MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests: XCTestCase {
 
     func test_toResendCodePublicError_invalidClient() {
         let error = sut.invalidClient.toResendCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
     }
 
     func test_toResendCodePublicError_unsupportedChallengeType() {
         let error = sut.unsupportedChallengeType.toResendCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
     }
 
     func test_toResendCodePublicError_expiredToken() {
         let error = sut.expiredToken.toResendCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
     }
 
     func test_toResendCodePublicError_invalidRequest() {
         let error = sut.invalidRequest.toResendCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
     }
 
     // MARK: - to PasswordRequiredError tests

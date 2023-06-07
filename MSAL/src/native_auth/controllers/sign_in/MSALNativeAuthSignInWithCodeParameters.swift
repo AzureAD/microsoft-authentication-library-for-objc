@@ -26,15 +26,15 @@
 
 class MSALNativeAuthSignInWithCodeParameters {
     let username: String
-    let correlationId: UUID?
+    let context: MSALNativeAuthRequestContext
     let scopes: [String]?
 
     init(
         username: String,
-        correlationId: UUID?,
+        context: MSALNativeAuthRequestContext,
         scopes: [String]?) {
         self.username = username
-        self.correlationId = correlationId
+        self.context = context
         self.scopes = scopes
     }
 }

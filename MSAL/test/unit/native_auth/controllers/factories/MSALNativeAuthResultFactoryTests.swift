@@ -79,34 +79,10 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(result.authentication?.tenantId, MSALNativeAuthNetworkStubs.tenantName)
     }
 
-    func test_makeResponse_withIncorrectScopes_should_fix_it() {
-        let accessToken = MSIDAccessToken()
-        accessToken.accessToken = "<access_token>"
-        accessToken.scopes = ["<scope_1>, <scope_2>"] // instead of two strings, the user passes one single string with scopes separated by a comma
-        accessToken.expiresOn = Date()
-
-        let tokenResult = MSIDTokenResult(
-            accessToken: accessToken,
-            refreshToken: MSIDRefreshToken(),
-            idToken: "",
-            account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.msidAuthority,
-            correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
-            tokenResponse: nil
-        )!
-
-        let result = sut.makeNativeAuthResponse(
-            stage: .completed,
-            credentialToken: nil,
-            tokenResult: tokenResult
-        )
-        XCTAssertEqual(result.authentication?.scopes, ["<scope_1>", "<scope_2>"])
-    }
-
     func test_makeResponse_withCorrectScopes() {
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "<access_token>"
-        accessToken.scopes = ["<scope_1>", "<scope_2>"]
+        accessToken.scopes = ["User.Read", "profile", "offline_access"]
         accessToken.expiresOn = Date()
 
         let tokenResult = MSIDTokenResult(
@@ -124,7 +100,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             credentialToken: nil,
             tokenResult: tokenResult
         )
-        XCTAssertEqual(result.authentication?.scopes, ["<scope_1>", "<scope_2>"])
+        XCTAssertEqual(result.authentication?.scopes, ["User.Read", "profile", "offline_access"])
     }
 
     func test_makeMsidConfiguration() {
@@ -133,7 +109,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(result.authority, MSALNativeAuthNetworkStubs.msidAuthority)
         XCTAssertNil(result.redirectUri)
         XCTAssertEqual(result.clientId, DEFAULT_TEST_CLIENT_ID)
-        XCTAssertEqual(result.target, "<scope_1>,<scope_2>")
+        XCTAssertEqual(result.target, "<scope_1> <scope_2>")
     }
     
     func test_makeUserAccount_returnExpectedResult() {

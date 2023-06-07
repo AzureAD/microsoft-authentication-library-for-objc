@@ -25,56 +25,90 @@
 import Foundation
 
 @objcMembers
-public class SignInCodeRequiredState: MSALNativeAuthBaseState {
+public class SignInBaseState: MSALNativeAuthBaseState {
+    fileprivate let controller: MSALNativeAuthSignInControlling
+    fileprivate let inputValidator: MSALNativeAuthInputValidating
+
+    init(
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
+        self.controller = controller
+        self.inputValidator = inputValidator
+        super.init(flowToken: flowToken)
+    }
+}
+
+@objcMembers
+public class SignInCodeRequiredState: SignInBaseState {
+
+    private let scopes: [String]
+
+    init(
+        scopes: [String],
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
+        self.scopes = scopes
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+    }
 
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
-        if correlationId != nil {
-            DispatchQueue.main.async {
-                delegate.onSignInResendCodeError(error: ResendCodeError(type: .accountTemporarilyLocked), newState: self)
-            }
-        } else {
-            DispatchQueue.main.async {
-                delegate.onSignInResendCodeCodeRequired(newState: self,
-                                                        sentTo: "email@contoso.com",
-                                                        channelTargetType: .email,
-                                                        codeLength: 4)
-            }
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
+        Task {
+            await controller.resendCode(credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
         }
     }
 
-    public func submitCode(code: String, delegate: SignInCodeRequiredDelegate, correlationId: UUID? = nil) {
-        DispatchQueue.main.async {
-            switch code {
-            case "0000": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-            case "2222": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .generalError), newState: self)
-            case "3333": delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .browserRequired), newState: nil)
-            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
-                username: "email@contoso.com",
-                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
-                rawIdToken: nil,
-                scopes: [],
-                expiresOn: Date()
-            ))
-            }
+    public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
+        guard inputValidator.isInputValid(code) else {
+            delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
+            return
+        }
+        Task {
+            await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
         }
     }
 }
 
 @objcMembers
-public class SignInPasswordRequiredState: MSALNativeAuthBaseState {
+public class SignInPasswordRequiredState: SignInBaseState {
+
+    private let scopes: [String]
+    private let username: String
+
+    init(
+        scopes: [String],
+        username: String,
+        controller: MSALNativeAuthSignInControlling,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        flowToken: String) {
+        self.scopes = scopes
+        self.username = username
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+    }
 
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        DispatchQueue.main.async {
-            switch password {
-            case "incorrect": delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
-            default: delegate.onSignInCompleted(result: MSALNativeAuthUserAccount(
-                username: "email@contoso.com",
-                accessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9", // swiftlint:disable:this line_length
-                rawIdToken: nil,
-                scopes: [],
-                expiresOn: Date()
-            ))
-            }
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
+
+        guard inputValidator.isInputValid(password) else {
+            delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
+            return
+        }
+        Task {
+            await controller.submitPassword(
+                password,
+                username: username,
+                credentialToken: flowToken,
+                context: context,
+                scopes: scopes,
+                delegate: delegate)
         }
     }
 }

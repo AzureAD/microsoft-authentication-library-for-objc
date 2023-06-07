@@ -16,28 +16,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-@objc
-public class SignInCodeStartError: MSALNativeAuthError {
-    @objc public let type: SignInCodeStartErrorType
-
-    init(type: SignInCodeStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
-}
-
-@objc
-public enum SignInCodeStartErrorType: Int {
-    case browserRequired
-    case userNotFound
-    case invalidUsername
-    case generalError
+protocol MSALNativeAuthSignInControlling {
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInCodeStartDelegate) async
+    func submitCode(
+        _ code: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        delegate: SignInVerifyCodeDelegate) async
+    func submitPassword(
+        _ password: String,
+        username: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        delegate: SignInPasswordRequiredDelegate) async
+    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
 }

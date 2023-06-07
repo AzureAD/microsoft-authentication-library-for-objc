@@ -25,7 +25,6 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALLogging {
-    // swiftlint:disable function_parameter_count
     static func log(
         level: MSIDLogLevel,
         context: MSIDRequestContext?,
@@ -58,7 +57,6 @@ protocol MSALLogging {
         function: String,
         format: String,
         _ args: CVarArg...)
-    // swiftlint:enable function_parameter_count
 }
 
 extension MSALLogger: MSALLogging {

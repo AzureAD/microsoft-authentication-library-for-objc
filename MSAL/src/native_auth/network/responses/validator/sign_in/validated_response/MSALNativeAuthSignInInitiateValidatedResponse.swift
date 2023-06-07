@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,20 +24,29 @@
 
 import Foundation
 
-@objc
-public class SignInCodeStartError: MSALNativeAuthError {
-    @objc public let type: SignInCodeStartErrorType
-
-    init(type: SignInCodeStartErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
+enum MSALNativeAuthSignInInitiateValidatedResponse {
+    case success(credentialToken: String)
+    case error(MSALNativeAuthSignInInitiateValidatedErrorType)
 }
 
-@objc
-public enum SignInCodeStartErrorType: Int {
-    case browserRequired
+enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
+    case redirect
+    case invalidClient
+    case invalidRequest
+    case invalidServerResponse
     case userNotFound
-    case invalidUsername
-    case generalError
+    case unsupportedChallengeType
+
+    func convertToSignInCodeStartError() -> SignInCodeStartError {
+        switch self {
+        case .redirect:
+            return .init(type: .browserRequired)
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .userNotFound:
+            return .init(type: .userNotFound)
+        case .unsupportedChallengeType, .invalidRequest, .invalidServerResponse:
+            return .init(type: .generalError)
+        }
+    }
 }

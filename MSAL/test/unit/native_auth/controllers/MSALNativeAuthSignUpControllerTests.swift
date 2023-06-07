@@ -534,7 +534,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }
@@ -572,7 +572,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }
@@ -591,7 +591,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }
@@ -610,7 +610,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }
@@ -629,7 +629,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertNotNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpResendCode, isSuccessful: false)
     }

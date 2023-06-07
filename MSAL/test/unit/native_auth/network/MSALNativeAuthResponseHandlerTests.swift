@@ -30,7 +30,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
 
     // MARK: - Variables
 
-    private var sut: MSALNativeAuthResponseHandler!
+    private var sut: MSALNativeAuthTokenResponseHandler!
 
     private var tokenResponseValidatorMock: MSALNativeTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
@@ -43,7 +43,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
         try super.setUpWithError()
         tokenResponseValidatorMock = MSALNativeTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
 
-        sut = MSALNativeAuthResponseHandler(
+        sut = MSALNativeAuthTokenResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock
         )
     }
@@ -58,7 +58,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
         tokenResponseValidatorMock.shouldThrowGenericError = true
 
         XCTAssertThrowsError(try sut.handle(context: context, accountIdentifier: accountIdentifier, tokenResponse: .init(), configuration: configuration, validateAccount: false)) {
-            XCTAssertEqual($0 as? MSALNativeAuthError, .validationError)
+            XCTAssertEqual($0 as? MSALNativeAuthInternalError, .validationError)
         }
     }
 
@@ -97,11 +97,11 @@ private class MSALNativeTokenResponseValidatorMock: MSALNativeAuthTokenResponseV
 
     func validateResponse(tokenResponse: MSIDTokenResponse, context: MSIDRequestContext, configuration: MSIDConfiguration, accountIdentifier: MSIDAccountIdentifier) throws -> MSIDTokenResult {
         if shouldThrowGenericError {
-            throw MSALNativeAuthError.validationError
+            throw MSALNativeAuthInternalError.validationError
         }
 
         if shouldThrowIntuneError {
-            throw MSALNativeAuthError.serverProtectionPoliciesRequired(homeAccountId: nil)
+            throw MSALNativeAuthInternalError.serverProtectionPoliciesRequired(homeAccountId: nil)
         }
 
         let account = MSIDAccount()

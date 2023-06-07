@@ -25,7 +25,7 @@
 import Foundation
 
 @objc
-public class SignInPasswordStartError: MSALNativeAuthBaseError {
+public class SignInPasswordStartError: MSALNativeAuthError {
     @objc public let type: SignInPasswordStartErrorType
 
     init(type: SignInPasswordStartErrorType, message: String? = nil) {
@@ -41,4 +41,5 @@ public enum SignInPasswordStartErrorType: Int {
     case invalidPassword
     case invalidUsername
     case generalError
+    case invalidAuthenticationType
 }

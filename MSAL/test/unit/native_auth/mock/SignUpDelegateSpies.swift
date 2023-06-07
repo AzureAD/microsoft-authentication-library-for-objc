@@ -102,7 +102,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
+    func onSignUpResendCodeError(error: ResendCodeError) {
         onSignUpResendCodeErrorCalled = true
         self.error = error
 

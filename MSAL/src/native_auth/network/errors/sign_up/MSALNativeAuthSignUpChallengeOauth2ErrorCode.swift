@@ -62,13 +62,13 @@ extension MSALNativeAuthSignUpChallengeOauth2ErrorCode {
     func toResendCodePublicError() -> ResendCodeError {
         switch self {
         case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+            return .init(message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+            return .init(message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
+            return .init(message: MSALNativeAuthErrorMessage.expiredToken)
         case .invalidRequest:
-            return .init(type: .generalError)
+            return .init()
         }
     }
 

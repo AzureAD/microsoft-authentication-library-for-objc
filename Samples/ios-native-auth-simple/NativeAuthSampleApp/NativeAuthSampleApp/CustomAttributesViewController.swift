@@ -148,7 +148,7 @@ class CustomAttributesViewController: UIViewController {
 }
 
 extension CustomAttributesViewController: SignUpPasswordStartDelegate {
-    func onSignUpError(error: MSAL.SignUpStartError) {
+    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
         switch error.type {
         case .userAlreadyExists:
             showResultText("Unable to sign up: User already exists")
@@ -232,14 +232,14 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
 }
 
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
-    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState _: MSAL.SignUpCodeRequiredState?) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
         showResultText("Unexpected error while requesting new code")
         dismissVerifyCodeModal()
     }
 
-    func onSignUpResendCodeRequired(
+    func onSignUpResendCodeCodeRequired(
         newState: MSAL.SignUpCodeRequiredState,
         sentTo _: String,
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
