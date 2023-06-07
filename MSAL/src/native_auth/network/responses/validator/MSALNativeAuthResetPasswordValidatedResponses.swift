@@ -38,21 +38,21 @@ enum MSALNativeAuthResetPasswordChallengeValidatedResponse {
 
 enum MSALNativeAuthResetPasswordContinueValidatedResponse {
     case success(passwordSubmitToken: String)
-    case invalidOOB(passwordResetToken: String)
+    case invalidOOB
     case error(MSALNativeAuthResetPasswordContinueOauth2ErrorCode)
     case unexpectedError
 }
 
 enum MSALNativeAuthResetPasswordSubmitValidatedResponse {
     case success(passwordResetToken: String, pollInterval: Int)
-    case passwordError(error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode, passwordSubmitToken: String?)
+    case passwordError(error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode)
     case error(MSALNativeAuthResetPasswordSubmitOauth2ErrorCode)
     case unexpectedError
 }
 
 enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
     case success(status: MSALNativeAuthResetPasswordPollCompletionStatus)
-    case passwordError(error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode, passwordSubmitToken: String?)
+    case passwordError(error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode)
     case error(MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode)
     case unexpectedError
 }

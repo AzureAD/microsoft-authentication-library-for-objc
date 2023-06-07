@@ -106,8 +106,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         switch response.challengeType {
         case .redirect:
             return .redirect
-        case .password,
-             .oob:
+        case .oob:
             if let sentTo = response.challengeTargetLabel,
                let channelTargetType = MSALNativeAuthApiChannelType(rawValue: response.challengeChannel ?? ""),
                let codeLength = response.codeLength,
@@ -119,11 +118,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                     passwordResetToken
                 )
             } else {
-                MSALLogger.log(level: .info, context: context, format: "Missing expected fields from backend")
+                MSALLogger.log(level: .error, context: context, format: "Missing expected fields from backend")
                 return .unexpectedError
             }
-        case .otp:
-            MSALLogger.log(level: .info, context: context, format: "ChallengeType not expected")
+        case .password,
+             .otp:
+            MSALLogger.log(level: .error, context: context, format: "ChallengeType not expected")
             return .unexpectedError
         }
     }
@@ -166,12 +166,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
         switch apiError.error {
         case .invalidOOBValue:
-            guard let passwordResetToken = apiError.passwordResetToken else {
-                MSALLogger.log(level: .error, context: context, format: "password reset token is missing")
-                return .unexpectedError
-            }
-
-            return .invalidOOB(passwordResetToken: passwordResetToken)
+            return .invalidOOB
         case .invalidClient,
              .invalidGrant,
              .expiredToken,
@@ -219,7 +214,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned:
-            return .passwordError(error: apiError.error, passwordSubmitToken: nil) // TODO: pass passwordSubmitToken when it is available
+            return .passwordError(error: apiError.error)
         case .invalidRequest,
              .invalidClient,
              .expiredToken:
@@ -263,7 +258,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned:
-            return .passwordError(error: apiError.error, passwordSubmitToken: nil) // TODO: pass passwordSubmitToken when it is available
+            return .passwordError(error: apiError.error)
         case .userNotFound,
              .invalidRequest,
              .invalidClient,

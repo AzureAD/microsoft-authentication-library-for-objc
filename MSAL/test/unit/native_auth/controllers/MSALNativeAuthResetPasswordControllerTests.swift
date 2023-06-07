@@ -428,11 +428,11 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     func test_whenResetPasswordSubmitCode_returns_invalidOOB_it_callsDelegateInvalidCode() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateResetPasswordContinueFunc(.invalidOOB(passwordResetToken: "flowToken"))
+        validatorMock.mockValidateResetPasswordContinueFunc(.invalidOOB)
 
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "", flowToken: "", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "", flowToken: "flowToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertEqual(delegate.newCodeRequiredState?.flowToken, "flowToken")
@@ -525,11 +525,11 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     func test_whenResetPasswordSubmitPassword_returns_passwordError_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateResetPasswordSubmitFunc(.passwordError(error: .passwordTooWeak, passwordSubmitToken: "flowToken"))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.passwordError(error: .passwordTooWeak))
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "", flowToken: "flowToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "flowToken")
@@ -622,16 +622,16 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSubmitPassword_pollCompletion_returns_passwordError_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateResetPasswordPollCompletionFunc(.passwordError(error: .passwordBanned, passwordSubmitToken: "flowToken"))
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.passwordError(error: .passwordBanned))
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "passwordResetToken")
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.passwordBanned)
 
