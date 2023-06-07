@@ -92,7 +92,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     }
 
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async {
-        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn using code started")
+        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithCodeStart, context: params.context)
         guard let request = createInitiateRequest(username: params.username, context: params.context) else {
             stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthInternalError.invalidRequest)
@@ -116,7 +116,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 scopes: scopes,
                 delegate: delegate)
         case .error(let error):
-            MSALLogger.log(level: .error, context: params.context, format: "SignIn using code: an error occurred after calling /initiate API")
+            MSALLogger.log(level: .error, context: params.context, format: "SignIn: an error occurred after calling /initiate API")
             stopTelemetryEvent(telemetryEvent, context: params.context, error: error)
             DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInStartError()) }
         }
