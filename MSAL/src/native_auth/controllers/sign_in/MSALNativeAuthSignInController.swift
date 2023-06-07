@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             password: params.password,
             scopes: scopes,
             grantType: .password,
-            addNcaFlag: true,
+            addNCAFlag: true,
             context: params.context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: params.context, error: MSALNativeAuthError.invalidRequest)
@@ -347,7 +347,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         credentialToken: String? = nil,
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
-        addNcaFlag: Bool = false,
+        addNCAFlag: Bool = false,
         includeChallengeType: Bool = true,
         context: MSIDRequestContext) -> MSIDHttpRequest? {
         do {
@@ -360,7 +360,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 scope: scopes.joinScopes(),
                 password: password,
                 oobCode: oobCode,
-                addNcaFlag: addNcaFlag,
+                addNCAFlag: addNCAFlag,
                 includeChallengeType: includeChallengeType)
             return try requestProvider.token(parameters: params, context: context)
         } catch {

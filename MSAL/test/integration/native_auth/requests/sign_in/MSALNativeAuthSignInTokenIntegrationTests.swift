@@ -46,7 +46,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 scope: nil,
                 password: nil,
                 oobCode: nil,
-                addNcaFlag: false,
+                addNCAFlag: false,
                 includeChallengeType: false
             ),
             context: context
@@ -77,7 +77,7 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                                                                     scope: "test & alt test",
                                                                     password: nil,
                                                                     oobCode: nil,
-                                                                    addNcaFlag: false,
+                                                                    addNCAFlag: false,
                                                                     includeChallengeType: false)
 
 

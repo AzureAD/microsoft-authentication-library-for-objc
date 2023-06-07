@@ -45,7 +45,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
                                                                     scope: "scope",
                                                                     password: "password",
                                                                     oobCode: "Test OTP Code",
-                                                                    addNcaFlag: true,
+                                                                    addNCAFlag: true,
                                                                     includeChallengeType: true)
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
@@ -63,7 +63,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             scope: "<scope-1>",
             password: "password",
             oobCode: "oob",
-            addNcaFlag: true,
+            addNCAFlag: true,
             includeChallengeType: true
         )
 
@@ -96,7 +96,7 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             scope: nil,
             password: nil,
             oobCode: nil,
-            addNcaFlag: false,
+            addNCAFlag: false,
             includeChallengeType: false
         )
 
