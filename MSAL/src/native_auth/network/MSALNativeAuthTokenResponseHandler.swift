@@ -59,7 +59,7 @@ final class MSALNativeAuthTokenResponseHandler: MSALNativeAuthTokenResponseHandl
                 tokenResponse: MSIDTokenResponse,
                 configuration: MSIDConfiguration,
                 validateAccount: Bool) throws -> MSIDTokenResult {
-        MSALLogger.log(level: .info, context: context, format: "Validate and save token response...")
+        MSALLogger.log(level: .info, context: context, format: "Validate token response...")
 
         let tokenResult = try tokenResponseValidator.validateResponse(tokenResponse: tokenResponse,
                                                                       context: context,
