@@ -90,6 +90,10 @@ static NSDictionary *s_currentProfile = nil;
         }
     }
     
+    __auto_type authorityCIAM = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com"];
+    __auto_type authorityCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com"];
+    [authorities addObjectsFromArray: @[authorityCIAM, authorityCIAMTenant]];
+    
     s_authorities = authorities;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default", @"https://microsoftgraph.chinacloudapi.cn/.default",
