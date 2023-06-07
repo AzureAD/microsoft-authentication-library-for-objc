@@ -66,7 +66,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Internal
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async {
-        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn with email and password started")
+        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn with username and password started")
         let scopes = joinScopes(params.scopes)
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithPasswordStart, context: params.context)
         guard let request = createTokenRequest(
@@ -156,7 +156,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(
                 level: .verbose,
                 context: context,
-                format: "SignIn with password completed with errorType: \(errorType)")
+                format: "SignIn completed with errorType: \(errorType)")
             stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
             DispatchQueue.main.async {
                 delegate.onSignInVerifyCodeError(
@@ -196,7 +196,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(
                 level: .verbose,
                 context: context,
-                format: "SignIn with email and password completed with errorType: \(errorType)")
+                format: "SignIn with username and password completed with errorType: \(errorType)")
             stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
             DispatchQueue.main.async {
                 delegate.onSignInPasswordRequiredError(
@@ -254,7 +254,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 MSALLogger.log(
                     level: .verbose,
                     context: context,
-                    format: "SignIn with email and password completed with errorType: \(errorType)")
+                    format: "SignIn with username and password completed with errorType: \(errorType)")
                 stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
                 DispatchQueue.main.async { delegate.onSignInPasswordError(error: errorType.convertToSignInPasswordStartError()) }
         }
@@ -274,7 +274,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         MSALLogger.log(
             level: .verbose,
             context: context,
-            format: "SignIn with email and password completed successfully")
+            format: "SignIn with username and password completed successfully")
         DispatchQueue.main.async { delegate.onSignInCompleted(result: account) }
     }
 
@@ -287,17 +287,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         delegate: SignInCodeStartDelegate) {
             switch validatedResponse {
             case .passwordRequired(let credentialToken):
-                DispatchQueue.main.async {
-                    if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
-                        self.stopTelemetryEvent(telemetryEvent, context: context)
+                if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
+                    self.stopTelemetryEvent(telemetryEvent, context: context)
+                    DispatchQueue.main.async {
                         passwordRequiredMethod(SignInPasswordRequiredState(
                             scopes: scopes,
                             username: username,
                             controller: self,
                             flowToken: credentialToken)
                         )
-                    } else {
-                        self.stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
+                    }
+                } else {
+                    self.stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthGenericError())
+                    DispatchQueue.main.async {
                         delegate.onSignInCodeError(
                             error: SignInCodeStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
                     }
