@@ -2482,6 +2482,15 @@
 			path = ciam;
 			sourceTree = "<group>";
 		};
+		8878C60929DC9AD4002F5F4B /* ciam */ = {
+			isa = PBXGroup;
+			children = (
+				8878C61129DC9AFB002F5F4B /* MSALCIAMOauth2Provider.m */,
+				8878C61629DC9B1A002F5F4B /* MSALCIAMOauth2Provider.h */,
+			);
+			path = ciam;
+			sourceTree = "<group>";
+		};
 		94E876C91E492D2800FB96ED /* instance */ = {
 			isa = PBXGroup;
 			children = (
