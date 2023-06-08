@@ -145,15 +145,14 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         switch result {
         case .success(let response):
-            return handleContinueSuccess(response, with: context)
+            return handleContinueSuccess(response)
         case .failure(let error):
             return handleContinueError(error, with: context)
         }
     }
 
     private func handleContinueSuccess(
-        _ response: MSALNativeAuthResetPasswordContinueResponse,
-        with context: MSIDRequestContext
+        _ response: MSALNativeAuthResetPasswordContinueResponse
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         return .success(passwordSubmitToken: response.passwordSubmitToken)
     }
@@ -186,15 +185,14 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         switch result {
         case .success(let response):
-            return handleSubmitSuccess(response, with: context)
+            return handleSubmitSuccess(response)
         case .failure(let error):
             return handleSubmitError(error, with: context)
         }
     }
 
     private func handleSubmitSuccess(
-        _ response: MSALNativeAuthResetPasswordSubmitResponse,
-        with context: MSIDRequestContext
+        _ response: MSALNativeAuthResetPasswordSubmitResponse
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
             passwordResetToken: response.passwordResetToken,
@@ -230,15 +228,14 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         switch result {
         case .success(let response):
-            return handlePollCompletionSuccess(response, with: context)
+            return handlePollCompletionSuccess(response)
         case .failure(let error):
             return handlePollCompletionError(error, with: context)
         }
     }
 
     private func handlePollCompletionSuccess(
-        _ response: MSALNativeAuthResetPasswordPollCompletionResponse,
-        with context: MSIDRequestContext
+        _ response: MSALNativeAuthResetPasswordPollCompletionResponse
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         return .success(status: response.status)
     }
