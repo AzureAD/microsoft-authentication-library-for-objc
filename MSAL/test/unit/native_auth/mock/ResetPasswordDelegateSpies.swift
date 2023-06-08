@@ -109,7 +109,6 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
     private(set) var onResetPasswordCompletedCalled = false
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
-    private(set) var resetPasswordCompletedCalled = false
 
     func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?) {
         onResetPasswordRequiredErrorCalled = true
@@ -122,6 +121,5 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
     func onResetPasswordCompleted() {
         onResetPasswordCompletedCalled = true
 
-        resetPasswordCompletedCalled = true
     }
 }
