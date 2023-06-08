@@ -25,7 +25,6 @@
 import Foundation
 
 enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable {
-
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case invalidGrant = "invalid_grant"

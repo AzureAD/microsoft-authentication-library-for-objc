@@ -38,7 +38,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
         guard let aadAuthority = config.authority as? MSALAADAuthority else {
-            throw MSALNativeAuthError.invalidAuthority
+            throw MSALNativeAuthInternalError.invalidAuthority
         }
 
         self.internalChallengeTypes =
@@ -187,9 +187,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let params = MSALNativeAuthSignInWithPasswordParameters(
             username: username,
             password: password,
-            correlationId: correlationId,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
             scopes: scopes)
-        controller.signIn(params: params, delegate: delegate)
+        Task {
+            await controller.signIn(params: params, delegate: delegate)
+        }
     }
 
     public func signInUsingCode(
@@ -207,9 +209,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeSignInController()
         let params = MSALNativeAuthSignInWithCodeParameters(
             username: username,
-            correlationId: correlationId,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
             scopes: scopes)
-        controller.signIn(params: params, delegate: delegate)
+        Task {
+            await controller.signIn(params: params, delegate: delegate)
+        }
     }
 
     public func resetPassword(

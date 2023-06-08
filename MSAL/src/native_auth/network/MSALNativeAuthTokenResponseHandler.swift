@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthResponseHandling {
+protocol MSALNativeAuthTokenResponseHandling {
 
     func handle(
         context: MSIDRequestContext,
@@ -32,12 +32,9 @@ protocol MSALNativeAuthResponseHandling {
         tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
         validateAccount: Bool) throws -> MSIDTokenResult
-
-    func handle(context: MSIDRequestContext,
-                resendCodeReponse: MSALNativeAuthResendCodeRequestResponse) throws -> Bool
 }
 
-final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
+final class MSALNativeAuthTokenResponseHandler: MSALNativeAuthTokenResponseHandling {
 
     // MARK: - Variables
 
@@ -62,7 +59,7 @@ final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
                 tokenResponse: MSIDTokenResponse,
                 configuration: MSIDConfiguration,
                 validateAccount: Bool) throws -> MSIDTokenResult {
-        MSALLogger.log(level: .info, context: context, format: "Validate and save token response...")
+        MSALLogger.log(level: .info, context: context, format: "Validate token response...")
 
         let tokenResult = try tokenResponseValidator.validateResponse(tokenResponse: tokenResponse,
                                                                       context: context,
@@ -78,17 +75,6 @@ final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
         }
 
         return tokenResult
-    }
-
-    func handle(context: MSIDRequestContext,
-                resendCodeReponse: MSALNativeAuthResendCodeRequestResponse) throws -> Bool {
-        MSALLogger.log(level: .info, context: context, format: "Validate resend code response")
-        if resendCodeReponse.credentialToken.isEmpty {
-            MSALLogger.log(level: .error, context: context, format: "Credential Token is empty")
-            throw MSALNativeAuthError.validationError
-        } else {
-            return true
-        }
     }
 
     private func performAccountValidation(
@@ -109,7 +95,7 @@ final class MSALNativeAuthResponseHandler: MSALNativeAuthResponseHandling {
             format: "Validated account with result %d, old account %@, new account %@",
             accountChecked,
             MSALLogMask.maskTrackablePII(accountIdentifier.uid),
-            MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier.uid)
+            MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier?.uid)
         )
     }
 }

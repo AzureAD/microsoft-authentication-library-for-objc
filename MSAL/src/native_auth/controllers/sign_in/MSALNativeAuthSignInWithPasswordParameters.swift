@@ -30,12 +30,12 @@ class MSALNativeAuthSignInWithPasswordParameters: MSALNativeAuthSignInWithCodePa
     init(
         username: String,
         password: String,
-        correlationId: UUID?,
+        context: MSALNativeAuthRequestContext,
         scopes: [String]?) {
         self.password = password
         super.init(
             username: username,
-            correlationId: correlationId,
+            context: context,
             scopes: scopes)
     }
 }

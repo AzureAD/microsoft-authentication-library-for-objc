@@ -50,8 +50,8 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     
     var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
     
-    private(set) var makeNativeAuthResponseResult: MSALNativeAuthResponse!
-    private(set) var makeMsidConfigurationResult: MSIDConfiguration!
+    private(set) var makeNativeAuthResponseResult: MSALNativeAuthResponse?
+    private(set) var makeMsidConfigurationResult: MSIDConfiguration?
 
     func mockMakeNativeAuthResponse(_ result: MSALNativeAuthResponse) {
         self.makeNativeAuthResponseResult = result
@@ -71,7 +71,17 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
         credentialToken: String?,
         tokenResult: MSIDTokenResult
     ) -> MSALNativeAuthResponse {
-        return makeNativeAuthResponseResult
+        return makeNativeAuthResponseResult ?? .init(
+            stage: .completed,
+            credentialToken: nil,
+            authentication: .init(
+                accessToken: "<access_token>",
+                idToken: "<id_token>",
+                scopes: ["<scope_1>, <scope_2>"],
+                expiresOn: Date(),
+                tenantId: "myTenant"
+            )
+        )
     }
 
     func mockMakeMsidConfigurationFunc(_ result: MSIDConfiguration) {
@@ -79,6 +89,6 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     }
 
     func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration {
-        return makeMsidConfigurationResult
+        return makeMsidConfigurationResult ?? MSALNativeAuthConfigStubs.msidConfiguration
     }
 }

@@ -22,18 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthError: Error, Equatable {
-    case invalidInput
-    case validationError
-    case tokenResultNotPresent
-    case serverProtectionPoliciesRequired(homeAccountId: String?)
-    case headerNotSerialized
-    case invalidAuthority
-    case invalidUrl
-    case missingResponseSerializer
-    case responseSerializationError
-    case invalidResponse
-    case invalidRequest
-    case generalError
-    case invalidAttributes
+enum MSALNativeAuthInternalChannelType: String, Decodable {
+    case phone
+    case email
+
+    func toPublicChannelType() -> MSALNativeAuthChannelType {
+        switch self {
+        case .phone:
+            return .phone
+        case .email:
+            return .email
+        }
+    }
 }

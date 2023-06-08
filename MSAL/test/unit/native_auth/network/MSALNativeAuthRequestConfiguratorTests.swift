@@ -107,7 +107,9 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                                 grantType: .password,
                                                                 scope: "<scope-1>",
                                                                 password: "password",
-                                                                oobCode: "oob")
+                                                                oobCode: "oob",
+                                                                addNCAFlag: true,
+                                                                includeChallengeType: true)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.token(params)),
@@ -115,6 +117,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                           telemetryProvider: telemetryProvider)
 
         let expectedBodyParams = [
+            "nca": "1",
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "credential_token": "Test Credential Token",

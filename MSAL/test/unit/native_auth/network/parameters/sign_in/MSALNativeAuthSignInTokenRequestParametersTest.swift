@@ -44,7 +44,9 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
                                                                     grantType: .password,
                                                                     scope: "scope",
                                                                     password: "password",
-                                                                    oobCode: "Test OTP Code")
+                                                                    oobCode: "Test OTP Code",
+                                                                    addNCAFlag: true,
+                                                                    includeChallengeType: true)
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/token")
@@ -60,7 +62,9 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             grantType: .password,
             scope: "<scope-1>",
             password: "password",
-            oobCode: "oob"
+            oobCode: "oob",
+            addNCAFlag: true,
+            includeChallengeType: true
         )
 
         let body = params.makeRequestBody(config: config)
@@ -74,7 +78,8 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             "challenge_type": "password",
             "scope": "<scope-1>",
             "password": "password",
-            "oob": "oob"
+            "oob": "oob",
+            "nca": "1"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)
@@ -90,7 +95,9 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             grantType: .password,
             scope: nil,
             password: nil,
-            oobCode: nil
+            oobCode: nil,
+            addNCAFlag: false,
+            includeChallengeType: false
         )
 
         let body = params.makeRequestBody(config: config)

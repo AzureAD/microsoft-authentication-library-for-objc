@@ -110,7 +110,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .redirect
         case .oob:
             if let sentTo = response.challengeTargetLabel,
-               let channelType = MSALNativeAuthApiChannelType(rawValue: response.challengeChannel ?? ""),
+               let channelType = response.challengeChannel?.toPublicChannelType(),
                let codeLength = response.codeLength,
                let signUpChallengeToken = response.signUpToken {
                 return .successOOB(sentTo, channelType, codeLength, signUpChallengeToken)

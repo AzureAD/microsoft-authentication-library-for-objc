@@ -25,13 +25,13 @@
 import Foundation
 
 @objc
-public protocol SignInPasswordStartDelegate {
-    func onSignInPasswordError(error: SignInPasswordStartError)
-    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                             sentTo: String,
-                                             channelTargetType: MSALNativeAuthChannelType,
-                                             codeLength: Int)
+public protocol SignInCompletedDelegate {
     func onSignInCompleted(result: MSALNativeAuthUserAccount)
+}
+
+@objc
+public protocol SignInPasswordStartDelegate: SignInCompletedDelegate {
+    func onSignInPasswordError(error: SignInPasswordStartError)
 }
 
 @objc
@@ -41,17 +41,17 @@ public protocol SignInCodeStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
+    @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
 
 @objc
-public protocol SignInPasswordRequiredDelegate {
+public protocol SignInPasswordRequiredDelegate: SignInCompletedDelegate {
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
 public protocol SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState)
+    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
     func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState,
                                         sentTo: String,
                                         channelTargetType: MSALNativeAuthChannelType,
@@ -59,7 +59,6 @@ public protocol SignInResendCodeDelegate {
 }
 
 @objc
-public protocol SignInCodeRequiredDelegate {
+public protocol SignInVerifyCodeDelegate: SignInCompletedDelegate {
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }

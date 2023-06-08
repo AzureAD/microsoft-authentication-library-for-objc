@@ -26,7 +26,6 @@
 
 enum MSALNativeAuthSignInTokenValidatedResponse {
     case success(MSIDTokenResult, MSIDTokenResponse)
-    case credentialRequired(String)
     case error(MSALNativeAuthSignInTokenValidatedErrorType)
 }
 
@@ -38,25 +37,47 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
     case invalidServerResponse
     case userNotFound
     case invalidPassword
+    case invalidAuthenticationType
+    case invalidOOBCode
     case unsupportedChallengeType
+    case strongAuthRequired
     case invalidScope
     case authorizationPending
     case slowDown
 
     func convertToSignInPasswordStartError() -> SignInPasswordStartError {
         switch self {
-        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse, .invalidOOBCode:
             return SignInPasswordStartError(type: .generalError)
         case .invalidClient:
-            return SignInPasswordStartError(type: .generalError, message: "Invalid Client ID")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return SignInPasswordStartError(type: .generalError, message: "Unsupported challenge type")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         case .invalidScope:
-            return SignInPasswordStartError(type: .generalError, message: "Invalid scope")
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
         case .userNotFound:
             return SignInPasswordStartError(type: .userNotFound)
         case .invalidPassword:
             return SignInPasswordStartError(type: .invalidPassword)
+        case .invalidAuthenticationType:
+            return SignInPasswordStartError(type: .invalidAuthenticationType, message: MSALNativeAuthErrorMessage.useSignInCode)
+        case .strongAuthRequired:
+            return SignInPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
         }
+    }
+
+    func convertToVerifyCodeError() -> VerifyCodeError {
+        switch self {
+        case .invalidOOBCode:
+            return VerifyCodeError(type: .invalidCode)
+        case.strongAuthRequired:
+            return VerifyCodeError(type: .browserRequired)
+        default:
+            return VerifyCodeError(type: .generalError, message: self.localizedDescription)
+        }
+    }
+
+    func convertToPasswordRequiredError() -> PasswordRequiredError {
+        return PasswordRequiredError(signInPasswordError: convertToSignInPasswordStartError())
     }
 }

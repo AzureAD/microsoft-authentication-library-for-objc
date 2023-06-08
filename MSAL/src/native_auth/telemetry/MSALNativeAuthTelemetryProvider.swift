@@ -56,7 +56,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
     func telemetryForSignIn(
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryApiIdSignInWithPassword,
+            apiId: .telemetryApiIdSignInWithPasswordStart,
             operationType: type.rawValue,
             platformFields: nil)
     }

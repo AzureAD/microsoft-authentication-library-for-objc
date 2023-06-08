@@ -33,7 +33,7 @@ final class MSALNativeAuthAuthorityProvider: MSALNativeAuthAuthorityProviding {
     func authority(rawTenant: String?) throws -> MSALAADAuthority {
         guard let url = URL(string: MSID_DEFAULT_AAD_AUTHORITY) else {
             assert(false, "URL for default AAD Authority must be valid")
-            throw MSALNativeAuthError.invalidAuthority
+            throw MSALNativeAuthInternalError.invalidAuthority
         }
 
         return try MSALAADAuthority(url: url, rawTenant: rawTenant)

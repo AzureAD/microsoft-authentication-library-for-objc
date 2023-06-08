@@ -47,10 +47,10 @@ struct MSALNativeAuthResetPasswordStartResponse: Decodable {
         self.challengeType = try container.decodeIfPresent(
             MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
         if self.passwordResetToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthError.responseSerializationError
+            throw MSALNativeAuthInternalError.responseSerializationError
         }
         if self.passwordResetToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthError.responseSerializationError
+            throw MSALNativeAuthInternalError.responseSerializationError
         }
     }
 }

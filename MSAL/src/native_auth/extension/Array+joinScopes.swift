@@ -20,23 +20,12 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-enum MSALNativeAuthApiChannelType: String {
-    case email
-    case phone
-}
-
-extension MSALNativeAuthApiChannelType {
-
-    func toDomain() -> MSALNativeAuthChannelType {
-        switch self {
-        case .email:
-            return .email
-        case .phone:
-            return .phone
-        }
+extension Array where Element: StringProtocol {
+    func joinScopes() -> String {
+        return self.joined(separator: " ")
     }
 }

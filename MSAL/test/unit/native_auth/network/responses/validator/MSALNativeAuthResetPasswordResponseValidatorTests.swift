@@ -94,7 +94,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .redirect,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: .email,
             passwordResetToken: "token",
             codeLength: nil)
         )
@@ -108,19 +108,19 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .oob,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "email",
+            challengeChannel: .email,
             passwordResetToken: "token",
             codeLength: 6)
         )
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let displayName, let displayType, let codeLength, let passwordResetToken) = result else {
+        guard case .success(let sentTo, let channelTargetType, let codeLength, let passwordResetToken) = result else {
             return XCTFail("Unexpected response")
         }
 
-        XCTAssertEqual(displayName, "challenge-type-label")
-        XCTAssertEqual(displayType, .email)
+        XCTAssertEqual(sentTo, "challenge-type-label")
+        XCTAssertEqual(channelTargetType, .email)
         XCTAssertEqual(codeLength, 6)
         XCTAssertEqual(passwordResetToken, "token")
     }
@@ -130,7 +130,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .oob,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: .email,
             passwordResetToken: nil,
             codeLength: 6)
         )
@@ -139,12 +139,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeType_it_returns_unexpectedError() {
+    func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeChannel_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
             challengeType: .otp,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: .none,
             passwordResetToken: nil,
             codeLength: 6)
         )

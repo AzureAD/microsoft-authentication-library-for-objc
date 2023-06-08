@@ -75,38 +75,77 @@ class MSALNativeAuthRequestContextMock: MSIDRequestContext {
 }
 
 class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseValidating {
-    
+
     var expectedRequestContext: MSALNativeAuthRequestContext?
     var expectedConfiguration: MSIDConfiguration?
     var expectedTokenResponse: MSIDAADTokenResponse?
-    var expectedTokenResponseError: Error?
-    var tokenValidatesResponse: MSALNativeAuthSignInTokenValidatedResponse = .error(.generalError)
+    var expectedChallengeResponse: MSALNativeAuthSignInChallengeResponse?
+    var expectedInitiateResponse: MSALNativeAuthSignInInitiateResponse?
+    var expectedResponseError: Error?
+    var tokenValidatedResponse: MSALNativeAuthSignInTokenValidatedResponse = .error(.generalError)
+    var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound)
+    var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken)
     
-    func validateSignInTokenResponse(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDAADTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
-        if let expectedRequestContext = expectedRequestContext {
-            XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
-            XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
-        }
-        if let expectedConfiguration = expectedConfiguration {
-            XCTAssertEqual(expectedConfiguration, msidConfiguration)
-        }
+    func validate(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDAADTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
+        checkConfAndContext(context, config: msidConfiguration)
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
             XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)
             XCTAssertEqual(successTokenResponse.refreshToken, expectedTokenResponse.refreshToken)
             XCTAssertEqual(successTokenResponse.idToken, expectedTokenResponse.idToken)
             XCTAssertEqual(successTokenResponse.scope, expectedTokenResponse.scope)
         }
-        if case .failure(let tokenResponseError) = result, let expectedTokenResponseError = expectedTokenResponseError {
+        if case .failure(let tokenResponseError) = result, let expectedTokenResponseError = expectedResponseError {
+            XCTAssertTrue(type(of: tokenResponseError) == type(of: expectedResponseError))
             XCTAssertEqual(tokenResponseError.localizedDescription, expectedTokenResponseError.localizedDescription)
         }
-        return tokenValidatesResponse
+        return tokenValidatedResponse
     }
     
+    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
+        checkConfAndContext(context)
+        if case .success(let successChallengeResponse) = result, let expectedChallengeResponse = expectedChallengeResponse {
+            XCTAssertEqual(successChallengeResponse.challengeType, expectedChallengeResponse.challengeType)
+            XCTAssertEqual(successChallengeResponse.credentialToken, expectedChallengeResponse.credentialToken)
+            XCTAssertEqual(successChallengeResponse.challengeTargetLabel, expectedChallengeResponse.challengeTargetLabel)
+            XCTAssertEqual(successChallengeResponse.challengeChannel, expectedChallengeResponse.challengeChannel)
+            XCTAssertEqual(successChallengeResponse.codeLength, expectedChallengeResponse.codeLength)
+        }
+        if case .failure(let challengeResponseError) = result, let expectedChallengeResponseError = expectedResponseError {
+            XCTAssertTrue(type(of: challengeResponseError) == type(of: expectedChallengeResponseError))
+            XCTAssertEqual(challengeResponseError.localizedDescription, expectedChallengeResponseError.localizedDescription)
+        }
+        return challengeValidatedResponse
+    }
+    
+    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
+        checkConfAndContext(context)
+        if case .success(let successInitiateResponse) = result, let expectedInitiateResponse = expectedInitiateResponse {
+            XCTAssertEqual(successInitiateResponse.challengeType, expectedInitiateResponse.challengeType)
+            XCTAssertEqual(successInitiateResponse.credentialToken, expectedInitiateResponse.credentialToken)
+        }
+        if case .failure(let initiateResponseError) = result, let expectedInitiateResponseError = expectedResponseError {
+            XCTAssertTrue(type(of: initiateResponseError) == type(of: expectedInitiateResponseError))
+            XCTAssertEqual(initiateResponseError.localizedDescription, expectedInitiateResponseError.localizedDescription)
+        }
+        return initiateValidatedResponse
+    }
+    
+    private func checkConfAndContext(_ context: MSAL.MSALNativeAuthRequestContext, config: MSIDConfiguration? = nil) {
+        if let expectedRequestContext = expectedRequestContext {
+            XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
+            XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
+        }
+        if let expectedConfiguration = expectedConfiguration {
+            XCTAssertEqual(expectedConfiguration, config)
+        }
+    }
 }
 
 class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProviding {
     
-    var throwingError: Error?
+    var throwingInitError: Error?
+    var throwingChallengeError: Error?
+    var throwingTokenError: Error?
     var result: MSIDHttpRequest?
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
@@ -114,24 +153,23 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     var expectedTokenParams: MSALNativeAuthSignInTokenRequestParameters?
     
     func inititate(parameters: MSAL.MSALNativeAuthSignInInitiateRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
-        if let expectedContext = expectedContext {
-            XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
-            XCTAssertEqual(expectedContext.telemetryRequestId(), context.telemetryRequestId())
-        }
+        checkContext(context)
         if let expectedUsername = expectedUsername {
             XCTAssertEqual(expectedUsername, parameters.username)
         }
-        return try returnMockedResult(result: result)
+        return try returnMockedResult(throwingInitError)
     }
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+        checkContext(context)
         if let expectedCredentialToken = expectedCredentialToken {
             XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
         }
-        return try returnMockedResult(result: result)
+        return try returnMockedResult(throwingChallengeError)
     }
     
     func token(parameters: MSAL.MSALNativeAuthSignInTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+        checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
             XCTAssertEqual(expectedTokenParams.credentialToken, parameters.credentialToken)
@@ -142,11 +180,17 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
         }
-        return try returnMockedResult(result: result)
+        return try returnMockedResult(throwingTokenError)
     }
     
-    private func returnMockedResult(result: MSIDHttpRequest?) throws -> MSIDHttpRequest  {
-        if let throwingError = throwingError {
+    fileprivate func checkContext(_ context: MSIDRequestContext) {
+        if let expectedContext = expectedContext {
+            XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
+        }
+    }
+    
+    private func returnMockedResult(_ error: Error?) throws -> MSIDHttpRequest  {
+        if let throwingError = error {
             throw throwingError
         }
         if let result = result {
@@ -157,11 +201,10 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     }
 }
 
-class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
+class MSALNativeAuthTokenResponseHandlerMock: MSALNativeAuthTokenResponseHandling {
 
     private(set) var throwingError: Error?
     private(set) var handleTokenFuncResult: MSIDTokenResult?
-    private(set) var handleResendCodeFuncResult: Bool?
     var expectedAccountId: MSIDAccountIdentifier?
     var expectedContext: MSIDRequestContext?
     var expectedValidateAccount: Bool?
@@ -206,28 +249,8 @@ class MSALNativeAuthResponseHandlerMock: MSALNativeAuthResponseHandling {
 
     func mockHandleResendCodeFunc(throwingError: Error? = nil, result: Bool? = nil) {
         self.throwingError = throwingError
-        self.handleResendCodeFuncResult = result
     }
 
-    func handle(
-        context: MSIDRequestContext,
-        resendCodeReponse: MSAL.MSALNativeAuthResendCodeRequestResponse
-    ) throws -> Bool {
-        if throwingError == nil && handleResendCodeFuncResult == nil {
-            XCTFail("Both parameters are nil")
-        }
-
-        if let error = throwingError {
-            throw error
-        }
-
-        if let handleResendCodeFuncResult = handleResendCodeFuncResult {
-            return handleResendCodeFuncResult
-        }
-
-        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
-        return handleResendCodeFuncResult!
-    }
 }
 
 class HttpModuleMockConfigurator {

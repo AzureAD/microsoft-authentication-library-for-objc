@@ -24,6 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController, MSALNativeAuthResetPasswordControlling {
     private let requestProvider: MSALNativeAuthResetPasswordRequestProviding
@@ -189,14 +190,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         delegate: ResetPasswordStartDelegate
     ) async {
         switch response {
-        case .success(let displayName, let displayType, let codeLength, let challengeToken):
+        case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/challenge request")
             stopTelemetryEvent(event, context: context)
 
             await delegate.onResetPasswordCodeRequired(
                 newState: ResetPasswordCodeRequiredState(controller: self, flowToken: challengeToken),
-                sentTo: displayName,
-                channelTargetType: .email,
+                sentTo: sentTo,
+                channelTargetType: channelTargetType,
                 codeLength: codeLength
             )
         case .error(let apiError):
@@ -240,7 +241,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         case .redirect,
                 .unexpectedError:
-            let error = ResendCodeError(type: .generalError)
+            let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         }
@@ -444,32 +445,13 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             case .inProgress,
                  .notStarted:
 
-                guard retriesRemaining > 0 else {
-                    let error = PasswordRequiredError(type: .generalError)
-                    self.stopTelemetryEvent(event, context: context, error: error)
-                    MSALLogger.log(level: .error, context: context, format: "password poll completion did not complete in time")
-
-                    await delegate.onResetPasswordRequiredError(error: error, newState: nil)
-
-                    return
-                }
-
-                MSALLogger.log(
-                    level: .info,
-                    context: context,
-                    format: "resetpassword: waiting for \(pollInterval) seconds before retrying"
-                )
-
-                try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
-
-                await doPollCompletionLoop(
-                    passwordResetToken: "token",
+                await retryPollCompletion(
                     pollInterval: pollInterval,
-                    retriesRemaining: retriesRemaining - 1,
+                    retriesRemaining: retriesRemaining,
                     event: event,
                     context: context,
-                    delegate: delegate)
-
+                    delegate: delegate
+                )
             case .succeeded:
                 stopTelemetryEvent(event, context: context)
 
@@ -505,4 +487,39 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             await delegate.onResetPasswordRequiredError(error: error, newState: nil)
         }
     }
+
+    private func retryPollCompletion(
+        pollInterval: Int,
+        retriesRemaining: Int,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        delegate: ResetPasswordRequiredDelegate
+    ) async {
+        guard retriesRemaining > 0 else {
+            let error = PasswordRequiredError(type: .generalError)
+            self.stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error, context: context, format: "password poll completion did not complete in time")
+
+            await delegate.onResetPasswordRequiredError(error: error, newState: nil)
+
+            return
+        }
+
+        MSALLogger.log(
+            level: .info,
+            context: context,
+            format: "resetpassword: waiting for \(pollInterval) seconds before retrying"
+        )
+
+        try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
+
+        await doPollCompletionLoop(
+            passwordResetToken: "token",
+            pollInterval: pollInterval,
+            retriesRemaining: retriesRemaining - 1,
+            event: event,
+            context: context,
+            delegate: delegate)
+    }
 }
+// swiftlint:enable file_length

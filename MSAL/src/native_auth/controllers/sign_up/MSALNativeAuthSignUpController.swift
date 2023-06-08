@@ -243,7 +243,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
@@ -280,7 +280,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
@@ -317,7 +317,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 delegate.onSignUpResendCodeCodeRequired(
                     newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
                     sentTo: sentTo,
-                    channelTargetType: challengeType.toDomain(),
+                    channelTargetType: challengeType,
                     codeLength: codeLength
                 )
             }
@@ -329,7 +329,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .redirect,
              .unexpectedError,
              .successPassword:
-            let error = ResendCodeError(type: .generalError)
+            let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge resendCode request \(error)")
             DispatchQueue.main.async { delegate.onSignUpResendCodeError(error: error) }

@@ -30,17 +30,21 @@ enum MSALNativeAuthTelemetryApiId: Int {
     // to prevent any clashes with existing id's
     // a number that is unlikely to be used has been added
     case telemetryApiIdSignUp = 75001
-    case telemetryApiIdSignInWithPassword = 75002
     case telemetryApiIdRefreshToken = 75003
     case telemetryApiIdResetPasswordStart = 75004
     case telemetryApiIdResetPasswordComplete = 75005
-    case telemetryApiIdResetPasswordResendCode = 75006
-    case telemetryApiIdResetPasswordVerifyCode = 75007
-    case telemetryApiIdResetPasswordSubmit = 75008
-    case telemetryApiIdResendCode = 75906 // TODO: Remove me and all related legacy code
-    case telemetryApiIdVerifyCode = 75907 // TODO: Remove me and all related legacy code
-    case telemetryApiIdSignOut = 75908 // TODO: Remove me and all related legacy code
-    case telemetryResetPassword = 75909 // TODO: Remove me and all related legacy code
+    case telemetryApiIdResendCode = 75006
+    case telemetryApiIdVerifyCode = 75007
+    case telemetryApiIdSignOut = 75008
+    case telemetryResetPassword = 75009
+    case telemetryApiIdSignInWithPasswordStart = 74001
+    case telemetryApiIdSignInWithCodeStart = 74002
+    case telemetryApiIdSignInSubmitCode = 74003
+    case telemetryApiIdSignInResendCode = 74004
+    case telemetryApiIdSignInSubmitPassword = 74005
+    case telemetryApiIdResetPasswordResendCode = 75026
+    case telemetryApiIdResetPasswordVerifyCode = 75027
+    case telemetryApiIdResetPasswordSubmit = 75028
     case telemetryApiIdSignUpPasswordStart = 75019
     case telemetryApiIdSignUpPasswordChallenge = 75015
     case telemetryApiIdSignUpCodeStart = 75010

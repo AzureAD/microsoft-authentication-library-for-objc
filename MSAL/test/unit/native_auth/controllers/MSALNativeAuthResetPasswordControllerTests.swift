@@ -300,7 +300,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordResendCode, isSuccessful: false)
     }
@@ -336,7 +335,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordResendCode, isSuccessful: false)
     }
@@ -354,7 +352,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordResendCode, isSuccessful: false)
     }
@@ -372,7 +369,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordResendCode, isSuccessful: false)
     }

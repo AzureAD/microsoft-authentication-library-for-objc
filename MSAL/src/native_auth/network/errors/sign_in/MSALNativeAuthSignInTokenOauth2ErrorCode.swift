@@ -25,7 +25,6 @@
 import Foundation
 
 enum MSALNativeAuthSignInTokenOauth2ErrorCode: String, Decodable {
-
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case invalidGrant = "invalid_grant"
@@ -34,5 +33,4 @@ enum MSALNativeAuthSignInTokenOauth2ErrorCode: String, Decodable {
     case invalidScope = "invalid_scope"
     case authorizationPending = "authorization_pending"
     case slowDown = "slow_down"
-    case credentialRequired = "credential_required"
 }

@@ -102,7 +102,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: nil,
             signUpToken: "token",
             codeLength: nil)
         )
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: nil,
             signUpToken: "token",
             codeLength: nil)
         )
@@ -132,7 +132,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "email",
+            challengeChannel: .email,
             signUpToken: "token",
             codeLength: 6)
         )
@@ -155,7 +155,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "email",
+            challengeChannel: .email,
             signUpToken: "token",
             codeLength: nil)
         )
@@ -175,7 +175,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: nil,
             signUpToken: "token",
             codeLength: 6)
         )
@@ -190,7 +190,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: "challenge-channel",
+            challengeChannel: nil,
             signUpToken: nil,
             codeLength: 6)
         )

@@ -24,6 +24,7 @@
 
 enum MSALNativeAuthErrorMessage {
     static let invalidClient = "Invalid Client ID"
+    static let invalidScope = "Invalid scope"
     static let unsupportedChallengeType = "Unsupported challenge type"
     static let unsupportedAuthMethod = "Authentication method not supported"
     static let expiredToken = "Flow token has expired. Please start the flow again"
@@ -33,5 +34,7 @@ enum MSALNativeAuthErrorMessage {
     static let passwordRecentlyUsed = "Password recently used"
     static let passwordBanned = "Password banned"
     static let delegateNotImplemented = "MSALNativeAuth has called an optional delegate method that has not been implemented"
+    static let useSignInCode = "Use signInUsingCode instead"
+    static let unsupportedMFA = "MFA currently not supported. Use the browser instead"
     static let browserRequired = "Browser required"
 }
