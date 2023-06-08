@@ -26,7 +26,6 @@
 import XCTest
 
 class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
-    private let expectation: XCTestExpectation?
     private(set) var onResetPasswordErrorCalled = false
     private(set) var onResetPasswordCodeRequiredCalled = false
     private(set) var error: ResetPasswordStartError?
@@ -35,15 +34,10 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
 
-    init(expectation: XCTestExpectation? = nil) {
-        self.expectation = expectation
-    }
-
     func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
         onResetPasswordErrorCalled = true
         self.error = error
 
-        self.expectation?.fulfill()
     }
 
     func onResetPasswordCodeRequired(
@@ -58,12 +52,10 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
-        self.expectation?.fulfill()
     }
 }
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
-    private let expectation: XCTestExpectation?
     private(set) var onResetPasswordResendCodeErrorCalled = false
     private(set) var onResetPasswordResendCodeRequiredCalled = false
     private(set) var error: ResendCodeError?
@@ -72,17 +64,12 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
 
-    init(expectation: XCTestExpectation? = nil) {
-        self.expectation = expectation
-    }
-
     func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?) {
         onResetPasswordResendCodeErrorCalled = true
 
         self.error = error
         self.newState = newState
 
-        expectation?.fulfill()
     }
 
     func onResetPasswordResendCodeRequired(newState: MSAL.ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
@@ -93,49 +80,36 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
-        expectation?.fulfill()
     }
 }
 
 class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
-    private let expectation: XCTestExpectation?
     private(set) var onResetPasswordVerifyCodeErrorCalled = false
     private(set) var onPasswordRequiredCalled = false
     private(set) var error: VerifyCodeError?
     private(set) var newCodeRequiredState: ResetPasswordCodeRequiredState?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
 
-    init(expectation: XCTestExpectation? = nil) {
-        self.expectation = expectation
-    }
-
     func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?) {
         onResetPasswordVerifyCodeErrorCalled = true
         self.error = error
         newCodeRequiredState = newState
 
-        expectation?.fulfill()
     }
 
     func onPasswordRequired(newState: ResetPasswordRequiredState) {
         onPasswordRequiredCalled = true
         newPasswordRequiredState = newState
 
-        expectation?.fulfill()
     }
 }
 
 class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
-    private let expectation: XCTestExpectation?
     private(set) var onResetPasswordRequiredErrorCalled = false
     private(set) var onResetPasswordCompletedCalled = false
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
     private(set) var resetPasswordCompletedCalled = false
-
-    init(expectation: XCTestExpectation? = nil) {
-        self.expectation = expectation
-    }
 
     func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?) {
         onResetPasswordRequiredErrorCalled = true
@@ -143,14 +117,11 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
         self.error = error
         newPasswordRequiredState = newState
 
-        expectation?.fulfill()
     }
 
     func onResetPasswordCompleted() {
         onResetPasswordCompletedCalled = true
 
         resetPasswordCompletedCalled = true
-        
-        expectation?.fulfill()
     }
 }

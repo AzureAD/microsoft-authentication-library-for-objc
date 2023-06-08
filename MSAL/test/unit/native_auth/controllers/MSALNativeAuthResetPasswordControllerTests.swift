@@ -680,8 +680,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNotNil(telemetryEventDict["response_time"])
     }
 
-    private func prepareResetPasswordStartDelegateSpy(_ expectation: XCTestExpectation? = nil) -> ResetPasswordStartDelegateSpy {
-        let delegate = ResetPasswordStartDelegateSpy(expectation: expectation)
+    private func prepareResetPasswordStartDelegateSpy() -> ResetPasswordStartDelegateSpy {
+        let delegate = ResetPasswordStartDelegateSpy()
         XCTAssertFalse(delegate.onResetPasswordErrorCalled)
         XCTAssertFalse(delegate.onResetPasswordCodeRequiredCalled)
         XCTAssertNil(delegate.newState)
@@ -693,8 +693,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         return delegate
     }
 
-    private func prepareResetPasswordResendCodeDelegateSpy(_ expectation: XCTestExpectation? = nil) -> ResetPasswordResendCodeDelegateSpy {
-        let delegate = ResetPasswordResendCodeDelegateSpy(expectation: expectation)
+    private func prepareResetPasswordResendCodeDelegateSpy() -> ResetPasswordResendCodeDelegateSpy {
+        let delegate = ResetPasswordResendCodeDelegateSpy()
         XCTAssertFalse(delegate.onResetPasswordResendCodeErrorCalled)
         XCTAssertFalse(delegate.onResetPasswordResendCodeRequiredCalled)
         XCTAssertNil(delegate.newState)
@@ -706,8 +706,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         return delegate
     }
 
-    private func prepareResetPasswordSubmitCodeDelegateSpy(_ expectation: XCTestExpectation? = nil) -> ResetPasswordVerifyCodeDelegateSpy {
-        let delegate = ResetPasswordVerifyCodeDelegateSpy(expectation: expectation)
+    private func prepareResetPasswordSubmitCodeDelegateSpy() -> ResetPasswordVerifyCodeDelegateSpy {
+        let delegate = ResetPasswordVerifyCodeDelegateSpy()
         XCTAssertFalse(delegate.onPasswordRequiredCalled)
         XCTAssertFalse(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -717,8 +717,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         return delegate
     }
 
-    private func prepareResetPasswordSubmitPasswordDelegateSpy(_ expectation: XCTestExpectation? = nil) -> ResetPasswordRequiredDelegateSpy {
-        let delegate = ResetPasswordRequiredDelegateSpy(expectation: expectation)
+    private func prepareResetPasswordSubmitPasswordDelegateSpy() -> ResetPasswordRequiredDelegateSpy {
+        let delegate = ResetPasswordRequiredDelegateSpy()
         XCTAssertFalse(delegate.onResetPasswordCompletedCalled)
         XCTAssertFalse(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newPasswordRequiredState)
