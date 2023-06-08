@@ -50,7 +50,7 @@ enum MSALNativeAuthResetPasswordSubmitValidatedResponse: Equatable {
     case unexpectedError
 }
 
-enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse: Equatable {
     case success(status: MSALNativeAuthResetPasswordPollCompletionStatus)
     case passwordError(error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode)
     case error(MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode)
