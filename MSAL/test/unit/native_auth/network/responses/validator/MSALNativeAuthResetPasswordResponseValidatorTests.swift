@@ -245,7 +245,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Submit Response
 
     func test_whenResetPasswordSubmitSuccessResponseContainsToken_it_returns_success() {
-        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(passwordResetToken: "passwordResetToken", pollInterval: 1))
 
         let result = sut.validate(response, with: context)
 
@@ -254,7 +254,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         }
 
         XCTAssertEqual(passwordResetToken, "passwordResetToken")
-        XCTAssertEqual(pollInterval, 5)
+        XCTAssertEqual(pollInterval, 1)
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordTooWeak_it_returns_expectedError() {

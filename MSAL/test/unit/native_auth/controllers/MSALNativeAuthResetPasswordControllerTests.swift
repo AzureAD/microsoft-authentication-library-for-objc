@@ -456,7 +456,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_succeeds_it_callsDelegate() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded))
@@ -526,7 +526,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegate() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.unexpectedError)
@@ -544,7 +544,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_unexpectedError_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.unexpectedError)
@@ -562,7 +562,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_passwordError_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.passwordError(error: .passwordBanned))
@@ -582,7 +582,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.error(.expiredToken))
@@ -622,7 +622,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .failed))
@@ -642,7 +642,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_pollCompletion_returns_inProgress_it_callsDelegateErrorAfterRetries() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
-        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 5))
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken", pollInterval: 0))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .inProgress))
