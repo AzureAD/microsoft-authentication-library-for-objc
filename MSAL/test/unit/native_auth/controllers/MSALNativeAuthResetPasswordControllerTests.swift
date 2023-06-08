@@ -662,7 +662,6 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - Common Methods
 
-    // TODO: Reuse function from Sign Up tests
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
         XCTAssertEqual(receivedEvents.count, 1)
 
