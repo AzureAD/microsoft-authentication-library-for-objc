@@ -38,6 +38,7 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
         onResetPasswordErrorCalled = true
         self.error = error
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 
     func onResetPasswordCodeRequired(
@@ -52,6 +53,7 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
 
@@ -70,6 +72,7 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.error = error
         self.newState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 
     func onResetPasswordResendCodeRequired(newState: MSAL.ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
@@ -80,6 +83,7 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
 
@@ -95,12 +99,14 @@ class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
         self.error = error
         newCodeRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 
     func onPasswordRequired(newState: ResetPasswordRequiredState) {
         onPasswordRequiredCalled = true
         newPasswordRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
 
@@ -116,10 +122,12 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
         self.error = error
         newPasswordRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 
     func onResetPasswordCompleted() {
         onResetPasswordCompletedCalled = true
 
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
