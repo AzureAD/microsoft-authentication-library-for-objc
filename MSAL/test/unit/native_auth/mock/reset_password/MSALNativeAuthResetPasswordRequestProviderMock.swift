@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
@@ -30,8 +31,8 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     var requestStart: MSIDHttpRequest?
     var throwErrorStart = false
-    private(set) var startParameters: MSALNativeAuthResetPasswordStartRequestProviderParameters?
     private(set) var startCalled = false
+    var expectedStartRequestParameters: MSALNativeAuthResetPasswordStartRequestProviderParameters!
 
     func mockStartRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestStart = request
@@ -40,8 +41,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     func start(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) throws -> MSIDHttpRequest {
         startCalled = true
-
-        startParameters = parameters   
+        checkParameters(params: parameters)
 
         if let request = requestStart {
             return request
@@ -52,13 +52,17 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         }
     }
 
+    private func checkParameters(params: MSALNativeAuthResetPasswordStartRequestProviderParameters) {
+        XCTAssertEqual(params.username, expectedStartRequestParameters.username)
+        XCTAssertEqual(params.context.correlationId(), expectedStartRequestParameters.context.correlationId())
+    }
+
     // MARK: Challenge
 
     var requestChallenge: MSIDHttpRequest?
     var throwErrorChallenge = false
-    private(set) var challengeTokenParam: String?
-    private(set) var challengeContextParam: MSIDRequestContext?
     private(set) var challengeCalled = false
+    var expectedChallengeRequestParameters: (token: String, context: MSIDRequestContext)!
 
     func mockChallengeRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestChallenge = request
@@ -67,9 +71,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
-
-        challengeTokenParam = token
-        challengeContextParam = context
+        checkParameters(token: token, context: context)
 
         if let request = requestChallenge {
             return request
@@ -80,12 +82,17 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         }
     }
 
+    private func checkParameters(token: String, context: MSIDRequestContext) {
+        XCTAssertEqual(token, expectedChallengeRequestParameters.token)
+        XCTAssertEqual(context.correlationId(), expectedChallengeRequestParameters.context.correlationId())
+    }
+
     // MARK: Continue
 
     var requestContinue: MSIDHttpRequest?
     var throwErrorContinue = false
-    private(set) var continueParameters: MSALNativeAuthResetPasswordContinueRequestParameters?
     private(set) var continueCalled = false
+    var expectedContinueRequestParameters: MSALNativeAuthResetPasswordContinueRequestParameters!
 
     func mockContinueRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestContinue = request
@@ -94,8 +101,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     func `continue`(parameters: MSAL.MSALNativeAuthResetPasswordContinueRequestParameters) throws -> MSIDHttpRequest {
         continueCalled = true
-
-        continueParameters = parameters
+        checkParameters(parameters)
 
         if let request = requestContinue {
             return request
@@ -106,12 +112,19 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         }
     }
 
+    private func checkParameters(_ params: MSALNativeAuthResetPasswordContinueRequestParameters) {
+        XCTAssertEqual(params.grantType, expectedContinueRequestParameters.grantType)
+        XCTAssertEqual(params.passwordResetToken, expectedContinueRequestParameters.passwordResetToken)
+        XCTAssertEqual(params.oobCode, expectedContinueRequestParameters.oobCode)
+        XCTAssertEqual(params.context.correlationId(), expectedContinueRequestParameters.context.correlationId())
+    }
+
     // MARK: Submit
 
     var requestSubmit: MSIDHttpRequest?
     var throwErrorSubmit = false
-    private(set) var submitParameters: MSALNativeAuthResetPasswordSubmitRequestParameters?
     private(set) var submitCalled = false
+    var expectedSubmitRequestParameters: MSALNativeAuthResetPasswordSubmitRequestParameters!
 
     func mockSubmitRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestSubmit = request
@@ -120,8 +133,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     func submit(parameters: MSAL.MSALNativeAuthResetPasswordSubmitRequestParameters) throws -> MSIDHttpRequest {
         submitCalled = true
-
-        submitParameters = parameters
+        checkParameters(parameters)
 
         if let request = requestSubmit {
             return request
@@ -132,12 +144,18 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         }
     }
 
+    private func checkParameters(_ params: MSALNativeAuthResetPasswordSubmitRequestParameters) {
+        XCTAssertEqual(params.passwordSubmitToken, expectedSubmitRequestParameters.passwordSubmitToken)
+        XCTAssertEqual(params.newPassword, expectedSubmitRequestParameters.newPassword)
+        XCTAssertEqual(params.context.correlationId(), expectedSubmitRequestParameters.context.correlationId())
+    }
+
     // MARK: PollCompletion
 
     var requestPollCompletion: MSIDHttpRequest?
     var throwErrorPollCompletion = false
-    private(set) var pollCompletionParameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters?
     private(set) var pollCompletionCalled = false
+    var expectedPollCompletionParameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters!
 
     func mockPollCompletionRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestPollCompletion = request
@@ -146,8 +164,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     func pollCompletion(parameters: MSAL.MSALNativeAuthResetPasswordPollCompletionRequestParameters) throws -> MSIDHttpRequest {
         pollCompletionCalled = true
-
-        pollCompletionParameters = parameters
+        checkParameters(parameters)
 
         if let request = requestPollCompletion {
             return request
@@ -156,5 +173,10 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         } else {
             fatalError("Make sure to use mockPollCompletionRequestFunc()")
         }
+    }
+
+    private func checkParameters(_ params: MSALNativeAuthResetPasswordPollCompletionRequestParameters) {
+        XCTAssertEqual(params.passwordResetToken, expectedPollCompletionParameters.passwordResetToken)
+        XCTAssertEqual(params.context.correlationId(), expectedPollCompletionParameters.context.correlationId())
     }
 }

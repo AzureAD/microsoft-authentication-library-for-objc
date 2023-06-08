@@ -446,6 +446,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                  .notStarted:
 
                 await retryPollCompletion(
+                    passwordResetToken: passwordResetToken,
                     pollInterval: pollInterval,
                     retriesRemaining: retriesRemaining,
                     event: event,
@@ -489,6 +490,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     }
 
     private func retryPollCompletion(
+        passwordResetToken: String,
         pollInterval: Int,
         retriesRemaining: Int,
         event: MSIDTelemetryAPIEvent?,
@@ -514,7 +516,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
 
         await doPollCompletionLoop(
-            passwordResetToken: "token",
+            passwordResetToken: passwordResetToken,
             pollInterval: pollInterval,
             retriesRemaining: retriesRemaining - 1,
             event: event,
