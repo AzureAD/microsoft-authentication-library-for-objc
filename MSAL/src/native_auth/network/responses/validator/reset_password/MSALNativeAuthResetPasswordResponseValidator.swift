@@ -60,9 +60,6 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         } else {
             MSALLogger.log(level: .error,
                            context: context,
-                           filename: #fileID,
-                           lineNumber: #line,
-                           function: #function,
                            format: "Error type not expected")
 
             return .unexpectedError
@@ -74,9 +71,6 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         guard let apiError = error as? MSALNativeAuthResetPasswordStartResponseError else {
             MSALLogger.log(level: .error,
                            context: context,
-                           filename: #fileID,
-                           lineNumber: #line,
-                           function: #function,
                            format: "Error type not expected")
 
             return .unexpectedError
