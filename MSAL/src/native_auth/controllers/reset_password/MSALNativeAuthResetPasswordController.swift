@@ -307,6 +307,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             let error = VerifyCodeError(type: .invalidCode)
             self.stopTelemetryEvent(event, context: context, error: error)
 
+            MSALLogger.log(level: .error, context: context, format: "Invalid code error calling resetpassword/continue \(error)")
+
             await delegate.onResetPasswordVerifyCodeError(
                 error: error,
                 newState: ResetPasswordCodeRequiredState(
@@ -359,6 +361,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .passwordError(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
             self.stopTelemetryEvent(event, context: context, error: error)
+
+            MSALLogger.log(level: .error, context: context, format: "Password error calling resetpassword/submit \(error)")
 
             await delegate.onResetPasswordRequiredError(
                 error: error,
@@ -476,6 +480,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .passwordError(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
             self.stopTelemetryEvent(event, context: context, error: error)
+
+            MSALLogger.log(level: .error, context: context, format: "Password error calling resetpassword/poll_completion \(error)")
 
             await delegate.onResetPasswordRequiredError(
                 error: error,
