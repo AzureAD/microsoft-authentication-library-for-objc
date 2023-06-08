@@ -27,6 +27,8 @@
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController, MSALNativeAuthResetPasswordControlling {
+    private let kNumberOfTimesToRetryPollCompletionCall = 5
+
     private let requestProvider: MSALNativeAuthResetPasswordRequestProviding
     private let responseValidator: MSALNativeAuthResetPasswordResponseValidating
     private let config: MSALNativeAuthConfiguration
@@ -349,6 +351,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             await doPollCompletionLoop(
                 passwordResetToken: passwordResetToken,
                 pollInterval: pollInterval,
+                retriesRemaining: kNumberOfTimesToRetryPollCompletionCall,
                 event: event,
                 context: context,
                 delegate: delegate
@@ -383,7 +386,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     private func doPollCompletionLoop(
         passwordResetToken: String,
         pollInterval: Int,
-        retriesRemaining: Int = 5,
+        retriesRemaining: Int,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
         delegate: ResetPasswordRequiredDelegate
