@@ -35,6 +35,11 @@ struct MSALNativeAuthResetPasswordStartResponse: Decodable {
         case challengeType
     }
 
+    init(passwordResetToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
+        self.passwordResetToken = passwordResetToken
+        self.challengeType = challengeType
+    }
+
     // TODO: Move to validator class
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

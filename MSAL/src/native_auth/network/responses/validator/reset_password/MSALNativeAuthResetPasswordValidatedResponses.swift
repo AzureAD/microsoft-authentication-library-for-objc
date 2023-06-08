@@ -22,21 +22,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthResetPasswordStartValidatedResponse {
+enum MSALNativeAuthResetPasswordStartValidatedResponse: Equatable {
     case success(passwordResetToken: String)
     case redirect
     case error(MSALNativeAuthResetPasswordStartOauth2ErrorCode)
     case unexpectedError
 }
 
-enum MSALNativeAuthResetPasswordChallengeValidatedResponse {
+enum MSALNativeAuthResetPasswordChallengeValidatedResponse: Equatable {
     case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ resetPasswordChallengeToken: String)
     case redirect
     case error(MSALNativeAuthResetPasswordChallengeOauth2ErrorCode)
     case unexpectedError
 }
 
-enum MSALNativeAuthResetPasswordContinueValidatedResponse {
+enum MSALNativeAuthResetPasswordContinueValidatedResponse: Equatable {
     case success(passwordSubmitToken: String)
     case invalidOOB
     case error(MSALNativeAuthResetPasswordContinueOauth2ErrorCode)
