@@ -146,7 +146,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                                      context: MSIDRequestContext,
                                      delegate: ResetPasswordStartDelegate) async {
 
-        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request with result: \(response)")
+        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request")
 
         switch response {
         case .success(let passwordResetToken):
@@ -232,7 +232,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordResendCodeDelegate
     ) async {
-        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/challenge request with response: \(response)")
+        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/challenge request")
 
         switch response {
         case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
@@ -282,7 +282,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             context: MSIDRequestContext,
             delegate: ResetPasswordVerifyCodeDelegate
     ) async {
-        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/continue request with response: \(response)")
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/continue request")
 
         switch response {
         case .success(let passwordSubmitToken):
@@ -346,7 +346,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             context: MSIDRequestContext,
             delegate: ResetPasswordRequiredDelegate
     ) async {
-        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/submit request with response: \(response)")
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/submit request")
 
         switch response {
         case .success(let passwordResetToken, let pollInterval):
@@ -450,7 +450,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             context: MSIDRequestContext,
             delegate: ResetPasswordRequiredDelegate
     ) async {
-        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/poll_completion with response: \(response)")
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/poll_completion")
 
         switch response {
         case .success(let status):
