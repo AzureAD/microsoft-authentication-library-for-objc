@@ -60,7 +60,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         } else {
             MSALLogger.log(level: .error,
                            context: context,
-                           format: "Error type not expected")
+                           format: "resetpassword/start returned success with unexpected response body")
 
             return .unexpectedError
         }
