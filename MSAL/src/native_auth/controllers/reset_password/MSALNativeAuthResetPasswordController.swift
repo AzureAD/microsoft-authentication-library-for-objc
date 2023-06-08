@@ -56,7 +56,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
         }
 
-    // Internal interface methods
+    // MARK: - Internal interface methods
 
     func resetPassword(
         parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters,
