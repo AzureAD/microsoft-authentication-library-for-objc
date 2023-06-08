@@ -31,7 +31,6 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
     private let requestProvider: MSALNativeAuthResetPasswordRequestProviding
     private let responseValidator: MSALNativeAuthResetPasswordResponseValidating
-    private let config: MSALNativeAuthConfiguration
 
     init(
         config: MSALNativeAuthConfiguration,
@@ -41,7 +40,6 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     ) {
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
-        self.config = config
 
         super.init(clientId: config.clientId)
     }
