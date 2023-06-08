@@ -45,22 +45,22 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         expectation.fulfill()
     }
 
-    func resendCode(flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
-        self.flowToken = flowToken
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+        self.flowToken = passwordResetToken
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
     }
 
-    func submitCode(code: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
-        self.flowToken = flowToken
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+        self.flowToken = passwordResetToken
         self.context = context
         submitCodeCalled = true
         expectation.fulfill()
     }
 
-    func submitPassword(password: String, flowToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
-        self.flowToken = flowToken
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+        self.flowToken = passwordSubmitToken
         self.context = context
         submitPasswordCalled = true
         expectation.fulfill()

@@ -40,7 +40,7 @@ public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         Task {
-            await controller.resendCode(flowToken: flowToken, context: context, delegate: delegate)
+            await controller.resendCode(passwordResetToken: flowToken, context: context, delegate: delegate)
         }
     }
 
@@ -48,7 +48,7 @@ public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         Task {
-            await controller.submitCode(code: code, flowToken: flowToken, context: context, delegate: delegate)
+            await controller.submitCode(code: code, passwordResetToken: flowToken, context: context, delegate: delegate)
         }
     }
 }
@@ -59,7 +59,7 @@ public class ResetPasswordRequiredState: ResetPasswordBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         Task {
-            await controller.submitPassword(password: password, flowToken: flowToken, context: context, delegate: delegate)
+            await controller.submitPassword(password: password, passwordSubmitToken: flowToken, context: context, delegate: delegate)
         }
     }
 }

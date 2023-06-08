@@ -266,7 +266,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordResendCodeDelegateSpy()
 
-        await sut.resendCode(flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.resendCode(passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
@@ -285,7 +285,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordResendCodeDelegateSpy()
 
-        await sut.resendCode(flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.resendCode(passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordResendCodeRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "flowToken response")
@@ -304,7 +304,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordResendCodeDelegateSpy()
 
-        await sut.resendCode(flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.resendCode(passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
@@ -322,7 +322,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordResendCodeDelegateSpy()
 
-        await sut.resendCode(flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.resendCode(passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
@@ -340,7 +340,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordResendCodeDelegateSpy()
 
-        await sut.resendCode(flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.resendCode(passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
@@ -358,7 +358,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "1234", flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "1234", passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -375,7 +375,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "1234", flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "1234", passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onPasswordRequiredCalled)
         XCTAssertNotNil(delegate.newPasswordRequiredState)
@@ -392,7 +392,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "1234", flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "1234", passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertEqual(delegate.newCodeRequiredState?.flowToken, "passwordResetToken")
@@ -409,7 +409,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "1234", flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "1234", passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newCodeRequiredState?.flowToken)
@@ -426,7 +426,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitCodeDelegateSpy()
 
-        await sut.submitCode(code: "1234", flowToken: "passwordResetToken", context: contextMock, delegate: delegate)
+        await sut.submitCode(code: "1234", passwordResetToken: "passwordResetToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newCodeRequiredState?.flowToken)
@@ -444,7 +444,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -463,7 +463,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordCompletedCalled)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -479,7 +479,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "passwordSubmitToken")
@@ -496,7 +496,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -512,7 +512,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -533,7 +533,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertNotNil(delegate.error)
@@ -551,7 +551,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -569,7 +569,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "passwordResetToken")
@@ -589,7 +589,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -611,7 +611,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -631,7 +631,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -651,7 +651,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
-        await sut.submitPassword(password: "password", flowToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword(password: "password", passwordSubmitToken: "passwordSubmitToken", context: contextMock, delegate: delegate)
 
         XCTAssertTrue(delegate.onResetPasswordRequiredErrorCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)

@@ -68,18 +68,18 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     }
 
     func resendCode(
-        flowToken: String,
+        passwordResetToken: String,
         context: MSIDRequestContext,
         delegate: ResetPasswordResendCodeDelegate
     ) async {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
-        let response = await performChallengeRequest(flowToken: flowToken, context: context)
+        let response = await performChallengeRequest(passwordResetToken: passwordResetToken, context: context)
         await handleResendCodeChallengeResponse(response, event: event, context: context, delegate: delegate)
     }
 
     func submitCode(
         code: String,
-        flowToken: String,
+        passwordResetToken: String,
         context: MSIDRequestContext,
         delegate: ResetPasswordVerifyCodeDelegate
     ) async {
@@ -87,18 +87,18 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            passwordResetToken: flowToken,
+            passwordResetToken: passwordResetToken,
             grantType: .oobCode,
             oobCode: code
         )
 
         let response = await performContinueRequest(parameters: params)
-        await handleSubmitCodeResponse(response, flowToken: flowToken, event: event, context: context, delegate: delegate)
+        await handleSubmitCodeResponse(response, passwordResetToken: passwordResetToken, event: event, context: context, delegate: delegate)
     }
 
     func submitPassword(
         password: String,
-        flowToken: String,
+        passwordSubmitToken: String,
         context: MSIDRequestContext,
         delegate: ResetPasswordRequiredDelegate
     ) async {
@@ -106,11 +106,17 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         let params = MSALNativeAuthResetPasswordSubmitRequestParameters(
             context: context,
-            passwordSubmitToken: flowToken,
+            passwordSubmitToken: passwordSubmitToken,
             newPassword: password
         )
         let submitRequestResponse = await performSubmitRequest(parameters: params)
-        await handleSubmitPasswordResponse(submitRequestResponse, flowToken: flowToken, event: event, context: context, delegate: delegate)
+        await handleSubmitPasswordResponse(
+            submitRequestResponse,
+            passwordSubmitToken: passwordSubmitToken,
+            event: event,
+            context: context,
+            delegate: delegate
+        )
     }
 
     // MARK: - Start Request handling
@@ -141,8 +147,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request with result: \(response)")
 
         switch response {
-        case .success(let flowToken):
-            let challengeResponse = await performChallengeRequest(flowToken: flowToken, context: context)
+        case .success(let passwordResetToken):
+            let challengeResponse = await performChallengeRequest(passwordResetToken: passwordResetToken, context: context)
             await handleChallengeResponse(challengeResponse, event: event, context: context, delegate: delegate)
         case .redirect:
             let error = ResetPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.browserRequired)
@@ -165,13 +171,13 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     // MARK: - Challenge Request handling
 
     private func performChallengeRequest(
-        flowToken: String,
+        passwordResetToken: String,
         context: MSIDRequestContext
     ) async -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         let request: MSIDHttpRequest
 
         do {
-            request = try requestProvider.challenge(token: flowToken, context: context)
+            request = try requestProvider.challenge(token: passwordResetToken, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating Challenge Request: \(error)")
             return .unexpectedError
@@ -269,7 +275,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
     private func handleSubmitCodeResponse(
             _ response: MSALNativeAuthResetPasswordContinueValidatedResponse,
-            flowToken: String,
+            passwordResetToken: String,
             event: MSIDTelemetryAPIEvent?,
             context: MSIDRequestContext,
             delegate: ResetPasswordVerifyCodeDelegate
@@ -303,7 +309,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 error: error,
                 newState: ResetPasswordCodeRequiredState(
                     controller: self,
-                    flowToken: flowToken
+                    flowToken: passwordResetToken
                 )
             )
         }
@@ -331,7 +337,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
     private func handleSubmitPasswordResponse(
             _ response: MSALNativeAuthResetPasswordSubmitValidatedResponse,
-            flowToken: String,
+            passwordSubmitToken: String,
             event: MSIDTelemetryAPIEvent?,
             context: MSIDRequestContext,
             delegate: ResetPasswordRequiredDelegate
@@ -353,7 +359,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
             await delegate.onResetPasswordRequiredError(
                 error: error,
-                newState: ResetPasswordRequiredState(controller: self, flowToken: flowToken)
+                newState: ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken)
             )
         case .error(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
