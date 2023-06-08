@@ -526,7 +526,18 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             format: "resetpassword: waiting for \(pollInterval) seconds before retrying"
         )
 
-        try? await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
+        do {
+            try await Task.sleep(nanoseconds: 1_000_000_000 * UInt64(pollInterval))
+        } catch {
+            // Task.sleep can throw a CancellationError if the Task is cancelled.
+            // We don't expect that to ever happen here so we just log it and carry on
+
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "resetpassword: Task.sleep unexpectedly threw an error: \(error). Ignoring..."
+            )
+        }
 
         await doPollCompletionLoop(
             passwordResetToken: passwordResetToken,
