@@ -655,15 +655,14 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
 
-
-    func test_whenSubmitPassword_pollCompletion_returns_notStarted_it_callsDelegateErrorAfterRetries() async throws {
-        throw XCTSkip("This test needs more work to allow it to properly work with mocked MSIDHTTPRequests")
-
+    func test_whenSubmitPassword_pollCompletion_returns_notStarted_it_callsDelegateErrorAfterRetries() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 1))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .notStarted))
 
+        prepareMockRequestsForPollCompletionRetries(5)
+
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
         await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
@@ -674,14 +673,14 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
 
-    func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegateError() async throws {
-        throw XCTSkip("This test needs more work to allow it to properly work with mocked MSIDHTTPRequests")
-
+    func test_whenSubmitPassword_pollCompletion_returns_failed_it_callsDelegateError() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .failed))
 
+        prepareMockRequestsForPollCompletionRetries(5)
+
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
         await sut.submitPassword(password: "", flowToken: "", context: contextMock, delegate: delegate)
@@ -692,13 +691,13 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
 
-    func test_whenSubmitPassword_pollCompletion_returns_inProgress_it_callsDelegateErrorAfterRetries() async throws {
-        throw XCTSkip("This test needs more work to allow it to properly work with mocked MSIDHTTPRequests")
-
+    func test_whenSubmitPassword_pollCompletion_returns_inProgress_it_callsDelegateErrorAfterRetries() async {
         requestProviderMock.mockSubmitRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "", pollInterval: 5))
         requestProviderMock.mockPollCompletionRequestFunc(prepareMockRequest())
         validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .inProgress))
+
+        prepareMockRequestsForPollCompletionRetries(5)
 
         let delegate = prepareResetPasswordSubmitPasswordDelegateSpy()
 
@@ -786,4 +785,9 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         return request
     }
 
+    private func prepareMockRequestsForPollCompletionRetries(_ count: Int) {
+        for _ in 1...count {
+            _ = prepareMockRequest()
+        }
+    }
 }

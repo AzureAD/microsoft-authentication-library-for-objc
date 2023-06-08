@@ -381,14 +381,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordRequiredDelegate
     ) async {
-            MSALLogger.log(level: .verbose, context: context, format: "🐛🐛🐛 performing poll completion request...")
+            MSALLogger.log(level: .verbose, context: context, format: "performing poll completion request...")
 
             let pollCompletionResponse = await performPollCompletionRequest(
                 passwordResetToken: passwordResetToken,
                 context: context
             )
 
-            MSALLogger.log(level: .verbose, context: context, format: "🦋🦋🦋 handling poll completion response...")
+            MSALLogger.log(level: .verbose, context: context, format: "handling poll completion response...")
 
             await handlePollCompletionResponse(
                 pollCompletionResponse,
