@@ -35,17 +35,8 @@ struct MSALNativeAuthResetPasswordStartResponse: Decodable {
         case challengeType
     }
 
-    // TODO: Move to validator class
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.passwordResetToken = try container.decodeIfPresent(String.self, forKey: .passwordResetToken)
-        self.challengeType = try container.decodeIfPresent(
-            MSALNativeAuthInternalChallengeType.self, forKey: .challengeType)
-        if self.passwordResetToken == nil && self.challengeType == nil {
-            throw MSALNativeAuthInternalError.responseSerializationError
-        }
-        if self.passwordResetToken != nil && self.challengeType != nil {
-            throw MSALNativeAuthInternalError.responseSerializationError
-        }
+    init(passwordResetToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
+        self.passwordResetToken = passwordResetToken
+        self.challengeType = challengeType
     }
 }

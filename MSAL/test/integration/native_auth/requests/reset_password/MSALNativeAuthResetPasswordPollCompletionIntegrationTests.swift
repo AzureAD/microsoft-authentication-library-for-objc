@@ -43,8 +43,8 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
 
         sut = try provider.pollCompletion(
             parameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters(context: context,
-                                                                                   passwordResetToken: "<password-reset-token"),
-            context: MSALNativeAuthRequestContext(correlationId: correlationId)
+                                                                                   passwordResetToken: "<password-reset-token")
+
         )
     }
 

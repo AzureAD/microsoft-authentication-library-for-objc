@@ -222,8 +222,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         guard inputValidator.isInputValid(username) else {
-            DispatchQueue.main.async {
-                delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
+            Task {
+                await delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
             }
             return
         }
@@ -231,7 +231,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let controller = controllerFactory.makeResetPasswordController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.resetPassword(username: username, context: context, delegate: delegate)
+        Task {
+            await controller.resetPassword(
+                parameters: .init(
+                    username: username,
+                    context: context
+                ),
+                delegate: delegate
+            )
+        }
     }
 
     public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {

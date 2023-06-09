@@ -29,7 +29,7 @@ class MSALNativeAuthTestCase: XCTestCase {
     //Do not create more than one instance of this variable, inherit this class instead
     static let logger = MSALNativeAuthTestLogger()
     var dispatcher: MSALNativeAuthTelemetryTestDispatcher!
-    var receivedEvents: [MSIDTelemetryEventInterface] = []
+    var receivedEvents: [[AnyHashable: Any]] = []
 
     override func setUpWithError() throws {
         // Logger needs to reset so the expectation name and count resets from the previous test
@@ -39,7 +39,7 @@ class MSALNativeAuthTestCase: XCTestCase {
         dispatcher = MSALNativeAuthTelemetryTestDispatcher()
 
         dispatcher.setTestCallback { event in
-            self.receivedEvents.append(event)
+            self.receivedEvents.append(event.propertyMap)
         }
 
         MSIDTelemetry.sharedInstance().add(dispatcher)
