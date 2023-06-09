@@ -37,4 +37,6 @@ enum MSALNativeAuthErrorMessage {
     static let useSignInCode = "Use signInUsingCode instead"
     static let unsupportedMFA = "MFA currently not supported. Use the browser instead"
     static let browserRequired = "Browser required. Use acquireTokenInteractively instead"
+    static let userDoesNotHavePassword = "User does not have password associated with account"
+    static let userNotFound = "User does not exist"
 }

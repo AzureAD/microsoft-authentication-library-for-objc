@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable {
+enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable, CaseIterable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case expiredToken = "expired_token"

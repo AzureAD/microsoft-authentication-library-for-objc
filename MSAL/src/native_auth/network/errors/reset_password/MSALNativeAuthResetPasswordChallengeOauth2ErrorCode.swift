@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordChallengeOauth2ErrorCode: String, Decodable {
+enum MSALNativeAuthResetPasswordChallengeOauth2ErrorCode: String, Decodable, CaseIterable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case expiredToken = "expired_token"
@@ -40,7 +40,7 @@ extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
         case .invalidClient:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return .init(type: .userDoesNotHavePassword)
+            return .init(type: .generalError)
         case .expiredToken:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
         }
@@ -51,7 +51,7 @@ extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
         case .invalidClient:
             return .init(message: MSALNativeAuthErrorMessage.invalidClient)
         case .unsupportedChallengeType:
-            return .init(message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+            return .init()
         case .expiredToken:
             return .init(message: MSALNativeAuthErrorMessage.expiredToken)
         case .invalidRequest:

@@ -111,7 +111,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenResetPasswordStart_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockStartRequestFunc(prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = resetPasswordStartParams
-        validatorMock.mockValidateResetPasswordStartFunc(.error(.unsupportedChallengeType))
+        validatorMock.mockValidateResetPasswordStartFunc(.error(.userNotFound))
 
         let delegate = prepareResetPasswordStartDelegateSpy()
 
@@ -122,7 +122,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.sentTo)
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
-        XCTAssertEqual(delegate.error?.type, .userDoesNotHavePassword)
+        XCTAssertEqual(delegate.error?.type, .userNotFound)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
     }
