@@ -230,25 +230,26 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordResendCodeDelegate
     ) async {
-        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/challenge request")
-
         switch response {
         case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
             stopTelemetryEvent(event, context: context)
+            MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/challenge (resend code) request")
             await delegate.onResetPasswordResendCodeRequired(
                 newState: ResetPasswordCodeRequiredState(controller: self, flowToken: challengeToken),
                 sentTo: sentTo,
                 channelTargetType: channelTargetType,
                 codeLength: codeLength
             )
-        case .error(let error):
-            let error = error.toResendCodePublicError()
+        case .error(let apiError):
+            let error = apiError.toResendCodePublicError()
             stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error, context: context, format: "Error in resetpassword/challenge request (resend code) \(error)")
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         case .redirect,
                 .unexpectedError:
             let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error, context: context, format: "Error in resetpassword/challenge request (resend code) \(error)")
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         }
     }
@@ -280,12 +281,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             context: MSIDRequestContext,
             delegate: ResetPasswordVerifyCodeDelegate
     ) async {
-        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/continue request")
-
         switch response {
         case .success(let passwordSubmitToken):
             stopTelemetryEvent(event, context: context)
-
+            MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/continue request")
             await delegate.onPasswordRequired(
                 newState: ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken)
             )
