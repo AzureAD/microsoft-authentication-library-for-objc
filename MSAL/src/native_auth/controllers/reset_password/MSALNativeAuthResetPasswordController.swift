@@ -83,7 +83,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext,
         delegate: ResetPasswordVerifyCodeDelegate
     ) async {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordVerifyCode, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
 
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,

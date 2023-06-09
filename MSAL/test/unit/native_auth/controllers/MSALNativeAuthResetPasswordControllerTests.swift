@@ -365,7 +365,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newPasswordRequiredState)
         XCTAssertEqual(delegate.error?.type, .generalError)
 
-        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordVerifyCode, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmitCode, isSuccessful: false)
     }
 
     func test_whenResetPasswordSubmitCode_succeeds_it_callsDelegate() async {
@@ -382,7 +382,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newCodeRequiredState)
         XCTAssertNil(delegate.error)
 
-        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordVerifyCode, isSuccessful: true)
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmitCode, isSuccessful: true)
     }
 
     func test_whenResetPasswordSubmitCode_returns_invalidOOB_it_callsDelegateInvalidCode() async {
@@ -399,7 +399,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newPasswordRequiredState)
         XCTAssertEqual(delegate.error?.type, .invalidCode)
 
-        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordVerifyCode, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmitCode, isSuccessful: false)
     }
 
     func test_whenResetPasswordSubmitCode_returns_error_it_callsDelegateError() async {
@@ -416,7 +416,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newPasswordRequiredState)
         XCTAssertEqual(delegate.error?.type, .generalError)
 
-        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordVerifyCode, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmitCode, isSuccessful: false)
     }
 
     func test_whenResetPasswordSubmitCode_returns_unexpectedError_it_callsDelegateError() async {
@@ -433,7 +433,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newPasswordRequiredState)
         XCTAssertEqual(delegate.error?.type, .generalError)
 
-        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordVerifyCode, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmitCode, isSuccessful: false)
     }
 
     // MARK: - SubmitPassword tests
