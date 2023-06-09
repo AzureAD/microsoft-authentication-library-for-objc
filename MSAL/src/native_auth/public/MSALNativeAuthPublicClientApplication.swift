@@ -62,7 +62,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         rawTenant: String,
         redirectUri: String? = nil) throws {
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
-                .authority(clientId: clientId, rawTenant: rawTenant)
+                .authority(rawTenant: rawTenant)
 
         self.internalChallengeTypes =
                 MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)

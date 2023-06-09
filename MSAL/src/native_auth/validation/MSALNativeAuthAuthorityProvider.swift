@@ -25,13 +25,13 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthAuthorityProviding {
-    func authority(clientId: String, rawTenant: String) throws -> MSALCIAMAuthority
+    func authority(rawTenant: String) throws -> MSALCIAMAuthority
 }
 
 final class MSALNativeAuthAuthorityProvider: MSALNativeAuthAuthorityProviding {
 
-    func authority(clientId: String, rawTenant: String) throws -> MSALCIAMAuthority {
-        let ciamUrlString = "https://\(rawTenant).ciamlogin.com/\(clientId)"
+    func authority(rawTenant: String) throws -> MSALCIAMAuthority {
+        let ciamUrlString = "https://\(rawTenant).ciamlogin.com"
         guard let url = URL(string: ciamUrlString) else {
             assert(false, "URL for default CIAM Authority must be valid")
             throw MSALNativeAuthInternalError.invalidAuthority
