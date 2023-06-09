@@ -33,6 +33,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     private let requestProvider: MSALNativeAuthSignInRequestProviding
     private let factory: MSALNativeAuthResultBuildable
     private let responseValidator: MSALNativeAuthSignInResponseValidating
+    private let cacheAccessor: MSALNativeAuthCacheInterface?
 
     // MARK: - Init
 
@@ -46,9 +47,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         self.requestProvider = requestProvider
         self.factory = factory
         self.responseValidator = responseValidator
+        self.cacheAccessor = cacheAccessor
         super.init(
-            clientId: clientId,
-            cacheAccessor: cacheAccessor
+            clientId: clientId
         )
     }
 
