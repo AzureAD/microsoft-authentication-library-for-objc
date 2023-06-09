@@ -206,7 +206,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
         let result = sut.validate(response, with: context)
 
-        guard case .successChallengeTypeOOB(let displayName, let displayType, let codeLength, let signUpToken) = result else {
+        guard case .codeRequired(let displayName, let displayType, let codeLength, let signUpToken) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -229,7 +229,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
         let result = sut.validate(response, with: context)
 
-        guard case .successChallengeTypePassword(let signUpToken) = result else {
+        guard case .passwordRequired(let signUpToken) = result else {
             return XCTFail("Unexpected response")
         }
 

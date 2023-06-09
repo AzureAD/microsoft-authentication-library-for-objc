@@ -259,7 +259,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpPasswordStartDelegate
     ) {
         switch result {
-        case .successChallengeTypeOOB(let sentTo, let challengeType, let codeLength, let signUpToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge password request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
@@ -281,7 +281,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge password request \(error)")
             DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
         case .unexpectedError,
-             .successChallengeTypePassword:
+             .passwordRequired:
             let error = SignUpPasswordStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge password request \(error)")
@@ -296,7 +296,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpStartDelegate
     ) {
         switch result {
-        case .successChallengeTypeOOB(let sentTo, let challengeType, let codeLength, let signUpToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge code request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
@@ -318,7 +318,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge code request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError,
-             .successPassword:
+             .passwordRequired:
             let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge code request \(error)")
@@ -333,7 +333,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpResendCodeDelegate
     ) {
         switch result {
-        case .successChallengeTypeOOB(let sentTo, let challengeType, let codeLength, let signUpToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge resendCode request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
@@ -351,7 +351,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async { delegate.onSignUpResendCodeError(error: error) }
         case .redirect,
              .unexpectedError,
-             .successChallengeTypePassword:
+             .passwordRequired:
             let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge resendCode request \(error)")
@@ -367,7 +367,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpVerifyCodeDelegate
     ) {
         switch result {
-        case .successChallengeTypePassword(let signUpToken):
+        case .passwordRequired(let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request after credential_required")
 
             DispatchQueue.main.async {
@@ -387,7 +387,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
         case .error,
-             .successChallengeTypeOOB,
+             .codeRequired,
              .unexpectedError:
             let error = VerifyCodeError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
