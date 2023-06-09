@@ -895,9 +895,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -914,9 +914,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andCantCreateRequest() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(nil, throwError: true)
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
@@ -936,10 +936,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andSucceeds() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.successChallengeTypePassword("signUpToken 2"))
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
+        validatorMock.mockValidateSignUpChallengeFunc(.successChallengeTypePassword("signUpToken 3"))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
 
@@ -953,7 +953,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(delegate.onSignUpPasswordRequiredCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "signUpToken 3")
         XCTAssertNil(delegate.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: true)
@@ -962,9 +962,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andSucceeds_butUserHasNotImplementedOptionalProtocol() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.successChallengeTypePassword(""))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -984,11 +984,11 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andSucceedOOB_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.successChallengeTypeOOB("", .email, 4, "signUpToken 2"))
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
+        validatorMock.mockValidateSignUpChallengeFunc(.successChallengeTypeOOB("", .email, 4, "signUpToken 3"))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
 
@@ -1007,9 +1007,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andRedirects() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.redirect)
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -1032,9 +1032,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andReturnsError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.error(.expiredToken))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -1057,9 +1057,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andReturnsUnexpectedError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -1196,7 +1196,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitPassword_returns_credentialRequired_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
@@ -1384,7 +1384,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
             oobCode: nil,
             attributes: ["key": "value"]
         )
-        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired)
+        validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)

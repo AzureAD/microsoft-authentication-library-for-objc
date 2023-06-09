@@ -437,7 +437,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async {
                 delegate.onSignUpVerifyCodeError(error: error, newState: SignUpCodeRequiredState(controller: self, flowToken: signUpToken))
             }
-        case .credentialRequired:
+        case .credentialRequired(let signUpToken):
             MSALLogger.log(level: .verbose, context: context, format: "credential_required received in signup/continue request")
 
             let result = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
