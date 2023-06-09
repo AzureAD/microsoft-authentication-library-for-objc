@@ -43,6 +43,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
+        XCTAssertTrue(Thread.isMainThread)
         self.expectation?.fulfill()
     }
 
@@ -53,6 +54,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
+        XCTAssertTrue(Thread.isMainThread)
         self.expectation?.fulfill()
     }
 }
@@ -75,6 +77,7 @@ class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
         onSignUpCodeErrorCalled = true
         self.error = error
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
@@ -85,6 +88,7 @@ class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
         self.channelTargetType = channelTargetType
         self.codeLength = codeLength
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 }
@@ -106,6 +110,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         onSignUpResendCodeErrorCalled = true
         self.error = error
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
@@ -115,6 +120,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         self.sentTo = sentTo
         self.codeLength = codeLength
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 }
@@ -139,6 +145,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         self.error = error
         newCodeRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
@@ -146,6 +153,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         onSignUpAttributesRequiredCalled = true
         newAttributesRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
@@ -153,12 +161,14 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         onSignUpPasswordRequiredCalled = true
         newPasswordRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
         onSignUpCompletedCalled = true
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 }
@@ -181,6 +191,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         self.error = error
         newPasswordRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
@@ -188,12 +199,14 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         onSignUpAttributesRequiredCalled = true
         newAttributesRequiredState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
         onSignUpCompletedCalled = true
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 }
@@ -214,12 +227,14 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         self.error = error
         self.newState = newState
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 
     func onSignUpCompleted() {
         onSignUpCompletedCalled = true
 
+        XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }
 }
@@ -234,10 +249,12 @@ class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDel
 
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         self.error = error
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
 
     func onSignUpCompleted() {
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
 
@@ -251,9 +268,11 @@ class SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented: SignUpPasswor
 
     func onSignUpPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignUpPasswordRequiredState?) {
         self.error = error
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
 
     func onSignUpCompleted() {
+        XCTAssertTrue(Thread.isMainThread)
     }
 }
