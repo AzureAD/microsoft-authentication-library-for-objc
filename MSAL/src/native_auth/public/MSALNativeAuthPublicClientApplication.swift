@@ -59,16 +59,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public init(
         clientId: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
-        rawTenant: String? = nil,
+        rawTenant: String,
         redirectUri: String? = nil) throws {
-        let aadAuthority = try MSALNativeAuthAuthorityProvider()
-            .authority(rawTenant: rawTenant)
+        let ciamAuthority = try MSALNativeAuthAuthorityProvider()
+                .authority(clientId: clientId, rawTenant: rawTenant)
 
         self.internalChallengeTypes =
                 MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
-            authority: aadAuthority,
+            authority: ciamAuthority,
             rawTenant: rawTenant,
             challengeTypes: internalChallengeTypes
         )
@@ -79,7 +79,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let configuration = MSALPublicClientApplicationConfig(
             clientId: clientId,
             redirectUri: redirectUri,
-            authority: aadAuthority
+            authority: ciamAuthority
         )
 
         try super.init(configuration: configuration)
