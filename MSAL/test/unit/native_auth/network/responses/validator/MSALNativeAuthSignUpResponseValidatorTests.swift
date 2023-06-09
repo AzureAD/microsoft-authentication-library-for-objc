@@ -423,6 +423,11 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(signUpToken, "sign-up-token")
     }
 
+    func test_whenSignUpContinueErrorResponseIs_credentialRequired_but_signUpToken_isNil_it_returns_unexpectedError() {
+        let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedSignUpToken: nil)
+        XCTAssertEqual(result, .unexpectedError)
+    }
+
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedSignUpToken: "sign-up-token", requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 

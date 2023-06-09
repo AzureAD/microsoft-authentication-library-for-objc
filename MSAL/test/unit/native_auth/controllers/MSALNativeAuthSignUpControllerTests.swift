@@ -57,7 +57,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         contextMock = .init(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
         requestProviderMock = .init()
         validatorMock = .init()
-        cacheAccessorMock = .init()
 
         sut = MSALNativeAuthSignUpController(
             config: MSALNativeAuthConfigStubs.configuration,
@@ -100,6 +99,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: prepareSignUpPasswordStartDelegateSpy())
         XCTAssertTrue(requestProviderMock.challengeCalled)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
 
     func test_whenSignUpStartPassword_returnsAttributeValidationFailed_it_callsChallenge() async {
@@ -120,6 +121,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart + "[\"name\"]")
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
 
     func test_whenSignUpStartPassword_returns_redirect_it_callsDelegateError() async {
@@ -363,6 +366,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: prepareSignUpCodeStartDelegateSpy())
         XCTAssertTrue(requestProviderMock.challengeCalled)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
 
     func test_whenSignUpStartCode_returnsAttributeValidationFailed_it_callsDelegateError() async {
@@ -383,6 +388,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart + "[\"name\"]")
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
 
     func test_whenSignUpStartCode_returns_redirect_it_callsDelegateError() async {
@@ -909,6 +916,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         wait(for: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_callsChallengeEndpoint_andCantCreateRequest() async {
