@@ -22,33 +22,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
+    private let expectation: XCTestExpectation
     private(set) var context: MSIDRequestContext?
+    private(set) var flowToken: String?
     private(set) var resetPasswordCalled = false
     private(set) var resendCodeCalled = false
     private(set) var submitCodeCalled = false
     private(set) var submitPasswordCalled = false
 
-    func resetPassword(username: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordStartDelegate) {
-        self.context = context
-        resetPasswordCalled = true
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
     }
 
-    func resendCode(context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters, delegate: MSAL.ResetPasswordStartDelegate) {
+        self.context = parameters.context
+        resetPasswordCalled = true
+        expectation.fulfill()
+    }
+
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+        self.flowToken = passwordResetToken
         self.context = context
         resendCodeCalled = true
+        expectation.fulfill()
     }
 
-    func submitCode(code: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+        self.flowToken = passwordResetToken
         self.context = context
         submitCodeCalled = true
+        expectation.fulfill()
     }
 
-    func submitPassword(password: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+        self.flowToken = passwordSubmitToken
         self.context = context
         submitPasswordCalled = true
+        expectation.fulfill()
     }
 }

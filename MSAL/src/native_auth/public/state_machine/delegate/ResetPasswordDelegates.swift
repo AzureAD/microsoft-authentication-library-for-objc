@@ -26,30 +26,34 @@ import Foundation
 
 @objc
 public protocol ResetPasswordStartDelegate {
-    func onResetPasswordError(error: ResetPasswordStartError)
-    func onResetPasswordCodeRequired(newState: ResetPasswordCodeRequiredState,
-                                     sentTo: String,
-                                     channelTargetType: MSALNativeAuthChannelType,
-                                     codeLength: Int)
+    @MainActor func onResetPasswordError(error: ResetPasswordStartError)
+    @MainActor func onResetPasswordCodeRequired(
+        newState: ResetPasswordCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
-    func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
-    func onPasswordRequired(newState: ResetPasswordRequiredState)
+    @MainActor func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
+    @MainActor func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
 public protocol ResetPasswordResendCodeDelegate {
-    func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
-    func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState,
-                                           sentTo: String,
-                                           channelTargetType: MSALNativeAuthChannelType,
-                                           codeLength: Int)
+    @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
+    @MainActor func onResetPasswordResendCodeRequired(
+        newState: ResetPasswordCodeRequiredState,
+        sentTo: String,
+        channelTargetType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
 }
 
 @objc
 public protocol ResetPasswordRequiredDelegate {
-    func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
-    func onResetPasswordCompleted()
+    @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    @MainActor func onResetPasswordCompleted()
 }

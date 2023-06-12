@@ -42,9 +42,10 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
         )
 
         sut = try provider.start(
-            parameters: MSALNativeAuthResetPasswordStartRequestParameters(context: context,
-                                                                          username: DEFAULT_TEST_ID_TOKEN_USERNAME),
-            context: MSALNativeAuthRequestContext(correlationId: correlationId)
+            parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters(
+                username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+                context: context
+            )
         )
     }
 

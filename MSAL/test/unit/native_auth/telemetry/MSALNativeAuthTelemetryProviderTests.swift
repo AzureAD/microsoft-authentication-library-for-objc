@@ -55,11 +55,6 @@ final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
         XCTAssertEqual(result.apiId, .telemetryApiIdResetPasswordStart)
     }
     
-    func testTelemetryForResetPasswordComplete_returnsCorrectApiId() {
-        let result = sut.telemetryForResetPasswordComplete(type: MSALNativeAuthResetPasswordCompleteType.resetPasswordComplete)
-        XCTAssertEqual(result.apiId, .telemetryApiIdResetPasswordComplete)
-    }
-    
     func testTelemetryForResendCode_returnsCorrectApiId() {
         let result = sut.telemetryForResendCode(type: MSALNativeAuthResendCodeType.resendCode)
         XCTAssertEqual(result.apiId, .telemetryApiIdResendCode)
