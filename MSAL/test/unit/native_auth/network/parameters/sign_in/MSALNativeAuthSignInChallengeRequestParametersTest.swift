@@ -37,7 +37,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let parameters = MSALNativeAuthSignInChallengeRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                         credentialToken: "Test Credential Token")
         var resultUrl: URL? = nil
@@ -46,7 +46,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
     }
 
     func test_otpParameters_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.otp]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.otp]))
         let params = MSALNativeAuthSignInChallengeRequestParameters(
             context: context,
             credentialToken: "Test Credential Token"
@@ -64,7 +64,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
     }
 
     func test_nilParameters_shouldCreteCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect]))
         let params = MSALNativeAuthSignInChallengeRequestParameters(
             context: context,
             credentialToken: "Test Credential Token"

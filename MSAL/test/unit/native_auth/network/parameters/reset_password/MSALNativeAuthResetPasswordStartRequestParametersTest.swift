@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordStartRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.redirect]))
         let parameters = MSALNativeAuthResetPasswordStartRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
             username: "username"
@@ -48,7 +48,7 @@ final class MSALNativeAuthResetPasswordStartRequestParametersTest: XCTestCase {
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password, .oob, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect]))
         let params = MSALNativeAuthResetPasswordStartRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
             username: DEFAULT_TEST_ID_TOKEN_USERNAME
