@@ -76,6 +76,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil), delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
     
     func test_whenUserSpecifiesScope_defaultScopesShouldBeIncluded() async throws {
@@ -204,6 +205,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
         wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: true)
     }
 
     func test_afterSignInWithCodeSubmitCode_signInShouldCompleteSuccessfully() {
@@ -461,6 +463,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [], delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: true)
     }
     
     func test_signInWithCodeResendCodeChallengeCreationFail_errorShouldBeReturned() async {
@@ -476,6 +479,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         wait(for: [expectation], timeout: 1)
         XCTAssertNotNil(mockDelegate.newSignInCodeRequiredState)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
     
     func test_signInWithCodeResendCodePasswordRequired_shouldReturnAnError() async {
@@ -498,6 +502,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         wait(for: [expectation], timeout: 1)
         XCTAssertNil(mockDelegate.newSignInCodeRequiredState)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
     
     func test_signInWithCodeResendCodeChallengeReturnError_shouldReturnAnError() async {
@@ -521,6 +526,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         wait(for: [expectation], timeout: 1)
         XCTAssertNotNil(mockDelegate.newSignInCodeRequiredState)
         XCTAssertEqual(mockDelegate.newSignInCodeRequiredState?.flowToken, credentialToken)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
     
     // MARK: private methods
@@ -646,7 +652,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
         XCTAssertEqual(receivedEvents.count, 1)
 
-        guard let telemetryEventDict = receivedEvents.first?.propertyMap else {
+        guard let telemetryEventDict = receivedEvents.first else {
             return XCTFail("Telemetry test fail")
         }
 

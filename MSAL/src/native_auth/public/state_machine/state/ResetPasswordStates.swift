@@ -27,9 +27,15 @@ import Foundation
 @objcMembers
 public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     fileprivate let controller: MSALNativeAuthResetPasswordControlling
+    fileprivate let inputValidator: MSALNativeAuthInputValidating
 
-    init(controller: MSALNativeAuthResetPasswordControlling, flowToken: String) {
+    init(
+        controller: MSALNativeAuthResetPasswordControlling,
+        flowToken: String,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
+    ) {
         self.controller = controller
+        self.inputValidator = inputValidator
         super.init(flowToken: flowToken)
     }
 }
@@ -39,13 +45,23 @@ public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.resendCode(context: context, delegate: delegate)
+        Task {
+            await controller.resendCode(passwordResetToken: flowToken, context: context, delegate: delegate)
+        }
     }
 
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        controller.submitCode(code: code, context: context, delegate: delegate)
+        guard inputValidator.isInputValid(code) else {
+            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
+            Task {
+                await delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
+            }
+            return
+        }
+        Task {
+            await controller.submitCode(code: code, passwordResetToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }
 
@@ -54,6 +70,15 @@ public class ResetPasswordRequiredState: ResetPasswordBaseState {
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        controller.submitPassword(password: password, context: context, delegate: delegate)
+        guard inputValidator.isInputValid(password) else {
+            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
+            Task {
+                await delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            }
+            return
+        }
+        Task {
+            await controller.submitPassword(password: password, passwordSubmitToken: flowToken, context: context, delegate: delegate)
+        }
     }
 }

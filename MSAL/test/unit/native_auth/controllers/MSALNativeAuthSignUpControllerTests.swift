@@ -32,7 +32,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     private var contextMock: MSALNativeAuthRequestContext!
     private var requestProviderMock: MSALNativeAuthSignUpRequestProviderMock!
     private var validatorMock: MSALNativeAuthSignUpResponseValidatorMock!
-    private var telemetryDispatcher: MSALNativeAuthTelemetryTestDispatcher!
 
     private var signUpStartPasswordParams: MSALNativeAuthSignUpStartRequestProviderParameters {
         .init(
@@ -1206,7 +1205,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
         XCTAssertEqual(receivedEvents.count, 1)
 
-        guard let telemetryEventDict = receivedEvents.first?.propertyMap else {
+        guard let telemetryEventDict = receivedEvents.first else {
             return XCTFail("Telemetry test fail")
         }
 

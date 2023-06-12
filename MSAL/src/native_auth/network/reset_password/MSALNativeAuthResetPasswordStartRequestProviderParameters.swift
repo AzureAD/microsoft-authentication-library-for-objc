@@ -24,28 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordContinueOauth2ErrorCode: String, Decodable, CaseIterable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case expiredToken = "expired_token"
-    case verificationRequired = "verification_required"
-    case invalidOOBValue = "invalid_oob_value"
-}
-
-extension MSALNativeAuthResetPasswordContinueOauth2ErrorCode {
-    func toVerifyCodePublicError() -> VerifyCodeError {
-        switch self {
-        case .invalidOOBValue:
-            return .init(type: .invalidCode)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
-        case .invalidRequest,
-             .invalidGrant,
-             .verificationRequired:
-            return .init(type: .generalError)
-        }
-     }
+struct MSALNativeAuthResetPasswordStartRequestProviderParameters {
+    let username: String
+    let context: MSALNativeAuthRequestContext
 }
