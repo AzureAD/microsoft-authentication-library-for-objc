@@ -44,7 +44,7 @@ final class MSALNativeAuthSignUpChallengeRequestParametersTest: XCTestCase {
         )
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup/challenge")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/signup/challenge")
     }
 
     func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {

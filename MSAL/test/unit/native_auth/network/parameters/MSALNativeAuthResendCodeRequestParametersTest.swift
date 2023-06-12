@@ -37,6 +37,6 @@ final class MSALNativeAuthResendCodeRequestParametersTest: XCTestCase {
         let parameters = MSALNativeAuthResendCodeRequestParameters(credentialToken: "Test Credential Token", context: MSALNativeAuthRequestContextMock())
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/resendcode")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/resendcode")
     }
 }

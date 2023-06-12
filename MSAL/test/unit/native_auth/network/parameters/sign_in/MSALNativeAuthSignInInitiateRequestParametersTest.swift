@@ -42,7 +42,7 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
                                                                        username: "username")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/initiate")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/initiate")
     }
 
     func test_passwordChallengeType_shouldCreateCorrectBodyRequest() throws {

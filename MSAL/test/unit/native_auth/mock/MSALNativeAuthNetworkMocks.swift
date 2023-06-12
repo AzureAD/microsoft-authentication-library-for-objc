@@ -30,16 +30,16 @@ struct MSALNativeAuthNetworkStubs {
 
     static let tenantName = "test_tenant"
 
-    static var authority: MSALAADAuthority {
+    static var authority: MSALCIAMAuthority {
         try! .init(
-            url: .init(string: DEFAULT_TEST_AUTHORITY)!,
-            rawTenant: tenantName
+            url: .init(string: DEFAULT_TEST_AUTHORITY)!
         )
     }
 
-    static var msidAuthority: MSIDAADAuthority {
+    static var msidAuthority: MSIDCIAMAuthority {
         try! .init(
             url: .init(string: DEFAULT_TEST_AUTHORITY)!,
+            validateFormat: false,
             rawTenant: tenantName,
             context: nil
         )

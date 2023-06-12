@@ -37,6 +37,6 @@ final class MSALNativeAuthVerifyCodeRequestParametersTest: XCTestCase {
         let parameters = MSALNativeAuthVerifyCodeRequestParameters(credentialToken: "Test Credential Token", otp:"Test OTP", context: MSALNativeAuthRequestContextMock())
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/verifycode")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/verifycode")
     }
 }

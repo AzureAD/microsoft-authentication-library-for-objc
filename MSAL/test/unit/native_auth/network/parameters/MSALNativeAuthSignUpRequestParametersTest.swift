@@ -37,6 +37,6 @@ final class MSALNativeAuthSignUpRequestParametersTest: XCTestCase {
         let parameters = MSALNativeAuthSignUpRequestParameters(email: "email", password: "password", attributes: "", scope: "scope", context: MSALNativeAuthRequestContextMock(), grantType: .password)
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/signup")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/signup")
     }
 }

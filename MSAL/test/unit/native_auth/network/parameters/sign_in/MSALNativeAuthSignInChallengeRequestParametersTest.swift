@@ -42,7 +42,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
                                                                         credentialToken: "Test Credential Token")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/challenge")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/challenge")
     }
 
     func test_otpParameters_shouldCreateCorrectBodyRequest() throws {
