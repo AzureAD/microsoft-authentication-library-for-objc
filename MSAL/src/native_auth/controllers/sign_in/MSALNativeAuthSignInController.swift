@@ -326,11 +326,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         _ request: MSIDHttpRequest,
         config: MSIDConfiguration,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthSignInTokenValidatedResponse {
-        let aadTokenResponse: Result<MSIDAADTokenResponse, Error> = await performTokenRequest(request, context: context)
+        let ciamTokenResponse: Result<MSIDCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
         return responseValidator.validate(
             context: context,
             msidConfiguration: config,
-            result: aadTokenResponse
+            result: ciamTokenResponse
         )
     }
 
@@ -419,7 +419,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func performTokenRequest(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<MSIDAADTokenResponse, Error> {
+    private func performTokenRequest(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<MSIDCIAMTokenResponse, Error> {
         return await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {
@@ -431,7 +431,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     return
                 }
                 do {
-                    let tokenResponse = try MSIDAADTokenResponse(jsonDictionary: responseDict)
+                    let tokenResponse = try MSIDCIAMTokenResponse(jsonDictionary: responseDict)
                     tokenResponse.correlationId = request.context?.correlationId().uuidString
                     continuation.resume(returning: .success(tokenResponse))
                 } catch {

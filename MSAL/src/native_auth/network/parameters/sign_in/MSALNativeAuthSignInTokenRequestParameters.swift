@@ -48,9 +48,8 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
             Key.grantType.rawValue: grantType.rawValue,
             Key.scope.rawValue: scope,
             Key.password.rawValue: password,
-            Key.oobCode.rawValue: oobCode
-            // TODO: Do we send this parameter?
-            // Key.clientInfo: clientInfo
+            Key.oobCode.rawValue: oobCode,
+            Key.clientInfo.rawValue: clientInfo.description
         ]
 
         if includeChallengeType {

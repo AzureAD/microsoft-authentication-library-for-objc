@@ -79,7 +79,8 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
             "scope": "<scope-1>",
             "password": "password",
             "oob": "oob",
-            "nca": "1"
+            "nca": "1",
+            "client_info" : "true"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)
@@ -104,7 +105,8 @@ final class MSALNativeAuthSignInTokenRequestParametersTest: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": config.clientId,
-            "grant_type": "password"
+            "grant_type": "password",
+            "client_info" : "true"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)

@@ -48,7 +48,7 @@ final class MSALNativeAuthTokenResponseHandler: MSALNativeAuthTokenResponseHandl
 
     convenience init() {
         let tokenResponseValidator = MSALNativeAuthTokenResponseValidator(
-            factory: MSIDAADOauth2Factory())
+            factory: MSIDCIAMOauth2Factory())
         self.init(tokenResponseValidator: tokenResponseValidator)
     }
 

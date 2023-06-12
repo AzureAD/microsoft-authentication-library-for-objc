@@ -49,7 +49,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     func test_whenValidSignInTokenResponse_validationIsSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let tokenResult = MSIDTokenResult()
-        let tokenResponse = MSIDAADTokenResponse()
+        let tokenResponse = MSIDCIAMTokenResponse()
         responseHandler.mockHandleTokenFunc(result: tokenResult)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
         if case .success(tokenResult, tokenResponse) = result {} else {
@@ -62,7 +62,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
         responseHandler.expectedContext = context
         responseHandler.expectedValidateAccount = true
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDAADTokenResponse()))
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDCIAMTokenResponse()))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }

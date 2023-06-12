@@ -126,7 +126,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
             "challenge_type": "password",
             "scope": "<scope-1>",
             "password": "password",
-            "oob": "oob"
+            "oob": "oob",
+            "client_info" : "true"
         ]
 
         XCTAssertEqual(request.parameters, expectedBodyParams)

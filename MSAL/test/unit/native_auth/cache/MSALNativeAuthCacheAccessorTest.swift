@@ -142,7 +142,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     
     func testRemoveTokens_whenInvalidInputIsUsed_shouldNotThrowsAnError() {
         var authority: MSIDAuthority? = nil
-        XCTAssertNoThrow(authority = try MSIDB2CAuthority(url: URL(string: "https://www.microsoft.com")!, validateFormat: false, context: nil))
+        XCTAssertNoThrow(authority = try MSIDCIAMAuthority(url: URL(string: "https://www.microsoft.com")!, validateFormat: false, context: nil))
         XCTAssertNoThrow(try cacheAccessor.removeTokens(accountIdentifier: MSIDAccountIdentifier(), authority: authority!, clientId: "" , context: contextStub))
     }
     
@@ -193,7 +193,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     }
     
     private func getMSIDConfiguration() -> MSIDConfiguration {
-        let configuration = MSIDConfiguration(authority: try? MSIDB2CAuthority(url: URL(string: "https://contoso.com/tfp/tenantName/policyName")!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
+        let configuration = MSIDConfiguration(authority: try? MSIDCIAMAuthority(url: URL(string: "https://contoso.com/tfp/tenantName/policyName")!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
         let authSchema = MSIDAuthenticationSchemePop(schemeParameters: [
             "kid":"kidSample",
             "token_type":"Pop",
