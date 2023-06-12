@@ -181,8 +181,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         return MSIDAccountIdentifier(displayableId: "displayableId", homeAccountId: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff")
     }
     
-    private func getTokenResponse() -> MSIDAADTokenResponse {
-        let tokenResponse = MSIDAADTokenResponse()
+    private func getTokenResponse() -> MSIDCIAMTokenResponse {
+        let tokenResponse = MSIDCIAMTokenResponse()
         tokenResponse.accessToken = "AccessToken"
         tokenResponse.refreshToken = "refreshToken"
         tokenResponse.idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
