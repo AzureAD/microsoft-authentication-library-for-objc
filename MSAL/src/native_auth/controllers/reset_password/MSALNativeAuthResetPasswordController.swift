@@ -35,8 +35,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     init(
         config: MSALNativeAuthConfiguration,
         requestProvider: MSALNativeAuthResetPasswordRequestProviding,
-        responseValidator: MSALNativeAuthResetPasswordResponseValidating,
-        cacheAccessor: MSALNativeAuthCacheInterface
+        responseValidator: MSALNativeAuthResetPasswordResponseValidating
     ) {
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
@@ -51,8 +50,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                     requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
                     telemetryProvider: MSALNativeAuthTelemetryProvider()
                 ),
-                responseValidator: MSALNativeAuthResetPasswordResponseValidator(),
-                cacheAccessor: MSALNativeAuthCacheAccessor()
+                responseValidator: MSALNativeAuthResetPasswordResponseValidator()
             )
         }
 

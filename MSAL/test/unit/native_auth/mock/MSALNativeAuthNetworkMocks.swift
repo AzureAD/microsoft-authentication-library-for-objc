@@ -30,16 +30,16 @@ struct MSALNativeAuthNetworkStubs {
 
     static let tenantName = "test_tenant"
 
-    static var authority: MSALAADAuthority {
+    static var authority: MSALCIAMAuthority {
         try! .init(
-            url: .init(string: DEFAULT_TEST_AUTHORITY)!,
-            rawTenant: tenantName
+            url: .init(string: DEFAULT_TEST_AUTHORITY)!
         )
     }
 
-    static var msidAuthority: MSIDAADAuthority {
+    static var msidAuthority: MSIDCIAMAuthority {
         try! .init(
             url: .init(string: DEFAULT_TEST_AUTHORITY)!,
+            validateFormat: false,
             rawTenant: tenantName,
             context: nil
         )
@@ -78,7 +78,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
 
     var expectedRequestContext: MSALNativeAuthRequestContext?
     var expectedConfiguration: MSIDConfiguration?
-    var expectedTokenResponse: MSIDAADTokenResponse?
+    var expectedTokenResponse: MSIDCIAMTokenResponse?
     var expectedChallengeResponse: MSALNativeAuthSignInChallengeResponse?
     var expectedInitiateResponse: MSALNativeAuthSignInInitiateResponse?
     var expectedResponseError: Error?
@@ -86,7 +86,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound)
     var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken)
     
-    func validate(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDAADTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
+    func validate(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthSignInTokenValidatedResponse {
         checkConfAndContext(context, config: msidConfiguration)
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
             XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)

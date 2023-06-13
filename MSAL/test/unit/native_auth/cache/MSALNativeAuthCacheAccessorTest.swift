@@ -142,7 +142,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     
     func testRemoveTokens_whenInvalidInputIsUsed_shouldNotThrowsAnError() {
         var authority: MSIDAuthority? = nil
-        XCTAssertNoThrow(authority = try MSIDB2CAuthority(url: URL(string: "https://www.microsoft.com")!, validateFormat: false, context: nil))
+        XCTAssertNoThrow(authority = try MSIDCIAMAuthority(url: URL(string: "https://www.microsoft.com")!, validateFormat: false, context: nil))
         XCTAssertNoThrow(try cacheAccessor.removeTokens(accountIdentifier: MSIDAccountIdentifier(), authority: authority!, clientId: "" , context: contextStub))
     }
     
@@ -181,8 +181,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         return MSIDAccountIdentifier(displayableId: "displayableId", homeAccountId: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff")
     }
     
-    private func getTokenResponse() -> MSIDAADTokenResponse {
-        let tokenResponse = MSIDAADTokenResponse()
+    private func getTokenResponse() -> MSIDCIAMTokenResponse {
+        let tokenResponse = MSIDCIAMTokenResponse()
         tokenResponse.accessToken = "AccessToken"
         tokenResponse.refreshToken = "refreshToken"
         tokenResponse.idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
@@ -193,7 +193,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     }
     
     private func getMSIDConfiguration() -> MSIDConfiguration {
-        let configuration = MSIDConfiguration(authority: try? MSIDB2CAuthority(url: URL(string: "https://contoso.com/tfp/tenantName/policyName")!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
+        let configuration = MSIDConfiguration(authority: try? MSIDCIAMAuthority(url: URL(string: "https://contoso.com/tfp/tenantName/policyName")!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
         let authSchema = MSIDAuthenticationSchemePop(schemeParameters: [
             "kid":"kidSample",
             "token_type":"Pop",

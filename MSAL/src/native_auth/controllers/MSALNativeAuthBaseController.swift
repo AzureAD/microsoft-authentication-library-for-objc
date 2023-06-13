@@ -27,14 +27,11 @@
 class MSALNativeAuthBaseController {
 
     let clientId: String
-    let cacheAccessor: MSALNativeAuthCacheInterface?
 
     init(
-        clientId: String,
-        cacheAccessor: MSALNativeAuthCacheInterface? = nil
+        clientId: String
     ) {
         self.clientId = clientId
-        self.cacheAccessor = cacheAccessor
     }
 
     func makeAndStartTelemetryEvent(

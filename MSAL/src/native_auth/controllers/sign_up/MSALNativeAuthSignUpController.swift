@@ -38,12 +38,11 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     init(
         config: MSALNativeAuthConfiguration,
         requestProvider: MSALNativeAuthSignUpRequestProviding,
-        responseValidator: MSALNativeAuthSignUpResponseValidating,
-        cacheAccessor: MSALNativeAuthCacheInterface
+        responseValidator: MSALNativeAuthSignUpResponseValidating
     ) {
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
-        super.init(clientId: config.clientId, cacheAccessor: cacheAccessor)
+        super.init(clientId: config.clientId)
     }
 
     convenience init(config: MSALNativeAuthConfiguration) {
@@ -53,8 +52,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
                 telemetryProvider: MSALNativeAuthTelemetryProvider()
             ),
-            responseValidator: MSALNativeAuthSignUpResponseValidator(),
-            cacheAccessor: MSALNativeAuthCacheAccessor()
+            responseValidator: MSALNativeAuthSignUpResponseValidator()
         )
     }
 

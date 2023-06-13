@@ -37,7 +37,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
-        guard let aadAuthority = config.authority as? MSALAADAuthority else {
+        guard let ciamAuthority = config.authority as? MSALCIAMAuthority else {
             throw MSALNativeAuthInternalError.invalidAuthority
         }
 
@@ -46,7 +46,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
-            authority: aadAuthority,
+            authority: ciamAuthority,
             challengeTypes: internalChallengeTypes
         )
 
@@ -59,16 +59,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     public init(
         clientId: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
-        rawTenant: String? = nil,
+        rawTenant: String,
         redirectUri: String? = nil) throws {
-        let aadAuthority = try MSALNativeAuthAuthorityProvider()
-            .authority(rawTenant: rawTenant)
+        let ciamAuthority = try MSALNativeAuthAuthorityProvider()
+                .authority(rawTenant: rawTenant)
 
         self.internalChallengeTypes =
                 MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
-            authority: aadAuthority,
+            authority: ciamAuthority,
             rawTenant: rawTenant,
             challengeTypes: internalChallengeTypes
         )
@@ -79,7 +79,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let configuration = MSALPublicClientApplicationConfig(
             clientId: clientId,
             redirectUri: redirectUri,
-            authority: aadAuthority
+            authority: ciamAuthority
         )
 
         try super.init(configuration: configuration)

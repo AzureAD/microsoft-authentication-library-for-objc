@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
             passwordResetToken: "<password-reset-token"
@@ -45,11 +45,11 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
 
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/resetpassword/poll_completion")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/resetpassword/poll_completion")
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
             passwordResetToken: "<password-reset-token"
