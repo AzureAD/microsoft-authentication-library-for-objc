@@ -36,8 +36,7 @@ struct MSALNativeAuthConfigStubs {
         try! .init(
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
-                url: URL(string: DEFAULT_TEST_AUTHORITY)!,
-                rawTenant: MSALNativeAuthNetworkStubs.tenantName
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
             challengeTypes: [.redirect]
         )

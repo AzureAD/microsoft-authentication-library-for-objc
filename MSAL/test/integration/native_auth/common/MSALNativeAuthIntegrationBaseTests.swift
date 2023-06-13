@@ -32,8 +32,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
     let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
-                                                                               authority: MSALAADAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
-                                                                               rawTenant: "test",
+                                                                               authority: MSALCIAMAuthority(url:  URL(string: "https://native-ux-mock-api.azurewebsites.net/test")!),
                                                                                challengeTypes: [.password, .oob, .redirect])
     var sut: MSIDHttpRequest!
     

@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             passwordResetToken: "<password-reset-token>",
@@ -47,11 +47,11 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
 
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/resetpassword/continue")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/resetpassword/continue")
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             passwordResetToken: "<password-reset-token>",
@@ -72,7 +72,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     }
 
     func test_allOptionalNil_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             passwordResetToken: "<password-reset-token>",

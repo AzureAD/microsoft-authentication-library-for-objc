@@ -37,16 +37,16 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
     )
     
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let parameters = MSALNativeAuthSignInInitiateRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                        username: "username")
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/tenant/oauth2/v2.0/initiate")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/initiate")
     }
 
     func test_passwordChallengeType_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.password]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let params = MSALNativeAuthSignInInitiateRequestParameters(
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME
@@ -64,7 +64,7 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
     }
 
     func test_otpChallenge_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALAADAuthority(url: baseUrl, rawTenant: "tenant"), challengeTypes: [.oob]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.oob]))
         let params = MSALNativeAuthSignInInitiateRequestParameters(
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME

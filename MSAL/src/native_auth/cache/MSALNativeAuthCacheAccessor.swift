@@ -71,7 +71,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         try tokenCacheAccessor.saveTokens(
             with: configuration,
             response: tokenResult,
-            factory: MSIDAADOauth2Factory(),
+            factory: MSIDCIAMOauth2Factory(),
             context: context)
     }
 

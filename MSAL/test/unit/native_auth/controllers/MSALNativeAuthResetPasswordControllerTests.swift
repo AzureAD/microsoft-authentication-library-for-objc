@@ -50,8 +50,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         sut = .init(config: MSALNativeAuthConfigStubs.configuration,
                     requestProvider: requestProviderMock,
-                    responseValidator: validatorMock,
-                    cacheAccessor: MSALNativeAuthCacheAccessorMock()
+                    responseValidator: validatorMock
         )
     }
 

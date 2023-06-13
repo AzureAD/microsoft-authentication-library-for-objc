@@ -44,65 +44,6 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         sut = .init(config: MSALNativeAuthConfigStubs.configuration)
     }
 
-    func test_makeNativeAuthResponse() {
-        let expirationDate = Date()
-
-        let accessToken = MSIDAccessToken()
-        accessToken.accessToken = "<access_token>"
-        accessToken.scopes = []
-        accessToken.expiresOn = expirationDate
-
-        let idToken = "<id_token>"
-
-        let tokenResult = MSIDTokenResult(
-            accessToken: accessToken,
-            refreshToken: MSIDRefreshToken(),
-            idToken: idToken,
-            account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.msidAuthority,
-            correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
-            tokenResponse: nil
-        )!
-
-        let result = sut.makeNativeAuthResponse(
-            stage: .completed,
-            credentialToken: nil,
-            tokenResult: tokenResult
-        )
-
-        XCTAssertEqual(result.stage, .completed)
-        XCTAssertNil(result.credentialToken)
-        XCTAssertEqual(result.authentication?.accessToken, "<access_token>")
-        XCTAssertEqual(result.authentication?.idToken, idToken)
-        XCTAssertEqual(result.authentication?.scopes, [])
-        XCTAssertEqual(result.authentication?.expiresOn, expirationDate)
-        XCTAssertEqual(result.authentication?.tenantId, MSALNativeAuthNetworkStubs.tenantName)
-    }
-
-    func test_makeResponse_withCorrectScopes() {
-        let accessToken = MSIDAccessToken()
-        accessToken.accessToken = "<access_token>"
-        accessToken.scopes = ["User.Read", "profile", "offline_access"]
-        accessToken.expiresOn = Date()
-
-        let tokenResult = MSIDTokenResult(
-            accessToken: accessToken,
-            refreshToken: MSIDRefreshToken(),
-            idToken: "",
-            account: MSIDAccount(),
-            authority: MSALNativeAuthNetworkStubs.msidAuthority,
-            correlationId: UUID(uuidString: DEFAULT_TEST_UID)!,
-            tokenResponse: nil
-        )!
-
-        let result = sut.makeNativeAuthResponse(
-            stage: .completed,
-            credentialToken: nil,
-            tokenResult: tokenResult
-        )
-        XCTAssertEqual(result.authentication?.scopes, ["User.Read", "profile", "offline_access"])
-    }
-
     func test_makeMsidConfiguration() {
         let result = sut.makeMSIDConfiguration(scope: ["<scope_1>", "<scope_2>"])
 

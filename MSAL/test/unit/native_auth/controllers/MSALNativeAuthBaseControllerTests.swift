@@ -41,8 +41,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
         dispatcher = MSALNativeAuthTelemetryTestDispatcher()
 
         sut = MSALNativeAuthBaseController(
-            clientId: clientId,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            clientId: clientId
         )
     }
 
