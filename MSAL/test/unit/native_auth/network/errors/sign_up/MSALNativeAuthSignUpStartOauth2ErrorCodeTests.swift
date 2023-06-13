@@ -116,7 +116,7 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     // MARK: - to SignUpCodeStartError tests
 
     func test_toSignUpStartCodePublicError_invalidClient() {
-        let error = sut.invalidClient.toSignUpStartCodePublicError()
+        let error = sut.invalidClient.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
     }
@@ -128,37 +128,37 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     }
 
     func test_toSignUpStartCodePublicError_passwordTooWeak() {
-        let error = sut.passwordTooWeak.toSignUpStartCodePublicError()
+        let error = sut.passwordTooWeak.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_passwordTooShort() {
-        let error = sut.passwordTooShort.toSignUpStartCodePublicError()
+        let error = sut.passwordTooShort.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_passwordTooLong() {
-        let error = sut.passwordTooLong.toSignUpStartCodePublicError()
+        let error = sut.passwordTooLong.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_passwordRecentlyUsed() {
-        let error = sut.passwordRecentlyUsed.toSignUpStartCodePublicError()
+        let error = sut.passwordRecentlyUsed.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_passwordBanned() {
-        let error = sut.passwordBanned.toSignUpStartCodePublicError()
+        let error = sut.passwordBanned.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_userAlreadyExists() {
-        let error = sut.userAlreadyExists.toSignUpStartCodePublicError()
+        let error = sut.userAlreadyExists.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .userAlreadyExists)
     }
 
     func test_toSignUpStartCodePublicError_authNotSupported() {
-        let error = sut.authNotSupported.toSignUpStartCodePublicError()
+        let error = sut.authNotSupported.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedAuthMethod)
     }
@@ -169,22 +169,22 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     }
 
     func test_toSignUpStartCodePublicError_attributesRequired() {
-        let error = sut.attributesRequired.toSignUpStartCodePublicError()
+        let error = sut.attributesRequired.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .invalidAttributes)
     }
 
     func test_toSignUpStartCodePublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toSignUpStartCodePublicError()
+        let error = sut.invalidAttributes.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .invalidAttributes)
     }
 
     func test_toSignUpStartCodePublicError_invalidRequest() {
-        let error = sut.invalidRequest.toSignUpStartCodePublicError()
+        let error = sut.invalidRequest.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
     func test_toSignUpStartCodePublicError_verificationRequired() {
-        let error = sut.verificationRequired.toSignUpStartCodePublicError()
+        let error = sut.verificationRequired.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 }

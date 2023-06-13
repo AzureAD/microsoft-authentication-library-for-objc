@@ -52,7 +52,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
 
     func signUpStartCode(
         parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
-        delegate: SignUpCodeStartDelegate
+        delegate: SignUpStartDelegate
     ) {
         self.context = parameters.context
         signUpStartCalled = true

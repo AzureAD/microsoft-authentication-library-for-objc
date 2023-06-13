@@ -25,20 +25,19 @@
 import Foundation
 
 @objc
-public class SignUpCodeStartError: MSALNativeAuthError {
-    @objc public let type: SignUpCodeStartErrorType
+public class SignInStartError: MSALNativeAuthError {
+    @objc public let type: SignInStartErrorType
 
-    init(type: SignUpCodeStartErrorType, message: String? = nil) {
+    init(type: SignInStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 }
 
 @objc
-public enum SignUpCodeStartErrorType: Int {
+public enum SignInStartErrorType: Int {
     case browserRequired
-    case userAlreadyExists
+    case userNotFound
     case invalidUsername
-    case invalidAttributes
     case generalError
 }

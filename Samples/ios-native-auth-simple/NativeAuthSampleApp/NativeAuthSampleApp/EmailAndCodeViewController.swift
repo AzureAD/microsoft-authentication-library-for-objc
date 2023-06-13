@@ -69,7 +69,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing up with email \(email)")
 
-        nativeAuth.signUpUsingCode(username: email, delegate: self)
+        nativeAuth.signUp(username: email, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
@@ -80,7 +80,7 @@ class EmailAndCodeViewController: UIViewController {
 
         print("Signing in with email \(email)")
 
-        nativeAuth.signInUsingCode(username: email, delegate: self)
+        nativeAuth.signIn(username: email, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -168,8 +168,8 @@ class EmailAndCodeViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-extension EmailAndCodeViewController: SignUpCodeStartDelegate {
-    func onSignUpCodeError(error: MSAL.SignUpCodeStartError) {
+extension EmailAndCodeViewController: SignUpStartDelegate {
+    func onSignUpError(error: MSAL.SignUpStartError) {
         switch error.type {
         case .browserRequired:
             showResultText("Unable to sign up: Web UX required")
@@ -279,9 +279,9 @@ extension EmailAndCodeViewController: SignUpResendCodeDelegate {
 
 // MARK: - Sign In delegates
 
-extension EmailAndCodeViewController: SignInCodeStartDelegate {
+extension EmailAndCodeViewController: SignInStartDelegate {
 
-    func onSignInCodeError(error: MSAL.SignInCodeStartError) {
+    func onSignInError(error: MSAL.SignInStartError) {
         print("SignInCodeStartDelegate: onSignInCodeError: \(error)")
 
         switch error.type {

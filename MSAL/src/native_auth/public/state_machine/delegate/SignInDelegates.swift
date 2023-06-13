@@ -35,8 +35,8 @@ public protocol SignInPasswordStartDelegate: SignInCompletedDelegate {
 }
 
 @objc
-public protocol SignInCodeStartDelegate {
-    func onSignInCodeError(error: SignInCodeStartError)
+public protocol SignInStartDelegate {
+    func onSignInError(error: SignInStartError)
     func onSignInCodeRequired(newState: SignInCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,

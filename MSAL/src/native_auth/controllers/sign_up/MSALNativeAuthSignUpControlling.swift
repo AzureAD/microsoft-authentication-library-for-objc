@@ -33,7 +33,7 @@ protocol MSALNativeAuthSignUpControlling: AnyObject {
 
     func signUpStartCode(
         parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
-        delegate: SignUpCodeStartDelegate
+        delegate: SignUpStartDelegate
     ) async
 
     func resendCode(context: MSIDRequestContext, signUpToken: String, delegate: SignUpResendCodeDelegate) async

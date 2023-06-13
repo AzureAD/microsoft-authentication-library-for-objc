@@ -240,7 +240,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedContext = expectedContext
         requestProviderMock.throwingInitError = MSALNativeAuthError()
 
-        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInCodeStartError(type: .generalError))
+        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
@@ -249,12 +249,12 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeStartAndInitiateReturnError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .browserRequired), validatorError: .redirect)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient), validatorError: .invalidClient)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .userNotFound), validatorError: .userNotFound)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .unsupportedChallengeType)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .invalidRequest)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .invalidServerResponse)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient), validatorError: .invalidClient)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .unsupportedChallengeType)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidServerResponse)
     }
     
     func test_whenSignInWithCodeChallengeRequestCreationFail_errorShouldBeReturned() async {
@@ -270,7 +270,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.throwingChallengeError = MSALNativeAuthError()
         responseValidatorMock.initiateValidatedResponse = .success(credentialToken: "credentialToken")
         
-        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInCodeStartError(type: .generalError))
+        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError))
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
@@ -279,14 +279,14 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeChallengeReturnsError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .browserRequired), validatorError: .redirect)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .expiredToken)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .invalidToken)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .invalidRequest)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError), validatorError: .invalidServerResponse)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient), validatorError: .invalidClient)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .userNotFound), validatorError: .userNotFound)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType), validatorError: .unsupportedChallengeType)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .browserRequired), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .expiredToken)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidToken)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidServerResponse)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient), validatorError: .invalidClient)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType), validatorError: .unsupportedChallengeType)
     }
     
     func test_whenSignInWithCodePasswordIsRequired_newStateIsPropagatedToUser() async {
@@ -328,7 +328,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         responseValidatorMock.initiateValidatedResponse = .success(credentialToken: expectedCredentialToken)
         responseValidatorMock.challengeValidatedResponse = .passwordRequired(credentialToken: expectedCredentialToken)
         
-        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInCodeStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
+        let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: SignInStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required"))
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
@@ -582,7 +582,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         receivedEvents.removeAll()
     }
     
-    private func checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInChallengeValidatedErrorType) async {
+    private func checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError, validatorError: MSALNativeAuthSignInChallengeValidatedErrorType) async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -605,7 +605,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         receivedEvents.removeAll()
     }
     
-    private func checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInCodeStartError, validatorError: MSALNativeAuthSignInInitiateValidatedErrorType) async {
+    private func checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError, validatorError: MSALNativeAuthSignInInitiateValidatedErrorType) async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)

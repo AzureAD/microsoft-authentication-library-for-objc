@@ -57,11 +57,11 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
     }
 }
 
-class SignUpCodeStartDelegateSpy: SignUpCodeStartDelegate {
+class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
     private let expectation: XCTestExpectation?
     private(set) var onSignUpCodeErrorCalled = false
     private(set) var onSignUpCodeRequiredCalled = false
-    private(set) var error: SignUpCodeStartError?
+    private(set) var error: SignUpStartError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
@@ -71,7 +71,7 @@ class SignUpCodeStartDelegateSpy: SignUpCodeStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpCodeError(error: MSAL.SignUpCodeStartError) {
+    func onSignUpError(error: MSAL.SignUpStartError) {
         onSignUpCodeErrorCalled = true
         self.error = error
 

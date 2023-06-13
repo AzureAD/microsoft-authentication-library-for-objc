@@ -61,25 +61,25 @@ final class MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests: XCTestCase {
     // MARK: - to SignUpCodeStartError tests
 
     func test_toSignUpCodeStartPublicError_invalidClient() {
-        let error = sut.invalidClient.toSignUpCodeStartPublicError()
+        let error = sut.invalidClient.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
     }
 
     func test_toSignUpCodeStartPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toSignUpCodeStartPublicError()
+        let error = sut.unsupportedChallengeType.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
     }
 
     func test_toSignUpCodeStartPublicError_expiredToken() {
-        let error = sut.expiredToken.toSignUpCodeStartPublicError()
+        let error = sut.expiredToken.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
     }
 
     func test_toSignUpCodeStartPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toSignUpCodeStartPublicError()
+        let error = sut.invalidRequest.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
