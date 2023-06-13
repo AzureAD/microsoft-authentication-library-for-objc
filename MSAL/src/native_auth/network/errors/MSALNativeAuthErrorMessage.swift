@@ -40,4 +40,5 @@ enum MSALNativeAuthErrorMessage {
     static let userDoesNotHavePassword = "User does not have password associated with account"
     static let userNotFound = "User does not exist"
     static let attributeValidationFailedSignUpStart = "Check the invalid attributes and start the sign-up process again. Invalid attributes: %@"
+    static let attributeValidationFailed = "Invalid attributes: %@"
 }

@@ -1454,10 +1454,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
-        XCTAssertEqual(
-            delegate.error?.errorDescription,
-            String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, "[\"key\"]")
-        )
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, "[\"key\"]"))
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
