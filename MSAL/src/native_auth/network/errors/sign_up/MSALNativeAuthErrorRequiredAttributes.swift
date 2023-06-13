@@ -24,8 +24,12 @@
 
 import Foundation
 
-struct MSALNativeAuthErrorRequiredAttributes: Decodable {
+struct MSALNativeAuthErrorRequiredAttributes: Decodable, CustomStringConvertible {
     let name: String
     let type: String
     let required: Bool
+
+    var description: String {
+        return "\(name) - required: \(required)"
+    }
 }

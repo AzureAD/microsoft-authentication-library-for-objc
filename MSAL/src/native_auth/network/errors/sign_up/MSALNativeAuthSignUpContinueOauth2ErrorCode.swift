@@ -40,7 +40,6 @@ enum MSALNativeAuthSignUpContinueOauth2ErrorCode: String, Decodable, CaseIterabl
     case attributeValidationFailed = "attribute_validation_failed"
     case credentialRequired = "credential_required"
     case invalidOOBValue = "invalid_oob_value"
-    case invalidAttributes = "invalid_attributes"
 }
 
 extension MSALNativeAuthSignUpContinueOauth2ErrorCode {
@@ -64,8 +63,7 @@ extension MSALNativeAuthSignUpContinueOauth2ErrorCode {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
-             .attributeValidationFailed,
-             .invalidAttributes:
+             .attributeValidationFailed:
             return .init(type: .generalError)
         }
     }
@@ -93,8 +91,7 @@ extension MSALNativeAuthSignUpContinueOauth2ErrorCode {
              .verificationRequired,
              .credentialRequired,
              .attributeValidationFailed,
-             .invalidOOBValue,
-             .invalidAttributes:
+             .invalidOOBValue:
             return .init(type: .generalError)
         }
     }
@@ -103,8 +100,7 @@ extension MSALNativeAuthSignUpContinueOauth2ErrorCode {
         switch self {
         case .invalidClient:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .attributeValidationFailed,
-             .invalidAttributes:
+        case .attributeValidationFailed:
             return .init(type: .invalidAttributes)
         case .expiredToken:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)

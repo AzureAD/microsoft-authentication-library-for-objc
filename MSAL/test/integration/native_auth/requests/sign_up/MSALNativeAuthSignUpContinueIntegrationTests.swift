@@ -101,11 +101,27 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
+    func test_signUpContinue_invalidSignUpToken() async throws {
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .invalidSignUpToken,
+            expectedError: Error(error: .invalidRequest)
+        )
+    }
+
     func test_signUpContinue_expiredToken() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .expiredToken,
             expectedError: Error(error: .expiredToken)
+        )
+    }
+
+    func test_signUpContinue_explicitInvalidOOBValue() async throws {
+        try await perform_testFail(
+            endpoint: .signUpContinue,
+            response: .explicitInvalidOOBValue,
+            expectedError: Error(error: .invalidOOBValue)
         )
     }
 
@@ -193,16 +209,6 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             endpoint: .signUpContinue,
             response: .credentialRequired,
             expectedError: Error(error: .credentialRequired)
-        )
-
-        XCTAssertNotNil(response.signUpToken)
-    }
-
-    func test_signUpContinue_invalidAttributes() async throws {
-        let response = try await perform_testFail(
-            endpoint: .signUpContinue,
-            response: .invalidAttributes,
-            expectedError: Error(error: .invalidAttributes)
         )
 
         XCTAssertNotNil(response.signUpToken)

@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
@@ -35,6 +36,9 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
     private(set) var startCalled = false
     private(set) var challengeCalled = false
     private(set) var continueCalled = false
+    var expectedStartRequestParameters: MSALNativeAuthSignUpStartRequestProviderParameters!
+    var expectedChallengeRequestParameters: (token: String, context: MSIDRequestContext)!
+    var expectedContinueRequestParameters: MSALNativeAuthSignUpContinueRequestProviderParams!
 
     func mockStartRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         self.requestStart = request
@@ -43,6 +47,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
 
     func start(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) throws -> MSIDHttpRequest {
         startCalled = true
+        checkStartParameters(params: parameters)
         
         if let request = requestStart {
             return request
@@ -53,6 +58,13 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         }
     }
 
+    private func checkStartParameters(params: MSALNativeAuthSignUpStartRequestProviderParameters) {
+        XCTAssertEqual(params.username, expectedStartRequestParameters.username)
+        XCTAssertEqual(params.password, expectedStartRequestParameters.password)
+        XCTAssertEqual(params.context.correlationId(), expectedStartRequestParameters.context.correlationId())
+        XCTAssertEqual(params.attributes["key"] as? String, expectedStartRequestParameters.attributes["key"] as? String)
+    }
+
     func mockChallengeRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         self.requestChallenge = request
         self.throwErrorChallenge = throwError
@@ -60,6 +72,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
 
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
+        checkChallengeParameters(token: token, context: context)
 
         if let request = requestChallenge {
             return request
@@ -70,6 +83,11 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         }
     }
 
+    private func checkChallengeParameters(token: String, context: MSIDRequestContext) {
+        XCTAssertEqual(token, expectedChallengeRequestParameters.token)
+        XCTAssertEqual(context.correlationId(), expectedChallengeRequestParameters.context.correlationId())
+    }
+
     func mockContinueRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         self.requestContinue = request
         self.throwErrorContinue = throwError
@@ -77,6 +95,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
 
     func `continue`(parameters: MSAL.MSALNativeAuthSignUpContinueRequestProviderParams) throws -> MSIDHttpRequest {
         continueCalled = true
+        checkContinueParameters(parameters)
 
         if let request = requestContinue {
             return request
@@ -85,5 +104,14 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         } else {
             fatalError("Make sure to use mockContinueRequestFunc()")
         }
+    }
+
+    private func checkContinueParameters(_ params: MSALNativeAuthSignUpContinueRequestProviderParams) {
+        XCTAssertEqual(params.grantType, expectedContinueRequestParameters.grantType)
+        XCTAssertEqual(params.signUpToken, expectedContinueRequestParameters.signUpToken)
+        XCTAssertEqual(params.password, expectedContinueRequestParameters.password)
+        XCTAssertEqual(params.oobCode, expectedContinueRequestParameters.oobCode)
+        XCTAssertEqual(params.attributes?["key"] as? String, expectedContinueRequestParameters.attributes?["key"] as? String)
+        XCTAssertEqual(params.context.correlationId(), expectedContinueRequestParameters.context.correlationId())
     }
 }

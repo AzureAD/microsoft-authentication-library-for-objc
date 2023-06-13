@@ -22,39 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import XCTest
+@testable import MSAL
 
-struct MSALNativeAuthSignInRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint
-    let context: MSIDRequestContext
-    let email: String
-    let password: String?
-    let scope: String
-    let grantType: MSALNativeAuthGrantType
+final class MSALNativeAuthErrorRequiredAttributesTests: XCTestCase {
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
-        return [:]
+    func test_toString_requiredTrue() {
+        let sut = MSALNativeAuthErrorRequiredAttributes(name: "aName", type: "", required: true)
+        XCTAssertEqual(sut.description, "aName - required: true")
     }
-}
 
-// MARK: - Convenience init
-
-extension MSALNativeAuthSignInRequestParameters {
-
-    init(
-        email: String,
-        password: String? = nil,
-        scope: String,
-        context: MSIDRequestContext,
-        grantType: MSALNativeAuthGrantType
-    ) {
-        self.init(
-            endpoint: .signIn,
-            context: context,
-            email: email,
-            password: password,
-            scope: scope,
-            grantType: grantType
-        )
+    func test_toString_requiredFalse() {
+        let sut = MSALNativeAuthErrorRequiredAttributes(name: "aName", type: "", required: false)
+        XCTAssertEqual(sut.description, "aName - required: false")
     }
 }

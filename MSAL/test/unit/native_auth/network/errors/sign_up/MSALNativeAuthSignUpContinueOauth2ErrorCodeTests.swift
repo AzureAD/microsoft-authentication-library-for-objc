@@ -30,7 +30,7 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpContinueOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 16)
+        XCTAssertEqual(sut.allCases.count, 15)
     }
 
     // MARK: - to VerifyCodeError tests
@@ -109,11 +109,6 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
 
     func test_toVerifyCodePublicError_attributeValidationFailed() {
         let error = sut.attributeValidationFailed.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toVerifyCodePublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .generalError)
     }
 
@@ -201,11 +196,6 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
         XCTAssertEqual(error.type, .generalError)
     }
 
-    func test_toPasswordRequiredPublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
     // MARK: - to AttributesRequiredError tests
 
     func test_toAttributesRequiredPublicError_invalidClient() {
@@ -282,11 +272,6 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
 
     func test_toAttributesRequiredPublicError_attributeValidationFailed() {
         let error = sut.attributeValidationFailed.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidAttributes)
-    }
-
-    func test_toAttributesRequiredPublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toAttributesRequiredPublicError()
         XCTAssertEqual(error.type, .invalidAttributes)
     }
 }

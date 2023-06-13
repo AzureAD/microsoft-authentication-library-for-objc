@@ -30,7 +30,7 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpStartOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 14)
+        XCTAssertEqual(sut.allCases.count, 13)
     }
 
     // MARK: - to SignUpPasswordStartError tests
@@ -95,11 +95,6 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
 
     func test_toSignUpStartPasswordPublicError_attributesRequired() {
         let error = sut.attributesRequired.toSignUpStartPasswordPublicError()
-        XCTAssertEqual(error.type, .invalidAttributes)
-    }
-
-    func test_toSignUpStartPasswordPublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toSignUpStartPasswordPublicError()
         XCTAssertEqual(error.type, .invalidAttributes)
     }
 
@@ -170,11 +165,6 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
 
     func test_toSignUpStartCodePublicError_attributesRequired() {
         let error = sut.attributesRequired.toSignUpStartPublicError()
-        XCTAssertEqual(error.type, .invalidAttributes)
-    }
-
-    func test_toSignUpStartCodePublicError_invalidAttributes() {
-        let error = sut.invalidAttributes.toSignUpStartPublicError()
         XCTAssertEqual(error.type, .invalidAttributes)
     }
 
