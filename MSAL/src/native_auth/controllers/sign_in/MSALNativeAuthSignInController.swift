@@ -314,10 +314,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 stopTelemetryEvent(telemetryEvent, context: context, error: challengeError)
             case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
                 let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)
+                stopTelemetryEvent(telemetryEvent, context: context)
                 DispatchQueue.main.async {
                     delegate.onSignInCodeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength)
                 }
-                stopTelemetryEvent(telemetryEvent, context: context)
             }
     }
 
