@@ -35,7 +35,6 @@ enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable {
     case passwordBanned = "password_banned"
     case userAlreadyExists = "user_already_exists"
     case attributesRequired = "attributes_required"
-    case invalidAttributes = "invalid_attributes"
     case verificationRequired = "verification_required"
     case authNotSupported = "auth_not_supported"
     case attributeValidationFailed = "attribute_validation_failed"
@@ -65,8 +64,7 @@ extension MSALNativeAuthSignUpStartOauth2ErrorCode {
         case .authNotSupported:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedAuthMethod)
         case .attributeValidationFailed,
-             .attributesRequired,
-             .invalidAttributes:
+             .attributesRequired:
             return .init(type: .invalidAttributes)
         case .invalidRequest,
              .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
@@ -83,8 +81,7 @@ extension MSALNativeAuthSignUpStartOauth2ErrorCode {
         case .userAlreadyExists:
             return .init(type: .userAlreadyExists)
         case .attributeValidationFailed,
-             .attributesRequired,
-             .invalidAttributes:
+             .attributesRequired:
             return .init(type: .invalidAttributes)
         case .authNotSupported:
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedAuthMethod)

@@ -76,6 +76,8 @@ enum MockAPIResponse: String {
     case invalidAttributes = "InvalidAttributes"
     case verificationRequired = "VerificationRequired"
     case attributeValidationFailed = "AttributeValidationFailed"
+    case invalidSignUpToken = "InvalidSignupToken"
+    case explicitInvalidOOBValue = "ExplicitInvalidOOBValue"
     case ssprStartSuccess = "SSPRStartSuccess"
     case ssprContinueSuccess = "SSPRContinueSuccess"
     case ssprSubmitSuccess = "SSPRSubmitSuccess"

@@ -52,5 +52,4 @@ protocol MSALNativeAuthCacheInterface {
         authority: MSIDAuthority,
         clientId: String,
         context: MSIDRequestContext) throws
-
 }

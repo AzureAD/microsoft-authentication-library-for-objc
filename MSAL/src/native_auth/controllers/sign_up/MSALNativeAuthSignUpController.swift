@@ -90,7 +90,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(grantType: .oobCode, signUpToken: signUpToken, oobCode: code, context: context)
 
         let result = await performAndValidateContinueRequest(parameters: params)
-        await handleSubmitCodeResult(result, event: event, context: context, delegate: delegate)
+        await handleSubmitCodeResult(result, signUpToken: signUpToken, event: event, context: context, delegate: delegate)
     }
 
     func submitPassword(
@@ -108,7 +108,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             context: context
         )
         let continueRequestResult = await performAndValidateContinueRequest(parameters: params)
-        handleSubmitPasswordResult(continueRequestResult, event: event, context: context, delegate: delegate)
+        handleSubmitPasswordResult(continueRequestResult, signUpToken: signUpToken, event: event, context: context, delegate: delegate)
     }
 
     func submitAttributes(
@@ -118,10 +118,15 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpAttributesRequiredDelegate
     ) async {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitAttributes, context: context)
-        let params = MSALNativeAuthSignUpContinueRequestProviderParams(grantType: .attributes, signUpToken: signUpToken, context: context)
+        let params = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .attributes,
+            signUpToken: signUpToken,
+            attributes: attributes,
+            context: context
+        )
 
         let result = await performAndValidateContinueRequest(parameters: params)
-        handleSubmitAttributesResult(result, event: event, context: context, delegate: delegate)
+        handleSubmitAttributesResult(result, signUpToken: signUpToken, event: event, context: context, delegate: delegate)
     }
 
     // MARK: - Start Request handling
@@ -151,14 +156,24 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpPasswordStartDelegate
     ) async {
         switch result {
-        case .verificationRequired(let signUpToken):
+        case .verificationRequired(let signUpToken, let attributes):
             MSALLogger.log(
                 level: .info,
                 context: context,
-                format: "verification_required received from signup/start with password request"
+                format: "verification_required received from signup/start with password request for attributes: \(attributes)"
             )
             let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
             handleSignUpPasswordChallengeResult(challengeResult, event: event, context: context, delegate: delegate)
+        case .attributeValidationFailed(let invalidAttributes):
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "attribute_validation_failed received from signup/start with password request for attributes: \(invalidAttributes)"
+            )
+            let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
+            let error = SignUpPasswordStartError(type: .invalidAttributes, message: message)
+            stopTelemetryEvent(event, context: context, error: error)
+            DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
         case .redirect:
             let error = SignUpPasswordStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
@@ -184,28 +199,38 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpStartDelegate
     ) async {
         switch result {
-        case .verificationRequired(let signUpToken):
+        case .verificationRequired(let signUpToken, let unverifiedAttributes):
             MSALLogger.log(
                 level: .info,
                 context: context,
-                format: "verification_required received from signup/start with code request"
+                format: "verification_required received from signup/start request for attributes: \(unverifiedAttributes)"
             )
             let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
             handleSignUpCodeChallengeResult(challengeResult, event: event, context: context, delegate: delegate)
+        case .attributeValidationFailed(let invalidAttributes):
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "attribute_validation_failed received from signup/start request for attributes: \(invalidAttributes)"
+            )
+            let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
+            let error = SignUpStartError(type: .invalidAttributes, message: message)
+            stopTelemetryEvent(event, context: context, error: error)
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .redirect:
             let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/start with code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/start request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .error(let apiError):
             let error = apiError.toSignUpStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Error in signup/start with code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error in signup/start request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError:
             let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/start with code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/start request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         }
     }
@@ -238,12 +263,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpPasswordStartDelegate
     ) {
         switch result {
-        case .successOOB(let sentTo, let challengeType, let codeLength, let challengeToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge password request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
                 delegate.onSignUpCodeRequired(
-                    newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
+                    newState: SignUpCodeRequiredState(controller: self, flowToken: signUpToken),
                     sentTo: sentTo,
                     channelTargetType: challengeType,
                     codeLength: codeLength
@@ -260,7 +285,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge password request \(error)")
             DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
         case .unexpectedError,
-             .successPassword:
+             .passwordRequired:
             let error = SignUpPasswordStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge password request \(error)")
@@ -275,12 +300,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpStartDelegate
     ) {
         switch result {
-        case .successOOB(let sentTo, let challengeType, let codeLength, let challengeToken):
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge code request")
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
+            MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
                 delegate.onSignUpCodeRequired(
-                    newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
+                    newState: SignUpCodeRequiredState(controller: self, flowToken: signUpToken),
                     sentTo: sentTo,
                     channelTargetType: challengeType,
                     codeLength: codeLength
@@ -289,18 +314,18 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .error(let apiError):
             let error = apiError.toSignUpStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Error in signup/challenge code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .redirect:
             let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError,
-             .successPassword:
+             .passwordRequired:
             let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge code request \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         }
     }
@@ -312,12 +337,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         delegate: SignUpResendCodeDelegate
     ) {
         switch result {
-        case .successOOB(let sentTo, let challengeType, let codeLength, let challengeToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge resendCode request")
             stopTelemetryEvent(event, context: context)
             DispatchQueue.main.async {
                 delegate.onSignUpResendCodeCodeRequired(
-                    newState: SignUpCodeRequiredState(controller: self, flowToken: challengeToken),
+                    newState: SignUpCodeRequiredState(controller: self, flowToken: signUpToken),
                     sentTo: sentTo,
                     channelTargetType: challengeType,
                     codeLength: codeLength
@@ -330,7 +355,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async { delegate.onSignUpResendCodeError(error: error) }
         case .redirect,
              .unexpectedError,
-             .successPassword:
+             .passwordRequired:
             let error = ResendCodeError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge resendCode request \(error)")
@@ -338,37 +363,37 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func handlePerformChallengeAfterCredentialRequiredError(
+    /// This method handles the /challenge response after receiving a "credential_required" error
+    private func handlePerformChallengeAfterContinueRequest(
         _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
         delegate: SignUpVerifyCodeDelegate
     ) {
         switch result {
-        case .successPassword(let token):
+        case .passwordRequired(let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request after credential_required")
-            DispatchQueue.main.async {
-                if let function = delegate.onSignUpPasswordRequired {
-                    self.stopTelemetryEvent(event, context: context)
-                    function(SignUpPasswordRequiredState(controller: self, flowToken: token))
-                } else {
-                    MSALLogger.log(level: .error, context: context, format: "onSignUpPasswordRequired() is not implemented by developer")
-                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    self.stopTelemetryEvent(event, context: context, error: error)
-                    delegate.onSignUpVerifyCodeError(error: error, newState: nil)
-                }
+
+            if let function = delegate.onSignUpPasswordRequired {
+                stopTelemetryEvent(event, context: context)
+                DispatchQueue.main.async { function(SignUpPasswordRequiredState(controller: self, flowToken: signUpToken)) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpPasswordRequired() is not implemented by developer")
+                let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
             }
         case .redirect:
             let error = VerifyCodeError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge request after credential_required \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Redirect error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
         case .error,
-             .unexpectedError,
-             .successOOB:
+             .codeRequired,
+             .unexpectedError:
             let error = VerifyCodeError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge request after credential_required \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/challenge request \(error)")
             DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
         }
     }
@@ -395,6 +420,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     private func handleSubmitCodeResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
+        signUpToken: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
         delegate: SignUpVerifyCodeDelegate
@@ -402,32 +428,45 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .success(let slt):
             handleSuccessfulSignUp(slt: slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
-        case .invalidUserInput(_, let token):
+        case .invalidUserInput:
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
 
             let error = VerifyCodeError(type: .invalidCode)
             stopTelemetryEvent(event, context: context, error: error)
             DispatchQueue.main.async {
-                delegate.onSignUpVerifyCodeError(error: error, newState: SignUpCodeRequiredState(controller: self, flowToken: token))
+                delegate.onSignUpVerifyCodeError(error: error, newState: SignUpCodeRequiredState(controller: self, flowToken: signUpToken))
             }
-        case .credentialRequired(let token):
+        case .credentialRequired(let signUpToken):
             MSALLogger.log(level: .verbose, context: context, format: "credential_required received in signup/continue request")
 
-            let result = await performAndValidateChallengeRequest(signUpToken: token, context: context)
-            handlePerformChallengeAfterCredentialRequiredError(result, event: event, context: context, delegate: delegate)
-        case .attributesRequired(let token):
-            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request")
+            let result = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
+            handlePerformChallengeAfterContinueRequest(result, event: event, context: context, delegate: delegate)
+        case .attributesRequired(let signUpToken, let attributes):
+            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
-            DispatchQueue.main.async {
-                if let function = delegate.onSignUpAttributesRequired {
-                    self.stopTelemetryEvent(event, context: context)
-                    function(SignUpAttributesRequiredState(controller: self, flowToken: token))
-                } else {
-                    MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
-                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    self.stopTelemetryEvent(event, context: context, error: error)
-                    delegate.onSignUpVerifyCodeError(error: error, newState: nil)
-                }
+            if let function = delegate.onSignUpAttributesRequired {
+                stopTelemetryEvent(event, context: context)
+                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
+                let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
+            }
+        case .attributeValidationFailed(let signUpToken, let invalidAttributes):
+            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
+            MSALLogger.log(level: .error, context: context, format: message)
+
+            if let function = delegate.onSignUpAttributesRequired {
+                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
+                let error = VerifyCodeError(type: .generalError, message: errorMessage)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
+                let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
             }
         case .error(let apiError):
             let error = apiError.toVerifyCodePublicError()
@@ -444,6 +483,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     private func handleSubmitPasswordResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
+        signUpToken: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
         delegate: SignUpPasswordRequiredDelegate
@@ -451,25 +491,43 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .success(let slt):
             handleSuccessfulSignUp(slt: slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
-        case .invalidUserInput(let error, let token):
+        case .invalidUserInput(let error):
             let error = error.toPasswordRequiredPublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue submitPassword request \(error)")
+
             DispatchQueue.main.async {
-                delegate.onSignUpPasswordRequiredError(error: error, newState: SignUpPasswordRequiredState(controller: self, flowToken: token))
+                delegate.onSignUpPasswordRequiredError(
+                    error: error,
+                    newState: SignUpPasswordRequiredState(controller: self, flowToken: signUpToken)
+                )
             }
-        case .attributesRequired(let token):
-            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue submitPassword request")
-            DispatchQueue.main.async {
-                if let function = delegate.onSignUpAttributesRequired {
-                    self.stopTelemetryEvent(event, context: context)
-                    function(SignUpAttributesRequiredState(controller: self, flowToken: token))
-                } else {
-                    MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
-                    let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    self.stopTelemetryEvent(event, context: context, error: error)
-                    delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
-                }
+        case .attributesRequired(let signUpToken, let attributes):
+            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
+
+            if let function = delegate.onSignUpAttributesRequired {
+                stopTelemetryEvent(event, context: context)
+                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
+                let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpPasswordRequiredError(error: error, newState: nil) }
+            }
+        case .attributeValidationFailed(let signUpToken, let invalidAttributes):
+            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
+            MSALLogger.log(level: .error, context: context, format: message)
+
+            if let function = delegate.onSignUpAttributesRequired {
+                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
+                let error = PasswordRequiredError(type: .generalError, message: errorMessage)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
+                let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpPasswordRequiredError(error: error, newState: nil) }
             }
         case .error(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
@@ -487,6 +545,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     private func handleSubmitAttributesResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
+        signUpToken: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext,
         delegate: SignUpAttributesRequiredDelegate
@@ -494,12 +553,34 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .success(let slt):
             handleSuccessfulSignUp(slt: slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
-        case .invalidUserInput(_, let token):
+        case .invalidUserInput:
             let error = AttributesRequiredError(type: .invalidAttributes)
             stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue submitAttributes request \(error)")
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "invalid_user_input error in signup/continue submitAttributes request \(error)"
+            )
+
             DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(error: error, newState: SignUpAttributesRequiredState(controller: self, flowToken: token))
+                delegate.onSignUpAttributesRequiredError(
+                    error: error,
+                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
+                )
+            }
+        case .attributeValidationFailed(let signUpToken, let invalidAttributes):
+            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
+            MSALLogger.log(level: .error, context: context, format: message)
+
+            let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
+            let error = AttributesRequiredError(type: .invalidAttributes, message: errorMessage)
+            stopTelemetryEvent(event, context: context, error: error)
+
+            DispatchQueue.main.async {
+                delegate.onSignUpAttributesRequiredError(
+                    error: error,
+                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
+                )
             }
         case .error(let apiError):
             let error = apiError.toAttributesRequiredPublicError()
