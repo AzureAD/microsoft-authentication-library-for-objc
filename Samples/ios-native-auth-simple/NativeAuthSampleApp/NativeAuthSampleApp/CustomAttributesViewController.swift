@@ -225,7 +225,7 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
         dismissVerifyCodeModal()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
     }

@@ -156,7 +156,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         expectation?.fulfill()
@@ -191,7 +191,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         expectation?.fulfill()
@@ -217,7 +217,7 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         expectation?.fulfill()
@@ -237,7 +237,7 @@ class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDel
         expectation.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
     }
 }
 
@@ -254,6 +254,6 @@ class SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented: SignUpPasswor
         expectation.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
     }
 }
