@@ -84,12 +84,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: params.context)
-        await handleTokenResponse(
+        if let error = await handleTokenResponse(
             response,
             scopes: scopes,
             context: params.context,
             telemetryEvent: telemetryEvent,
-            delegate: delegate)
+            delegate: delegate) {
+            DispatchQueue.main.async { delegate.onSignInPasswordError(error: error)}
+        }
     }
 
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async {
@@ -122,9 +124,38 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInStartError()) }
         }
     }
-    
+
     func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
-        // TODO: handle signIn with SLT
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
+        let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context)
+        guard let slt = slt else {
+            let error = SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods")
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+            DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: error) }
+            return
+        }
+        let scopes = joinScopes(scopes)
+        guard let request = createTokenRequest(
+            scopes: scopes,
+            signInSLT: slt,
+            grantType: .slt,
+            context: context
+        ) else {
+            let error = SignInAfterSignUpError()
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+            DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: error) }
+            return
+        }
+        let config = factory.makeMSIDConfiguration(scope: scopes)
+        let response = await performAndValidateTokenRequest(request, config: config, context: context)
+        if let error = await handleTokenResponse(
+            response,
+            scopes: scopes,
+            context: context,
+            telemetryEvent: telemetryEvent,
+            delegate: delegate) {
+            DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: SignInAfterSignUpError(message: error.errorDescription)) }
+        }
     }
 
     func submitCode(
@@ -248,7 +279,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
-        delegate: SignInPasswordStartDelegate) async {
+        delegate: SignInCompletedDelegate) async -> SignInPasswordStartError? {
             let config = factory.makeMSIDConfiguration(scope: scopes)
             switch response {
             case .success(let validatedTokenResult, let tokenResponse):
@@ -259,13 +290,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     context: context,
                     config: config,
                     delegate: delegate)
+                return nil
             case .error(let errorType):
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "SignIn with username and password completed with errorType: \(errorType)")
+                    format: "SignIn completed with errorType: \(errorType)")
                 stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                DispatchQueue.main.async { delegate.onSignInPasswordError(error: errorType.convertToSignInPasswordStartError()) }
+                return errorType.convertToSignInPasswordStartError()
         }
     }
 
@@ -283,7 +315,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         MSALLogger.log(
             level: .verbose,
             context: context,
-            format: "SignIn with username and password completed successfully")
+            format: "SignIn completed successfully")
         DispatchQueue.main.async { delegate.onSignInCompleted(result: account) }
     }
 
@@ -356,6 +388,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         credentialToken: String? = nil,
         oobCode: String? = nil,
+        signInSLT: String? = nil,
         grantType: MSALNativeAuthGrantType,
         addNCAFlag: Bool = false,
         includeChallengeType: Bool = true,
@@ -365,7 +398,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 context: context,
                 username: username,
                 credentialToken: credentialToken,
-                signInSLT: nil,
+                signInSLT: signInSLT,
                 grantType: grantType,
                 scope: scopes.joinScopes(),
                 password: password,

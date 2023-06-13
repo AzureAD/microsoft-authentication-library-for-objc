@@ -26,10 +26,10 @@ import Foundation
 
 @objcMembers
 public class SignInAfterSignUpState: NSObject {
-    
+
     private let controller: MSALNativeAuthSignInControlling
     private let slt: String?
-    
+
     init(controller: MSALNativeAuthSignInControlling, slt: String?) {
         self.slt = slt
         self.controller = controller

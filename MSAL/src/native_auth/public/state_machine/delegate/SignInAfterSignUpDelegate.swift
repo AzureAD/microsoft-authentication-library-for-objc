@@ -25,7 +25,6 @@
 import Foundation
 
 @objc
-public protocol SignInAfterSignUpDelegate {
+public protocol SignInAfterSignUpDelegate: SignInCompletedDelegate {
     func onSignInAfterSignUpError(error: SignInAfterSignUpError)
-    func onSignInAfterSignUpCompleted(result: MSALNativeAuthUserAccount)
 }
