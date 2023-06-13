@@ -76,14 +76,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         switch apiError.error {
         case .verificationRequired:
             if let signUpToken = apiError.signUpToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
-                return .verificationRequired(signUpToken: signUpToken, unverifiedAttributes: extractAttributeName(from: unverifiedAttributes))
+                return .verificationRequired(signUpToken: signUpToken, unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes))
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/start for verification_required error")
                 return .unexpectedError
             }
         case .attributeValidationFailed:
             if let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
-                return .attributeValidationFailed(invalidAttributes: extractAttributeName(from: invalidAttributes))
+                return .attributeValidationFailed(invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
                 MSALLogger.log(
                     level: .error,
@@ -196,7 +196,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .invalidUserInput(apiError.error)
         case .attributeValidationFailed:
             if let signUpToken = apiError.signUpToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
-                return .attributeValidationFailed(signUpToken: signUpToken, invalidAttributes: extractAttributeName(from: invalidAttributes))
+                return .attributeValidationFailed(signUpToken: signUpToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
                 MSALLogger.log(
                     level: .error,
@@ -233,7 +233,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
-    private func extractAttributeName(from dictionaryList: [[String: String]]) -> [String] {
+    private func extractAttributeNames(from dictionaryList: [[String: String]]) -> [String] {
         return dictionaryList.map { $0.description }
     }
 }

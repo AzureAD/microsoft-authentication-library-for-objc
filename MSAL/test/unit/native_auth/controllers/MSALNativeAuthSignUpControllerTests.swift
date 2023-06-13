@@ -120,7 +120,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart + "[\"name\"]")
+        XCTAssertEqual(
+            delegate.error?.errorDescription,
+            String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, "[\"name\"]")
+        )
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
@@ -387,7 +390,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart + "[\"name\"]")
+        XCTAssertEqual(
+            delegate.error?.errorDescription,
+            String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, "[\"name\"]")
+        )
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
@@ -1448,7 +1454,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart + "[\"key\"]")
+        XCTAssertEqual(
+            delegate.error?.errorDescription,
+            String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, "[\"key\"]")
+        )
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
