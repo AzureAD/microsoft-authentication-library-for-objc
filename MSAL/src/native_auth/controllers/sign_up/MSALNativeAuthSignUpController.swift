@@ -401,10 +401,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) async {
         switch result {
         case .success(let slt):
-            // TODO: Handle slt
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/continue request")
-            stopTelemetryEvent(event, context: context)
-            DispatchQueue.main.async { delegate.onSignUpCompleted() }
+            handleSuccessfulSignUp(slt: slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
         case .invalidUserInput(_, let token):
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
 
@@ -525,7 +522,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext,
         signUpCompleted: @escaping (SignInAfterSignUpState) -> Void
     ) {
-        MSALLogger.log(level: .info, context: context, format: "Successful signup/continue submitAttributes request")
+        MSALLogger.log(level: .info, context: context, format: "SignUp completed successfully")
         let newState = SignInAfterSignUpState(controller: signInController, slt: slt)
         stopTelemetryEvent(event, context: context)
         DispatchQueue.main.async { signUpCompleted(newState) }
