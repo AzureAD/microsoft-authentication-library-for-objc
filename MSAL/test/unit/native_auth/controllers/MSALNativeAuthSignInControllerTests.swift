@@ -34,7 +34,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private var responseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
     private var contextMock: MSALNativeAuthRequestContextMock!
     private var tokenResult = MSIDTokenResult()
-    private var tokenResponse = MSIDAADTokenResponse()
+    private var tokenResponse = MSIDCIAMTokenResponse()
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private let defaultScopes = "openid profile offline_access"
 

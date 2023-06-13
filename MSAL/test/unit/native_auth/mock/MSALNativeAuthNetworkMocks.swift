@@ -78,7 +78,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
 
     var expectedRequestContext: MSALNativeAuthRequestContext?
     var expectedConfiguration: MSIDConfiguration?
-    var expectedTokenResponse: MSIDAADTokenResponse?
+    var expectedTokenResponse: MSIDCIAMTokenResponse?
     var expectedChallengeResponse: MSALNativeAuthSignInChallengeResponse?
     var expectedInitiateResponse: MSALNativeAuthSignInInitiateResponse?
     var expectedResponseError: Error?

@@ -50,7 +50,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
     // MARK: - ValidateResponse tests
 
     func test_validateResponse_returns_tokenResult() throws {
-        let response = MSIDAADTokenResponse()
+        let response = MSIDCIAMTokenResponse()
         defaultValidatorMock.shouldReturnTokenResult = true
 
         let result = try sut.validateResponse(tokenResponse: response, context: context, configuration: configuration, accountIdentifier: accountIdentifier)
@@ -58,7 +58,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
     }
 
     func test_validateResponse_returns_intune_policy_error() throws {
-        let response = MSIDAADTokenResponse()
+        let response = MSIDCIAMTokenResponse()
         defaultValidatorMock.shouldReturnServerProtectionPoliciesRequiredError = true
 
         XCTAssertThrowsError(try sut.validateResponse(tokenResponse: response, context: context, configuration: configuration, accountIdentifier: accountIdentifier)) {
@@ -67,7 +67,7 @@ final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
     }
 
     func test_validateResponse_returns_generic_error() throws {
-        let response = MSIDAADTokenResponse()
+        let response = MSIDCIAMTokenResponse()
         defaultValidatorMock.shouldThrowGenericError = true
 
         XCTAssertThrowsError(try sut.validateResponse(tokenResponse: response, context: context, configuration: configuration, accountIdentifier: accountIdentifier)) {
