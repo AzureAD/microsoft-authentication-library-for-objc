@@ -24,22 +24,26 @@
 
 import Foundation
 
-protocol MSALNativeAuthSignInControlling {
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async
-    func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async
-    func submitCode(
-        _ code: String,
-        credentialToken: String,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInVerifyCodeDelegate) async
-    func submitPassword(
-        _ password: String,
-        username: String,
-        credentialToken: String,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInPasswordRequiredDelegate) async
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
+@objcMembers
+public class SignInAfterSignUpState: NSObject {
+    
+    private let controller: MSALNativeAuthSignInControlling
+    private let slt: String?
+    
+    init(controller: MSALNativeAuthSignInControlling, slt: String?) {
+        self.slt = slt
+        self.controller = controller
+    }
+
+    public func signIn(
+        scopes: [String]? = nil,
+        correlationId: UUID? = nil,
+        delegate: SignInAfterSignUpDelegate
+    ) {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        Task {
+            await controller.signIn(slt: slt, scopes: scopes, context: context, delegate: delegate)
+        }
+    }
 }

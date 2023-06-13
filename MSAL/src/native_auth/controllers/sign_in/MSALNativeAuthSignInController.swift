@@ -122,6 +122,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             DispatchQueue.main.async { delegate.onSignInError(error: error.convertToSignInStartError()) }
         }
     }
+    
+    func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
+        // TODO: handle signIn with SLT
+    }
 
     func submitCode(
         _ code: String,

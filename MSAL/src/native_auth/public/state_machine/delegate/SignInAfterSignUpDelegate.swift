@@ -24,22 +24,8 @@
 
 import Foundation
 
-protocol MSALNativeAuthSignInControlling {
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async
-    func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async
-    func submitCode(
-        _ code: String,
-        credentialToken: String,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInVerifyCodeDelegate) async
-    func submitPassword(
-        _ password: String,
-        username: String,
-        credentialToken: String,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInPasswordRequiredDelegate) async
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
+@objc
+public protocol SignInAfterSignUpDelegate {
+    func onSignInAfterSignUpError(error: SignInAfterSignUpError)
+    func onSignInAfterSignUpCompleted(result: MSALNativeAuthUserAccount)
 }
