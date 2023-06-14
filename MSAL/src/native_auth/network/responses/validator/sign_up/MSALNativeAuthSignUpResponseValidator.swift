@@ -163,6 +163,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
         switch result {
         case .success(let response):
+            // Even if the `signInSLT` is nil, the signUp flow is considered successfully completed
             return .success(response.signinSLT)
         case .failure(let error):
             return handleContinueError(error, with: context)

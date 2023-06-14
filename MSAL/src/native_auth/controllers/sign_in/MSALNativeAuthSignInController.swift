@@ -129,7 +129,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context)
         guard let slt = slt else {
-            let error = SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods")
+            let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryEvent, context: context, error: error)
             DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: error) }
             return
@@ -341,7 +341,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     }
                 } else {
                     MSALLogger.log(level: .error, context: context, format: "SignIn, implementation of onSignInPasswordRequired required")
-                    let error = SignInStartError(type: .generalError, message: "Implementation of onSignInPasswordRequired required")
+                    let error = SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.passwordRequiredNotImplemented)
                     self.stopTelemetryEvent(telemetryEvent, context: context, error: error)
                     DispatchQueue.main.async { delegate.onSignInError(error: error)}
                 }
