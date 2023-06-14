@@ -437,7 +437,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .slowDown)
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidPassword)
     }
-    
+        
     func test_signInWithCodeResendCode_shouldSendNewCode() async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
@@ -528,6 +528,92 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(mockDelegate.newSignInCodeRequiredState?.flowToken, credentialToken)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
+    
+    // MARK: signIn using SLT
+    
+    func test_whenSignInWithSLT_signInIsCompletedSuccessfully() {
+        let request = MSIDHttpRequest()
+        let slt = "signInSLT"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        
+        let expectation = expectation(description: "SignInController")
+        
+        requestProviderMock.result = request
+        requestProviderMock.expectedContext = expectedContext
+        requestProviderMock.expectedTokenParams = MSALNativeAuthSignInTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: slt, grantType: .slt, scope: defaultScopes, password: nil, oobCode: nil, addNCAFlag: false, includeChallengeType: false)
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedUserAccount: MSALNativeAuthUserAccount(username: "username", accessToken: "accessToken", rawIdToken: "IdToken", scopes: [], expiresOn: Date()))
+        responseValidatorMock.tokenValidatedResponse = .success(tokenResult, tokenResponse)
+        responseValidatorMock.expectedTokenResponse = tokenResponse
+
+        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: true)
+    }
+    
+    func test_whenSignInWithSLTTokenRequestCreationFail_errorShouldBeReturned() {
+        let request = MSIDHttpRequest()
+        let slt = "signInSLT"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+        
+        let exp = expectation(description: "SignInController")
+        
+        requestProviderMock.throwingTokenError = MSALNativeAuthError()
+        requestProviderMock.expectedContext = expectedContext
+        
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError())
+
+        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+        
+        wait(for: [exp], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+    
+    func test_whenSignInWithSLTTokenReturnError_shouldReturnAnError() {
+        let request = MSIDHttpRequest()
+        let slt = "signInSLT"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        
+        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
+
+        let expectation = expectation(description: "SignInController")
+
+        requestProviderMock.result = request
+        requestProviderMock.expectedContext = expectedContext
+
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Invalid Client ID"))
+
+        responseValidatorMock.tokenValidatedResponse = .error(.invalidClient)
+
+        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+    
+    func test_whenSignInWithSLTHaveTokenNil_shouldReturnAnError() {        
+        let expectation = expectation(description: "SignInController")
+
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods"))
+
+        let state = SignInAfterSignUpState(controller: sut, slt: nil)
+        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.saveTokenWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+
     
     // MARK: private methods
     

@@ -41,4 +41,6 @@ enum MSALNativeAuthErrorMessage {
     static let userNotFound = "User does not exist"
     static let attributeValidationFailedSignUpStart = "Check the invalid attributes and start the sign-up process again. Invalid attributes: %@"
     static let attributeValidationFailed = "Invalid attributes: %@"
+    static let signInNotAvailable = "Sign In is not available at this point, please use the standalone sign in methods"
+    static let passwordRequiredNotImplemented = "Implementation of onSignInPasswordRequired required"
 }

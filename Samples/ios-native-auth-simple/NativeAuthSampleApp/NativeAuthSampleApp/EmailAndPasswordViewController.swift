@@ -168,7 +168,7 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
         }
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()
     }

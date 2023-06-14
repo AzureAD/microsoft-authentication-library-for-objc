@@ -163,21 +163,10 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
         switch result {
         case .success(let response):
-            return handleContinueSuccess(response, with: context)
+            // Even if the `signInSLT` is nil, the signUp flow is considered successfully completed
+            return .success(response.signinSLT)
         case .failure(let error):
             return handleContinueError(error, with: context)
-        }
-    }
-
-    private func handleContinueSuccess(
-        _ response: MSALNativeAuthSignUpContinueResponse,
-        with context: MSIDRequestContext
-    ) -> MSALNativeAuthSignUpContinueValidatedResponse {
-        if let slt = response.signinSLT {
-            return .success(slt)
-        } else {
-            MSALLogger.log(level: .error, context: context, format: "signin_slt is missing from signup/continue response")
-            return .unexpectedError
         }
     }
 

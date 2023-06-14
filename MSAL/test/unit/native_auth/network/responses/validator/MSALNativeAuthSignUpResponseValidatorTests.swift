@@ -308,13 +308,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .success("<signin_slt>"))
     }
 
-    func test_whenSignUpStartSuccessResponseButDoesNotContainSLT_it_returns_unexpectedError() throws {
+    func test_whenSignUpStartSuccessResponseButDoesNotContainSLT_it_returns_successWithNoSLT() throws {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
             .init(signinSLT: nil, expiresIn: nil, signupToken: nil)
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError)
+        XCTAssertEqual(result, .success(nil))
     }
 
     func test_whenSignUpContinueErrorResponseIsNotExpected_it_returns_unexpectedError() {

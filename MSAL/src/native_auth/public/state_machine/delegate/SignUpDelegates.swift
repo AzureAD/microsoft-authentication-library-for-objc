@@ -47,7 +47,7 @@ public protocol SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
     @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
-    func onSignUpCompleted()
+    func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
@@ -65,11 +65,11 @@ public protocol SignUpResendCodeDelegate {
 public protocol SignUpPasswordRequiredDelegate {
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
-    func onSignUpCompleted()
+    func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpAttributesRequiredDelegate {
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
-    func onSignUpCompleted()
+    func onSignUpCompleted(newState: SignInAfterSignUpState)
 }

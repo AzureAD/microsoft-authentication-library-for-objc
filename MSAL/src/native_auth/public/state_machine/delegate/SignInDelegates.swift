@@ -25,13 +25,9 @@
 import Foundation
 
 @objc
-public protocol SignInCompletedDelegate {
-    func onSignInCompleted(result: MSALNativeAuthUserAccount)
-}
-
-@objc
-public protocol SignInPasswordStartDelegate: SignInCompletedDelegate {
+public protocol SignInPasswordStartDelegate {
     func onSignInPasswordError(error: SignInPasswordStartError)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
@@ -45,8 +41,9 @@ public protocol SignInStartDelegate {
 }
 
 @objc
-public protocol SignInPasswordRequiredDelegate: SignInCompletedDelegate {
+public protocol SignInPasswordRequiredDelegate {
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }
 
 @objc
@@ -59,6 +56,7 @@ public protocol SignInResendCodeDelegate {
 }
 
 @objc
-public protocol SignInVerifyCodeDelegate: SignInCompletedDelegate {
+public protocol SignInVerifyCodeDelegate {
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
+    func onSignInCompleted(result: MSALNativeAuthUserAccount)
 }

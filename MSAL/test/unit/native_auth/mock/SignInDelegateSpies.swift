@@ -232,3 +232,35 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
         expectation.fulfill()
     }
 }
+
+open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
+    
+    private let expectation: XCTestExpectation
+    var expectedError: SignInAfterSignUpError?
+    var expectedUserAccount: MSALNativeAuthUserAccount?
+    
+    init(expectation: XCTestExpectation, expectedError: SignInAfterSignUpError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedUserAccount = expectedUserAccount
+    }
+    
+    public func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
+        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+    
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        guard let expectedUserAccount = expectedUserAccount else {
+            XCTFail("expectedUserAccount expected not nil")
+            expectation.fulfill()
+            return
+        }
+        XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
+        XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
+        XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}

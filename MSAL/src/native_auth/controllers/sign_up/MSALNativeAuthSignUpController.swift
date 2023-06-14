@@ -32,16 +32,19 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     private let requestProvider: MSALNativeAuthSignUpRequestProviding
     private let responseValidator: MSALNativeAuthSignUpResponseValidating
+    private let signInController: MSALNativeAuthSignInControlling
 
     // MARK: - Init
 
     init(
         config: MSALNativeAuthConfiguration,
         requestProvider: MSALNativeAuthSignUpRequestProviding,
-        responseValidator: MSALNativeAuthSignUpResponseValidating
+        responseValidator: MSALNativeAuthSignUpResponseValidating,
+        signInController: MSALNativeAuthSignInControlling
     ) {
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
+        self.signInController = signInController
         super.init(clientId: config.clientId)
     }
 
@@ -52,7 +55,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
                 telemetryProvider: MSALNativeAuthTelemetryProvider()
             ),
-            responseValidator: MSALNativeAuthSignUpResponseValidator()
+            responseValidator: MSALNativeAuthSignUpResponseValidator(),
+            signInController: MSALNativeAuthSignInController(config: config)
         )
     }
 
@@ -423,10 +427,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) async {
         switch result {
         case .success(let slt):
-            // TODO: Handle slt
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/continue request")
-            stopTelemetryEvent(event, context: context)
-            DispatchQueue.main.async { delegate.onSignUpCompleted() }
+            completeSignUpUsingSLT(slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
         case .invalidUserInput:
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
 
@@ -489,10 +490,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) {
         switch result {
         case .success(let slt):
-            // TODO: Handle slt
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/continue submitPassword request")
-            stopTelemetryEvent(event, context: context)
-            DispatchQueue.main.async { delegate.onSignUpCompleted() }
+            completeSignUpUsingSLT(slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
         case .invalidUserInput(let error):
             let error = error.toPasswordRequiredPublicError()
             stopTelemetryEvent(event, context: context, error: error)
@@ -554,10 +552,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) {
         switch result {
         case .success(let slt):
-            // TODO: Handle slt
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/continue submitAttributes request")
-            stopTelemetryEvent(event, context: context)
-            DispatchQueue.main.async { delegate.onSignUpCompleted() }
+            completeSignUpUsingSLT(slt, event: event, context: context, signUpCompleted: delegate.onSignUpCompleted)
         case .invalidUserInput:
             let error = AttributesRequiredError(type: .invalidAttributes)
             stopTelemetryEvent(event, context: context, error: error)
@@ -600,5 +595,17 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: "Unexpected error in signup/continue submitAttributes request \(error)")
             DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: error, newState: nil) }
         }
+    }
+
+    private func completeSignUpUsingSLT(
+        _ slt: String?,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        signUpCompleted: @escaping (SignInAfterSignUpState) -> Void
+    ) {
+        MSALLogger.log(level: .info, context: context, format: "SignUp completed successfully")
+        let newState = SignInAfterSignUpState(controller: signInController, slt: slt)
+        stopTelemetryEvent(event, context: context)
+        DispatchQueue.main.async { signUpCompleted(newState) }
     }
 }

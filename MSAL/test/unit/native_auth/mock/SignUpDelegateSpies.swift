@@ -165,7 +165,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         XCTAssertTrue(Thread.isMainThread)
@@ -203,7 +203,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         XCTAssertTrue(Thread.isMainThread)
@@ -231,7 +231,7 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
         XCTAssertTrue(Thread.isMainThread)
@@ -253,7 +253,7 @@ class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDel
         expectation.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         XCTAssertTrue(Thread.isMainThread)
     }
 }
@@ -272,7 +272,7 @@ class SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented: SignUpPasswor
         expectation.fulfill()
     }
 
-    func onSignUpCompleted() {
+    func onSignUpCompleted(newState: SignInAfterSignUpState) {
         XCTAssertTrue(Thread.isMainThread)
     }
 }
