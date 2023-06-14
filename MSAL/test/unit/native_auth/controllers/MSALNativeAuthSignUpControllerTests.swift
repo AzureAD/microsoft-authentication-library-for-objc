@@ -62,7 +62,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
             config: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
             responseValidator: validatorMock,
-            signInController: MSALNativeAuthSignInWithSLTControllerMock()
+            signInController: MSALNativeAuthSignInControllerMock()
         )
     }
 
