@@ -89,7 +89,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             scopes: scopes,
             context: params.context,
             telemetryEvent: telemetryEvent,
-            delegate: delegate,
+            onSuccess: delegate.onSignInCompleted,
             onError: delegate.onSignInPasswordError)
     }
 
@@ -148,12 +148,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
-        await handleTokenResponse(
+        handleTokenResponse(
             response,
             scopes: scopes,
             context: context,
             telemetryEvent: telemetryEvent,
-            delegate: delegate) { passwordRequiredError in
+            onSuccess: delegate.onSignInCompleted) { passwordRequiredError in
                 delegate.onSignInAfterSignUpError(error: SignInAfterSignUpError(message: passwordRequiredError.errorDescription))
             }
     }
@@ -189,7 +189,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             handleSuccessfulTokenResult(
                 tokenResult: validatedTokenResult,
                 tokenResponse: tokenResponse,
-                telemetryEvent: telemetryEvent, context: context, config: config, delegate: delegate)
+                telemetryEvent: telemetryEvent,
+                context: context,
+                config: config,
+                onSuccess: delegate.onSignInCompleted)
         case .error(let errorType):
             MSALLogger.log(
                 level: .error,
@@ -231,7 +234,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             handleSuccessfulTokenResult(
                 tokenResult: validatedTokenResult,
                 tokenResponse: tokenResponse,
-                telemetryEvent: telemetryEvent, context: context, config: config, delegate: delegate)
+                telemetryEvent: telemetryEvent,
+                context: context,
+                config: config,
+                onSuccess: delegate.onSignInCompleted)
         case .error(let errorType):
             MSALLogger.log(
                 level: .error,
@@ -279,8 +285,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
-        delegate: SignInCompletedDelegate,
-        onError: @escaping (SignInPasswordStartError) -> Void) async {
+        onSuccess: @escaping (MSALNativeAuthUserAccount) -> Void,
+        onError: @escaping (SignInPasswordStartError) -> Void) {
             let config = factory.makeMSIDConfiguration(scope: scopes)
             switch response {
             case .success(let validatedTokenResult, let tokenResponse):
@@ -290,7 +296,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     telemetryEvent: telemetryEvent,
                     context: context,
                     config: config,
-                    delegate: delegate)
+                    onSuccess: onSuccess)
             case .error(let errorType):
                 MSALLogger.log(
                     level: .error,
@@ -307,7 +313,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         telemetryEvent: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         config: MSIDConfiguration,
-        delegate: SignInCompletedDelegate) {
+        onSuccess: @escaping (MSALNativeAuthUserAccount) -> Void) {
         telemetryEvent?.setUserInformation(tokenResult.account)
         cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
         let account = factory.makeUserAccount(tokenResult: tokenResult)
@@ -316,7 +322,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             level: .verbose,
             context: context,
             format: "SignIn completed successfully")
-        DispatchQueue.main.async { delegate.onSignInCompleted(result: account) }
+        DispatchQueue.main.async { onSuccess(account) }
     }
 
     private func handleChallengeResponse(

@@ -531,7 +531,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     
     // MARK: signIn using SLT
     
-    func test_whenSignInWithSLT_signInIsCompletedSuccessfully() async {
+    func test_whenSignInWithSLT_signInIsCompletedSuccessfully() {
         let request = MSIDHttpRequest()
         let slt = "signInSLT"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -577,7 +577,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
     
-    func test_whenSignInWithSLTTokenReturnError_shouldReturnAnError() async {
+    func test_whenSignInWithSLTTokenReturnError_shouldReturnAnError() {
         let request = MSIDHttpRequest()
         let slt = "signInSLT"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -601,7 +601,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
     
-    func test_whenSignInWithSLTHaveTokenNil_shouldReturnAnError() async {        
+    func test_whenSignInWithSLTHaveTokenNil_shouldReturnAnError() {        
         let expectation = expectation(description: "SignInController")
 
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods"))
