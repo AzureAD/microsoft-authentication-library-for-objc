@@ -84,14 +84,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: params.context)
-        if let error = await handleTokenResponse(
+        await handleTokenResponse(
             response,
             scopes: scopes,
             context: params.context,
             telemetryEvent: telemetryEvent,
-            delegate: delegate) {
-            DispatchQueue.main.async { delegate.onSignInPasswordError(error: error)}
-        }
+            delegate: delegate,
+            onError: delegate.onSignInPasswordError)
     }
 
     func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async {
@@ -149,14 +148,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         }
         let config = factory.makeMSIDConfiguration(scope: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
-        if let error = await handleTokenResponse(
+        await handleTokenResponse(
             response,
             scopes: scopes,
             context: context,
             telemetryEvent: telemetryEvent,
-            delegate: delegate) {
-            DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: SignInAfterSignUpError(message: error.errorDescription)) }
-        }
+            delegate: delegate) { passwordRequiredError in
+                delegate.onSignInAfterSignUpError(error: SignInAfterSignUpError(message: passwordRequiredError.errorDescription))
+            }
     }
 
     func submitCode(
@@ -280,7 +279,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
-        delegate: SignInCompletedDelegate) async -> SignInPasswordStartError? {
+        delegate: SignInCompletedDelegate,
+        onError: @escaping (SignInPasswordStartError) -> Void) async {
             let config = factory.makeMSIDConfiguration(scope: scopes)
             switch response {
             case .success(let validatedTokenResult, let tokenResponse):
@@ -291,14 +291,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                     context: context,
                     config: config,
                     delegate: delegate)
-                return nil
             case .error(let errorType):
                 MSALLogger.log(
                     level: .error,
                     context: context,
                     format: "SignIn completed with errorType: \(errorType)")
                 stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                return errorType.convertToSignInPasswordStartError()
+                DispatchQueue.main.async { onError(errorType.convertToSignInPasswordStartError()) }
         }
     }
 
