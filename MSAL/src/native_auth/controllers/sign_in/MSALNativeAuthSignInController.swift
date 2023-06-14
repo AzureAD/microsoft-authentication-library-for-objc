@@ -129,6 +129,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context)
         guard let slt = slt else {
+            MSALLogger.log(level: .error, context: context, format: "SignIn not available because SLT is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryEvent, context: context, error: error)
             DispatchQueue.main.async { delegate.onSignInAfterSignUpError(error: error) }
