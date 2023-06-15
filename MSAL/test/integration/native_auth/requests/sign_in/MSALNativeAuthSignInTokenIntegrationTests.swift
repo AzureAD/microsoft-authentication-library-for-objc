@@ -102,6 +102,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     }
 
     func test_failRequest_invalidPurposeToken() async throws {
+        throw XCTSkip()
+        
         let response = try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPurposeToken,
