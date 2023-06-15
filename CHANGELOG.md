@@ -1,3 +1,5 @@
+## [TBD]
+* Remove references to deprecated APIs. (#1779)
 ## [1.2.12]
 * Support read device info when ecc is on. (#1714)
 * Add troubleshooting flow when doing Just in Time registration (#1646)
