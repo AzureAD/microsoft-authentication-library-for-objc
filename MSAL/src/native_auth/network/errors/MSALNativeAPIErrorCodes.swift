@@ -28,4 +28,5 @@ enum MSALNativeAPIErrorCodes: Int, Decodable {
     case invalidOTP = 50181
     case invalidAuthenticationType = 400002
     case strongAuthRequired = 50076
+    case invalidPasswordResetToken = 550003
 }

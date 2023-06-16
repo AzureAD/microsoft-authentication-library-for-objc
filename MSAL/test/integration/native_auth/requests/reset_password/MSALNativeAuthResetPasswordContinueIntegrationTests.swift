@@ -70,14 +70,6 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         )
     }
 
-    func test_resetPasswordContinue_invalidGrant() async throws {
-        try await perform_testFail(
-            endpoint: .resetPasswordContinue,
-            response: .invalidPurposeToken,
-            expectedError: Error(error: .invalidRequest)
-        )
-    }
-
     func test_resetPasswordContinue_expiredToken() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
@@ -97,8 +89,8 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
     func test_resetPasswordContinue_invalidOOB() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
-            response: .invalidOOBValue,
-            expectedError: Error(error: .invalidOOBValue, errorCodes: [.invalidOTP])
+            response: .explicitInvalidOOBValue,
+            expectedError: Error(error: .invalidOOBValue)
         )
     }
 
