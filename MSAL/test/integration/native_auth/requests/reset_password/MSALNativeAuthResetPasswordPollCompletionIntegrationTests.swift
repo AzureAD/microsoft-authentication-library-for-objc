@@ -112,8 +112,8 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         )
     }
 
-    func test_resetPasswordChallenge_invalidPasswordResetToken() async throws {
-        let response = try await perform_testFail(
+    func test_resetPasswordPollCompletion_invalidPasswordResetToken() async throws {
+        try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .invalidPasswordResetToken,
             expectedError: Error(error: .invalidRequest)
