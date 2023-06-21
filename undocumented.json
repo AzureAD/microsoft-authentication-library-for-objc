@@ -58,21 +58,21 @@
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
-      "line": 32,
+      "line": 33,
       "symbol": "MSALAuthenticationSchemeProtocol",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.protocol",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
-      "line": 34,
+      "line": 35,
       "symbol": "MSALAuthenticationSchemeProtocol.scheme",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAuthenticationSchemeProtocol.h",
-      "line": 36,
+      "line": 37,
       "symbol": "MSALAuthenticationSchemeProtocol.authenticationScheme",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
