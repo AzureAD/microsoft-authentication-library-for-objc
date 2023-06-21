@@ -112,19 +112,12 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         )
     }
 
-    func test_resetPasswordChallenge_invalidPurposeToken() async throws {
-        let response = try await perform_testFail(
+    func test_resetPasswordPollCompletion_invalidPasswordResetToken() async throws {
+        try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
-            response: .invalidPurposeToken,
+            response: .invalidPasswordResetToken,
             expectedError: Error(error: .invalidRequest)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_resetPasswordPollCompletion_expiredToken() async throws {

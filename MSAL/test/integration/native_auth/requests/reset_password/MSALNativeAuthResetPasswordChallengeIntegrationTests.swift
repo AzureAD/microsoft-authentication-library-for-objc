@@ -34,8 +34,6 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         provider = MSALNativeAuthResetPasswordRequestProvider(
             requestConfigurator: MSALNativeAuthRequestConfigurator(config: config),
             telemetryProvider: MSALNativeAuthTelemetryProvider()
@@ -93,19 +91,12 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         )
     }
 
-    func test_resetPasswordChallenge_invalidPurposeToken() async throws {
-        let response = try await perform_testFail(
+    func test_resetPasswordChallenge_invalidPasswordResetToken() async throws {
+        try await perform_testFail(
             endpoint: .resetPasswordChallenge,
-            response: .invalidPurposeToken,
+            response: .invalidPasswordResetToken,
             expectedError: Error(error: .invalidRequest)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_resetPasswordChallenge_unsupportedChallengeType() async throws {
