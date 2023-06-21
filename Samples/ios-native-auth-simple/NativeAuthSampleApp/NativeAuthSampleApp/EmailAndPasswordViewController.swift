@@ -38,7 +38,7 @@ class EmailAndPasswordViewController: UIViewController {
 
     var verifyCodeViewController: VerifyCodeViewController?
 
-    var account: MSALNativeAuthUserAccount?
+    var accountResult: MSALNativeAuthUserAccountResult?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,6 +56,7 @@ class EmailAndPasswordViewController: UIViewController {
             print("Unable to initialize MSAL \(error)")
             showResultText("Unable to initialize MSAL")
         }
+        checkAccountExists()
     }
 
     @IBAction func signUpPressed(_: Any) {
@@ -81,12 +82,13 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
-        guard account != nil else {
+        guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return
         }
+        accountResult?.signOut()
 
-        account = nil
+        accountResult = nil
 
         showResultText("Signed out")
 
@@ -98,11 +100,26 @@ class EmailAndPasswordViewController: UIViewController {
     }
 
     func updateUI() {
-        let signedIn = (account != nil)
+        let signedIn = (accountResult != nil)
 
         signUpButton.isEnabled = !signedIn
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
+    }
+
+    func checkAccountExists() {
+        accountResult = nativeAuth.getNativeAuthUserAccount()
+        if let accountResult = accountResult {
+            print("Account already exists, logging in")
+            print("Account username: \(accountResult.username)")
+            print("Raw Id Token: \(accountResult.idToken ?? "")")
+            print("Scopes: \(accountResult.scopes)")
+            print("Expires On: \(String(describing: accountResult.expiresOn))")
+            print("Attributes: \(accountResult.accountClaims)")
+            accountResult.getAccessToken(delegate: self)
+        } else {
+            print("No account found")
+        }
     }
 }
 
@@ -214,12 +231,9 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
 
 extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
 
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
-
-        account = result
-
-        updateUI()
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        accountResult = result
+        result.getAccessToken(delegate: self)
     }
 
     func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
@@ -240,6 +254,20 @@ extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
         codeLength _: Int
     ) {
         showResultText("Unexpected result while signing in: Verification required")
+    }
+}
+
+// MARK: - Credentials delegates
+
+extension EmailAndPasswordViewController: CredentialsDelegate {
+    func onAccessTokenRetrieveCompleted(accessToken: String) {
+        print("Access Token: \(accessToken)")
+        showResultText("Signed in successfully. Access Token: \(accessToken)")
+        updateUI()
+    }
+
+    func onAccessTokenRetrieveError(error: MSAL.RetrieveTokenError) {
+        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
     }
 }
 

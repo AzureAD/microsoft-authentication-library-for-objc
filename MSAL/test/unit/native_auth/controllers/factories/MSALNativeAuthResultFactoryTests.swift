@@ -45,7 +45,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     }
 
     func test_makeMsidConfiguration() {
-        let result = sut.makeMSIDConfiguration(scope: ["<scope_1>", "<scope_2>"])
+        let result = sut.makeMSIDConfiguration(scopes: ["<scope_1>", "<scope_2>"])
 
         XCTAssertEqual(result.authority, MSALNativeAuthNetworkStubs.msidAuthority)
         XCTAssertNil(result.redirectUri)
@@ -64,14 +64,21 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         accessToken.accountIdentifier = MSIDAccountIdentifier(displayableId: username, homeAccountId: "")
         accessToken.expiresOn = expiresOn
         accessToken.scopes = NSOrderedSet(array: scopes)
-        guard let tokenResult = MSIDTokenResult(accessToken: accessToken, refreshToken: nil, idToken: idToken, account: MSIDAccount(), authority: MSALNativeAuthNetworkStubs.msidAuthority, correlationId: UUID(), tokenResponse: nil) else {
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = "refreshToken"
+        let msidAccount = MSIDAccount()
+        msidAccount.username = username
+        guard let tokenResult = MSIDTokenResult(accessToken: accessToken, refreshToken: refreshToken, idToken: idToken, account: msidAccount, authority: MSALNativeAuthNetworkStubs.msidAuthority, correlationId: UUID(), tokenResponse: nil) else {
             XCTFail("Unexpected nil token")
             return
         }
-        let account = sut.makeUserAccount(tokenResult: tokenResult)
-        XCTAssertEqual(account.accessToken, accessTokenString)
+        let context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        guard let account = sut.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
+            XCTFail("Unexpected nil account")
+            return
+        }
         XCTAssertEqual(account.username, username)
-        XCTAssertEqual(account.rawIdToken, idToken)
+        XCTAssertEqual(account.idToken, idToken)
         XCTAssertEqual(account.expiresOn, expiresOn)
         XCTAssertEqual(account.scopes, scopes)
     }

@@ -44,29 +44,44 @@ class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuilda
             config: MSALNativeAuthConfigStubs.configuration
         )
     }
+
+    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+        MSALNativeAuthCredentialsController(
+            config: MSALNativeAuthConfigStubs.configuration
+        )
+    }
 }
 
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
-    
+
     var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
+    private(set) var makeNativeAuthUserAccountResult: MSALNativeAuthUserAccountResult?
 
-    
-    func makeUserAccount(tokenResult: MSIDTokenResult) -> MSAL.MSALNativeAuthUserAccount {
-        return .init(
-            username: "username",
-            accessToken: "accessToken",
-            rawIdToken: "IdToken",
-            scopes: [],
-            expiresOn: Date())
+    func mockMakeUserAccountResult(_ result: MSALNativeAuthUserAccountResult) {
+        self.makeNativeAuthUserAccountResult = result
+    }
+
+    func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
+        return makeNativeAuthUserAccountResult ?? .init(account:
+                                                            MSALAccount.init(msidAccount: tokenResult.account,
+                                                                             createTenantProfile: false),
+                                                        authTokens:
+                                                            MSALNativeAuthTokens(accessToken: tokenResult.accessToken,
+                                                                                 refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
+                                                                                 rawIdToken: tokenResult.rawIdToken))
+    }
+
+    func makeUserAccountResult(account: MSALAccount, authTokens: MSAL.MSALNativeAuthTokens) -> MSAL.MSALNativeAuthUserAccountResult? {
+        return makeNativeAuthUserAccountResult ?? .init(account: account, authTokens: authTokens)
     }
 
     func mockMakeMsidConfigurationFunc(_ result: MSIDConfiguration) {
         self.makeMsidConfigurationResult = result
     }
 
-    func makeMSIDConfiguration(scope: [String]) -> MSIDConfiguration {
+    func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {
         return makeMsidConfigurationResult ?? MSALNativeAuthConfigStubs.msidConfiguration
     }
 }

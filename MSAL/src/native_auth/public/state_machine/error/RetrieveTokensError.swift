@@ -22,16 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-class MSALNativeAuthTokens {
-    let accessToken: MSIDAccessToken?
-    let refreshToken: MSIDRefreshToken?
-    let rawIdToken: String?
+@objc
+public class RetrieveTokenError: MSALNativeAuthError {
+    @objc public let type: RetrieveTokenErrorType
 
-    init(accessToken: MSIDAccessToken?, refreshToken: MSIDRefreshToken?, rawIdToken: String?) {
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-        self.rawIdToken = rawIdToken
+    init(type: RetrieveTokenErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
     }
+}
+
+@objc
+public enum RetrieveTokenErrorType: Int {
+    case generalError
+    case tokenNotFound
 }

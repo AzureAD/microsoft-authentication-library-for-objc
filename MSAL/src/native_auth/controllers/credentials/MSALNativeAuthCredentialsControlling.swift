@@ -22,16 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-class MSALNativeAuthTokens {
-    let accessToken: MSIDAccessToken?
-    let refreshToken: MSIDRefreshToken?
-    let rawIdToken: String?
-
-    init(accessToken: MSIDAccessToken?, refreshToken: MSIDRefreshToken?, rawIdToken: String?) {
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-        self.rawIdToken = rawIdToken
-    }
+protocol MSALNativeAuthCredentialsControlling {
+    func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult?
 }

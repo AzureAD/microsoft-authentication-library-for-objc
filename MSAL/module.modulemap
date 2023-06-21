@@ -86,5 +86,8 @@ module MSAL_Private {
     header "src/configuration/external/ios/MSALLegacySharedADALAccount.h"
     header "src/MSALPublicClientApplication+Internal.h"
     header "IdentityCore/IdentityCore/src/MSIDError.h"
+    header "src/MSALAccount+Internal.h"
+    header "src/configuration/external/MSALExternalAccountHandler.h"
+    header "src/instance/MSALAccountsProvider.h"
     export *
 }

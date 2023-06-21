@@ -27,17 +27,21 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
-    
+
+    private let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
     private var sut: MSALNativeAuthSignInResponseValidator!
     private var responseHandler: MSALNativeAuthTokenResponseHandlerMock!
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private var tokenResponse = MSIDTokenResponse()
-    
+    private var factory: MSALNativeAuthResultFactoryMock!
+
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        
+
+        factory =  MSALNativeAuthResultFactoryMock()
         responseHandler = MSALNativeAuthTokenResponseHandlerMock()
-        sut = MSALNativeAuthSignInResponseValidator(tokenResponseHandler: responseHandler)
+        sut = MSALNativeAuthSignInResponseValidator(tokenResponseHandler: responseHandler, factory: factory)
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -48,11 +52,21 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenValidSignInTokenResponse_validationIsSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let userAccountResult = MSALNativeAuthUserAccountResult(account:
+                                                                    MSALNativeAuthUserAccountResultStub.account,
+                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
+                                                                                                 refreshToken: nil,
+                                                                                                 rawIdToken: nil))
         let tokenResult = MSIDTokenResult()
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.familyId = "familyId"
+        refreshToken.refreshToken = "refreshToken"
+        tokenResult.refreshToken = refreshToken
         let tokenResponse = MSIDCIAMTokenResponse()
         responseHandler.mockHandleTokenFunc(result: tokenResult)
+        factory.mockMakeUserAccountResult(userAccountResult)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
-        if case .success(tokenResult, tokenResponse) = result {} else {
+        if case .success(userAccountResult, tokenResult, tokenResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

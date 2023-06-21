@@ -29,16 +29,31 @@ import XCTest
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     enum E: Error {
         case notImplemented
+        case noAccount
+        case noTokens
     }
 
     private(set) var saveTokenWasCalled = false
+    private(set) var clearCacheWasCalled = false
+    var mockUserAccounts: [MSALAccount]?
+    var mockAuthTokens: MSALNativeAuthTokens?
 
     func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
-        throw E.notImplemented
+        guard let mockAuthTokens = mockAuthTokens else {
+            throw E.noTokens
+        }
+        return mockAuthTokens
     }
 
     func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount? {
         throw E.notImplemented
+    }
+
+    func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
+        guard let mockUserAccounts = mockUserAccounts else {
+            throw E.noAccount
+        }
+        return mockUserAccounts
     }
 
     func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
@@ -50,6 +65,6 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     }
 
     func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
-        throw E.notImplemented
+        clearCacheWasCalled = true
     }
 }

@@ -51,7 +51,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+        func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
             XCTFail()
             expectation.fulfill()
         }
@@ -76,7 +76,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             expectation.fulfill()
         }
         
-        func completed(result: MSAL.MSALNativeAuthUserAccount) {
+        func completed(result: MSAL.MSALNativeAuthUserAccountResult) {
             XCTFail()
             expectation.fulfill()
         }

@@ -28,9 +28,6 @@ import Foundation
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
     private let controllerFactory: MSALNativeAuthControllerBuildable
-    // TODO: Remove kMockAccessToken when mock functionality is no longer required in SDK
-    // swiftlint:disable:next line_length
-    private let kMockAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSIsImtpZCI6Imk2bEdrM0ZaenhSY1ViMkMzbkVRN3N5SEpsWSJ9"
     private let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
@@ -242,14 +239,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    public func getUserAccount() async throws -> MSALNativeAuthUserAccount? {
-        return MSALNativeAuthUserAccount(
-            username: "email@contoso.com",
-            accessToken: kMockAccessToken,
-            rawIdToken: nil,
-            scopes: [],
-            expiresOn: Date()
-        )
+    public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
+        let controller = controllerFactory.makeCredentialsController()
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        return controller.retrieveUserAccountResult(context: context)
     }
 
     private static func getInternalChallengeTypes(

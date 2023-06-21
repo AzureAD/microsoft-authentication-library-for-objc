@@ -28,7 +28,7 @@
 
 
 
-@interface ObjCViewController () <SignInPasswordStartDelegate>
+@interface ObjCViewController () <SignInPasswordStartDelegate, CredentialsDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *emailTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
@@ -38,7 +38,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *signOutButton;
 
 @property (strong) MSALNativeAuthPublicClientApplication *nativeAuth;
-@property (strong) MSALNativeAuthUserAccount *account;
+@property (strong) MSALNativeAuthUserAccountResult *accountResult;
 
 @end
 
@@ -74,12 +74,12 @@
 }
 
 - (IBAction)signOutPressed:(id)sender {
-    if (self.account == nil) {
+    if (self.accountResult == nil) {
         NSLog(@"signOutPressed: Not currently signed in.");
         return;
     }
 
-    self.account = nil;
+    self.accountResult = nil;
 
     [self showResultText:@"Signed out."];
 
@@ -91,7 +91,7 @@
 }
 
 - (void)updateUI {
-    BOOL signedIn = (self.account != nil);
+    BOOL signedIn = (self.accountResult != nil);
 
     self.signInButton.enabled = !signedIn;
     self.signOutButton.enabled = signedIn;
@@ -103,12 +103,9 @@
     NSLog(@"Unexpected state while signing in: Code Required");
 }
 
-- (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccount * _Nonnull)result {
-    [self showResultText:[NSString stringWithFormat:@"Signed in successfully. Access Token: %@", result.accessToken]];
-
-    self.account = result;
-
-    [self updateUI];
+- (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccountResult * _Nonnull)result {
+    self.accountResult = result;
+    [result getAccessTokenWithDelegate:self];
 }
 
 - (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {
@@ -124,6 +121,17 @@
         default:
             [self showResultText:[NSString stringWithFormat:@"Unexpected error signing in: %@", @(error.type)]];
     }
+}
+
+#pragma mark -  Credentials Delegate methods
+
+- (void)onAccessTokenRetrieveCompletedWithAccessToken:(NSString *)accessToken {
+    [self showResultText:[NSString stringWithFormat:@"Signed in successfully. Access Token: %@", accessToken]];
+    [self updateUI];
+}
+
+- (void)onAccessTokenRetrieveErrorWithError:(RetrieveTokenError *)error {
+    [self showResultText:[NSString stringWithFormat:@"Unexpected error retrieving access token in: %@", @(error.type)]];
 }
 
 @end

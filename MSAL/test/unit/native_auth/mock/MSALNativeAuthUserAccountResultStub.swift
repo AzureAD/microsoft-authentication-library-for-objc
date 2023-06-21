@@ -16,41 +16,40 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@objc
-public final class MSALNativeAuthUserAccount: NSObject {
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Private
 
-    @objc public let username: String
-    @objc public let accessToken: String
-    @objc public let rawIdToken: String?
-    @objc public let scopes: [String]
-    @objc public let expiresOn: Date
-    @objc public let attributes: [String: Any]
+import Foundation
 
-    init(
-        username: String,
-        accessToken: String,
-        rawIdToken: String?,
-        scopes: [String],
-        expiresOn: Date,
-        attributes: [String: Any] = [:]
-    ) {
-        self.username = username
-        self.accessToken = accessToken
-        self.rawIdToken = rawIdToken
-        self.scopes = scopes
-        self.expiresOn = expiresOn
-        self.attributes = attributes
+struct MSALNativeAuthUserAccountResultStub {
+
+    static var result : MSALNativeAuthUserAccountResult {
+        return MSALNativeAuthUserAccountResult(account: account,
+                                               authTokens: authTokens)
     }
 
-    public func signOut() {
-        MSALLogger.log(level: .info,
-                       context: nil,
-                       format: "Account with username \(username) has been logged out. All tokens cleared.")
+    static var account: MSALAccount {
+        MSALAccount(username: "username",
+                    homeAccountId: MSALAccountId(),
+                    environment: "",
+                    tenantProfiles: [])
     }
+
+    static var authTokens: MSALNativeAuthTokens {
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "accessToken"
+        accessToken.expiresOn = Date()
+        accessToken.scopes = []
+        return MSALNativeAuthTokens(accessToken: accessToken,
+                             refreshToken: nil,
+                             rawIdToken: "IdToken")
+    }
+
 }

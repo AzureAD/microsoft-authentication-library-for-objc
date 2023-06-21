@@ -36,6 +36,8 @@ protocol MSALNativeAuthCacheInterface {
         authority: MSIDAuthority,
         context: MSIDRequestContext) throws -> MSIDAccount?
 
+    func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount]
+
     func saveTokensAndAccount(
         tokenResult: MSIDTokenResponse,
         configuration: MSIDConfiguration,

@@ -45,9 +45,11 @@ protocol MSALNativeAuthSignInResponseValidating {
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
     private let tokenResponseHandler: MSALNativeAuthTokenResponseHandling
+    private let factory: MSALNativeAuthResultBuildable
 
-    init(tokenResponseHandler: MSALNativeAuthTokenResponseHandling) {
+    init(tokenResponseHandler: MSALNativeAuthTokenResponseHandling, factory: MSALNativeAuthResultBuildable) {
         self.tokenResponseHandler = tokenResponseHandler
+        self.factory = factory
     }
 
     func validate(
@@ -64,7 +66,13 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             ) else {
                 return .error(.invalidServerResponse)
             }
-            return .success(tokenResult, tokenResponse)
+            guard let userAccountResult = factory.makeUserAccountResult(
+                tokenResult: tokenResult,
+                context: context
+            ) else {
+                return .error(.invalidServerResponse)
+            }
+            return .success(userAccountResult, tokenResult, tokenResponse)
         case .failure(let signInTokenResponseError):
             guard let signInTokenResponseError =
                     signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
@@ -227,10 +235,11 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         msidConfiguration: MSIDConfiguration
     ) -> MSIDTokenResult? {
         do {
-            // TODO: where can we retrieve real homeAccountId and displayableId?
+            let displayableId = tokenResponse.idTokenObj?.username()
+            let homeAccountId = tokenResponse.idTokenObj?.uniqueId
             return try tokenResponseHandler.handle(
                 context: context,
-                accountIdentifier: .init(displayableId: "mock-displayable-id", homeAccountId: "mock-home-account"),
+                accountIdentifier: .init(displayableId: displayableId, homeAccountId: homeAccountId),
                 tokenResponse: tokenResponse,
                 configuration: msidConfiguration,
                 validateAccount: true

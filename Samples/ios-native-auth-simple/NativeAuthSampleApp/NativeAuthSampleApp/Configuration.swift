@@ -29,7 +29,8 @@ class Configuration: NSObject {
     // Update the below to your client ID you received in the portal. The below is for running the demo only
 
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
-    static let authorityURL = "https://login.microsoftonline.com/RoCustomers.onmicrosoft.com"
+    static let authorityURL = "https://native-ux-mock-api.azurewebsites.net/test"
+
     // swiftlint:disable:next force_try
     static let authority = try! MSALCIAMAuthority(url: URL(string: authorityURL)!)
 }

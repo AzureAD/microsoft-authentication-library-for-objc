@@ -28,12 +28,12 @@ import XCTest
 open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     private let expectation: XCTestExpectation
     var expectedError: SignInPasswordStartError?
-    var expectedUserAccount: MSALNativeAuthUserAccount?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     
-    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
-        self.expectedUserAccount = expectedUserAccount
+        self.expectedUserAccountResult = expectedUserAccountResult
     }
     
     public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
@@ -53,12 +53,11 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        if let expectedUserAccount = expectedUserAccount {
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        if let expectedUserAccountResult = expectedUserAccountResult {
             XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
-            XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
-            XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+            XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         } else {
             XCTFail("This method should not be called")
         }
@@ -72,12 +71,12 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
     private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
     fileprivate let expectation: XCTestExpectation
     var expectedError: PasswordRequiredError?
-    var expectedUserAccount: MSALNativeAuthUserAccount?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     
-    init(expectation: XCTestExpectation, expectedError: PasswordRequiredError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+    init(expectation: XCTestExpectation, expectedError: PasswordRequiredError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
-        self.expectedUserAccount = expectedUserAccount
+        self.expectedUserAccountResult = expectedUserAccountResult
     }
 
     func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
@@ -95,12 +94,11 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
         newSignInCodeRequiredState = newState
     }
 
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         XCTAssertTrue(Thread.isMainThread)
-        if let expectedUserAccount = expectedUserAccount {
-            XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
-            XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
-            XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        if let expectedUserAccountResult = expectedUserAccountResult {
+            XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         } else {
             XCTFail("This method should not be called")
         }
@@ -118,7 +116,7 @@ open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
         XCTFail("This method should not be called")
     }
     
-    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         XCTFail("This method should not be called")
     }
 }
@@ -205,12 +203,12 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
     
     private let expectation: XCTestExpectation
     var expectedError: VerifyCodeError?
-    var expectedUserAccount: MSALNativeAuthUserAccount?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     
-    init(expectation: XCTestExpectation, expectedError: VerifyCodeError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+    init(expectation: XCTestExpectation, expectedError: VerifyCodeError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
-        self.expectedUserAccount = expectedUserAccount
+        self.expectedUserAccountResult = expectedUserAccountResult
     }
     
     public func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?) {
@@ -219,15 +217,14 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInCompleted(result: MSALNativeAuthUserAccount) {
-        guard let expectedUserAccount = expectedUserAccount else {
-            XCTFail("expectedUserAccount expected not nil")
+    public func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        guard let expectedUserAccountResult = expectedUserAccountResult else {
+            XCTFail("expectedUserAccountResult expected not nil")
             expectation.fulfill()
             return
         }
-        XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
-        XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
-        XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -237,12 +234,12 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     
     private let expectation: XCTestExpectation
     var expectedError: SignInAfterSignUpError?
-    var expectedUserAccount: MSALNativeAuthUserAccount?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     
-    init(expectation: XCTestExpectation, expectedError: SignInAfterSignUpError? = nil, expectedUserAccount: MSALNativeAuthUserAccount? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInAfterSignUpError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
-        self.expectedUserAccount = expectedUserAccount
+        self.expectedUserAccountResult = expectedUserAccountResult
     }
     
     public func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
@@ -251,15 +248,14 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        guard let expectedUserAccount = expectedUserAccount else {
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        guard let expectedUserAccountResult = expectedUserAccountResult else {
             XCTFail("expectedUserAccount expected not nil")
             expectation.fulfill()
             return
         }
-        XCTAssertEqual(expectedUserAccount.accessToken, result.accessToken)
-        XCTAssertEqual(expectedUserAccount.rawIdToken, result.rawIdToken)
-        XCTAssertEqual(expectedUserAccount.scopes, result.scopes)
+        XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }

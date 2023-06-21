@@ -37,7 +37,7 @@ class EmailAndCodeViewController: UIViewController {
 
     var verifyCodeViewController: VerifyCodeViewController?
 
-    var account: MSALNativeAuthUserAccount?
+    var accountResult: MSALNativeAuthUserAccountResult?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,12 +84,12 @@ class EmailAndCodeViewController: UIViewController {
     }
 
     @IBAction func signOutPressed(_: Any) {
-        guard account != nil else {
+        guard accountResult != nil else {
             print("signOutPressed: Not currently signed in")
             return
         }
 
-        account = nil
+        accountResult = nil
 
         showResultText("Signed out")
 
@@ -158,7 +158,7 @@ class EmailAndCodeViewController: UIViewController {
     }
 
     func updateUI() {
-        let signedIn = (account != nil)
+        let signedIn = (accountResult != nil)
 
         signUpButton.isEnabled = !signedIn
         signInButton.isEnabled = !signedIn

@@ -36,7 +36,7 @@ class WebFallbackViewController: UIViewController {
     var nativeAuth: MSALNativeAuthPublicClientApplication!
     var webviewParams: MSALWebviewParameters!
 
-    var account: MSALNativeAuthUserAccount?
+    var accountResult: MSALNativeAuthUserAccountResult?
     var msalAccount: MSALAccount?
 
     override func viewDidLoad() {
@@ -75,8 +75,8 @@ class WebFallbackViewController: UIViewController {
     @IBAction func signOutPressed(_: Any) {
         if msalAccount != nil {
             signOutWithWebUX()
-        } else if account != nil {
-            account = nil
+        } else if accountResult != nil {
+            accountResult = nil
 
             showResultText("Signed out")
 
@@ -89,7 +89,7 @@ class WebFallbackViewController: UIViewController {
     }
 
     fileprivate func updateUI() {
-        let signedIn = msalAccount != nil || account != nil
+        let signedIn = msalAccount != nil || accountResult != nil
 
         signInButton.isEnabled = !signedIn
         signOutButton.isEnabled = signedIn
@@ -151,12 +151,9 @@ class WebFallbackViewController: UIViewController {
 
 extension WebFallbackViewController: SignInPasswordStartDelegate {
 
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccount) {
-        showResultText("Signed in successfully. Access Token: \(result.accessToken)")
-
-        account = result
-
-        updateUI()
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        accountResult = result
+        result.getAccessToken(delegate: self)
     }
 
     func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
@@ -179,5 +176,19 @@ extension WebFallbackViewController: SignInPasswordStartDelegate {
         codeLength: Int
     ) {
         showResultText("Unexpected result while signing in: Verification required")
+    }
+}
+
+// MARK: - Credentials Delegate methods
+
+extension WebFallbackViewController: CredentialsDelegate {
+    func onAccessTokenRetrieveCompleted(accessToken: String) {
+        print("Access Token: \(accessToken)")
+        showResultText("Signed in successfully. Access Token: \(accessToken)")
+        updateUI()
+    }
+
+    func onAccessTokenRetrieveError(error: MSAL.RetrieveTokenError) {
+        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
     }
 }
