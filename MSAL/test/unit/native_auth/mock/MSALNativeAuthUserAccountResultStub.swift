@@ -31,8 +31,12 @@ import Foundation
 struct MSALNativeAuthUserAccountResultStub {
 
     static var result : MSALNativeAuthUserAccountResult {
-        return MSALNativeAuthUserAccountResult(account: account,
-                                               authTokens: authTokens)
+        return MSALNativeAuthUserAccountResult(
+            account: account,
+            authTokens: authTokens,
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
     }
 
     static var account: MSALAccount {

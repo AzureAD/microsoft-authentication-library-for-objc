@@ -64,7 +64,12 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     func test_whenNoTokenPresent_shouldReturnNoAccounts() {
         let account = MSALNativeAuthUserAccountResultStub.account
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-        let userAccountResult = MSALNativeAuthUserAccountResult(account: account, authTokens: authTokens)
+        let userAccountResult = MSALNativeAuthUserAccountResult(
+            account: account,
+            authTokens: authTokens,
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
         factory.mockMakeUserAccountResult(userAccountResult)
         cacheAccessorMock.mockUserAccounts = [account]
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -75,7 +80,12 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     func test_whenAccountSet_shouldReturnAccount() async {
         let account = MSALNativeAuthUserAccountResultStub.account
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-        let userAccountResult = MSALNativeAuthUserAccountResult(account: account, authTokens: authTokens)
+        let userAccountResult = MSALNativeAuthUserAccountResult(
+            account: account,
+            authTokens: authTokens,
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
 
         factory.mockMakeUserAccountResult(userAccountResult)
         cacheAccessorMock.mockUserAccounts = [account]

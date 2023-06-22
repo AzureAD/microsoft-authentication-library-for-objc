@@ -30,7 +30,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthBaseController, M
     // MARK: - Variables
 
     private let factory: MSALNativeAuthResultBuildable
-    private let cacheAccessor: MSALNativeAuthCacheInterface?
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     // MARK: - Init
 
@@ -79,7 +79,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthBaseController, M
             // We pass an empty array of scopes because that will return all accounts
             // that have been saved for the current Client Id. We expect only one account to exist at this point per Client Id
             let config = factory.makeMSIDConfiguration(scopes: [])
-            return try cacheAccessor?.getAllAccounts(configuration: config) ?? []
+            return try cacheAccessor.getAllAccounts(configuration: config)
         } catch {
             MSALLogger.log(
                 level: .error,
@@ -96,7 +96,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthBaseController, M
     ) -> MSALNativeAuthTokens? {
         do {
             let config = factory.makeMSIDConfiguration(scopes: scopes)
-            return try cacheAccessor?.getTokens(accountIdentifier: accountIdentifier, configuration: config, context: context)
+            return try cacheAccessor.getTokens(accountIdentifier: accountIdentifier, configuration: config, context: context)
         } catch {
             MSALLogger.log(
                 level: .error,

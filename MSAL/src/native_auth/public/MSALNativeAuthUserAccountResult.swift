@@ -28,6 +28,8 @@ import Foundation
 public class MSALNativeAuthUserAccountResult: NSObject {
     private let account: MSALAccount
     private let authTokens: MSALNativeAuthTokens
+    private let configuration: MSALNativeAuthConfiguration
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     @objc public var username: String {
         account.username ?? ""
@@ -45,14 +47,35 @@ public class MSALNativeAuthUserAccountResult: NSObject {
         account.accountClaims ?? [:]
     }
 
-    init(account: MSALAccount,
-         authTokens: MSALNativeAuthTokens) {
+    init(
+        account: MSALAccount,
+        authTokens: MSALNativeAuthTokens,
+        configuration: MSALNativeAuthConfiguration,
+        cacheAccessor: MSALNativeAuthCacheInterface
+    ) {
         self.account = account
         self.authTokens = authTokens
+        self.configuration = configuration
+        self.cacheAccessor = cacheAccessor
     }
 
     @objc public func signOut() {
+        let context = MSALNativeAuthRequestContext()
 
+        do {
+            try cacheAccessor.clearCache(
+                accountIdentifier: account.lookupAccountIdentifier,
+                authority: configuration.authority,
+                clientId: configuration.clientId,
+                context: context
+            )
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Clearing MSAL token cache for the current account failed with error %@: \(error)"
+            )
+        }
     }
 
     @objc public func getAccessToken(delegate: CredentialsDelegate) {

@@ -30,6 +30,7 @@ import XCTest
 
 class MSALNativeAuthUserAccountResultTests: XCTestCase {
     var sut: MSALNativeAuthUserAccountResult!
+    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var account: MSALAccount!
 
     override func setUpWithError() throws {
@@ -41,11 +42,14 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         refreshToken.refreshToken = "refreshToken"
         let rawIdToken = "rawIdToken"
 
-        sut = MSALNativeAuthUserAccountResult(account: account!,
-                                              authTokens:
-                                                MSALNativeAuthTokens(accessToken: accessToken,
-                                                                     refreshToken: refreshToken,
-                                                                     rawIdToken: rawIdToken))
+        cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
+
+        sut = MSALNativeAuthUserAccountResult(
+            account: account!,
+            authTokens: MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: rawIdToken),
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: cacheAccessorMock
+        )
         try super.setUpWithError()
     }
 
@@ -61,12 +65,21 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     func test_whenNoAccessToken_itReturnsCorrectError() {
         let expectation = expectation(description: "CredentialsController")
-        sut = MSALNativeAuthUserAccountResult(account: account!,
-                                              authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                               refreshToken: nil,
-                                                                               rawIdToken: nil))
+        sut = MSALNativeAuthUserAccountResult(
+            account: account!,
+            authTokens: MSALNativeAuthTokens(accessToken: nil, refreshToken: nil, rawIdToken: nil),
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
         let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveTokenError(type: .tokenNotFound))
         sut.getAccessToken(delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
+    }
+
+    // MARK: - sign-out tests
+
+    func test_signOut_successfullyCallsCacheAccessor() {
+        sut.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
     }
 }

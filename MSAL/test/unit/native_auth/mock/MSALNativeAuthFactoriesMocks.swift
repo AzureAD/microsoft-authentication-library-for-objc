@@ -64,17 +64,25 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     }
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
-        return makeNativeAuthUserAccountResult ?? .init(account:
-                                                            MSALAccount.init(msidAccount: tokenResult.account,
-                                                                             createTenantProfile: false),
-                                                        authTokens:
-                                                            MSALNativeAuthTokens(accessToken: tokenResult.accessToken,
-                                                                                 refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
-                                                                                 rawIdToken: tokenResult.rawIdToken))
+        return makeNativeAuthUserAccountResult ?? .init(
+            account: MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false),
+            authTokens: MSALNativeAuthTokens(
+                accessToken: tokenResult.accessToken,
+                refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
+                rawIdToken: tokenResult.rawIdToken
+            ),
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
     }
 
     func makeUserAccountResult(account: MSALAccount, authTokens: MSAL.MSALNativeAuthTokens) -> MSAL.MSALNativeAuthUserAccountResult? {
-        return makeNativeAuthUserAccountResult ?? .init(account: account, authTokens: authTokens)
+        return makeNativeAuthUserAccountResult ?? .init(
+            account: account,
+            authTokens: authTokens,
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
     }
 
     func mockMakeMsidConfigurationFunc(_ result: MSIDConfiguration) {

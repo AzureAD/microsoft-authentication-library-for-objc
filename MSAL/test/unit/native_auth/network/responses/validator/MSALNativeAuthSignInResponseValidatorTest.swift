@@ -52,11 +52,16 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenValidSignInTokenResponse_validationIsSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let userAccountResult = MSALNativeAuthUserAccountResult(account:
-                                                                    MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil))
+        let userAccountResult = MSALNativeAuthUserAccountResult(
+            account: MSALNativeAuthUserAccountResultStub.account,
+            authTokens: MSALNativeAuthTokens(
+                accessToken: nil,
+                refreshToken: nil,
+                rawIdToken: nil
+            ),
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+        )
         let tokenResult = MSIDTokenResult()
         let refreshToken = MSIDRefreshToken()
         refreshToken.familyId = "familyId"
