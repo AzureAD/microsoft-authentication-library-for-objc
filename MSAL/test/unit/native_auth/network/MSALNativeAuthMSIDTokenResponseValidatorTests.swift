@@ -26,11 +26,11 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthTokenResponseValidatorTests: XCTestCase {
+final class MSALNativeAuthMSIDTokenResponseValidatorTests: XCTestCase {
 
     // MARK: - Variables
 
-    private var sut: MSALNativeAuthTokenResponseValidator!
+    private var sut: MSALNativeAuthMSIDTokenResponseValidator!
     private var defaultValidatorMock: MSALNativeAuthDefaultValidatorMock!
     private let context = ContextStub()
     private let configuration = MSIDConfiguration()

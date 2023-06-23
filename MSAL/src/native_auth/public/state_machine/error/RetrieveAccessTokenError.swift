@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,13 +24,20 @@
 
 import Foundation
 
-enum MSALNativeAuthSignInTokenOauth2ErrorCode: String, Decodable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case invalidGrant = "invalid_grant"
-    case expiredToken = "expired_token"
-    case unsupportedChallengeType = "unsupported_challenge_type"
-    case invalidScope = "invalid_scope"
-    case authorizationPending = "authorization_pending"
-    case slowDown = "slow_down"
+@objc
+public class RetrieveAccessTokenError: MSALNativeAuthError {
+    @objc public let type: RetrieveAccessTokenErrorType
+
+    init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
+}
+
+@objc
+public enum RetrieveAccessTokenErrorType: Int {
+    case generalError
+    case refreshTokenExpired
+    case tokenNotFound
+    case browserRequired
 }

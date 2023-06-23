@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
+struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .token
     let context: MSIDRequestContext
     let username: String?
@@ -37,6 +37,7 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
     let addNCAFlag: Bool
     let includeChallengeType: Bool
     let clientInfo = true
+    let refreshToken: String?
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
@@ -49,7 +50,8 @@ struct MSALNativeAuthSignInTokenRequestParameters: MSALNativeAuthRequestable {
             Key.scope.rawValue: scope,
             Key.password.rawValue: password,
             Key.oobCode.rawValue: oobCode,
-            Key.clientInfo.rawValue: clientInfo.description
+            Key.clientInfo.rawValue: clientInfo.description,
+            Key.refreshToken.rawValue: refreshToken
         ]
 
         if includeChallengeType {

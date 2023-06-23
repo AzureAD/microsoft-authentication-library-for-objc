@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthTokenResponseValidating {
+protocol MSALNativeAuthMSIDTokenResponseValidating {
 
     var defaultValidator: MSIDTokenResponseValidator { get }
     var factory: MSIDOauth2Factory { get }
@@ -40,7 +40,7 @@ protocol MSALNativeAuthTokenResponseValidating {
                          error: inout NSError?) -> Bool
 }
 
-final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseValidating {
+final class MSALNativeAuthMSIDTokenResponseValidator: MSALNativeAuthMSIDTokenResponseValidating {
 
     // MARK: - Variables
 
@@ -101,4 +101,5 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             error: &error
         )
     }
+
 }

@@ -27,5 +27,5 @@ import Foundation
 @objc
 public protocol CredentialsDelegate {
     @MainActor func onAccessTokenRetrieveCompleted(accessToken: String)
-    @MainActor func onAccessTokenRetrieveError(error: RetrieveTokenError)
+    @MainActor func onAccessTokenRetrieveError(error: RetrieveAccessTokenError)
 }

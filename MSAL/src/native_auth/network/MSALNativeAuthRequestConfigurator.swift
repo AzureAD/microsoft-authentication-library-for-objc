@@ -36,7 +36,6 @@ enum MSALNativeAuthRequestConfiguratorType {
     enum SignIn {
         case initiate(MSALNativeAuthSignInInitiateRequestParameters)
         case challenge(MSALNativeAuthSignInChallengeRequestParameters)
-        case token(MSALNativeAuthSignInTokenRequestParameters)
     }
 
     enum ResetPassword {
@@ -47,9 +46,15 @@ enum MSALNativeAuthRequestConfiguratorType {
         case pollCompletion(MSALNativeAuthResetPasswordPollCompletionRequestParameters)
     }
 
+    enum Token {
+        case signInWithPassword(MSALNativeAuthTokenRequestParameters)
+        case refreshToken(MSALNativeAuthTokenRequestParameters)
+    }
+
     case signUp(SignUp)
     case signIn(SignIn)
     case resetPassword(ResetPassword)
+    case token(Token)
 }
 
 class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
@@ -69,6 +74,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             try signInConfigure(subType, request, telemetryProvider)
         case .resetPassword(let subType):
             try resetPasswordConfigure(subType, request, telemetryProvider)
+        case .token(let subType):
+            try tokenConfigure(subType, request, telemetryProvider)
         }
     }
 
@@ -128,13 +135,6 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
                           responseSerializer: responseSerializer,
                           telemetry: telemetry,
                           errorHandler: errorHandler)
-        case .token(let parameters):
-            let telemetry = telemetryProvider.telemetryForSignIn(type: .signInToken)
-            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInTokenResponseError>()
-            try configure(request: request,
-                          parameters: parameters,
-                          telemetry: telemetry,
-                          errorHandler: errorHandler)
         }
     }
 
@@ -187,6 +187,27 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             try configure(request: request,
                           parameters: parameters,
                           responseSerializer: responseSerializer,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        }
+    }
+
+    private func tokenConfigure(_ subType: MSALNativeAuthRequestConfiguratorType.Token,
+                                _ request: MSIDHttpRequest,
+                                _ telemetryProvider: MSALNativeAuthTelemetryProviding) throws {
+        switch subType {
+        case .signInWithPassword(let parameters):
+            let telemetry = telemetryProvider.telemetryForToken(type: .signInWithPassword)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthTokenResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        case .refreshToken(let parameters):
+            let telemetry = telemetryProvider.telemetryForToken(type: .refreshToken)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthTokenResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
                           telemetry: telemetry,
                           errorHandler: errorHandler)
         }
@@ -245,11 +266,6 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             )
             throw MSALNativeAuthInternalError.invalidRequest
         }
-        // TODO: Until we are clear on how the Authority looks like we assume it's AAD
-        // Once it's clarified we might need to create a new Authority to use with the new API
-        // It's imperative that this gets called before responseSerializer, requestSerializer,
-        // serverTelemetry and errorHandler get set as it overwrites them
-        // Further work will be done in ADO 2563119
         configure(request)
     }
 }

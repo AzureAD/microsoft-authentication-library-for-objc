@@ -26,30 +26,32 @@
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNativeAuthSignInControlling {
+final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling {
 
     // MARK: - Variables
 
-    private let requestProvider: MSALNativeAuthSignInRequestProviding
-    private let factory: MSALNativeAuthResultBuildable
-    private let responseValidator: MSALNativeAuthSignInResponseValidating
-    private let cacheAccessor: MSALNativeAuthCacheInterface?
+    private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
+    private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
 
     // MARK: - Init
 
     init(
         clientId: String,
-        requestProvider: MSALNativeAuthSignInRequestProviding,
+        signInRequestProvider: MSALNativeAuthSignInRequestProviding,
+        tokenRequestProvider: MSALNativeAuthTokenRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
-        responseValidator: MSALNativeAuthSignInResponseValidating
+        signInResponseValidator: MSALNativeAuthSignInResponseValidating,
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating
     ) {
-        self.requestProvider = requestProvider
-        self.factory = factory
-        self.responseValidator = responseValidator
-        self.cacheAccessor = cacheAccessor
+        self.signInRequestProvider = signInRequestProvider
+        self.signInResponseValidator = signInResponseValidator
         super.init(
-            clientId: clientId
+            clientId: clientId,
+            requestProvider: tokenRequestProvider,
+            cacheAccessor: cacheAccessor,
+            factory: factory,
+            responseValidator: tokenResponseValidator
         )
     }
 
@@ -57,11 +59,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         let factory = MSALNativeAuthResultFactory(config: config)
         self.init(
             clientId: config.clientId,
-            requestProvider: MSALNativeAuthSignInRequestProvider(
+            signInRequestProvider: MSALNativeAuthSignInRequestProvider(
+                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
+            tokenRequestProvider: MSALNativeAuthTokenRequestProvider(
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
             cacheAccessor: MSALNativeAuthCacheAccessor(),
             factory: factory,
-            responseValidator: MSALNativeAuthSignInResponseValidator(
+            signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
+            tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 tokenResponseHandler: MSALNativeAuthTokenResponseHandler(),
                 factory: factory)
         )
@@ -105,7 +110,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             return
         }
         let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: params.context)
-        let validatedResponse = responseValidator.validate(context: params.context, result: initiateResponse)
+        let validatedResponse = signInResponseValidator.validate(context: params.context, result: initiateResponse)
         switch validatedResponse {
         case .success(credentialToken: let credentialToken):
             let validatedResponse = await performAndValidateChallengeRequest(
@@ -291,7 +296,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Private
 
     private func handleTokenResponse(
-        _ response: MSALNativeAuthSignInTokenValidatedResponse,
+        _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -326,15 +331,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
         context: MSALNativeAuthRequestContext,
         config: MSIDConfiguration,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void) {
-        telemetryEvent?.setUserInformation(tokenResult.account)
-        cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-        stopTelemetryEvent(telemetryEvent, context: context)
-        MSALLogger.log(
-            level: .verbose,
-            context: context,
-            format: "SignIn completed successfully")
-        DispatchQueue.main.async { onSuccess(userAccountResult) }
-    }
+            telemetryEvent?.setUserInformation(tokenResult.account)
+            cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+            stopTelemetryEvent(telemetryEvent, context: context)
+            MSALLogger.log(
+                level: .verbose,
+                context: context,
+                format: "SignIn completed successfully")
+            DispatchQueue.main.async { onSuccess(userAccountResult) }
+        }
 
     private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
@@ -375,18 +380,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
             }
         }
 
-    private func performAndValidateTokenRequest(
-        _ request: MSIDHttpRequest,
-        config: MSIDConfiguration,
-        context: MSALNativeAuthRequestContext) async -> MSALNativeAuthSignInTokenValidatedResponse {
-        let ciamTokenResponse: Result<MSIDCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
-        return responseValidator.validate(
-            context: context,
-            msidConfiguration: config,
-            result: ciamTokenResponse
-        )
-    }
-
     private func performAndValidateChallengeRequest(
         credentialToken: String,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -396,43 +389,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 return .error(.invalidRequest)
             }
             let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
-            return responseValidator.validate(context: context, result: challengeResponse)
-        }
-
-    private func createTokenRequest(
-        username: String? = nil,
-        password: String? = nil,
-        scopes: [String],
-        credentialToken: String? = nil,
-        oobCode: String? = nil,
-        signInSLT: String? = nil,
-        grantType: MSALNativeAuthGrantType,
-        addNCAFlag: Bool = false,
-        includeChallengeType: Bool = true,
-        context: MSIDRequestContext) -> MSIDHttpRequest? {
-            do {
-                let params = MSALNativeAuthSignInTokenRequestParameters(
-                    context: context,
-                    username: username,
-                    credentialToken: credentialToken,
-                    signInSLT: signInSLT,
-                    grantType: grantType,
-                    scope: scopes.joinScopes(),
-                    password: password,
-                    oobCode: oobCode,
-                    addNCAFlag: addNCAFlag,
-                    includeChallengeType: includeChallengeType)
-                return try requestProvider.token(parameters: params, context: context)
-            } catch {
-                MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
-                return nil
-            }
+            return signInResponseValidator.validate(context: context, result: challengeResponse)
         }
 
     private func createInitiateRequest(username: String, context: MSIDRequestContext) -> MSIDHttpRequest? {
         let params = MSALNativeAuthSignInInitiateRequestParameters(context: context, username: username)
         do {
-            return try requestProvider.inititate(parameters: params, context: context)
+            return try signInRequestProvider.inititate(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Initiate Request: \(error)")
             return nil
@@ -448,76 +411,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthBaseController, MSALNa
                 context: context,
                 credentialToken: credentialToken
             )
-            return try requestProvider.challenge(parameters: params, context: context)
+            return try signInRequestProvider.challenge(parameters: params, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
             return nil
-        }
-    }
-
-    private func joinScopes(_ scopes: [String]?) -> [String] {
-        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
-        guard let scopes = scopes else {
-            return defaultOIDCScopes as? [String] ?? []
-        }
-        let joinedScopes = NSMutableOrderedSet(array: scopes)
-        joinedScopes.addObjects(from: defaultOIDCScopes)
-        return joinedScopes.array as? [String] ?? []
-    }
-
-    private func cacheTokenResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) {
-        do {
-            // If there is an account existing already in the cache, we remove it
-            try clearAccount(msidConfiguration: msidConfiguration, context: context)
-            try cacheAccessor?.saveTokensAndAccount(tokenResult: tokenResponse, configuration: msidConfiguration, context: context)
-        } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error caching response: \(error) (ignoring)")
-        }
-    }
-
-    private func clearAccount(msidConfiguration: MSIDConfiguration, context: MSALNativeAuthRequestContext) throws {
-        do {
-        if let accounts = try cacheAccessor?.getAllAccounts(configuration: msidConfiguration), let account = accounts.first {
-            if let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.identifier) {
-                    try cacheAccessor?.clearCache(accountIdentifier: identifier,
-                                                  authority: msidConfiguration.authority,
-                                                  clientId: msidConfiguration.clientId,
-                                                  context: context)
-                }
-            } else {
-                MSALLogger.log(level: .error,
-                               context: context,
-                               format: "Error creating MSIDAccountIdentifier out of MSALAccount (ignoring)")
-            }
-        } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error clearing previous account (ignoring)")
-        }
-    }
-
-    private func performTokenRequest(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<MSIDCIAMTokenResponse, Error> {
-        return await withCheckedContinuation { continuation in
-            request.send { response, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-                guard let responseDict = response as? [AnyHashable: Any] else {
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                    return
-                }
-                do {
-                    let tokenResponse = try MSIDCIAMTokenResponse(jsonDictionary: responseDict)
-                    tokenResponse.correlationId = request.context?.correlationId().uuidString
-                    continuation.resume(returning: .success(tokenResponse))
-                } catch {
-                    MSALLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                }
-            }
         }
     }
 }

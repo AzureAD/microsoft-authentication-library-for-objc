@@ -32,7 +32,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthTokenResponseHandler!
 
-    private var tokenResponseValidatorMock: MSALNativeTokenResponseValidatorMock!
+    private var tokenResponseValidatorMock: MSALNativeMSIDTokenResponseValidatorMock!
     private let context: MSIDRequestContext = MSIDBasicContext()
     private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
     private let configuration = MSIDConfiguration()
@@ -41,7 +41,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        tokenResponseValidatorMock = MSALNativeTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
+        tokenResponseValidatorMock = MSALNativeMSIDTokenResponseValidatorMock(context: context, accountIdentifier: accountIdentifier)
 
         sut = MSALNativeAuthTokenResponseHandler(
             tokenResponseValidator: tokenResponseValidatorMock
@@ -80,7 +80,7 @@ final class MSALNativeAuthResponseHandlerTests: MSALNativeAuthTestCase {
     }
 }
 
-private class MSALNativeTokenResponseValidatorMock: MSALNativeAuthTokenResponseValidating {
+private class MSALNativeMSIDTokenResponseValidatorMock: MSALNativeAuthMSIDTokenResponseValidating {
     var shouldThrowGenericError = false
     var shouldThrowIntuneError = false
 

@@ -78,19 +78,24 @@ public class MSALNativeAuthUserAccountResult: NSObject {
         }
     }
 
-    @objc public func getAccessToken(delegate: CredentialsDelegate) {
+    @objc public func getAccessToken(delegate: CredentialsDelegate, forceRefresh: Bool = false, correlationId: UUID? = nil) {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         if let accessToken = self.authTokens.accessToken {
-            if !accessToken.isExpired() {
+            if forceRefresh || accessToken.isExpired() {
+                let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
+                let credentialsController = controllerFactory.makeCredentialsController()
+                Task {
+                    await credentialsController.refreshToken(context: context, authTokens: authTokens, delegate: delegate)
+                }
+            } else {
                 Task {
                     await delegate.onAccessTokenRetrieveCompleted(accessToken: accessToken.accessToken)
                 }
-            } else {
-                // TODO: Retrieve new access token based on refresh token from API
             }
         } else {
-            MSALLogger.log(level: .error, context: nil, format: "Retrieve Access Token: Existing token not found")
+            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
             Task {
-                await delegate.onAccessTokenRetrieveError(error: RetrieveTokenError(type: .tokenNotFound))
+                await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .tokenNotFound))
             }
         }
     }

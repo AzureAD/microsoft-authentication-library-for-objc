@@ -28,8 +28,8 @@ protocol MSALNativeAuthTelemetryProviding {
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForSignIn(
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry
-    func telemetryForRefreshToken(
-        type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry
+    func telemetryForToken(
+        type: MSALNativeAuthTokenType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForResetPassword(
         type: MSALNAtiveAuthResetPasswordType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForResetPasswordStart(
@@ -46,7 +46,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
     func telemetryForSignUp(
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryApiIdSignUp,
+            apiId: .telemetryApiIdSignUpCodeStart,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -54,22 +54,22 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
     func telemetryForSignIn(
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryApiIdSignInWithPasswordStart,
+            apiId: .telemetryApiIdSignInWithCodeStart,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
-    func telemetryForRefreshToken(
-        type: MSALNativeAuthTokenRefreshType) -> MSALNativeAuthCurrentRequestTelemetry {
+    func telemetryForToken(
+        type: MSALNativeAuthTokenType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryApiIdRefreshToken,
+            apiId: .telemetryApiIdToken,
             operationType: type.rawValue,
             platformFields: nil)
     }
 
     func telemetryForResetPassword(type: MSALNAtiveAuthResetPasswordType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryResetPassword,
+            apiId: .telemetryApiIdResetPassword,
             operationType: type.rawValue,
             platformFields: nil)
     }

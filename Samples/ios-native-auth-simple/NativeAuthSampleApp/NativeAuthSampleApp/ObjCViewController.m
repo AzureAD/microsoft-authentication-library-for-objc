@@ -105,7 +105,7 @@
 
 - (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccountResult * _Nonnull)result {
     self.accountResult = result;
-    [result getAccessTokenWithDelegate:self];
+    [result getAccessTokenWithDelegate:self forceRefresh:false correlationId:nil];
 }
 
 - (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {
@@ -130,7 +130,7 @@
     [self updateUI];
 }
 
-- (void)onAccessTokenRetrieveErrorWithError:(RetrieveTokenError *)error {
+- (void)onAccessTokenRetrieveErrorWithError:(RetrieveAccessTokenError *)error {
     [self showResultText:[NSString stringWithFormat:@"Unexpected error retrieving access token in: %@", @(error.type)]];
 }
 

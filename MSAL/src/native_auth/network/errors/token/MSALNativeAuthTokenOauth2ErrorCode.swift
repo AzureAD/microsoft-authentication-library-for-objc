@@ -24,21 +24,14 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInTokenResponseError: MSALNativeAuthResponseError {
-
-    let error: MSALNativeAuthSignInTokenOauth2ErrorCode
-    let errorDescription: String?
-    var errorCodes: [MSALNativeAPIErrorCodes]?
-    let errorURI: String?
-    let innerErrors: [MSALNativeAuthInnerError]?
-    let credentialToken: String?
-
-    enum CodingKeys: String, CodingKey {
-        case error
-        case errorDescription = "error_description"
-        case errorCodes = "error_codes"
-        case errorURI = "error_uri"
-        case innerErrors = "inner_errors"
-        case credentialToken = "credential_token"
-    }
+enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable {
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case invalidGrant = "invalid_grant"
+    case expiredToken = "expired_token"
+    case expiredRefreshToken = "expired_refresh_token"
+    case unsupportedChallengeType = "unsupported_challenge_type"
+    case invalidScope = "invalid_scope"
+    case authorizationPending = "authorization_pending"
+    case slowDown = "slow_down"
 }

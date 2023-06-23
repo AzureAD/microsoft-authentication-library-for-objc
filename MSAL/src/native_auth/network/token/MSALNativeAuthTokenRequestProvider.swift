@@ -24,19 +24,19 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthSignInRequestProviding {
-    func inititate(
-        parameters: MSALNativeAuthSignInInitiateRequestParameters,
+protocol MSALNativeAuthTokenRequestProviding {
+    func signInWithPassword(
+        parameters: MSALNativeAuthTokenRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
 
-    func challenge(
-        parameters: MSALNativeAuthSignInChallengeRequestParameters,
+    func refreshToken(
+        parameters: MSALNativeAuthTokenRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
 }
 
-final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProviding {
+final class MSALNativeAuthTokenRequestProvider: MSALNativeAuthTokenRequestProviding {
 
     // MARK: - Variables
     private let requestConfigurator: MSALNativeAuthRequestConfigurator
@@ -52,32 +52,29 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProv
         self.telemetryProvider = telemetryProvider
     }
 
-    // MARK: - SignIn Initiate
+    // MARK: - Token
 
-    func inititate(
-        parameters: MSALNativeAuthSignInInitiateRequestParameters,
+    func signInWithPassword(
+        parameters: MSALNativeAuthTokenRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest {
 
         let request = MSIDHttpRequest()
-        try requestConfigurator.configure(configuratorType: .signIn(.initiate(parameters)),
+        try requestConfigurator.configure(configuratorType: .token(.signInWithPassword(parameters)),
                                           request: request,
                                           telemetryProvider: telemetryProvider)
-
         return request
     }
 
-    // MARK: - SignIn Challenge
-
-    func challenge(
-        parameters: MSALNativeAuthSignInChallengeRequestParameters,
+    func refreshToken(
+        parameters: MSALNativeAuthTokenRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest {
 
         let request = MSIDHttpRequest()
-        try requestConfigurator.configure(configuratorType: .signIn(.challenge(parameters)),
-                                      request: request,
-                                      telemetryProvider: telemetryProvider)
+        try requestConfigurator.configure(configuratorType: .token(.refreshToken(parameters)),
+                                          request: request,
+                                          telemetryProvider: telemetryProvider)
         return request
     }
 }

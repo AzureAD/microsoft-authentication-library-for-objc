@@ -32,6 +32,7 @@ class MSALNativeAuthTestLogger : NSObject {
     @objc dynamic var containsPII = false
     @objc dynamic var messages = NSMutableArray()
     var expectation = XCTestExpectation()
+    private var queue = DispatchQueue(label: "test", qos: .default)
     
     override init () {
         super.init()
@@ -40,20 +41,24 @@ class MSALNativeAuthTestLogger : NSObject {
         }
         Self.instanceCreated = true
         MSALGlobalConfig.loggerConfig.setLogCallback { [weak self] level, message, containsPII in
-            self?.messages.add(message as Any)
-            self?.containsPII = containsPII
-            // Making sure expectation has been set in the test case
-            if self?.expectation.description != "" {
-                self?.expectation.fulfill()
+            self?.queue.sync {
+                self?.messages.add(message as Any)
+                self?.containsPII = containsPII
+                // Making sure expectation has been set in the test case
+                if self?.expectation.description != "" {
+                    self?.expectation.fulfill()
+                }
             }
         }
     }
     
     func reset() {
-        expectation = XCTestExpectation(description: "")
-        containsPII = false
-        messages.removeAllObjects()
-        MSALGlobalConfig.loggerConfig.logLevel = .last
+        queue.sync {
+            expectation = XCTestExpectation(description: "")
+            containsPII = false
+            messages.removeAllObjects()
+            MSALGlobalConfig.loggerConfig.logLevel = .last
+        }
     }
 }
 

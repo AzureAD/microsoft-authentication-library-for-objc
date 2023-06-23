@@ -37,17 +37,17 @@ final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
     // MARK: Correct API Id tests
     func testTelemetryForSignUp_returnsCorrectApiId() {
         let result = sut.telemetryForSignUp(type: MSALNativeAuthSignUpType.signUpWithPassword)
-        XCTAssertEqual(result.apiId, .telemetryApiIdSignUp)
+        XCTAssertEqual(result.apiId, .telemetryApiIdSignUpCodeStart)
     }
     
-    func testTelemetryForSignIn_returnsCorrectApiId() {
-        let result = sut.telemetryForSignIn(type: MSALNativeAuthSignInType.signInWithPassword)
-        XCTAssertEqual(result.apiId, .telemetryApiIdSignInWithPasswordStart)
+    func testTelemetryForSignInWithCode_returnsCorrectApiId() {
+        let result = sut.telemetryForSignIn(type: MSALNativeAuthSignInType.signInWithOTP)
+        XCTAssertEqual(result.apiId, .telemetryApiIdSignInWithCodeStart)
     }
     
     func testTelemetryForRefreshToken_returnsCorrectApiId() {
-        let result = sut.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.noCacheLookupInvolved)
-        XCTAssertEqual(result.apiId, .telemetryApiIdRefreshToken)
+        let result = sut.telemetryForToken(type: MSALNativeAuthTokenType.refreshToken)
+        XCTAssertEqual(result.apiId, .telemetryApiIdToken)
     }
     
     func testTelemetryForResetPasswordStart_returnsCorrectApiId() {
@@ -76,8 +76,8 @@ final class MSALNativeAuthTelemetryProviderTests: XCTestCase {
         XCTAssertEqual(result.operationType, MSALNativeAuthSignUpType.signUpWithOTP.rawValue)
     }
     
-    func testTelemetryForRefreshToken_returnsCorrectOperationType() {
-        let result = sut.telemetryForRefreshToken(type: MSALNativeAuthTokenRefreshType.expiredAT)
-        XCTAssertEqual(result.operationType, MSALNativeAuthTokenRefreshType.expiredAT.rawValue)
+    func testTelemetryForToken_returnsCorrectOperationType() {
+        let result = sut.telemetryForToken(type: MSALNativeAuthTokenType.refreshToken)
+        XCTAssertEqual(result.operationType, MSALNativeAuthTokenType.refreshToken.rawValue)
     }
 }

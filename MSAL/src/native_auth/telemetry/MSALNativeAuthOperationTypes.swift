@@ -37,22 +37,23 @@ enum MSALNativeAuthSignUpType: MSALNativeAuthOperationType {
 }
 
 enum MSALNativeAuthSignInType: MSALNativeAuthOperationType {
-    case signInWithPassword = 0
-    case signInWithOTP = 1
-    case signInWithMFA = 2
-    case signInInitiate = 3
-    case signInChallenge = 4
-    case signInToken = 5
+    case signInWithOTP = 0
+    case signInWithMFA = 1
+    case signInInitiate = 2
+    case signInChallenge = 3
 }
 
-typealias MSALNativeAuthTokenRefreshType = TokenCacheRefreshType
+enum MSALNativeAuthTokenType: MSALNativeAuthOperationType {
+    case signInWithPassword = 0
+    case refreshToken = 1
 
+}
 enum MSALNAtiveAuthResetPasswordType: MSALNativeAuthOperationType {
-    case resetPasswordStart
-    case resetPasswordChallenge
-    case resetPasswordContinue
-    case resetPasswordSubmit
-    case resetPasswordPollCompletion
+    case resetPasswordStart = 0
+    case resetPasswordChallenge = 1
+    case resetPasswordContinue = 2
+    case resetPasswordSubmit = 3
+    case resetPasswordPollCompletion = 4
 }
 
 enum MSALNativeAuthResetPasswordStartType: MSALNativeAuthOperationType {

@@ -26,14 +26,14 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
-    private typealias Error = MSALNativeAuthSignInTokenResponseError
-    private var provider: MSALNativeAuthSignInRequestProvider!
+class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
+    private typealias Error = MSALNativeAuthTokenResponseError
+    private var provider: MSALNativeAuthTokenRequestProvider!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        provider = MSALNativeAuthSignInRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: config))
+        provider = MSALNativeAuthTokenRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: config))
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         sut = try provider.token(
@@ -47,7 +47,8 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
                 password: nil,
                 oobCode: nil,
                 addNCAFlag: false,
-                includeChallengeType: false
+                includeChallengeType: false,
+                refreshToken: nil
             ),
             context: context
         )
@@ -69,16 +70,17 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let parameters = MSALNativeAuthSignInTokenRequestParameters(context: context,
-                                                                    username: "test@contoso.com",
-                                                                    credentialToken: nil,
-                                                                    signInSLT: nil,
-                                                                    grantType: .otp,
-                                                                    scope: "test & alt test",
-                                                                    password: nil,
-                                                                    oobCode: nil,
-                                                                    addNCAFlag: false,
-                                                                    includeChallengeType: false)
+        let parameters = MSALNativeAuthTokenRequestParameters(context: context,
+                                                              username: "test@contoso.com",
+                                                              credentialToken: nil,
+                                                              signInSLT: nil,
+                                                              grantType: .otp,
+                                                              scope: "test & alt test",
+                                                              password: nil,
+                                                              oobCode: nil,
+                                                              addNCAFlag: false,
+                                                              includeChallengeType: false,
+                                                              refreshToken: nil)
 
 
         let request = try! provider.token(parameters: parameters,
@@ -168,14 +170,14 @@ class MSALNativeAuthSignInTokenIntegrationTests: MSALNativeAuthIntegrationBaseTe
 
     func test_succeedRequest_slowDown() async throws {
         try await mockResponse(.slowDown, endpoint: .signInToken)
-        let result: MSALNativeAuthSignInTokenResponseError = try await perform_uncheckedTestFail()
+        let result: MSALNativeAuthTokenResponseError = try await perform_uncheckedTestFail()
 
         let expectedError = createError(.slowDown)
 
         XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
     }
 
-    private func createError(_ code: MSALNativeAuthSignInTokenOauth2ErrorCode) -> Error {
+    private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode) -> Error {
         .init(error: code, errorDescription: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
     }
 }

@@ -45,4 +45,5 @@ enum MSALNativeAuthRequestParametersKey: String {
     case passwordSubmitToken = "password_submit_token"
     case newPassword = "new_password"
     case clientInfo = "client_info"
+    case refreshToken = "refresh_token"
 }

@@ -28,10 +28,10 @@ import XCTest
 open class CredentialsDelegateSpy: CredentialsDelegate {
 
     private let expectation: XCTestExpectation
-    var expectedError: RetrieveTokenError?
+    var expectedError: RetrieveAccessTokenError?
     var expectedAccessToken: String?
     
-    init(expectation: XCTestExpectation, expectedError: RetrieveTokenError? = nil, expectedAccessToken: String? = nil) {
+    init(expectation: XCTestExpectation, expectedError: RetrieveAccessTokenError? = nil, expectedAccessToken: String? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
         self.expectedAccessToken = expectedAccessToken
@@ -47,7 +47,7 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
         expectation.fulfill()
     }
 
-    public func onAccessTokenRetrieveError(error: MSAL.RetrieveTokenError) {
+    public func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)

@@ -30,6 +30,7 @@ import Foundation
 
 struct MSALNativeAuthUserAccountResultStub {
 
+    
     static var result : MSALNativeAuthUserAccountResult {
         return MSALNativeAuthUserAccountResult(
             account: account,
@@ -51,8 +52,10 @@ struct MSALNativeAuthUserAccountResultStub {
         accessToken.accessToken = "accessToken"
         accessToken.expiresOn = Date()
         accessToken.scopes = []
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = "refreshToken"
         return MSALNativeAuthTokens(accessToken: accessToken,
-                             refreshToken: nil,
+                             refreshToken: refreshToken,
                              rawIdToken: "IdToken")
     }
 

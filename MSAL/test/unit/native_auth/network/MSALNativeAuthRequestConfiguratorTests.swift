@@ -95,24 +95,25 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
     func test_signInToken_getsConfiguredSuccessfully() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let telemetry = MSALNativeAuthServerTelemetry(
-            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInToken),
+            currentRequestTelemetry: telemetryProvider.telemetryForToken(type: .signInWithPassword),
             context: context
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignInTokenRequestParameters(context: context,
-                                                                username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-                                                                credentialToken: "Test Credential Token",
-                                                                signInSLT: "Test SignIn SLT",
-                                                                grantType: .password,
-                                                                scope: "<scope-1>",
-                                                                password: "password",
-                                                                oobCode: "oob",
-                                                                addNCAFlag: true,
-                                                                includeChallengeType: true)
+        let params = MSALNativeAuthTokenRequestParameters(context: context,
+                                                          username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+                                                          credentialToken: "Test Credential Token",
+                                                          signInSLT: "Test SignIn SLT",
+                                                          grantType: .password,
+                                                          scope: "<scope-1>",
+                                                          password: "password",
+                                                          oobCode: "oob",
+                                                          addNCAFlag: true,
+                                                          includeChallengeType: true,
+                                                          refreshToken: nil)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
-        try sut.configure(configuratorType: .signIn(.token(params)),
+        try sut.configure(configuratorType: .token(.signInWithPassword(params)),
                           request: request,
                           telemetryProvider: telemetryProvider)
 
@@ -374,6 +375,46 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         checkHeaders(request: request)
         checkTelemetry(request.serverTelemetry, telemetry)
     }
+
+    func test_refreshToken_getsConfiguredSuccessfully() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
+        let telemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForToken(type: .refreshToken),
+            context: context
+        )
+
+        let request = MSIDHttpRequest()
+        let params = MSALNativeAuthTokenRequestParameters(context: context,
+                                                          username: nil,
+                                                          credentialToken: nil,
+                                                          signInSLT: nil,
+                                                          grantType: .refreshToken,
+                                                          scope: "<scope-1>",
+                                                          password: nil,
+                                                          oobCode: nil,
+                                                          addNCAFlag: false,
+                                                          includeChallengeType: false,
+                                                          refreshToken: "refreshToken")
+
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
+        try sut.configure(configuratorType: .token(.refreshToken(params)),
+                          request: request,
+                          telemetryProvider: telemetryProvider)
+
+        let expectedBodyParams = [
+            "client_id" : DEFAULT_TEST_CLIENT_ID,
+            "grant_type" : "refresh_token",
+            "scope" : "<scope-1>",
+            "refresh_token" : "refreshToken",
+            "client_info" : "true"
+        ]
+
+        XCTAssertEqual(request.parameters, expectedBodyParams)
+        checkUrlRequest(request.urlRequest, endpoint: .token)
+        checkHeaders(request: request)
+        checkTelemetry(request.serverTelemetry, telemetry)
+    }
+
 
     private func checkUrlRequest(_ result: URLRequest?, endpoint: MSALNativeAuthEndpoint) {
         XCTAssertEqual(result?.httpMethod, MSALParameterStringForHttpMethod(.POST))

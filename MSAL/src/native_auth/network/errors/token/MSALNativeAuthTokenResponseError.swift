@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,18 +24,21 @@
 
 import Foundation
 
-@objc
-public class RetrieveTokenError: MSALNativeAuthError {
-    @objc public let type: RetrieveTokenErrorType
+struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
 
-    init(type: RetrieveTokenErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
+    let error: MSALNativeAuthTokenOauth2ErrorCode
+    let errorDescription: String?
+    var errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
+    let credentialToken: String?
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorCodes = "error_codes"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+        case credentialToken = "credential_token"
     }
-}
-
-@objc
-public enum RetrieveTokenErrorType: Int {
-    case generalError
-    case tokenNotFound
 }

@@ -26,4 +26,5 @@ import Foundation
 
 protocol MSALNativeAuthCredentialsControlling {
     func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult?
+    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens, delegate: CredentialsDelegate) async
 }

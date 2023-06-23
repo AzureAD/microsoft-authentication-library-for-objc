@@ -24,14 +24,15 @@
 
 @_implementationOnly import MSAL_Private
 
-enum MSALNativeAuthSignInTokenValidatedResponse {
+enum MSALNativeAuthTokenValidatedResponse {
     case success(MSALNativeAuthUserAccountResult, MSIDTokenResult, MSIDTokenResponse)
-    case error(MSALNativeAuthSignInTokenValidatedErrorType)
+    case error(MSALNativeAuthTokenValidatedErrorType)
 }
 
-enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
+enum MSALNativeAuthTokenValidatedErrorType: Error {
     case generalError
     case expiredToken
+    case expiredRefreshToken
     case invalidClient
     case invalidRequest
     case invalidServerResponse
@@ -63,6 +64,29 @@ enum MSALNativeAuthSignInTokenValidatedErrorType: Error {
             return SignInPasswordStartError(type: .invalidAuthenticationType, message: MSALNativeAuthErrorMessage.useSignInCode)
         case .strongAuthRequired:
             return SignInPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
+        case .expiredRefreshToken:
+            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            return SignInPasswordStartError(type: .generalError)
+        }
+    }
+
+    func convertToRetrieveAccessTokenError() -> RetrieveAccessTokenError {
+        switch self {
+        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+            return RetrieveAccessTokenError(type: .generalError)
+        case .expiredRefreshToken:
+            return RetrieveAccessTokenError(type: .refreshTokenExpired)
+        case .invalidClient:
+            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType:
+            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .invalidScope:
+            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
+        case .strongAuthRequired:
+            return RetrieveAccessTokenError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
+        case .userNotFound, .invalidPassword, .invalidAuthenticationType, .invalidOOBCode:
+            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            return RetrieveAccessTokenError(type: .generalError)
         }
     }
 

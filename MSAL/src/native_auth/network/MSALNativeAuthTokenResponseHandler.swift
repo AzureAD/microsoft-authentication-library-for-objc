@@ -38,16 +38,16 @@ final class MSALNativeAuthTokenResponseHandler: MSALNativeAuthTokenResponseHandl
 
     // MARK: - Variables
 
-    private let tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+    private let tokenResponseValidator: MSALNativeAuthMSIDTokenResponseValidating
 
     // MARK: - Init
 
-    init(tokenResponseValidator: MSALNativeAuthTokenResponseValidating) {
+    init(tokenResponseValidator: MSALNativeAuthMSIDTokenResponseValidating) {
         self.tokenResponseValidator = tokenResponseValidator
     }
 
     convenience init() {
-        let tokenResponseValidator = MSALNativeAuthTokenResponseValidator(
+        let tokenResponseValidator = MSALNativeAuthMSIDTokenResponseValidator(
             factory: MSIDCIAMOauth2Factory())
         self.init(tokenResponseValidator: tokenResponseValidator)
     }

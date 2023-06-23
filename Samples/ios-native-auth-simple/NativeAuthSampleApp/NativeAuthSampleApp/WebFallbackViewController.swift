@@ -188,7 +188,7 @@ extension WebFallbackViewController: CredentialsDelegate {
         updateUI()
     }
 
-    func onAccessTokenRetrieveError(error: MSAL.RetrieveTokenError) {
+    func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
         showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
     }
 }

@@ -30,9 +30,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
 
     private let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
     private var sut: MSALNativeAuthSignInResponseValidator!
-    private var responseHandler: MSALNativeAuthTokenResponseHandlerMock!
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
-    private var tokenResponse = MSIDTokenResponse()
     private var factory: MSALNativeAuthResultFactoryMock!
 
 
@@ -40,92 +38,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         try super.setUpWithError()
 
         factory =  MSALNativeAuthResultFactoryMock()
-        responseHandler = MSALNativeAuthTokenResponseHandlerMock()
-        sut = MSALNativeAuthSignInResponseValidator(tokenResponseHandler: responseHandler, factory: factory)
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
-    }
-    
-    // MARK: token API tests
-    
-    func test_whenValidSignInTokenResponse_validationIsSuccessful() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let userAccountResult = MSALNativeAuthUserAccountResult(
-            account: MSALNativeAuthUserAccountResultStub.account,
-            authTokens: MSALNativeAuthTokens(
-                accessToken: nil,
-                refreshToken: nil,
-                rawIdToken: nil
-            ),
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
-        )
-        let tokenResult = MSIDTokenResult()
-        let refreshToken = MSIDRefreshToken()
-        refreshToken.familyId = "familyId"
-        refreshToken.refreshToken = "refreshToken"
-        tokenResult.refreshToken = refreshToken
-        let tokenResponse = MSIDCIAMTokenResponse()
-        responseHandler.mockHandleTokenFunc(result: tokenResult)
-        factory.mockMakeUserAccountResult(userAccountResult)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
-        if case .success(userAccountResult, tokenResult, tokenResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    func test_whenInvalidSignInTokenResponse_anErrorIsReturned() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
-        responseHandler.expectedContext = context
-        responseHandler.expectedValidateAccount = true
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDCIAMTokenResponse()))
-        if case .error(.invalidServerResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
-        if case .error(.invalidServerResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    func test_invalidGrantTokenResponse_isTranslatedToProperErrorResult() {
-        let userNotFoundError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.userNotFound], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
-        let invalidPasswordError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
-        let invalidOTPCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidOTPCodeError, expectedError: .invalidOOBCode)
-        let invalidAuthTypeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidAuthenticationType], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
-        let genericErrorCodeError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
-        let strongAuthRequiredError = MSALNativeAuthSignInTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.strongAuthRequired], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: strongAuthRequiredError, expectedError: .strongAuthRequired)
-    }
-    
-    func test_errorTokenResponse_isTranslatedToProperErrorResult() {
-        let invalidReqError = MSALNativeAuthSignInTokenResponseError(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidReqError, expectedError: .invalidRequest)
-        let invalidClientError = MSALNativeAuthSignInTokenResponseError(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidClientError, expectedError: .invalidClient)
-        let expiredTokenError = MSALNativeAuthSignInTokenResponseError(error: .expiredToken, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: expiredTokenError, expectedError: .expiredToken)
-        let unsupportedChallengeTypeError = MSALNativeAuthSignInTokenResponseError(error: .unsupportedChallengeType, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: unsupportedChallengeTypeError, expectedError: .unsupportedChallengeType)
-        let invalidScopeError = MSALNativeAuthSignInTokenResponseError(error: .invalidScope, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidScopeError, expectedError: .invalidScope)
-        let authPendingError = MSALNativeAuthSignInTokenResponseError(error: .authorizationPending, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: authPendingError, expectedError: .authorizationPending)
-        let slowDownError = MSALNativeAuthSignInTokenResponseError(error: .slowDown, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: slowDownError, expectedError: .slowDown)
+        sut = MSALNativeAuthSignInResponseValidator()
     }
     
     // MARK: challenge API tests
@@ -303,17 +216,5 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         if case .error(expectedValidatedError) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-    }
-    
-    private func checkRelationBetweenErrorResponseAndValidatedErrorResult(
-        responseError: MSALNativeAuthSignInTokenResponseError,
-        expectedError: MSALNativeAuthSignInTokenValidatedErrorType) {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(responseError))
-        if case .error(expectedError) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
+    }    
 }

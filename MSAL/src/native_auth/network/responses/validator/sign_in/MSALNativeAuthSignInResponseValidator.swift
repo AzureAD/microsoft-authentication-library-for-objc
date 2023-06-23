@@ -27,12 +27,6 @@
 protocol MSALNativeAuthSignInResponseValidating {
     func validate(
         context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration,
-        result: Result<MSIDCIAMTokenResponse, Error>
-    ) -> MSALNativeAuthSignInTokenValidatedResponse
-
-    func validate(
-        context: MSALNativeAuthRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
 
@@ -43,48 +37,6 @@ protocol MSALNativeAuthSignInResponseValidating {
 }
 
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
-
-    private let tokenResponseHandler: MSALNativeAuthTokenResponseHandling
-    private let factory: MSALNativeAuthResultBuildable
-
-    init(tokenResponseHandler: MSALNativeAuthTokenResponseHandling, factory: MSALNativeAuthResultBuildable) {
-        self.tokenResponseHandler = tokenResponseHandler
-        self.factory = factory
-    }
-
-    func validate(
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration,
-        result: Result<MSIDCIAMTokenResponse, Error>
-    ) -> MSALNativeAuthSignInTokenValidatedResponse {
-        switch result {
-        case .success(let tokenResponse):
-            guard let tokenResult = validateAndConvertTokenResponse(
-                tokenResponse,
-                context: context,
-                msidConfiguration: msidConfiguration
-            ) else {
-                return .error(.invalidServerResponse)
-            }
-            guard let userAccountResult = factory.makeUserAccountResult(
-                tokenResult: tokenResult,
-                context: context
-            ) else {
-                return .error(.invalidServerResponse)
-            }
-            return .success(userAccountResult, tokenResult, tokenResponse)
-        case .failure(let signInTokenResponseError):
-            guard let signInTokenResponseError =
-                    signInTokenResponseError as? MSALNativeAuthSignInTokenResponseError else {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "SignIn Token: Error type not expected, error: \(signInTokenResponseError)")
-                return .error(.invalidServerResponse)
-            }
-            return handleFailedSignInTokenResult(context, signInTokenResponseError)
-        }
-    }
 
     func validate(
         context: MSALNativeAuthRequestContext,
@@ -191,29 +143,6 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             }
     }
 
-    private func handleFailedSignInTokenResult(
-        _ context: MSALNativeAuthRequestContext,
-        _ responseError: MSALNativeAuthSignInTokenResponseError) -> MSALNativeAuthSignInTokenValidatedResponse {
-        switch responseError.error {
-        case .invalidRequest:
-            return .error(.invalidRequest)
-        case .invalidClient:
-            return .error(.invalidClient)
-        case .invalidGrant:
-            return .error(convertErrorCodeToErrorType(responseError.errorCodes?.first))
-        case .expiredToken:
-            return .error(.expiredToken)
-        case .unsupportedChallengeType:
-            return .error(.unsupportedChallengeType)
-        case .invalidScope:
-            return .error(.invalidScope)
-        case .authorizationPending:
-            return .error(.authorizationPending)
-        case .slowDown:
-            return .error(.slowDown)
-        }
-    }
-
     private func handleFailedSignInInitiateResult(
         _ context: MSALNativeAuthRequestContext,
         error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {
@@ -227,48 +156,5 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             case .invalidGrant:
                 return .error(.userNotFound)
             }
-    }
-
-    private func validateAndConvertTokenResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            let displayableId = tokenResponse.idTokenObj?.username()
-            let homeAccountId = tokenResponse.idTokenObj?.uniqueId
-            return try tokenResponseHandler.handle(
-                context: context,
-                accountIdentifier: .init(displayableId: displayableId, homeAccountId: homeAccountId),
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                validateAccount: true
-            )
-        } catch {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Response validation error: \(error)"
-            )
-            return nil
-        }
-    }
-
-    private func convertErrorCodeToErrorType(
-        _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthSignInTokenValidatedErrorType {
-        switch errorCode {
-        case .userNotFound:
-            return .userNotFound
-        case .invalidCredentials:
-            return .invalidPassword
-        case .invalidAuthenticationType:
-            return .invalidAuthenticationType
-        case .invalidOTP:
-            return .invalidOOBCode
-        case .strongAuthRequired:
-            return .strongAuthRequired
-        default:
-            return .generalError
-        }
     }
 }

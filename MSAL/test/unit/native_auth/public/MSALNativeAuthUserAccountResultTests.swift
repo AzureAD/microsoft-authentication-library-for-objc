@@ -71,7 +71,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveTokenError(type: .tokenNotFound))
+        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .tokenNotFound))
         sut.getAccessToken(delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
