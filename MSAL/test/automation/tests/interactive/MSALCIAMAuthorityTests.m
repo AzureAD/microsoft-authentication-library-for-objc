@@ -63,9 +63,9 @@
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
-    request.configurationAuthority = @"https://msidlabciam1.ciamlogin.com";
-    request.expectedResultAuthority = @"https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d";
-    request.cacheAuthority = @"https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d";
+    request.configurationAuthority = @"https://msidlabciam2.ciamlogin.com";
+    request.expectedResultAuthority = @"https://msidlabciam2.ciamlogin.com/f7416cc8-8ea1-4e5c-b230-0c978f81dfc6";
+    request.cacheAuthority = @"https://msidlabciam2.ciamlogin.com/f7416cc8-8ea1-4e5c-b230-0c978f81dfc6";
     request.acquireTokenAuthority = request.cacheAuthority;
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.promptBehavior = @"force";
