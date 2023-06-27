@@ -28,13 +28,13 @@ jobs:
         target: "macFramework"
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-12'
+    vmImage: 'macOS-13'
     timeOutInMinutes: 30
 
   steps:
   - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_13.4.1.app"
-    displayName: 'Switch to use Xcode 13.4.1'
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
+    displayName: 'Switch to use Xcode 14.3'
   - task: CmdLine@2
     displayName: Installing dependencies
     inputs:

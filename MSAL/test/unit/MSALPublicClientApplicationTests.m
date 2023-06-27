@@ -2552,9 +2552,13 @@
         
         MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
         msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+#if TARGET_OS_IPHONE
         NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
         extraDeviceInfoDict[MSID_BROKER_MDM_ID_KEY] = @"mdmId";
         extraDeviceInfoDict[MSID_ENROLLED_USER_OBJECT_ID_KEY] = @"objectId";
+        extraDeviceInfoDict[MSID_IS_CALLER_MANAGED_KEY] = @"0";
+#endif
+        
         msidDeviceInfo.extraDeviceInfo = extraDeviceInfoDict;
         MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
         
@@ -2569,8 +2573,11 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+#if TARGET_OS_IPHONE
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_BROKER_MDM_ID_KEY], @"mdmId");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_IS_CALLER_MANAGED_KEY], @"0");
+#endif
         [deviceInfoExpectation fulfill];
     }];
     
@@ -2920,8 +2927,6 @@
 
 #pragma mark - allAccountsFilteredByAuthority
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common" uid:@"myuid"
@@ -2983,7 +2988,6 @@
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
-#pragma clang diagnostic pop
 
 #pragma mark - loadAccountForHomeAccountId
 
