@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAPIErrorCodes: Int, Decodable {
+enum MSALNativeAuthESTSAPIErrorCodes: Int, Decodable {
     case userNotFound = 50034
     case invalidCredentials = 50126
     case invalidOTP = 50181

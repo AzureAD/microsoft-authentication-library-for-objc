@@ -90,7 +90,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .invalidPassword,
-            expectedError: Error(error: .invalidGrant, errorCodes: [.invalidCredentials])
+            expectedError: Error(error: .invalidGrant, errorCodes: [MSALNativeAuthESTSAPIErrorCodes.invalidCredentials.rawValue])
         )
     }
 

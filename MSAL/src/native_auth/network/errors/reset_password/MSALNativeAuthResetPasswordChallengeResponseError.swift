@@ -28,7 +28,7 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
 
     let error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode
     let errorDescription: String?
-    let errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
@@ -36,7 +36,7 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
     init(
         error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode,
         errorDescription: String? = nil,
-        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
+        errorCodes: [Int]? = nil,
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         target: String? = nil

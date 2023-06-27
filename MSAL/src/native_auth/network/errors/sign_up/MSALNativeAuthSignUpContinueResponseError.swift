@@ -27,7 +27,7 @@ import Foundation
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
-    var errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
@@ -38,7 +38,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     init(
         error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         errorDescription: String? = nil,
-        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
+        errorCodes: [Int]? = nil,
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
@@ -60,6 +60,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case signUpToken = "signup_token"

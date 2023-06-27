@@ -29,7 +29,7 @@ protocol MSALNativeAuthResponseError: Error, Decodable {
 
     var error: ErrorCode { get }
     var errorDescription: String? { get }
-    var errorCodes: [MSALNativeAPIErrorCodes]? { get }
+    var errorCodes: [Int]? { get }
     var errorURI: String? { get }
     var innerErrors: [MSALNativeAuthInnerError]? { get }
 }
