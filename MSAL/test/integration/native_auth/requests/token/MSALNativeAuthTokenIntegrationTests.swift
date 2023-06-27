@@ -36,7 +36,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         provider = MSALNativeAuthTokenRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: config))
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        sut = try provider.token(
+        sut = try provider.refreshToken(
             parameters: .init(
                 context: context,
                 username: "test@contoso.com",
@@ -83,7 +83,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
                                                               refreshToken: nil)
 
 
-        let request = try! provider.token(parameters: parameters,
+        let request = try! provider.refreshToken(parameters: parameters,
                                                        context: context)
 
         request.send { result, error in
