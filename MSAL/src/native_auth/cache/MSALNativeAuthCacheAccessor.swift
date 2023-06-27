@@ -39,6 +39,9 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         accountIdentifier: MSIDAccountIdentifier,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSALNativeAuthTokens {
+            // When retrieving the Tokens the authority has to be nil if it's not present in the data saved
+            // The config has the the authority going forward and can be used to make further requests
+            configuration.authority = nil
             let idToken = try tokenCacheAccessor.getIDToken(
                 forAccount: accountIdentifier,
                 configuration: configuration,
