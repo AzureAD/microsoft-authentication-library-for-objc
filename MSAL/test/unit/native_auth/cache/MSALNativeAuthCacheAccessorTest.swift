@@ -93,6 +93,27 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         clearCache()
     }
 
+    func testGetAllAccounts_whenAllInfoPresent_shouldRetrieveDataCorrectlyRegardlessOfAuthority() {
+        clearCache()
+        let tokenResponse = getTokenResponse()
+        var tokens: MSALNativeAuthTokens? = nil
+        var account: MSALAccount? = nil
+
+        XCTAssertNoThrow(try cacheAccessor.saveTokensAndAccount(tokenResult: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
+        XCTAssertNoThrow(account = try cacheAccessor.getAllAccounts(configuration: parameters.msidConfiguration).first)
+        XCTAssertEqual(account?.username, parameters.accountIdentifier.displayableId)
+        XCTAssertEqual(account?.identifier, parameters.accountIdentifier.homeAccountId)
+        XCTAssertEqual(account?.environment, "contoso.com")
+        XCTAssertNil(account?.accountClaims)
+        parameters.msidConfiguration = getMSIDConfiguration(host: "https://contoso.com/tfp/differentTenantName/differentPolicyName")
+        let accountIdentifier = MSIDAccountIdentifier(displayableId: account!.username, homeAccountId: account!.homeAccountId.identifier)!
+        XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(accountIdentifier: accountIdentifier, configuration: parameters.msidConfiguration, context: contextStub))
+        XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
+        XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
+        XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
+        clearCache()
+    }
+
     func testDataRetrieval_whenAccountIsOverwritten_shouldRetrieveLastAccount() {
         clearCache()
         let tokenResponse = getTokenResponse()
@@ -229,7 +250,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     private func getParameters() -> ParametersStub {
         ParametersStub(
             accountIdentifier: getAccountIdentifier(),
-            msidConfiguration: getMSIDConfiguration()
+            msidConfiguration: getMSIDConfiguration(host: "https://contoso.com/tfp/tenantName/policyName")
         )
     }
     
@@ -248,8 +269,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         return tokenResponse
     }
     
-    private func getMSIDConfiguration() -> MSIDConfiguration {
-        let configuration = MSIDConfiguration(authority: try? MSIDCIAMAuthority(url: URL(string: "https://contoso.com/tfp/tenantName/policyName")!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
+    private func getMSIDConfiguration(host: String) -> MSIDConfiguration {
+        let configuration = MSIDConfiguration(authority: try? MSIDCIAMAuthority(url: URL(string: host)!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
         let authSchema = MSIDAuthenticationSchemePop(schemeParameters: [
             "kid":"kidSample",
             "token_type":"Pop",
@@ -274,7 +295,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
 
 private struct ParametersStub {
     var accountIdentifier: MSIDAccountIdentifier
-    let msidConfiguration: MSIDConfiguration
+    var msidConfiguration: MSIDConfiguration
 }
 
 private class ContextStub: MSIDRequestContext {
