@@ -129,20 +129,16 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     }
 
     private func handleInvalidGrantErrorCodes(errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
-        if let knownError = errorCodes?.compactMap({ convertErrorCodeToApiErrorCode($0, context) }).first {
-            return .error(convertErrorCodeToErrorType(knownError))
-        } else {
+        guard let errorCode = errorCodes?.first else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return .error(.generalError)
         }
-    }
 
-    private func convertErrorCodeToApiErrorCode(_ errorCode: Int, _ context: MSALNativeAuthRequestContext) -> MSALNativeAuthESTSAPIErrorCodes? {
-        if let error = MSALNativeAuthESTSAPIErrorCodes(rawValue: errorCode) {
-            return error
+        if let knownErrorCode = MSALNativeAuthESTSAPIErrorCodes(rawValue: errorCode) {
+            return .error(convertErrorCodeToErrorType(knownErrorCode))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(errorCode)")
-            return nil
+            return .error(.generalError)
         }
     }
 

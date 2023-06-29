@@ -112,12 +112,6 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
     }
 
-    func test_invalidGrantTokenResponse_withUnknownErrorCode_isProperlyHandled() {
-        let unknownErrorCode = Int.max
-        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [unknownErrorCode], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
-    }
-
     func test_invalidGrantTokenResponse_withSeveralUnknownErrorCodes_isProperlyHandled() {
         let unknownErrorCode1 = Int.max
         let unknownErrorCode2 = unknownErrorCode1 - 1
@@ -144,10 +138,12 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         let unknownErrorCode1 = Int.max
         let unknownErrorCode2 = unknownErrorCode1 - 1
 
+        // We only check for the first error, if it's unknown, we return .generalError
+
         let errorCodes: [Int] = [unknownErrorCode1, knownErrorCode, unknownErrorCode2]
 
         let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .userNotFound)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
     }
 
     func test_errorTokenResponse_isTranslatedToProperErrorResult() {
