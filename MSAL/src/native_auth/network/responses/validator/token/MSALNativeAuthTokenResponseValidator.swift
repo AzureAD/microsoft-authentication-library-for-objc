@@ -87,7 +87,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             case .invalidClient:
                 return .error(.invalidClient)
             case .invalidGrant:
-                return handleInvalidGrantErrorCodes(errorCodes: responseError.errorCodes, context: context)
+                return handleInvalidGrantErrorCodes(responseError.errorCodes, context: context)
             case .expiredToken:
                 return .error(.expiredToken)
             case .expiredRefreshToken:
@@ -128,7 +128,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         }
     }
 
-    private func handleInvalidGrantErrorCodes(errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
+    private func handleInvalidGrantErrorCodes(_ errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
         guard let errorCode = errorCodes?.first else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return .error(.generalError)
@@ -154,8 +154,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .invalidOOBCode
         case .strongAuthRequired:
             return .strongAuthRequired
-        case .invalidPasswordResetToken:
-            return .generalError
         }
     }
 }
