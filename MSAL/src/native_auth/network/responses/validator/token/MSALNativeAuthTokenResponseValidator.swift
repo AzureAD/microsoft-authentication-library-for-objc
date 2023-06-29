@@ -134,7 +134,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .error(.generalError)
         }
 
-        if let knownErrorCode = MSALNativeAuthESTSAPIErrorCodes(rawValue: errorCode) {
+        if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) {
             return .error(convertErrorCodeToErrorType(knownErrorCode))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(errorCode)")
@@ -142,7 +142,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         }
     }
 
-    private func convertErrorCodeToErrorType(_ errorCode: MSALNativeAuthESTSAPIErrorCodes) -> MSALNativeAuthTokenValidatedErrorType {
+    private func convertErrorCodeToErrorType(_ errorCode: MSALNativeAuthESTSApiErrorCodes) -> MSALNativeAuthTokenValidatedErrorType {
         switch errorCode {
         case .userNotFound:
             return .userNotFound
