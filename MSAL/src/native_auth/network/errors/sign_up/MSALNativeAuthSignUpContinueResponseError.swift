@@ -35,28 +35,6 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let unverifiedAttributes: [[String: String]]?
     let invalidAttributes: [[String: String]]?
 
-    init(
-        error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        signUpToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
-        unverifiedAttributes: [[String: String]]? = nil,
-        invalidAttributes: [[String: String]]? = nil
-    ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
-        self.signUpToken = signUpToken
-        self.requiredAttributes = requiredAttributes
-        self.unverifiedAttributes = unverifiedAttributes
-        self.invalidAttributes = invalidAttributes
-    }
-
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"

@@ -211,7 +211,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     private func checkRelationBetweenErrorResponseAndValidatedErrorResult(
         errorCode: MSALNativeAuthSignInChallengeOauth2ErrorCode,
         expectedValidatedError: MSALNativeAuthSignInChallengeValidatedErrorType) {
-            let challengeError = MSALNativeAuthSignInChallengeResponseError(error: errorCode, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
+        let challengeError = MSALNativeAuthSignInChallengeResponseError(error: errorCode, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         let result: MSALNativeAuthSignInChallengeValidatedResponse = sut.validate(context: MSALNativeAuthRequestContext(correlationId: defaultUUID), result: .failure(challengeError))
         if case .error(expectedValidatedError) = result {} else {
             XCTFail("Unexpected result: \(result)")

@@ -33,22 +33,6 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
 
-    init(
-        error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil
-    ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
-        self.target = target
-    }
-
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"

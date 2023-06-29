@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthResetPasswordContinueResponseError
     private var provider: MSALNativeAuthResetPasswordRequestProvider!
 
     override func setUpWithError() throws {
@@ -66,7 +65,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createResetPasswordContinueError(error: .invalidClient)
         )
     }
 
@@ -74,7 +73,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken)
+            expectedError: createResetPasswordContinueError(error: .expiredToken)
         )
     }
 
@@ -82,7 +81,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .invalidPasswordResetToken,
-            expectedError: Error(error: .invalidRequest)
+            expectedError: createResetPasswordContinueError(error: .invalidRequest)
         )
     }
 
@@ -90,7 +89,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .invalidPassword,
-            expectedError: Error(error: .invalidGrant, errorCodes: [MSALNativeAuthESTSAPIErrorCodes.invalidCredentials.rawValue])
+            expectedError: createResetPasswordContinueError(error: .invalidGrant, errorCodes: [MSALNativeAuthESTSAPIErrorCodes.invalidCredentials.rawValue])
         )
     }
 
@@ -98,7 +97,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .explicitInvalidOOBValue,
-            expectedError: Error(error: .invalidOOBValue)
+            expectedError: createResetPasswordContinueError(error: .invalidOOBValue)
         )
     }
 
@@ -106,7 +105,27 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .verificationRequired,
-            expectedError: Error(error: .verificationRequired)
+            expectedError: createResetPasswordContinueError(error: .verificationRequired)
+        )
+    }
+
+    private func createResetPasswordContinueError(
+        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        passwordResetToken: String? = nil
+    ) -> MSALNativeAuthResetPasswordContinueResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target,
+            passwordResetToken: passwordResetToken
         )
     }
 }

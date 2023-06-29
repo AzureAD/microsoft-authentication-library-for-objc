@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthResetPasswordStartResponseError
     private var provider: MSALNativeAuthResetPasswordRequestProvider!
 
     override func setUpWithError() throws {
@@ -74,7 +73,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
         try await perform_testFail(
             endpoint: .resetPasswordStart,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createResetPasswordStartError(error: .invalidClient)
         )
     }
 
@@ -82,7 +81,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
         try await perform_testFail(
             endpoint: .resetPasswordStart,
             response: .explicityUserNotFound,
-            expectedError: Error(error: .userNotFound)
+            expectedError: createResetPasswordStartError(error: .userNotFound)
         )
     }
 
@@ -90,7 +89,25 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
         try await perform_testFail(
             endpoint: .resetPasswordStart,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType)
+            expectedError: createResetPasswordStartError(error: .unsupportedChallengeType)
+        )
+    }
+
+    private func createResetPasswordStartError(
+        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordStartResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
         )
     }
 }

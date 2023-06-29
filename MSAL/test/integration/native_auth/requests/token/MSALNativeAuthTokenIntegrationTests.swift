@@ -120,7 +120,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         XCTAssertNotNil(innerError.errorDescription)
     }
 
-    func test_failRequest_invalidPasword() async throws {
+    func test_failRequest_invalidPassword() async throws {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
