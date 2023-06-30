@@ -6,17 +6,17 @@ Questions, issues, or feedback can be directed to idnadevexciamdublin@microsoft.
 
 ## Prerequisite
 
-To install and run the sample application is required a Mac with XCode installed.
+To install and run the sample application is required a Mac with Xcode installed.
 
 ## Setup
-After that you downloaded the code or cloned the repo, you need to initialise the git submodule. 
-To do that open the command line and navigate the home of the project just downloaded. Now run this command:
+After you have downloaded the code or cloned the repo, you need to initialise the git submodule. 
+To do that open the command line and navigate the home directory of the project just downloaded. Now run this command:
 
 ```
 git submodule update --init
 ```
 
-At this point you can navigate to the sample app folder: Samples/ios-native-auth-simple/NativeAuthSampleApp and open the project using XCode
+At this point you can navigate to the sample app folder: Samples/ios-native-auth-simple/NativeAuthSampleApp and open the project using Xcode
 
 After that, you will be able to run the sample application.
 
