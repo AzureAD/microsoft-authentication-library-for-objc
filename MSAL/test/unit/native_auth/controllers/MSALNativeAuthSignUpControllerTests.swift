@@ -1371,7 +1371,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
 
-    func test_whenSignUpSubmitAttributes_returns_attributesRequired_it_callsDelegateError() async {
+    func test_whenSignUpSubmitAttributes_returns_attributesRequired_it_callsAttributesRequiredError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
@@ -1387,8 +1387,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         wait(for: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
-        XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(delegate.error?.type, .missingRequiredAttributes)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }

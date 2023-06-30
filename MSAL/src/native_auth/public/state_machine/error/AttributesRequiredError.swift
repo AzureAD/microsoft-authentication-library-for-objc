@@ -39,4 +39,5 @@ public enum AttributesRequiredErrorType: Int {
     case browserRequired
     case generalError
     case invalidAttributes
+    case missingRequiredAttributes
 }

@@ -28,6 +28,7 @@ import MSAL
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
+    var defaultTimeout: TimeInterval = 5
 
     var sut: MSALNativeAuthPublicClientApplication!
     var usingMockAPI = false
