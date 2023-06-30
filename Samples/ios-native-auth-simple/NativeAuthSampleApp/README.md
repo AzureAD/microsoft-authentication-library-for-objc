@@ -6,7 +6,7 @@ Questions, issues, or feedback can be directed to idnadevexciamdublin@microsoft.
 
 ## Prerequisite
 
-To install and run the sample application is required a MacBook with XCode installed.
+To install and run the sample application is required a Mac with XCode installed.
 
 ## Setup
 After that you downloaded the code or cloned the repo, you need to initialise the git submodule. 
