@@ -129,17 +129,36 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     }
 
     private func handleInvalidGrantErrorCodes(_ errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
-        guard let errorCode = errorCodes?.first else {
+        guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return .error(.generalError)
         }
 
-        if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) {
-            return .error(convertErrorCodeToErrorType(knownErrorCode))
+        let validatedResponse: MSALNativeAuthTokenValidatedResponse
+        let firstErrorCode = errorCodes.removeFirst()
+
+        if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
+            validatedResponse = .error(convertErrorCodeToErrorType(knownErrorCode))
         } else {
-            MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(errorCode)")
-            return .error(.generalError)
+            MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
+            validatedResponse = .error(.generalError)
         }
+
+        // Log the rest of error_codes
+
+        errorCodes.forEach { errorCode in
+            let errorMessage: String
+
+            if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) {
+                errorMessage = "/token error - ESTS error received in error_codes: \(knownErrorCode) (ignoring)"
+            } else {
+                errorMessage = "/token error - Unknown ESTS received in error_codes with code: \(errorCode) (ignoring)"
+            }
+
+            MSALLogger.log(level: .verbose, context: context, format: errorMessage)
+        }
+
+        return validatedResponse
     }
 
     private func convertErrorCodeToErrorType(_ errorCode: MSALNativeAuthESTSApiErrorCodes) -> MSALNativeAuthTokenValidatedErrorType {

@@ -146,6 +146,40 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
     }
 
+    func test_invalidGrantTokenResponse_withTwoKnownErrorCode_isProperlyHandled_logsCorrectlySecondErrorCode() {
+        let knownErrorCode1 = MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue
+        let knownErrorCode2 = MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue
+
+        let errorCodes: [Int] = [knownErrorCode1, knownErrorCode2]
+
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .userNotFound)
+
+        // Fix to avoid test flakiness by setting an expectation to `Self.logger`
+        sleep(1)
+
+        let resultingLog = Self.logger.messages.lastObject as! String
+        XCTAssertTrue(resultingLog.contains("/token error - ESTS error received in error_codes: invalidCredentials (ignoring)"))
+        XCTAssertEqual(Self.logger.level, .verbose)
+    }
+
+    func test_invalidGrantTokenResponse_withKnownErrorCodeAndUnknownErrorCode_logsCorrectlyUnknownErrorCode() {
+        let knownErrorCode = MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue
+        let unknownErrorCode = Int.max
+
+        let errorCodes: [Int] = [knownErrorCode, unknownErrorCode]
+
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .userNotFound)
+
+        // Fix to avoid test flakiness by setting an expectation to `Self.logger`
+        sleep(1)
+
+        let resultingLog = Self.logger.messages.lastObject as! String
+        XCTAssertTrue(resultingLog.contains("/token error - Unknown ESTS received in error_codes with code: \(unknownErrorCode) (ignoring)"))
+        XCTAssertEqual(Self.logger.level, .verbose)
+    }
+
     func test_errorTokenResponse_isTranslatedToProperErrorResult() {
         let invalidReqError = MSALNativeAuthTokenResponseError(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidReqError, expectedError: .invalidRequest)
