@@ -27,27 +27,14 @@ import Foundation
 struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode
     let errorDescription: String?
-    var errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
-
-    init(
-        error: MSALNativeAuthSignUpChallengeOauth2ErrorCode,
-        errorDescription: String? = nil,
-        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil
-    ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
-    }
 
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
     }

@@ -79,7 +79,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -89,7 +89,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response = try await perform_testFail(
             endpoint: .signInChallenge,
             response: .invalidPurposeToken,
-            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
 
         guard let innerError = response.innerErrors?.first else {
@@ -104,7 +104,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .expiredToken, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 
@@ -112,7 +112,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .unsupportedChallengeType, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }
 }

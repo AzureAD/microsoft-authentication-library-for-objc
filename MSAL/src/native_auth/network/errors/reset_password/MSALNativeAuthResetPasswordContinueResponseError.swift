@@ -28,29 +28,11 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
 
     let error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode
     let errorDescription: String?
-    let errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
     let passwordResetToken: String?
-
-    init(
-        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
-        errorDescription: String? = nil,
-        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil,
-        passwordResetToken: String? = nil
-    ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
-        self.target = target
-        self.passwordResetToken = passwordResetToken
-    }
 
     enum CodingKeys: String, CodingKey {
         case error

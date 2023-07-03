@@ -80,7 +80,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordStartErrorResponseIsExpected_it_returns_error() {
-        let error = MSALNativeAuthResetPasswordStartResponseError(error: .userNotFound)
+        let error = createResetPasswordStartError(error: .userNotFound)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -161,7 +161,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsExpected_it_returns_error() {
-        let error = MSALNativeAuthResetPasswordChallengeResponseError(error: .expiredToken)
+        let error = createResetPasswordChallengeError(error: .expiredToken)
 
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(error)
 
@@ -452,7 +452,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedPasswordResetToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(
-            MSALNativeAuthResetPasswordContinueResponseError(
+            createResetPasswordContinueError(
                 error: expectedError,
                 passwordResetToken: expectedPasswordResetToken
             )
@@ -465,7 +465,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedError: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(
-            MSALNativeAuthResetPasswordSubmitResponseError(
+            createResetPasswordSubmitError(
                 error: expectedError
             )
         )
@@ -477,11 +477,103 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedError: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(
-            MSALNativeAuthResetPasswordPollCompletionResponseError(
+            createResetPasswordPollCompletionError(
                 error: expectedError
             )
         )
 
         return sut.validate(response, with: context)
+    }
+
+    private func createResetPasswordStartError(
+        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordStartResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
+        )
+    }
+
+    private func createResetPasswordChallengeError(
+        error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordChallengeResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
+        )
+    }
+
+    private func createResetPasswordContinueError(
+        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        passwordResetToken: String? = nil
+    ) -> MSALNativeAuthResetPasswordContinueResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target,
+            passwordResetToken: passwordResetToken
+        )
+    }
+
+    private func createResetPasswordSubmitError(
+        error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordSubmitResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
+        )
+    }
+
+    private func createResetPasswordPollCompletionError(
+        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordPollCompletionResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
+        )
     }
 }

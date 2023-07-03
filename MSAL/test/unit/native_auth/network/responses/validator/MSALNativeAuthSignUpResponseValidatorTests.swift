@@ -66,7 +66,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_verificationRequiredErrorWithSignUpTokenAndUnverifiedAttributes_it_returns_verificationRequired() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .verificationRequired,
             signUpToken: "sign-up token",
             unverifiedAttributes: [["name": "username"]]
@@ -84,7 +84,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_verificationRequiredErrorWithSignUpToken_but_unverifiedAttributesIsEmpty_it_returns_unexpectedError() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .verificationRequired,
             signUpToken: "sign-up token",
             unverifiedAttributes: []
@@ -96,7 +96,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_verificationRequiredErrorWithSignUpToken_but_unverifiedAttributesIsNil_it_returns_unexpectedError() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .verificationRequired,
             signUpToken: "sign-up token",
             unverifiedAttributes: nil
@@ -108,7 +108,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_attributeValidationFailedWithSignUpTokenAndInvalidAttributes_it_returns_attributeValidationFailed() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .attributeValidationFailed,
             invalidAttributes: [["city": "dublin"]]
         )
@@ -124,7 +124,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_attributeValidationFailedWithSignUpToken_but_invalidAttributesIsEmpty_it_returns_attributeValidationFailed() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .attributeValidationFailed,
             invalidAttributes: []
         )
@@ -135,7 +135,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_attributeValidationFailedWithSignUpToken_but_invalidAttributesIsNil_it_returns_attributeValidationFailed() {
-        let error = MSALNativeAuthSignUpStartResponseError(
+        let error = createSignUpStartError(
             error: .verificationRequired,
             invalidAttributes: nil
         )
@@ -146,7 +146,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_expectedVerificationRequiredErrorWithoutSignUpToken_it_returns_unexpectedError() {
-        let error = MSALNativeAuthSignUpStartResponseError(error: .verificationRequired, signUpToken: nil)
+        let error = createSignUpStartError(error: .verificationRequired, signUpToken: nil)
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -154,7 +154,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStartErrorResponseIsExpected_it_returns_error() {
-        let error = MSALNativeAuthSignUpStartResponseError(error: .userAlreadyExists)
+        let error = createSignUpStartError(error: .userAlreadyExists)
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -289,7 +289,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpChallengeErrorResponseIsExpected_it_returns_error() {
-        let error = MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken)
+        let error = createSignUpChallengeError(error: .expiredToken)
 
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .failure(error)
 
@@ -521,7 +521,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         invalidAttributes: [[String: String]]? = nil
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .failure(
-            MSALNativeAuthSignUpContinueResponseError(
+            createSignUpContinueError(
                 error: expectedError,
                 signUpToken: expectedSignUpToken,
                 requiredAttributes: requiredAttributes,
@@ -530,5 +530,67 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         return sut.validate(response, with: context)
+    }
+
+    private func createSignUpStartError(
+        error: MSALNativeAuthSignUpStartOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        signUpToken: String? = nil,
+        unverifiedAttributes: [[String: String]]? = nil,
+        invalidAttributes: [[String: String]]? = nil
+    ) -> MSALNativeAuthSignUpStartResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            signUpToken: signUpToken,
+            unverifiedAttributes: unverifiedAttributes,
+            invalidAttributes: invalidAttributes
+        )
+    }
+
+    private func createSignUpChallengeError(
+        error: MSALNativeAuthSignUpChallengeOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil
+    ) -> MSALNativeAuthSignUpChallengeResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors
+        )
+    }
+
+    private func createSignUpContinueError(
+        error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        signUpToken: String? = nil,
+        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
+        unverifiedAttributes: [[String: String]]? = nil,
+        invalidAttributes: [[String: String]]? = nil
+    ) -> MSALNativeAuthSignUpContinueResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            signUpToken: signUpToken,
+            requiredAttributes: requiredAttributes,
+            unverifiedAttributes: unverifiedAttributes,
+            invalidAttributes: invalidAttributes
+        )
     }
 }
