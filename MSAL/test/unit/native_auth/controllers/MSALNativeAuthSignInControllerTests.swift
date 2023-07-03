@@ -81,7 +81,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockDelegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: SignInPasswordStartError(type: .generalError))
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil), delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
     
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockDelegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: SignInPasswordStartError(type: .generalError))
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: ["scope1", "scope2"]), delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
     
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockDelegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: SignInPasswordStartError(type: .generalError))
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: ["scope1", "openid", "profile"]), delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
     }
     
     func test_successfulResponseAndValidation_shouldCompleteSignIn() async {
@@ -142,7 +142,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil), delegate: mockDelegate)
         
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.saveTokenWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
@@ -179,7 +179,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenResponseValidatorMock.tokenValidatedResponse = .error(.strongAuthRequired)
 
         await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil), delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
     
@@ -211,7 +211,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: true)
     }
 
@@ -255,7 +255,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
     }
     
@@ -285,7 +285,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
     }
     
@@ -319,7 +319,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: true)
         XCTAssertEqual(mockCodeStartDelegate.passwordRequiredState?.flowToken, expectedCredentialToken)
     }
@@ -343,7 +343,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
     }
     
@@ -477,7 +477,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [], delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: true)
     }
     
@@ -492,7 +492,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(credentialToken: "credentialToken", context: expectedContext, scopes: [], delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         XCTAssertNotNil(mockDelegate.newSignInCodeRequiredState)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
@@ -515,7 +515,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [], delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         XCTAssertNil(mockDelegate.newSignInCodeRequiredState)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
@@ -538,7 +538,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [], delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         XCTAssertNotNil(mockDelegate.newSignInCodeRequiredState)
         XCTAssertEqual(mockDelegate.newSignInCodeRequiredState?.flowToken, credentialToken)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
@@ -703,7 +703,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
         receivedEvents.removeAll()
     }
@@ -725,7 +725,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockCodeStartDelegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: delegateError)
         await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil), delegate: mockCodeStartDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
         receivedEvents.removeAll()
     }
@@ -749,7 +749,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
         receivedEvents.removeAll()
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
     }
     
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {

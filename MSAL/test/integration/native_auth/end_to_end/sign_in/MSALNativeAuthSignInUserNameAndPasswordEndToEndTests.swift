@@ -38,7 +38,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signInUsingPassword(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertEqual(signInDelegateSpy.error?.type, .userNotFound)
@@ -56,7 +56,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signInUsingPassword(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertEqual(signInDelegateSpy.error?.type, .invalidPassword)
@@ -76,7 +76,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)

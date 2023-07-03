@@ -40,7 +40,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
         XCTAssertEqual(signInDelegateSpy.error?.type, .userNotFound)
@@ -61,7 +61,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -85,7 +85,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
 
-        wait(for: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
@@ -125,7 +125,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -142,7 +142,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
 
-        wait(for: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
@@ -165,7 +165,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
@@ -188,7 +188,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
@@ -201,7 +201,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
 
-        wait(for: [passwordRequiredExpectation], timeout: 2)
+        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
         XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.type, .invalidPassword)
@@ -226,7 +226,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
@@ -239,7 +239,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
 
-        wait(for: [passwordRequiredExpectation], timeout: 2)
+        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
