@@ -47,7 +47,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
 
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
-        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/resetpassword/continue")
+        XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/resetpassword/v1.0/continue")
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
