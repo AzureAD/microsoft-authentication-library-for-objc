@@ -34,15 +34,15 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     }
 
     func test_signUp_start() {
-        XCTAssertEqual(sut.signUpStart.rawValue, "/signup/start")
+        XCTAssertEqual(sut.signUpStart.rawValue, "/signup/v1.0/start")
     }
 
     func test_signUp_challenge() {
-        XCTAssertEqual(sut.signUpChallenge.rawValue, "/signup/challenge")
+        XCTAssertEqual(sut.signUpChallenge.rawValue, "/signup/v1.0/challenge")
     }
 
     func test_signUp_continue() {
-        XCTAssertEqual(sut.signUpContinue.rawValue, "/signup/continue")
+        XCTAssertEqual(sut.signUpContinue.rawValue, "/signup/v1.0/continue")
     }
 
     func test_signInInitiate_endpoint() {
@@ -58,22 +58,22 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     }
 
     func test_resetPasswordStart_endpoint() {
-        XCTAssertEqual(sut.resetPasswordStart.rawValue, "/resetpassword/start")
+        XCTAssertEqual(sut.resetPasswordStart.rawValue, "/resetpassword/v1.0/start")
     }
 
     func test_resetPasswordChallenge_endpoint() {
-        XCTAssertEqual(sut.resetPasswordChallenge.rawValue, "/resetpassword/challenge")
+        XCTAssertEqual(sut.resetPasswordChallenge.rawValue, "/resetpassword/v1.0/challenge")
     }
 
     func test_resetPasswordContinue_endpoint() {
-        XCTAssertEqual(sut.resetPasswordContinue.rawValue, "/resetpassword/continue")
+        XCTAssertEqual(sut.resetPasswordContinue.rawValue, "/resetpassword/v1.0/continue")
     }
 
     func test_resetPasswordSubmit_endpoint() {
-        XCTAssertEqual(sut.resetPasswordSubmit.rawValue, "/resetpassword/submit")
+        XCTAssertEqual(sut.resetPasswordSubmit.rawValue, "/resetpassword/v1.0/submit")
     }
 
     func test_resetPasswordComplete_endpoint() {
-        XCTAssertEqual(sut.resetPasswordComplete.rawValue, "/resetpassword/complete")
+        XCTAssertEqual(sut.resetPasswordComplete.rawValue, "/resetpassword/v1.0/complete")
     }
 }
