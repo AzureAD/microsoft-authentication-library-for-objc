@@ -26,9 +26,12 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    func test_signInWithUnknownUsernameResultsInError() async throws {
+    override func setUpWithError() throws {
+        try super.setUpWithError()
         try XCTSkipIf(!usingMockAPI)
+    }
 
+    func test_signInWithUnknownUsernameResultsInError() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
@@ -47,8 +50,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
 
     func test_signInWithKnownUsernameResultsInOTPSent() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
@@ -69,8 +70,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
 
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -108,8 +107,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -151,8 +148,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
 
     func test_signInWithKnownPasswordUsernameResultsInPasswordSent() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
@@ -172,8 +167,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
 
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let passwordRequiredExpectation = expectation(description: "verifying password")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -209,8 +202,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
     func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let passwordRequiredExpectation = expectation(description: "verifying password")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
