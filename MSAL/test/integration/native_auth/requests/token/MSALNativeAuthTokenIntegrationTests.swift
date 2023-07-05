@@ -100,7 +100,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
             }
             expectation.fulfill()
         }
-        XCTWaiter().wait(for: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: defaultTimeout)
     }
 
     func test_failRequest_invalidPurposeToken() async throws {

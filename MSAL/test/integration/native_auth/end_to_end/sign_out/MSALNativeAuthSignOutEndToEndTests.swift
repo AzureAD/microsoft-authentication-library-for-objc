@@ -33,8 +33,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     }
 
     func test_noSignOutAfterSignInOTPAccountStillPresent() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -44,13 +42,13 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let otp = "<otp not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -59,7 +57,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         // Now submit the code..
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         } else {
             // TODO: Replace this with retrieving the OTP from email
             XCTAssertNotEqual(otp, "<otp not set>")
@@ -67,7 +65,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
 
-        wait(for: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
@@ -84,8 +82,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     // Hero Scenario 1.3.1. Sign out – Local sign out from app on device (no SSO)
     
     func test_signOutAfterSignInOTPSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -95,13 +91,13 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let otp = "<otp not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -110,7 +106,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         // Now submit the code..
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         } else {
             // TODO: Replace this with retrieving the OTP from email
             XCTAssertNotEqual(otp, "<otp not set>")
@@ -118,7 +114,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
 
-        wait(for: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
@@ -134,7 +130,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         XCTAssertNil(userAccountResult)
     }
 
-    func test_noSignOutAfterSignInPasswordAccountStillPresent() async {
+    func test_noSignOutAfterSignInPasswordAccountStillPresent() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
@@ -142,12 +138,12 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
         sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
@@ -162,7 +158,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
 
-    func test_signOutAfterSignInPasswordSuccess() async {
+    func test_signOutAfterSignInPasswordSuccess() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
@@ -170,12 +166,12 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
         sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        wait(for: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)

@@ -26,14 +26,14 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    func test_signInUsingPasswordWithUnknownUsernameResultsInError() async {
+    func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let unknownUsername = UUID().uuidString
 
         if usingMockAPI {
-            try! await mockResponse(.userNotFound, endpoint: .signInToken)
+            try await mockResponse(.userNotFound, endpoint: .signInToken)
         }
 
         sut.signInUsingPassword(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
@@ -44,14 +44,14 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertEqual(signInDelegateSpy.error?.type, .userNotFound)
     }
 
-    func test_signInWithKnownUsernameInvalidPasswordResultsInError() async {
+    func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.invalidPassword, endpoint: .signInToken)
+            try await mockResponse(.invalidPassword, endpoint: .signInToken)
         }
 
         sut.signInUsingPassword(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
@@ -63,7 +63,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
-    func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async {
+    func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
@@ -71,7 +71,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
         sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)

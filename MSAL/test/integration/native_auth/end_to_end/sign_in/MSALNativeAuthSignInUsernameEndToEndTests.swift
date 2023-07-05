@@ -35,7 +35,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let unknownUsername = UUID().uuidString
 
         if usingMockAPI {
-            try! await mockResponse(.userNotFound, endpoint: .signInInitiate)
+            try await mockResponse(.userNotFound, endpoint: .signInInitiate)
         }
 
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -55,8 +55,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -79,8 +79,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -94,7 +94,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         // Now submit the code..
 
         if usingMockAPI {
-            try! await mockResponse(.invalidOOBValue, endpoint: .signInToken)
+            try await mockResponse(.invalidOOBValue, endpoint: .signInToken)
         }
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
@@ -119,8 +119,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let otp = "<otp not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -134,7 +134,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         // Now submit the code..
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         } else {
             // TODO: Replace this with retrieving the OTP from email
             XCTAssertNotEqual(otp, "<otp not set>")
@@ -159,8 +159,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -182,8 +182,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -196,7 +196,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         // Now submit the password..
 
         if usingMockAPI {
-            try! await mockResponse(.invalidPassword, endpoint: .signInToken)
+            try await mockResponse(.invalidPassword, endpoint: .signInToken)
         }
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
@@ -220,8 +220,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         if usingMockAPI {
-            try! await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try! await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
         }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
@@ -234,7 +234,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         // Now submit the password..
 
         if usingMockAPI {
-            try! await mockResponse(.tokenSuccess, endpoint: .signInToken)
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
