@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAPIErrorCodes: Int, Decodable {
+// This enum contains all the handled error cases from eSTS in error_codes
+enum MSALNativeAuthESTSApiErrorCodes: Int, Decodable {
     case userNotFound = 50034
     case invalidCredentials = 50126
     case invalidOTP = 50181
     case invalidAuthenticationType = 400002
     case strongAuthRequired = 50076
-    case invalidPasswordResetToken = 550003
 }

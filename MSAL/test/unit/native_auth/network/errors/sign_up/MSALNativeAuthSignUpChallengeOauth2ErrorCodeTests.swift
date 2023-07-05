@@ -102,6 +102,7 @@ final class MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests: XCTestCase {
 
     func test_toResendCodePublicError_invalidRequest() {
         let error = sut.invalidRequest.toResendCodePublicError()
+        XCTAssertNil(error.errorDescription)
     }
 
     // MARK: - to PasswordRequiredError tests

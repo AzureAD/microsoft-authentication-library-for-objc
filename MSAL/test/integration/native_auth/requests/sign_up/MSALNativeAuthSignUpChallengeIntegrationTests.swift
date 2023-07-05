@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthSignUpChallengeResponseError
     private var provider: MSALNativeAuthSignUpRequestProvider!
 
     override func setUpWithError() throws {
@@ -77,7 +76,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         try await perform_testFail(
             endpoint: .signUpChallenge,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createError(.invalidClient)
         )
     }
 
@@ -85,7 +84,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         try await perform_testFail(
             endpoint: .signUpChallenge,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken)
+            expectedError: createError(.expiredToken)
         )
     }
 
@@ -93,7 +92,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         try await perform_testFail(
             endpoint: .signUpChallenge,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType)
+            expectedError: createError(.unsupportedChallengeType)
         )
     }
 
@@ -101,7 +100,11 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         try await perform_testFail(
             endpoint: .signUpChallenge,
             response: .invalidSignUpToken,
-            expectedError: Error(error: .invalidRequest)
+            expectedError: createError(.invalidRequest)
         )
+    }
+
+    private func createError(_ error: MSALNativeAuthSignUpChallengeOauth2ErrorCode) -> MSALNativeAuthSignUpChallengeResponseError {
+        .init(error: error, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
     }
 }

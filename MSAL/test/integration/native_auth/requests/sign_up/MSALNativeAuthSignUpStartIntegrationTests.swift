@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthSignUpStartResponseError
     private var provider: MSALNativeAuthSignUpRequestProvider!
 
     override func setUpWithError() throws {
@@ -61,7 +60,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createError(.invalidClient)
         )
     }
 
@@ -69,7 +68,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType)
+            expectedError: createError(.unsupportedChallengeType)
         )
     }
 
@@ -77,7 +76,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooWeak,
-            expectedError: Error(error: .passwordTooWeak)
+            expectedError: createError(.passwordTooWeak)
         )
     }
 
@@ -85,7 +84,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooShort,
-            expectedError: Error(error: .passwordTooShort)
+            expectedError: createError(.passwordTooShort)
         )
     }
 
@@ -93,7 +92,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooLong,
-            expectedError: Error(error: .passwordTooLong)
+            expectedError: createError(.passwordTooLong)
         )
     }
 
@@ -101,7 +100,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordRecentlyUsed,
-            expectedError: Error(error: .passwordRecentlyUsed)
+            expectedError: createError(.passwordRecentlyUsed)
         )
     }
 
@@ -109,7 +108,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordBanned,
-            expectedError: Error(error: .passwordBanned)
+            expectedError: createError(.passwordBanned)
         )
     }
 
@@ -117,7 +116,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .userAlreadyExists,
-            expectedError: Error(error: .userAlreadyExists)
+            expectedError: createError(.userAlreadyExists)
         )
     }
 
@@ -125,7 +124,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         let response = try await perform_testFail(
             endpoint: .signUpStart,
             response: .attributesRequired,
-            expectedError: Error(error: .attributesRequired)
+            expectedError: createError(.attributesRequired)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -135,7 +134,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         let response = try await perform_testFail(
             endpoint: .signUpStart,
             response: .verificationRequired,
-            expectedError: Error(error: .verificationRequired)
+            expectedError: createError(.verificationRequired)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -146,7 +145,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         let response = try await perform_testFail(
             endpoint: .signUpStart,
             response: .attributeValidationFailed,
-            expectedError: Error(error: .attributeValidationFailed)
+            expectedError: createError(.attributeValidationFailed)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -156,7 +155,20 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .authNotSupported,
-            expectedError: Error(error: .authNotSupported)
+            expectedError: createError(.authNotSupported)
+        )
+    }
+
+    private func createError(_ error: MSALNativeAuthSignUpStartOauth2ErrorCode) -> MSALNativeAuthSignUpStartResponseError {
+        .init(
+            error: error,
+            errorDescription: nil,
+            errorCodes: nil,
+            errorURI: nil,
+            innerErrors: nil,
+            signUpToken: nil,
+            unverifiedAttributes: nil,
+            invalidAttributes: nil
         )
     }
 }

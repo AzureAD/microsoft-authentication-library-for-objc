@@ -28,13 +28,14 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignInChallengeOauth2ErrorCode
     let errorDescription: String?
-    var errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
 
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
     }

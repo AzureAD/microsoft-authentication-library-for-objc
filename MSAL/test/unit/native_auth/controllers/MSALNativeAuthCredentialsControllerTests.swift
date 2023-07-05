@@ -120,7 +120,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdRefreshToken, isSuccessful: false)
     }
 
@@ -151,7 +151,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.mockAuthTokens = authTokens
         await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
 
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
         XCTAssertEqual(expectedAccessToken, authTokens.accessToken?.accessToken)
     }
 
@@ -188,7 +188,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdRefreshToken, isSuccessful: false)
         receivedEvents.removeAll()
-        wait(for: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: 1)
     }
 
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {

@@ -87,7 +87,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             case .invalidClient:
                 return .error(.invalidClient)
             case .invalidGrant:
-                return .error(convertErrorCodeToErrorType(responseError.errorCodes?.first))
+                return handleInvalidGrantErrorCodes(responseError.errorCodes, context: context)
             case .expiredToken:
                 return .error(.expiredToken)
             case .expiredRefreshToken:
@@ -128,21 +128,51 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         }
     }
 
-    private func convertErrorCodeToErrorType(
-        _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthTokenValidatedErrorType {
-            switch errorCode {
-            case .userNotFound:
-                return .userNotFound
-            case .invalidCredentials:
-                return .invalidPassword
-            case .invalidAuthenticationType:
-                return .invalidAuthenticationType
-            case .invalidOTP:
-                return .invalidOOBCode
-            case .strongAuthRequired:
-                return .strongAuthRequired
-            default:
-                return .generalError
-            }
+    private func handleInvalidGrantErrorCodes(_ errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
+        guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
+            MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
+            return .error(.generalError)
         }
+
+        let validatedResponse: MSALNativeAuthTokenValidatedResponse
+        let firstErrorCode = errorCodes.removeFirst()
+
+        if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
+            validatedResponse = .error(convertErrorCodeToErrorType(knownErrorCode))
+        } else {
+            MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
+            validatedResponse = .error(.generalError)
+        }
+
+        // Log the rest of error_codes
+
+        errorCodes.forEach { errorCode in
+            let errorMessage: String
+
+            if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) {
+                errorMessage = "/token error - ESTS error received in error_codes: \(knownErrorCode) (ignoring)"
+            } else {
+                errorMessage = "/token error - Unknown ESTS received in error_codes with code: \(errorCode) (ignoring)"
+            }
+
+            MSALLogger.log(level: .verbose, context: context, format: errorMessage)
+        }
+
+        return validatedResponse
+    }
+
+    private func convertErrorCodeToErrorType(_ errorCode: MSALNativeAuthESTSApiErrorCodes) -> MSALNativeAuthTokenValidatedErrorType {
+        switch errorCode {
+        case .userNotFound:
+            return .userNotFound
+        case .invalidCredentials:
+            return .invalidPassword
+        case .invalidAuthenticationType:
+            return .invalidAuthenticationType
+        case .invalidOTP:
+            return .invalidOOBCode
+        case .strongAuthRequired:
+            return .strongAuthRequired
+        }
+    }
 }

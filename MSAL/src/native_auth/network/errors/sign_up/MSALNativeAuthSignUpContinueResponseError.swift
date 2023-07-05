@@ -27,7 +27,7 @@ import Foundation
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let errorDescription: String?
-    var errorCodes: [MSALNativeAPIErrorCodes]?
+    let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
@@ -35,31 +35,10 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let unverifiedAttributes: [[String: String]]?
     let invalidAttributes: [[String: String]]?
 
-    init(
-        error: MSALNativeAuthSignUpContinueOauth2ErrorCode,
-        errorDescription: String? = nil,
-        errorCodes: [MSALNativeAPIErrorCodes]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        signUpToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
-        unverifiedAttributes: [[String: String]]? = nil,
-        invalidAttributes: [[String: String]]? = nil
-    ) {
-        self.error = error
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.errorURI = errorURI
-        self.innerErrors = innerErrors
-        self.signUpToken = signUpToken
-        self.requiredAttributes = requiredAttributes
-        self.unverifiedAttributes = unverifiedAttributes
-        self.invalidAttributes = invalidAttributes
-    }
-
     enum CodingKeys: String, CodingKey {
         case error
         case errorDescription = "error_description"
+        case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case signUpToken = "signup_token"
