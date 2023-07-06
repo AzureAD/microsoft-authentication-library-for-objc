@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthResetPasswordPollCompletionResponseError
     private var provider: MSALNativeAuthResetPasswordRequestProvider!
 
     override func setUpWithError() throws {
@@ -108,7 +107,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createResetPasswordPollCompletionError(error: .invalidClient)
         )
     }
 
@@ -116,7 +115,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .invalidPasswordResetToken,
-            expectedError: Error(error: .invalidRequest)
+            expectedError: createResetPasswordPollCompletionError(error: .invalidRequest)
         )
     }
 
@@ -124,7 +123,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken)
+            expectedError: createResetPasswordPollCompletionError(error: .expiredToken)
         )
     }
 
@@ -132,7 +131,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .passwordTooWeak,
-            expectedError: Error(error: .passwordTooWeak)
+            expectedError: createResetPasswordPollCompletionError(error: .passwordTooWeak)
         )
     }
 
@@ -140,7 +139,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .passwordTooShort,
-            expectedError: Error(error: .passwordTooShort)
+            expectedError: createResetPasswordPollCompletionError(error: .passwordTooShort)
         )
     }
 
@@ -148,7 +147,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .passwordTooLong,
-            expectedError: Error(error: .passwordTooLong)
+            expectedError: createResetPasswordPollCompletionError(error: .passwordTooLong)
         )
     }
 
@@ -156,7 +155,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .passwordRecentlyUsed,
-            expectedError: Error(error: .passwordRecentlyUsed)
+            expectedError: createResetPasswordPollCompletionError(error: .passwordRecentlyUsed)
         )
     }
 
@@ -164,7 +163,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .passwordBanned,
-            expectedError: Error(error: .passwordBanned)
+            expectedError: createResetPasswordPollCompletionError(error: .passwordBanned)
         )
     }
 
@@ -172,7 +171,25 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .explicityUserNotFound,
-            expectedError: Error(error: .userNotFound, errorURI: nil)
+            expectedError: createResetPasswordPollCompletionError(error: .userNotFound)
+        )
+    }
+
+    private func createResetPasswordPollCompletionError(
+        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil
+    ) -> MSALNativeAuthResetPasswordPollCompletionResponseError {
+        .init(
+            error: error,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            errorURI: errorURI,
+            innerErrors: innerErrors,
+            target: target
         )
     }
 }

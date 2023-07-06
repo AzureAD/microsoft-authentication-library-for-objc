@@ -31,6 +31,7 @@ class MSALNativeAuthTestLogger : NSObject {
 
     @objc dynamic var containsPII = false
     @objc dynamic var messages = NSMutableArray()
+    @objc dynamic var level: MSALLogLevel = .nothing
     var expectation = XCTestExpectation()
     private var queue = DispatchQueue(label: "test", qos: .default)
     
@@ -44,6 +45,7 @@ class MSALNativeAuthTestLogger : NSObject {
             self?.queue.sync {
                 self?.messages.add(message as Any)
                 self?.containsPII = containsPII
+                self?.level = level
                 // Making sure expectation has been set in the test case
                 if self?.expectation.description != "" {
                     self?.expectation.fulfill()

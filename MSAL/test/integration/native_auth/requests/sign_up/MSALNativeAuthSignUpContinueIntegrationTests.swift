@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthSignUpContinueResponseError
     private var provider: MSALNativeAuthSignUpRequestProvider!
     private var context: MSIDRequestContext!
 
@@ -89,7 +88,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createError(.invalidClient)
         )
     }
 
@@ -97,7 +96,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .invalidGrant,
-            expectedError: Error(error: .invalidGrant)
+            expectedError: createError(.invalidGrant)
         )
     }
 
@@ -105,7 +104,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .invalidSignUpToken,
-            expectedError: Error(error: .invalidRequest)
+            expectedError: createError(.invalidRequest)
         )
     }
 
@@ -113,7 +112,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken)
+            expectedError: createError(.expiredToken)
         )
     }
 
@@ -121,7 +120,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .explicitInvalidOOBValue,
-            expectedError: Error(error: .invalidOOBValue)
+            expectedError: createError(.invalidOOBValue)
         )
     }
 
@@ -129,7 +128,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooWeak,
-            expectedError: Error(error: .passwordTooWeak)
+            expectedError: createError(.passwordTooWeak)
         )
     }
 
@@ -137,7 +136,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooShort,
-            expectedError: Error(error: .passwordTooShort)
+            expectedError: createError(.passwordTooShort)
         )
     }
 
@@ -145,7 +144,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordTooLong,
-            expectedError: Error(error: .passwordTooLong)
+            expectedError: createError(.passwordTooLong)
         )
     }
 
@@ -153,7 +152,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordRecentlyUsed,
-            expectedError: Error(error: .passwordRecentlyUsed)
+            expectedError: createError(.passwordRecentlyUsed)
         )
     }
 
@@ -161,7 +160,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .passwordBanned,
-            expectedError: Error(error: .passwordBanned)
+            expectedError: createError(.passwordBanned)
         )
     }
 
@@ -169,7 +168,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         try await perform_testFail(
             endpoint: .signUpContinue,
             response: .userAlreadyExists,
-            expectedError: Error(error: .userAlreadyExists)
+            expectedError: createError(.userAlreadyExists)
         )
     }
 
@@ -177,7 +176,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .attributesRequired,
-            expectedError: Error(error: .attributesRequired)
+            expectedError: createError(.attributesRequired)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -187,7 +186,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .verificationRequired,
-            expectedError: Error(error: .verificationRequired)
+            expectedError: createError(.verificationRequired)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -198,7 +197,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .attributeValidationFailed,
-            expectedError: Error(error: .attributeValidationFailed)
+            expectedError: createError(.attributeValidationFailed)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -208,7 +207,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         let response = try await perform_testFail(
             endpoint: .signUpContinue,
             response: .credentialRequired,
-            expectedError: Error(error: .credentialRequired)
+            expectedError: createError(.credentialRequired)
         )
 
         XCTAssertNotNil(response.signUpToken)
@@ -222,5 +221,19 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         XCTAssertNotNil(response?.signinSLT)
         XCTAssertNil(response?.signupToken)
+    }
+
+    private func createError(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode) -> MSALNativeAuthSignUpContinueResponseError {
+        .init(
+            error: error,
+            errorDescription: nil,
+            errorCodes: nil,
+            errorURI: nil,
+            innerErrors: nil,
+            signUpToken: nil,
+            requiredAttributes: nil,
+            unverifiedAttributes: nil,
+            invalidAttributes: nil
+        )
     }
 }

@@ -298,6 +298,97 @@ extension EmailAndCodeViewController: SignInStartDelegate {
         channelTargetType: MSAL.MSALNativeAuthChannelType,
         codeLength: Int
     ) {
-        showResultText("Unexpected result while signing in: Verification required")
+        print("SignInStartDelegate: onSignInCodeRequired: \(newState)")
+
+        showResultText("Email verification required")
+
+        showVerifyCodeModal(submitCallback: { [weak self] code in
+                                guard let self else { return }
+
+                                newState.submitCode(code: code, delegate: self)
+                            },
+                            resendCallback: { [weak self] in
+                                guard let self else { return }
+
+                                newState.resendCode(delegate: self)
+                            })
+    }
+}
+
+// MARK: - Sign In verify code delegates
+
+extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
+    func onSignInVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignInCodeRequiredState?) {
+        switch error.type {
+        case .invalidCode:
+            guard let newState else {
+                print("Unexpected state. Received invalidCode but newState is nil")
+
+                showResultText("Internal error verifying code")
+                return
+            }
+
+            updateVerifyCodeModal(errorMessage: "Invalid code",
+                                  submitCallback: { [weak self] code in
+                                      guard let self else { return }
+
+                                      newState.submitCode(code: code, delegate: self)
+                                  }, resendCallback: { [weak self] in
+                                      guard let self else { return }
+
+                                      newState.resendCode(delegate: self)
+                                  })
+        case .browserRequired:
+            showResultText("Unable to sign in: Web UX required")
+            dismissVerifyCodeModal()
+        default:
+            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
+            dismissVerifyCodeModal()
+        }
+    }
+
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        accountResult = result
+        result.getAccessToken(delegate: self)
+    }
+}
+
+// MARK: - SignInResendCodeDelegate methods
+
+extension EmailAndCodeViewController: SignInResendCodeDelegate {
+    func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
+        print("SignInResendCodeDelegate: onSignInResendCodeError: \(error)")
+
+        showResultText("Unexpected error while requesting new code")
+        dismissVerifyCodeModal()
+    }
+
+    func onSignInResendCodeCodeRequired(newState: MSAL.SignInCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: { [weak self] code in
+                                  guard let self else { return }
+
+                                  newState.submitCode(code: code, delegate: self)
+                              }, resendCallback: { [weak self] in
+                                  guard let self else { return }
+
+                                  newState.resendCode(delegate: self)
+                              })
+    }
+}
+
+// MARK: - CredentialsDelegate methods
+
+extension EmailAndCodeViewController: CredentialsDelegate {
+    func onAccessTokenRetrieveCompleted(accessToken: String) {
+        print("Access Token: \(accessToken)")
+        showResultText("Signed in successfully. Access Token: \(accessToken)")
+        dismissVerifyCodeModal()
+        updateUI()
+    }
+
+    func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
+        showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
+        dismissVerifyCodeModal()
     }
 }

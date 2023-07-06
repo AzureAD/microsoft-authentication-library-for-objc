@@ -28,7 +28,6 @@ import XCTest
 
 final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
-    private typealias Error = MSALNativeAuthResetPasswordChallengeResponseError
     private var provider: MSALNativeAuthResetPasswordRequestProvider!
 
     override func setUpWithError() throws {
@@ -79,7 +78,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .invalidClient,
-            expectedError: Error(error: .invalidClient)
+            expectedError: createError(.invalidClient)
         )
     }
 
@@ -87,7 +86,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .expiredToken,
-            expectedError: Error(error: .expiredToken)
+            expectedError: createError(.expiredToken)
         )
     }
 
@@ -95,7 +94,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .invalidPasswordResetToken,
-            expectedError: Error(error: .invalidRequest)
+            expectedError: createError(.invalidRequest)
         )
     }
 
@@ -103,7 +102,18 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .unsupportedChallengeType,
-            expectedError: Error(error: .unsupportedChallengeType)
+            expectedError: createError(.unsupportedChallengeType)
+        )
+    }
+
+    private func createError(_ error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode) -> MSALNativeAuthResetPasswordChallengeResponseError {
+        .init(
+            error: error,
+            errorDescription: nil,
+            errorCodes: nil,
+            errorURI: nil,
+            innerErrors: nil,
+            target: nil
         )
     }
 }

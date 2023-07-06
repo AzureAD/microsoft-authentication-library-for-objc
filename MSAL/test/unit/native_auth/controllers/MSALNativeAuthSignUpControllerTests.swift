@@ -77,9 +77,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        // TODO: Update to `await fulfillment()` in every test
-        // Note: use of wait() instead of `await fulfillment()` to pass CI (which uses Xcode 13.4.1)
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -114,7 +112,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -139,7 +137,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -160,7 +158,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -181,7 +179,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -206,7 +204,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -230,7 +228,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
         XCTAssertEqual(delegate.sentTo, "sentTo")
@@ -254,7 +252,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -278,7 +276,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -302,7 +300,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -327,7 +325,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -349,7 +347,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -384,7 +382,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -409,7 +407,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -430,7 +428,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -451,7 +449,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -476,7 +474,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -500,7 +498,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
         XCTAssertEqual(delegate.sentTo, "sentTo")
@@ -524,7 +522,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -548,7 +546,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -572,7 +570,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -597,7 +595,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -619,7 +617,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -639,7 +637,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeCodeRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
@@ -659,7 +657,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken 2", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -679,7 +677,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -699,7 +697,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -719,7 +717,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.sentTo)
@@ -740,7 +738,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -760,7 +758,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -780,7 +778,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertEqual(delegate.newCodeRequiredState?.flowToken, "signUpToken")
@@ -800,7 +798,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken")
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -820,7 +818,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
 
@@ -839,7 +837,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken 2")
         XCTAssertNil(delegate.error)
@@ -857,7 +855,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
 
@@ -874,7 +872,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState?.flowToken)
@@ -894,7 +892,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState?.flowToken)
@@ -921,7 +919,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
@@ -939,7 +937,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -964,7 +962,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
@@ -990,7 +988,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
@@ -1013,7 +1011,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertEqual(delegate.error?.type, .generalError)
 
@@ -1035,7 +1033,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -1060,7 +1058,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -1085,7 +1083,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newCodeRequiredState)
@@ -1106,7 +1104,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1125,7 +1123,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1144,7 +1142,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "signUpToken")
@@ -1164,7 +1162,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken 2")
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1183,7 +1181,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
 
@@ -1200,7 +1198,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1219,7 +1217,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1238,7 +1236,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertNil(delegate.newPasswordRequiredState)
@@ -1257,7 +1255,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken 2")
         XCTAssertNil(delegate.error)
@@ -1275,7 +1273,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
          await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-         wait(for: [exp], timeout: 1)
+         await fulfillment(of: [exp], timeout: 1)
          XCTAssertEqual(delegate.error?.type, .generalError)
          XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
 
@@ -1297,7 +1295,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1319,7 +1317,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertNil(delegate.error)
@@ -1341,7 +1339,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken")
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)
@@ -1363,7 +1361,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1371,7 +1369,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
 
-    func test_whenSignUpSubmitAttributes_returns_attributesRequired_it_callsDelegateError() async {
+    func test_whenSignUpSubmitAttributes_returns_attributesRequired_it_callsAttributesRequiredError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
@@ -1385,10 +1383,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
-        XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(delegate.error?.type, .missingRequiredAttributes)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1407,7 +1405,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1429,7 +1427,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1451,7 +1449,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
-        wait(for: [exp], timeout: 1)
+        await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
         XCTAssertEqual(delegate.error?.type, .invalidAttributes)

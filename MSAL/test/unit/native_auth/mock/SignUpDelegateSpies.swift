@@ -213,6 +213,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
 
 class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
     private let expectation: XCTestExpectation?
+    private(set) var onSignUpAttributesRequiredCalled = false
     private(set) var onSignUpAttributesRequiredErrorCalled = false
     private(set) var onSignUpCompletedCalled = false
     private(set) var error: AttributesRequiredError?
@@ -220,6 +221,14 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
+    }
+
+    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredCalled = true
+        self.newState = newState
+
+        XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 
     func onSignUpAttributesRequiredError(error: MSAL.AttributesRequiredError, newState: MSAL.SignUpAttributesRequiredState?) {

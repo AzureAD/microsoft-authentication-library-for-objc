@@ -543,6 +543,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitAttributesResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
         signUpToken: String,
@@ -568,8 +569,19 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                     newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
                 )
             }
+        case .attributesRequired(let signUpToken, let attributes):
+            let error = AttributesRequiredError(type: .missingRequiredAttributes)
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error, context: context, format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
+
+            DispatchQueue.main.async {
+                delegate.onSignUpAttributesRequiredError(
+                    error: error,
+                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
+                )
+            }
         case .attributeValidationFailed(let signUpToken, let invalidAttributes):
-            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
+            let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)"
             MSALLogger.log(level: .error, context: context, format: message)
 
             let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
@@ -587,8 +599,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Error in signup/continue submitAttributes request \(error)")
             DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: apiError.toAttributesRequiredPublicError(), newState: nil) }
-        case .attributesRequired,
-             .credentialRequired,
+        case .credentialRequired,
              .unexpectedError:
             let error = AttributesRequiredError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)

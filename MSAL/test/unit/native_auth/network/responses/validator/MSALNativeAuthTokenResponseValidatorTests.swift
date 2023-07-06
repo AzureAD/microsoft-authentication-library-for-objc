@@ -93,18 +93,57 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     }
 
     func test_invalidGrantTokenResponse_isTranslatedToProperErrorResult() {
-        let userNotFoundError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.userNotFound], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let userNotFoundError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: userNotFoundError, expectedError: .userNotFound)
-        let invalidPasswordError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidCredentials], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let invalidPasswordError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
-        let invalidOTPCodeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidOTP], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let invalidOTPCodeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidOTPCodeError, expectedError: .invalidOOBCode)
-        let invalidAuthTypeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.invalidAuthenticationType], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let invalidAuthTypeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidAuthenticationType.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
         let genericErrorCodeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
-        let strongAuthRequiredError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [.strongAuthRequired], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        let strongAuthRequiredError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: strongAuthRequiredError, expectedError: .strongAuthRequired)
+    }
+
+    func test_invalidGrantTokenResponse_withEmptyErrorCodesArray_isProperlyHandled() {
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [], errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
+    }
+
+    func test_invalidGrantTokenResponse_withSeveralUnknownErrorCodes_isProperlyHandled() {
+        let unknownErrorCode1 = Int.max
+        let unknownErrorCode2 = unknownErrorCode1 - 1
+
+        let errorCodes: [Int] = [unknownErrorCode1, unknownErrorCode2]
+
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
+    }
+
+    func test_invalidGrantTokenResponse_withKnownError_andSeveralUnknownErrorCodes_isProperlyHandled() {
+        let knownErrorCode = MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue
+        let unknownErrorCode1 = Int.max
+        let unknownErrorCode2 = unknownErrorCode1 - 1
+
+        let errorCodes: [Int] = [knownErrorCode, unknownErrorCode1, unknownErrorCode2]
+
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .userNotFound)
+    }
+
+    func test_invalidGrantTokenResponse_withUnknownErrorCode_andKnownErrorCodes_isProperlyHandled() {
+        let knownErrorCode = MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue
+        let unknownErrorCode1 = Int.max
+        let unknownErrorCode2 = unknownErrorCode1 - 1
+
+        // We only check for the first error, if it's unknown, we return .generalError
+
+        let errorCodes: [Int] = [unknownErrorCode1, knownErrorCode, unknownErrorCode2]
+
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: error, expectedError: .generalError)
     }
 
     func test_errorTokenResponse_isTranslatedToProperErrorResult() {
