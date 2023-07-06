@@ -32,29 +32,27 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
     }()
 
-    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor()
+    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
     private let externalAccountProvider: MSALExternalAccountHandler = MSALExternalAccountHandler()
+    private let validator = MSIDTokenResponseValidator()
 
     func getTokens(
-        accountIdentifier: MSIDAccountIdentifier,
+        account: MSALAccount,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSALNativeAuthTokens {
-            // When retrieving the Tokens the authority has to be nil if it's not present in the data saved
-            // The config has the the authority going forward as it's only changed inside this function and ones below
-            let accountConfiguration = configuration.copy() as? MSIDConfiguration
-            accountConfiguration?.authority = nil
+            let accountConfiguration = getAccountConfiguration(configuration: configuration, account: account)
             let idToken = try tokenCacheAccessor.getIDToken(
-                forAccount: accountIdentifier,
+                forAccount: account.lookupAccountIdentifier,
                 configuration: accountConfiguration,
                 idTokenType: MSIDCredentialType.MSIDIDTokenType,
                 context: context)
             let refreshToken = try tokenCacheAccessor.getRefreshToken(
-                withAccount: accountIdentifier,
+                withAccount: account.lookupAccountIdentifier,
                 familyId: nil,
                 configuration: accountConfiguration,
                 context: context)
             let accessToken = try tokenCacheAccessor.getAccessToken(
-                forAccount: accountIdentifier,
+                forAccount: account.lookupAccountIdentifier,
                 configuration: accountConfiguration,
                 context: context)
             return MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: idToken.rawIdToken)
@@ -79,16 +77,49 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         return try request?.allAccounts() ?? []
     }
 
-    func saveTokensAndAccount(
-        tokenResult: MSIDTokenResponse,
+    func validateAndSaveTokensAndAccount(
+        tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws {
-            try tokenCacheAccessor.saveTokens(
-                with: configuration,
-                response: tokenResult,
-                factory: MSIDCIAMOauth2Factory(),
-                context: context)
+        context: MSIDRequestContext) throws -> MSIDTokenResult? {
+            let ciamOauth2Provider = getCIAMOauth2Provider(configuration: configuration)
+            return try? validator.validateAndSave(tokenResponse,
+                                                  oauthFactory: ciamOauth2Provider.msidOauth2Factory,
+                                                  tokenCache: tokenCacheAccessor,
+                                                  accountMetadataCache: accountMetadataCache,
+                                                  requestParameters: getRequestParameters(tokenResponse: tokenResponse,
+                                                                                          configuration: configuration,
+                                                                                          context: context),
+                                                  saveSSOStateOnly: false)
         }
+
+    // Here we create the MSIDRequestParameters required by the validateAndSave method
+    private func getRequestParameters(
+        tokenResponse: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext
+    ) -> MSIDRequestParameters {
+
+        let parameters = MSIDRequestParameters()
+        // MSIDRequestParameters has to follow MSIDRequestContext protocol
+        parameters.correlationId = context.correlationId()
+        parameters.logComponent = context.logComponent()
+        parameters.telemetryRequestId = context.telemetryRequestId()
+        parameters.appRequestMetadata = context.appRequestMetadata()
+
+        parameters.msidConfiguration = configuration
+        parameters.clientId = configuration.clientId
+
+        let displayableId = tokenResponse.idTokenObj?.username()
+        let homeAccountId = tokenResponse.idTokenObj?.uniqueId
+
+        let  accountIdentifier = MSIDAccountIdentifier(displayableId: displayableId, homeAccountId: homeAccountId)
+        parameters.accountIdentifier = accountIdentifier
+        parameters.authority = configuration.authority
+        parameters.instanceAware = false
+        let defaultOIDCScopesArray = MSALPublicClientApplication.defaultOIDCScopes().array as? [String]
+        parameters.oidcScope = defaultOIDCScopesArray?.joinScopes()
+        return parameters
+    }
 
     func removeTokens(
         accountIdentifier: MSIDAccountIdentifier,
@@ -117,4 +148,26 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                 clearAccounts: true,
                 context: context)
         }
+
+    private func getCIAMOauth2Provider(configuration: MSIDConfiguration) -> MSALOauth2Provider {
+        return MSALCIAMOauth2Provider(clientId: configuration.clientId,
+                               tokenCache: tokenCacheAccessor,
+                               accountMetadataCache: accountMetadataCache)
+
+    }
+
+    private func getAccountConfiguration(configuration: MSIDConfiguration,
+                                         account: MSALAccount) -> MSIDConfiguration? {
+        // When retrieving tokens from the cache, we first have to get the
+        // Tenant Id from the AccountMetadataCache. Because in NativeAuth
+        // We use only CIAM authorities, we retrieve using it's provider
+        let ciamOauth2Provider = getCIAMOauth2Provider(configuration: configuration)
+        let accountConfiguration = configuration.copy() as? MSIDConfiguration
+        let requestAuthority = ciamOauth2Provider.issuerAuthority(with: account,
+                                                                  request: configuration.authority,
+                                                                  instanceAware: false,
+                                                                  error: nil)
+        accountConfiguration?.authority = requestAuthority
+        return accountConfiguration
+    }
 }

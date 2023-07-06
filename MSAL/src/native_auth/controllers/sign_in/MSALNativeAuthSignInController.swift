@@ -28,6 +28,7 @@
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling {
 
+    typealias ConvertedTokenResponse = (tokenResult: MSIDTokenResult, userAccountResult: MSALNativeAuthUserAccountResult)
     // MARK: - Variables
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
@@ -67,8 +68,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             factory: factory,
             signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
-                tokenResponseHandler: MSALNativeAuthTokenResponseHandler(),
-                factory: factory)
+                factory: factory,
+                msidValidator: MSIDTokenResponseValidator())
         )
     }
 
@@ -181,40 +182,64 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 includeChallengeType: false,
                 context: context) else {
                 MSALLogger.log(level: .error, context: context, format: "SignIn, submit code: unable to create token request")
-                let error = VerifyCodeError(type: .generalError)
-                stopTelemetryEvent(telemetryEvent, context: context, error: error)
-                DispatchQueue.main.async {
-                    delegate.onSignInVerifyCodeError(
-                        error: error,
-                        newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken))
-                }
+                failSubmitCode(errorType: .generalError,
+                               telemetryEvent: telemetryEvent,
+                               scopes: scopes,
+                               credentialToken: credentialToken,
+                               context: context,
+                               delegate: delegate)
                 return
             }
             let config = factory.makeMSIDConfiguration(scopes: scopes)
             let response = await performAndValidateTokenRequest(request, config: config, context: context)
             switch response {
-            case .success(let userAccountResult, let validatedTokenResult, let tokenResponse):
-                handleSuccessfulTokenResult(
-                    userAccountResult: userAccountResult,
-                    tokenResult: validatedTokenResult,
-                    tokenResponse: tokenResponse,
-                    telemetryEvent: telemetryEvent,
-                    context: context,
-                    config: config,
-                    onSuccess: delegate.onSignInCompleted)
-            case .error(let errorType):
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "SignIn completed with errorType: \(errorType)")
-                stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                DispatchQueue.main.async {
-                    delegate.onSignInVerifyCodeError(
-                        error: errorType.convertToVerifyCodeError(),
-                        newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken))
+            case .success(let tokenResponse):
+                do {
+                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse,
+                                                                     context: context,
+                                                                     config: config)
+                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
+                                               userAccountResult: convertedResponse.userAccountResult,
+                                               telemetryEvent: telemetryEvent,
+                                               context: context,
+                                               onSuccess: delegate.onSignInCompleted)
+                } catch {
+                    failSubmitCode(errorType: .generalError,
+                                   telemetryEvent: telemetryEvent,
+                                   scopes: scopes,
+                                   credentialToken: credentialToken,
+                                   context: context,
+                                   delegate: delegate)
                 }
+            case .error(let errorType):
+                failSubmitCode(errorType: errorType,
+                               telemetryEvent: telemetryEvent,
+                               scopes: scopes,
+                               credentialToken: credentialToken,
+                               context: context,
+                               delegate: delegate)
             }
         }
+
+    func failSubmitCode(
+        errorType: MSALNativeAuthTokenValidatedErrorType,
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        scopes: [String],
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        delegate: SignInVerifyCodeDelegate
+    ) {
+        MSALLogger.log(
+            level: .error,
+            context: context,
+            format: "SignIn completed with errorType: \(errorType)")
+        stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
+        DispatchQueue.main.async {
+            delegate.onSignInVerifyCodeError(
+                error: errorType.convertToVerifyCodeError(),
+                newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken))
+        }
+    }
 
     func submitPassword(
         _ password: String,
@@ -232,40 +257,68 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 grantType: .password,
                 context: context) else {
                 MSALLogger.log(level: .error, context: context, format: "SignIn, submit password: unable to create token request")
-                let error = PasswordRequiredError(type: .generalError)
-                stopTelemetryEvent(telemetryEvent, context: context, error: error)
-                DispatchQueue.main.async {
-                    delegate.onSignInPasswordRequiredError(
-                        error: error,
-                        newState: SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, flowToken: credentialToken))
-                }
+                failSubmitPassword(errorType: .generalError,
+                                   telemetryEvent: telemetryEvent,
+                                   username: username,
+                                   credentialToken: credentialToken,
+                                   context: context,
+                                   scopes: scopes,
+                                   delegate: delegate)
                 return
             }
             let config = factory.makeMSIDConfiguration(scopes: scopes)
             let response = await performAndValidateTokenRequest(request, config: config, context: context)
             switch response {
-            case .success(let userAccountResult, let validatedTokenResult, let tokenResponse):
-                handleSuccessfulTokenResult(
-                    userAccountResult: userAccountResult,
-                    tokenResult: validatedTokenResult,
-                    tokenResponse: tokenResponse,
-                    telemetryEvent: telemetryEvent,
-                    context: context,
-                    config: config,
-                    onSuccess: delegate.onSignInCompleted)
-            case .error(let errorType):
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "SignIn with username and password completed with errorType: \(errorType)")
-                stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                DispatchQueue.main.async {
-                    delegate.onSignInPasswordRequiredError(
-                        error: errorType.convertToPasswordRequiredError(),
-                        newState: SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, flowToken: credentialToken))
+            case .success(let tokenResponse):
+                do {
+                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse,
+                                                                     context: context,
+                                                                     config: config)
+                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
+                                               userAccountResult: convertedResponse.userAccountResult,
+                                               telemetryEvent: telemetryEvent,
+                                               context: context,
+                                               onSuccess: delegate.onSignInCompleted)
+                } catch {
+                    failSubmitPassword(errorType: .generalError,
+                                       telemetryEvent: telemetryEvent,
+                                       username: username,
+                                       credentialToken: credentialToken,
+                                       context: context,
+                                       scopes: scopes,
+                                       delegate: delegate)
                 }
+            case .error(let errorType):
+                failSubmitPassword(errorType: errorType,
+                                   telemetryEvent: telemetryEvent,
+                                   username: username,
+                                   credentialToken: credentialToken,
+                                   context: context,
+                                   scopes: scopes,
+                                   delegate: delegate)
             }
         }
+
+    func failSubmitPassword(
+        errorType: MSALNativeAuthTokenValidatedErrorType,
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        username: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        delegate: SignInPasswordRequiredDelegate
+    ) {
+        MSALLogger.log(
+            level: .error,
+            context: context,
+            format: "SignIn with username and password completed with errorType: \(errorType)")
+        stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
+        DispatchQueue.main.async {
+            delegate.onSignInPasswordRequiredError(
+                error: errorType.convertToPasswordRequiredError(),
+                newState: SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, flowToken: credentialToken))
+        }
+    }
 
     func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInResendCode, context: context)
@@ -304,15 +357,23 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         onError: @escaping (SignInPasswordStartError) -> Void) {
             let config = factory.makeMSIDConfiguration(scopes: scopes)
             switch response {
-            case .success(let userAccountResult, let validatedTokenResult, let tokenResponse):
-                handleSuccessfulTokenResult(
-                    userAccountResult: userAccountResult,
-                    tokenResult: validatedTokenResult,
-                    tokenResponse: tokenResponse,
-                    telemetryEvent: telemetryEvent,
-                    context: context,
-                    config: config,
-                    onSuccess: onSuccess)
+            case .success(let tokenResponse):
+                do {
+                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse, context: context, config: config)
+                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
+                                               userAccountResult: convertedResponse.userAccountResult,
+                                               telemetryEvent: telemetryEvent,
+                                               context: context,
+                                               onSuccess: onSuccess)
+                } catch {
+                    let errorType = MSALNativeAuthTokenValidatedErrorType.generalError
+                    MSALLogger.log(
+                        level: .error,
+                        context: context,
+                        format: "SignIn completed with errorType: \(errorType)")
+                    stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
+                    DispatchQueue.main.async { onError(errorType.convertToSignInPasswordStartError()) }
+                }
             case .error(let errorType):
                 MSALLogger.log(
                     level: .error,
@@ -323,23 +384,36 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         }
 
-    private func handleSuccessfulTokenResult(
-        userAccountResult: MSALNativeAuthUserAccountResult,
-        tokenResult: MSIDTokenResult,
+    private func convertTokenResponse(
         tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        config: MSIDConfiguration) throws -> ConvertedTokenResponse {
+            let tokenResult = try retrieveTokenResult(tokenResponse, context: context, msidConfiguration: config)
+            guard let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "User account result could not be created")
+                throw MSALNativeAuthInternalError.generalError
+            }
+            return (tokenResult, userAccountResult)
+        }
+
+    private func handleTokenResponseSuccess(
+        result: MSIDTokenResult,
+        userAccountResult: MSALNativeAuthUserAccountResult,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration,
-        onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void) {
-            telemetryEvent?.setUserInformation(tokenResult.account)
-            cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            stopTelemetryEvent(telemetryEvent, context: context)
-            MSALLogger.log(
-                level: .verbose,
-                context: context,
-                format: "SignIn completed successfully")
-            DispatchQueue.main.async { onSuccess(userAccountResult) }
-        }
+        onSuccess: @escaping (MSALNativeAuthUserAccountResult
+        ) -> Void) {
+        telemetryEvent?.setUserInformation(result.account)
+        stopTelemetryEvent(telemetryEvent, context: context)
+        MSALLogger.log(
+            level: .verbose,
+            context: context,
+            format: "SignIn completed successfully")
+        DispatchQueue.main.async { onSuccess(userAccountResult) }
+    }
 
     private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,

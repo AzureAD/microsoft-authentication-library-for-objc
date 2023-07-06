@@ -30,18 +30,24 @@ protocol MSALNativeAuthTokenResponseValidating {
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse
+
+    func validateAccount(with tokenResult: MSIDTokenResult,
+                         context: MSIDRequestContext,
+                         configuration: MSIDConfiguration,
+                         accountIdentifier: MSIDAccountIdentifier,
+                         error: inout NSError?) -> Bool
 }
 
 final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseValidating {
-    private let tokenResponseHandler: MSALNativeAuthTokenResponseHandling
     private let factory: MSALNativeAuthResultBuildable
+    private let msidValidator: MSIDTokenResponseValidator
 
     init(
-        tokenResponseHandler: MSALNativeAuthTokenResponseHandling,
-        factory: MSALNativeAuthResultBuildable
+        factory: MSALNativeAuthResultBuildable,
+        msidValidator: MSIDTokenResponseValidator
     ) {
-        self.tokenResponseHandler = tokenResponseHandler
         self.factory = factory
+        self.msidValidator = msidValidator
     }
 
     func validate(
@@ -51,20 +57,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     ) -> MSALNativeAuthTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
-            guard let tokenResult = validateAndConvertTokenResponse(
-                tokenResponse,
-                context: context,
-                msidConfiguration: msidConfiguration
-            ) else {
-                return .error(.invalidServerResponse)
-            }
-            guard let userAccountResult = factory.makeUserAccountResult(
-                tokenResult: tokenResult,
-                context: context
-            ) else {
-                return .error(.invalidServerResponse)
-            }
-            return .success(userAccountResult, tokenResult, tokenResponse)
+            return .success(tokenResponse)
         case .failure(let tokenResponseError):
             guard let tokenResponseError =
                     tokenResponseError as? MSALNativeAuthTokenResponseError else {
@@ -76,6 +69,19 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             }
             return handleFailedTokenResult(context, tokenResponseError)
         }
+    }
+
+    func validateAccount(with tokenResult: MSIDTokenResult,
+                         context: MSIDRequestContext,
+                         configuration: MSIDConfiguration,
+                         accountIdentifier: MSIDAccountIdentifier,
+                         error: inout NSError?) -> Bool {
+        return msidValidator.validateAccount(
+            accountIdentifier,
+            tokenResult: tokenResult,
+            correlationID: context.correlationId(),
+            error: &error
+        )
     }
 
     private func handleFailedTokenResult(
@@ -102,31 +108,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 return .error(.slowDown)
             }
         }
-
-    private func validateAndConvertTokenResponse(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            let displayableId = tokenResponse.idTokenObj?.username()
-            let homeAccountId = tokenResponse.idTokenObj?.uniqueId
-            return try tokenResponseHandler.handle(
-                context: context,
-                accountIdentifier: .init(displayableId: displayableId, homeAccountId: homeAccountId),
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                validateAccount: true
-            )
-        } catch {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Response validation error: \(error)"
-            )
-            return nil
-        }
-    }
 
     private func convertErrorCodeToErrorType(
         _ errorCode: MSALNativeAPIErrorCodes?) -> MSALNativeAuthTokenValidatedErrorType {

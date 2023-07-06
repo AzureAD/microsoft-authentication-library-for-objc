@@ -89,5 +89,6 @@ module MSAL_Private {
     header "src/MSALAccount+Internal.h"
     header "src/configuration/external/MSALExternalAccountHandler.h"
     header "src/instance/MSALAccountsProvider.h"
+    header "src/instance/oauth2/ciam/MSALCIAMOauth2Provider.h"
     export *
 }
