@@ -28,7 +28,6 @@ import XCTest
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
     }
     
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
