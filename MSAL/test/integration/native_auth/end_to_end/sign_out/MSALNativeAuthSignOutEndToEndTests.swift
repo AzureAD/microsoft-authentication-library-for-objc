@@ -26,13 +26,9 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
-    }
-
     func test_noSignOutAfterSignInOTPAccountStillPresent() async throws {
+        try XCTSkipIf(!usingMockAPI)
+
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
@@ -82,6 +78,8 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     // Hero Scenario 1.3.1. Sign out – Local sign out from app on device (no SSO)
     
     func test_signOutAfterSignInOTPSuccess() async throws {
+        try XCTSkipIf(!usingMockAPI)
+
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
