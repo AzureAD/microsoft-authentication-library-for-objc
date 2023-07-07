@@ -26,7 +26,6 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-
     func test_signInWithUnknownUsernameResultsInError() async throws {
         try XCTSkipIf(!usingMockAPI)
 
