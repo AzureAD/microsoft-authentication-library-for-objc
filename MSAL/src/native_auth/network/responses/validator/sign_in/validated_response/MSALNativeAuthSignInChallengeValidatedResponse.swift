@@ -54,4 +54,19 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
         }
     }
+
+    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
+        switch self {
+        case .redirect:
+            return .init(type: .browserRequired)
+        case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
+            return .init(type: .generalError)
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .userNotFound:
+            return .init(type: .userNotFound)
+        case .unsupportedChallengeType:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        }
+    }
 }

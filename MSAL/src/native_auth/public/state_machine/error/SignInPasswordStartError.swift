@@ -41,5 +41,4 @@ public enum SignInPasswordStartErrorType: Int {
     case invalidPassword
     case invalidUsername
     case generalError
-    case invalidAuthenticationType
 }
