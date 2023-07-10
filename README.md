@@ -93,7 +93,7 @@ end
 You can use [Carthage](https://github.com/Carthage/Carthage) to install `MSAL` by adding it to your `Cartfile`: 
 
 ```
-github "AzureAD/microsoft-authentication-library-for-objc" "master"
+github "AzureAD/microsoft-authentication-library-for-objc" "main"
 ```
 ### Using Swift Packages
 
@@ -104,7 +104,7 @@ For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Sw
 2. Choose project to add dependency in
 3. Enter : https://github.com/AzureAD/microsoft-authentication-library-for-objc as the package repository URL
 4. Choose package options with :
-    1. Rules → Branch : master (For latest MSAL release)
+    1. Rules → Branch : main (For latest MSAL release)
     2. Rules → Version → Exact : [release version >= 1.1.14] (For a particular release version)
 
 For any issues, please check if there is an outstanding SPM/Xcode bug.
