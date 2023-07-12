@@ -27,12 +27,16 @@ import XCTest
 
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
+        try XCTSkipIf(!usingMockAPI)
+
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let unknownUsername = UUID().uuidString
 
         if usingMockAPI {
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
             try await mockResponse(.userNotFound, endpoint: .signInToken)
         }
 
@@ -45,12 +49,16 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
+        try XCTSkipIf(!usingMockAPI)
+
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
         if usingMockAPI {
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
             try await mockResponse(.invalidPassword, endpoint: .signInToken)
         }
 
@@ -64,6 +72,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
+        try XCTSkipIf(!usingMockAPI)
+
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
@@ -71,6 +81,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         if usingMockAPI {
+            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
+            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 

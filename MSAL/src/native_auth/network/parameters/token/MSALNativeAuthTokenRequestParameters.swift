@@ -34,7 +34,6 @@ struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
     let scope: String?
     let password: String?
     let oobCode: String?
-    let addNCAFlag: Bool
     let includeChallengeType: Bool
     let clientInfo = true
     let refreshToken: String?
@@ -56,10 +55,6 @@ struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
 
         if includeChallengeType {
             parameters[Key.challengeType.rawValue] = config.challengeTypesString
-        }
-
-        if addNCAFlag {
-            parameters[Key.nca.rawValue] = "1"
         }
 
         return parameters.compactMapValues { $0 }

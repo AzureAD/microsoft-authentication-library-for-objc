@@ -38,7 +38,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case invalidServerResponse
     case userNotFound
     case invalidPassword
-    case invalidAuthenticationType
     case invalidOOBCode
     case unsupportedChallengeType
     case strongAuthRequired
@@ -60,8 +59,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInPasswordStartError(type: .userNotFound)
         case .invalidPassword:
             return SignInPasswordStartError(type: .invalidPassword)
-        case .invalidAuthenticationType:
-            return SignInPasswordStartError(type: .invalidAuthenticationType, message: MSALNativeAuthErrorMessage.useSignInCode)
         case .strongAuthRequired:
             return SignInPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
         case .expiredRefreshToken:
@@ -84,7 +81,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
         case .strongAuthRequired:
             return RetrieveAccessTokenError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
-        case .userNotFound, .invalidPassword, .invalidAuthenticationType, .invalidOOBCode:
+        case .userNotFound, .invalidPassword, .invalidOOBCode:
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
             return RetrieveAccessTokenError(type: .generalError)
         }

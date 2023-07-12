@@ -26,6 +26,7 @@
 
 class MSALNativeAuthBaseController {
 
+    typealias TelemetryInfo = (event: MSIDTelemetryAPIEvent?, context: MSALNativeAuthRequestContext)
     let clientId: String
 
     init(
@@ -79,6 +80,10 @@ class MSALNativeAuthBaseController {
             context.telemetryRequestId(),
             eventName: eventName
         )
+    }
+
+    func stopTelemetryEvent(_ telemetryInfo: TelemetryInfo, error: Error? = nil) {
+        stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, error: error)
     }
 
     func stopTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, context: MSIDRequestContext, error: Error? = nil) {

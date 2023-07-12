@@ -66,109 +66,6 @@ class ResetPasswordViewController: UIViewController {
         nativeAuth.resetPassword(username: email, delegate: self)
     }
 
-    // MARK: - Verify Code modal methods
-
-    func showVerifyCodeModal(
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        verifyCodeViewController = storyboard?.instantiateViewController(
-            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
-
-        guard let verifyCodeViewController else {
-            print("Error creating Verify Code view controller")
-            return
-        }
-
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: submitCallback,
-                              resendCallback: resendCallback)
-
-        present(verifyCodeViewController, animated: true)
-    }
-
-    func updateVerifyCodeModal(
-        errorMessage: String?,
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        guard let verifyCodeViewController else {
-            return
-        }
-
-        if let errorMessage {
-            verifyCodeViewController.errorLabel.text = errorMessage
-        }
-
-        verifyCodeViewController.onSubmit = { code in
-            DispatchQueue.main.async {
-                submitCallback(code)
-            }
-        }
-
-        verifyCodeViewController.onResend = {
-            DispatchQueue.main.async {
-                resendCallback()
-            }
-        }
-    }
-
-    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
-        guard verifyCodeViewController != nil else {
-            print("Unexpected error: Verify Code view controller is nil")
-            return
-        }
-
-        dismiss(animated: true, completion: completion)
-        verifyCodeViewController = nil
-    }
-
-    // MARK: - New Password modal methods
-
-    func showNewPasswordModal(submittedCallback: @escaping ((_ password: String) -> Void)) {
-        newPasswordViewController = storyboard?.instantiateViewController(
-            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController
-
-        guard let newPasswordViewController else {
-            print("Error creating password view controller")
-            return
-        }
-
-        newPasswordViewController.onSubmit = submittedCallback
-
-        present(newPasswordViewController, animated: true)
-    }
-
-    func updateNewPasswordModal(
-        errorMessage: String?,
-        submittedCallback: @escaping ((_ password: String) -> Void)
-    ) {
-        guard let newPasswordViewController else {
-            return
-        }
-
-        if let errorMessage {
-            newPasswordViewController.errorLabel.text = errorMessage
-        }
-
-        newPasswordViewController.onSubmit = { password in
-            DispatchQueue.main.async {
-                submittedCallback(password)
-            }
-        }
-    }
-
-    func dismissNewPasswordModal() {
-        guard newPasswordViewController != nil else {
-            print("Unexpected error: Password view controller is nil")
-            return
-        }
-
-        dismiss(animated: true)
-
-        newPasswordViewController = nil
-    }
-
     func showResultText(_ text: String) {
         resultTextView.text = text
     }
@@ -305,5 +202,112 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
     func onResetPasswordCompleted() {
         showResultText("Password reset successfully")
         dismissNewPasswordModal()
+    }
+}
+
+// MARK: - Verify Code modal methods
+
+extension ResetPasswordViewController {
+    func showVerifyCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeViewController else {
+            return
+        }
+
+        if let errorMessage {
+            verifyCodeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
+            }
+        }
+
+        verifyCodeViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+    }
+
+    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true, completion: completion)
+        verifyCodeViewController = nil
+    }
+}
+
+// MARK: - New Password modal methods
+
+extension ResetPasswordViewController {
+    func showNewPasswordModal(submittedCallback: @escaping ((_ password: String) -> Void)) {
+        newPasswordViewController = storyboard?.instantiateViewController(
+            withIdentifier: "NewPasswordViewController") as? NewPasswordViewController
+
+        guard let newPasswordViewController else {
+            print("Error creating password view controller")
+            return
+        }
+
+        newPasswordViewController.onSubmit = submittedCallback
+
+        present(newPasswordViewController, animated: true)
+    }
+
+    func updateNewPasswordModal(
+        errorMessage: String?,
+        submittedCallback: @escaping ((_ password: String) -> Void)
+    ) {
+        guard let newPasswordViewController else {
+            return
+        }
+
+        if let errorMessage {
+            newPasswordViewController.errorLabel.text = errorMessage
+        }
+
+        newPasswordViewController.onSubmit = { password in
+            DispatchQueue.main.async {
+                submittedCallback(password)
+            }
+        }
+    }
+
+    func dismissNewPasswordModal() {
+        guard newPasswordViewController != nil else {
+            print("Unexpected error: Password view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+
+        newPasswordViewController = nil
     }
 }

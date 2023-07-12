@@ -108,7 +108,6 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                           scope: "<scope-1>",
                                                           password: "password",
                                                           oobCode: "oob",
-                                                          addNCAFlag: true,
                                                           includeChallengeType: true,
                                                           refreshToken: nil)
 
@@ -118,7 +117,6 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                           telemetryProvider: telemetryProvider)
 
         let expectedBodyParams = [
-            "nca": "1",
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "credential_token": "Test Credential Token",
@@ -392,7 +390,6 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                           scope: "<scope-1>",
                                                           password: nil,
                                                           oobCode: nil,
-                                                          addNCAFlag: false,
                                                           includeChallengeType: false,
                                                           refreshToken: "refreshToken")
 

@@ -37,7 +37,7 @@ class CustomAttributesViewController: UIViewController {
     @IBOutlet weak var signUpButton: UIButton!
     @IBOutlet weak var signOutButton: UIButton!
 
-    var appContext: MSALNativeAuthPublicClientApplication!
+    var nativeAuth: MSALNativeAuthPublicClientApplication!
 
     var verifyCodeViewController: VerifyCodeViewController?
 
@@ -45,7 +45,7 @@ class CustomAttributesViewController: UIViewController {
         super.viewDidLoad()
 
         do {
-            appContext = try MSALNativeAuthPublicClientApplication(
+            nativeAuth = try MSALNativeAuthPublicClientApplication(
                 configuration: MSALPublicClientApplicationConfig(
                     clientId: Configuration.clientId,
                     redirectUri: nil,
@@ -79,73 +79,20 @@ class CustomAttributesViewController: UIViewController {
 
         print("Signing up with email \(email), password and attributes: \(attributes)")
 
-        appContext.signUpUsingPassword(username: email,
+        nativeAuth.signUpUsingPassword(username: email,
                                        password: password,
                                        attributes: attributes,
                                        delegate: self)
-    }
-
-    // MARK: - Verify Code modal methods
-
-    func showVerifyCodeModal(
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        verifyCodeViewController = storyboard?.instantiateViewController(
-            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
-
-        guard let verifyCodeViewController else {
-            print("Error creating Verify Code view controller")
-            return
-        }
-
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: submitCallback,
-                              resendCallback: resendCallback)
-
-        present(verifyCodeViewController, animated: true)
-    }
-
-    func updateVerifyCodeModal(
-        errorMessage: String?,
-        submitCallback: @escaping (_ code: String) -> Void,
-        resendCallback: @escaping () -> Void
-    ) {
-        guard let verifyCodeViewController else {
-            return
-        }
-
-        if let errorMessage {
-            verifyCodeViewController.errorLabel.text = errorMessage
-        }
-
-        verifyCodeViewController.onSubmit = { code in
-            DispatchQueue.main.async {
-                submitCallback(code)
-            }
-        }
-
-        verifyCodeViewController.onResend = {
-            DispatchQueue.main.async {
-                resendCallback()
-            }
-        }
-    }
-
-    func dismissVerifyCodeModal(completion: (() -> Void)? = nil) {
-        guard verifyCodeViewController != nil else {
-            print("Unexpected error: Verify Code view controller is nil")
-            return
-        }
-
-        dismiss(animated: true, completion: completion)
-        verifyCodeViewController = nil
     }
 
     func showResultText(_ text: String) {
         resultTextView.text = text
     }
 }
+
+// MARK: - Sign Up delegates
+
+// MARK: SignUpPasswordStartDelegate
 
 extension CustomAttributesViewController: SignUpPasswordStartDelegate {
     func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
@@ -167,7 +114,8 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
         newState: MSAL.SignUpCodeRequiredState,
         sentTo _: String,
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
-        codeLength _: Int) {
+        codeLength _: Int
+    ) {
         print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showResultText("Email verification required")
@@ -184,6 +132,8 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
                             })
     }
 }
+
+// MARK: SignUpVerifyCodeDelegate
 
 extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
@@ -231,6 +181,8 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
     }
 }
 
+// MARK: SignUpResendCodeDelegate
+
 extension CustomAttributesViewController: SignUpResendCodeDelegate {
     func onSignUpResendCodeError(error: MSAL.ResendCodeError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
@@ -243,7 +195,8 @@ extension CustomAttributesViewController: SignUpResendCodeDelegate {
         newState: MSAL.SignUpCodeRequiredState,
         sentTo _: String,
         channelTargetType _: MSAL.MSALNativeAuthChannelType,
-        codeLength _: Int) {
+        codeLength _: Int
+    ) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
                                   guard let self else { return }
@@ -254,5 +207,64 @@ extension CustomAttributesViewController: SignUpResendCodeDelegate {
 
                                   newState.resendCode(delegate: self)
                               })
+    }
+}
+
+// MARK: - Verify Code modal methods
+
+extension CustomAttributesViewController {
+    func showVerifyCodeModal(
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        verifyCodeViewController = storyboard?.instantiateViewController(
+            withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
+
+        guard let verifyCodeViewController else {
+            print("Error creating Verify Code view controller")
+            return
+        }
+
+        updateVerifyCodeModal(errorMessage: nil,
+                              submitCallback: submitCallback,
+                              resendCallback: resendCallback)
+
+        present(verifyCodeViewController, animated: true)
+    }
+
+    func updateVerifyCodeModal(
+        errorMessage: String?,
+        submitCallback: @escaping (_ code: String) -> Void,
+        resendCallback: @escaping () -> Void
+    ) {
+        guard let verifyCodeViewController else {
+            return
+        }
+
+        if let errorMessage {
+            verifyCodeViewController.errorLabel.text = errorMessage
+        }
+
+        verifyCodeViewController.onSubmit = { code in
+            DispatchQueue.main.async {
+                submitCallback(code)
+            }
+        }
+
+        verifyCodeViewController.onResend = {
+            DispatchQueue.main.async {
+                resendCallback()
+            }
+        }
+    }
+
+    func dismissVerifyCodeModal() {
+        guard verifyCodeViewController != nil else {
+            print("Unexpected error: Verify Code view controller is nil")
+            return
+        }
+
+        dismiss(animated: true)
+        verifyCodeViewController = nil
     }
 }

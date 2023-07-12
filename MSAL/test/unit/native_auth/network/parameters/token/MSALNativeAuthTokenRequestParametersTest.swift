@@ -45,7 +45,6 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
                                                                     scope: "scope",
                                                                     password: "password",
                                                                     oobCode: "Test OTP Code",
-                                                                    addNCAFlag: true,
                                                                     includeChallengeType: true,
                                                                     refreshToken: nil)
         var resultUrl: URL? = nil
@@ -64,7 +63,6 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
             scope: "<scope-1>",
             password: "password",
             oobCode: "oob",
-            addNCAFlag: true,
             includeChallengeType: true,
             refreshToken: nil
         )
@@ -81,7 +79,6 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
             "scope": "<scope-1>",
             "password": "password",
             "oob": "oob",
-            "nca": "1",
             "client_info" : "true"
         ]
 
@@ -99,7 +96,6 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
             scope: nil,
             password: nil,
             oobCode: nil,
-            addNCAFlag: false,
             includeChallengeType: false,
             refreshToken: nil
         )
