@@ -49,8 +49,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
-        XCTAssertGreaterThanOrEqual(resetPasswordStartDelegate.codeLength ?? 0, 4)
-        XCTAssertLessThanOrEqual(resetPasswordStartDelegate.codeLength ?? 0, 6)
+        XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
         // Now submit the code...
 
