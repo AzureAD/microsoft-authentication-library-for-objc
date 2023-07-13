@@ -100,7 +100,7 @@ import Foundation
         super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
     }
 
-    /// Submits the code to the server for verification.
+    /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
