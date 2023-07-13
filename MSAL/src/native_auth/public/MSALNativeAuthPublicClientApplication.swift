@@ -161,6 +161,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign in a user with a given username and password
+    /// - Parameters:
+    ///   - username: Email address of the account to sign in
+    ///   - password: Password for the account
+    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed
+    ///   - correlationId: UUID to correlate this request with the server for debugging
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow
     public func signInUsingPassword(
         username: String,
         password: String,
@@ -191,6 +198,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign in a user with a given username
+    /// - Parameters:
+    ///   - username: Email address of the account to sign in
+    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed
+    ///   - correlationId: UUID to correlate this request with the server for debugging
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow
     public func signIn(
         username: String,
         scopes: [String]? = nil,
