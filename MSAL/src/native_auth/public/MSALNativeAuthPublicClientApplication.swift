@@ -31,6 +31,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     private let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
+    /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
+    /// - Parameters:
+    ///   - config: Configuration for PublicClientApplication
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    /// - Throws: An error that occured creating the application object
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
@@ -53,6 +58,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: config)
     }
 
+    /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
+    /// - Parameters:
+    ///   - clientId: The client ID of the application, this should come from the app developer portal.
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - rawTenant: The name of the tenant, this should come from the app developer portal.
+    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
+    /// - Throws: An error that occured creating the application object
     public init(
         clientId: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
