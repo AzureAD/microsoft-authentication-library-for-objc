@@ -96,6 +96,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
+    /// Sign up a user with a given username and password
+    /// - Parameters:
+    ///   - username: Username for the new account
+    ///   - password: Password to be used for the new account
+    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed
+    ///   - correlationId: UUID to correlate this request with the server for debugging
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow
     public func signUpUsingPassword(
         username: String,
         password: String,
@@ -132,6 +139,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign up a user with a given username
+    /// - Parameters:
+    ///   - username: Username for the new account
+    ///   - attributes: User attributes to be used during account creation
+    ///   - correlationId: UUID to correlate this request with the server for debugging
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow
     public func signUp(
         username: String,
         attributes: [String: Any]? = nil,

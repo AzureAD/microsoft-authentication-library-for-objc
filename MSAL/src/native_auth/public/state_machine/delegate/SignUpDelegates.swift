@@ -26,7 +26,16 @@ import Foundation
 
 @objc
 public protocol SignUpPasswordStartDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
     func onSignUpPasswordError(error: SignUpPasswordStartError)
+
+    /// Tells the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: the length of the code required.
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -35,7 +44,16 @@ public protocol SignUpPasswordStartDelegate {
 
 @objc
 public protocol SignUpStartDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
     func onSignUpError(error: SignUpStartError)
+
+    /// Tells the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: the length of the code required.
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -44,15 +62,36 @@ public protocol SignUpStartDelegate {
 
 @objc
 public protocol SignUpVerifyCodeDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
+
+    /// Tells the delegate that attributes are required from the user to continue.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+
+    /// Tells the delegate that a password is required from the user to continue.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
+
+    /// Tells the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpResendCodeDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
     func onSignUpResendCodeError(error: ResendCodeError)
+
+    /// Tells the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: the length of the code required.
     func onSignUpResendCodeCodeRequired(
         newState: SignUpCodeRequiredState,
         sentTo: String,
@@ -63,13 +102,28 @@ public protocol SignUpResendCodeDelegate {
 
 @objc
 public protocol SignUpPasswordRequiredDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
+
+    /// Tells the delegate that attributes are required from the user to continue.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+
+    /// Tells the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpAttributesRequiredDelegate {
+    /// Tells the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
+
+    /// Tells the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
