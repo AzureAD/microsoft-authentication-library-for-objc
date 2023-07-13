@@ -72,6 +72,7 @@ public protocol SignInStartDelegate {
 public protocol SignInPasswordRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 
     /// Tells the delegate that the sign in operation completed successfully.
