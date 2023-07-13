@@ -100,7 +100,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - username: Username for the new account.
     ///   - password: Password to be used for the new account.
-    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed.
+    ///   - attributes: User attributes to be used during account creation.
     ///   - correlationId: UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUpUsingPassword(
