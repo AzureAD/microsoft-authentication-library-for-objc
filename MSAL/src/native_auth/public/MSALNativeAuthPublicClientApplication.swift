@@ -265,6 +265,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Retrieve the current signed in account from the cache.
+    /// - Parameter correlationId: UUID to correlate this request with the server for debugging.
+    /// - Returns: An object representing the account information.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
         let controller = controllerFactory.makeCredentialsController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
