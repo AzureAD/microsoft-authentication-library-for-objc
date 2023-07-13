@@ -24,25 +24,34 @@
 
 import Foundation
 
-@objc
-public class MSALNativeAuthUserAccountResult: NSObject {
+/// Represents information returned to the application after a sign in operation.
+@objc public class MSALNativeAuthUserAccountResult: NSObject {
     private let account: MSALAccount
     private let authTokens: MSALNativeAuthTokens
     private let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
 
+    /// Get the username for the account.
     @objc public var username: String {
         account.username ?? ""
     }
+
+    /// Get the ID token for the account.
     @objc public var idToken: String? {
         authTokens.rawIdToken
     }
+
+    /// Get the list of permissions for the access token for the account if present, otherwise returns an empty array.
     @objc public var scopes: [String] {
         authTokens.accessToken?.scopes.array as? [String] ?? []
     }
+
+    /// Get the expiration date for the access token for the account if present, otherwise returns nil.
     @objc public var expiresOn: Date? {
         authTokens.accessToken?.expiresOn
     }
+
+    /// Get the claims for the account if present, otheriwse returns an empty dictionary.
     @objc public var accountClaims: [String: Any] {
         account.accountClaims ?? [:]
     }
@@ -59,6 +68,7 @@ public class MSALNativeAuthUserAccountResult: NSObject {
         self.cacheAccessor = cacheAccessor
     }
 
+    /// Removes the current account from the cache.
     @objc public func signOut() {
         let context = MSALNativeAuthRequestContext()
 
@@ -78,6 +88,11 @@ public class MSALNativeAuthUserAccountResult: NSObject {
         }
     }
 
+    /// Retrieves an access token for the account.
+    /// - Parameters:
+    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
+    ///   - correlationId: UUID to correlate this request with the server for debugging.
     @objc public func getAccessToken(delegate: CredentialsDelegate, forceRefresh: Bool = false, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         if let accessToken = self.authTokens.accessToken {
