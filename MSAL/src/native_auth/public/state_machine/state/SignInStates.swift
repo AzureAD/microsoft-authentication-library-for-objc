@@ -102,7 +102,7 @@ import Foundation
 
     /// Submits the password to the server for verification.
     /// - Parameters:
-    ///   - password: Password that the user supplies.
+    ///   - password: Password that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
