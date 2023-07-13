@@ -18,7 +18,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 The first step is to create and configure a ``MSALNativeAuthPublicClientApplication`` by passing it a valid ``MSALPublicClientApplicationConfig``.
 
+### Signing In an existing User
+- ``MSALNativeAuthPublicClientApplication/signIn(username:scopes:correlationId:delegate:)``
 
-### Signing Up a new User
+### Signing In an existing User using a Password
+- ``MSALNativeAuthPublicClientApplication/signInUsingPassword(username:password:scopes:correlationId:delegate:)``
 
-- ``MSALNativeAuthPublicClientApplication/signUp(username:attributes:correlationId:delegate:)`` method
