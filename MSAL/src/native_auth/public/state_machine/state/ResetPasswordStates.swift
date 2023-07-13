@@ -40,8 +40,12 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     }
 }
 
-@objcMembers
-public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
+/// An object of this type is created when a user is required to supply a verification code to continue a reset password flow.
+@objcMembers public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
+    /// Requests the server to resend the verfication code to the user.
+    /// - Parameters:
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -50,6 +54,11 @@ public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
         }
     }
 
+    /// Submits the code to the server for verification.
+    /// - Parameters:
+    ///   - code: Verification code that the user supplied.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         guard inputValidator.isInputValid(code) else {
@@ -65,8 +74,13 @@ public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
     }
 }
 
-@objcMembers
-public class ResetPasswordRequiredState: ResetPasswordBaseState {
+/// An object of this type is created when a user is required to supply a password to continue a reset password flow.
+@objcMembers public class ResetPasswordRequiredState: ResetPasswordBaseState {
+    /// Submits the password to the server for verification.
+    /// - Parameters:
+    ///   - password: Password that the user supplied.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
