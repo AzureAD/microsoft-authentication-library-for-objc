@@ -239,6 +239,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Reset the password for a given username.
+    /// - Parameters:
+    ///   - username: Username for the account.
+    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
     public func resetPassword(
         username: String,
         correlationId: UUID? = nil,
