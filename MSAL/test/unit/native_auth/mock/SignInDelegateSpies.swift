@@ -29,6 +29,9 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     private let expectation: XCTestExpectation
     var expectedError: SignInPasswordStartError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    var expectedSentTo: String?
+    var expectedChannelTargetType: MSALNativeAuthChannelType?
+    var expectedCodeLength: Int?
     
     init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
@@ -49,7 +52,11 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
     }
     
     public func onSignInCodeRequired(newState: MSAL.SignInCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
-        XCTFail("This method should not be called")
+        XCTAssertTrue(Thread.isMainThread)
+        expectedSentTo = sentTo
+        expectedChannelTargetType = channelTargetType
+        expectedCodeLength = codeLength
+
         expectation.fulfill()
     }
     
@@ -257,6 +264,41 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
         XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
         XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}
+
+final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPasswordStartDelegate {
+    private let expectation: XCTestExpectation
+    var expectedError: SignInPasswordStartError?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+
+    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedUserAccountResult = expectedUserAccountResult
+    }
+
+    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+        if let expectedError = expectedError {
+            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertEqual(error.type, expectedError.type)
+            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            expectation.fulfill()
+            return
+        }
+        XCTFail("This method should not be called")
+        expectation.fulfill()
+    }
+
+    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        if let expectedUserAccountResult = expectedUserAccountResult {
+            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
+        } else {
+            XCTFail("This method should not be called")
+        }
         expectation.fulfill()
     }
 }

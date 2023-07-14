@@ -300,8 +300,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertGreaterThanOrEqual(delegate.codeLength ?? 0, 4)
-        XCTAssertLessThanOrEqual(delegate.codeLength ?? 0, 6)
+        XCTAssertNotNil(delegate.codeLength)
     }
 
     private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy) {

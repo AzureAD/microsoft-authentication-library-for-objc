@@ -150,7 +150,6 @@ class WebFallbackViewController: UIViewController {
 // MARK: - Sign In delegates
 
 extension WebFallbackViewController: SignInPasswordStartDelegate {
-
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         accountResult = result
         result.getAccessToken(delegate: self)

@@ -113,7 +113,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
 
-        requestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.refreshToken, scope: "" , password: nil, oobCode: nil, addNCAFlag: true, includeChallengeType: true, refreshToken: "refreshToken")
+        requestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.refreshToken, scope: "" , password: nil, oobCode: nil, includeChallengeType: true, refreshToken: "refreshToken")
         requestProviderMock.throwingTokenError = ErrorMock.error
 
         let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError))

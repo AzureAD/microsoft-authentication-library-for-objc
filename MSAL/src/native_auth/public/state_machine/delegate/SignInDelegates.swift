@@ -27,6 +27,10 @@ import Foundation
 @objc
 public protocol SignInPasswordStartDelegate {
     func onSignInPasswordError(error: SignInPasswordStartError)
+    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                                             sentTo: String,
+                                             channelTargetType: MSALNativeAuthChannelType,
+                                             codeLength: Int)
     func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 

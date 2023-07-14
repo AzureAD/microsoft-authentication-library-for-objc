@@ -81,7 +81,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         oobCode: String? = nil,
         signInSLT: String? = nil,
         grantType: MSALNativeAuthGrantType,
-        addNCAFlag: Bool = false,
         includeChallengeType: Bool = true,
         context: MSIDRequestContext) -> MSIDHttpRequest? {
             do {
@@ -94,7 +93,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     scope: scopes.joinScopes(),
                     password: password,
                     oobCode: oobCode,
-                    addNCAFlag: addNCAFlag,
                     includeChallengeType: includeChallengeType,
                     refreshToken: nil)
                 return try requestProvider.signInWithPassword(parameters: params, context: context)
@@ -122,7 +120,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     scope: scopes.joinScopes(),
                     password: nil,
                     oobCode: nil,
-                    addNCAFlag: false,
                     includeChallengeType: false,
                     refreshToken: refreshToken)
                 return try requestProvider.refreshToken(parameters: params, context: context)

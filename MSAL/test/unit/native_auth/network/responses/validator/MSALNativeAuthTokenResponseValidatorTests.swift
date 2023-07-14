@@ -87,8 +87,6 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidPasswordError, expectedError: .invalidPassword)
         let invalidOTPCodeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidOTPCodeError, expectedError: .invalidOOBCode)
-        let invalidAuthTypeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidAuthenticationType.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: invalidAuthTypeError, expectedError: .invalidAuthenticationType)
         let genericErrorCodeError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: genericErrorCodeError, expectedError: .generalError)
         let strongAuthRequiredError = MSALNativeAuthTokenResponseError(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)

@@ -152,8 +152,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound
         case .invalidCredentials:
             return .invalidPassword
-        case .invalidAuthenticationType:
-            return .invalidAuthenticationType
         case .invalidOTP:
             return .invalidOOBCode
         case .strongAuthRequired:

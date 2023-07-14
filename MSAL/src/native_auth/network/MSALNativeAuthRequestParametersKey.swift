@@ -35,7 +35,6 @@ enum MSALNativeAuthRequestParametersKey: String {
     case credentialToken = "credential_token"
     case flowToken
     case oobCode = "oob"
-    case nca
     case otp
     case customAttributes
     case signInSLT = "signin_slt"
