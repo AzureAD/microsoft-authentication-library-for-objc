@@ -41,12 +41,12 @@ import Foundation
         authTokens.rawIdToken
     }
 
-    /// Get the list of permissions for the access token for the account if present, otherwise returns an empty array.
+    /// Get the list of permissions for the access token for the account if present.
     @objc public var scopes: [String] {
         authTokens.accessToken?.scopes.array as? [String] ?? []
     }
 
-    /// Get the expiration date for the access token for the account if present, otherwise returns nil.
+    /// Get the expiration date for the access token for the account if present.
     @objc public var expiresOn: Date? {
         authTokens.accessToken?.expiresOn
     }
@@ -68,7 +68,7 @@ import Foundation
         self.cacheAccessor = cacheAccessor
     }
 
-    /// Removes the current account from the cache.
+    /// Removes all the data from the cache.
     @objc public func signOut() {
         let context = MSALNativeAuthRequestContext()
 
