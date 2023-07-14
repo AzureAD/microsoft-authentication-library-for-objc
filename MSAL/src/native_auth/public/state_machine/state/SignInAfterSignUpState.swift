@@ -24,8 +24,8 @@
 
 import Foundation
 
-@objcMembers
-public class SignInAfterSignUpState: NSObject {
+/// An object of this type is created when a user has signed up successfully.
+@objcMembers public class SignInAfterSignUpState: NSObject {
 
     private let controller: MSALNativeAuthSignInControlling
     private let slt: String?
@@ -35,6 +35,11 @@ public class SignInAfterSignUpState: NSObject {
         self.controller = controller
     }
 
+    /// Sign in the user that signed up.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
