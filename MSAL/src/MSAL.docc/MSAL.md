@@ -6,7 +6,7 @@ The MSAL Native Auth SDK allows developers to add authentication to an app using
 
 MSAL Native Auth is built on top of the MSAL Objective-C SDK so this reference documentation includes the full reference documentation for all MSAL classes.
 
-The first step is to create and configure a ``MSALNativeAuthPublicClientApplication`` by passing it a valid ``MSALPublicClientApplicationConfig``.
+The first step is to create and configure a ``MSALNativeAuthPublicClientApplication`` by calling the  ``MSALNativeAuthPublicClientApplication/init(clientId:challengeTypes:rawTenant:redirectUri:)`` method with valid values.
 
 
 ## Topics
