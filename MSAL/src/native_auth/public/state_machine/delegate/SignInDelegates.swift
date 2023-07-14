@@ -33,7 +33,7 @@ public protocol SignInPasswordStartDelegate {
     /// Tells the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires a code but this optional method is not implemented, then ``onSignInPasswordError(error:newState:)`` will be called.
     /// - Parameters:
-    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: the length of the code required.
@@ -55,7 +55,7 @@ public protocol SignInStartDelegate {
 
     /// Tells the delegate that a verification code is required from the user to continue.
     /// - Parameters:
-    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: the length of the code required.
@@ -66,7 +66,7 @@ public protocol SignInStartDelegate {
 
     /// Tells the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:)`` will be called.
-    /// - Parameter newState: An object representing the current state of the flow with follow on methods.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
 
@@ -75,7 +75,7 @@ public protocol SignInPasswordRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameters:
     ///   - error: An error object indicating how the operation failed.
-    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 
     /// Tells the delegate that the sign in operation completed successfully.
@@ -91,7 +91,7 @@ public protocol SignInResendCodeDelegate {
 
     /// Tells the delegate that a verification code is required from the user to continue.
     /// - Parameters:
-    ///   - newState: An object representing the current state of the flow with follow on methods.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: the length of the code required.
