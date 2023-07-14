@@ -58,7 +58,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: config)
     }
 
-    /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
+    /// Initialize a MSALNativePublicClientApplication.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
     ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
