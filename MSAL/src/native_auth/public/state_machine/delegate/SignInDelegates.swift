@@ -31,6 +31,7 @@ public protocol SignInPasswordStartDelegate {
     func onSignInPasswordError(error: SignInPasswordStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
+    /// - Note: If a flow requires a code but this optional method is not implemented, then ``onSignInPasswordError(error:newState:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the current state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -64,7 +65,7 @@ public protocol SignInStartDelegate {
                               codeLength: Int)
 
     /// Tells the delegate that a password is required from the user to continue.
-    /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:newState:)`` will be called.
+    /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:)`` will be called.
     /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
