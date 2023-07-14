@@ -201,6 +201,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                 onSuccess: delegate.onSignInCompleted)
 
                 } catch {
+                    MSALLogger.log(
+                        level: .error,
+                        context: context,
+                        format: "SignIn submit code, token request failed with error \(error)")
                     failSubmitCode(errorType: .generalError,
                                    telemetryInfo: telemetryInfo,
                                    scopes: scopes,
@@ -276,6 +280,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                 config: config,
                                                 onSuccess: delegate.onSignInCompleted)
                 } catch {
+                    MSALLogger.log(
+                        level: .error,
+                        context: context,
+                        format: "SignIn submit password, token request failed with error \(error)")
                     failSubmitPassword(errorType: .generalError,
                                        telemetryInfo: telemetryInfo,
                                        username: username,
@@ -397,7 +405,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     MSALLogger.log(
                         level: .error,
                         context: telemetryInfo.context,
-                        format: "SignIn completed with errorType: \(errorType)")
+                        format: "SignIn completed with error: \(error)")
                     stopTelemetryEvent(telemetryInfo, error: errorType)
                     DispatchQueue.main.async { onError(errorType.convertToSignInPasswordStartError()) }
                 }

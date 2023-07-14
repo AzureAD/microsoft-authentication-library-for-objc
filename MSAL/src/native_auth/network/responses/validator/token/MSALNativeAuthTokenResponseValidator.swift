@@ -35,9 +35,8 @@ protocol MSALNativeAuthTokenResponseValidating {
         with tokenResult: MSIDTokenResult,
         context: MSIDRequestContext,
         configuration: MSIDConfiguration,
-        accountIdentifier: MSIDAccountIdentifier,
-        error: inout NSError?
-    ) -> Bool
+        accountIdentifier: MSIDAccountIdentifier
+    ) throws -> Bool
 }
 
 final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseValidating {
@@ -77,15 +76,19 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         with tokenResult: MSIDTokenResult,
         context: MSIDRequestContext,
         configuration: MSIDConfiguration,
-        accountIdentifier: MSIDAccountIdentifier,
-        error: inout NSError?
-    ) -> Bool {
-        return msidValidator.validateAccount(
+        accountIdentifier: MSIDAccountIdentifier
+    ) throws -> Bool {
+        var error: NSError?
+        let validAccount = msidValidator.validateAccount(
             accountIdentifier,
             tokenResult: tokenResult,
             correlationID: context.correlationId(),
             error: &error
         )
+        if let error {
+            throw error
+        }
+        return validAccount
     }
 
     private func handleFailedTokenResult(

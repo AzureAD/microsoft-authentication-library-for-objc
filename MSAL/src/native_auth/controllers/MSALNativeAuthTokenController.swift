@@ -143,17 +143,19 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         }
 
         guard let result = cacheTokenResponseRetrieveTokenResult(tokenResponse,
-                                              context: context,
-                                              msidConfiguration: msidConfiguration) else {
+                                                                 context: context,
+                                                                 msidConfiguration: msidConfiguration) else {
             MSALLogger.log(level: .error, context: context, format: "Error caching token response")
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
-        performAccountValidation(
-            tokenResult: result,
-            context: context,
-            accountIdentifier: accountIdentifier,
-            configuration: msidConfiguration)
+        guard try responseValidator.validateAccount(with: result,
+                                                    context: context,
+                                                    configuration: msidConfiguration,
+                                                    accountIdentifier: accountIdentifier) else {
+            MSALLogger.log(level: .error, context: context, format: "Error validating account")
+            throw MSALNativeAuthInternalError.invalidResponse
+        }
 
         return result
     }
@@ -179,28 +181,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         }
         return nil
     }
-
-    private func performAccountValidation(
-        tokenResult: MSIDTokenResult,
-        context: MSIDRequestContext,
-        accountIdentifier: MSIDAccountIdentifier,
-        configuration: MSIDConfiguration) {
-            var error: NSError?
-            let accountChecked = responseValidator.validateAccount(with: tokenResult,
-                                                                        context: context,
-                                                                        configuration: configuration,
-                                                                        accountIdentifier: accountIdentifier,
-                                                                        error: &error)
-
-            MSALLogger.logPII(
-                level: error == nil ? .info : .error,
-                context: context,
-                format: "Validated account with result %d, old account %@, new account %@",
-                accountChecked,
-                MSALLogMask.maskTrackablePII(accountIdentifier.uid),
-                MSALLogMask.maskTrackablePII(tokenResult.account.accountIdentifier?.uid)
-            )
-        }
 
     private func clearAccount(msidConfiguration: MSIDConfiguration, context: MSALNativeAuthRequestContext) throws {
         do {

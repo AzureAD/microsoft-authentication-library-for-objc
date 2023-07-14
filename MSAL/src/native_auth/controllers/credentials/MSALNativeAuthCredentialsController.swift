@@ -189,7 +189,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "Token Result was not created properly!")
+                    format: "Token Result was not created properly error - \(error)")
                 await onError(RetrieveAccessTokenError(type: .generalError))
             }
         }
