@@ -33,8 +33,8 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private var tokenResponse = MSIDTokenResponse()
     private var factory: MSALNativeAuthResultFactoryMock!
+    private var context: MSALNativeAuthRequestContext!
 
-    private let context = ContextStub()
     private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
     private let configuration = MSIDConfiguration()
 
@@ -42,6 +42,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
+        context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         factory =  MSALNativeAuthResultFactoryMock()
         sut = MSALNativeAuthTokenResponseValidator(factory: factory, msidValidator: MSIDDefaultTokenResponseValidator())
         tokenResponse.accessToken = "accessToken"
@@ -174,23 +175,4 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
                 XCTFail("Unexpected result: \(result)")
             }
         }
-}
-
-private class ContextStub: MSIDRequestContext {
-
-    func correlationId() -> UUID! {
-        .init()
-    }
-
-    func logComponent() -> String! {
-        ""
-    }
-
-    func telemetryRequestId() -> String! {
-        ""
-    }
-
-    func appRequestMetadata() -> [AnyHashable : Any]! {
-        [:]
-    }
 }
