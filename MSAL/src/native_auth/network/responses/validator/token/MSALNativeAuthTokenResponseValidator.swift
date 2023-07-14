@@ -34,7 +34,6 @@ protocol MSALNativeAuthTokenResponseValidating {
     func validateAccount(
         with tokenResult: MSIDTokenResult,
         context: MSIDRequestContext,
-        configuration: MSIDConfiguration,
         accountIdentifier: MSIDAccountIdentifier
     ) throws -> Bool
 }
@@ -75,7 +74,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     func validateAccount(
         with tokenResult: MSIDTokenResult,
         context: MSIDRequestContext,
-        configuration: MSIDConfiguration,
         accountIdentifier: MSIDAccountIdentifier
     ) throws -> Bool {
         var error: NSError?

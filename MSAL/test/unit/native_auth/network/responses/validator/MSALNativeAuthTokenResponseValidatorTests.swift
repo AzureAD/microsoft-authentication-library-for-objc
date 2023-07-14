@@ -157,13 +157,13 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
 
     func test_validateAccount_successfully() throws {
         var accountValid: Bool?
-         XCTAssertNoThrow(accountValid = try sut.validateAccount(with: MSIDTokenResult(), context: context, configuration: configuration, accountIdentifier: accountIdentifier))
+         XCTAssertNoThrow(accountValid = try sut.validateAccount(with: MSIDTokenResult(), context: context, accountIdentifier: accountIdentifier))
         XCTAssertTrue(accountValid!)
     }
 
     func test_validateAccount_error() throws {
         accountIdentifier.uid = "differentUid"
-        XCTAssertThrowsError(try sut.validateAccount(with: MSIDTokenResult(), context: context, configuration: configuration, accountIdentifier: accountIdentifier))
+        XCTAssertThrowsError(try sut.validateAccount(with: MSIDTokenResult(), context: context, accountIdentifier: accountIdentifier))
     }
 
     private func checkRelationBetweenErrorResponseAndValidatedErrorResult(

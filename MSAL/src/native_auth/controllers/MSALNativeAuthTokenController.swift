@@ -151,7 +151,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
 
         guard try responseValidator.validateAccount(with: result,
                                                     context: context,
-                                                    configuration: msidConfiguration,
                                                     accountIdentifier: accountIdentifier) else {
             MSALLogger.log(level: .error, context: context, format: "Error validating account")
             throw MSALNativeAuthInternalError.invalidResponse

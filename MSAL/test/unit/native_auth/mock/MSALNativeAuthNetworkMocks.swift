@@ -148,7 +148,7 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
         return tokenValidatedResponse
     }
 
-    func validateAccount(with tokenResult: MSIDTokenResult, context: MSIDRequestContext, configuration: MSIDConfiguration, accountIdentifier: MSIDAccountIdentifier) throws -> Bool {
+    func validateAccount(with tokenResult: MSIDTokenResult, context: MSIDRequestContext, accountIdentifier: MSIDAccountIdentifier) throws -> Bool {
         true
     }
 
