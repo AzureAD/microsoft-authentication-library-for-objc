@@ -31,11 +31,13 @@ protocol MSALNativeAuthTokenResponseValidating {
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse
 
-    func validateAccount(with tokenResult: MSIDTokenResult,
-                         context: MSIDRequestContext,
-                         configuration: MSIDConfiguration,
-                         accountIdentifier: MSIDAccountIdentifier,
-                         error: inout NSError?) -> Bool
+    func validateAccount(
+        with tokenResult: MSIDTokenResult,
+        context: MSIDRequestContext,
+        configuration: MSIDConfiguration,
+        accountIdentifier: MSIDAccountIdentifier,
+        error: inout NSError?
+    ) -> Bool
 }
 
 final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseValidating {
@@ -71,11 +73,13 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         }
     }
 
-    func validateAccount(with tokenResult: MSIDTokenResult,
-                         context: MSIDRequestContext,
-                         configuration: MSIDConfiguration,
-                         accountIdentifier: MSIDAccountIdentifier,
-                         error: inout NSError?) -> Bool {
+    func validateAccount(
+        with tokenResult: MSIDTokenResult,
+        context: MSIDRequestContext,
+        configuration: MSIDConfiguration,
+        accountIdentifier: MSIDAccountIdentifier,
+        error: inout NSError?
+    ) -> Bool {
         return msidValidator.validateAccount(
             accountIdentifier,
             tokenResult: tokenResult,

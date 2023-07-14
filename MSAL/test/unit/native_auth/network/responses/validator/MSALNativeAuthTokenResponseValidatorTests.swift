@@ -30,17 +30,20 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
 
     private let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
     private var sut: MSALNativeAuthTokenResponseValidator!
-    private var responseHandler: MSALNativeAuthTokenResponseHandlerMock!
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private var tokenResponse = MSIDTokenResponse()
     private var factory: MSALNativeAuthResultFactoryMock!
 
+    private let context = ContextStub()
+    private let accountIdentifier = MSIDAccountIdentifier(displayableId: "aDisplayableId", homeAccountId: "home.account.id")!
+    private let configuration = MSIDConfiguration()
+
+
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        responseHandler = MSALNativeAuthTokenResponseHandlerMock()
         factory =  MSALNativeAuthResultFactoryMock()
-        sut = MSALNativeAuthTokenResponseValidator(tokenResponseHandler: responseHandler, factory: factory)
+        sut = MSALNativeAuthTokenResponseValidator(factory: factory, msidValidator: MSIDDefaultTokenResponseValidator())
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -58,34 +61,19 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
                                                                                                  rawIdToken: nil),
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
-        let tokenResult = MSIDTokenResult()
         let refreshToken = MSIDRefreshToken()
         refreshToken.familyId = "familyId"
         refreshToken.refreshToken = "refreshToken"
-        tokenResult.refreshToken = refreshToken
         let tokenResponse = MSIDCIAMTokenResponse()
-        responseHandler.mockHandleTokenFunc(result: tokenResult)
         factory.mockMakeUserAccountResult(userAccountResult)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
-        if case .success(userAccountResult, tokenResult, tokenResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenInvalidTokenResponse_anErrorIsReturned() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
-        responseHandler.expectedContext = context
-        responseHandler.expectedValidateAccount = true
-        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(MSIDCIAMTokenResponse()))
-        if case .error(.invalidServerResponse) = result {} else {
+        if case .success(tokenResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
 
     func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -165,14 +153,47 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         checkRelationBetweenErrorResponseAndValidatedErrorResult(responseError: slowDownError, expectedError: .slowDown)
     }
 
+
+    // MARK: - ValidateAccount tests
+
+    func test_validateAccount_successfully() throws {
+        var error: NSError?
+
+        XCTAssertTrue(sut.validateAccount(with: MSIDTokenResult(), context: context, configuration: configuration, accountIdentifier: accountIdentifier, error: &error))
+    }
+
+    func test_validateAccount_error() throws {
+        var error: NSError?
+        accountIdentifier.uid = "differentUid"
+        XCTAssertFalse(sut.validateAccount(with: MSIDTokenResult(), context: context, configuration: configuration, accountIdentifier: accountIdentifier, error: &error))
+    }
+
     private func checkRelationBetweenErrorResponseAndValidatedErrorResult(
         responseError: MSALNativeAuthTokenResponseError,
         expectedError: MSALNativeAuthTokenValidatedErrorType) {
             let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-            responseHandler.mockHandleTokenFunc(throwingError: MSALNativeAuthInternalError.generalError)
             let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(responseError))
             if case .error(expectedError) = result {} else {
                 XCTFail("Unexpected result: \(result)")
             }
         }
+}
+
+private class ContextStub: MSIDRequestContext {
+
+    func correlationId() -> UUID! {
+        .init()
+    }
+
+    func logComponent() -> String! {
+        ""
+    }
+
+    func telemetryRequestId() -> String! {
+        ""
+    }
+
+    func appRequestMetadata() -> [AnyHashable : Any]! {
+        [:]
+    }
 }

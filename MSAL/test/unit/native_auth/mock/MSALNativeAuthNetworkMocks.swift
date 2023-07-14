@@ -148,6 +148,10 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
         return tokenValidatedResponse
     }
 
+    func validateAccount(with tokenResult: MSIDTokenResult, context: MSIDRequestContext, configuration: MSIDConfiguration, accountIdentifier: MSIDAccountIdentifier, error: inout NSError?) -> Bool {
+        true
+    }
+
     private func checkConfAndContext(_ context: MSAL.MSALNativeAuthRequestContext, config: MSIDConfiguration? = nil) {
         if let expectedRequestContext = expectedRequestContext {
             XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
@@ -262,58 +266,6 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         XCTFail("Both parameters are nil")
         throw ErrorMock.error
     }
-}
-
-class MSALNativeAuthTokenResponseHandlerMock: MSALNativeAuthTokenResponseHandling {
-
-    private(set) var throwingError: Error?
-    private(set) var handleTokenFuncResult: MSIDTokenResult?
-    var expectedAccountId: MSIDAccountIdentifier?
-    var expectedContext: MSIDRequestContext?
-    var expectedValidateAccount: Bool?
-
-    func mockHandleTokenFunc(throwingError: Error? = nil, result: MSIDTokenResult? = nil) {
-        self.throwingError = throwingError
-        self.handleTokenFuncResult = result
-    }
-
-    func handle(
-        context: MSIDRequestContext,
-        accountIdentifier: MSIDAccountIdentifier,
-        tokenResponse: MSIDTokenResponse,
-        configuration: MSIDConfiguration,
-        validateAccount: Bool
-    ) throws -> MSIDTokenResult {
-        if throwingError == nil && handleTokenFuncResult == nil {
-            XCTFail("Both parameters are nil")
-        }
-        if let expectedContext = expectedContext {
-            XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
-        }
-        if let expectedAccountId = expectedAccountId {
-            XCTAssertEqual(expectedAccountId.displayableId, accountIdentifier.displayableId)
-            XCTAssertEqual(expectedAccountId.homeAccountId, accountIdentifier.homeAccountId)
-        }
-        if let expectedValidateAccount = expectedValidateAccount {
-            XCTAssertEqual(expectedValidateAccount, validateAccount)
-        }
-
-        if let error = throwingError {
-            throw error
-        }
-
-        if let handleFuncResult = handleTokenFuncResult {
-            return handleFuncResult
-        }
-
-        // This will cause the tests to immediately stop execution. Make sure you're setting one param using `mockFunc()`
-        return handleTokenFuncResult!
-    }
-
-    func mockHandleResendCodeFunc(throwingError: Error? = nil, result: Bool? = nil) {
-        self.throwingError = throwingError
-    }
-
 }
 
 class HttpModuleMockConfigurator {

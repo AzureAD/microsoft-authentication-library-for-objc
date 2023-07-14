@@ -28,7 +28,6 @@
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling {
 
-    typealias ConvertedTokenResponse = (tokenResult: MSIDTokenResult, userAccountResult: MSALNativeAuthUserAccountResult)
     // MARK: - Variables
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
@@ -195,14 +194,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             switch response {
             case .success(let tokenResponse):
                 do {
-                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse,
-                                                                     context: context,
-                                                                     config: config)
-                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
-                                               userAccountResult: convertedResponse.userAccountResult,
-                                               telemetryEvent: telemetryEvent,
-                                               context: context,
-                                               onSuccess: delegate.onSignInCompleted)
+                    try handleMSIDTokenResponse(tokenResponse: tokenResponse,
+                                                context: context,
+                                                telemetryEvent: telemetryEvent,
+                                                config: config,
+                                                onSuccess: delegate.onSignInCompleted)
+
                 } catch {
                     failSubmitCode(errorType: .generalError,
                                    telemetryEvent: telemetryEvent,
@@ -271,14 +268,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             switch response {
             case .success(let tokenResponse):
                 do {
-                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse,
-                                                                     context: context,
-                                                                     config: config)
-                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
-                                               userAccountResult: convertedResponse.userAccountResult,
-                                               telemetryEvent: telemetryEvent,
-                                               context: context,
-                                               onSuccess: delegate.onSignInCompleted)
+                    try handleMSIDTokenResponse(tokenResponse: tokenResponse,
+                                                context: context,
+                                                telemetryEvent: telemetryEvent,
+                                                config: config,
+                                                onSuccess: delegate.onSignInCompleted)
                 } catch {
                     failSubmitPassword(errorType: .generalError,
                                        telemetryEvent: telemetryEvent,
@@ -359,12 +353,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             switch response {
             case .success(let tokenResponse):
                 do {
-                    let convertedResponse = try convertTokenResponse(tokenResponse: tokenResponse, context: context, config: config)
-                    handleTokenResponseSuccess(result: convertedResponse.tokenResult,
-                                               userAccountResult: convertedResponse.userAccountResult,
-                                               telemetryEvent: telemetryEvent,
-                                               context: context,
-                                               onSuccess: onSuccess)
+                    try handleMSIDTokenResponse(tokenResponse: tokenResponse,
+                                                context: context,
+                                                telemetryEvent: telemetryEvent,
+                                                config: config,
+                                                onSuccess: onSuccess)
                 } catch {
                     let errorType = MSALNativeAuthTokenValidatedErrorType.generalError
                     MSALLogger.log(
@@ -384,11 +377,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         }
 
-    private func convertTokenResponse(
+    private func handleMSIDTokenResponse(
         tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration) throws -> ConvertedTokenResponse {
-            let tokenResult = try retrieveTokenResult(tokenResponse, context: context, msidConfiguration: config)
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        config: MSIDConfiguration,
+        onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void) throws {
+            let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
             guard let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
                 MSALLogger.log(
                     level: .error,
@@ -396,7 +391,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     format: "User account result could not be created")
                 throw MSALNativeAuthInternalError.generalError
             }
-            return (tokenResult, userAccountResult)
+
+            handleTokenResponseSuccess(result: tokenResult,
+                                       userAccountResult: userAccountResult,
+                                       telemetryEvent: telemetryEvent,
+                                       context: context,
+                                       onSuccess: onSuccess)
         }
 
     private func handleTokenResponseSuccess(
@@ -404,8 +404,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         userAccountResult: MSALNativeAuthUserAccountResult,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
-        onSuccess: @escaping (MSALNativeAuthUserAccountResult
-        ) -> Void) {
+        onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void) {
         telemetryEvent?.setUserInformation(result.account)
         stopTelemetryEvent(telemetryEvent, context: context)
         MSALLogger.log(

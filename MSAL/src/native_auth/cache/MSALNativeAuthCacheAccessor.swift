@@ -40,7 +40,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         account: MSALAccount,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSALNativeAuthTokens {
-            let accountConfiguration = getAccountConfiguration(configuration: configuration, account: account)
+            let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
             let idToken = try tokenCacheAccessor.getIDToken(
                 forAccount: account.lookupAccountIdentifier,
                 configuration: accountConfiguration,
@@ -110,7 +110,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         parameters.clientId = configuration.clientId
 
         let displayableId = tokenResponse.idTokenObj?.username()
-        let homeAccountId = tokenResponse.idTokenObj?.uniqueId
+        let homeAccountId = tokenResponse.idTokenObj?.userId
 
         let  accountIdentifier = MSIDAccountIdentifier(displayableId: displayableId, homeAccountId: homeAccountId)
         parameters.accountIdentifier = accountIdentifier
@@ -149,7 +149,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                 context: context)
         }
 
-    private func getCIAMOauth2Provider(configuration: MSIDConfiguration) -> MSALOauth2Provider {
+    private func getCIAMOauth2Provider(configuration: MSIDConfiguration) -> MSALCIAMOauth2Provider {
         return MSALCIAMOauth2Provider(clientId: configuration.clientId,
                                tokenCache: tokenCacheAccessor,
                                accountMetadataCache: accountMetadataCache)
@@ -157,16 +157,20 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
     }
 
     private func getAccountConfiguration(configuration: MSIDConfiguration,
-                                         account: MSALAccount) -> MSIDConfiguration? {
+                                         account: MSALAccount) throws -> MSIDConfiguration? {
         // When retrieving tokens from the cache, we first have to get the
         // Tenant Id from the AccountMetadataCache. Because in NativeAuth
-        // We use only CIAM authorities, we retrieve using it's provider
+        // We use only CIAM authorities, we retrieve using its provider
         let ciamOauth2Provider = getCIAMOauth2Provider(configuration: configuration)
         let accountConfiguration = configuration.copy() as? MSIDConfiguration
+        let errorPointer: NSErrorPointer = nil
         let requestAuthority = ciamOauth2Provider.issuerAuthority(with: account,
-                                                                  request: configuration.authority,
-                                                                  instanceAware: false,
-                                                                  error: nil)
+                                                                      request: configuration.authority,
+                                                                      instanceAware: false,
+                                                                      error: errorPointer)
+        if let errorPointer = errorPointer, let error = errorPointer.pointee {
+            throw error
+        }
         accountConfiguration?.authority = requestAuthority
         return accountConfiguration
     }
