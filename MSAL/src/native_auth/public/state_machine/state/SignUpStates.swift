@@ -45,7 +45,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// Requests the server to resend the verfication code to the user.
     /// - Parameters:
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         Task {
@@ -57,7 +57,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - code: Verification code that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -80,7 +80,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - password: Password that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -102,7 +102,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - attributes: Dictionary of attributes that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitAttributes(
         attributes: [String: Any],
         delegate: SignUpAttributesRequiredDelegate,

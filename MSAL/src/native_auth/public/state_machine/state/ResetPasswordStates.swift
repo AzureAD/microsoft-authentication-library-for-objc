@@ -45,7 +45,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// Requests the server to resend the verfication code to the user.
     /// - Parameters:
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -58,7 +58,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - code: Verification code that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         guard inputValidator.isInputValid(code) else {
@@ -80,7 +80,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - password: Password that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 

@@ -112,8 +112,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - username: Username for the new account.
     ///   - password: Password to be used for the new account.
-    ///   - attributes: User attributes to be used during account creation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - attributes: Optional. User attributes to be used during account creation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUpUsingPassword(
         username: String,
@@ -154,8 +154,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Sign up a user with a given username.
     /// - Parameters:
     ///   - username: Username for the new account.
-    ///   - attributes: User attributes to be used during account creation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - attributes: Optional. User attributes to be used during account creation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUp(
         username: String,
@@ -190,8 +190,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - username: Username for the account.
     ///   - password: Password for the account.
-    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signInUsingPassword(
         username: String,
@@ -226,8 +226,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Sign in a user with a given username.
     /// - Parameters:
     ///   - username: Username for the account
-    ///   - scopes: Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         username: String,
@@ -254,7 +254,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Reset the password for a given username.
     /// - Parameters:
     ///   - username: Username for the account.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
     public func resetPassword(
         username: String,
@@ -283,8 +283,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     /// Retrieve the current signed in account from the cache.
-    /// - Parameter correlationId: UUID to correlate this request with the server for debugging.
-    /// - Returns: An object representing the account information.
+    /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
+    /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
         let controller = controllerFactory.makeCredentialsController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)

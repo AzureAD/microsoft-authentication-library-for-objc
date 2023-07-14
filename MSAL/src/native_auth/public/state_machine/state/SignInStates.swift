@@ -55,7 +55,7 @@ import Foundation
     /// Requests the server to resend the verfication code to the user.
     /// - Parameters:
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
@@ -68,7 +68,7 @@ import Foundation
     /// - Parameters:
     ///   - code: Verification code that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
@@ -104,7 +104,7 @@ import Foundation
     /// - Parameters:
     ///   - password: Password that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: UUID to correlate this request with the server for debugging.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
