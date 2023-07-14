@@ -68,10 +68,12 @@ public protocol SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
 
     /// Tells the delegate that attributes are required from the user to continue.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
 
     /// Tells the delegate that a password is required from the user to continue.
+    /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
 
@@ -108,6 +110,7 @@ public protocol SignUpPasswordRequiredDelegate {
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
 
     /// Tells the delegate that attributes are required from the user to continue.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordRequiredError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
 

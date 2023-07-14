@@ -64,6 +64,7 @@ public protocol SignInStartDelegate {
                               codeLength: Int)
 
     /// Tells the delegate that a password is required from the user to continue.
+    /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the current state of the flow with follow on methods.
     @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
