@@ -67,18 +67,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
-        challengeTypes: MSALNativeAuthChallengeTypes,
-        rawTenant: String,
-        redirectUri: String? = nil) throws {
+        tenantName: String,
+        challengeTypes: MSALNativeAuthChallengeTypes) throws {
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
-                .authority(rawTenant: rawTenant)
+                .authority(rawTenant: tenantName)
 
         self.internalChallengeTypes =
                 MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
-            rawTenant: rawTenant,
+            rawTenant: tenantName,
             challengeTypes: internalChallengeTypes
         )
 

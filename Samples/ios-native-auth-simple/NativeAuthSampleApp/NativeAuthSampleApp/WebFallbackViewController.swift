@@ -44,11 +44,8 @@ class WebFallbackViewController: UIViewController {
 
         do {
             nativeAuth = try MSALNativeAuthPublicClientApplication(
-                configuration: MSALPublicClientApplicationConfig(
-                    clientId: Configuration.clientId,
-                    redirectUri: nil,
-                    authority: Configuration.authority
-                ),
+                clientId: Configuration.clientId,
+                tenantName: Configuration.tenantName,
                 challengeTypes: [.OOB, .password]
             )
         } catch {
@@ -60,6 +57,9 @@ class WebFallbackViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
+        signInWithWebUX()
+        return
+        
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty
         else {
