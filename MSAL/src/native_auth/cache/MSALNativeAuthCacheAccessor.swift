@@ -98,7 +98,11 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         configuration: MSIDConfiguration,
         context: MSIDRequestContext
     ) -> MSIDRequestParameters {
-
+        
+        // We are creating the default MSIDRequestParameters to prevent unintended functionality changes.
+        // If the method `validateAndSaveTokenResponse` from `MSIDTokenResponseValidator` changes
+        // the implementation here also needs to change to match the properties needed by the method
+        // Currently only the required and used parameters are set
         let parameters = MSIDRequestParameters()
         // MSIDRequestParameters has to follow MSIDRequestContext protocol
         parameters.correlationId = context.correlationId()
