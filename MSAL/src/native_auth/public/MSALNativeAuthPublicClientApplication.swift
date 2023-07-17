@@ -74,7 +74,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         let configuration = MSALPublicClientApplicationConfig(
             clientId: clientId,
-            redirectUri: redirectUri,
+            redirectUri: nil,
             authority: ciamAuthority
         )
 
