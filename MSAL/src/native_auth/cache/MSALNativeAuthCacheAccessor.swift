@@ -81,7 +81,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSIDTokenResult? {
-            let ciamOauth2Provider = getCIAMOauth2Provider(configuration: configuration)
+            let ciamOauth2Provider = getCIAMOauth2Provider(clientId: configuration.clientId)
             return try? validator.validateAndSave(tokenResponse,
                                                   oauthFactory: ciamOauth2Provider.msidOauth2Factory,
                                                   tokenCache: tokenCacheAccessor,
@@ -98,7 +98,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         configuration: MSIDConfiguration,
         context: MSIDRequestContext
     ) -> MSIDRequestParameters {
-        
+
         // We are creating the default MSIDRequestParameters to prevent unintended functionality changes.
         // If the method `validateAndSaveTokenResponse` from `MSIDTokenResponseValidator` changes
         // the implementation here also needs to change to match the properties needed by the method
@@ -153,8 +153,8 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                 context: context)
         }
 
-    private func getCIAMOauth2Provider(configuration: MSIDConfiguration) -> MSALCIAMOauth2Provider {
-        return MSALCIAMOauth2Provider(clientId: configuration.clientId,
+    private func getCIAMOauth2Provider(clientId: String) -> MSALCIAMOauth2Provider {
+        return MSALCIAMOauth2Provider(clientId: clientId,
                                tokenCache: tokenCacheAccessor,
                                accountMetadataCache: accountMetadataCache)
 
@@ -165,7 +165,7 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         // When retrieving tokens from the cache, we first have to get the
         // Tenant Id from the AccountMetadataCache. Because in NativeAuth
         // We use only CIAM authorities, we retrieve using its provider
-        let ciamOauth2Provider = getCIAMOauth2Provider(configuration: configuration)
+        let ciamOauth2Provider = getCIAMOauth2Provider(clientId: configuration.clientId)
         let accountConfiguration = configuration.copy() as? MSIDConfiguration
         let errorPointer: NSErrorPointer = nil
         let requestAuthority = ciamOauth2Provider.issuerAuthority(with: account,
