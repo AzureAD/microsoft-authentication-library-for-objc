@@ -26,11 +26,8 @@ import MSAL
 
 @objcMembers
 class Configuration: NSObject {
-    // Update the below to your client ID you received in the portal. The below is for running the demo only
+    // Update the below to your client ID and tenantName you received in the portal. The below is for running the demo only
 
-    static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
-    static let authorityURL = "https://native-ux-mock-api.azurewebsites.net/test"
-
-    // swiftlint:disable:next force_try
-    static let authority = try! MSALCIAMAuthority(url: URL(string: authorityURL)!)
+    static let clientId = "b2b6499a-cce2-424d-ab8e-4ebf3eb131b2"
+    static let tenantName = "RoCustomersDemo10"
 }
