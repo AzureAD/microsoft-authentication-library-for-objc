@@ -35,8 +35,8 @@ protocol MSALNativeAuthRequestable {
 extension MSALNativeAuthRequestable {
 
     func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL {
-        var endpointUrl = config.authority.url.absoluteString + endpoint.rawValue
-        var components = URLComponents(string: endpointUrl)
+        var components = URLComponents(string: config.authority.url.absoluteString)
+        components?.path += endpoint.rawValue
         
         if let dc = config.sliceConfig?.dc {
             components?.queryItems = [URLQueryItem(name: "dc", value: dc)]
