@@ -24,15 +24,31 @@
 
 import Foundation
 
-/// Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 @objc
 public class AttributesRequiredError: MSALNativeAuthError {
-    /// Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    /// An error type indicating the type of error that occurred
     @objc public let type: AttributesRequiredErrorType
 
     init(type: AttributesRequiredErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
+    }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .invalidAttributes:
+            return "Invalid attributes"
+        case .missingRequiredAttributes:
+            return "Missing required attributes"
+        case .generalError:
+            return "General error"
+        }
     }
 }
 

@@ -26,11 +26,31 @@ import Foundation
 
 @objc
 public class ResetPasswordStartError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: ResetPasswordStartErrorType
 
     init(type: ResetPasswordStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
+    }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .generalError:
+            return "General error"
+        case .userDoesNotHavePassword:
+            return "User does not have a password"
+        case .userNotFound:
+            return "User not found"
+        case .invalidUsername:
+            return "Invalid username"
+        }
     }
 }
 

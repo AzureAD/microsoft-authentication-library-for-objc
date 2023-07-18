@@ -38,7 +38,7 @@ final class MSALNativeAuthResetPasswordContinueOauth2ErrorCodeTests: XCTestCase 
     func test_toVerifyCodePublicError_invalidRequest() {
         let error = sut.invalidRequest.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toVerifyCodePublicError_invalidClient() {
@@ -50,7 +50,7 @@ final class MSALNativeAuthResetPasswordContinueOauth2ErrorCodeTests: XCTestCase 
     func test_toVerifyCodePublicError_invalidGrant() {
         let error = sut.invalidGrant.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toVerifyCodePublicError_expiredToken() {
@@ -62,12 +62,12 @@ final class MSALNativeAuthResetPasswordContinueOauth2ErrorCodeTests: XCTestCase 
     func test_toVerifyCodePublicError_verificationRequired() {
         let error = sut.verificationRequired.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toVerifyCodePublicError_invalidOOBValue() {
         let error = sut.invalidOOBValue.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .invalidCode)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 }

@@ -38,7 +38,7 @@ final class MSALNativeAuthResetPasswordSubmitOauth2ErrorCodeTests: XCTestCase {
     func test_toPasswordRequiredPublicError_invalidRequest() {
         let error = sut.invalidRequest.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toPasswordRequiredPublicError_invalidClient() {

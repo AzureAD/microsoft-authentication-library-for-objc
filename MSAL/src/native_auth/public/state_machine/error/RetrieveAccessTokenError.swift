@@ -26,11 +26,29 @@ import Foundation
 
 @objc
 public class RetrieveAccessTokenError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: RetrieveAccessTokenErrorType
 
     init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
+    }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .generalError:
+            return "General error"
+        case .refreshTokenExpired:
+            return "Refresh token expired"
+        case .tokenNotFound:
+            return "Token not found"
+        case .browserRequired:
+            return "Browser required"
+        }
     }
 }
 

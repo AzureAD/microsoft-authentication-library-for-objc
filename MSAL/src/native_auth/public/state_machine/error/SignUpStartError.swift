@@ -26,11 +26,31 @@ import Foundation
 
 @objc
 public class SignUpStartError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: SignUpStartErrorType
 
     init(type: SignUpStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
+    }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .userAlreadyExists:
+            return "User already exists"
+        case .invalidUsername:
+            return "Invalid username"
+        case .invalidAttributes:
+            return "Invalid attributes"
+        case .generalError:
+            return "General error"
+        }
     }
 }
 

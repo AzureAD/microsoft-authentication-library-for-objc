@@ -26,6 +26,7 @@ import Foundation
 
 @objc
 public class PasswordRequiredError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: PasswordRequiredErrorType
 
     init(type: PasswordRequiredErrorType, message: String? = nil) {
@@ -43,6 +44,21 @@ public class PasswordRequiredError: MSALNativeAuthError {
             self.type = .generalError
         }
         super.init(message: signInPasswordError.errorDescription)
+    }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .invalidPassword:
+            return "Invalid password"
+        case .generalError:
+            return "General error"
+        }
     }
 }
 

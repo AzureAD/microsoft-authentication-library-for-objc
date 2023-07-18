@@ -26,6 +26,11 @@ import Foundation
 
 @objc
 public protocol SignInAfterSignUpDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignInAfterSignUpError(error: SignInAfterSignUpError)
+
+    /// Notifies the delegate that the sign in operation completed successfully.
+    /// - Parameter result: An object representing the signed in user account.
     func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }

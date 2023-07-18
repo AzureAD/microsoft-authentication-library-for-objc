@@ -44,7 +44,7 @@ final class MSALNativeAuthResetPasswordChallengeOauth2ErrorCodeTests: XCTestCase
     func test_toResetPasswordStartPublicError_invalidRequest() {
         let error = sut.invalidRequest.toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toResetPasswordStartPublicError_expiredToken() {
@@ -56,7 +56,7 @@ final class MSALNativeAuthResetPasswordChallengeOauth2ErrorCodeTests: XCTestCase
     func test_toResetPasswordStartPublicError_unsupportedChallengeType() {
         let error = sut.unsupportedChallengeType.toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     // MARK: - to ResendCodePublicError tests
@@ -68,7 +68,7 @@ final class MSALNativeAuthResetPasswordChallengeOauth2ErrorCodeTests: XCTestCase
 
     func test_toResendCodePublicError_invalidRequest() {
         let error = sut.invalidRequest.toResendCodePublicError()
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toResendCodePublicError_expiredToken() {
@@ -78,6 +78,6 @@ final class MSALNativeAuthResetPasswordChallengeOauth2ErrorCodeTests: XCTestCase
 
     func test_toResendCodePublicError_unsupportedChallengeType() {
         let error = sut.unsupportedChallengeType.toResendCodePublicError()
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 }

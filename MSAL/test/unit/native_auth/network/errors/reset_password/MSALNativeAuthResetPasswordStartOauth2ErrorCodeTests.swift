@@ -56,6 +56,6 @@ final class MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests: XCTestCase {
     func test_toResetPasswordStartPublicError_unsupportedChallengeType() {
         let error = sut.unsupportedChallengeType.toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 }

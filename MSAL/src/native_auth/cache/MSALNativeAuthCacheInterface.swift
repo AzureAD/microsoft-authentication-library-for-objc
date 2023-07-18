@@ -27,7 +27,7 @@ import Foundation
 
 protocol MSALNativeAuthCacheInterface {
     func getTokens(
-        accountIdentifier: MSIDAccountIdentifier,
+        account: MSALAccount,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSALNativeAuthTokens
 
@@ -38,10 +38,10 @@ protocol MSALNativeAuthCacheInterface {
 
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount]
 
-    func saveTokensAndAccount(
-        tokenResult: MSIDTokenResponse,
+    func validateAndSaveTokensAndAccount(
+        tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws
+        context: MSIDRequestContext) throws -> MSIDTokenResult?
 
     func removeTokens(
         accountIdentifier: MSIDAccountIdentifier,

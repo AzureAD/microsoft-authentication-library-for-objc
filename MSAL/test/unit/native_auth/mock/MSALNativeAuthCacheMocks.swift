@@ -33,12 +33,13 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
         case noTokens
     }
 
-    private(set) var saveTokenWasCalled = false
+    private(set) var validateAndSaveTokensWasCalled = false
     private(set) var clearCacheWasCalled = false
+    var expectedMSIDTokenResult: MSIDTokenResult?
     var mockUserAccounts: [MSALAccount]?
     var mockAuthTokens: MSALNativeAuthTokens?
 
-    func getTokens(accountIdentifier: MSIDAccountIdentifier, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
+    func getTokens(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
         guard let mockAuthTokens = mockAuthTokens else {
             throw E.noTokens
         }
@@ -56,8 +57,9 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
         return mockUserAccounts
     }
 
-    func saveTokensAndAccount(tokenResult: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws {
-        saveTokenWasCalled = true
+    func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
+        validateAndSaveTokensWasCalled = true
+        return expectedMSIDTokenResult
     }
 
     func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {

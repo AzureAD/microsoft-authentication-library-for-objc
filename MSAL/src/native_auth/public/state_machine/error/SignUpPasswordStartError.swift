@@ -26,12 +26,35 @@ import Foundation
 
 @objc
 public class SignUpPasswordStartError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: SignUpPasswordStartErrorType
 
     init(type: SignUpPasswordStartErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .userAlreadyExists:
+            return "User already exists"
+        case .invalidPassword:
+            return "Invalid password"
+        case .invalidUsername:
+            return "Invalid username"
+        case .invalidAttributes:
+            return "Invalid attributes"
+        case .generalError:
+            return "General error"
+        }
+    }
+
 }
 
 @objc

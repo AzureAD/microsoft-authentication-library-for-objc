@@ -25,4 +25,12 @@
 import Foundation
 
 @objc
-public class ResendCodeError: MSALNativeAuthError {}
+public class ResendCodeError: MSALNativeAuthError {
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        return "General error"
+    }
+}

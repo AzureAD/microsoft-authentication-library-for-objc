@@ -31,6 +31,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     private let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
+    /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
+    /// - Parameters:
+    ///   - config: Configuration for PublicClientApplication
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    /// - Throws: An error that occurred creating the application object
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
@@ -54,6 +59,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: config)
     }
 
+    /// Initialize a MSALNativePublicClientApplication.
+    /// - Parameters:
+    ///   - clientId: The client ID of the application, this should come from the app developer portal.
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - rawTenant: The name of the tenant, this should come from the app developer portal.
+    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
+    /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
@@ -97,6 +109,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
+    /// Sign up a user with a given username and password.
+    /// - Parameters:
+    ///   - username: Username for the new account.
+    ///   - password: Password to be used for the new account.
+    ///   - attributes: Optional. User attributes to be used during account creation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUpUsingPassword(
         username: String,
         password: String,
@@ -133,6 +152,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign up a user with a given username.
+    /// - Parameters:
+    ///   - username: Username for the new account.
+    ///   - attributes: Optional. User attributes to be used during account creation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUp(
         username: String,
         attributes: [String: Any]? = nil,
@@ -162,6 +187,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign in a user with a given username and password.
+    /// - Parameters:
+    ///   - username: Username for the account.
+    ///   - password: Password for the account.
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signInUsingPassword(
         username: String,
         password: String,
@@ -192,6 +224,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Sign in a user with a given username.
+    /// - Parameters:
+    ///   - username: Username for the account
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         username: String,
         scopes: [String]? = nil,
@@ -214,6 +252,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Reset the password for a given username.
+    /// - Parameters:
+    ///   - username: Username for the account.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
     public func resetPassword(
         username: String,
         correlationId: UUID? = nil,
@@ -240,6 +283,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    /// Retrieve the current signed in account from the cache.
+    /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
+    /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
         let controller = controllerFactory.makeCredentialsController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
