@@ -42,7 +42,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
 
 /// An object of this type is created when a user is required to supply a verification code to continue a reset password flow.
 @objcMembers public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
-    /// Requests the server to resend the verfication code to the user.
+    /// Requests the server to resend the verification code to the user.
     /// - Parameters:
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.

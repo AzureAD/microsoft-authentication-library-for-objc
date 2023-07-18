@@ -51,7 +51,7 @@ import Foundation
         authTokens.accessToken?.expiresOn
     }
 
-    /// Get the claims for the account if present, otheriwse returns an empty dictionary.
+    /// Get the claims for the account if present, otherwise returns an empty dictionary.
     @objc public var accountClaims: [String: Any] {
         account.accountClaims ?? [:]
     }

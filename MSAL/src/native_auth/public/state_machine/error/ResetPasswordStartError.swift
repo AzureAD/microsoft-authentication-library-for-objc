@@ -26,7 +26,7 @@ import Foundation
 
 @objc
 public class ResetPasswordStartError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occured
+    /// An error type indicating the type of error that occurred
     @objc public let type: ResetPasswordStartErrorType
 
     init(type: ResetPasswordStartErrorType, message: String? = nil) {

@@ -26,7 +26,7 @@ import Foundation
 
 @objc
 public class PasswordRequiredError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occured
+    /// An error type indicating the type of error that occurred
     @objc public let type: PasswordRequiredErrorType
 
     init(type: PasswordRequiredErrorType, message: String? = nil) {

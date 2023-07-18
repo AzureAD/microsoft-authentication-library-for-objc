@@ -35,7 +35,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - config: Configuration for PublicClientApplication
     ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
-    /// - Throws: An error that occured creating the application object
+    /// - Throws: An error that occurred creating the application object
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
@@ -64,7 +64,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     ///   - rawTenant: The name of the tenant, this should come from the app developer portal.
     ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
-    /// - Throws: An error that occured creating the application object
+    /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
         challengeTypes: MSALNativeAuthChallengeTypes,

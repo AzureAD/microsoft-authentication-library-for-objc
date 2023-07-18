@@ -52,7 +52,7 @@ import Foundation
         super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
     }
 
-    /// Requests the server to resend the verfication code to the user.
+    /// Requests the server to resend the verification code to the user.
     /// - Parameters:
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.

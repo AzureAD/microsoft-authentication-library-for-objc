@@ -26,7 +26,7 @@ import Foundation
 
 @objc
 public class AttributesRequiredError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occured
+    /// An error type indicating the type of error that occurred
     @objc public let type: AttributesRequiredErrorType
 
     init(type: AttributesRequiredErrorType, message: String? = nil) {
