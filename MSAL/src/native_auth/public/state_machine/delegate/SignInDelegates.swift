@@ -36,7 +36,7 @@ public protocol SignInPasswordStartDelegate {
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: the length of the code required.
+    ///   - codeLength: The length of the code required.
     @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
                                              sentTo: String,
                                              channelTargetType: MSALNativeAuthChannelType,
@@ -58,7 +58,7 @@ public protocol SignInStartDelegate {
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: the length of the code required.
+    ///   - codeLength: The length of the code required.
     func onSignInCodeRequired(newState: SignInCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -94,7 +94,7 @@ public protocol SignInResendCodeDelegate {
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: the length of the code required.
+    ///   - codeLength: The length of the code required.
     func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState,
                                         sentTo: String,
                                         channelTargetType: MSALNativeAuthChannelType,

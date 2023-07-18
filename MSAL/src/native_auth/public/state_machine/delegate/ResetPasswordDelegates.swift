@@ -35,7 +35,7 @@ public protocol ResetPasswordStartDelegate {
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: the length of the code required.
+    ///   - codeLength: The length of the code required.
     @MainActor func onResetPasswordCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
@@ -66,7 +66,7 @@ public protocol ResetPasswordResendCodeDelegate {
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: the length of the code required.
+    ///   - codeLength: The length of the code required.
     @MainActor func onResetPasswordResendCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
