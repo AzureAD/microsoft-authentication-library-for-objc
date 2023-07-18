@@ -56,7 +56,7 @@ struct MSALNativeAuthUserAccountResultStub {
         refreshToken.refreshToken = "refreshToken"
         return MSALNativeAuthTokens(accessToken: accessToken,
                              refreshToken: refreshToken,
-                             rawIdToken: "IdToken")
+                             rawIdToken: "idToken")
     }
 
 }

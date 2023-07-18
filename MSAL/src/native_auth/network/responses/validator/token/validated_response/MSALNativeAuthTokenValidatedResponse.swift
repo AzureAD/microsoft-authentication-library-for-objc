@@ -25,7 +25,7 @@
 @_implementationOnly import MSAL_Private
 
 enum MSALNativeAuthTokenValidatedResponse {
-    case success(MSALNativeAuthUserAccountResult, MSIDTokenResult, MSIDTokenResponse)
+    case success(MSIDTokenResponse)
     case error(MSALNativeAuthTokenValidatedErrorType)
 }
 

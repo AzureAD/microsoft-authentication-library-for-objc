@@ -146,9 +146,10 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()
         tokenResult.accessToken.accessToken = expectedAccessToken
-        responseValidatorMock.tokenValidatedResponse = .success(userAccountResult, tokenResult, tokenResponse)
+        responseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
         cacheAccessorMock.mockUserAccounts = [account]
         cacheAccessorMock.mockAuthTokens = authTokens
+        cacheAccessorMock.expectedMSIDTokenResult = tokenResult
         await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
 
         await fulfillment(of: [expectation], timeout: 1)
