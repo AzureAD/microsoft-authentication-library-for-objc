@@ -26,6 +26,7 @@ import Foundation
 
 @objc
 public class RetrieveAccessTokenError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: RetrieveAccessTokenErrorType
 
     init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
