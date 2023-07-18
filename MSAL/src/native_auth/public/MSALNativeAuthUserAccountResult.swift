@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// Represents information returned to the application after a sign in operation.
+/// Class that groups account and token information.
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
     private let account: MSALAccount
     private let authTokens: MSALNativeAuthTokens
