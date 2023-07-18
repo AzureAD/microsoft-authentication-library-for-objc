@@ -32,6 +32,25 @@ public class SignUpStartError: MSALNativeAuthError {
         self.type = type
         super.init(message: message)
     }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .userAlreadyExists:
+            return "User already exists"
+        case .invalidUsername:
+            return "Invalid username"
+        case .invalidAttributes:
+            return "Invalid attributes"
+        case .generalError:
+            return "General error"
+        }
+    }
 }
 
 @objc

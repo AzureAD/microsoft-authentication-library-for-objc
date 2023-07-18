@@ -38,7 +38,7 @@ final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTes
     func test_toPasswordRequiredPublicError_invalidRequest() {
         let error = sut.invalidRequest.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 
     func test_toPasswordRequiredPublicError_invalidClient() {
@@ -86,6 +86,6 @@ final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTes
     func test_toPasswordRequiredPublicError_userNotFound() {
         let error = sut.userNotFound.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, nil)
+        XCTAssertNotNil(error.errorDescription)
     }
 }

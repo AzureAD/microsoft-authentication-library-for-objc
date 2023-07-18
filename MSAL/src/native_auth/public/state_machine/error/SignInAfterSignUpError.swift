@@ -25,4 +25,12 @@
 import Foundation
 
 @objc
-public class SignInAfterSignUpError: MSALNativeAuthError {}
+public class SignInAfterSignUpError: MSALNativeAuthError {
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        return "General error"
+    }
+}

@@ -32,6 +32,21 @@ public class VerifyCodeError: MSALNativeAuthError {
         self.type = type
         super.init(message: message)
     }
+
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .generalError:
+            return "General error"
+        case .invalidCode:
+            return "Invalid code"
+        }
+    }
 }
 
 @objc
