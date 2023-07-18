@@ -24,8 +24,7 @@
 
 import Foundation
 
-@objcMembers
-public class SignInBaseState: MSALNativeAuthBaseState {
+@objcMembers public class SignInBaseState: MSALNativeAuthBaseState {
     fileprivate let controller: MSALNativeAuthSignInControlling
     fileprivate let inputValidator: MSALNativeAuthInputValidating
 
@@ -39,8 +38,8 @@ public class SignInBaseState: MSALNativeAuthBaseState {
     }
 }
 
-@objcMembers
-public class SignInCodeRequiredState: SignInBaseState {
+/// An object of this type is created when a user is required to supply a verification code to continue a sign in flow.
+@objcMembers public class SignInCodeRequiredState: SignInBaseState {
 
     private let scopes: [String]
 
@@ -53,6 +52,10 @@ public class SignInCodeRequiredState: SignInBaseState {
         super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
     }
 
+    /// Requests the server to resend the verification code to the user.
+    /// - Parameters:
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
@@ -61,6 +64,11 @@ public class SignInCodeRequiredState: SignInBaseState {
         }
     }
 
+    /// Submits the code to the server for verification.
+    /// - Parameters:
+    ///   - code: Verification code that the user supplies.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
@@ -75,8 +83,8 @@ public class SignInCodeRequiredState: SignInBaseState {
     }
 }
 
-@objcMembers
-public class SignInPasswordRequiredState: SignInBaseState {
+/// An object of this type is created when a user is required to supply a password to continue a sign in flow.
+@objcMembers public class SignInPasswordRequiredState: SignInBaseState {
 
     private let scopes: [String]
     private let username: String
@@ -92,6 +100,11 @@ public class SignInPasswordRequiredState: SignInBaseState {
         super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
     }
 
+    /// Submits the password to the server for verification.
+    /// - Parameters:
+    ///   - password: Password that the user supplied.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")

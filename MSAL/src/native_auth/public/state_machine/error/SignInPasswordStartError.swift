@@ -26,6 +26,7 @@ import Foundation
 
 @objc
 public class SignInPasswordStartError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
     @objc public let type: SignInPasswordStartErrorType
 
     init(type: SignInPasswordStartErrorType, message: String? = nil) {

@@ -26,7 +26,16 @@ import Foundation
 
 @objc
 public protocol SignUpPasswordStartDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpPasswordError(error: SignUpPasswordStartError)
+
+    /// Notifies the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the new state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: The length of the code required.
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -35,7 +44,16 @@ public protocol SignUpPasswordStartDelegate {
 
 @objc
 public protocol SignUpStartDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpError(error: SignUpStartError)
+
+    /// Notifies the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the new state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: The length of the code required.
     func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -44,15 +62,39 @@ public protocol SignUpStartDelegate {
 
 @objc
 public protocol SignUpVerifyCodeDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
+
+    /// Notifies the delegate that attributes are required from the user to continue.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+
+    /// Notifies the delegate that a password is required from the user to continue.
+    /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
+
+    /// Notifies the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpResendCodeDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpResendCodeError(error: ResendCodeError)
+
+    /// Notifies the delegate that a verification code is required from the user to continue.
+    /// - Parameters:
+    ///   - newState: An object representing the new state of the flow with follow on methods.
+    ///   - sentTo: The email/phone number that the code was sent to.
+    ///   - channelTargetType: The channel (email/phone) the code was sent through.
+    ///   - codeLength: The length of the code required.
     func onSignUpResendCodeCodeRequired(
         newState: SignUpCodeRequiredState,
         sentTo: String,
@@ -63,13 +105,31 @@ public protocol SignUpResendCodeDelegate {
 
 @objc
 public protocol SignUpPasswordRequiredDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
+
+    /// Notifies the delegate that attributes are required from the user to continue.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordRequiredError(error:newState:)`` will be called.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+
+    /// Notifies the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpAttributesRequiredDelegate {
+    /// Notifies the delegate that the operation resulted in an error.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
+
+    /// Notifies the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }

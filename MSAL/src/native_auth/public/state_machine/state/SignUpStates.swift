@@ -40,9 +40,12 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     }
 }
 
-@objcMembers
-public class SignUpCodeRequiredState: SignUpBaseState {
-
+/// An object of this type is created when a user is required to supply a verification code to continue a sign up flow.
+@objcMembers public class SignUpCodeRequiredState: SignUpBaseState {
+    /// Requests the server to resend the verification code to the user.
+    /// - Parameters:
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         Task {
@@ -50,6 +53,11 @@ public class SignUpCodeRequiredState: SignUpBaseState {
         }
     }
 
+    /// Submits the code to the server for verification.
+    /// - Parameters:
+    ///   - code: Verification code that the user supplies.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -65,9 +73,14 @@ public class SignUpCodeRequiredState: SignUpBaseState {
     }
 }
 
-@objcMembers
-public class SignUpPasswordRequiredState: SignUpBaseState {
+/// An object of this type is created when a user is required to supply a password to continue a sign up flow.
+@objcMembers public class SignUpPasswordRequiredState: SignUpBaseState {
 
+    /// Submits the password to the server for verification.
+    /// - Parameters:
+    ///   - password: Password that the user supplied.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -83,9 +96,13 @@ public class SignUpPasswordRequiredState: SignUpBaseState {
     }
 }
 
-@objcMembers
-public class SignUpAttributesRequiredState: SignUpBaseState {
-
+/// An object of this type is created when a user is required to supply attributes to continue a sign up flow.
+@objcMembers public class SignUpAttributesRequiredState: SignUpBaseState {
+    /// Submits the attributes to the server for verification.
+    /// - Parameters:
+    ///   - attributes: Dictionary of attributes that the user supplied.
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitAttributes(
         attributes: [String: Any],
         delegate: SignUpAttributesRequiredDelegate,
