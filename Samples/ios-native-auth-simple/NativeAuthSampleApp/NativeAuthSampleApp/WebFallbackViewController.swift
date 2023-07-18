@@ -57,9 +57,6 @@ class WebFallbackViewController: UIViewController {
     }
 
     @IBAction func signInPressed(_: Any) {
-        signInWithWebUX()
-        return
-        
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty
         else {
