@@ -44,12 +44,15 @@ class EmailAndPasswordViewController: UIViewController {
         super.viewDidLoad()
 
         do {
+            let config = MSALPublicClientApplicationConfig(
+                clientId: Configuration.clientId,
+                redirectUri: nil,
+                authority: Configuration.authority
+            )
+            config.sliceConfig = MSALSliceConfig(slice: nil, dc: Configuration.testSlice)
+            
             nativeAuth = try MSALNativeAuthPublicClientApplication(
-                configuration: MSALPublicClientApplicationConfig(
-                    clientId: Configuration.clientId,
-                    redirectUri: nil,
-                    authority: Configuration.authority
-                ),
+                configuration: config,
                 challengeTypes: [.OOB, .password]
             )
         } catch {

@@ -41,11 +41,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.internalChallengeTypes =
             MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
 
-        let nativeConfiguration = try MSALNativeAuthConfiguration(
+        var nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: ciamAuthority,
             challengeTypes: internalChallengeTypes
-        )
+        )   
+        nativeConfiguration.sliceConfig = config.sliceConfig
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
