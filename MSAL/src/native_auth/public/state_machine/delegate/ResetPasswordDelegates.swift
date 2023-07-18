@@ -27,7 +27,7 @@ import Foundation
 @objc
 public protocol ResetPasswordStartDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordError(error: ResetPasswordStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -47,7 +47,7 @@ public protocol ResetPasswordStartDelegate {
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Tells the delegate that a password is required from the user to continue.
@@ -58,7 +58,7 @@ public protocol ResetPasswordVerifyCodeDelegate {
 @objc
 public protocol ResetPasswordResendCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -78,7 +78,7 @@ public protocol ResetPasswordResendCodeDelegate {
 @objc
 public protocol ResetPasswordRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 
     /// Tells the delegate that the reset password operation completed successfully.

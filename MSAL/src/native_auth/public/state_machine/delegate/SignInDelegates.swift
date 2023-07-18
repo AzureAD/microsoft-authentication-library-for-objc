@@ -27,7 +27,7 @@ import Foundation
 @objc
 public protocol SignInPasswordStartDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignInPasswordError(error: SignInPasswordStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -50,7 +50,7 @@ public protocol SignInPasswordStartDelegate {
 @objc
 public protocol SignInStartDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignInError(error: SignInStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -74,7 +74,7 @@ public protocol SignInStartDelegate {
 public protocol SignInPasswordRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameters:
-    ///   - error: An error object indicating how the operation failed.
+    ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 
@@ -86,7 +86,7 @@ public protocol SignInPasswordRequiredDelegate {
 @objc
 public protocol SignInResendCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -104,7 +104,7 @@ public protocol SignInResendCodeDelegate {
 @objc
 public protocol SignInVerifyCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 
     /// Tells the delegate that the sign in operation completed successfully.

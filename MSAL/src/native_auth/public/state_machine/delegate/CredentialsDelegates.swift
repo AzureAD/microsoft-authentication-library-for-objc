@@ -31,6 +31,6 @@ public protocol CredentialsDelegate {
     @MainActor func onAccessTokenRetrieveCompleted(accessToken: String)
 
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onAccessTokenRetrieveError(error: RetrieveAccessTokenError)
 }

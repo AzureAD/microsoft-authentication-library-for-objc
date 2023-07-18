@@ -27,7 +27,7 @@ import Foundation
 @objc
 public protocol SignUpPasswordStartDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpPasswordError(error: SignUpPasswordStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -45,7 +45,7 @@ public protocol SignUpPasswordStartDelegate {
 @objc
 public protocol SignUpStartDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpError(error: SignUpStartError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -64,7 +64,7 @@ public protocol SignUpStartDelegate {
 public protocol SignUpVerifyCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameters:
-    ///   - error: An error object indicating how the operation failed.
+    ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
 
@@ -86,7 +86,7 @@ public protocol SignUpVerifyCodeDelegate {
 @objc
 public protocol SignUpResendCodeDelegate {
     /// Tells the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating how the operation failed.
+    /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpResendCodeError(error: ResendCodeError)
 
     /// Tells the delegate that a verification code is required from the user to continue.
@@ -107,7 +107,7 @@ public protocol SignUpResendCodeDelegate {
 public protocol SignUpPasswordRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameters:
-    ///   - error: An error object indicating how the operation failed.
+    ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
 
@@ -125,7 +125,7 @@ public protocol SignUpPasswordRequiredDelegate {
 public protocol SignUpAttributesRequiredDelegate {
     /// Tells the delegate that the operation resulted in an error.
     /// - Parameters:
-    ///   - error: An error object indicating how the operation failed.
+    ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
 
