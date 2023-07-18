@@ -26,11 +26,11 @@ import Foundation
 
 @objc
 public protocol ResetPasswordStartDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordError(error: ResetPasswordStartError)
 
-    /// Tells the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -46,22 +46,22 @@ public protocol ResetPasswordStartDelegate {
 
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
 
-    /// Tells the delegate that a password is required from the user to continue.
+    /// Notifies the delegate that a password is required from the user to continue.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
 public protocol ResetPasswordResendCodeDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
 
-    /// Tells the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -77,10 +77,10 @@ public protocol ResetPasswordResendCodeDelegate {
 
 @objc
 public protocol ResetPasswordRequiredDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 
-    /// Tells the delegate that the reset password operation completed successfully.
+    /// Notifies the delegate that the reset password operation completed successfully.
     @MainActor func onResetPasswordCompleted()
 }

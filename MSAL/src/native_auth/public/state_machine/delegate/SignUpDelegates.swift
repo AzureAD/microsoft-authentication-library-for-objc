@@ -26,11 +26,11 @@ import Foundation
 
 @objc
 public protocol SignUpPasswordStartDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpPasswordError(error: SignUpPasswordStartError)
 
-    /// Tells the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -44,11 +44,11 @@ public protocol SignUpPasswordStartDelegate {
 
 @objc
 public protocol SignUpStartDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpError(error: SignUpStartError)
 
-    /// Tells the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -62,34 +62,34 @@ public protocol SignUpStartDelegate {
 
 @objc
 public protocol SignUpVerifyCodeDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpVerifyCodeError(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
 
-    /// Tells the delegate that attributes are required from the user to continue.
+    /// Notifies the delegate that attributes are required from the user to continue.
     /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
 
-    /// Tells the delegate that a password is required from the user to continue.
+    /// Notifies the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpPasswordRequired(newState: SignUpPasswordRequiredState)
 
-    /// Tells the delegate that the sign up operation completed successfully.
+    /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpResendCodeDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     func onSignUpResendCodeError(error: ResendCodeError)
 
-    /// Tells the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
@@ -105,31 +105,31 @@ public protocol SignUpResendCodeDelegate {
 
 @objc
 public protocol SignUpPasswordRequiredDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpPasswordRequiredError(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
 
-    /// Tells the delegate that attributes are required from the user to continue.
+    /// Notifies the delegate that attributes are required from the user to continue.
     /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordRequiredError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
 
-    /// Tells the delegate that the sign up operation completed successfully.
+    /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
 @objc
 public protocol SignUpAttributesRequiredDelegate {
-    /// Tells the delegate that the operation resulted in an error.
+    /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
 
-    /// Tells the delegate that the sign up operation completed successfully.
+    /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
