@@ -61,9 +61,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Initialize a MSALNativePublicClientApplication.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
-    ///   - rawTenant: The name of the tenant, this should come from the app developer portal.
-    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
+    ///   - tenantName: The name of the tenant, this should come from the app developer portal.
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset 
     /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
