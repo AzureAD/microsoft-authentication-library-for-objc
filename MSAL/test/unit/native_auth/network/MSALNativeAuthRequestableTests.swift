@@ -40,7 +40,7 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
         request = MSALNativeAuthResetPasswordStartRequestParameters(context: context, username: DEFAULT_TEST_ID_TOKEN_USERNAME)
     }
     
-    func testMakeEndpointUrl() throws {
+    func test_whenSliceConfigIsUsed_CorrectURLIsGenerated() throws {
         let sliceDc = "TEST-SLICE-IDENTIFIER"
         
         guard let authorityUrl = URL(string: DEFAULT_TEST_AUTHORITY) else {
@@ -57,6 +57,23 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
         let url = try request.makeEndpointUrl(config: config)
         
         let expectedUrlString = config.authority.url.absoluteString + request.endpoint.rawValue + "?dc=\(sliceDc)"
+        XCTAssertEqual(url.absoluteString, expectedUrlString)
+    }
+    
+    func test_whenSliceConfigIsNotUsed_CorrectURLIsGenerated() throws {
+        guard let authorityUrl = URL(string: DEFAULT_TEST_AUTHORITY) else {
+            XCTFail()
+            return
+        }
+        
+        let authority = try MSALCIAMAuthority(url: authorityUrl)
+        var config = try MSALNativeAuthConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
+                                                      authority: authority,
+                                                      challengeTypes: [.redirect])
+        
+        let url = try request.makeEndpointUrl(config: config)
+        
+        let expectedUrlString = config.authority.url.absoluteString + request.endpoint.rawValue
         XCTAssertEqual(url.absoluteString, expectedUrlString)
     }
 }
