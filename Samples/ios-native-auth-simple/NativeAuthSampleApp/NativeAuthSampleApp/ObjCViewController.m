@@ -47,12 +47,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    MSALPublicClientApplicationConfig *configuration = [[MSALPublicClientApplicationConfig alloc] initWithClientId:Configuration.clientId];
-
     NSError *error = nil;
     self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]
-                       initWithConfiguration:configuration
+                       initWithClientId:Configuration.clientId
+                       tenantName:Configuration.tenantName
                        challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
+                       redirectUri:NULL
                        error:&error];
 
     if (error != nil) {
