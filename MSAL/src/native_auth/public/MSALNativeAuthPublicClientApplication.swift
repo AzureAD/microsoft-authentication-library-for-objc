@@ -62,12 +62,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
     ///   - tenantName: The name of the tenant, this should come from the app developer portal.
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset 
+    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal.
     /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
         tenantName: String,
-        challengeTypes: MSALNativeAuthChallengeTypes) throws {
+        challengeTypes: MSALNativeAuthChallengeTypes,
+        redirectUri: String? = nil) throws {
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
                 .authority(rawTenant: tenantName)
 
@@ -85,7 +87,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         let configuration = MSALPublicClientApplicationConfig(
             clientId: clientId,
-            redirectUri: nil,
+            redirectUri: redirectUri,
             authority: ciamAuthority
         )
 

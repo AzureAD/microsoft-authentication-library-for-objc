@@ -52,6 +52,7 @@
                        initWithClientId:Configuration.clientId
                        tenantName:Configuration.tenantName
                        challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
+                       redirectUri:NULL
                        error:&error];
 
     if (error != nil) {
