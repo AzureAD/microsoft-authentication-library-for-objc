@@ -44,11 +44,8 @@ class WebFallbackViewController: UIViewController {
 
         do {
             nativeAuth = try MSALNativeAuthPublicClientApplication(
-                configuration: MSALPublicClientApplicationConfig(
-                    clientId: Configuration.clientId,
-                    redirectUri: nil,
-                    authority: Configuration.authority
-                ),
+                clientId: Configuration.clientId,
+                tenantName: Configuration.tenantName,
                 challengeTypes: [.OOB, .password]
             )
         } catch {
