@@ -30,7 +30,6 @@ class Configuration: NSObject {
 
     static let clientId = "14de7ba1-6089-4f1a-a72f-896d0388aa43"
     static let authorityURL = "https://native-ux-mock-api.azurewebsites.net/test"
-    static let testSlice: String = "ESTS-PUB-WUS2-AZ1-FD000-TEST1"
 
     // swiftlint:disable:next force_try
     static let authority = try! MSALCIAMAuthority(url: URL(string: authorityURL)!)

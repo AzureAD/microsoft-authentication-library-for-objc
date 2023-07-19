@@ -45,15 +45,12 @@ class CustomAttributesViewController: UIViewController {
         super.viewDidLoad()
 
         do {
-            let config = MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: Configuration.authority
-            )
-            config.sliceConfig = MSALSliceConfig(slice: nil, dc: Configuration.testSlice)
-            
             nativeAuth = try MSALNativeAuthPublicClientApplication(
-                configuration: config,
+                configuration: MSALPublicClientApplicationConfig(
+                    clientId: Configuration.clientId,
+                    redirectUri: nil,
+                    authority: Configuration.authority
+                ),
                 challengeTypes: [.OOB, .password]
             )
         } catch {
