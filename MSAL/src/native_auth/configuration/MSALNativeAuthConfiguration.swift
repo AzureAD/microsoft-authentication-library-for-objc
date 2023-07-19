@@ -32,6 +32,7 @@ struct MSALNativeAuthConfiguration {
     let clientId: String
     let authority: MSIDCIAMAuthority
     let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    var sliceConfig: MSALSliceConfig?
 
     init(
         clientId: String,
