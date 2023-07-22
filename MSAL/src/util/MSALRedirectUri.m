@@ -67,7 +67,7 @@
 
 + (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
 {
-    return [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri];
+    return [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri] == MSIDRedirectUriValidationResultMatched;
 }
 
 @end
