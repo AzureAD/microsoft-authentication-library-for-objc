@@ -73,13 +73,13 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
             return
         }
         let context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
-        guard let account = sut.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
+        guard let accountResult = sut.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
             XCTFail("Unexpected nil account")
             return
         }
-        XCTAssertEqual(account.username, username)
-        XCTAssertEqual(account.idToken, idToken)
-        XCTAssertEqual(account.expiresOn, expiresOn)
-        XCTAssertEqual(account.scopes, scopes)
+        XCTAssertEqual(accountResult.account.username, username)
+        XCTAssertEqual(accountResult.idToken, idToken)
+        XCTAssertEqual(accountResult.expiresOn, expiresOn)
+        XCTAssertEqual(accountResult.scopes, scopes)
     }
 }

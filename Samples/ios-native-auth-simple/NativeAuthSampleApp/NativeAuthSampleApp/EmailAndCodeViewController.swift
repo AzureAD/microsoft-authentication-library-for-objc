@@ -109,10 +109,10 @@ class EmailAndCodeViewController: UIViewController {
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult {
-            print("Account found in cache: \(accountResult.username)")
+        if let accountResult = accountResult, let username = accountResult.account.username {
+            print("Account found in cache: \(username)")
 
-            emailTextField.text = accountResult.username
+            emailTextField.text = username
 
             accountResult.getAccessToken(delegate: self)
         } else {
@@ -323,7 +323,7 @@ extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
         dismissVerifyCodeModal()
 
-        print("Signed in: \(result.username)")
+        print("Signed in: \(result.account.username ?? "")")
 
         accountResult = result
 

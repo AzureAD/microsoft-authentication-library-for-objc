@@ -100,7 +100,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.mockAuthTokens = authTokens
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let accountResult = sut.retrieveUserAccountResult(context: expectedContext)
-        XCTAssertEqual(accountResult?.username, account.username)
+        XCTAssertEqual(accountResult?.account.username, account.username)
         XCTAssertEqual(accountResult?.idToken, authTokens.rawIdToken)
         XCTAssertEqual(accountResult?.scopes, authTokens.accessToken?.scopes.array as? [String])
         XCTAssertEqual(accountResult?.expiresOn, authTokens.accessToken?.expiresOn)
