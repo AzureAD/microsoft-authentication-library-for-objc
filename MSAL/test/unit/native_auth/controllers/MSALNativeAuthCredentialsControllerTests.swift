@@ -104,7 +104,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(accountResult?.idToken, authTokens.rawIdToken)
         XCTAssertEqual(accountResult?.scopes, authTokens.accessToken?.scopes.array as? [String])
         XCTAssertEqual(accountResult?.expiresOn, authTokens.accessToken?.expiresOn)
-        XCTAssertTrue(NSDictionary(dictionary: accountResult?.accountClaims ?? [:]).isEqual(to: account.accountClaims ?? [:]))
+        XCTAssertTrue(NSDictionary(dictionary: accountResult?.account.accountClaims ?? [:]).isEqual(to: account.accountClaims ?? [:]))
     }
 
     func test_whenCreateRequestFails_shouldReturnError() async throws {

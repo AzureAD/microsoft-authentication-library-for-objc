@@ -47,11 +47,6 @@ import Foundation
         authTokens.accessToken?.expiresOn
     }
 
-    /// Get the claims for the account if present, otherwise returns an empty dictionary.
-    @objc public var accountClaims: [String: Any] {
-        account.accountClaims ?? [:]
-    }
-
     init(
         account: MSALAccount,
         authTokens: MSALNativeAuthTokens,
