@@ -437,9 +437,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy) {
         XCTAssertTrue(delegate.onSignInCompletedCalled)
-        XCTAssertEqual(delegate.result?.username, usernamePassword)
+        XCTAssertEqual(delegate.result?.account.username, usernamePassword)
         XCTAssertNotNil(delegate.result?.idToken)
-        XCTAssertTrue(delegate.result?.accountClaims.isEmpty ?? true)
+        XCTAssertNil(delegate.result?.account.accountClaims)
         XCTAssertEqual(delegate.result?.scopes[0], "openid")
         XCTAssertEqual(delegate.result?.scopes[1], "offline_access")
     }

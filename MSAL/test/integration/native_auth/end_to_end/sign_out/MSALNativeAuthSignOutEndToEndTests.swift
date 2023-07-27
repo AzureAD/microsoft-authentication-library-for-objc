@@ -66,13 +66,13 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
 
         // Check Account Exists
 
         let userAccountResult = sut.getNativeAuthUserAccount()
         XCTAssertNotNil(userAccountResult)
-        XCTAssertEqual(userAccountResult?.username, username)
+        XCTAssertEqual(userAccountResult?.account.username, username)
     }
 
     // Hero Scenario 1.3.1. Sign out – Local sign out from app on device (no SSO)
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
 
         // Sign out
 
@@ -149,13 +149,13 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
 
         // Check Account Exists
 
         let userAccountResult = sut.getNativeAuthUserAccount()
         XCTAssertNotNil(userAccountResult)
-        XCTAssertEqual(userAccountResult?.username, username)
+        XCTAssertEqual(userAccountResult?.account.username, username)
     }
 
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
@@ -181,7 +181,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
 
         // Sign out
 

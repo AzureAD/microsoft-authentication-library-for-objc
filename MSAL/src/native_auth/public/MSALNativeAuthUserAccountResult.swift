@@ -26,15 +26,11 @@ import Foundation
 
 /// Class that groups account and token information.
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
-    private let account: MSALAccount
+    /// The account object that holds account information.
+    @objc public let account: MSALAccount
     private let authTokens: MSALNativeAuthTokens
     private let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
-
-    /// Get the username for the account.
-    @objc public var username: String {
-        account.username ?? ""
-    }
 
     /// Get the ID token for the account.
     @objc public var idToken: String? {
@@ -49,11 +45,6 @@ import Foundation
     /// Get the expiration date for the access token for the account if present.
     @objc public var expiresOn: Date? {
         authTokens.accessToken?.expiresOn
-    }
-
-    /// Get the claims for the account if present, otherwise returns an empty dictionary.
-    @objc public var accountClaims: [String: Any] {
-        account.accountClaims ?? [:]
     }
 
     init(

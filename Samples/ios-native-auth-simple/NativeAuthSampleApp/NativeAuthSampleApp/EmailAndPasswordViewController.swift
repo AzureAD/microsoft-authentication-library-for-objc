@@ -107,10 +107,10 @@ class EmailAndPasswordViewController: UIViewController {
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult {
-            print("Account found in cache: \(accountResult.username)")
+        if let accountResult = accountResult, let username = accountResult.account.username {
+            print("Account found in cache: \(username)")
 
-            emailTextField.text = accountResult.username
+            emailTextField.text = username
             passwordTextField.text = "********"
 
             accountResult.getAccessToken(delegate: self)
@@ -248,7 +248,7 @@ extension EmailAndPasswordViewController: SignInAfterSignUpDelegate {
 
 extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        print("Signed in: \(result.username)")
+        print("Signed in: \(result.account.username ?? "")")
 
         accountResult = result
 

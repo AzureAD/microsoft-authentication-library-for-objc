@@ -147,7 +147,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
     }
 
     func test_signInWithKnownPasswordUsernameResultsInPasswordSent() async throws {
@@ -243,6 +243,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.account.username, username)
     }
 }

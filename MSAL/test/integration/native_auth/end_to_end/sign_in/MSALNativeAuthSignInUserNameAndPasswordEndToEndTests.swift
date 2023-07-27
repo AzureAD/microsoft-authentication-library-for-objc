@@ -92,6 +92,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.username, username)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
 }
