@@ -439,7 +439,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(delegate.onSignInCompletedCalled)
         XCTAssertEqual(delegate.result?.account.username, usernamePassword)
         XCTAssertNotNil(delegate.result?.idToken)
-        XCTAssertTrue(delegate.result?.account.accountClaims?.isEmpty ?? true)
+        XCTAssertNil(delegate.result?.account.accountClaims)
         XCTAssertEqual(delegate.result?.scopes[0], "openid")
         XCTAssertEqual(delegate.result?.scopes[1], "offline_access")
     }
