@@ -73,6 +73,8 @@ class WebFallbackViewController: UIViewController {
         if msalAccount != nil {
             signOutWithWebUX()
         } else if accountResult != nil {
+            accountResult?.signOut()
+
             accountResult = nil
 
             showResultText("Signed out")

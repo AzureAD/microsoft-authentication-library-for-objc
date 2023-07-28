@@ -78,7 +78,8 @@
         NSLog(@"signOutPressed: Not currently signed in.");
         return;
     }
-
+    [self.accountResult signOut];
+    
     self.accountResult = nil;
 
     [self showResultText:@"Signed out."];

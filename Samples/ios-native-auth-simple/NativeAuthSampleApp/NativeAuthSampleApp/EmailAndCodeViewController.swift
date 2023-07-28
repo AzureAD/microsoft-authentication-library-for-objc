@@ -87,6 +87,7 @@ class EmailAndCodeViewController: UIViewController {
             print("signOutPressed: Not currently signed in")
             return
         }
+        accountResult?.signOut()
 
         accountResult = nil
 
