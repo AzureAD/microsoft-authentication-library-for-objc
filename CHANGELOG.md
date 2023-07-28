@@ -1,6 +1,9 @@
 ## TBD
 * Moving master branch history to main (#1787)
 
+## [1.2.14]
+* Added method name with line number for errors in telemetry (#1795)
+
 ## [1.2.13]
 * Remove references to deprecated APIs. (#1779)
 
