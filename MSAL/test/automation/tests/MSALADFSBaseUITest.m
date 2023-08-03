@@ -43,13 +43,6 @@
     {
         [self aadEnterEmail:self.testApp];
     }
-    Class certClazz =  [NSClassFromString(@"MSIDCertAuthHandler") class];
-    XCTAssertNotNil(certClazz);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    SEL sel = NSSelectorFromString(@"disableCertBasedAuth");
-    [certClazz performSelector:sel];
-#pragma clang diagnostic pop
     sleep(1);
     [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
