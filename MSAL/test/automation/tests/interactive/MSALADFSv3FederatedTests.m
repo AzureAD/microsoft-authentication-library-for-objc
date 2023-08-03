@@ -47,13 +47,17 @@
     appConfigurationRequest.testAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
-    
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     accountConfigurationRequest.accountType = MSIDTestAccountTypeFederated;
     accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeADFSV3;
-    
+    [self disableCertBasedAuth];
     [self loadTestAccount:accountConfigurationRequest];
+}
+
+- (void)disableCertBasedAuth
+{
+    [[NSClassFromString(@"MSIDCertAuthHandler") class] performSelector:@selector(disableCertBasedAuth)];
 }
 
 #pragma mark - Tests
