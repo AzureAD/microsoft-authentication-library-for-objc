@@ -141,8 +141,7 @@ extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
     func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState,
                               sentTo _: String,
                               channelTargetType _: MSAL.MSALNativeAuthChannelType,
-                              codeLength _: Int)
-    {
+                              codeLength _: Int) {
         print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in

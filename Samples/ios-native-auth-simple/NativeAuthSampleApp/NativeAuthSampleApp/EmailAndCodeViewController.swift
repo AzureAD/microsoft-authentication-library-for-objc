@@ -25,6 +25,7 @@
 import MSAL
 import UIKit
 
+// swiftlint:disable file_length
 class EmailAndCodeViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!

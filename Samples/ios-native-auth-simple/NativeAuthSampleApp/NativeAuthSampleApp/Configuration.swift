@@ -26,7 +26,8 @@ import MSAL
 
 @objcMembers
 class Configuration: NSObject {
-    // Update the below to your client ID and tenantName you received in the portal. The below is for running the demo only
+    // Update the below to your client ID and tenantName you received in the portal.
+    // The below is for running the demo only
 
     static let clientId = "b2b6499a-cce2-424d-ab8e-4ebf3eb131b2"
     static let tenantName = "RoCustomersDemo10"

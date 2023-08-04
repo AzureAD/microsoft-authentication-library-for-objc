@@ -35,8 +35,9 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device = "iPhone 14"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=latest'"
+ios_sim_device_type = "iPhone 14"
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(16.4\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=16.4'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
@@ -58,7 +59,7 @@ target_specifiers = [
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
 		"operations" : [ "build", "test", "codecov" ],
-		"min_warn_codecov" : 70.0,
+        "min_warn_codecov" : 70.0,
 		"platform" : "iOS",
         "target" : "iosFramework"
 	},
@@ -273,7 +274,7 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device)
+			return device_guids.get_ios(ios_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
@@ -381,7 +382,7 @@ def requires_simulator(targets) :
 
 def launch_simulator() :
 	print("Booting simulator...")
-	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device)
+	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
 	print(command)
 	
 	# This spawns a new process without us having to wait for it
