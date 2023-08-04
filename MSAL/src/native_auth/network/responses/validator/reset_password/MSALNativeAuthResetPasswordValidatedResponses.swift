@@ -25,8 +25,29 @@
 enum MSALNativeAuthResetPasswordStartValidatedResponse: Equatable {
     case success(passwordResetToken: String)
     case redirect
-    case error(MSALNativeAuthResetPasswordStartOauth2ErrorCode)
+    case error(MSALNativeAuthResetPasswordStartValidatedErrorType)
     case unexpectedError
+}
+
+enum MSALNativeAuthResetPasswordStartValidatedErrorType: Error, CaseIterable {
+    case invalidRequest
+    case invalidClient
+    case userNotFound
+    case unsupportedChallengeType
+    case userDoesNotHavePassword
+
+    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+        switch self {
+        case .userNotFound:
+            return .init(type: .userNotFound, message: MSALNativeAuthErrorMessage.userNotFound)
+        case .invalidClient:
+            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .unsupportedChallengeType, .invalidRequest:
+            return .init(type: .generalError)
+        case .userDoesNotHavePassword:
+            return .init(type: .userDoesNotHavePassword, message: MSALNativeAuthErrorMessage.userDoesNotHavePassword)
+        }
+    }
 }
 
 enum MSALNativeAuthResetPasswordChallengeValidatedResponse: Equatable {

@@ -40,7 +40,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     // MARK: - Start Response
 
-    func test_whenResetPasswordStartSuccessResponseContainsRedirect_it_returns_redirect() {
+    func test_whenResetPasswordStartSuccessResponseContainsRedirect_itReturnsRedirect() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
             .init(passwordResetToken: nil, challengeType: .redirect)
         )
@@ -49,7 +49,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .redirect)
     }
 
-    func test_whenResetPasswordStartSuccessResponseDoesNotContainsTokenOrRedirect_it_returns_unexpectedError() {
+    func test_whenResetPasswordStartSuccessResponseDoesNotContainsTokenOrRedirect_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
             .init(passwordResetToken: nil, challengeType: .otp)
         )
@@ -58,7 +58,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordStartSuccessResponseContainsToken_it_returns_success() {
+    func test_whenResetPasswordStartSuccessResponseContainsToken_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
             .init(passwordResetToken: "passwordResetToken", challengeType: .otp)
         )
@@ -72,24 +72,64 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(passwordResetToken, "passwordResetToken")
     }
 
-    func test_whenResetPasswordStartErrorResponseIsNotExpected_it_returns_unexpectedError() {
+    func test_whenResetPasswordStartErrorResponseIsNotExpected_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(NSError())
 
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordStartErrorResponseIsExpected_it_returns_error() {
+    func test_whenResetPasswordStartErrorResponseUserNotFound_itReturnsRelatedError() {
         let error = createResetPasswordStartError(error: .userNotFound)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .error(.userNotFound))
     }
+    
+    func test_whenResetPasswordStartErrorResponseInvalidClient_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .invalidClient)
+        let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .error(.invalidClient))
+    }
+    
+    func test_whenResetPasswordStartErrorResponseUnsupportedChallengeType_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .unsupportedChallengeType)
+        let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .error(.unsupportedChallengeType))
+    }
+    
+    func test_whenResetPasswordStartInvalidRequestUserDoesntHaveAPwd_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .invalidRequest, errorCodes: [500222])
+        let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .error(.userDoesNotHavePassword))
+    }
+    
+    func test_whenResetPasswordStartInvalidRequestGenericErrorCode_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .invalidRequest, errorCodes: [90023])
+        let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .error(.invalidRequest))
+    }
+    
+    func test_whenResetPasswordStartInvalidRequestNoErrorCode_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .invalidRequest)
+        let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .error(.invalidRequest))
+    }
 
     // MARK: - Challenge Response
 
-    func test_whenResetPasswordChallengeSuccessResponseContainsRedirect_it_returns_redirect() {
+    func test_whenResetPasswordChallengeSuccessResponseContainsRedirect_itReturnsRedirect() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
             challengeType: .redirect,
             bindingMethod: nil,
@@ -103,7 +143,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .redirect)
     }
 
-    func test_whenResetPasswordChallengeSuccessResponseContainsValidAttributesAndOOB_it_returns_success() {
+    func test_whenResetPasswordChallengeSuccessResponseContainsValidAttributesAndOOB_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
             challengeType: .oob,
             bindingMethod: nil,
@@ -125,7 +165,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(passwordResetToken, "token")
     }
 
-    func test_whenResetPasswordChallengeSuccessResponseOmitsSomeAttributes_it_returns_unexpectedError() {
+    func test_whenResetPasswordChallengeSuccessResponseOmitsSomeAttributes_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
             challengeType: .oob,
             bindingMethod: nil,
@@ -139,7 +179,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeChannel_it_returns_unexpectedError() {
+    func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeChannel_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
             challengeType: .otp,
             bindingMethod: nil,
@@ -153,14 +193,14 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordChallengeErrorResponseIsNotExpected_it_returns_unexpectedError() {
+    func test_whenResetPasswordChallengeErrorResponseIsNotExpected_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(NSError())
 
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordChallengeErrorResponseIsExpected_it_returns_error() {
+    func test_whenResetPasswordChallengeErrorResponseIsExpected_itReturnsError() {
         let error = createResetPasswordChallengeError(error: .expiredToken)
 
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(error)
@@ -171,7 +211,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     // MARK: - Continue Response
 
-    func test_whenResetPasswordContinueSuccessResponseContainsValidAttributesAndOOB_it_returns_success() {
+    func test_whenResetPasswordContinueSuccessResponseContainsValidAttributesAndOOB_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .success(.init(passwordSubmitToken: "passwordSubmitToken", expiresIn: 300))
 
         let result = sut.validate(response, with: context)
@@ -183,26 +223,26 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(passwordSubmitToken, "passwordSubmitToken")
     }
 
-    func test_whenResetPasswordContinueErrorResponseIsNotExpected_it_returns_unexpectedError() {
+    func test_whenResetPasswordContinueErrorResponseIsNotExpected_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(NSError())
 
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_invalidOOBValue_it_returns_expectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_invalidOOBValue_itReturnsExpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidOOBValue)
 
         XCTAssertEqual(result, .invalidOOB)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_verificationRequired_it_returns_unexpectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_verificationRequired_itReturnsUnexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .verificationRequired)
 
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_invalidClient_it_returns_expectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_invalidClient_itReturnsExpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidClient)
 
         guard case .error(let error) = result else {
@@ -212,7 +252,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidClient)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_invalidGrant_it_returns_expectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_invalidGrant_itReturnsExpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidGrant)
 
         guard case .error(let error) = result else {
@@ -222,7 +262,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidGrant)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_expiredToken_it_returns_expectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_expiredToken_itReturnsExpectedError() {
         let result = buildContinueErrorResponse(expectedError: .expiredToken)
 
         guard case .error(let error) = result else {
@@ -232,7 +272,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .expiredToken)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_invalidRequest_it_returns_expectedError() {
+    func test_whenResetPasswordContinueErrorResponseIs_invalidRequest_itReturnsExpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidRequest)
 
         guard case .error(let error) = result else {
@@ -244,7 +284,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     // MARK: - Submit Response
 
-    func test_whenResetPasswordSubmitSuccessResponseContainsToken_it_returns_success() {
+    func test_whenResetPasswordSubmitSuccessResponseContainsToken_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(passwordResetToken: "passwordResetToken", pollInterval: 1))
 
         let result = sut.validate(response, with: context)
@@ -257,7 +297,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(pollInterval, 1)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooWeak_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooWeak_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .passwordTooWeak)
 
         guard case .passwordError(let error) = result else {
@@ -267,7 +307,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooWeak)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooShort_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooShort_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .passwordTooShort)
 
         guard case .passwordError(let error) = result else {
@@ -277,7 +317,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooShort)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooLong_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_passwordTooLong_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .passwordTooLong)
 
         guard case .passwordError(let error) = result else {
@@ -287,7 +327,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooLong)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_passwordRecentlyUsed_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_passwordRecentlyUsed_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .passwordRecentlyUsed)
 
         guard case .passwordError(let error) = result else {
@@ -297,7 +337,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordRecentlyUsed)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_passwordBanned_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_passwordBanned_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .passwordBanned)
 
         guard case .passwordError(let error) = result else {
@@ -307,7 +347,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordBanned)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_invalidRequest_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_invalidRequest_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .invalidRequest)
 
         guard case .error(let error) = result else {
@@ -317,7 +357,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidRequest)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_invalidClient_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_invalidClient_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .invalidClient)
 
         guard case .error(let error) = result else {
@@ -327,7 +367,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidClient)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_expiredToken_it_returns_expectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIs_expiredToken_itReturnsExpectedError() {
         let result = buildSubmitErrorResponse(expectedError: .expiredToken)
 
         guard case .error(let error) = result else {
@@ -337,7 +377,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .expiredToken)
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIsNotExpected_it_returns_unexpectedError() {
+    func test_whenResetPasswordSubmitErrorResponseIsNotExpected_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(NSError())
 
         let result = sut.validate(response, with: context)
@@ -346,7 +386,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     // MARK: - Poll Completion Response
 
-    func test_whenResetPasswordPollCompletionSuccessResponse_it_returns_success() {
+    func test_whenResetPasswordPollCompletionSuccessResponse_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .success(.init(status: .succeeded, signInSLT: nil, expiresIn: nil))
 
         let result = sut.validate(response, with: context)
@@ -358,7 +398,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(status, .succeeded)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_passwordTooWeak_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooWeak_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .passwordTooWeak)
 
         guard case .passwordError(let error) = result else {
@@ -368,7 +408,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooWeak)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_passwordTooShort_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooShort_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .passwordTooShort)
 
         guard case .passwordError(let error) = result else {
@@ -378,7 +418,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooShort)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_passwordTooLong_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooLong_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .passwordTooLong)
 
         guard case .passwordError(let error) = result else {
@@ -388,7 +428,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordTooLong)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_passwordRecentlyUsed_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsPasswordRecentlyUsed_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .passwordRecentlyUsed)
 
         guard case .passwordError(let error) = result else {
@@ -398,7 +438,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordRecentlyUsed)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_passwordBanned_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsPasswordBanned_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .passwordBanned)
 
         guard case .passwordError(let error) = result else {
@@ -408,7 +448,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .passwordBanned)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_invalidRequest_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsInvalidRequest_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .invalidRequest)
 
         guard case .error(let error) = result else {
@@ -418,7 +458,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidRequest)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_invalidClient_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsInvalidClient_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .invalidClient)
 
         guard case .error(let error) = result else {
@@ -428,7 +468,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .invalidClient)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIs_expiredToken_it_returns_expectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsExpiredToken_itReturnsExpectedError() {
         let result = buildPollCompletionErrorResponse(expectedError: .expiredToken)
 
         guard case .error(let error) = result else {
@@ -438,7 +478,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error, .expiredToken)
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIsNotExpected_it_returns_unexpectedError() {
+    func test_whenResetPasswordPollCompletionErrorResponseIsNotExpected_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(NSError())
 
         let result = sut.validate(response, with: context)

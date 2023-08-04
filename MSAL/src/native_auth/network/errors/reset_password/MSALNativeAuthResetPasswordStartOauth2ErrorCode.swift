@@ -24,24 +24,9 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordStartOauth2ErrorCode: String, Decodable, CaseIterable {
+enum MSALNativeAuthResetPasswordStartOauth2ErrorCode: String, Decodable {
     case invalidRequest = "invalid_request"
     case invalidClient = "invalid_client"
     case userNotFound = "user_not_found"
     case unsupportedChallengeType = "unsupported_challenge_type"
-}
-
-extension MSALNativeAuthResetPasswordStartOauth2ErrorCode {
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
-        switch self {
-        case .userNotFound:
-            return .init(type: .userNotFound, message: MSALNativeAuthErrorMessage.userNotFound)
-        case .invalidRequest:
-            return .init(type: .userDoesNotHavePassword, message: MSALNativeAuthErrorMessage.userDoesNotHavePassword)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .unsupportedChallengeType:
-            return .init(type: .generalError)
-        }
-    }
 }

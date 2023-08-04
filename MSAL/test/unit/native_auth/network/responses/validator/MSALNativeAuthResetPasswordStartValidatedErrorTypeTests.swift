@@ -25,12 +25,12 @@
 import XCTest
 @testable import MSAL
 
-final class MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests: XCTestCase {
+final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase {
 
-    private typealias sut = MSALNativeAuthResetPasswordStartOauth2ErrorCode
+    private typealias sut = MSALNativeAuthResetPasswordStartValidatedErrorType
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 4)
+        XCTAssertEqual(sut.allCases.count, 5)
     }
 
     // MARK: - to ResetPasswordStartError tests
@@ -43,6 +43,12 @@ final class MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests: XCTestCase {
 
     func test_toResetPasswordStartPublicError_invalidRequest() {
         let error = sut.invalidRequest.toResetPasswordStartPublicError()
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertNotNil(error.errorDescription)
+    }
+    
+    func test_toResetPasswordStartPublicError_userDoesNotHavePassword() {
+        let error = sut.userDoesNotHavePassword.toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .userDoesNotHavePassword)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.userDoesNotHavePassword)
     }

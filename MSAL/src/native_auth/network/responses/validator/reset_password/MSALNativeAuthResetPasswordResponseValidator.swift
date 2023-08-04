@@ -76,7 +76,20 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .unexpectedError
         }
 
-        return .error(apiError.error)
+        switch apiError.error {
+        case .invalidRequest:
+            if apiError.errorCodes?.first == MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue {
+                return .error(.userDoesNotHavePassword)
+            } else {
+                return .error(.invalidRequest)
+            }
+        case .invalidClient:
+            return .error(.invalidClient)
+        case .userNotFound:
+            return .error(.userNotFound)
+        case .unsupportedChallengeType:
+            return .error(.unsupportedChallengeType)
+        }
     }
 
     // MARK: - Challenge Request

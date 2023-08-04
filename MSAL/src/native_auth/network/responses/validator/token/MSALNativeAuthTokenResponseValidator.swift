@@ -157,6 +157,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .invalidOOBCode
         case .strongAuthRequired:
             return .strongAuthRequired
+        case .userNotHaveAPassword:
+            return .generalError
         }
     }
 }

@@ -28,4 +28,5 @@ enum MSALNativeAuthESTSApiErrorCodes: Int, Decodable {
     case invalidCredentials = 50126
     case invalidOTP = 50181
     case strongAuthRequired = 50076
+    case userNotHaveAPassword = 500222
 }
