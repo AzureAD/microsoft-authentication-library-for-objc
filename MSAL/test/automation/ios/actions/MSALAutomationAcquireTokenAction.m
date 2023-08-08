@@ -38,6 +38,7 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALClaimsRequest.h"
 #import "MSALWebviewParameters.h"
+#import "MSIDCertAuthHandler.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -172,6 +173,11 @@
         webviewParameters.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
         webviewParameters.parentViewController = containerController;
+    }
+    
+    if (testRequest.disableCertBasedAuth)
+    {
+        [[MSIDCertAuthHandler class] performSelector:@selector(disableCertBasedAuth)];
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array

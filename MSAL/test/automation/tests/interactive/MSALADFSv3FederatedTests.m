@@ -45,19 +45,12 @@
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
     appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
     appConfigurationRequest.testAppEnvironment = self.testEnvironment;
-    
     [self loadTestApp:appConfigurationRequest];
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     accountConfigurationRequest.accountType = MSIDTestAccountTypeFederated;
     accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeADFSV3;
-    [self disableCertBasedAuth];
     [self loadTestAccount:accountConfigurationRequest];
-}
-
-- (void)disableCertBasedAuth
-{
-    [[NSClassFromString(@"MSIDCertAuthHandler") class] performSelector:@selector(disableCertBasedAuth)];
 }
 
 #pragma mark - Tests
@@ -108,6 +101,7 @@
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.upn;
+    request.disableCertBasedAuth = YES;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
