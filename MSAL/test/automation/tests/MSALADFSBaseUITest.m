@@ -43,6 +43,7 @@
     {
         [self aadEnterEmail:self.testApp];
     }
+    
     sleep(1);
     [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
