@@ -160,12 +160,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                     onSuccess: onSuccess,
                     onError: onError)
             case .error(let errorType):
+                let error = errorType.convertToRetrieveAccessTokenError()
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "Refresh Token completed with errorType: \(errorType)")
-                stopTelemetryEvent(telemetryEvent, context: context, error: errorType)
-                await onError(errorType.convertToRetrieveAccessTokenError())
+                    format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
+                stopTelemetryEvent(telemetryEvent, context: context, error: error)
+                await onError(error)
             }
         }
 

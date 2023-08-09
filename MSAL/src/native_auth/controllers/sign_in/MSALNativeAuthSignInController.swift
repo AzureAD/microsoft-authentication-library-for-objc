@@ -180,7 +180,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 includeChallengeType: false,
                 context: context) else {
                 MSALLogger.log(level: .error, context: context, format: "SignIn, submit code: unable to create token request")
-
                 failSubmitCode(errorType: .generalError,
                                telemetryInfo: telemetryInfo,
                                scopes: scopes,
@@ -379,7 +378,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             await onSuccess(challengeValidatedResponse)
         case .error(let error):
-            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn: an error occurred after calling /initiate API")
+            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn: an error occurred after calling /initiate API: \(error)")
             stopTelemetryEvent(telemetryInfo, error: error)
             onError(error)
         }
@@ -410,9 +409,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     DispatchQueue.main.async { onError(errorType.convertToSignInPasswordStartError()) }
                 }
             case .error(let errorType):
-                MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn completed with errorType: \(errorType)")
-                stopTelemetryEvent(telemetryInfo, error: errorType)
-                DispatchQueue.main.async { onError(errorType.convertToSignInPasswordStartError()) }
+                let error = errorType.convertToSignInPasswordStartError()
+                MSALLogger.log(level: .error,
+                               context: telemetryInfo.context,
+                               format: "SignIn completed with errorType: \(error.errorDescription ?? "No error description")")
+                stopTelemetryEvent(telemetryInfo, error: error)
+                DispatchQueue.main.async { onError(error) }
             }
         }
 
@@ -487,9 +489,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 delegate.onSignInCodeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength)
             }
         case .error(let challengeError):
-            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn, completed with error: \(challengeError)")
-            stopTelemetryEvent(telemetryInfo, error: challengeError)
-            DispatchQueue.main.async { delegate.onSignInError(error: challengeError.convertToSignInStartError()) }
+            let error = challengeError.convertToSignInStartError()
+            MSALLogger.log(level: .error,
+                           context: telemetryInfo.context,
+                           format: "SignIn, completed with error: \(error.errorDescription ?? "No error description")")
+            stopTelemetryEvent(telemetryInfo, error: error)
+            DispatchQueue.main.async { delegate.onSignInError(error: error) }
         }
     }
 
@@ -540,9 +545,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 onError: delegate.onSignInPasswordError
             )
         case .error(let challengeError):
-            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn, completed with error: \(challengeError)")
-            stopTelemetryEvent(telemetryInfo, error: challengeError)
-            DispatchQueue.main.async { delegate.onSignInPasswordError(error: challengeError.convertToSignInPasswordStartError()) }
+            let error = challengeError.convertToSignInPasswordStartError()
+            MSALLogger.log(level: .error,
+                           context: telemetryInfo.context,
+                           format: "SignIn, completed with error: \(error.errorDescription ?? "No error description")")
+            stopTelemetryEvent(telemetryInfo, error: error)
+            DispatchQueue.main.async { delegate.onSignInPasswordError(error: error) }
         }
     }
 
@@ -579,7 +587,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Challenge Request: \(error)")
             return nil
         }
     }

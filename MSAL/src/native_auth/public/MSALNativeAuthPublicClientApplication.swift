@@ -50,7 +50,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             clientId: config.clientId,
             authority: ciamAuthority,
             challengeTypes: internalChallengeTypes
-        )   
+        )
         nativeConfiguration.sliceConfig = config.sliceConfig
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
