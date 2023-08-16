@@ -24,12 +24,33 @@
 
 import Foundation
 
-struct MSALNativeAuthErrorRequiredAttributes: Decodable, CustomStringConvertible {
-    let name: String
-    let type: String
-    let required: Bool
-
-    var description: String {
+public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
+    public let name: String
+    public let type: String
+    public let required: Bool
+    public let options: RequiredAttributeOptions?
+    
+    public init(name: String, type: String, required: Bool, options: RequiredAttributeOptions? = nil) {
+        self.name = name
+        self.type = type
+        self.required = required
+        self.options = options
+    }
+    
+    public override var description: String {
         return "\(name) - required: \(required)"
     }
 }
+
+public class RequiredAttributeOptions: NSObject, Decodable {
+    let regex : String?
+}
+
+class MSALNativeAuthErrorBasicAttributes: NSObject, Decodable {
+    let name: String
+    
+    init(name: String) {
+        self.name = name
+    }
+}
+

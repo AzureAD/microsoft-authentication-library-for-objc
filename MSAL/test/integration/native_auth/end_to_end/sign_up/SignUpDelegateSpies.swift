@@ -227,6 +227,18 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
 
         expectation.fulfill()
     }
+    
+    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthErrorRequiredAttributes], newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredErrorCalled = true
+        attributesRequiredState = newState
+        expectation.fulfill()
+    }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredErrorCalled = true
+        attributesRequiredState = newState
+        expectation.fulfill()
+    }
 }
 
 class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {

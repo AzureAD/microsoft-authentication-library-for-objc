@@ -790,7 +790,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpSubmitCode_returns_attributesRequired_it_callsDelegateAttributesRequired() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken", requiredAttributes: [""]))
+        validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken", requiredAttributes: []))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
 
         let exp = expectation(description: "SignUpController expectation")
@@ -811,7 +811,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_attributesRequired_but_developerDoesnNotImplementDelegate_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "", requiredAttributes: [""]))
+        validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "", requiredAttributes: []))
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
@@ -1384,9 +1384,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
-        XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
+        XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
-        XCTAssertEqual(delegate.error?.type, .missingRequiredAttributes)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1450,10 +1449,8 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
-        XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
+        XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
-        XCTAssertEqual(delegate.error?.type, .invalidAttributes)
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, "[\"key\"]"))
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }

@@ -132,4 +132,12 @@ public protocol SignUpAttributesRequiredDelegate {
     /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
+    
+    ///     - attributes:  List of required attributes.
+    ///     - Parameter newState: An object representing the new state of the flow with follow on methods.
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthErrorRequiredAttributes], newState: SignUpAttributesRequiredState)
+    
+    ///     - attributeNames: List of attribute names that failed validation.
+    ///     - Parameter newState: An object representing the new state of the flow with follow on methods.
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState)
 }

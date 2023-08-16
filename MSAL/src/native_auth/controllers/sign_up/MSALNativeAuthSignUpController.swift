@@ -621,10 +621,9 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
 
             DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(
-                    error: error,
-                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
-                )
+                delegate.onSignUpAttributesRequired(
+                    attributes: attributes,
+                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken))
             }
         case .attributeValidationFailed(let signUpToken, let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
@@ -635,8 +634,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             stopTelemetryEvent(event, context: context, error: error)
 
             DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(
-                    error: error,
+                delegate.onSignUpAttributesInvalid(
+                    attributeNames: invalidAttributes,
                     newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
                 )
             }

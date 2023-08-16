@@ -218,6 +218,7 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
     private(set) var onSignUpCompletedCalled = false
     private(set) var error: AttributesRequiredError?
     private(set) var newState: SignUpAttributesRequiredState?
+    private(set) var attributes: [MSAL.MSALNativeAuthErrorRequiredAttributes]?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
@@ -243,6 +244,21 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
     func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
 
+        XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
+    }
+    
+    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthErrorRequiredAttributes], newState: MSAL.SignUpAttributesRequiredState) {
+        self.attributes = attributes
+        self.newState = newState
+        onSignUpAttributesRequiredCalled = true
+        XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
+    }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: MSAL.SignUpAttributesRequiredState) {
+        self.newState = newState
+        onSignUpAttributesRequiredCalled = true
         XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
     }

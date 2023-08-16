@@ -33,7 +33,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let signUpToken: String?
     let requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]?
     let unverifiedAttributes: [[String: String]]?
-    let invalidAttributes: [[String: String]]?
+    let invalidAttributes: [MSALNativeAuthErrorBasicAttributes]?
 
     enum CodingKeys: String, CodingKey {
         case error
