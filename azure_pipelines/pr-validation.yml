@@ -6,11 +6,11 @@ pr:
     - '*'
   drafts: true
 
-# Trigger CI for only master/release branches
+# Trigger CI for only main/release branches
 trigger:
   branches:
     include:
-    - master
+    - main
     - release/*
     exclude:
     - '*'

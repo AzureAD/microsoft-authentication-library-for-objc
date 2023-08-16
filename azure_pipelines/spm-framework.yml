@@ -8,7 +8,7 @@ variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: 'repositoryBranch' # Name of the branch where version number will be updated for files that contain version number.
-    value: 'master'
+    value: 'main'
   - name: 'GithubServiceConnection' # Service connection name used to connect Github repository
     value: 'MSAL ObjC Service Connection'
   - name: 'docsRepositoryBranch' # Name of the branch where public reference docs will be pushed for github page
@@ -17,7 +17,7 @@ variables:
 trigger:
   branches:
     include:
-    - master
+    - main
   paths:
     include:
     - CHANGELOG.md
@@ -212,7 +212,7 @@ jobs:
       gitHubConnection: '$(GithubServiceConnection)'
       repositoryName: 'AzureAD/microsoft-authentication-library-common-for-objc'
       action: 'create'
-      target: 'master'
+      target: 'main'
       tagSource: 'userSpecifiedTag'
       tag: '$(commonCoreReleaseVersion)'
       title: '$(commonCoreReleaseVersion)'
@@ -366,7 +366,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        # NOTE : This should be the last step since it changes branch from master to $(docsRepositoryBranch)
+        # NOTE : This should be the last step since it changes branch from main to $(docsRepositoryBranch)
         if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
