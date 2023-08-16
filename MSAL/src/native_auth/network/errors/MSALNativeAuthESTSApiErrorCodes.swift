@@ -27,6 +27,11 @@ enum MSALNativeAuthESTSApiErrorCodes: Int, Decodable {
     case userNotFound = 50034
     case invalidCredentials = 50126
     case invalidOTP = 50181
+    case incorrectOTP = 501811
+    case OTPNoCacheEntryForUser = 50184
+    case expiredOTP = 50182
+    case OTPCacheError = 50183
+    case cannotGenerateOTP = 501831
     case strongAuthRequired = 50076
     case userNotHaveAPassword = 500222
 }

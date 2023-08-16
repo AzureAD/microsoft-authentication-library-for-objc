@@ -93,12 +93,10 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         _ context: MSALNativeAuthRequestContext,
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
             switch responseError.error {
-            case .invalidRequest:
-                return .error(.invalidRequest)
             case .invalidClient:
                 return .error(.invalidClient)
-            case .invalidGrant:
-                return handleInvalidGrantErrorCodes(responseError.errorCodes, context: context)
+            case .invalidGrant, .invalidRequest:
+                return handleInvalidResponsesErrorCodes(responseError.errorCodes, context: context)
             case .expiredToken:
                 return .error(.expiredToken)
             case .expiredRefreshToken:
@@ -114,7 +112,10 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             }
         }
 
-    private func handleInvalidGrantErrorCodes(_ errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
+    private func handleInvalidResponsesErrorCodes(
+        _ errorCodes: [Int]?,
+        context: MSALNativeAuthRequestContext
+    ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return .error(.generalError)
@@ -153,7 +154,12 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound
         case .invalidCredentials:
             return .invalidPassword
-        case .invalidOTP:
+        case .invalidOTP,
+            .incorrectOTP,
+            .OTPNoCacheEntryForUser,
+            .expiredOTP,
+            .OTPCacheError,
+            .cannotGenerateOTP:
             return .invalidOOBCode
         case .strongAuthRequired:
             return .strongAuthRequired
