@@ -5,3 +5,8 @@ MSAL.xcscmblueprint
 ## Build generated
 build/
 DerivedData/
+/.build/
+/.DerivedData/
+/.idea/
+/archives/
+/MSAL.xcframework/
