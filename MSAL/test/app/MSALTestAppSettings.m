@@ -38,7 +38,7 @@
 // function named _addtionalProfiles() that returns an NSDictionary that will
 // be folded into the profiles list without you having to constantly alter your
 // github enlistment!
-static NSDictionary* _additionalProfiles()
+static NSDictionary* _additionalProfiles(void)
 {
     return nil;
 }
@@ -89,6 +89,10 @@ static NSDictionary *s_currentProfile = nil;
             [authorities addObject:authorityString];
         }
     }
+    
+    __auto_type authorityCIAM = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com"];
+    __auto_type authorityCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com"];
+    [authorities addObjectsFromArray: @[authorityCIAM, authorityCIAMTenant]];
     
     s_authorities = authorities;
     

@@ -25,7 +25,7 @@
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSALAccountEnumerationParameters+Private.h"
-#import <MSAL/MSAL.h>
+#import "MSALAccount+Internal.h"
 
 @interface MSALLegacySharedAccount()
 

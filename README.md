@@ -1,7 +1,7 @@
 Microsoft Authentication Library for iOS and macOS
 =====================================
 
-| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [<u>B2C Sample Code</u>](https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/xuBV0CzEih)
+| [Get Started](https://learn.microsoft.com/en-us/azure/active-directory/develop/mobile-app-quickstart?pivots=devlang-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [<u>B2C Sample Code</u>](https://github.com/Azure-Samples/active-directory-b2c-ios-swift-native-msal) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/xuBV0CzEih)
 | --- | --- | --- | --- | --- | --- | --- | 
 
 The MSAL library for iOS and macOS gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
@@ -75,6 +75,9 @@ MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParame
 }];
 ```
 
+## Master branch deprercation
+The master branch has been copied over to main branch. The master branch will contain updates only until version 1.2.14, for further releases please refer to 'main' branch instead of 'master'.
+
 ## Installation
 ### Using CocoaPods
 
@@ -93,7 +96,7 @@ end
 You can use [Carthage](https://github.com/Carthage/Carthage) to install `MSAL` by adding it to your `Cartfile`: 
 
 ```
-github "AzureAD/microsoft-authentication-library-for-objc" "master"
+github "AzureAD/microsoft-authentication-library-for-objc" "main"
 ```
 ### Using Swift Packages
 
@@ -104,7 +107,7 @@ For MSAL version 1.1.14 and above, distribution of MSAL binary framework as a Sw
 2. Choose project to add dependency in
 3. Enter : https://github.com/AzureAD/microsoft-authentication-library-for-objc as the package repository URL
 4. Choose package options with :
-    1. Rules → Branch : master (For latest MSAL release)
+    1. Rules → Branch : main (For latest MSAL release)
     2. Rules → Version → Exact : [release version >= 1.1.14] (For a particular release version)
 
 For any issues, please check if there is an outstanding SPM/Xcode bug.
