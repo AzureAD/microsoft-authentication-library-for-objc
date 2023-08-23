@@ -25,47 +25,27 @@
 import XCTest
 @testable import MSAL
 
-final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTestCase {
+final class MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests: XCTestCase {
 
-    private typealias sut = MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode
+    private typealias sut = MSALNativeAuthResetPasswordStartOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 9)
+        XCTAssertEqual(sut.allCases.count, 4)
     }
-
+    
     func test_invalidRequest() {
         XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
-    
+
     func test_invalidClient() {
         XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
     }
-    
-    func test_expiredToken() {
-        XCTAssertEqual(sut.expiredToken.rawValue, "expired_token")
-    }
-    
-    func test_passwordTooWeak() {
-        XCTAssertEqual(sut.passwordTooWeak.rawValue, "password_too_weak")
-    }
-    
-    func test_passwordTooShort() {
-        XCTAssertEqual(sut.passwordTooShort.rawValue, "password_too_short")
-    }
-    
-    func test_passwordTooLong() {
-        XCTAssertEqual(sut.passwordTooLong.rawValue, "password_too_long")
-    }
-    
-    func test_passwordRecentlyUsed() {
-        XCTAssertEqual(sut.passwordRecentlyUsed.rawValue, "password_recently_used")
-    }
-    
-    func test_passwordBanned() {
-        XCTAssertEqual(sut.passwordBanned.rawValue, "password_banned")
-    }
-    
+
     func test_userNotFound() {
         XCTAssertEqual(sut.userNotFound.rawValue, "user_not_found")
+    }
+
+    func test_unsupportedChallengeType() {
+        XCTAssertEqual(sut.unsupportedChallengeType.rawValue, "unsupported_challenge_type")
     }
 }

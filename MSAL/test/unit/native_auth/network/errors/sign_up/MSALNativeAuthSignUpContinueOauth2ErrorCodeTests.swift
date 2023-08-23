@@ -33,245 +33,63 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
         XCTAssertEqual(sut.allCases.count, 15)
     }
 
-    // MARK: - to VerifyCodeError tests
-
-    func test_toVerifyCodePublicError_invalidClient() {
-        let error = sut.invalidClient.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
+    func test_invalidRequest() {
+        XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
-
-    func test_toVerifyCodePublicError_invalidOOBValue() {
-        let error = sut.invalidOOBValue.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .invalidCode)
+    
+    func test_invalidClient() {
+        XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
     }
-
-    func test_toVerifyCodePublicError_expiredToken() {
-        let error = sut.expiredToken.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+    
+    func test_invalidGrant() {
+        XCTAssertEqual(sut.invalidGrant.rawValue, "invalid_grant")
     }
-
-    func test_toVerifyCodePublicError_invalidRequest() {
-        let error = sut.invalidRequest.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_expiredToken() {
+        XCTAssertEqual(sut.expiredToken.rawValue, "expired_token")
     }
-
-    func test_toVerifyCodePublicError_invalidGrant() {
-        let error = sut.invalidGrant.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_passwordTooWeak() {
+        XCTAssertEqual(sut.passwordTooWeak.rawValue, "password_too_weak")
     }
-
-    func test_toVerifyCodePublicError_passwordTooWeak() {
-        let error = sut.passwordTooWeak.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_passwordTooShort() {
+        XCTAssertEqual(sut.passwordTooShort.rawValue, "password_too_short")
     }
-
-    func test_toVerifyCodePublicError_passwordTooShort() {
-        let error = sut.passwordTooShort.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_passwordTooLong() {
+        XCTAssertEqual(sut.passwordTooLong.rawValue, "password_too_long")
     }
-
-    func test_toVerifyCodePublicError_passwordTooLong() {
-        let error = sut.passwordTooLong.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_passwordRecentlyUsed() {
+        XCTAssertEqual(sut.passwordRecentlyUsed.rawValue, "password_recently_used")
     }
-
-    func test_toVerifyCodePublicError_passwordRecentlyUsed() {
-        let error = sut.passwordRecentlyUsed.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_passwordBanned() {
+        XCTAssertEqual(sut.passwordBanned.rawValue, "password_banned")
     }
-
-    func test_toVerifyCodePublicError_passwordBanned() {
-        let error = sut.passwordBanned.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_userAlreadyExists() {
+        XCTAssertEqual(sut.userAlreadyExists.rawValue, "user_already_exists")
     }
-
-    func test_toVerifyCodePublicError_userAlreadyExists() {
-        let error = sut.userAlreadyExists.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_attributesRequired() {
+        XCTAssertEqual(sut.attributesRequired.rawValue, "attributes_required")
     }
-
-    func test_toVerifyCodePublicError_attributesRequired() {
-        let error = sut.attributesRequired.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_verificationRequired() {
+        XCTAssertEqual(sut.verificationRequired.rawValue, "verification_required")
     }
-
-    func test_toVerifyCodePublicError_verificationRequired() {
-        let error = sut.verificationRequired.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_attributeValidationFailed() {
+        XCTAssertEqual(sut.attributeValidationFailed.rawValue, "attribute_validation_failed")
     }
-
-    func test_toVerifyCodePublicError_credentialRequired() {
-        let error = sut.credentialRequired.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_credentialRequired() {
+        XCTAssertEqual(sut.credentialRequired.rawValue, "credential_required")
     }
-
-    func test_toVerifyCodePublicError_attributeValidationFailed() {
-        let error = sut.attributeValidationFailed.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    // MARK: - to PasswordRequiredError tests
-
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        let error = sut.invalidClient.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
-    }
-
-    func test_toPasswordRequiredPublicError_invalidOOBValue() {
-        let error = sut.invalidOOBValue.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_expiredToken() {
-        let error = sut.expiredToken.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
-    }
-
-    func test_toPasswordRequiredPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_invalidGrant() {
-        let error = sut.invalidGrant.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        let error = sut.passwordTooWeak.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooWeak)
-    }
-
-    func test_toPasswordRequiredPublicError_passwordTooShort() {
-        let error = sut.passwordTooShort.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooShort)
-    }
-
-    func test_toPasswordRequiredPublicError_passwordTooLong() {
-        let error = sut.passwordTooLong.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooLong)
-    }
-
-    func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        let error = sut.passwordRecentlyUsed.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordRecentlyUsed)
-    }
-
-    func test_toPasswordRequiredPublicError_passwordBanned() {
-        let error = sut.passwordBanned.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordBanned)
-    }
-
-    func test_toPasswordRequiredPublicError_userAlreadyExists() {
-        let error = sut.userAlreadyExists.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_attributesRequired() {
-        let error = sut.attributesRequired.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_verificationRequired() {
-        let error = sut.verificationRequired.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_credentialRequired() {
-        let error = sut.credentialRequired.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toPasswordRequiredPublicError_attributeValidationFailed() {
-        let error = sut.attributeValidationFailed.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    // MARK: - to AttributesRequiredError tests
-
-    func test_toAttributesRequiredPublicError_invalidClient() {
-        let error = sut.invalidClient.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
-    }
-
-    func test_toAttributesRequiredPublicError_invalidOOBValue() {
-        let error = sut.invalidOOBValue.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_expiredToken() {
-        let error = sut.expiredToken.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
-    }
-
-    func test_toAttributesRequiredPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_invalidGrant() {
-        let error = sut.invalidGrant.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_passwordTooWeak() {
-        let error = sut.passwordTooWeak.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_passwordTooShort() {
-        let error = sut.passwordTooShort.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_passwordTooLong() {
-        let error = sut.passwordTooLong.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_passwordRecentlyUsed() {
-        let error = sut.passwordRecentlyUsed.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_passwordBanned() {
-        let error = sut.passwordBanned.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_userAlreadyExists() {
-        let error = sut.userAlreadyExists.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_attributesRequired() {
-        let error = sut.attributesRequired.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_verificationRequired() {
-        let error = sut.verificationRequired.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_credentialRequired() {
-        let error = sut.credentialRequired.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    func test_toAttributesRequiredPublicError_attributeValidationFailed() {
-        let error = sut.attributeValidationFailed.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidAttributes)
+    
+    func test_invalidOOBValue() {
+        XCTAssertEqual(sut.invalidOOBValue.rawValue, "invalid_oob_value")
     }
 }

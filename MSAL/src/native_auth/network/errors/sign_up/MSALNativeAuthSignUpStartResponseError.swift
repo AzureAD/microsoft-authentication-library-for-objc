@@ -46,3 +46,49 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         case invalidAttributes = "invalid_attributes"
     }
 }
+
+extension MSALNativeAuthSignUpStartResponseError {
+
+    func toSignUpStartPasswordPublicError() -> SignUpPasswordStartError {
+        switch error {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .init(type: .invalidPassword, message: errorDescription)
+        case .userAlreadyExists:
+            return .init(type: .userAlreadyExists, message: errorDescription)
+        case .attributeValidationFailed,
+             .attributesRequired:
+            return .init(type: .invalidAttributes, message: errorDescription)
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .authNotSupported,
+             .invalidRequest,
+             .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toSignUpStartPublicError() -> SignUpStartError {
+        switch error {
+        case .userAlreadyExists:
+            return .init(type: .userAlreadyExists, message: errorDescription)
+        case .attributeValidationFailed,
+             .attributesRequired:
+            return .init(type: .invalidAttributes, message: errorDescription)
+        case .invalidClient,
+             .invalidRequest,
+             .passwordTooWeak, /// password errors should not occur when signing up code
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned,
+             .authNotSupported,
+             .unsupportedChallengeType,
+             .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+}

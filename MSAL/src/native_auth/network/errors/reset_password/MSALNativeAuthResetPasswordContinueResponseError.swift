@@ -44,3 +44,19 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
         case passwordResetToken = "password_reset_token"
     }
 }
+
+extension MSALNativeAuthResetPasswordContinueResponseError {
+
+    func toVerifyCodePublicError() -> VerifyCodeError {
+        switch error {
+        case .invalidOOBValue:
+            return .init(type: .invalidCode, message: errorDescription)
+        case .invalidClient,
+             .expiredToken,
+             .invalidRequest,
+             .invalidGrant,
+             .verificationRequired:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+}

@@ -42,3 +42,26 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
         case target
     }
 }
+
+extension MSALNativeAuthResetPasswordChallengeResponseError {
+
+    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+        switch error {
+        case .invalidRequest,
+             .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toResendCodePublicError() -> ResendCodeError {
+        switch error {
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken,
+             .invalidRequest:
+            return .init(message: errorDescription)
+        }
+    }
+}

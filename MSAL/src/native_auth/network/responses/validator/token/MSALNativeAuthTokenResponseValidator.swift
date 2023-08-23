@@ -94,27 +94,31 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
             switch responseError.error {
             case .invalidRequest:
-                return .error(.invalidRequest)
+                return .error(.invalidRequest(message: responseError.errorDescription))
             case .invalidClient:
-                return .error(.invalidClient)
+                return .error(.invalidClient(message: responseError.errorDescription))
             case .invalidGrant:
-                return handleInvalidGrantErrorCodes(responseError.errorCodes, context: context)
+                return handleInvalidGrantErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
             case .expiredToken:
-                return .error(.expiredToken)
+                return .error(.expiredToken(message: responseError.errorDescription))
             case .expiredRefreshToken:
-                return .error(.expiredRefreshToken)
+                return .error(.expiredRefreshToken(message: responseError.errorDescription))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType)
+                return .error(.unsupportedChallengeType(message: responseError.errorDescription))
             case .invalidScope:
-                return .error(.invalidScope)
+                return .error(.invalidScope(message: responseError.errorDescription))
             case .authorizationPending:
-                return .error(.authorizationPending)
+                return .error(.authorizationPending(message: responseError.errorDescription))
             case .slowDown:
-                return .error(.slowDown)
+                return .error(.slowDown(message: responseError.errorDescription))
             }
         }
 
-    private func handleInvalidGrantErrorCodes(_ errorCodes: [Int]?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthTokenValidatedResponse {
+    private func handleInvalidGrantErrorCodes(
+        _ errorCodes: [Int]?,
+        errorDescription: String?,
+        context: MSALNativeAuthRequestContext
+    ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return .error(.generalError)
@@ -124,7 +128,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         let firstErrorCode = errorCodes.removeFirst()
 
         if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
-            validatedResponse = .error(convertErrorCodeToErrorType(knownErrorCode))
+            validatedResponse = .error(convertErrorCodeToErrorType(knownErrorCode, errorDescription: errorDescription))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
             validatedResponse = .error(.generalError)
@@ -147,16 +151,19 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         return validatedResponse
     }
 
-    private func convertErrorCodeToErrorType(_ errorCode: MSALNativeAuthESTSApiErrorCodes) -> MSALNativeAuthTokenValidatedErrorType {
+    private func convertErrorCodeToErrorType(
+        _ errorCode: MSALNativeAuthESTSApiErrorCodes,
+        errorDescription: String?
+    ) -> MSALNativeAuthTokenValidatedErrorType {
         switch errorCode {
         case .userNotFound:
-            return .userNotFound
+            return .userNotFound(message: errorDescription)
         case .invalidCredentials:
-            return .invalidPassword
+            return .invalidPassword(message: errorDescription)
         case .invalidOTP:
-            return .invalidOOBCode
+            return .invalidOOBCode(message: errorDescription)
         case .strongAuthRequired:
-            return .strongAuthRequired
+            return .strongAuthRequired(message: errorDescription)
         case .userNotHaveAPassword:
             return .generalError
         }

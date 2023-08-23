@@ -39,3 +39,46 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
         case innerErrors = "inner_errors"
     }
 }
+
+extension MSALNativeAuthSignUpChallengeResponseError {
+
+    func toSignUpPasswordStartPublicError() -> SignUpPasswordStartError {
+        switch error {
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken,
+             .invalidRequest:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toSignUpStartPublicError() -> SignUpStartError {
+        switch error {
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken,
+             .invalidRequest:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toResendCodePublicError() -> ResendCodeError {
+        switch error {
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken,
+             .invalidRequest:
+            return .init(message: errorDescription)
+        }
+    }
+
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch error {
+        case .invalidClient,
+             .unsupportedChallengeType,
+             .expiredToken,
+             .invalidRequest:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+}

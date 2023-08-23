@@ -131,15 +131,15 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest)
+                return .error(.invalidRequest(message: error.errorDescription))
             case .invalidClient:
-                return .error(.invalidClient)
+                return .error(.invalidClient(message: error.errorDescription))
             case .invalidGrant:
-                return .error(.invalidToken)
+                return .error(.invalidToken(message: error.errorDescription))
             case .expiredToken:
-                return .error(.expiredToken)
+                return .error(.expiredToken(message: error.errorDescription))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType)
+                return .error(.unsupportedChallengeType(message: error.errorDescription))
             }
     }
 
@@ -148,13 +148,13 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest)
+                return .error(.invalidRequest(message: error.errorDescription))
             case .invalidClient:
-                return .error(.invalidClient)
+                return .error(.invalidClient(message: error.errorDescription))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType)
+                return .error(.unsupportedChallengeType(message: error.errorDescription))
             case .invalidGrant:
-                return .error(.userNotFound)
+                return .error(.userNotFound(message: error.errorDescription))
             }
     }
 }

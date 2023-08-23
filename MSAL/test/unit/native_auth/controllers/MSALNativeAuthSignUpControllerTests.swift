@@ -151,13 +151,22 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpStartPassword_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockStartRequestFunc(prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
-        validatorMock.mockValidateSignUpStartFunc(.error(.passwordTooLong))
-
+        let error : MSALNativeAuthSignUpStartValidatedResponse = .error(
+            MSALNativeAuthSignUpStartResponseError(error: .passwordTooLong,
+                                                   errorDescription: nil,
+                                                   errorCodes: nil,
+                                                   errorURI: nil,
+                                                   innerErrors: nil,
+                                                   signUpToken: nil,
+                                                   unverifiedAttributes: nil,
+                                                   invalidAttributes: nil))
+        validatorMock.mockValidateSignUpStartFunc(error)
+        
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpPasswordStartDelegateSpy(exp)
-
+        
         await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
-
+        
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
         XCTAssertNil(delegate.newState)
@@ -165,7 +174,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
-
+        
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
 
@@ -293,7 +302,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.error(.expiredToken))
+        let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
+            MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
+                                                       errorDescription: "Expired Token",
+                                                       errorCodes: nil,
+                                                       errorURI: nil,
+                                                       innerErrors: nil))
+        validatorMock.mockValidateSignUpChallengeFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpPasswordStartDelegateSpy(exp)
@@ -307,7 +322,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+        XCTAssertEqual(delegate.error?.errorDescription, "Expired Token")
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
@@ -421,7 +436,16 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpStartCode_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockStartRequestFunc(prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
-        validatorMock.mockValidateSignUpStartFunc(.error(.attributeValidationFailed))
+        let error : MSALNativeAuthSignUpStartValidatedResponse = .error(
+            MSALNativeAuthSignUpStartResponseError(error: .attributeValidationFailed,
+                                                   errorDescription: nil,
+                                                   errorCodes: nil,
+                                                   errorURI: nil,
+                                                   innerErrors: nil,
+                                                   signUpToken: nil,
+                                                   unverifiedAttributes: nil,
+                                                   invalidAttributes: nil))
+        validatorMock.mockValidateSignUpStartFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpCodeStartDelegateSpy(exp)
@@ -563,7 +587,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.error(.expiredToken))
+        let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
+            MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
+                                                       errorDescription: "Expired Token",
+                                                       errorCodes: nil,
+                                                       errorURI: nil,
+                                                       innerErrors: nil))
+        validatorMock.mockValidateSignUpChallengeFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpCodeStartDelegateSpy(exp)
@@ -577,7 +607,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.channelTargetType)
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+        XCTAssertEqual(delegate.error?.errorDescription, "Expired Token")
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
@@ -670,7 +700,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpResendCode_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.error(.invalidRequest))
+        let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
+            MSALNativeAuthSignUpChallengeResponseError(error: .invalidRequest,
+                                                       errorDescription: nil,
+                                                       errorCodes: nil,
+                                                       errorURI: nil,
+                                                       innerErrors: nil))
+        validatorMock.mockValidateSignUpChallengeFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
@@ -770,7 +806,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpSubmitCode_returns_invalidUserInput_it_callsDelegateInvalidCode() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-        validatorMock.mockValidateSignUpContinueFunc(.invalidUserInput(.invalidOOBValue))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .invalidUserInput(
+            MSALNativeAuthSignUpContinueResponseError(error: .invalidOOBValue,
+                                                      errorDescription: nil,
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
 
         let exp = expectation(description: "SignUpController expectation")
@@ -865,7 +911,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitCode_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.error(.invalidRequest))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .error(
+            MSALNativeAuthSignUpContinueResponseError(error: .invalidRequest,
+                                                      errorDescription: nil,
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
@@ -1049,7 +1105,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
-        validatorMock.mockValidateSignUpChallengeFunc(.error(.expiredToken))
+        let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
+            MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
+                                                       errorDescription: nil,
+                                                       errorCodes: nil,
+                                                       errorURI: nil,
+                                                       innerErrors: nil))
+        validatorMock.mockValidateSignUpChallengeFunc(error)
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
 
@@ -1135,7 +1197,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitPassword_returns_invalidUserInput_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-        validatorMock.mockValidateSignUpContinueFunc(.invalidUserInput(.passwordTooWeak))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .invalidUserInput(
+            MSALNativeAuthSignUpContinueResponseError(error: .passwordTooWeak,
+                                                      errorDescription: "Password too weak",
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
@@ -1147,7 +1219,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.newAttributesRequiredState)
         XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, "signUpToken")
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.passwordTooWeak)
+        XCTAssertEqual(delegate.error?.errorDescription, "Password too weak")
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
     }
@@ -1191,7 +1263,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpSubmitPassword_returns_error_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-        validatorMock.mockValidateSignUpContinueFunc(.error(.invalidRequest))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .error(
+            MSALNativeAuthSignUpContinueResponseError(error: .invalidRequest,
+                                                      errorDescription: nil,
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
@@ -1332,7 +1414,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
             oobCode: nil,
             attributes: ["key": "value"]
         )
-        validatorMock.mockValidateSignUpContinueFunc(.invalidUserInput(.attributeValidationFailed))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .invalidUserInput(
+            MSALNativeAuthSignUpContinueResponseError(error: .attributeValidationFailed,
+                                                      errorDescription: nil,
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
@@ -1354,7 +1446,17 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
             oobCode: nil,
             attributes: ["key": "value"]
         )
-        validatorMock.mockValidateSignUpContinueFunc(.error(.invalidRequest))
+        let error : MSALNativeAuthSignUpContinueValidatedResponse = .error(
+            MSALNativeAuthSignUpContinueResponseError(error: .invalidRequest,
+                                                      errorDescription: nil,
+                                                      errorCodes: nil,
+                                                      errorURI: nil,
+                                                      innerErrors: nil,
+                                                      signUpToken: nil,
+                                                      requiredAttributes: nil,
+                                                      unverifiedAttributes: nil,
+                                                      invalidAttributes: nil))
+        validatorMock.mockValidateSignUpContinueFunc(error)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)

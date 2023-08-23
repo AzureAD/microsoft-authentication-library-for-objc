@@ -26,7 +26,7 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     case verificationRequired(signUpToken: String, unverifiedAttributes: [String])
     case attributeValidationFailed(invalidAttributes: [String])
     case redirect
-    case error(MSALNativeAuthSignUpStartOauth2ErrorCode)
+    case error(MSALNativeAuthSignUpStartResponseError)
     case unexpectedError
 }
 
@@ -34,17 +34,17 @@ enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
     case codeRequired(_ sentTo: String, _ channelType: MSALNativeAuthChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
     case passwordRequired(_ signUpChallengeToken: String)
     case redirect
-    case error(MSALNativeAuthSignUpChallengeOauth2ErrorCode)
+    case error(MSALNativeAuthSignUpChallengeResponseError)
     case unexpectedError
 }
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
     case success(_ signInSLT: String?)
     /// error that represents invalidOOB, invalidPassword and invalidAttributes, depending on which State the input comes from.
-    case invalidUserInput(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode)
+    case invalidUserInput(_ error: MSALNativeAuthSignUpContinueResponseError)
     case credentialRequired(signUpToken: String)
     case attributesRequired(signUpToken: String, requiredAttributes: [String])
     case attributeValidationFailed(signUpToken: String, invalidAttributes: [String])
-    case error(MSALNativeAuthSignUpContinueOauth2ErrorCode)
+    case error(MSALNativeAuthSignUpContinueResponseError)
     case unexpectedError
 }

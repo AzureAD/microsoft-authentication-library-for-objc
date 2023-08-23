@@ -24,20 +24,12 @@
 
 // swiftlint:disable line_length
 enum MSALNativeAuthErrorMessage {
-    static let invalidClient = "Invalid Client ID"
     static let invalidScope = "Invalid scope"
-    static let unsupportedChallengeType = "Unsupported challenge type"
-    static let unsupportedAuthMethod = "Authentication method not supported"
-    static let expiredToken = "Flow token has expired. Please start the flow again"
-    static let passwordTooWeak = "Password too weak"
-    static let passwordTooShort = "Password too short"
-    static let passwordTooLong = "Password too long"
-    static let passwordRecentlyUsed = "Password recently used"
-    static let passwordBanned = "Password banned"
     static let delegateNotImplemented = "MSALNativeAuth has called an optional delegate method that has not been implemented"
     static let unsupportedMFA = "MFA currently not supported. Use the browser instead"
     static let browserRequired = "Browser required. Use acquireTokenInteractively instead"
     static let userDoesNotHavePassword = "User does not have password associated with account"
+    static let invalidServerResponse = "Invalid server response"
     static let userNotFound = "User does not exist"
     static let attributeValidationFailedSignUpStart = "Check the invalid attributes and start the sign-up process again. Invalid attributes: %@"
     static let attributeValidationFailed = "Invalid attributes: %@"

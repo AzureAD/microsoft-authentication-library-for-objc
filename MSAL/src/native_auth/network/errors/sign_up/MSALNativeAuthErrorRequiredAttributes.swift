@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct MSALNativeAuthErrorRequiredAttributes: Decodable, CustomStringConvertible {
+struct MSALNativeAuthErrorRequiredAttributes: Decodable, CustomStringConvertible, Equatable {
     let name: String
     let type: String
     let required: Bool

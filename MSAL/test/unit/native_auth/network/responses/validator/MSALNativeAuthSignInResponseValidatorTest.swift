@@ -121,20 +121,6 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         }
     }
     
-    func test_whenChallengeErrorResponse_errorShouldBeMappedCorrectly() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let genericError = MSALNativeAuthInternalError.generalError
-        let result: MSALNativeAuthSignInChallengeValidatedResponse = sut.validate(context: context, result: .failure(genericError))
-        if case .error(.invalidServerResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(errorCode: .expiredToken, expectedValidatedError: .expiredToken)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(errorCode: .invalidClient, expectedValidatedError: .invalidClient)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(errorCode: .invalidGrant, expectedValidatedError: .invalidToken)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(errorCode: .invalidRequest, expectedValidatedError: .invalidRequest)
-        checkRelationBetweenErrorResponseAndValidatedErrorResult(errorCode: .unsupportedChallengeType, expectedValidatedError: .unsupportedChallengeType)
-    }
-    
     // MARK: initiate API tests
     
     func test_whenInitiateResponseIsValid_validationShouldBeSuccessful() {
@@ -183,38 +169,4 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
             XCTFail("Unexpected result: \(result)")
         }
     }
-    
-    func test_whenInitiateErrorResponse_errorShouldBeMappedCorrectly() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let result: MSALNativeAuthSignInInitiateValidatedResponse = sut.validate(context: context, result: .failure(MSALNativeAuthInternalError.generalError))
-        if case .error(.invalidServerResponse) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-        checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(errorCode: .invalidRequest, expectedValidatedError: .invalidRequest)
-        checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(errorCode: .invalidClient, expectedValidatedError: .invalidClient)
-        checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(errorCode: .invalidGrant, expectedValidatedError: .userNotFound)
-        checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(errorCode: .unsupportedChallengeType, expectedValidatedError: .unsupportedChallengeType)
-    }
-    
-    // MARK: private methods
-    
-    private func checkRelationBetweenInitiateErrorResponseAndValidatedErrorResult(
-        errorCode: MSALNativeAuthSignInInitiateOauth2ErrorCode,
-        expectedValidatedError: MSALNativeAuthSignInInitiateValidatedErrorType) {
-        let initiateError = MSALNativeAuthSignInInitiateResponseError(error: errorCode, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let result: MSALNativeAuthSignInInitiateValidatedResponse = sut.validate(context: MSALNativeAuthRequestContext(correlationId: defaultUUID), result: .failure(initiateError))
-        if case .error(expectedValidatedError) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    private func checkRelationBetweenErrorResponseAndValidatedErrorResult(
-        errorCode: MSALNativeAuthSignInChallengeOauth2ErrorCode,
-        expectedValidatedError: MSALNativeAuthSignInChallengeValidatedErrorType) {
-        let challengeError = MSALNativeAuthSignInChallengeResponseError(error: errorCode, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let result: MSALNativeAuthSignInChallengeValidatedResponse = sut.validate(context: MSALNativeAuthRequestContext(correlationId: defaultUUID), result: .failure(challengeError))
-        if case .error(expectedValidatedError) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }    
 }

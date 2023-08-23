@@ -47,3 +47,72 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
         case invalidAttributes = "invalid_attributes"
     }
 }
+
+extension MSALNativeAuthSignUpContinueResponseError {
+
+    func toVerifyCodePublicError() -> VerifyCodeError {
+        switch error {
+        case .invalidOOBValue:
+            return .init(type: .invalidCode, message: errorDescription)
+        case .invalidClient,
+             .expiredToken,
+             .invalidRequest,
+             .invalidGrant,
+             .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned,
+             .userAlreadyExists,
+             .attributesRequired,
+             .verificationRequired,
+             .credentialRequired,
+             .attributeValidationFailed:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch error {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .init(type: .invalidPassword, message: errorDescription)
+        case .invalidClient,
+             .expiredToken,
+             .invalidRequest,
+             .invalidGrant,
+             .userAlreadyExists,
+             .attributesRequired,
+             .verificationRequired,
+             .credentialRequired,
+             .attributeValidationFailed,
+             .invalidOOBValue:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+
+    func toAttributesRequiredPublicError() -> AttributesRequiredError {
+        switch error {
+        case .attributeValidationFailed:
+            return .init(type: .invalidAttributes, message: errorDescription)
+        case .invalidClient,
+             .expiredToken,
+             .invalidRequest,
+             .invalidGrant,
+             .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned,
+             .userAlreadyExists,
+             .attributesRequired,
+             .verificationRequired,
+             .credentialRequired,
+             .invalidOOBValue:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+}
