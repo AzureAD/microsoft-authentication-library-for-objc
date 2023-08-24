@@ -43,7 +43,7 @@ public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
 }
 
 public class RequiredAttributeOptions: NSObject, Decodable {
-    let regex : String?
+    public let regex : String?
 }
 
 class MSALNativeAuthErrorBasicAttributes: NSObject, Decodable {
