@@ -42,15 +42,3 @@ public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
     }
 }
 
-public class RequiredAttributeOptions: NSObject, Decodable {
-    public let regex : String?
-}
-
-class MSALNativeAuthErrorBasicAttributes: NSObject, Decodable {
-    let name: String
-    
-    init(name: String) {
-        self.name = name
-    }
-}
-
