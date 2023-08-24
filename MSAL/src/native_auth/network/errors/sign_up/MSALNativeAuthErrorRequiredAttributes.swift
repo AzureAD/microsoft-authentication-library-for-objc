@@ -38,7 +38,7 @@ public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
     }
     
     public override var description: String {
-        return "\(name) - required: \(required)"
+        return "\(name)"
     }
 }
 
