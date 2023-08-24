@@ -32,42 +32,28 @@ final class MSALNativeAuthResetPasswordContinueOauth2ErrorCodeTests: XCTestCase 
     func test_allCases() {
         XCTAssertEqual(sut.allCases.count, 6)
     }
-
-    // MARK: - toVerifyCodePublicError tests
-
-    func test_toVerifyCodePublicError_invalidRequest() {
-        let error = sut.invalidRequest.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+    
+    func test_invalidRequest() {
+        XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
 
-    func test_toVerifyCodePublicError_invalidClient() {
-        let error = sut.invalidClient.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
+    func test_invalidClient() {
+        XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
     }
 
-    func test_toVerifyCodePublicError_invalidGrant() {
-        let error = sut.invalidGrant.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+    func test_invalidGrant() {
+        XCTAssertEqual(sut.invalidGrant.rawValue, "invalid_grant")
     }
 
-    func test_toVerifyCodePublicError_expiredToken() {
-        let error = sut.expiredToken.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+    func test_expiredToken() {
+        XCTAssertEqual(sut.expiredToken.rawValue, "expired_token")
     }
 
-    func test_toVerifyCodePublicError_verificationRequired() {
-        let error = sut.verificationRequired.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+    func test_verificationRequired() {
+        XCTAssertEqual(sut.verificationRequired.rawValue, "verification_required")
     }
 
-    func test_toVerifyCodePublicError_invalidOOBValue() {
-        let error = sut.invalidOOBValue.toVerifyCodePublicError()
-        XCTAssertEqual(error.type, .invalidCode)
-        XCTAssertNotNil(error.errorDescription)
+    func test_invalidOOBValue() {
+        XCTAssertEqual(sut.invalidOOBValue.rawValue, "invalid_oob_value")
     }
 }

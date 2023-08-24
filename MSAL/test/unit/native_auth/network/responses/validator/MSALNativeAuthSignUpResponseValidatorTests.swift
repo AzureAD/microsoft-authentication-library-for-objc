@@ -158,7 +158,12 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .error(.userAlreadyExists))
+        guard case .error(let error) = result else {
+            return XCTFail("Unexpected response")
+        }
+        if case .userAlreadyExists = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     // MARK: - Challenge Response
@@ -294,7 +299,12 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .error(.expiredToken))
+        guard case .error(let error) = result else {
+            return XCTFail("Unexpected response")
+        }
+        if case .expiredToken = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     // MARK: - Continue Response
@@ -330,8 +340,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .invalidOOBValue)
+        if case .invalidOOBValue = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooWeak_it_returns_expectedError() {
@@ -340,8 +351,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .passwordTooWeak)
+        if case .passwordTooWeak = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooShort_it_returns_expectedError() {
@@ -350,8 +362,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .passwordTooShort)
+        if case .passwordTooShort = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooLong_it_returns_expectedError() {
@@ -360,8 +373,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .passwordTooLong)
+        if case .passwordTooLong = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordRecentlyUsed_it_returns_expectedError() {
@@ -370,8 +384,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .passwordRecentlyUsed)
+        if case .passwordRecentlyUsed = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordBanned_it_returns_expectedError() {
@@ -380,8 +395,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .passwordBanned)
+        if case .passwordBanned = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
@@ -470,8 +486,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .invalidClient)
+        if case .invalidClient = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_invalidGrant_it_returns_expectedError() {
@@ -480,8 +497,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .invalidGrant)
+        if case .invalidGrant = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_expiredToken_it_returns_expectedError() {
@@ -490,8 +508,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .expiredToken)
+        if case .expiredToken = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_invalidRequest_it_returns_expectedError() {
@@ -500,8 +519,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .invalidRequest)
+        if case .invalidRequest = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     func test_whenSignUpContinueErrorResponseIs_userAlreadyExists_it_returns_expectedError() {
@@ -510,8 +530,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-
-        XCTAssertEqual(error, .userAlreadyExists)
+        if case .userAlreadyExists = error.error {} else {
+            XCTFail("Unexpected error: \(error.error)")
+        }
     }
 
     private func buildContinueErrorResponse(

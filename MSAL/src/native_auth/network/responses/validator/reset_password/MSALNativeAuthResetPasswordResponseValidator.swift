@@ -81,14 +81,14 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             if apiError.errorCodes?.first == MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue {
                 return .error(.userDoesNotHavePassword)
             } else {
-                return .error(.invalidRequest)
+                return .error(.invalidRequest(message: apiError.errorDescription))
             }
         case .invalidClient:
-            return .error(.invalidClient)
+            return .error(.invalidClient(message: apiError.errorDescription))
         case .userNotFound:
-            return .error(.userNotFound)
+            return .error(.userNotFound(message: apiError.errorDescription))
         case .unsupportedChallengeType:
-            return .error(.unsupportedChallengeType)
+            return .error(.unsupportedChallengeType(message: apiError.errorDescription))
         }
     }
 
@@ -141,7 +141,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .unexpectedError
         }
 
-        return .error(apiError.error)
+        return .error(apiError)
     }
 
     // MARK: - Continue Request
@@ -177,7 +177,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .invalidGrant,
              .expiredToken,
              .invalidRequest:
-            return .error(apiError.error)
+            return .error(apiError)
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError
@@ -219,11 +219,11 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned:
-            return .passwordError(error: apiError.error)
+            return .passwordError(error: apiError)
         case .invalidRequest,
              .invalidClient,
              .expiredToken:
-            return .error(apiError.error)
+            return .error(apiError)
         }
     }
 
@@ -262,12 +262,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned:
-            return .passwordError(error: apiError.error)
+            return .passwordError(error: apiError)
         case .userNotFound,
              .invalidRequest,
              .invalidClient,
              .expiredToken:
-            return .error(apiError.error)
+            return .error(apiError)
         }
     }
 }

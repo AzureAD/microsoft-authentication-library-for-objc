@@ -31,70 +31,94 @@ enum MSALNativeAuthTokenValidatedResponse {
 
 enum MSALNativeAuthTokenValidatedErrorType: Error {
     case generalError
-    case expiredToken
-    case expiredRefreshToken
-    case invalidClient
-    case invalidRequest
+    case expiredToken(message: String?)
+    case expiredRefreshToken(message: String?)
+    case invalidClient(message: String?)
+    case invalidRequest(message: String?)
     case invalidServerResponse
-    case userNotFound
-    case invalidPassword
-    case invalidOOBCode
-    case unsupportedChallengeType
-    case strongAuthRequired
-    case invalidScope
-    case authorizationPending
-    case slowDown
+    case userNotFound(message: String?)
+    case invalidPassword(message: String?)
+    case invalidOOBCode(message: String?)
+    case unsupportedChallengeType(message: String?)
+    case strongAuthRequired(message: String?)
+    case invalidScope(message: String?)
+    case authorizationPending(message: String?)
+    case slowDown(message: String?)
 
     func convertToSignInPasswordStartError() -> SignInPasswordStartError {
         switch self {
-        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse, .invalidOOBCode:
+        case .expiredToken(let message),
+             .authorizationPending(let message),
+             .slowDown(let message),
+             .invalidRequest(let message),
+             .invalidOOBCode(let message),
+             .invalidClient(let message),
+             .unsupportedChallengeType(let message),
+             .invalidScope(let message):
+            return SignInPasswordStartError(type: .generalError, message: message)
+        case .generalError:
             return SignInPasswordStartError(type: .generalError)
-        case .invalidClient:
-            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .unsupportedChallengeType:
-            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
-        case .invalidScope:
-            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
-        case .userNotFound:
-            return SignInPasswordStartError(type: .userNotFound)
-        case .invalidPassword:
-            return SignInPasswordStartError(type: .invalidPassword)
-        case .strongAuthRequired:
-            return SignInPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
-        case .expiredRefreshToken:
+        case .invalidServerResponse:
+            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
+        case .userNotFound(let message):
+            return SignInPasswordStartError(type: .userNotFound, message: message)
+        case .invalidPassword(let message):
+            return SignInPasswordStartError(type: .invalidPassword, message: message)
+        case .strongAuthRequired(let message):
+            return SignInPasswordStartError(type: .browserRequired, message: message)
+        case .expiredRefreshToken(let message):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return SignInPasswordStartError(type: .generalError)
+            return SignInPasswordStartError(type: .generalError, message: message)
         }
     }
 
     func convertToRetrieveAccessTokenError() -> RetrieveAccessTokenError {
         switch self {
-        case .generalError, .expiredToken, .authorizationPending, .slowDown, .invalidRequest, .invalidServerResponse:
+        case .expiredToken(let message),
+             .authorizationPending(let message),
+             .slowDown(let message),
+             .invalidRequest(let message),
+             .invalidClient(let message),
+             .unsupportedChallengeType(let message),
+             .invalidScope(let message):
+            return RetrieveAccessTokenError(type: .generalError, message: message)
+        case .generalError:
             return RetrieveAccessTokenError(type: .generalError)
+        case .invalidServerResponse:
+            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
         case .expiredRefreshToken:
             return RetrieveAccessTokenError(type: .refreshTokenExpired)
-        case .invalidClient:
-            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .unsupportedChallengeType:
-            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
-        case .invalidScope:
-            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidScope)
-        case .strongAuthRequired:
-            return RetrieveAccessTokenError(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA)
-        case .userNotFound, .invalidPassword, .invalidOOBCode:
+        case .strongAuthRequired(let message):
+            return RetrieveAccessTokenError(type: .browserRequired, message: message)
+        case .userNotFound(let message),
+             .invalidPassword(let message),
+             .invalidOOBCode(let message):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return RetrieveAccessTokenError(type: .generalError)
+            return RetrieveAccessTokenError(type: .generalError, message: message)
         }
     }
 
     func convertToVerifyCodeError() -> VerifyCodeError {
         switch self {
-        case .invalidOOBCode:
-            return VerifyCodeError(type: .invalidCode)
-        case.strongAuthRequired:
-            return VerifyCodeError(type: .browserRequired)
-        default:
-            return VerifyCodeError(type: .generalError, message: self.localizedDescription)
+        case .invalidOOBCode(let message):
+            return VerifyCodeError(type: .invalidCode, message: message)
+        case .strongAuthRequired(let message):
+            return VerifyCodeError(type: .browserRequired, message: message)
+        case .expiredToken(let message),
+             .authorizationPending(let message),
+             .slowDown(let message),
+             .invalidRequest(let message),
+             .invalidClient(let message),
+             .unsupportedChallengeType(let message),
+             .invalidScope(let message),
+             .expiredRefreshToken(let message),
+             .userNotFound(let message),
+             .invalidPassword(let message):
+            return VerifyCodeError(type: .generalError, message: message)
+        case .generalError:
+            return VerifyCodeError(type: .generalError)
+        case .invalidServerResponse:
+            return VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
         }
     }
 

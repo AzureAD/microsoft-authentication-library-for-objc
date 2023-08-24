@@ -20,113 +20,32 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import XCTest
 @testable import MSAL
 
 final class MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests: XCTestCase {
-
+    
     private typealias sut = MSALNativeAuthSignUpChallengeOauth2ErrorCode
-
+    
     func test_allCases() {
         XCTAssertEqual(sut.allCases.count, 4)
     }
-
-    // MARK: - to SignUpPasswordStartError tests
-
-    func test_toSignUpPasswordStartPublicError_invalidClient() {
-        let error = sut.invalidClient.toSignUpPasswordStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
+    
+    func test_invalidRequest() {
+        XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
-
-    func test_toSignUpPasswordStartPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toSignUpPasswordStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
+    
+    func test_invalidClient() {
+        XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
     }
-
-    func test_toSignUpPasswordStartPublicError_expiredToken() {
-        let error = sut.expiredToken.toSignUpPasswordStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+    
+    func test_unsupportedChallengeType() {
+        XCTAssertEqual(sut.unsupportedChallengeType.rawValue, "unsupported_challenge_type")
     }
-
-    func test_toSignUpPasswordStartPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toSignUpPasswordStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    // MARK: - to SignUpCodeStartError tests
-
-    func test_toSignUpCodeStartPublicError_invalidClient() {
-        let error = sut.invalidClient.toSignUpStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
-    }
-
-    func test_toSignUpCodeStartPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toSignUpStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
-    }
-
-    func test_toSignUpCodeStartPublicError_expiredToken() {
-        let error = sut.expiredToken.toSignUpStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
-    }
-
-    func test_toSignUpCodeStartPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toSignUpStartPublicError()
-        XCTAssertEqual(error.type, .generalError)
-    }
-
-    // MARK: - to ResendCodeError tests
-
-    func test_toResendCodePublicError_invalidClient() {
-        let error = sut.invalidClient.toResendCodePublicError()
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
-    }
-
-    func test_toResendCodePublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toResendCodePublicError()
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
-    }
-
-    func test_toResendCodePublicError_expiredToken() {
-        let error = sut.expiredToken.toResendCodePublicError()
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
-    }
-
-    func test_toResendCodePublicError_invalidRequest() {
-        let error = sut.invalidRequest.toResendCodePublicError()
-        XCTAssertNotNil(error.errorDescription)
-    }
-
-    // MARK: - to PasswordRequiredError tests
-
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        let error = sut.invalidClient.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
-    }
-
-    func test_toPasswordRequiredPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.unsupportedChallengeType)
-    }
-
-    func test_toPasswordRequiredPublicError_expiredToken() {
-        let error = sut.expiredToken.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
-    }
-
-    func test_toPasswordRequiredPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
+    
+    func test_expiredToken() {
+        XCTAssertEqual(sut.expiredToken.rawValue, "expired_token")
     }
 }

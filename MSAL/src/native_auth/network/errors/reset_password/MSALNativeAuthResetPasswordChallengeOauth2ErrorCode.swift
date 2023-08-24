@@ -30,33 +30,3 @@ enum MSALNativeAuthResetPasswordChallengeOauth2ErrorCode: String, Decodable, Cas
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
 }
-
-extension MSALNativeAuthResetPasswordChallengeOauth2ErrorCode {
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
-        switch self {
-
-        case .invalidRequest:
-            return .init(type: .generalError)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .unsupportedChallengeType:
-            return .init(type: .generalError)
-        case .expiredToken:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.expiredToken)
-        }
-    }
-
-    func toResendCodePublicError() -> ResendCodeError {
-        switch self {
-        case .invalidClient:
-            return .init(message: MSALNativeAuthErrorMessage.invalidClient)
-        case .unsupportedChallengeType:
-            return .init()
-        case .expiredToken:
-            return .init(message: MSALNativeAuthErrorMessage.expiredToken)
-        case .invalidRequest:
-            return .init()
-        }
-    }
-
-}

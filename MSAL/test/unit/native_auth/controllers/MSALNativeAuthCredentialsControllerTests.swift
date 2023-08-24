@@ -158,16 +158,16 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
         await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .generalError)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .expiredToken)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .authorizationPending)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .slowDown)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidRequest)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidServerResponse)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .refreshTokenExpired), validatorError: .expiredRefreshToken)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .browserRequired, message: "MFA currently not supported. Use the browser instead"), validatorError: .strongAuthRequired)
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .expiredToken(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .authorizationPending(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .slowDown(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidRequest(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse), validatorError: .invalidServerResponse)
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient(message: "Invalid Client ID"))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .refreshTokenExpired), validatorError: .expiredRefreshToken(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .browserRequired, message: "MFA currently not supported. Use the browser instead"), validatorError: .strongAuthRequired(message: "MFA currently not supported. Use the browser instead"))
     }
 
     private func checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError, validatorError: MSALNativeAuthTokenValidatedErrorType) async {

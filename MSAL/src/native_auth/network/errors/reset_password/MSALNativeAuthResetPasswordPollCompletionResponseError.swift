@@ -42,3 +42,22 @@ struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthRes
         case target
     }
 }
+
+extension MSALNativeAuthResetPasswordPollCompletionResponseError {
+
+    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+        switch error {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .init(type: .invalidPassword, message: errorDescription)
+        case .invalidClient,
+             .expiredToken,
+             .invalidRequest,
+             .userNotFound:
+            return .init(type: .generalError, message: errorDescription)
+        }
+    }
+}

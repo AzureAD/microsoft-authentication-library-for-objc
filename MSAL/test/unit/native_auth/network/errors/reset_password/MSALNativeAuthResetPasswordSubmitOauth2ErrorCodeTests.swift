@@ -20,66 +20,48 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import XCTest
 @testable import MSAL
 
 final class MSALNativeAuthResetPasswordSubmitOauth2ErrorCodeTests: XCTestCase {
-
+    
     private typealias sut = MSALNativeAuthResetPasswordSubmitOauth2ErrorCode
-
+    
     func test_allCases() {
         XCTAssertEqual(sut.allCases.count, 8)
     }
-
-    // MARK: - toPasswordRequiredPublicError tests
-
-    func test_toPasswordRequiredPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+    
+    func test_invalidRequest() {
+        XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
-
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        let error = sut.invalidClient.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
+    
+    func test_invalidClient() {
+        XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
     }
-
-    func test_toPasswordRequiredPublicError_expiredToken() {
-        let error = sut.expiredToken.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.expiredToken)
+    
+    func test_expiredToken() {
+        XCTAssertEqual(sut.expiredToken.rawValue, "expired_token")
     }
-
-    func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        let error = sut.passwordTooWeak.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooWeak)
+    
+    func test_passwordTooWeak() {
+        XCTAssertEqual(sut.passwordTooWeak.rawValue, "password_too_weak")
     }
-
-    func test_toPasswordRequiredPublicError_passwordTooShort() {
-        let error = sut.passwordTooShort.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooShort)
+    
+    func test_passwordTooShort() {
+        XCTAssertEqual(sut.passwordTooShort.rawValue, "password_too_short")
     }
-
-    func test_toPasswordRequiredPublicError_passwordTooLong() {
-        let error = sut.passwordTooLong.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordTooLong)
+    
+    func test_passwordTooLong() {
+        XCTAssertEqual(sut.passwordTooLong.rawValue, "password_too_long")
     }
-
-    func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        let error = sut.passwordRecentlyUsed.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordRecentlyUsed)
+    
+    func test_passwordRecentlyUsed() {
+        XCTAssertEqual(sut.passwordRecentlyUsed.rawValue, "password_recently_used")
     }
-
-    func test_toPasswordRequiredPublicError_passwordBanned() {
-        let error = sut.passwordBanned.toPasswordRequiredPublicError()
-        XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.passwordBanned)
+    
+    func test_passwordBanned() {
+        XCTAssertEqual(sut.passwordBanned.rawValue, "password_banned")
     }
 }

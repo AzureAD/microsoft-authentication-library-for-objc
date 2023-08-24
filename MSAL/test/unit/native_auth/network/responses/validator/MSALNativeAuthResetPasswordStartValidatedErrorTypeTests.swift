@@ -28,23 +28,20 @@ import XCTest
 final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase {
 
     private typealias sut = MSALNativeAuthResetPasswordStartValidatedErrorType
-
-    func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 5)
-    }
+    private let testDescription = "testDescription"
 
     // MARK: - to ResetPasswordStartError tests
 
     func test_toResetPasswordStartPublicError_invalidClient() {
-        let error = sut.invalidClient.toResetPasswordStartPublicError()
+        let error = sut.invalidClient(message: testDescription).toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidClient)
+        XCTAssertEqual(error.errorDescription, testDescription)
     }
 
     func test_toResetPasswordStartPublicError_invalidRequest() {
-        let error = sut.invalidRequest.toResetPasswordStartPublicError()
+        let error = sut.invalidRequest(message: "General error").toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+        XCTAssertEqual(error.errorDescription, "General error")
     }
     
     func test_toResetPasswordStartPublicError_userDoesNotHavePassword() {
@@ -54,14 +51,14 @@ final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase 
     }
 
     func test_toResetPasswordStartPublicError_userNotFound() {
-        let error = sut.userNotFound.toResetPasswordStartPublicError()
+        let error = sut.userNotFound(message: testDescription).toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .userNotFound)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.userNotFound)
+        XCTAssertEqual(error.errorDescription, testDescription)
     }
 
     func test_toResetPasswordStartPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType.toResetPasswordStartPublicError()
+        let error = sut.unsupportedChallengeType(message: nil).toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+        XCTAssertEqual(error.errorDescription, "General error")
     }
 }

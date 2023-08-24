@@ -93,7 +93,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 return .unexpectedError
             }
         default:
-            return .error(apiError.error)
+            return .error(apiError)
         }
     }
 
@@ -152,7 +152,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .unexpectedError
         }
 
-        return .error(apiError.error)
+        return .error(apiError)
     }
 
     // MARK: - Continue Request
@@ -182,7 +182,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned:
-            return .invalidUserInput(apiError.error)
+            return .invalidUserInput(apiError)
         case .attributeValidationFailed:
             if let signUpToken = apiError.signUpToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
                 return .attributeValidationFailed(signUpToken: signUpToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
@@ -218,7 +218,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .invalidRequest,
              .userAlreadyExists:
 
-            return .error(apiError.error)
+            return .error(apiError)
         }
     }
 

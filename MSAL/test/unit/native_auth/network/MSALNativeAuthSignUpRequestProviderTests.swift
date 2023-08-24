@@ -97,7 +97,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.username.rawValue: DEFAULT_TEST_ID_TOKEN_USERNAME,
                 Key.challengeType.rawValue: "redirect",
-                Key.attributes.rawValue: "%7B%22city%22%3A%22dublin%22%7D",
+                Key.attributes.rawValue: "{\"city\":\"dublin\"}",
                 Key.password.rawValue: "1234"
             ]
         case .signUpChallenge:

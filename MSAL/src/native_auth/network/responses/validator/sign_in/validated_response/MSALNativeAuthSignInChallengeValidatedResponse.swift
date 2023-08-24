@@ -32,26 +32,30 @@ enum MSALNativeAuthSignInChallengeValidatedResponse {
 
 enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case redirect
-    case expiredToken
-    case invalidToken
-    case invalidClient
-    case invalidRequest
+    case expiredToken(message: String?)
+    case invalidToken(message: String?)
+    case invalidClient(message: String?)
+    case invalidRequest(message: String?)
     case invalidServerResponse
-    case userNotFound
-    case unsupportedChallengeType
+    case userNotFound(message: String?)
+    case unsupportedChallengeType(message: String?)
 
     func convertToSignInStartError() -> SignInStartError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)
-        case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
+        case .invalidServerResponse:
             return .init(type: .generalError)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .userNotFound:
-            return .init(type: .userNotFound)
-        case .unsupportedChallengeType:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .expiredToken(let message),
+             .invalidToken(let message),
+             .invalidRequest(let message):
+            return .init(type: .generalError, message: message)
+        case .invalidClient(let message):
+            return .init(type: .generalError, message: message)
+        case .userNotFound(let message):
+            return .init(type: .userNotFound, message: message)
+        case .unsupportedChallengeType(let message):
+            return .init(type: .generalError, message: message)
         }
     }
 
@@ -61,12 +65,12 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             return .init(type: .browserRequired)
         case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
             return .init(type: .generalError)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
+        case .invalidClient(let message):
+            return .init(type: .generalError, message: message)
         case .userNotFound:
             return .init(type: .userNotFound)
-        case .unsupportedChallengeType:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.unsupportedChallengeType)
+        case .unsupportedChallengeType(let message):
+            return .init(type: .generalError, message: message)
         }
     }
 }

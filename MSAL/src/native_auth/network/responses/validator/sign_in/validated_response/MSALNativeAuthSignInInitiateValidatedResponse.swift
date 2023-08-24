@@ -31,22 +31,24 @@ enum MSALNativeAuthSignInInitiateValidatedResponse {
 
 enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     case redirect
-    case invalidClient
-    case invalidRequest
+    case invalidClient(message: String?)
+    case invalidRequest(message: String?)
     case invalidServerResponse
-    case userNotFound
-    case unsupportedChallengeType
+    case userNotFound(message: String?)
+    case unsupportedChallengeType(message: String?)
 
     func convertToSignInStartError() -> SignInStartError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .userNotFound:
-            return .init(type: .userNotFound)
-        case .unsupportedChallengeType, .invalidRequest, .invalidServerResponse:
+        case .userNotFound(let message):
+            return .init(type: .userNotFound, message: message)
+        case .invalidServerResponse:
             return .init(type: .generalError)
+        case .invalidClient(let message),
+             .unsupportedChallengeType(let message),
+             .invalidRequest(let message):
+            return .init(type: .generalError, message: message)
         }
     }
 
@@ -54,12 +56,14 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)
-        case .invalidClient:
-            return .init(type: .generalError, message: MSALNativeAuthErrorMessage.invalidClient)
-        case .userNotFound:
-            return .init(type: .userNotFound)
-        case .unsupportedChallengeType, .invalidRequest, .invalidServerResponse:
+        case .userNotFound(let message):
+            return .init(type: .userNotFound, message: message)
+        case .invalidServerResponse:
             return .init(type: .generalError)
+        case .invalidClient(let message),
+             .unsupportedChallengeType(let message),
+             .invalidRequest(let message):
+            return .init(type: .generalError, message: message)
         }
     }
 }
