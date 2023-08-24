@@ -30,7 +30,7 @@ public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
     public let required: Bool
     public let options: RequiredAttributeOptions?
     
-    public init(name: String, type: String, required: Bool, options: RequiredAttributeOptions? = nil) {
+    init(name: String, type: String, required: Bool, options: RequiredAttributeOptions? = nil) {
         self.name = name
         self.type = type
         self.required = required
