@@ -94,7 +94,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
             switch responseError.error {
             case .invalidRequest:
-                return .error(.invalidRequest(message: responseError.errorDescription))
+                return handleInvalidRequestErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
             case .invalidClient:
                 return .error(.invalidClient(message: responseError.errorDescription))
             case .invalidGrant:
@@ -114,10 +114,37 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             }
         }
 
+    private func handleInvalidRequestErrorCodes(
+        _ errorCodes: [Int]?,
+        errorDescription: String?,
+        context: MSALNativeAuthRequestContext
+    ) -> MSALNativeAuthTokenValidatedResponse {
+        return handleInvalidResponseErrorCodes(
+            errorCodes,
+            errorDescription: errorDescription,
+            context: context,
+            errorCodesConverterFunction: convertInvalidRequestErrorCodeToErrorType
+        )
+    }
+
     private func handleInvalidGrantErrorCodes(
         _ errorCodes: [Int]?,
         errorDescription: String?,
         context: MSALNativeAuthRequestContext
+    ) -> MSALNativeAuthTokenValidatedResponse {
+        return handleInvalidResponseErrorCodes(
+            errorCodes,
+            errorDescription: errorDescription,
+            context: context,
+            errorCodesConverterFunction: convertInvalidGrantErrorCodeToErrorType
+        )
+    }
+
+    private func handleInvalidResponseErrorCodes(
+        _ errorCodes: [Int]?,
+        errorDescription: String?,
+        context: MSALNativeAuthRequestContext,
+        errorCodesConverterFunction: (MSALNativeAuthESTSApiErrorCodes, String?) -> MSALNativeAuthTokenValidatedErrorType
     ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
@@ -128,7 +155,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         let firstErrorCode = errorCodes.removeFirst()
 
         if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
-            validatedResponse = .error(convertErrorCodeToErrorType(knownErrorCode, errorDescription: errorDescription))
+            validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, errorDescription))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
             validatedResponse = .error(.generalError)
@@ -151,7 +178,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         return validatedResponse
     }
 
-    private func convertErrorCodeToErrorType(
+    private func convertInvalidGrantErrorCodeToErrorType(
         _ errorCode: MSALNativeAuthESTSApiErrorCodes,
         errorDescription: String?
     ) -> MSALNativeAuthTokenValidatedErrorType {
@@ -160,11 +187,30 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound(message: errorDescription)
         case .invalidCredentials:
             return .invalidPassword(message: errorDescription)
-        case .invalidOTP:
+        case .invalidOTP,
+            .incorrectOTP,
+            .OTPNoCacheEntryForUser:
             return .invalidOOBCode(message: errorDescription)
         case .strongAuthRequired:
             return .strongAuthRequired(message: errorDescription)
         case .userNotHaveAPassword:
+            return .generalError
+        }
+    }
+
+    private func convertInvalidRequestErrorCodeToErrorType(
+        _ errorCode: MSALNativeAuthESTSApiErrorCodes,
+        errorDescription: String?
+    ) -> MSALNativeAuthTokenValidatedErrorType {
+        switch errorCode {
+        case .invalidOTP,
+            .incorrectOTP,
+            .OTPNoCacheEntryForUser:
+            return .invalidOOBCode(message: errorDescription)
+        case .userNotFound,
+            .invalidCredentials,
+            .strongAuthRequired,
+            .userNotHaveAPassword:
             return .generalError
         }
     }
