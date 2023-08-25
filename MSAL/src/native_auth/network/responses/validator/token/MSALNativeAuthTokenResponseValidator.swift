@@ -123,6 +123,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             errorCodes,
             errorDescription: errorDescription,
             context: context,
+            useInvalidRequestAsDefaultResult: true,
             errorCodesConverterFunction: convertInvalidRequestErrorCodeToErrorType
         )
     }
@@ -144,11 +145,12 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         _ errorCodes: [Int]?,
         errorDescription: String?,
         context: MSALNativeAuthRequestContext,
+        useInvalidRequestAsDefaultResult: Bool = false,
         errorCodesConverterFunction: (MSALNativeAuthESTSApiErrorCodes, String?) -> MSALNativeAuthTokenValidatedErrorType
     ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
-            return .error(.generalError)
+            return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(message: errorDescription)) : .error(.generalError)
         }
 
         let validatedResponse: MSALNativeAuthTokenValidatedResponse
@@ -158,7 +160,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, errorDescription))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
-            validatedResponse = .error(.generalError)
+            validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(message: errorDescription)) : .error(.generalError)
         }
 
         // Log the rest of error_codes
@@ -211,7 +213,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             .invalidCredentials,
             .strongAuthRequired,
             .userNotHaveAPassword:
-            return .generalError
+            return .invalidRequest(message: errorDescription)
         }
     }
 }

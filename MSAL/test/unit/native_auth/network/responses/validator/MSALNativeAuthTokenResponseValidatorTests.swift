@@ -198,6 +198,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     }
     
     func test_invalidRequesTokenResponse_withGenericErrorCode_isTranslatedToGeneralError() {
+        let description = "description"
         let unknownErrorCode1 = Int.max
         var errorCodes: [Int] = [unknownErrorCode1]
         checkErrorCodes()
@@ -215,7 +216,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
                 return XCTFail("Unexpected response")
             }
             
-            guard case .generalError = innerError else {
+            guard case .invalidRequest(message: description) = innerError else {
                 return XCTFail("Unexpected Error")
             }
         }
