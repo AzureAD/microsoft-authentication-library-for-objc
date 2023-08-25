@@ -234,7 +234,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .invalidOTP,
             .incorrectOTP,
             .OTPNoCacheEntryForUser:
-            return .error(
+            return .invalidUserInput(
                 MSALNativeAuthSignUpContinueResponseError(
                     error: .invalidOOBValue,
                     errorDescription: errorDescription,
