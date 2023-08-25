@@ -29,16 +29,15 @@ public class MSALNativeAuthErrorRequiredAttributes: NSObject, Decodable {
     public let type: String
     public let required: Bool
     public let options: RequiredAttributeOptions?
-    
+
     init(name: String, type: String, required: Bool, options: RequiredAttributeOptions? = nil) {
         self.name = name
         self.type = type
         self.required = required
         self.options = options
     }
-    
+
     public override var description: String {
         return "\(name)"
     }
 }
-

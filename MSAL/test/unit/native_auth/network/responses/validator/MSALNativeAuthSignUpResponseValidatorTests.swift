@@ -599,7 +599,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
         requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
-        unverifiedAttributes: [[String: String]]? = nil,
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
         invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
     ) -> MSALNativeAuthSignUpContinueResponseError {
         .init(

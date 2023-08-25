@@ -32,7 +32,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let innerErrors: [MSALNativeAuthInnerError]?
     let signUpToken: String?
     let requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]?
-    let unverifiedAttributes: [[String: String]]?
+    let unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttributes]?
 
     enum CodingKeys: String, CodingKey {
