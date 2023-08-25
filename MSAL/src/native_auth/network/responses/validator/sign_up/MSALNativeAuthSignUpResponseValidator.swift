@@ -170,6 +170,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
             return .unexpectedError
@@ -215,10 +216,40 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .invalidClient,
              .invalidGrant,
              .expiredToken,
-             .invalidRequest,
              .userAlreadyExists:
-
             return .error(apiError)
+        case .invalidRequest:
+            return handleInvalidRequestOTPErrorCodes(apiError.errorCodes, errorDescription: apiError.errorDescription) ?? .error(apiError)
+        }
+    }
+
+    private func handleInvalidRequestOTPErrorCodes(
+        _ errorCodes: [Int]?,
+        errorDescription: String?
+    ) -> MSALNativeAuthSignUpContinueValidatedResponse? {
+        guard let errorCode = errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
+            return nil
+        }
+        switch knownErrorCode {
+        case .invalidOTP,
+            .incorrectOTP,
+            .OTPNoCacheEntryForUser:
+            return .error(
+                MSALNativeAuthSignUpContinueResponseError(
+                    error: .invalidOOBValue,
+                    errorDescription: errorDescription,
+                    errorCodes: nil,
+                    errorURI: nil,
+                    innerErrors: nil,
+                    signUpToken: nil,
+                    requiredAttributes: nil,
+                    unverifiedAttributes: nil,
+                    invalidAttributes: nil))
+        case .userNotFound,
+            .invalidCredentials,
+            .strongAuthRequired,
+            .userNotHaveAPassword:
+            return nil
         }
     }
 

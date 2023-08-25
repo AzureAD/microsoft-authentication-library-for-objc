@@ -40,7 +40,7 @@ enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
     case success(_ signInSLT: String?)
-    /// error that represents invalidOOB, invalidPassword and invalidAttributes, depending on which State the input comes from.
+    /// error that represents invalidOOB or invalidPassword, depending on which State the input comes from.
     case invalidUserInput(_ error: MSALNativeAuthSignUpContinueResponseError)
     case credentialRequired(signUpToken: String)
     case attributesRequired(signUpToken: String, requiredAttributes: [String])
