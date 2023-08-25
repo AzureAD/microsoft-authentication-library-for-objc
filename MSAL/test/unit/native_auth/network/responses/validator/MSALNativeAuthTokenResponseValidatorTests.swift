@@ -142,4 +142,53 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             XCTFail("Unexpected Error")
         }
     }
+    
+    func test_invalidRequesTokenResponse_withOTPErrorCodes_isTranslatedToInvalidCode() {
+        let unknownErrorCode1 = Int.max
+        var errorCodes: [Int] = [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue, unknownErrorCode1]
+        checkErrorCodes()
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.incorrectOTP.rawValue, unknownErrorCode1]
+        checkErrorCodes()
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.OTPNoCacheEntryForUser.rawValue, unknownErrorCode1]
+        checkErrorCodes()
+        func checkErrorCodes() {
+            let description = "description"
+            let error = MSALNativeAuthTokenResponseError(error: .invalidRequest, errorDescription: description, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+            
+            let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+            let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+            
+            guard case .error(let innerError) = result else {
+                return XCTFail("Unexpected response")
+            }
+            
+            guard case .invalidOOBCode(message: description) = innerError else {
+                return XCTFail("Unexpected Error")
+            }
+        }
+    }
+    
+    func test_invalidRequesTokenResponse_withGenericErrorCode_isTranslatedToGeneralError() {
+        let unknownErrorCode1 = Int.max
+        var errorCodes: [Int] = [unknownErrorCode1]
+        checkErrorCodes()
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue]
+        checkErrorCodes()
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue]
+        checkErrorCodes()
+        func checkErrorCodes() {
+            let error = MSALNativeAuthTokenResponseError(error: .invalidRequest, errorDescription: description, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, credentialToken: nil)
+            
+            let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+            let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+            
+            guard case .error(let innerError) = result else {
+                return XCTFail("Unexpected response")
+            }
+            
+            guard case .generalError = innerError else {
+                return XCTFail("Unexpected Error")
+            }
+        }
+    }
 }
