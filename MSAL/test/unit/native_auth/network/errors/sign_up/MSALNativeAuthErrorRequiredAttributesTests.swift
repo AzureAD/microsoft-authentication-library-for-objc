@@ -28,12 +28,12 @@ import XCTest
 final class MSALNativeAuthErrorRequiredAttributesTests: XCTestCase {
 
     func test_toString_requiredTrue() {
-        let sut = MSALNativeAuthErrorRequiredAttributes(name: "aName", type: "", required: true)
+        let sut = MSALNativeAuthRequiredAttributesInternal(name: "aName", type: "", required: true)
         XCTAssertEqual(sut.description, "aName")
     }
 
     func test_toString_requiredFalse() {
-        let sut = MSALNativeAuthErrorRequiredAttributes(name: "aName", type: "", required: false)
+        let sut = MSALNativeAuthRequiredAttributesInternal(name: "aName", type: "", required: false)
         XCTAssertEqual(sut.description, "aName")
     }
 }

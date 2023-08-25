@@ -25,25 +25,17 @@
 import Foundation
 
 @objc
-public class RequiredAttributesError: MSALNativeAuthError {
+public class MSALNativeAuthRequiredAttributes: NSObject {
     public let name: String
     public let type: String
     public let required: Bool
     public let regex: String?
 
-    init(message: String? = nil, name: String, type: String, required: Bool, regex: String? = nil) {
+    init(name: String, type: String, required: Bool, regex: String? = nil) {
         self.name = name
         self.type = type
         self.required = required
         self.regex = regex
-        super.init(message: message)
-    }
-
-    public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
-
-        return "Attributes required"
+        super.init()
     }
 }

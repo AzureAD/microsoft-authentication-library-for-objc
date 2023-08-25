@@ -91,6 +91,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
+            
+            configuration.sliceConfig = MSALSliceConfig(slice: nil, dc: "ESTS-PUB-WUS2-AZ1-FD000-TEST1")
 
         try super.init(configuration: configuration)
     }
