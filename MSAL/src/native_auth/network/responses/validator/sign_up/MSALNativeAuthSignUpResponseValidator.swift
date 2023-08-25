@@ -203,7 +203,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             }
         case .attributesRequired:
             if let signUpToken = apiError.signUpToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
-                return .attributesRequired(signUpToken: signUpToken, requiredAttributes: requiredAttributes)
+                return .attributesRequired(signUpToken: signUpToken, requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublicError() })
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
                 return .unexpectedError

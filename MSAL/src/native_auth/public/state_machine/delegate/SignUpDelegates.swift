@@ -137,7 +137,7 @@ public protocol SignUpAttributesRequiredDelegate {
     /// - Parameters:
     ///     - attributes:  List of required attributes.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    func onSignUpAttributesRequired(attributes: [MSALNativeAuthErrorRequiredAttributes], newState: SignUpAttributesRequiredState)
+    func onSignUpAttributesRequired(attributes: [RequiredAttributesError], newState: SignUpAttributesRequiredState)
     
     /// Notifies the delegate that invalid attributes were sent.
     /// - Parameters:
