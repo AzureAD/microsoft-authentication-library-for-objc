@@ -24,6 +24,6 @@
 
 import Foundation
 
-public class RequiredAttributeOptions: NSObject, Decodable {
-    public let regex: String?
+class MSALNativeAuthRequiredAttributeOptions: Decodable {
+    let regex: String?
 }
