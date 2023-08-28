@@ -22,18 +22,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import XCTest
-@testable import MSAL
+import Foundation
 
-final class MSALNativeAuthErrorRequiredAttributesTests: XCTestCase {
+class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
+    let name: String
+    let type: String
+    let required: Bool
+    let options: MSALNativeAuthRequiredAttributeOptions?
 
-    func test_toString_requiredTrue() {
-        let sut = MSALNativeAuthRequiredAttributesInternal(name: "aName", type: "", required: true)
-        XCTAssertEqual(sut.description, "aName")
+    init(name: String, type: String, required: Bool, options: MSALNativeAuthRequiredAttributeOptions? = nil) {
+        self.name = name
+        self.type = type
+        self.required = required
+        self.options = options
     }
 
-    func test_toString_requiredFalse() {
-        let sut = MSALNativeAuthRequiredAttributesInternal(name: "aName", type: "", required: false)
-        XCTAssertEqual(sut.description, "aName")
+    override var description: String {
+        return "\(name)"
+    }
+
+    func toRequiredAttributesPublic() -> MSALNativeAuthRequiredAttributes {
+        MSALNativeAuthRequiredAttributes(name: name, type: type, required: required, regex: options?.regex)
     }
 }

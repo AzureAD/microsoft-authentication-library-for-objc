@@ -69,7 +69,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let error = createSignUpStartError(
             error: .verificationRequired,
             signUpToken: "sign-up token",
-            unverifiedAttributes: [["name": "username"]]
+            unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes(name: "username")]
         )
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
@@ -80,7 +80,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         }
 
         XCTAssertEqual(signUpToken, "sign-up token")
-        XCTAssertEqual(unverifiedAttributes.first, "[\"name\": \"username\"]")
+        XCTAssertEqual(unverifiedAttributes.first, "username")
     }
 
     func test_whenSignUpStart_verificationRequiredErrorWithSignUpToken_but_unverifiedAttributesIsEmpty_it_returns_unexpectedError() {
@@ -110,7 +110,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpStart_attributeValidationFailedWithSignUpTokenAndInvalidAttributes_it_returns_attributeValidationFailed() {
         let error = createSignUpStartError(
             error: .attributeValidationFailed,
-            invalidAttributes: [["city": "dublin"]]
+            invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "city")]
         )
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
@@ -120,7 +120,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
 
-        XCTAssertEqual(invalidAttributes.first, "[\"city\": \"dublin\"]")
+        XCTAssertEqual(invalidAttributes.first, "city")
     }
 
     func test_whenSignUpStart_attributeValidationFailedWithSignUpToken_but_invalidAttributesIsEmpty_it_returns_attributeValidationFailed() {
@@ -401,14 +401,14 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: "sign-up-token", invalidAttributes: [["name": "email"]])
+        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: "sign-up-token", invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
 
         guard case .attributeValidationFailed(let signUpToken, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
         }
 
         XCTAssertEqual(signUpToken, "sign-up-token")
-        XCTAssertEqual(invalidAttributes.first, "[\"name\": \"email\"]")
+        XCTAssertEqual(invalidAttributes.first, "email")
     }
     
     func test_whenSignUpContinueErrorResponseIs_invalidRequestWithInvalidOTPErrorCode_it_returns_expectedError() {
@@ -447,7 +447,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_but_signUpTokenIsNil_it_returns_unexpectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: nil, invalidAttributes: [["name": "email"]])
+        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: nil, invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
 
         XCTAssertEqual(result, .unexpectedError)
     }
@@ -488,8 +488,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
         XCTAssertEqual(signUpToken, "sign-up-token")
         XCTAssertEqual(requiredAttributes.count, 2)
-        XCTAssertEqual(requiredAttributes[0], "email - required: true")
-        XCTAssertEqual(requiredAttributes[1], "city - required: false")
+        XCTAssertEqual(requiredAttributes[0].name, "email")
+        XCTAssertEqual(requiredAttributes[1].name, "city")
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_signUpToken_IsNil_it_returns_expectedError() {
@@ -573,8 +573,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         expectedSignUpToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
-        invalidAttributes: [[String: String]]? = nil,
+        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
         errorCodes: [Int]? = nil
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .failure(
@@ -597,8 +597,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
-        unverifiedAttributes: [[String: String]]? = nil,
-        invalidAttributes: [[String: String]]? = nil
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
     ) -> MSALNativeAuthSignUpStartResponseError {
         .init(
             error: error,
@@ -635,9 +635,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         signUpToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthErrorRequiredAttributes]? = nil,
-        unverifiedAttributes: [[String: String]]? = nil,
-        invalidAttributes: [[String: String]]? = nil
+        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
     ) -> MSALNativeAuthSignUpContinueResponseError {
         .init(
             error: error,

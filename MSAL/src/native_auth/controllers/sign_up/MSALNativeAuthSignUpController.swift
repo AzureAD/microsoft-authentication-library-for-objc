@@ -450,7 +450,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return responseValidator.validate(result, with: parameters.context)
     }
 
-    // swiftlint:disable:next function_body_length
     private func handleSubmitCodeResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
         signUpToken: String,
@@ -479,22 +478,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
             if let function = delegate.onSignUpAttributesRequired {
                 stopTelemetryEvent(event, context: context)
-                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
-            } else {
-                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
-                let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                stopTelemetryEvent(event, context: context, error: error)
-                DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
-            }
-        case .attributeValidationFailed(let signUpToken, let invalidAttributes):
-            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
-            MSALLogger.log(level: .error, context: context, format: message)
-
-            if let function = delegate.onSignUpAttributesRequired {
-                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
-                let error = VerifyCodeError(type: .generalError, message: errorMessage)
-                stopTelemetryEvent(event, context: context, error: error)
-                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+                DispatchQueue.main.async { function(attributes, SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
             } else {
                 MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
                 let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
@@ -508,7 +492,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            context: context,
                            format: "Error in signup/continue request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpVerifyCodeError(error: error, newState: nil) }
-        case .unexpectedError:
+        case .attributeValidationFailed,
+             .unexpectedError:
             let error = VerifyCodeError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
@@ -518,7 +503,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    // swiftlint:disable:next function_body_length
     private func handleSubmitPasswordResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
         signUpToken: String,
@@ -547,22 +531,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
             if let function = delegate.onSignUpAttributesRequired {
                 stopTelemetryEvent(event, context: context)
-                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
-            } else {
-                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
-                let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                stopTelemetryEvent(event, context: context, error: error)
-                DispatchQueue.main.async { delegate.onSignUpPasswordRequiredError(error: error, newState: nil) }
-            }
-        case .attributeValidationFailed(let signUpToken, let invalidAttributes):
-            let message = "attribute_validation_failed from signup/continue. Make sure these attributes are correct: \(invalidAttributes)"
-            MSALLogger.log(level: .error, context: context, format: message)
-
-            if let function = delegate.onSignUpAttributesRequired {
-                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
-                let error = PasswordRequiredError(type: .generalError, message: errorMessage)
-                stopTelemetryEvent(event, context: context, error: error)
-                DispatchQueue.main.async { function(SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
+                DispatchQueue.main.async { function(attributes, SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)) }
             } else {
                 MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesRequired() is not implemented by developer")
                 let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
@@ -576,7 +545,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            context: context,
                            format: "Error in signup/continue submitPassword request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpPasswordRequiredError(error: error, newState: nil) }
-        case .credentialRequired,
+        case .attributeValidationFailed,
+             .credentialRequired,
              .unexpectedError:
             let error = PasswordRequiredError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
@@ -621,10 +591,9 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
 
             DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(
-                    error: error,
-                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
-                )
+                delegate.onSignUpAttributesRequired(
+                    attributes: attributes,
+                    newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken))
             }
         case .attributeValidationFailed(let signUpToken, let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
@@ -635,8 +604,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             stopTelemetryEvent(event, context: context, error: error)
 
             DispatchQueue.main.async {
-                delegate.onSignUpAttributesRequiredError(
-                    error: error,
+                delegate.onSignUpAttributesInvalid(
+                    attributeNames: invalidAttributes,
                     newState: SignUpAttributesRequiredState(controller: self, flowToken: signUpToken)
                 )
             }

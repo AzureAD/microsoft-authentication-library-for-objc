@@ -24,12 +24,10 @@
 
 import Foundation
 
-struct MSALNativeAuthErrorRequiredAttributes: Decodable, CustomStringConvertible, Equatable {
+class MSALNativeAuthErrorBasicAttributes: NSObject, Decodable {
     let name: String
-    let type: String
-    let required: Bool
 
-    var description: String {
-        return "\(name) - required: \(required)"
+    init(name: String) {
+        self.name = name
     }
 }

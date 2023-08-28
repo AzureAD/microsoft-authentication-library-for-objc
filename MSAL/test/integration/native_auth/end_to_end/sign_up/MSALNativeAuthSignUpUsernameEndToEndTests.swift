@@ -231,7 +231,6 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         await fulfillment(of: [submitAttributesExp1], timeout: defaultTimeout)
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
-        XCTAssertEqual(signUpAttributesRequiredDelegate.error?.type, .missingRequiredAttributes)
 
         // Now submit more attributes...
 

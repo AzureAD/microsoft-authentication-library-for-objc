@@ -112,7 +112,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         expectation.fulfill()
     }
 
-    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
         onSignUpAttributesRequiredCalled = true
         attributesRequiredNewState = newState
 
@@ -186,7 +186,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         expectation.fulfill()
     }
 
-    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
         onSignUpAttributesRequiredCalled = true
         attributesRequiredState = newState
 
@@ -225,6 +225,18 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         onSignUpCompletedCalled = true
         signInAfterSignUpState = newState
 
+        expectation.fulfill()
+    }
+    
+    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttributes], newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredErrorCalled = true
+        attributesRequiredState = newState
+        expectation.fulfill()
+    }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: MSAL.SignUpAttributesRequiredState) {
+        onSignUpAttributesRequiredErrorCalled = true
+        attributesRequiredState = newState
         expectation.fulfill()
     }
 }
