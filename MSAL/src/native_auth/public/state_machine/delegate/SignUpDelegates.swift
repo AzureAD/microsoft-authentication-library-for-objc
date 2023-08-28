@@ -71,7 +71,7 @@ public protocol SignUpVerifyCodeDelegate {
     /// Notifies the delegate that attributes are required from the user to continue.
     /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+    @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
 
     /// Notifies the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
@@ -114,7 +114,7 @@ public protocol SignUpPasswordRequiredDelegate {
     /// Notifies the delegate that attributes are required from the user to continue.
     /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordRequiredError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @objc optional func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState)
+    @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
 
     /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
@@ -132,4 +132,16 @@ public protocol SignUpAttributesRequiredDelegate {
     /// Notifies the delegate that the sign up operation completed successfully.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     func onSignUpCompleted(newState: SignInAfterSignUpState)
+    
+    /// Notifies the delegate that there are some required attributes to be sent.
+    /// - Parameters:
+    ///     - attributes:  List of required attributes.
+    ///     - newState: An object representing the new state of the flow with follow on methods.
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
+    
+    /// Notifies the delegate that invalid attributes were sent.
+    /// - Parameters:
+    ///     - attributeNames: List of attribute names that failed validation.
+    ///     - newState: An object representing the new state of the flow with follow on methods.
+    func onSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState)
 }
