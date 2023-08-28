@@ -871,12 +871,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
     }
 
-    func test_whenSignUpSubmitCode_returns_attributeValidationFailed_it_calls_delegateAttributesRequired() async {
+    func test_whenSignUpSubmitCode_returns_attributeValidationFailed_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["name"]))
-
-        XCTAssertFalse(requestProviderMock.challengeCalled)
 
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
@@ -884,26 +882,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
-        XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken 2")
-        XCTAssertNil(delegate.error)
-
-        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
-    }
-
-    func test_whenSignUpSubmitCode_returns_attributeValidationFailed_it_calls_delegateAttributesRequired_but_developerDoesnNotImplementDelegate_it_callsDelegateError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["name"]))
-
-        let exp = expectation(description: "SignUpController expectation")
-        let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
-
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
-
-        await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
+        XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
+        XCTAssertNil(delegate.newAttributesRequiredState)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
     }
@@ -1327,7 +1308,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
     }
 
-    func test_whenSignUpSubmitPassword_returns_attributeValidationFailed_it_callsDelegateAttributesRequiredState() async {
+    func test_whenSignUpSubmitPassword_returns_attributeValidationFailed_it_callsDelegateError() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["key"]))
@@ -1338,29 +1319,12 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
-        XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(delegate.newAttributesRequiredState?.flowToken, "signUpToken 2")
-        XCTAssertNil(delegate.error)
-
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
+        XCTAssertNil(delegate.newAttributesRequiredState)
+        
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
     }
-
-     func test_whenSignUpSubmitPassword_returns_attributeValidationFailed_it_callsDelegateAttributesRequiredState_but_developerDoesnNotImplementDelegate_it_callsDelegateError() async {
-         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
-         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-         validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["key"]))
-
-         let exp = expectation(description: "SignUpController expectation")
-         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
-
-         await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
-
-         await fulfillment(of: [exp], timeout: 1)
-         XCTAssertEqual(delegate.error?.type, .generalError)
-         XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
-
-         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
-     }
 
     // MARK: - SubmitAttributes tests
 
