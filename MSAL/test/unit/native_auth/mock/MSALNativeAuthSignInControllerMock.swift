@@ -26,6 +26,9 @@
 import XCTest
 
 class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
+    private(set) var username: String?
+    private(set) var slt: String?
+    var expectation: XCTestExpectation?
     
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async {
         XCTFail("This method should not be called")
@@ -35,8 +38,10 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
         XCTFail("This method should not be called")
     }
     
-    func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
-        XCTFail("This method should not be called")
+    func signIn(username: String, slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
+        self.username = username
+        self.slt = slt
+        expectation?.fulfill()
     }
     
     func submitCode(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInVerifyCodeDelegate) async {

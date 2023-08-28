@@ -702,7 +702,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         tokenRequestProviderMock.result = request
         tokenRequestProviderMock.expectedContext = expectedContext
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: slt, grantType: .slt, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: false, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: "", credentialToken: nil, signInSLT: slt, grantType: .slt, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: false, refreshToken: nil)
 
         let userAccountResult = MSALNativeAuthUserAccountResultStub.result
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedUserAccountResult: userAccountResult)
@@ -711,7 +711,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
         
-        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
         state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
@@ -733,7 +733,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError())
 
-        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
         state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
         
         wait(for: [exp], timeout: 1)
@@ -757,7 +757,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         tokenResponseValidatorMock.tokenValidatedResponse = .error(.invalidClient(message: "Invalid Client ID"))
 
-        let state = SignInAfterSignUpState(controller: sut, slt: slt)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
         state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
@@ -770,7 +770,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods"))
 
-        let state = SignInAfterSignUpState(controller: sut, slt: nil)
+        let state = SignInAfterSignUpState(controller: sut, username: "username", slt: nil)
         state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)

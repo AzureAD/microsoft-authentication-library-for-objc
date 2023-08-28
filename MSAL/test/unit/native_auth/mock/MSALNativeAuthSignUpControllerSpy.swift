@@ -40,7 +40,6 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.expectation = expectation
     }
 
-
     func signUpStartPassword(
         parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
         delegate: SignUpPasswordStartDelegate
@@ -59,7 +58,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         expectation.fulfill()
     }
 
-    func resendCode(context: MSIDRequestContext, signUpToken: String, delegate: MSAL.SignUpResendCodeDelegate) {
+    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String, delegate: MSAL.SignUpResendCodeDelegate) {
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
@@ -67,6 +66,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
 
     func submitCode(
         _ code: String,
+        username: String,
         signUpToken: String,
         context: MSIDRequestContext,
         delegate: SignUpVerifyCodeDelegate
@@ -78,6 +78,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
 
     func submitPassword(
         _ password: String,
+        username: String,
         signUpToken: String,
         context: MSIDRequestContext,
         delegate: SignUpPasswordRequiredDelegate
@@ -89,6 +90,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
 
     func submitAttributes(
         _ attributes: [String: Any],
+        username: String,
         signUpToken: String,
         context: MSIDRequestContext,
         delegate: SignUpAttributesRequiredDelegate

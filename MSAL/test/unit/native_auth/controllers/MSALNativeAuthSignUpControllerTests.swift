@@ -32,6 +32,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     private var contextMock: MSALNativeAuthRequestContext!
     private var requestProviderMock: MSALNativeAuthSignUpRequestProviderMock!
     private var validatorMock: MSALNativeAuthSignUpResponseValidatorMock!
+    private var signInControllerMock: MSALNativeAuthSignInControllerMock!
 
     private var signUpStartPasswordParams: MSALNativeAuthSignUpStartRequestProviderParameters {
         .init(
@@ -57,12 +58,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         contextMock = .init(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
         requestProviderMock = .init()
         validatorMock = .init()
+        signInControllerMock = .init()
 
         sut = MSALNativeAuthSignUpController(
             config: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
             responseValidator: validatorMock,
-            signInController: MSALNativeAuthSignInControllerMock()
+            signInController: signInControllerMock
         )
     }
 
@@ -645,7 +647,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
@@ -665,7 +667,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeCodeRequiredCalled)
@@ -685,7 +687,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken 2", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken 2", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
@@ -711,7 +713,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
@@ -731,7 +733,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
@@ -751,7 +753,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpResendCodeDelegateSpy(exp)
 
-        await sut.resendCode(context: contextMock, signUpToken: "signUpToken", delegate: delegate)
+        await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken", delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
@@ -772,7 +774,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
@@ -792,7 +794,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
@@ -822,7 +824,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
@@ -842,7 +844,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
@@ -862,7 +864,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -879,7 +881,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -907,7 +909,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
@@ -927,7 +929,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
@@ -954,7 +956,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -972,7 +974,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpVerifyCodeErrorCalled)
@@ -997,7 +999,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1023,7 +1025,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1046,7 +1048,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1068,7 +1070,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1099,7 +1101,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1124,7 +1126,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitCodeDelegateSpy(exp)
 
-        await sut.submitCode("1234", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -1145,7 +1147,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
@@ -1164,7 +1166,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
@@ -1193,7 +1195,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
@@ -1213,7 +1215,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
@@ -1232,7 +1234,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1259,7 +1261,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
@@ -1278,7 +1280,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
@@ -1297,7 +1299,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpPasswordRequiredErrorCalled)
@@ -1316,7 +1318,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
 
-        await sut.submitPassword("password", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .generalError)
@@ -1339,7 +1341,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
@@ -1361,7 +1363,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpCompletedCalled)
@@ -1393,7 +1395,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
@@ -1425,7 +1427,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
@@ -1447,7 +1449,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
@@ -1468,7 +1470,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
@@ -1490,7 +1492,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
@@ -1512,13 +1514,50 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let delegate = prepareSignUpSubmitAttributesDelegateSpy(exp)
 
-        await sut.submitAttributes(["key": "value"], signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+        await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock, delegate: delegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredCalled)
         XCTAssertEqual(delegate.newState?.flowToken, "signUpToken 2")
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
+    }
+
+    // MARK: - Sign-in with SLT
+
+    func test_whenSignUpSucceeds_and_userCallsSignInWithSLT_signUpControllerPassesCorrectParams() async {
+        let username = "username"
+        let slt = "signInSLT"
+
+        class SignInAfterSignUpDelegateStub: SignInAfterSignUpDelegate {
+            func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {}
+            func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {}
+        }
+
+        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
+        validatorMock.mockValidateSignUpContinueFunc(.success(slt))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let delegate = prepareSignUpSubmitPasswordDelegateSpy(exp)
+
+        await sut.submitPassword("password", username: username, signUpToken: "signUpToken", context: contextMock, delegate: delegate)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onSignUpCompletedCalled)
+        XCTAssertNil(delegate.newAttributesRequiredState)
+        XCTAssertNil(delegate.newPasswordRequiredState)
+        XCTAssertNil(delegate.error)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: true)
+
+        let exp2 = expectation(description: "SignInAfterSignUp expectation")
+        signInControllerMock.expectation = exp2
+        delegate.signInAfterSignUpState?.signIn(delegate: SignInAfterSignUpDelegateStub())
+        await fulfillment(of: [exp2], timeout: 1)
+
+        XCTAssertEqual(signInControllerMock.username, username)
+        XCTAssertEqual(signInControllerMock.slt, slt)
     }
 
     // MARK: - Common Methods

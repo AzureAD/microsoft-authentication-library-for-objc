@@ -181,6 +181,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: SignUpPasswordRequiredState?
     private(set) var newAttributesRequiredState: SignUpAttributesRequiredState?
+    private(set) var signInAfterSignUpState: SignInAfterSignUpState?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
@@ -205,6 +206,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
 
     func onSignUpCompleted(newState: SignInAfterSignUpState) {
         onSignUpCompletedCalled = true
+        self.signInAfterSignUpState = newState
 
         XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()

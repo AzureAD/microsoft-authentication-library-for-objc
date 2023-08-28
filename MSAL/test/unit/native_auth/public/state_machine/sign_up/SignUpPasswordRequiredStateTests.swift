@@ -40,7 +40,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         correlationId = UUID()
         exp = expectation(description: "SignUpPasswordRequiredState expectation")
         controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
-        sut = SignUpPasswordRequiredState(controller: controller, flowToken: "<token>")
+        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
     }
 
     func test_submitPassword_usesControllerSuccessfully() {
