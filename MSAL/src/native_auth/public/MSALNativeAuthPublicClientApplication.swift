@@ -91,7 +91,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
-            
+
         try super.init(configuration: configuration)
     }
 
