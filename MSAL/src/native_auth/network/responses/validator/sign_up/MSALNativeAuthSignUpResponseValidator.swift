@@ -170,6 +170,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
             return .unexpectedError
@@ -215,10 +216,37 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .invalidClient,
              .invalidGrant,
              .expiredToken,
-             .invalidRequest,
              .userAlreadyExists:
-
             return .error(apiError)
+        case .invalidRequest:
+            return handleInvalidRequestError(apiError)
+        }
+    }
+
+    private func handleInvalidRequestError(_ error: MSALNativeAuthSignUpContinueResponseError) -> MSALNativeAuthSignUpContinueValidatedResponse {
+        guard let errorCode = error.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
+            return .error(error)
+        }
+        switch knownErrorCode {
+        case .invalidOTP,
+            .incorrectOTP,
+            .OTPNoCacheEntryForUser:
+            return .invalidUserInput(
+                MSALNativeAuthSignUpContinueResponseError(
+                    error: .invalidOOBValue,
+                    errorDescription: error.errorDescription,
+                    errorCodes: error.errorCodes,
+                    errorURI: error.errorURI,
+                    innerErrors: error.innerErrors,
+                    signUpToken: error.signUpToken,
+                    requiredAttributes: error.requiredAttributes,
+                    unverifiedAttributes: error.unverifiedAttributes,
+                    invalidAttributes: error.invalidAttributes))
+        case .userNotFound,
+            .invalidCredentials,
+            .strongAuthRequired,
+            .userNotHaveAPassword:
+            return .error(error)
         }
     }
 
