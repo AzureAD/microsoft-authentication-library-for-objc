@@ -27,14 +27,17 @@ import Foundation
 @objcMembers
 public class SignUpBaseState: MSALNativeAuthBaseState {
     fileprivate let controller: MSALNativeAuthSignUpControlling
+    fileprivate let username: String
     fileprivate let inputValidator: MSALNativeAuthInputValidating
 
     init(
         controller: MSALNativeAuthSignUpControlling,
+        username: String,
         flowToken: String,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
     ) {
         self.controller = controller
+        self.username = username
         self.inputValidator = inputValidator
         super.init(flowToken: flowToken)
     }
@@ -49,7 +52,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         Task {
-            await controller.resendCode(context: context, signUpToken: flowToken, delegate: delegate)
+            await controller.resendCode(username: username, context: context, signUpToken: flowToken, delegate: delegate)
         }
     }
 
@@ -68,7 +71,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         }
 
         Task {
-            await controller.submitCode(code, signUpToken: flowToken, context: context, delegate: delegate)
+            await controller.submitCode(code, username: username, signUpToken: flowToken, context: context, delegate: delegate)
         }
     }
 }
@@ -91,7 +94,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         }
 
         Task {
-            await controller.submitPassword(password, signUpToken: flowToken, context: context, delegate: delegate)
+            await controller.submitPassword(password, username: username, signUpToken: flowToken, context: context, delegate: delegate)
         }
     }
 }
@@ -117,7 +120,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         }
 
         Task {
-            await controller.submitAttributes(attributes, signUpToken: flowToken, context: context, delegate: delegate)
+            await controller.submitAttributes(attributes, username: username, signUpToken: flowToken, context: context, delegate: delegate)
         }
     }
 }

@@ -124,7 +124,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
     }
 
-    func signIn(slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
+    func signIn(username: String, slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
         MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
@@ -139,6 +139,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
         let scopes = joinScopes(scopes)
         guard let request = createTokenRequest(
+            username: username,
             scopes: scopes,
             signInSLT: slt,
             grantType: .slt,

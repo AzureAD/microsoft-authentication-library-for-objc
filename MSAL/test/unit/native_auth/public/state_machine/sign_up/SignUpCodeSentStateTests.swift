@@ -39,7 +39,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         correlationId = UUID()
         exp = expectation(description: "SignUpCodeSentState expectation")
         controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
-        sut = SignUpCodeRequiredState(controller: controller, flowToken: "<token>")
+        sut = SignUpCodeRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
     }
 
     func test_resendCode_usesControllerSuccessfully() {

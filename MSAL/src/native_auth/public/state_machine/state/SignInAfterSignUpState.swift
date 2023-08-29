@@ -28,9 +28,11 @@ import Foundation
 @objcMembers public class SignInAfterSignUpState: NSObject {
 
     private let controller: MSALNativeAuthSignInControlling
+    private let username: String
     private let slt: String?
 
-    init(controller: MSALNativeAuthSignInControlling, slt: String?) {
+    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?) {
+        self.username = username
         self.slt = slt
         self.controller = controller
     }
@@ -48,7 +50,7 @@ import Foundation
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         Task {
-            await controller.signIn(slt: slt, scopes: scopes, context: context, delegate: delegate)
+            await controller.signIn(username: username, slt: slt, scopes: scopes, context: context, delegate: delegate)
         }
     }
 }

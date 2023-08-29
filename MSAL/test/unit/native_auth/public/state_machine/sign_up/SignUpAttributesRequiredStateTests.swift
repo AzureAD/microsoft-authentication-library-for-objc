@@ -40,7 +40,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         correlationId = UUID()
         exp = expectation(description: "SignUpAttributesRequiredState expectation")
         controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
-        sut = SignUpAttributesRequiredState(controller: controller, flowToken: "<token>")
+        sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
     }
 
     func test_submitAttributes_usesControllerSuccessfully() {
