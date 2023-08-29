@@ -219,16 +219,13 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .userAlreadyExists:
             return .error(apiError)
         case .invalidRequest:
-            return handleInvalidRequestOTPErrorCodes(apiError.errorCodes, errorDescription: apiError.errorDescription) ?? .error(apiError)
+            return handleInvalidRequestError(apiError)
         }
     }
 
-    private func handleInvalidRequestOTPErrorCodes(
-        _ errorCodes: [Int]?,
-        errorDescription: String?
-    ) -> MSALNativeAuthSignUpContinueValidatedResponse? {
-        guard let errorCode = errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
-            return nil
+    private func handleInvalidRequestError(_ error: MSALNativeAuthSignUpContinueResponseError) -> MSALNativeAuthSignUpContinueValidatedResponse {
+        guard let errorCode = error.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
+            return .error(error)
         }
         switch knownErrorCode {
         case .invalidOTP,
@@ -237,19 +234,19 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .invalidUserInput(
                 MSALNativeAuthSignUpContinueResponseError(
                     error: .invalidOOBValue,
-                    errorDescription: errorDescription,
-                    errorCodes: nil,
-                    errorURI: nil,
-                    innerErrors: nil,
-                    signUpToken: nil,
-                    requiredAttributes: nil,
-                    unverifiedAttributes: nil,
-                    invalidAttributes: nil))
+                    errorDescription: error.errorDescription,
+                    errorCodes: error.errorCodes,
+                    errorURI: error.errorURI,
+                    innerErrors: error.innerErrors,
+                    signUpToken: error.signUpToken,
+                    requiredAttributes: error.requiredAttributes,
+                    unverifiedAttributes: error.unverifiedAttributes,
+                    invalidAttributes: error.invalidAttributes))
         case .userNotFound,
             .invalidCredentials,
             .strongAuthRequired,
             .userNotHaveAPassword:
-            return nil
+            return .error(error)
         }
     }
 

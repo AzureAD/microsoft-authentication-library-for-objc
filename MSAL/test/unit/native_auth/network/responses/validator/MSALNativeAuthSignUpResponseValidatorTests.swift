@@ -412,11 +412,15 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
     
     func test_whenSignUpContinueErrorResponseIs_invalidRequestWithInvalidOTPErrorCode_it_returns_expectedError() {
-        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "sign-up-token", errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue, Int.max])
+        let signUpToken = "sign-up-token"
+        var errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue, Int.max]
+        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: signUpToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "sign-up-token", errorCodes: [MSALNativeAuthESTSApiErrorCodes.incorrectOTP.rawValue])
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.incorrectOTP.rawValue]
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: signUpToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "sign-up-token", errorCodes: [MSALNativeAuthESTSApiErrorCodes.OTPNoCacheEntryForUser.rawValue])
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.OTPNoCacheEntryForUser.rawValue]
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: signUpToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
         func checkInvalidOOBValue() {
             guard case .invalidUserInput(let error) = result else {
@@ -425,6 +429,14 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             if case .invalidOOBValue = error.error {} else {
                 XCTFail("Unexpected error: \(error.error)")
             }
+            XCTAssertNil(error.errorDescription)
+            XCTAssertNil(error.errorURI)
+            XCTAssertNil(error.innerErrors)
+            XCTAssertEqual(error.signUpToken, signUpToken)
+            XCTAssertNil(error.requiredAttributes)
+            XCTAssertNil(error.unverifiedAttributes)
+            XCTAssertNil(error.invalidAttributes)
+            XCTAssertEqual(error.errorCodes, errorCodes)
         }
     }
     
