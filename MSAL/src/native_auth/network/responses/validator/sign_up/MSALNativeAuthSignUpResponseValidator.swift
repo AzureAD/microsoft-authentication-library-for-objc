@@ -92,6 +92,17 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError
             }
+        case .invalidRequest where isSignUpStartInvalidRequestParameter(apiError):
+            return .error(.init(
+                error: .invalidRequestParameter,
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                innerErrors: apiError.innerErrors,
+                signUpToken: apiError.signUpToken,
+                unverifiedAttributes: apiError.unverifiedAttributes,
+                invalidAttributes: apiError.invalidAttributes)
+            )
         default:
             return .error(apiError)
         }
@@ -245,9 +256,17 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .userNotFound,
             .invalidCredentials,
             .strongAuthRequired,
-            .userNotHaveAPassword:
+            .userNotHaveAPassword,
+            .invalidRequestParameter:
             return .error(error)
         }
+    }
+
+    private func isSignUpStartInvalidRequestParameter(_ apiError: MSALNativeAuthSignUpStartResponseError) -> Bool {
+        guard let errorCode = apiError.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
+            return false
+        }
+        return knownErrorCode == .invalidRequestParameter
     }
 
     private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttributes]) -> [String] {

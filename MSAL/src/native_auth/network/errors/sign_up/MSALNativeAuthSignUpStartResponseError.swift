@@ -62,6 +62,8 @@ extension MSALNativeAuthSignUpStartResponseError {
         case .attributeValidationFailed,
              .attributesRequired:
             return .init(type: .invalidAttributes, message: errorDescription)
+        case .invalidRequestParameter:
+            return .init(type: .invalidUsername, message: errorDescription)
         case .invalidClient,
              .unsupportedChallengeType,
              .authNotSupported,
@@ -78,6 +80,8 @@ extension MSALNativeAuthSignUpStartResponseError {
         case .attributeValidationFailed,
              .attributesRequired:
             return .init(type: .invalidAttributes, message: errorDescription)
+        case .invalidRequestParameter:
+            return .init(type: .invalidUsername, message: errorDescription)
         case .invalidClient,
              .invalidRequest,
              .passwordTooWeak, /// password errors should not occur when signing up code

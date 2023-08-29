@@ -166,6 +166,66 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         }
     }
 
+    func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidRequestParameterErrorCode_it_returns_expectedError() {
+        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
+
+        let apiError = createSignUpStartError(
+            error: .invalidRequest,
+            errorDescription: "aDescription",
+            errorCodes: errorCodes,
+            errorURI: "aURI",
+            signUpToken: "aToken",
+            unverifiedAttributes: attributes,
+            invalidAttributes: attributes
+        )
+        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(apiError)
+
+        let result = sut.validate(response, with: context)
+        guard case .error(let error) = result else {
+            return XCTFail("Unexpected response")
+        }
+
+        let resultError = error as MSALNativeAuthSignUpStartResponseError
+        XCTAssertEqual(resultError.error, .invalidRequestParameter)
+        XCTAssertEqual(resultError.errorDescription, "aDescription")
+        XCTAssertEqual(resultError.errorCodes, errorCodes)
+        XCTAssertEqual(resultError.errorURI, "aURI")
+        XCTAssertEqual(resultError.signUpToken, "aToken")
+        XCTAssertEqual(resultError.unverifiedAttributes, attributes)
+        XCTAssertEqual(resultError.invalidAttributes, attributes)
+    }
+
+    func test_whenSignUpStartErrorResponseIs_invalidRequestWithGenericErrorCode_it_returns_expectedError() {
+        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let errorCodes = [Int.max]
+
+        let apiError = createSignUpStartError(
+            error: .invalidRequest,
+            errorDescription: "aDescription",
+            errorCodes: errorCodes,
+            errorURI: "aURI",
+            signUpToken: "aToken",
+            unverifiedAttributes: attributes,
+            invalidAttributes: attributes
+        )
+        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(apiError)
+
+        let result = sut.validate(response, with: context)
+        guard case .error(let error) = result else {
+            return XCTFail("Unexpected response")
+        }
+
+        let resultError = error as MSALNativeAuthSignUpStartResponseError
+        XCTAssertEqual(resultError.error, .invalidRequest)
+        XCTAssertEqual(resultError.errorDescription, "aDescription")
+        XCTAssertEqual(resultError.errorCodes, errorCodes)
+        XCTAssertEqual(resultError.errorURI, "aURI")
+        XCTAssertEqual(resultError.signUpToken, "aToken")
+        XCTAssertEqual(resultError.unverifiedAttributes, attributes)
+        XCTAssertEqual(resultError.invalidAttributes, attributes)
+    }
+
     // MARK: - Challenge Response
 
     func test_whenSignUpChallengeSuccessResponseDoesNotContainChallengeType_it_returns_unexpectedError() {
