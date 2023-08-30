@@ -26,36 +26,11 @@ import Foundation
 
 @objc
 public class AttributesRequiredError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: AttributesRequiredErrorType
-
-    init(type: AttributesRequiredErrorType, message: String? = nil) {
-        self.type = type
-        super.init(message: message)
-    }
-
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
         }
 
-        switch type {
-        case .browserRequired:
-            return "Browser required"
-        case .invalidAttributes:
-            return "Invalid attributes"
-        case .missingRequiredAttributes:
-            return "Missing required attributes"
-        case .generalError:
-            return "General error"
-        }
+        return "General error"
     }
-}
-
-@objc
-public enum AttributesRequiredErrorType: Int {
-    case browserRequired
-    case generalError
-    case invalidAttributes
-    case missingRequiredAttributes
 }

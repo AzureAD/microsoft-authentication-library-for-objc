@@ -113,12 +113,6 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
-        guard inputValidator.isInputValid(attributes) else {
-            delegate.onSignUpAttributesRequiredError(error: AttributesRequiredError(type: .invalidAttributes), newState: self)
-            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid attributes")
-            return
-        }
-
         Task {
             await controller.submitAttributes(attributes, username: username, signUpToken: flowToken, context: context, delegate: delegate)
         }

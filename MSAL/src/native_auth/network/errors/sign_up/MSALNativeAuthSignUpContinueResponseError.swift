@@ -95,24 +95,6 @@ extension MSALNativeAuthSignUpContinueResponseError {
     }
 
     func toAttributesRequiredPublicError() -> AttributesRequiredError {
-        switch error {
-        case .attributeValidationFailed:
-            return .init(type: .invalidAttributes, message: errorDescription)
-        case .invalidClient,
-             .expiredToken,
-             .invalidRequest,
-             .invalidGrant,
-             .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned,
-             .userAlreadyExists,
-             .attributesRequired,
-             .verificationRequired,
-             .credentialRequired,
-             .invalidOOBValue:
-            return .init(type: .generalError, message: errorDescription)
-        }
+        return AttributesRequiredError(message: errorDescription)
     }
 }
