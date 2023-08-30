@@ -87,6 +87,7 @@ enum MockAPIResponse: String {
     case ssprPollFailed = "SSPRPollFailed"
     case ssprPollNotStarted = "SSPRPollNotStarted"
     case signUpContinueSuccess = "SignUpContinueSuccess"
+    case invalidUsername = "InvalidUsername"
 }
 
 // MARK: request body
