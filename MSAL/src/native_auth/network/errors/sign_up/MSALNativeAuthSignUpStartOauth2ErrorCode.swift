@@ -38,5 +38,4 @@ enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable, 
     case verificationRequired = "verification_required"
     case authNotSupported = "auth_not_supported"
     case attributeValidationFailed = "attribute_validation_failed"
-    case invalidRequestParameter = "invalid_request_parameter" // TODO: Not part of the API documentation. Remove when we refactor error handling
 }

@@ -30,7 +30,7 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpStartOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 14)
+        XCTAssertEqual(sut.allCases.count, 13)
     }
 
     func test_invalidRequest() {
@@ -83,9 +83,5 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
 
     func test_attributeValidationFailed() {
         XCTAssertEqual(sut.attributeValidationFailed.rawValue, "attribute_validation_failed")
-    }
-
-    func test_invalidRequestParameter() {
-        XCTAssertEqual(sut.invalidRequestParameter.rawValue, "invalid_request_parameter")
     }
 }

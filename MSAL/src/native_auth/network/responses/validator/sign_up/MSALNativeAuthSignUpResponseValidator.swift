@@ -93,16 +93,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 return .unexpectedError
             }
         case .invalidRequest where isSignUpStartInvalidRequestParameter(apiError):
-            return .error(.init(
-                error: .invalidRequestParameter,
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                innerErrors: apiError.innerErrors,
-                signUpToken: apiError.signUpToken,
-                unverifiedAttributes: apiError.unverifiedAttributes,
-                invalidAttributes: apiError.invalidAttributes)
-            )
+            return .invalidUsername(apiError)
         default:
             return .error(apiError)
         }
