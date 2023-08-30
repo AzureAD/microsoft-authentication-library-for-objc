@@ -213,10 +213,9 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?) {
+    func onSignUpAttributesRequiredError(error: AttributesRequiredError) {
         onSignUpAttributesRequiredErrorCalled = true
         self.error = error
-        attributesRequiredState = newState
 
         expectation.fulfill()
     }

@@ -626,7 +626,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/continue submitAttributes request \(error.errorDescription ?? "No error description")")
-            DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: apiError.toAttributesRequiredPublicError(), newState: nil) }
+            DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: apiError.toAttributesRequiredPublicError()) }
         case .credentialRequired,
              .unexpectedError,
              .invalidUserInput:
@@ -635,7 +635,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/continue submitAttributes request \(error.errorDescription ?? "No error description")")
-            DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: error, newState: nil) }
+            DispatchQueue.main.async { delegate.onSignUpAttributesRequiredError(error: error) }
         }
     }
 
