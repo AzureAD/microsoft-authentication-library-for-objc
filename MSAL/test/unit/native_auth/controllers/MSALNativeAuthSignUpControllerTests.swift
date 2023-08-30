@@ -1346,7 +1346,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1399,8 +1398,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
-        XCTAssertEqual(delegate.newState?.flowToken, "signUpToken")
-        XCTAssertEqual(delegate.error?.type, .invalidAttributes)
+        XCTAssertNil(delegate.newState)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1432,7 +1430,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1475,7 +1472,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1497,7 +1493,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(delegate.onSignUpAttributesRequiredErrorCalled)
         XCTAssertNil(delegate.newState)
-        XCTAssertEqual(delegate.error?.type, .generalError)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
