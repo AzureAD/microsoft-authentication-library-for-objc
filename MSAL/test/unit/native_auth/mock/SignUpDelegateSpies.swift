@@ -304,6 +304,52 @@ class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDel
     }
 }
 
+class SignUpPasswordStartDelegateOptionalMethodsNotImplemented: SignUpPasswordStartDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpPasswordErrorCalled = false
+    private(set) var error: SignUpPasswordStartError?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
+    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+        onSignUpPasswordErrorCalled = true
+        self.error = error
+
+        XCTAssertTrue(Thread.isMainThread)
+        self.expectation?.fulfill()
+    }
+    
+    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
+        XCTFail("This method should not be called")
+        self.expectation?.fulfill()
+    }
+}
+
+class SignUpStartDelegateOptionalMethodsNotImplemented: SignUpStartDelegate {
+    private let expectation: XCTestExpectation?
+    private(set) var onSignUpStartErrorCalled = false
+    private(set) var error: SignUpStartError?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
+    func onSignUpError(error: MSAL.SignUpStartError) {
+        onSignUpStartErrorCalled = true
+        self.error = error
+
+        XCTAssertTrue(Thread.isMainThread)
+        self.expectation?.fulfill()
+    }
+    
+    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
+        XCTFail("This method should not be called")
+        self.expectation?.fulfill()
+    }
+}
+
 class SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented: SignUpPasswordRequiredDelegate {
     private let expectation: XCTestExpectation
     private(set) var error: PasswordRequiredError?

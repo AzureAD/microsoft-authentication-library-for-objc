@@ -125,6 +125,23 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
+    
+    func test_whenSignUpStartPassword_returns_InvalidAttributes_but_developerDoesnNotImplementDelegate_it_callsDelegateError() async {
+        let invalidAttributes = ["name"]
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
+        validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
+    }
 
     func test_whenSignUpStartPassword_returns_redirect_it_callsDelegateError() async {
         requestProviderMock.mockStartRequestFunc(prepareMockRequest())
@@ -435,6 +452,23 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.attributeNames ,invalidAttributes)
 
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
+    }
+    
+    func test_whenSignUpStartCode_returns_InvalidAttributes_but_developerDoesnNotImplementDelegate_it_callsDelegateError() async {
+        let invalidAttributes = ["name"]
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
+        validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let delegate = SignUpStartDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
 
