@@ -27,7 +27,8 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     case attributeValidationFailed(invalidAttributes: [String])
     case redirect
     case error(MSALNativeAuthSignUpStartResponseError)
-    case invalidUsername(MSALNativeAuthSignUpStartResponseError) // TODO: Special error handled separately. Remove after refactor validated error handling
+    // TODO: Special error handled separately. Remove after refactor validated error handling
+    case invalidUsername(MSALNativeAuthSignUpStartResponseError)
     case unexpectedError
 }
 

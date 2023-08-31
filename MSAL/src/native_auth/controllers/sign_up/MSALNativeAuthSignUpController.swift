@@ -159,6 +159,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return responseValidator.validate(response, with: parameters.context)
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSignUpStartPasswordResult(
         _ result: MSALNativeAuthSignUpStartValidatedResponse,
         username: String,
@@ -223,6 +224,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSignUpStartCodeResult(
         _ result: MSALNativeAuthSignUpStartValidatedResponse,
         username: String,
