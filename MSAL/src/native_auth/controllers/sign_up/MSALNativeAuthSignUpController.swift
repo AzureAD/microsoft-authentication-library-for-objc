@@ -206,6 +206,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            context: context,
                            format: "Error in signup/start with password request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
+        case .invalidUsername(let apiError):
+            let error = SignUpPasswordStartError(type: .invalidUsername, message: apiError.errorDescription)
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "InvalidUsername in signup/start with password request \(error.errorDescription ?? "No error description")")
+            DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
         case .unexpectedError:
             let error = SignUpPasswordStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
@@ -262,6 +269,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/start request \(error.errorDescription ?? "No error description")")
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
+        case .invalidUsername(let apiError):
+            let error = SignUpStartError(type: .invalidUsername, message: apiError.errorDescription)
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "InvalidUsername in signup/start request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError:
             let error = SignUpStartError(type: .generalError)
