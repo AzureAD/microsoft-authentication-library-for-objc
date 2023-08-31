@@ -181,10 +181,17 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 context: context,
                 format: "attribute_validation_failed received from signup/start with password request for attributes: \(invalidAttributes)"
             )
-            let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = SignUpPasswordStartError(type: .invalidAttributes, message: message)
-            stopTelemetryEvent(event, context: context, error: error)
-            DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
+            if let function = delegate.onSignUpAttributesInvalid {
+                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
+                let error = SignUpPasswordStartError(type: .generalError, message: errorMessage)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { function(invalidAttributes) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesInvalid() is not implemented by developer")
+                let error = SignUpPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
+            }
         case .redirect:
             let error = SignUpPasswordStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
@@ -231,10 +238,17 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 context: context,
                 format: "attribute_validation_failed received from signup/start request for attributes: \(invalidAttributes)"
             )
-            let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = SignUpStartError(type: .invalidAttributes, message: message)
-            stopTelemetryEvent(event, context: context, error: error)
-            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
+            if let function = delegate.onSignUpAttributesInvalid {
+                let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
+                let error = SignUpPasswordStartError(type: .generalError, message: errorMessage)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { function(invalidAttributes) }
+            } else {
+                MSALLogger.log(level: .error, context: context, format: "onSignUpAttributesInvalid() is not implemented by developer")
+                let error = SignUpStartError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                stopTelemetryEvent(event, context: context, error: error)
+                DispatchQueue.main.async { delegate.onSignUpError(error: error) }
+            }
         case .redirect:
             let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)

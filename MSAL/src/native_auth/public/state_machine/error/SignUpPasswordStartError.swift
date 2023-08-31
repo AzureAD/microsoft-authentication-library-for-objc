@@ -48,8 +48,6 @@ public class SignUpPasswordStartError: MSALNativeAuthError {
             return "Invalid password"
         case .invalidUsername:
             return "Invalid username"
-        case .invalidAttributes:
-            return "Invalid attributes"
         case .generalError:
             return "General error"
         }
@@ -63,6 +61,5 @@ public enum SignUpPasswordStartErrorType: Int {
     case userAlreadyExists
     case invalidPassword
     case invalidUsername
-    case invalidAttributes
     case generalError
 }

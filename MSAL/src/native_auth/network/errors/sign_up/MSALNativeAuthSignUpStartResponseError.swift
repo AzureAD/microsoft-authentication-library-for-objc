@@ -60,9 +60,8 @@ extension MSALNativeAuthSignUpStartResponseError {
         case .userAlreadyExists:
             return .init(type: .userAlreadyExists, message: errorDescription)
         case .attributeValidationFailed,
-             .attributesRequired:
-            return .init(type: .invalidAttributes, message: errorDescription)
-        case .invalidClient,
+             .attributesRequired,
+             .invalidClient,
              .unsupportedChallengeType,
              .authNotSupported,
              .invalidRequest,
@@ -76,9 +75,8 @@ extension MSALNativeAuthSignUpStartResponseError {
         case .userAlreadyExists:
             return .init(type: .userAlreadyExists, message: errorDescription)
         case .attributeValidationFailed,
-             .attributesRequired:
-            return .init(type: .invalidAttributes, message: errorDescription)
-        case .invalidClient,
+             .attributesRequired,
+             .invalidClient,
              .invalidRequest,
              .passwordTooWeak, /// password errors should not occur when signing up code
              .passwordTooShort,

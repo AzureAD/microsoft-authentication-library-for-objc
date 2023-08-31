@@ -40,6 +40,11 @@ public protocol SignUpPasswordStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
+
+    /// Notifies the delegate that invalid attributes were sent.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordError(error)`` will be called.
+    /// - Parameter attributeNames: List of attribute names that failed validation.
+    @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
 
 @objc
@@ -58,6 +63,11 @@ public protocol SignUpStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
+
+    /// Notifies the delegate that invalid attributes were sent.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpError(error)`` will be called.
+    /// - Parameter attributeNames: List of attribute names that failed validation.
+    @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
 
 @objc
