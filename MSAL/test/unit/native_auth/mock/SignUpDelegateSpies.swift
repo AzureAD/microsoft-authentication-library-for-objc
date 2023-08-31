@@ -29,11 +29,13 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
     private let expectation: XCTestExpectation?
     private(set) var onSignUpPasswordErrorCalled = false
     private(set) var onSignUpCodeRequiredCalled = false
+    private(set) var onSignUpAttributesInvalidCalled = false
     private(set) var error: SignUpPasswordStartError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
+    private(set) var attributeNames: [String]?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
@@ -57,17 +59,27 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         XCTAssertTrue(Thread.isMainThread)
         self.expectation?.fulfill()
     }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String]) {
+        self.onSignUpAttributesInvalidCalled = true
+        self.attributeNames = attributeNames
+        
+        XCTAssertTrue(Thread.isMainThread)
+        self.expectation?.fulfill()
+    }
 }
 
 class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
     private let expectation: XCTestExpectation?
     private(set) var onSignUpCodeErrorCalled = false
     private(set) var onSignUpCodeRequiredCalled = false
+    private(set) var onSignUpAttributesInvalidCalled = false
     private(set) var error: SignUpStartError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
+    private(set) var attributeNames: [String]?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
@@ -90,6 +102,14 @@ class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
 
         XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
+    }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String]) {
+        self.onSignUpAttributesInvalidCalled = true
+        self.attributeNames = attributeNames
+        
+        XCTAssertTrue(Thread.isMainThread)
+        self.expectation?.fulfill()
     }
 }
 
