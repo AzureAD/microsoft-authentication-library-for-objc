@@ -159,7 +159,15 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         )
     }
 
-    private func createError(_ error: MSALNativeAuthSignUpStartOauth2ErrorCode) -> MSALNativeAuthSignUpStartResponseError {
+    func test_signUpStart_invalidRequest_withESTSErrorInvalidEmail() async throws {
+        try await perform_testFail(
+            endpoint: .signUpStart,
+            response: .invalidUsername,
+            expectedError: createError(.invalidRequest, errorCodes: [90100])
+        )
+    }
+
+    private func createError(_ error: MSALNativeAuthSignUpStartOauth2ErrorCode, errorCodes: [Int]? = nil) -> MSALNativeAuthSignUpStartResponseError {
         .init(
             error: error,
             errorDescription: nil,

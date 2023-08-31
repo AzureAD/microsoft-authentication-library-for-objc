@@ -195,7 +195,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .invalidOOBCode(message: errorDescription)
         case .strongAuthRequired:
             return .strongAuthRequired(message: errorDescription)
-        case .userNotHaveAPassword:
+        case .userNotHaveAPassword,
+             .invalidRequestParameter:
             return .generalError
         }
     }
@@ -212,7 +213,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         case .userNotFound,
             .invalidCredentials,
             .strongAuthRequired,
-            .userNotHaveAPassword:
+            .userNotHaveAPassword,
+            .invalidRequestParameter:
             return .invalidRequest(message: errorDescription)
         }
     }

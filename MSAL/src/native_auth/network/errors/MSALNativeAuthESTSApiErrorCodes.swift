@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 // This enum contains all the handled error cases from eSTS in error_codes
-enum MSALNativeAuthESTSApiErrorCodes: Int, Decodable {
+enum MSALNativeAuthESTSApiErrorCodes: Int {
     case userNotFound = 50034
     case invalidCredentials = 50126
     case invalidOTP = 50181
@@ -31,4 +31,5 @@ enum MSALNativeAuthESTSApiErrorCodes: Int, Decodable {
     case OTPNoCacheEntryForUser = 50184
     case strongAuthRequired = 50076
     case userNotHaveAPassword = 500222
+    case invalidRequestParameter = 90100
 }
