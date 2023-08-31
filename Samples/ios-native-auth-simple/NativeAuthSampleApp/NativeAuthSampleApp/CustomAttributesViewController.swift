@@ -100,8 +100,6 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
             showResultText("Unable to sign up: The password is invalid")
         case .invalidUsername:
             showResultText("Unable to sign up: The username is invalid")
-        case .invalidAttributes:
-            showResultText("Unable to sign up: One or more attributes are invalid")
         default:
             showResultText("Unexpected error signing up: \(error.errorDescription ?? String(error.type.rawValue))")
         }
@@ -127,6 +125,10 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
 
                                 newState.resendCode(delegate: self)
                             })
+    }
+    
+    func onSignUpAttributesInvalid(attributeNames: [String]) {
+        showResultText("Unable to sign up: Invalid attribute: \(attributeNames)")
     }
 }
 
