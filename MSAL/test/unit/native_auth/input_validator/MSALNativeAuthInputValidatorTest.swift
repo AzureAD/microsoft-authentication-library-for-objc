@@ -34,14 +34,9 @@ final class MSALNativeAuthInputValidatorTest: XCTestCase {
         XCTAssertTrue(validator.isInputValid("email@contoso.com"))
         XCTAssertTrue(validator.isInputValid("password"))
         XCTAssertTrue(validator.isInputValid("1"))
-        XCTAssertTrue(validator.isInputValid(["name": "John"]))
     }
     
     func testInput_whenInvalidStringInputIsUsed_resultShouldBeInvalid() {
         XCTAssertFalse(validator.isInputValid(""))
-    }
-
-    func testInput_whenInvalidDictionaryInputIsUsed_resultShouldBeInvalid() {
-        XCTAssertFalse(validator.isInputValid([:]))
     }
 }

@@ -40,6 +40,11 @@ public protocol SignUpPasswordStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
+
+    /// Notifies the delegate that invalid attributes were sent.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordError(error)`` will be called.
+    /// - Parameter attributeNames: List of attribute names that failed validation.
+    @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
 
 @objc
@@ -58,6 +63,11 @@ public protocol SignUpStartDelegate {
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int)
+
+    /// Notifies the delegate that invalid attributes were sent.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpError(error)`` will be called.
+    /// - Parameter attributeNames: List of attribute names that failed validation.
+    @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
 
 @objc
@@ -124,14 +134,8 @@ public protocol SignUpPasswordRequiredDelegate {
 @objc
 public protocol SignUpAttributesRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameters:
-    ///   - error: An error object indicating why the operation failed.
-    ///   - newState: An object representing the new state of the flow with follow on methods.
-    func onSignUpAttributesRequiredError(error: AttributesRequiredError, newState: SignUpAttributesRequiredState?)
-
-    /// Notifies the delegate that the sign up operation completed successfully.
-    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    func onSignUpCompleted(newState: SignInAfterSignUpState)
+    /// - Parameter error: An error object indicating why the operation failed.
+    func onSignUpAttributesRequiredError(error: AttributesRequiredError)
 
     /// Notifies the delegate that there are some required attributes to be sent.
     /// - Parameters:
@@ -144,4 +148,8 @@ public protocol SignUpAttributesRequiredDelegate {
     ///     - attributeNames: List of attribute names that failed validation.
     ///     - newState: An object representing the new state of the flow with follow on methods.
     func onSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState)
+
+    /// Notifies the delegate that the sign up operation completed successfully.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
+    func onSignUpCompleted(newState: SignInAfterSignUpState)
 }

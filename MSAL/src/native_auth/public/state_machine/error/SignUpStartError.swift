@@ -46,8 +46,6 @@ public class SignUpStartError: MSALNativeAuthError {
             return "User already exists"
         case .invalidUsername:
             return "Invalid username"
-        case .invalidAttributes:
-            return "Invalid attributes"
         case .generalError:
             return "General error"
         }
@@ -59,6 +57,5 @@ public enum SignUpStartErrorType: Int {
     case browserRequired
     case userAlreadyExists
     case invalidUsername
-    case invalidAttributes
     case generalError
 }

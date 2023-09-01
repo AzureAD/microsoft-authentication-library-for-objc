@@ -157,63 +157,63 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     // MARK: - toAttributesRequiredPublicError tests
     
     func test_toAttributesRequiredPublicError_invalidRequest() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidRequest, description: testDescription)
     }
     
-    func test_toAttributesRequiredPublicError_unauthorizedClient() {
-        testSignUpContinueErrorToAttributesRequired(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toAttributesRequiredPublicError_unauthorizedClien() {
+        testSignUpContinueErrorToAttributesRequired(code: .unauthorizedClient, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_invalidGrant() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_expiredToken() {
-        testSignUpContinueErrorToAttributesRequired(code: .expiredToken, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .expiredToken, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooWeak() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .passwordTooWeak, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooShort() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .passwordTooShort, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooLong() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .passwordTooLong, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .passwordRecentlyUsed, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordBanned() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .passwordBanned, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_userAlreadyExists() {
-        testSignUpContinueErrorToAttributesRequired(code: .userAlreadyExists, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .userAlreadyExists, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_attributesRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .attributesRequired, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_verificationRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .verificationRequired, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToAttributesRequired(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .invalidAttributes)
+        testSignUpContinueErrorToAttributesRequired(code: .attributeValidationFailed, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_credentialRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .credentialRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .credentialRequired, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_invalidOOBValue() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidOOBValue, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidOOBValue, description: testDescription)
     }
     
     // MARK: private methods
@@ -232,10 +232,9 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         XCTAssertEqual(error.errorDescription, description)
     }
     
-    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: AttributesRequiredErrorType) {
+    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, signUpToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
 }

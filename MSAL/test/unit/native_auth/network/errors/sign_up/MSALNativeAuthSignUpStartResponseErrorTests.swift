@@ -69,7 +69,7 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPasswordPublicError_attributesRequired() {
-        testSignUpStartErrorToSignUpStartPassword(code: .attributesRequired, description: testDescription, expectedErrorType: .invalidAttributes)
+        testSignUpStartErrorToSignUpStartPassword(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPasswordPublicError_verificationRequired() {
@@ -81,7 +81,7 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPasswordPublicError_attributeValidationFailed() {
-        testSignUpStartErrorToSignUpStartPassword(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .invalidAttributes)
+        testSignUpStartErrorToSignUpStartPassword(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
     }
 
     // MARK: - to toSignUpStartPublicError tests
@@ -123,7 +123,7 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPublicError_attributesRequired() {
-        testSignUpStartErrorToSignUpStart(code: .attributesRequired, description: testDescription, expectedErrorType: .invalidAttributes)
+        testSignUpStartErrorToSignUpStart(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_verificationRequired() {
@@ -135,7 +135,7 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPublicError_attributeValidationFailed() {
-        testSignUpStartErrorToSignUpStart(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .invalidAttributes)
+        testSignUpStartErrorToSignUpStart(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
     }
 
     // MARK: private methods
