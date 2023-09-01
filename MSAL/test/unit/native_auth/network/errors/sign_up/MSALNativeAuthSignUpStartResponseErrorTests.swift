@@ -76,8 +76,8 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStartPassword(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toSignUpStartPasswordPublicError_authNotSupported() {
-        testSignUpStartErrorToSignUpStartPassword(code: .authNotSupported, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpStartPasswordPublicError_unsupportedAuthMethod() {
+        testSignUpStartErrorToSignUpStartPassword(code: .unsupportedAuthMethod, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPasswordPublicError_attributeValidationFailed() {
@@ -130,8 +130,8 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStart(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toSignUpStartPublicError_authNotSupported() {
-        testSignUpStartErrorToSignUpStart(code: .authNotSupported, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpStartPublicError_unsupportedAuthMethod() {
+        testSignUpStartErrorToSignUpStart(code: .unsupportedAuthMethod, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_attributeValidationFailed() {

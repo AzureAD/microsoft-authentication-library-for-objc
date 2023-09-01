@@ -63,7 +63,7 @@ extension MSALNativeAuthSignUpStartResponseError {
              .attributesRequired,
              .unauthorizedClient,
              .unsupportedChallengeType,
-             .authNotSupported,
+             .unsupportedAuthMethod,
              .invalidRequest,
              .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
             return .init(type: .generalError, message: errorDescription)
@@ -83,7 +83,7 @@ extension MSALNativeAuthSignUpStartResponseError {
              .passwordTooLong,
              .passwordRecentlyUsed,
              .passwordBanned,
-             .authNotSupported,
+             .unsupportedAuthMethod,
              .unsupportedChallengeType,
              .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
             return .init(type: .generalError, message: errorDescription)

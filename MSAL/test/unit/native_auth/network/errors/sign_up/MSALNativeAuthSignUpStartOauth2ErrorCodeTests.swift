@@ -77,8 +77,8 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
         XCTAssertEqual(sut.verificationRequired.rawValue, "verification_required")
     }
     
-    func test_authNotSupported() {
-        XCTAssertEqual(sut.authNotSupported.rawValue, "auth_not_supported")
+    func test_unsupportedAuthMethod() {
+        XCTAssertEqual(sut.unsupportedAuthMethod.rawValue, "unsupported_auth_method")
     }
 
     func test_attributeValidationFailed() {

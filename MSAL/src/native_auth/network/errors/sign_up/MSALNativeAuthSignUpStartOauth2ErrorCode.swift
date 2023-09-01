@@ -36,6 +36,6 @@ enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable, 
     case userAlreadyExists = "user_already_exists"
     case attributesRequired = "attributes_required"
     case verificationRequired = "verification_required"
-    case authNotSupported = "auth_not_supported"
+    case unsupportedAuthMethod = "unsupported_auth_method"
     case attributeValidationFailed = "attribute_validation_failed"
 }
