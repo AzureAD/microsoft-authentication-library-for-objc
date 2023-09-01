@@ -26,6 +26,7 @@ import Foundation
 
 enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable {
     case invalidRequest = "invalid_request"
+    case unauthorizedClient = "unauthorized_client"
     case invalidClient = "invalid_client"
     case invalidGrant = "invalid_grant"
     case expiredToken = "expired_token"

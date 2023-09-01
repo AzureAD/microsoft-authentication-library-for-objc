@@ -54,7 +54,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
         switch error {
         case .invalidOOBValue:
             return .init(type: .invalidCode, message: errorDescription)
-        case .invalidClient,
+        case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .invalidGrant,
@@ -80,7 +80,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .passwordRecentlyUsed,
              .passwordBanned:
             return .init(type: .invalidPassword, message: errorDescription)
-        case .invalidClient,
+        case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .invalidGrant,

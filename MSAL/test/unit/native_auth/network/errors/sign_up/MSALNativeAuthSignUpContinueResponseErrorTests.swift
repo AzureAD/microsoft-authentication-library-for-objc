@@ -36,8 +36,8 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToVerifyCode(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toVerifyCodePublicError_invalidClient() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toVerifyCodePublicError_unauthorizedClient() {
+        testSignUpContinueErrorToVerifyCode(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_invalidGrant() {
@@ -98,8 +98,8 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToPasswordRequired(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_unauthorizedClient() {
+        testSignUpContinueErrorToPasswordRequired(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_invalidGrant() {
@@ -160,8 +160,8 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToAttributesRequired(code: .invalidRequest, description: testDescription)
     }
     
-    func test_toAttributesRequiredPublicError_invalidClient() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidClient, description: testDescription)
+    func test_toAttributesRequiredPublicError_unauthorizedClien() {
+        testSignUpContinueErrorToAttributesRequired(code: .unauthorizedClient, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_invalidGrant() {

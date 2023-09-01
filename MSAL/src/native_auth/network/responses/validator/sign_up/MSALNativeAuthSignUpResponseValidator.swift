@@ -215,7 +215,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError
-        case .invalidClient,
+        case .unauthorizedClient,
              .invalidGrant,
              .expiredToken,
              .userAlreadyExists:

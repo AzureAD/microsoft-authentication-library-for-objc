@@ -44,7 +44,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
 
     func toSignUpPasswordStartPublicError() -> SignUpPasswordStartError {
         switch error {
-        case .invalidClient,
+        case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest:
@@ -54,7 +54,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
 
     func toSignUpStartPublicError() -> SignUpStartError {
         switch error {
-        case .invalidClient,
+        case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest:
@@ -64,7 +64,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
 
     func toResendCodePublicError() -> ResendCodeError {
         switch error {
-        case .invalidClient,
+        case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest:
@@ -74,7 +74,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
 
     func toPasswordRequiredPublicError() -> PasswordRequiredError {
         switch error {
-        case .invalidClient,
+        case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest:

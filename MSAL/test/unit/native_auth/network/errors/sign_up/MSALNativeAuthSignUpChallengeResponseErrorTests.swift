@@ -32,8 +32,8 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to toSignUpPasswordStartPublicError tests
 
-    func test_toSignUpPasswordStartPublicError_invalidClient() {
-        testSignUpChallengeErrorToSignUpPasswordStart(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpPasswordStartPublicError_unauthorizedClient() {
+        testSignUpChallengeErrorToSignUpPasswordStart(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
 
     func test_toSignUpPasswordStartPublicError_unsupportedChallengeType() {
@@ -50,8 +50,8 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to SignUpCodeStartError tests
 
-    func test_toSignUpCodeStartPublicError_invalidClient() {
-        testSignUpChallengeErrorToSignUpStart(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpCodeStartPublicError_unauthorizedClient() {
+        testSignUpChallengeErrorToSignUpStart(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
 
     func test_toSignUpCodeStartPublicError_unsupportedChallengeType() {
@@ -68,8 +68,8 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to ResendCodeError tests
 
-    func test_toResendCodePublicError_invalidClient() {
-        testSignUpChallengeErrorToResendCodePublic(code: .invalidClient, description: testDescription)
+    func test_toResendCodePublicError_unauthorizedClient() {
+        testSignUpChallengeErrorToResendCodePublic(code: .unauthorizedClient, description: testDescription)
     }
 
     func test_toResendCodePublicError_unsupportedChallengeType() {
@@ -86,8 +86,8 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to PasswordRequiredError tests
 
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        testSignUpChallengeErrorToPasswordRequired(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_unauthorizedClient() {
+        testSignUpChallengeErrorToPasswordRequired(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
 
     func test_toPasswordRequiredPublicError_unsupportedChallengeType() {
