@@ -128,7 +128,7 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
     }
     
     func onSignUpAttributesInvalid(attributeNames: [String]) {
-        showResultText("Unable to sign up: Invalid attribute: \(attributeNames)")
+        showResultText("Unable to sign up - invalid attribute(s): \(attributeNames)")
     }
 }
 
