@@ -72,7 +72,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             XCTFail("Unexpected result: \(result)")
         }
     }
-
+    
     func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
@@ -100,6 +100,37 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             XCTFail("Unexpected Error")
         }
     }
+    
+    func test_invalidClient_isProperlyHandled() {
+        let error = MSALNativeAuthTokenResponseError(error: .invalidClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        
+        guard case .error(let innerError) = result else {
+            return XCTFail("Unexpected response")
+        }
+        
+        if case .invalidClient(message: nil) = innerError {} else {
+            XCTFail("Unexpected Error")
+        }
+    }
+    
+    func test_unauthorizedClient_isProperlyHandled() {
+        let error = MSALNativeAuthTokenResponseError(error: .unauthorizedClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        
+        guard case .error(let innerError) = result else {
+            return XCTFail("Unexpected response")
+        }
+        
+        if case .invalidClient(message: nil) = innerError {} else {
+            XCTFail("Unexpected Error")
+        }
+    }
+    
 
     func test_invalidGrantTokenResponse_withKnownError_andSeveralUnknownErrorCodes_isProperlyHandled() {
         let description = "description"

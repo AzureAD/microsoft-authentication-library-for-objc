@@ -132,7 +132,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             switch error.error {
             case .invalidRequest:
                 return .error(.invalidRequest(message: error.errorDescription))
-            case .invalidClient:
+            case .unauthorizedClient:
                 return .error(.invalidClient(message: error.errorDescription))
             case .invalidGrant:
                 return .error(.invalidToken(message: error.errorDescription))
@@ -149,7 +149,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             switch error.error {
             case .invalidRequest:
                 return .error(.invalidRequest(message: error.errorDescription))
-            case .invalidClient:
+            case .unauthorizedClient:
                 return .error(.invalidClient(message: error.errorDescription))
             case .unsupportedChallengeType:
                 return .error(.unsupportedChallengeType(message: error.errorDescription))

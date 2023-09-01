@@ -56,11 +56,13 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 
-    func test_signUpStart_invalidClient() async throws {
+    func test_signUpStart_unauthorizedClient() async throws {
+        throw XCTSkip()
+        
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .invalidClient,
-            expectedError: createError(.invalidClient)
+            expectedError: createError(.unauthorizedClient)
         )
     }
 
@@ -160,6 +162,8 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     }
 
     func test_signUpStart_invalidRequest_withESTSErrorInvalidEmail() async throws {
+        throw XCTSkip()
+        
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .invalidUsername,

@@ -36,8 +36,8 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStartPassword(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toSignUpStartPasswordPublicError_invalidClient() {
-        testSignUpStartErrorToSignUpStartPassword(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpStartPasswordPublicError_unauthorizedClient() {
+        testSignUpStartErrorToSignUpStartPassword(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
 
     func test_toSignUpStartPasswordPublicError_unsupportedChallengeType() {
@@ -90,8 +90,8 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStart(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toSignUpStartPublicError_invalidClient() {
-        testSignUpStartErrorToSignUpStart(code: .invalidClient, description: testDescription, expectedErrorType: .generalError)
+    func test_toSignUpStartPublicError_unauthorizedClient() {
+        testSignUpStartErrorToSignUpStart(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
     }
 
     func test_toSignUpStartPublicError_unsupportedChallengeType() {

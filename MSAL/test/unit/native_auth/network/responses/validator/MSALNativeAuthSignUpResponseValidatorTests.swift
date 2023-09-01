@@ -580,13 +580,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpContinueErrorResponseIs_invalidClient_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .invalidClient)
+    func test_whenSignUpContinueErrorResponseIs_unauthorizedClient_it_returns_expectedError() {
+        let result = buildContinueErrorResponse(expectedError: .unauthorizedClient)
 
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .invalidClient = error.error {} else {
+        if case .unauthorizedClient = error.error {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }

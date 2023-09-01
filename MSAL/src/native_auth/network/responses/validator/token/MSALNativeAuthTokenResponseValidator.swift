@@ -95,7 +95,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             switch responseError.error {
             case .invalidRequest:
                 return handleInvalidRequestErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
-            case .invalidClient:
+            case .invalidClient,
+                .unauthorizedClient:
                 return .error(.invalidClient(message: responseError.errorDescription))
             case .invalidGrant:
                 return handleInvalidGrantErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
