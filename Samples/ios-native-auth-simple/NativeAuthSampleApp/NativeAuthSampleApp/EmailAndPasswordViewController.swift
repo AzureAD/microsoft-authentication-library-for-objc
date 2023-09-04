@@ -107,12 +107,9 @@ class EmailAndPasswordViewController: UIViewController {
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult, let username = accountResult.account.username {
-            print("Account found in cache: \(username)")
-
-            emailTextField.text = username
-            passwordTextField.text = "********"
-
+        if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
+            print("Account found in cache: \(homeAccountId)")
+            
             accountResult.getAccessToken(delegate: self)
         } else {
             print("No account found in cache")
