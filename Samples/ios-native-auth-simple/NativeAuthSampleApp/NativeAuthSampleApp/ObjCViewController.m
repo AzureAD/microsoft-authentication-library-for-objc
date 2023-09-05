@@ -50,7 +50,7 @@
     NSError *error = nil;
     self.nativeAuth = [[MSALNativeAuthPublicClientApplication alloc]
                        initWithClientId:Configuration.clientId
-                       tenantName:Configuration.tenantName
+                       tenantSubdomain:Configuration.tenantSubdomain
                        challengeTypes:MSALNativeAuthChallengeTypeOOB | MSALNativeAuthChallengeTypePassword
                        redirectUri:nil
                        error:&error];
