@@ -102,6 +102,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration, challengeTypes: [.password]))
     }
     
+    func testInit_whenPassingNilRedirectUri_itShouldNotThrowError() {
+        XCTAssertNoThrow(try MSALNativeAuthPublicClientApplication(clientId: "genericClient", tenantSubdomain: "genericTenenat", challengeTypes: [.OOB]))
+    }
+    
     func testSignIn_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         MSALNativeAuthPublicClientApplicationTest.expectation = XCTestExpectation()
         let application = MSALNativeAuthPublicClientApplication(controllerFactory: MSALNativeAuthRequestControllerFactoryFail(), inputValidator: MSALNativeAuthInputValidator(), internalChallengeTypes: [])

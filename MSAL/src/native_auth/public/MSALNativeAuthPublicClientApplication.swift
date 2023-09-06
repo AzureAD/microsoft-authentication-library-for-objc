@@ -97,7 +97,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let defaultRedirectUri = String(format: "msauth.%@://auth", Bundle.main.bundleIdentifier ?? "<bundle_id>")
         // we need to set a default redirect URI value to ensure IdentityCore checks the bypassRedirectURIValidation flag
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
-            
+
         try super.init(configuration: configuration)
     }
 

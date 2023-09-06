@@ -28,6 +28,6 @@ import MSAL
 class Configuration: NSObject {
     // Update the below to your client ID and tenantSubdomain you received in the portal.
 
-    static let clientId = "<Enter_the_Application_Id_Here>"
-    static let tenantSubdomain = "<Enter_the_Tenant_Subdomain_Here>"
+    static let clientId = "Enter_the_Application_Id_Here"
+    static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
 }
