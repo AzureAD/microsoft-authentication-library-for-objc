@@ -79,7 +79,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
-            rawTenant: tenantSubdomain,
             challengeTypes: internalChallengeTypes
         )
 
