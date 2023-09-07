@@ -90,22 +90,12 @@ target_specifiers = [
 	{
 		"name" : "Simple Sample NativeAuth iOS App",
 		"scheme" : "NativeAuthSampleApp",
-		"project" : "Samples/ios-native-auth-simple/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
-		"directory" : "Samples/ios-native-auth-simple",
+		"project" : "Samples/ios-native-auth/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
+		"directory" : "Samples/ios-native-auth",
 		"linter" : "swiftlint",
 		"operations" : [ "build", "lint" ],
 		"platform" : "iOS",
         "target" : "simpleSampleNativeAuthIosApp"
-	},
-	{
-		"name" : "Sample NativeAuth iOS App",
-		"scheme" : "SDKSampleApp",
-		"project" : "Samples/ios-native-auth/SDKSampleApp.xcodeproj",
-		"directory" : "Samples/ios-native-auth",
-		"linter" : "swiftlint",
-		"operations" : [ "build", "lint", "test" ],
-		"platform" : "iOS",
-        "target" : "sampleNativeAuthIosApp"
 	},
 	{
 		"name" : "Mac Framework",
