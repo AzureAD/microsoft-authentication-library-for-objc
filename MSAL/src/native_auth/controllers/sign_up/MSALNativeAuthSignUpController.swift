@@ -214,6 +214,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            context: context,
                            format: "InvalidUsername in signup/start with password request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
+        case .invalidClientId(let apiError):
+            let error = SignUpPasswordStartError(type: .generalError, message: apiError.errorDescription)
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Invalid Client Id in signup/start with password request \(error.errorDescription ?? "No error description")")
+            DispatchQueue.main.async { delegate.onSignUpPasswordError(error: error) }
         case .unexpectedError:
             let error = SignUpPasswordStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
@@ -278,6 +285,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "InvalidUsername in signup/start request \(error.errorDescription ?? "No error description")")
+            DispatchQueue.main.async { delegate.onSignUpError(error: error) }
+        case .invalidClientId(let apiError):
+            let error = SignUpStartError(type: .generalError, message: apiError.errorDescription)
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Invalid Client Id in signup/start request \(error.errorDescription ?? "No error description")")
             DispatchQueue.main.async { delegate.onSignUpError(error: error) }
         case .unexpectedError:
             let error = SignUpStartError(type: .generalError)

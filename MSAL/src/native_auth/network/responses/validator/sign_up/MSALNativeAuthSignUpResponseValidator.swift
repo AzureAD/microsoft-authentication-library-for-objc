@@ -92,8 +92,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError
             }
-        case .invalidRequest where isSignUpStartInvalidRequestParameter(apiError):
+        case .invalidRequest where isSignUpStartInvalidRequestParameter(
+            apiError,
+            knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.usernameParameterIsEmptyOrNotValid.rawValue):
             return .invalidUsername(apiError)
+        case .invalidRequest where isSignUpStartInvalidRequestParameter(
+            apiError,
+            knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
+            return .invalidClientId(apiError)
         default:
             return .error(apiError)
         }
@@ -253,11 +259,13 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
-    private func isSignUpStartInvalidRequestParameter(_ apiError: MSALNativeAuthSignUpStartResponseError) -> Bool {
-        guard let errorCode = apiError.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
+    private func isSignUpStartInvalidRequestParameter(_ apiError: MSALNativeAuthSignUpStartResponseError, knownErrorDescription: String) -> Bool {
+        guard let errorCode = apiError.errorCodes?.first,
+              let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode),
+              let errorDescription = apiError.errorDescription else {
             return false
         }
-        return knownErrorCode == .invalidRequestParameter
+        return knownErrorCode == .invalidRequestParameter && errorDescription.contains(knownErrorDescription)
     }
 
     private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttributes]) -> [String] {

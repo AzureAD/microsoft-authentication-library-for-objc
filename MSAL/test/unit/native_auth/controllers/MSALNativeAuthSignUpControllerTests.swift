@@ -223,6 +223,36 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
+    
+    func test_whenSignUpStartPassword_returns_invalidClientId_it_callsDelegateGeneralError() async {
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
+        let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
+            MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
+                                                   errorDescription: nil,
+                                                   errorCodes: nil,
+                                                   errorURI: nil,
+                                                   innerErrors: nil,
+                                                   signUpToken: nil,
+                                                   unverifiedAttributes: nil,
+                                                   invalidAttributes: nil))
+        validatorMock.mockValidateSignUpStartFunc(invalidClientId)
+        
+        let exp = expectation(description: "SignUpController expectation")
+        let delegate = prepareSignUpPasswordStartDelegateSpy(exp)
+        
+        await sut.signUpStartPassword(parameters: signUpStartPasswordParams, delegate: delegate)
+        
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onSignUpPasswordErrorCalled)
+        XCTAssertNil(delegate.newState)
+        XCTAssertNil(delegate.sentTo)
+        XCTAssertNil(delegate.channelTargetType)
+        XCTAssertNil(delegate.codeLength)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
+    }
 
     func test_whenValidatorInSignUpStartPassword_returns_unexpectedError_it_callsDelegateGeneralError() async {
         requestProviderMock.mockStartRequestFunc(prepareMockRequest())
@@ -550,6 +580,36 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(delegate.codeLength)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
 
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
+    }
+    
+    func test_whenSignUpStartCode_returns_invalidClientId_it_callsDelegateGeneralError() async {
+        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
+        let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
+            MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
+                                                   errorDescription: nil,
+                                                   errorCodes: nil,
+                                                   errorURI: nil,
+                                                   innerErrors: nil,
+                                                   signUpToken: nil,
+                                                   unverifiedAttributes: nil,
+                                                   invalidAttributes: nil))
+        validatorMock.mockValidateSignUpStartFunc(invalidClientId)
+        
+        let exp = expectation(description: "SignUpController expectation")
+        let delegate = prepareSignUpCodeStartDelegateSpy(exp)
+        
+        await sut.signUpStartCode(parameters: signUpStartCodeParams, delegate: delegate)
+        
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(delegate.onSignUpCodeErrorCalled)
+        XCTAssertNil(delegate.newState)
+        XCTAssertNil(delegate.sentTo)
+        XCTAssertNil(delegate.channelTargetType)
+        XCTAssertNil(delegate.codeLength)
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
 

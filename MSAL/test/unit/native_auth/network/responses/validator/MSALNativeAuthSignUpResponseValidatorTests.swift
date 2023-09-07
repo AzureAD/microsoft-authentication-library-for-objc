@@ -166,13 +166,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         }
     }
 
-    func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidRequestParameterErrorCode_it_returns_expectedError() {
+    func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidUsernameErrorDescription_it_returns_expectedError() {
         let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
         let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
 
         let apiError = createSignUpStartError(
             error: .invalidRequest,
-            errorDescription: "aDescription",
+            errorDescription: "username parameter is empty or not valid",
             errorCodes: errorCodes,
             errorURI: "aURI",
             signUpToken: "aToken",
@@ -186,6 +186,29 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
 
+        XCTAssertEqual(error as MSALNativeAuthSignUpStartResponseError, apiError)
+    }
+    
+    func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidClientIdErrorDescription_it_returns_expectedError() {
+        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
+        
+        let apiError = createSignUpStartError(
+            error: .invalidRequest,
+            errorDescription: "client_id parameter is empty or not valid",
+            errorCodes: errorCodes,
+            errorURI: "aURI",
+            signUpToken: "aToken",
+            unverifiedAttributes: attributes,
+            invalidAttributes: attributes
+        )
+        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(apiError)
+        
+        let result = sut.validate(response, with: context)
+        guard case .invalidClientId(let error) = result else {
+            return XCTFail("Unexpected response")
+        }
+        
         XCTAssertEqual(error as MSALNativeAuthSignUpStartResponseError, apiError)
     }
 
