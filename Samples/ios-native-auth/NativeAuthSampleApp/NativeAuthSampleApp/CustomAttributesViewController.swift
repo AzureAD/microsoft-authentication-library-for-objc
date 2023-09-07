@@ -47,7 +47,7 @@ class CustomAttributesViewController: UIViewController {
         do {
             nativeAuth = try MSALNativeAuthPublicClientApplication(
                 clientId: Configuration.clientId,
-                tenantName: Configuration.tenantName,
+                tenantSubdomain: Configuration.tenantSubdomain,
                 challengeTypes: [.OOB, .password]
             )
         } catch {
@@ -126,7 +126,7 @@ extension CustomAttributesViewController: SignUpPasswordStartDelegate {
                                 newState.resendCode(delegate: self)
                             })
     }
-    
+
     func onSignUpAttributesInvalid(attributeNames: [String]) {
         showResultText("Unable to sign up - invalid attribute(s): \(attributeNames)")
     }

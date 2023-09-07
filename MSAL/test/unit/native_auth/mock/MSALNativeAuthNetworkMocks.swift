@@ -28,7 +28,7 @@ import XCTest
 
 struct MSALNativeAuthNetworkStubs {
 
-    static let tenantName = "test_tenant"
+    static let tenantSubdomain = "test_tenant"
 
     static var authority: MSALCIAMAuthority {
         try! .init(
@@ -40,7 +40,7 @@ struct MSALNativeAuthNetworkStubs {
         try! .init(
             url: .init(string: DEFAULT_TEST_AUTHORITY)!,
             validateFormat: false,
-            rawTenant: tenantName,
+            rawTenant: tenantSubdomain,
             context: nil
         )
     }

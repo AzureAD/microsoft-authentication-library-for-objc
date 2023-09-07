@@ -25,9 +25,9 @@
 import MSAL
 import UIKit
 
-// swiftlint:disable file_length
-class EmailAndCodeViewController: UIViewController {
+class EmailAndPasswordViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var resultTextView: UITextView!
 
     @IBOutlet weak var signUpButton: UIButton!
@@ -46,8 +46,8 @@ class EmailAndCodeViewController: UIViewController {
         do {
             nativeAuth = try MSALNativeAuthPublicClientApplication(
                 clientId: Configuration.clientId,
-                tenantName: Configuration.tenantName,
-                challengeTypes: [.OOB]
+                tenantSubdomain: Configuration.tenantSubdomain,
+                challengeTypes: [.OOB, .password]
             )
         } catch {
             print("Unable to initialize MSAL \(error)")
@@ -57,30 +57,26 @@ class EmailAndCodeViewController: UIViewController {
         retrieveCachedAccount()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     @IBAction func signUpPressed(_: Any) {
-        guard let email = emailTextField.text else {
-            resultTextView.text = "Email not set"
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "Email or password not set"
             return
         }
 
-        print("Signing up with email \(email)")
+        print("Signing up with email \(email) and password")
 
-        nativeAuth.signUp(username: email, delegate: self)
+        nativeAuth.signUpUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signInPressed(_: Any) {
-        guard let email = emailTextField.text else {
-            resultTextView.text = "email not set"
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            resultTextView.text = "Email or password not set"
             return
         }
 
-        print("Signing in with email \(email)")
+        print("Signing in with email \(email) and password")
 
-        nativeAuth.signIn(username: email, delegate: self)
+        nativeAuth.signInUsingPassword(username: email, password: password, delegate: self)
     }
 
     @IBAction func signOutPressed(_: Any) {
@@ -111,10 +107,8 @@ class EmailAndCodeViewController: UIViewController {
 
     func retrieveCachedAccount() {
         accountResult = nativeAuth.getNativeAuthUserAccount()
-        if let accountResult = accountResult, let username = accountResult.account.username {
-            print("Account found in cache: \(username)")
-
-            emailTextField.text = username
+        if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
+            print("Account found in cache: \(homeAccountId)")
 
             accountResult.getAccessToken(delegate: self)
         } else {
@@ -125,15 +119,15 @@ class EmailAndCodeViewController: UIViewController {
 
 // MARK: - Sign Up delegates
 
-// MARK: SignUpStartDelegate
+// MARK: SignUpPasswordStartDelegate
 
-extension EmailAndCodeViewController: SignUpStartDelegate {
-    func onSignUpError(error: MSAL.SignUpStartError) {
+extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
+    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
         switch error.type {
-        case .browserRequired:
-            showResultText("Unable to sign up: Web UX required")
         case .userAlreadyExists:
             showResultText("Unable to sign up: User already exists")
+        case .invalidPassword:
+            showResultText("Unable to sign up: The password is invalid")
         case .invalidUsername:
             showResultText("Unable to sign up: The username is invalid")
         default:
@@ -141,15 +135,11 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
         }
     }
 
-    func onSignUpCodeRequired(
-        newState: MSAL.SignUpCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
-    ) {
+    func onSignUpCodeRequired(newState: MSAL.SignUpCodeRequiredState,
+                              sentTo _: String,
+                              channelTargetType _: MSAL.MSALNativeAuthChannelType,
+                              codeLength _: Int) {
         print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
-
-        showResultText("Email verification required")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
                                 guard let self else { return }
@@ -166,7 +156,7 @@ extension EmailAndCodeViewController: SignUpStartDelegate {
 
 // MARK: SignUpVerifyCodeDelegate
 
-extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
+extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         switch error.type {
         case .invalidCode:
@@ -187,13 +177,17 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
 
                                       newState.resendCode(delegate: self)
                                   })
-        case .browserRequired:
-            showResultText("Unable to sign up: Web UX required")
-            dismissVerifyCodeModal()
         default:
             showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
             dismissVerifyCodeModal()
         }
+    }
+
+    func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
+        showResultText("Signed up successfully!")
+        dismissVerifyCodeModal()
+
+        newState.signIn(delegate: self)
     }
 
     func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
@@ -205,18 +199,11 @@ extension EmailAndCodeViewController: SignUpVerifyCodeDelegate {
         showResultText("Unexpected result while signing up: Password Required")
         dismissVerifyCodeModal()
     }
-
-    func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
-        showResultText("Signed up successfully!")
-        dismissVerifyCodeModal()
-
-        newState.signIn(delegate: self)
-    }
 }
 
 // MARK: SignUpResendCodeDelegate
 
-extension EmailAndCodeViewController: SignUpResendCodeDelegate {
+extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
     func onSignUpResendCodeError(error: ResendCodeError) {
         print("ResendCodeSignUpDelegate: onResendCodeSignUpError: \(error)")
 
@@ -245,7 +232,7 @@ extension EmailAndCodeViewController: SignUpResendCodeDelegate {
 
 // MARK: SignInAfterSignUpDelegate
 
-extension EmailAndCodeViewController: SignInAfterSignUpDelegate {
+extension EmailAndPasswordViewController: SignInAfterSignUpDelegate {
     func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
         showResultText("Error signing in after signing up.")
     }
@@ -253,133 +240,57 @@ extension EmailAndCodeViewController: SignInAfterSignUpDelegate {
 
 // MARK: - Sign In delegates
 
-// MARK: SignInStartDelegate
+// MARK: SignInPasswordStartDelegate
 
-extension EmailAndCodeViewController: SignInStartDelegate {
-    func onSignInError(error: MSAL.SignInStartError) {
-        print("SignInCodeStartDelegate: onSignInCodeError: \(error)")
-
-        switch error.type {
-        case .userNotFound, .invalidUsername:
-            showResultText("Invalid username")
-        default:
-            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
-        }
-    }
-
-    func onSignInCodeRequired(
-        newState: MSAL.SignInCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSAL.MSALNativeAuthChannelType,
-        codeLength: Int
-    ) {
-        print("SignInStartDelegate: onSignInCodeRequired: \(newState)")
-
-        showResultText("Email verification required")
-
-        showVerifyCodeModal(submitCallback: { [weak self] code in
-                                guard let self else { return }
-
-                                newState.submitCode(code: code, delegate: self)
-                            },
-                            resendCallback: { [weak self] in
-                                guard let self else { return }
-
-                                newState.resendCode(delegate: self)
-                            })
-    }
-}
-
-// MARK: SignInVerifyCodeDelegate
-
-extension EmailAndCodeViewController: SignInVerifyCodeDelegate {
-    func onSignInVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignInCodeRequiredState?) {
-        switch error.type {
-        case .invalidCode:
-            guard let newState else {
-                print("Unexpected state. Received invalidCode but newState is nil")
-
-                showResultText("Internal error verifying code")
-                return
-            }
-
-            updateVerifyCodeModal(errorMessage: "Invalid code",
-                                  submitCallback: { [weak self] code in
-                                      guard let self else { return }
-
-                                      newState.submitCode(code: code, delegate: self)
-                                  }, resendCallback: { [weak self] in
-                                      guard let self else { return }
-
-                                      newState.resendCode(delegate: self)
-                                  })
-        case .browserRequired:
-            showResultText("Unable to sign in: Web UX required")
-            dismissVerifyCodeModal()
-        default:
-            showResultText("Unexpected error verifying code: \(error.errorDescription ?? String(error.type.rawValue))")
-            dismissVerifyCodeModal()
-        }
-    }
-
+extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
     func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        dismissVerifyCodeModal()
-
         print("Signed in: \(result.account.username ?? "")")
 
         accountResult = result
 
         result.getAccessToken(delegate: self)
     }
-}
 
-// MARK: SignInResendCodeDelegate
+    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+        print("SignInPasswordStartDelegate: onSignInPasswordError: \(error)")
 
-extension EmailAndCodeViewController: SignInResendCodeDelegate {
-    func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
-        print("SignInResendCodeDelegate: onSignInResendCodeError: \(error)")
-
-        showResultText("Unexpected error while requesting new code")
-        dismissVerifyCodeModal()
+        switch error.type {
+        case .userNotFound, .invalidPassword, .invalidUsername:
+            showResultText("Invalid username or password")
+        default:
+            showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
+        }
     }
 
-    func onSignInResendCodeCodeRequired(
-        newState: MSAL.SignInCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSAL.MSALNativeAuthChannelType,
-        codeLength: Int
+    func onSignInCodeRequired(
+        newState _: MSAL.SignInCodeRequiredState,
+        sentTo _: String,
+        channelTargetType _: MSAL.MSALNativeAuthChannelType,
+        codeLength _: Int
     ) {
-        updateVerifyCodeModal(errorMessage: nil,
-                              submitCallback: { [weak self] code in
-                                  guard let self else { return }
-
-                                  newState.submitCode(code: code, delegate: self)
-                              }, resendCallback: { [weak self] in
-                                  guard let self else { return }
-
-                                  newState.resendCode(delegate: self)
-                              })
+        showResultText("Unexpected result while signing in: Verification required")
     }
 }
 
-// MARK: - CredentialsDelegate methods
+// MARK: - Credentials delegates
 
-extension EmailAndCodeViewController: CredentialsDelegate {
+// MARK: CredentialsDelegate
+
+extension EmailAndPasswordViewController: CredentialsDelegate {
     func onAccessTokenRetrieveCompleted(accessToken: String) {
         print("Access Token: \(accessToken)")
-        showResultText("Signed in. Access Token: \(accessToken)")
+        showResultText("Signed in successfully. Access Token: \(accessToken)")
         updateUI()
     }
 
     func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
         showResultText("Error retrieving access token: \(error.errorDescription ?? String(error.type.rawValue))")
-        dismissVerifyCodeModal()
     }
 }
 
 // MARK: - Verify Code modal methods
 
-extension EmailAndCodeViewController {
+extension EmailAndPasswordViewController {
     func showVerifyCodeModal(
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void

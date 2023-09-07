@@ -62,24 +62,23 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Initialize a MSALNativePublicClientApplication.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
-    ///   - tenantName: The name of the tenant, this should come from the app developer portal.
+    ///   - tenantSubdomain: The subdomain of the tenant, this should come from the app developer portal.
     ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
     /// - Throws: An error that occurred creating the application object
     public init(
         clientId: String,
-        tenantName: String,
+        tenantSubdomain: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
         redirectUri: String? = nil) throws {
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
-                .authority(rawTenant: tenantName)
+                .authority(rawTenant: tenantSubdomain)
 
         self.internalChallengeTypes =
                 MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
-            rawTenant: tenantName,
             challengeTypes: internalChallengeTypes
         )
 
@@ -91,6 +90,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
+
+        // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios
+        configuration.bypassRedirectURIValidation = redirectUri == nil
+        let defaultRedirectUri = String(format: "msauth.%@://auth", Bundle.main.bundleIdentifier ?? "<bundle_id>")
+        // we need to set a default redirect URI value to ensure IdentityCore checks the bypassRedirectURIValidation flag
+        configuration.redirectUri = redirectUri ?? defaultRedirectUri
 
         try super.init(configuration: configuration)
     }
