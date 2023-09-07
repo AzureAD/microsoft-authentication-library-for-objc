@@ -164,11 +164,6 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
         }
     }
 
-    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
-        showResultText("Unexpected result while signing up: Attributes Required")
-        dismissVerifyCodeModal()
-    }
-
     func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
         showResultText("Unexpected result while signing up: Password Required")
         dismissVerifyCodeModal()
