@@ -113,7 +113,7 @@ class EmailAndCodeViewController: UIViewController {
         accountResult = nativeAuth.getNativeAuthUserAccount()
         if let accountResult = accountResult, let homeAccountId = accountResult.account.homeAccountId?.identifier {
             print("Account found in cache: \(homeAccountId)")
-            
+
             accountResult.getAccessToken(delegate: self)
         } else {
             print("No account found in cache")
