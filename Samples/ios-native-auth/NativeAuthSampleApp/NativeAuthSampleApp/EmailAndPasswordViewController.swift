@@ -190,7 +190,7 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
         newState.signIn(delegate: self)
     }
 
-    func onSignUpAttributesRequired(newState _: MSAL.SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
         showResultText("Unexpected result while signing up: Attributes Required")
         dismissVerifyCodeModal()
     }

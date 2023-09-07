@@ -246,14 +246,6 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpAttributesRequired(newState: SignUpAttributesRequiredState) {
-        onSignUpAttributesRequiredCalled = true
-        self.newState = newState
-
-        XCTAssertTrue(Thread.isMainThread)
-        expectation?.fulfill()
-    }
-
     func onSignUpAttributesRequiredError(error: MSAL.AttributesRequiredError) {
         onSignUpAttributesRequiredErrorCalled = true
         self.error = error
