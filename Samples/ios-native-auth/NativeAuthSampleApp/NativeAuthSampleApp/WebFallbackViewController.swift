@@ -166,15 +166,6 @@ extension WebFallbackViewController: SignInPasswordStartDelegate {
             showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
         }
     }
-
-    func onSignInCodeRequired(
-        newState: MSAL.SignInCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSAL.MSALNativeAuthChannelType,
-        codeLength: Int
-    ) {
-        showResultText("Unexpected result while signing in: Verification required")
-    }
 }
 
 // MARK: - Credentials Delegate methods
