@@ -164,11 +164,6 @@ extension CustomAttributesViewController: SignUpVerifyCodeDelegate {
         }
     }
 
-    func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
-        showResultText("Unexpected result while signing up: Password Required")
-        dismissVerifyCodeModal()
-    }
-
     func onSignUpCompleted(newState: MSAL.SignInAfterSignUpState) {
         showResultText("Signed up successfully!")
         dismissVerifyCodeModal()

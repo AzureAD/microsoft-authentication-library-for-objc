@@ -189,11 +189,6 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 
         newState.signIn(delegate: self)
     }
-
-    func onSignUpPasswordRequired(newState _: MSAL.SignUpPasswordRequiredState) {
-        showResultText("Unexpected result while signing up: Password Required")
-        dismissVerifyCodeModal()
-    }
 }
 
 // MARK: SignUpResendCodeDelegate
@@ -255,15 +250,6 @@ extension EmailAndPasswordViewController: SignInPasswordStartDelegate {
         default:
             showResultText("Error while signing in: \(error.errorDescription ?? String(error.type.rawValue))")
         }
-    }
-
-    func onSignInCodeRequired(
-        newState _: MSAL.SignInCodeRequiredState,
-        sentTo _: String,
-        channelTargetType _: MSAL.MSALNativeAuthChannelType,
-        codeLength _: Int
-    ) {
-        showResultText("Unexpected result while signing in: Verification required")
     }
 }
 
