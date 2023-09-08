@@ -37,15 +37,13 @@ class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHan
         self.lastRequestTelemetry = MSIDLastRequestTelemetry.sharedInstance()
     }
 
-    func handleError(_ error: Error, context: MSIDRequestContext) {
-        // We need to change the MSIDHttpRequestServerTelemetryHandling
-        // protocol because error here could be nil so we should be able to use Error?
-        guard error != nil else { return }
+    func handleError(_ error: Error?, context: MSIDRequestContext) {
+        guard let error else { return }
         let errorString = (error as NSError).msidServerTelemetryErrorString()
         handleError(error, errorString: errorString, context: context)
     }
 
-    func handleError(_ error: Error, errorString: String, context: MSIDRequestContext) {
+    func handleError(_ error: Error?, errorString: String, context: MSIDRequestContext) {
         lastRequestTelemetry.update(withApiId: currentRequestTelemetry.apiId.rawValue,
                                     errorString: errorString,
                                     context: context)
