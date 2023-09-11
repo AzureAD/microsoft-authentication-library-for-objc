@@ -38,7 +38,7 @@ class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHan
     }
 
     func handleError(_ error: Error?, context: MSIDRequestContext) {
-        guard let error else { return }
+        guard let error = error else { return }
         let errorString = (error as NSError).msidServerTelemetryErrorString()
         handleError(error, errorString: errorString, context: context)
     }
