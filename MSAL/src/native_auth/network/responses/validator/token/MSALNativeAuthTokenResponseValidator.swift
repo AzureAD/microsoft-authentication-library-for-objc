@@ -83,7 +83,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             correlationID: context.correlationId(),
             error: &error
         )
-        if let error {
+        if let error = error {
             throw error
         }
         return validAccount
