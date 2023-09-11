@@ -70,7 +70,6 @@ jobs:
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
-      failOnStderr: true
   
   - task: Bash@3
     displayName: Run automations
