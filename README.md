@@ -6,7 +6,7 @@ In this article, you learn how to:
 
 - Register application in the Microsoft Entra External ID for customers.
 - Enable public client flow.
-- Create a sign-in and sign-out user flow in the Microsoft Entra External ID for customers.
+- Create a sign in and sign out user flow in the Microsoft Entra External ID for customers.
 - Associate your application with the user flow.
 - Update a sample native iOS mobile application to use your own Microsoft Entra External ID for customers tenant details.
 - Run and test the sample native iOS mobile application.
@@ -26,7 +26,7 @@ The following steps show you how to register your app in the Microsoft Entra adm
 1. Sign in to the <a href="https://entra.microsoft.com/" target="_blank">Microsoft Entra admin center</a>.
 1. If you have access to multiple tenants, make sure you use the directory that contains your Microsoft Entra External ID for customers tenant:
 
-   1. Select the **Directories + subscriptions** icon <img type="icon" src="../media/portal-directory-subscription-filter.png"> in the toolbar.
+   1. Select the **Directories + subscriptions** icon <img type="icon" src="Images/portal-directory-subscription-filter.png"> in the toolbar.
    1. On the **Portal settings | Directories + subscriptions** page, find your Microsoft Entra External ID for customers directory in the **Directory name** list, and then select **Switch**.
 
 1. On the sidebar menu, select **Identity**.
@@ -34,7 +34,7 @@ The following steps show you how to register your app in the Microsoft Entra adm
 1. Select **+ New registration**.
 1. In the **Register an application** page that appears;
 
-   1. Enter a meaningful application **Name** that will be displayed to users of the app, for example _ciam-client-app_.
+   1. Enter a meaningful application **Name**, for example _ciam-client-app_.
    1. Under **Supported account types**, select **Accounts in this organizational directory only**.
 
 1. Select **Register**.
@@ -63,7 +63,7 @@ To specify that this app is a public client, enable public client flow:
    1. Select **Grant admin consent for <your tenant name>**, then select **Yes**.
    1. Select **Refresh**, then verify that **Granted for<your tenant name>** appears under **Status** for both scopes.
 
-    <img src="../media/api-permissions.jpg">
+    <img src="Images/api-permissions.jpg">
 
 ## Create a user flow
 
@@ -81,11 +81,11 @@ Follow these steps to create a user flow a customer can use to sign in or sign u
 1. On the **Create** page:
 
    1. Enter a **Name** for the user flow, such as _SignInSignUpSample_.
-   1. In the **Identity providers** list, select **Email Accounts**. This identity provider allows users to sign-in or sign-up using their email address.
+   1. In the **Identity providers** list, select **Email Accounts**. This identity provider allows users to sign in or sign up using their email address.
    1. Under **Email accounts**, you can select one of the two options. For this tutorial, select **Email one-time passcode**.
 
-      - **Email with password**: Allows new users to sign up and sign in using an email address as the sign-in name and a password as their first factor credential.
-      - **Email one-time-passcode**: Allows new users to sign up and sign in using an email address as the sign-in name and email one-time passcode as their first factor credential.
+      - **Email with password**: Allows new users to sign up and sign in using an email address as the sign in name and a password as their first factor credential.
+      - **Email one-time-passcode**: Allows new users to sign up and sign in using an email address as the sign in name and email one-time passcode as their first factor credential.
 
         > [!NOTE]
         > Email one-time passcode must be enabled at the tenant level (**All Identity Providers** > **Email one-time passcode**) for this option to be available at the user flow level.
@@ -96,14 +96,13 @@ Follow these steps to create a user flow a customer can use to sign in or sign u
 
 ## Associate the application with the user flow
 
-Although many applications can be associated with your user flow, a single application can only be associated with one user flow. A user flow allows configuration of the user experience for specific applications. For example, you can configure a user flow that requires users to sign-in or sign-up with an email address.
+Although many applications can be associated with your user flow, a single application can only be associated with one user flow. A user flow allows configuration of the user experience for specific applications. For example, you can configure a user flow that requires users to sign in or sign up with an email address.
 
 1. On the sidebar menu, select **Identity**.
 1. Select **External Identities**, then **User flows**.
 1. In the **User flows** page, select the **User flow name** you created earlier, for example, _SignInSignUpSample_.
 1. Under **Use**, select **Applications**.
 1. Select **Add application**.
-   <!--[Screenshot the shows how to associate an application to a user flow.](media/20-create-user-flow-add-application.png)-->
 1. Select the application from the list such as _ciam-client-app_ or use the search box to find the application, and then select it.
 
 1. Choose **Select**.
@@ -149,11 +148,11 @@ Although many applications can be associated with your user flow, a single appli
 
 To build and run your code, select **Run** from the **Product** menu in Xcode. After a successful build, Xcode will launch the sample app in the Simulator.
 
-<img width="343" src="../media/naitive-auth-sign-in-sign-up.png">
+<img width="343" src="Images/naitive-auth-sign-in-sign-up.png">
 
 This guide tests **Email one-time-passcode** usage. Enter a valid email address, select **Sign Up**, and launch the submit code screen:
 
-<img width="343" src="../media/enter-one-time-pass-code.png">
+<img width="343" src="Images/enter-one-time-pass-code.png">
 
 After you enter your email address on the previous screen, the application will send a verification code to it. Once you submit the received code, the application will take you back to the previous screen and automatically sign you in. 
 
