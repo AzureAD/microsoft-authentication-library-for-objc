@@ -61,7 +61,7 @@ To specify that this app is a public client, enable public client flow:
 1. At this point, you've assigned the permissions correctly. However, since the tenant is a customer's tenant, the consumer users themselves can't consent to these permissions. You as the admin must consent to these permissions on behalf of all the users in the tenant:
 
    1. Select **Grant admin consent for <your tenant name>**, then select **Yes**.
-   1. Select **Refresh**, then verify that **Granted for<your tenant name>** appears under **Status** for both scopes.
+   1. Select **Refresh**, then verify that **Granted for <your tenant name>** appears under **Status** for both scopes.
 
     <img src="Images/api-permissions.jpg">
 
@@ -72,7 +72,7 @@ Follow these steps to create a user flow a customer can use to sign in or sign u
 1. Sign in to the <a href="https://entra.microsoft.com/" target="_blank">Microsoft Entra admin center</a>.
 1. If you have access to multiple tenants, make sure you use the directory that contains your Microsoft Entra External ID for customers tenant:
 
-   1. Select the **Directories + subscriptions** icon in the toolbar.
+   1. Select the **Directories + subscriptions** icon <img type="icon" src="Images/portal-directory-subscription-filter.png"> in the toolbar.
    1. On the **Portal settings | Directories + subscriptions** page, find your Microsoft Entra External ID for customers directory in the **Directory name** list, and then select **Switch**.
 
 1. On the sidebar menu, select **Identity**.
