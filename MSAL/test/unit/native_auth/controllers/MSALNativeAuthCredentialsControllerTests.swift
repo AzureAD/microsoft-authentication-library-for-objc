@@ -116,9 +116,10 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.refreshToken, scope: "" , password: nil, oobCode: nil, includeChallengeType: true, refreshToken: "refreshToken")
         requestProviderMock.throwingTokenError = ErrorMock.error
 
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError))
+        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError))
 
-        await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        helper.onAccessTokenRetrieveError(result)
 
         await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdRefreshToken, isSuccessful: false)
@@ -141,7 +142,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.result = request
 
         let expectedAccessToken = "accessToken"
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedAccessToken: expectedAccessToken)
+        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedAccessToken: expectedAccessToken)
 
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()
@@ -150,27 +151,28 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.mockUserAccounts = [account]
         cacheAccessorMock.mockAuthTokens = authTokens
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
-        await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        helper.onAccessTokenRetrieveCompleted(result)
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertEqual(expectedAccessToken, authTokens.accessToken?.accessToken)
     }
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .generalError)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .expiredToken(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .authorizationPending(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .slowDown(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidRequest(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse), validatorError: .invalidServerResponse)
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient(message: "Invalid Client ID"))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .refreshTokenExpired), validatorError: .expiredRefreshToken(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError(type: .browserRequired, message: "MFA currently not supported. Use the browser instead"), validatorError: .strongAuthRequired(message: "MFA currently not supported. Use the browser instead"))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .generalError)
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .expiredToken(message: nil))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .authorizationPending(message: nil))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .slowDown(message: nil))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidRequest(message: nil))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse), validatorError: .invalidServerResponse)
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient(message: "Invalid Client ID"))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .refreshTokenExpired), validatorError: .expiredRefreshToken(message: nil))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .browserRequired, message: "MFA currently not supported. Use the browser instead"), validatorError: .strongAuthRequired(message: "MFA currently not supported. Use the browser instead"))
     }
 
-    private func checkDelegateErrorWithValidatorError(delegateError: RetrieveAccessTokenError, validatorError: MSALNativeAuthTokenValidatedErrorType) async {
+    private func checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError, validatorError: MSALNativeAuthTokenValidatedErrorType) async {
         let request = MSIDHttpRequest()
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
@@ -181,11 +183,11 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         requestProviderMock.result = request
 
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: delegateError)
+        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: publicError)
         responseValidatorMock.tokenValidatedResponse = .error(validatorError)
 
-
-        await sut.refreshToken(context: expectedContext, authTokens: authTokens, delegate: mockDelegate)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        helper.onAccessTokenRetrieveError(result)
 
         checkTelemetryEventResult(id: .telemetryApiIdRefreshToken, isSuccessful: false)
         receivedEvents.removeAll()

@@ -22,19 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+extension SignInAfterSignUpState {
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult
-
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult
-
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult
-
-    func submitPassword(
-        password: String,
-        passwordSubmitToken: String,
-        context: MSIDRequestContext
-    ) async -> ResetPasswordRequiredResult
+    func signInInternal(scopes: [String]?, correlationId: UUID?) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError> {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        return await controller.signIn(username: username, slt: slt, scopes: scopes, context: context)
+    }
 }

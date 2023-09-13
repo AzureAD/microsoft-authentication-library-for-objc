@@ -22,19 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
+@testable import MSAL
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+class MSALNativeAuthResetPasswordControllerMock: MSALNativeAuthResetPasswordControlling {
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult
+    var resetPasswordResult: ResetPasswordStartResult!
+    var resendCodeResult: ResetPasswordResendCodeResult!
+    var submitCodeResult: ResetPasswordVerifyCodeResult!
+    var submitPasswordResult: ResetPasswordRequiredResult!
 
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult {
+        return resetPasswordResult
+    }
 
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult {
+        return resendCodeResult
+    }
 
-    func submitPassword(
-        password: String,
-        passwordSubmitToken: String,
-        context: MSIDRequestContext
-    ) async -> ResetPasswordRequiredResult
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult {
+        return submitCodeResult
+    }
+
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordRequiredResult {
+        return submitPasswordResult
+    }
 }

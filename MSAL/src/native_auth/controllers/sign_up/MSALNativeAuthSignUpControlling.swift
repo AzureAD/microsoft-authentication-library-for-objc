@@ -26,39 +26,30 @@
 
 protocol MSALNativeAuthSignUpControlling: AnyObject {
 
-    func signUpStartPassword(
-        parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
-        delegate: SignUpPasswordStartDelegate
-    ) async
+    typealias SignUpStartPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpPasswordStartResult>
+    typealias SignUpStartCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpStartResult>
+    typealias SignUpSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpVerifyCodeResult>
+    typealias SignUpSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpPasswordRequiredResult>
 
-    func signUpStartCode(
-        parameters: MSALNativeAuthSignUpStartRequestProviderParameters,
-        delegate: SignUpStartDelegate
-    ) async
+    func signUpStartPassword(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartPasswordControllerResponse
 
-    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String, delegate: SignUpResendCodeDelegate) async
+    func signUpStartCode(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartCodeControllerResponse
 
-    func submitCode(
-        _ code: String,
-        username: String,
-        signUpToken: String,
-        context: MSIDRequestContext,
-        delegate: SignUpVerifyCodeDelegate
-    ) async
+    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeResult
+
+    func submitCode(_ code: String, username: String, signUpToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse
 
     func submitPassword(
         _ password: String,
         username: String,
         signUpToken: String,
-        context: MSIDRequestContext,
-        delegate: SignUpPasswordRequiredDelegate
-    ) async
+        context: MSIDRequestContext
+    ) async -> SignUpSubmitPasswordControllerResponse
 
     func submitAttributes(
         _ attributes: [String: Any],
         username: String,
         signUpToken: String,
-        context: MSIDRequestContext,
-        delegate: SignUpAttributesRequiredDelegate
-    ) async
+        context: MSIDRequestContext
+    ) async -> SignUpAttributesRequiredResult
 }

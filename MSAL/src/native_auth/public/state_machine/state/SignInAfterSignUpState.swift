@@ -27,9 +27,9 @@ import Foundation
 /// An object of this type is created when a user has signed up successfully.
 @objcMembers public class SignInAfterSignUpState: NSObject {
 
-    private let controller: MSALNativeAuthSignInControlling
-    private let username: String
-    private let slt: String?
+    let controller: MSALNativeAuthSignInControlling
+    let username: String
+    let slt: String?
 
     init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?) {
         self.username = username
@@ -47,10 +47,15 @@ import Foundation
         correlationId: UUID? = nil,
         delegate: SignInAfterSignUpDelegate
     ) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.signIn(username: username, slt: slt, scopes: scopes, context: context, delegate: delegate)
+            let controllerResult = await signInInternal(scopes: scopes, correlationId: correlationId)
+
+            switch controllerResult {
+            case .success(let accountResult):
+                await delegate.onSignInCompleted(result: accountResult)
+            case .failure(let error):
+                await delegate.onSignInAfterSignUpError(error: error)
+            }
         }
     }
 }

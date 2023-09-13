@@ -25,8 +25,8 @@
 import Foundation
 
 @objcMembers public class SignInBaseState: MSALNativeAuthBaseState {
-    fileprivate let controller: MSALNativeAuthSignInControlling
-    fileprivate let inputValidator: MSALNativeAuthInputValidating
+    let controller: MSALNativeAuthSignInControlling
+    let inputValidator: MSALNativeAuthInputValidating
 
     init(
         controller: MSALNativeAuthSignInControlling,
@@ -41,7 +41,7 @@ import Foundation
 /// An object of this type is created when a user is required to supply a verification code to continue a sign in flow.
 @objcMembers public class SignInCodeRequiredState: SignInBaseState {
 
-    private let scopes: [String]
+    let scopes: [String]
 
     init(
         scopes: [String],
@@ -57,10 +57,20 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignInResendCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
         Task {
-            await controller.resendCode(credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
+            let result = await resendCodeInternal(correlationId: correlationId)
+
+            switch result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onSignInResendCodeCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .error(let error, let newState):
+                await delegate.onSignInResendCodeError(error: error, newState: newState)
+            }
         }
     }
 
@@ -70,15 +80,15 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
-        guard inputValidator.isInputValid(code) else {
-            delegate.onSignInVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
-            return
-        }
         Task {
-            await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes, delegate: delegate)
+            let result = await submitCodeInternal(code: code, correlationId: correlationId)
+
+            switch result {
+            case .completed(let accountResult):
+                await delegate.onSignInCompleted(result: accountResult)
+            case .error(let error, let newState):
+                await delegate.onSignInVerifyCodeError(error: error, newState: newState)
+            }
         }
     }
 }
@@ -86,8 +96,8 @@ import Foundation
 /// An object of this type is created when a user is required to supply a password to continue a sign in flow.
 @objcMembers public class SignInPasswordRequiredState: SignInBaseState {
 
-    private let scopes: [String]
-    private let username: String
+    let scopes: [String]
+    let username: String
 
     init(
         scopes: [String],
@@ -106,22 +116,15 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
-
-        guard inputValidator.isInputValid(password) else {
-            delegate.onSignInPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
-            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
-            return
-        }
         Task {
-            await controller.submitPassword(
-                password,
-                username: username,
-                credentialToken: flowToken,
-                context: context,
-                scopes: scopes,
-                delegate: delegate)
+            let result = await submitPasswordInternal(password: password, correlationId: correlationId)
+
+            switch result {
+            case .completed(let accountResult):
+                await delegate.onSignInCompleted(result: accountResult)
+            case .error(let error, let newState):
+                await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
+            }
         }
     }
 }

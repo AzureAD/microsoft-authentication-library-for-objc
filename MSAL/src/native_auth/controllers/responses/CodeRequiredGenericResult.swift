@@ -16,25 +16,24 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+/// Result type that contains information about the code sent, the next state of the reset password process and possible errors.
+enum CodeRequiredGenericResult<State: MSALNativeAuthBaseState, Error: MSALNativeAuthError> {
+    /// Returned if a user has received an email with code.
+    ///
+    /// - newState: An object representing the new state of the flow with follow on methods.
+    /// - sentTo: The email/phone number that the code was sent to.
+    /// - channelTargetType: The channel (email/phone) the code was sent through.
+    /// - codeLength: The length of the code required.
+    case codeRequired(newState: State, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult
-
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult
-
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult
-
-    func submitPassword(
-        password: String,
-        passwordSubmitToken: String,
-        context: MSIDRequestContext
-    ) async -> ResetPasswordRequiredResult
+    /// An error object indicating why the operation failed.
+    case error(error: Error, newState: State?)
 }

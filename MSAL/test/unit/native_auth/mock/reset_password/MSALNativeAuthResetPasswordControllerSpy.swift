@@ -39,30 +39,38 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         self.expectation = expectation
     }
 
-    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters, delegate: MSAL.ResetPasswordStartDelegate) {
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult {
         self.context = parameters.context
         resetPasswordCalled = true
         expectation.fulfill()
+
+        return .error(.init(type: .generalError))
     }
 
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordResendCodeDelegate) {
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult {
         self.flowToken = passwordResetToken
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
+
+        return .error(error: .init(), newState: nil)
     }
 
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordVerifyCodeDelegate) {
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult {
         self.flowToken = passwordResetToken
         self.context = context
         submitCodeCalled = true
         expectation.fulfill()
+
+        return .error(error: .init(type: .generalError), newState: nil)
     }
 
-    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext, delegate: MSAL.ResetPasswordRequiredDelegate) {
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordRequiredResult {
         self.flowToken = passwordSubmitToken
         self.context = context
         submitPasswordCalled = true
         expectation.fulfill()
+
+        return .error(error: .init(type: .generalError), newState: nil)
     }
 }

@@ -27,8 +27,8 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
-    private let controllerFactory: MSALNativeAuthControllerBuildable
-    private let inputValidator: MSALNativeAuthInputValidating
+    let controllerFactory: MSALNativeAuthControllerBuildable
+    let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
@@ -74,8 +74,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
                 .authority(rawTenant: tenantSubdomain)
 
-        self.internalChallengeTypes =
-                MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+        self.internalChallengeTypes = MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
@@ -128,32 +127,34 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignUpPasswordStartDelegate
     ) {
-        guard inputValidator.isInputValid(username) else {
-            DispatchQueue.main.async {
-                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidUsername))
-            }
-            return
-        }
-        guard inputValidator.isInputValid(password) else {
-            DispatchQueue.main.async {
-                delegate.onSignUpPasswordError(error: SignUpPasswordStartError(type: .invalidPassword))
-            }
-            return
-        }
-
-        let controller = controllerFactory.makeSignUpController()
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.signUpStartPassword(
-                parameters: .init(
-                    username: username,
-                    password: password,
-                    attributes: attributes ?? [:],
-                    context: context
-                ),
-                delegate: delegate
+            let controllerResponse = await signUpUsingPasswordInternal(
+                username: username,
+                password: password,
+                attributes: attributes,
+                correlationId: correlationId
             )
+
+            switch controllerResponse.result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onSignUpCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .attributesInvalid(let attributes):
+                if let signUpAttributesMethod = delegate.onSignUpAttributesInvalid {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await signUpAttributesMethod(attributes)
+                } else {
+                    let error = SignUpPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignUpPasswordError(error: error)
+                }
+            case .error(let error):
+                await delegate.onSignUpPasswordError(error: error)
+            }
         }
     }
 
@@ -169,26 +170,29 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
     ) {
-        guard inputValidator.isInputValid(username) else {
-            DispatchQueue.main.async {
-                delegate.onSignUpError(error: SignUpStartError(type: .invalidUsername))
-            }
-            return
-        }
-
-        let controller = controllerFactory.makeSignUpController()
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.signUpStartCode(
-                parameters: .init(
-                    username: username,
-                    password: nil,
-                    attributes: attributes ?? [:],
-                    context: context
-                ),
-                delegate: delegate
-            )
+            let controllerResponse = await signUpInternal(username: username, attributes: attributes, correlationId: correlationId)
+
+            switch controllerResponse.result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onSignUpCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .attributesInvalid(let attributes):
+                if let signUpAttributesMethod = delegate.onSignUpAttributesInvalid {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await signUpAttributesMethod(attributes)
+                } else {
+                    let error = SignUpStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignUpError(error: error)
+                }
+            case .error(let error):
+                await delegate.onSignUpError(error: error)
+            }
         }
     }
 
@@ -206,26 +210,29 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignInPasswordStartDelegate
     ) {
-        guard inputValidator.isInputValid(username) else {
-            DispatchQueue.main.async {
-                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidUsername))
-            }
-            return
-        }
-        guard inputValidator.isInputValid(password) else {
-            DispatchQueue.main.async {
-                delegate.onSignInPasswordError(error: SignInPasswordStartError(type: .invalidPassword))
-            }
-            return
-        }
-        let controller = controllerFactory.makeSignInController()
-        let params = MSALNativeAuthSignInWithPasswordParameters(
-            username: username,
-            password: password,
-            context: MSALNativeAuthRequestContext(correlationId: correlationId),
-            scopes: scopes)
         Task {
-            await controller.signIn(params: params, delegate: delegate)
+            let controllerResponse = await signInUsingPasswordInternal(
+                username: username,
+                password: password,
+                scopes: scopes,
+                correlationId: correlationId
+            )
+
+            switch controllerResponse.result {
+            case .completed(let result):
+                await delegate.onSignInCompleted(result: result)
+            case .codeRequired(let newState, let sentTo, let channelType, let codeLength):
+                if let codeRequiredMethod = delegate.onSignInCodeRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await codeRequiredMethod(newState, sentTo, channelType, codeLength)
+                } else {
+                    let error = SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignInPasswordError(error: error)
+                }
+            case .error(let error):
+                await delegate.onSignInPasswordError(error: error)
+            }
         }
     }
 
@@ -241,19 +248,28 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
-        guard inputValidator.isInputValid(username) else {
-            DispatchQueue.main.async {
-                delegate.onSignInError(error: SignInStartError(type: .invalidUsername))
-            }
-            return
-        }
-        let controller = controllerFactory.makeSignInController()
-        let params = MSALNativeAuthSignInWithCodeParameters(
-            username: username,
-            context: MSALNativeAuthRequestContext(correlationId: correlationId),
-            scopes: scopes)
         Task {
-            await controller.signIn(params: params, delegate: delegate)
+            let controllerResponse = await signInInternal(
+                username: username,
+                scopes: scopes,
+                correlationId: correlationId
+            )
+
+            switch controllerResponse.result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onSignInCodeRequired(newState: newState, sentTo: sentTo, channelTargetType: channelTargetType, codeLength: codeLength)
+            case .passwordRequired(let newState):
+                if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await passwordRequiredMethod(newState)
+                } else {
+                    let error = SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.passwordRequiredNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignInError(error: error)
+                }
+            case .error(let error):
+                await delegate.onSignInError(error: error)
+            }
         }
     }
 
@@ -267,24 +283,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: ResetPasswordStartDelegate
     ) {
-        guard inputValidator.isInputValid(username) else {
-            Task {
-                await delegate.onResetPasswordError(error: ResetPasswordStartError(type: .invalidUsername))
-            }
-            return
-        }
-
-        let controller = controllerFactory.makeResetPasswordController()
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.resetPassword(
-                parameters: .init(
-                    username: username,
-                    context: context
-                ),
-                delegate: delegate
-            )
+            let result = await resetPasswordInternal(username: username, correlationId: correlationId)
+
+            switch result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onResetPasswordCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .error(let error):
+                await delegate.onResetPasswordError(error: error)
+            }
         }
     }
 
@@ -296,21 +308,5 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
-    }
-
-    private static func getInternalChallengeTypes(
-        _ challengeTypes: MSALNativeAuthChallengeTypes) -> [MSALNativeAuthInternalChallengeType] {
-            var internalChallengeTypes = [MSALNativeAuthInternalChallengeType]()
-
-            if challengeTypes.contains(.OOB) {
-                internalChallengeTypes.append(.oob)
-            }
-
-            if challengeTypes.contains(.password) {
-                internalChallengeTypes.append(.password)
-            }
-
-            internalChallengeTypes.append(.redirect)
-            return internalChallengeTypes
     }
 }

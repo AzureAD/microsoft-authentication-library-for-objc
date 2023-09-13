@@ -26,9 +26,9 @@ import Foundation
 
 @objcMembers
 public class SignUpBaseState: MSALNativeAuthBaseState {
-    fileprivate let controller: MSALNativeAuthSignUpControlling
-    fileprivate let username: String
-    fileprivate let inputValidator: MSALNativeAuthInputValidating
+    let controller: MSALNativeAuthSignUpControlling
+    let username: String
+    let inputValidator: MSALNativeAuthInputValidating
 
     init(
         controller: MSALNativeAuthSignUpControlling,
@@ -50,9 +50,20 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         Task {
-            await controller.resendCode(username: username, context: context, signUpToken: flowToken, delegate: delegate)
+            let result = await resendCodeInternal(correlationId: correlationId)
+
+            switch result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onSignUpResendCodeCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .error(let error):
+                await delegate.onSignUpResendCodeError(error: error)
+            }
         }
     }
 
@@ -62,16 +73,33 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard inputValidator.isInputValid(code) else {
-            delegate.onSignUpVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid code")
-            return
-        }
-
         Task {
-            await controller.submitCode(code, username: username, signUpToken: flowToken, context: context, delegate: delegate)
+            let controllerResponse = await submitCodeInternal(code: code, correlationId: correlationId)
+
+            switch controllerResponse.result {
+            case .completed(let state):
+                await delegate.onSignUpCompleted(newState: state)
+            case .passwordRequired(let state):
+                if let function = delegate.onSignUpPasswordRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await function(state)
+                } else {
+                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
+                }
+            case .attributesRequired(let attributes, let state):
+                if let function = delegate.onSignUpAttributesRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await function(attributes, state)
+                } else {
+                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
+                }
+            case .error(let error, let state):
+                await delegate.onSignUpVerifyCodeError(error: error, newState: state)
+            }
         }
     }
 }
@@ -85,16 +113,24 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard inputValidator.isInputValid(password) else {
-            delegate.onSignUpPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
-            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid password")
-            return
-        }
-
         Task {
-            await controller.submitPassword(password, username: username, signUpToken: flowToken, context: context, delegate: delegate)
+            let controllerResponse = await submitPasswordInternal(password: password, correlationId: correlationId)
+
+            switch controllerResponse.result {
+            case .completed(let state):
+                await delegate.onSignUpCompleted(newState: state)
+            case .attributesRequired(let attributes, let state):
+                if let function = delegate.onSignUpAttributesRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await function(attributes, state)
+                } else {
+                    let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
+                }
+            case .error(let error, let state):
+                await delegate.onSignUpPasswordRequiredError(error: error, newState: state)
+            }
         }
     }
 }
@@ -111,10 +147,19 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         delegate: SignUpAttributesRequiredDelegate,
         correlationId: UUID? = nil
     ) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.submitAttributes(attributes, username: username, signUpToken: flowToken, context: context, delegate: delegate)
+            let result = await submitAttributesInternal(attributes: attributes, correlationId: correlationId)
+
+            switch result {
+            case .completed(let state):
+                await delegate.onSignUpCompleted(newState: state)
+            case .error(let error):
+                await delegate.onSignUpAttributesRequiredError(error: error)
+            case .attributesRequired(let attributes, let state):
+                await delegate.onSignUpAttributesRequired(attributes: attributes, newState: state)
+            case .attributesInvalid(let attributes, let state):
+                await delegate.onSignUpAttributesInvalid(attributeNames: attributes, newState: state)
+            }
         }
     }
 }

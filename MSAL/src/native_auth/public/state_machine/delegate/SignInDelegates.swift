@@ -28,7 +28,7 @@ import Foundation
 public protocol SignInPasswordStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    func onSignInPasswordError(error: SignInPasswordStartError)
+    @MainActor func onSignInPasswordError(error: SignInPasswordStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires a code but this optional method is not implemented, then ``onSignInPasswordError(error:)`` will be called.
@@ -37,21 +37,21 @@ public protocol SignInPasswordStartDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                             sentTo: String,
-                                             channelTargetType: MSALNativeAuthChannelType,
-                                             codeLength: Int)
+    @MainActor @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                                                        sentTo: String,
+                                                        channelTargetType: MSALNativeAuthChannelType,
+                                                        codeLength: Int)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
 @objc
 public protocol SignInStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    func onSignInError(error: SignInStartError)
+    @MainActor func onSignInError(error: SignInStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
@@ -59,15 +59,15 @@ public protocol SignInStartDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                              sentTo: String,
-                              channelTargetType: MSALNativeAuthChannelType,
-                              codeLength: Int)
+    @MainActor func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                                         sentTo: String,
+                                         channelTargetType: MSALNativeAuthChannelType,
+                                         codeLength: Int)
 
     /// Notifies the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
+    @MainActor @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
 }
 
 @objc
@@ -76,18 +76,18 @@ public protocol SignInPasswordRequiredDelegate {
     /// - Parameters:
     ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
-    func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
+    @MainActor func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
 @objc
 public protocol SignInResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
+    @MainActor func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Parameters:
@@ -95,19 +95,19 @@ public protocol SignInResendCodeDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState,
-                                        sentTo: String,
-                                        channelTargetType: MSALNativeAuthChannelType,
-                                        codeLength: Int)
+    @MainActor func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState,
+                                                   sentTo: String,
+                                                   channelTargetType: MSALNativeAuthChannelType,
+                                                   codeLength: Int)
 }
 
 @objc
 public protocol SignInVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
+    @MainActor func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }

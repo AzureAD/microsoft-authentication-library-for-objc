@@ -26,6 +26,7 @@
 import XCTest
 
 class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
+    let expectation: XCTestExpectation?
     private(set) var onResetPasswordErrorCalled = false
     private(set) var onResetPasswordCodeRequiredCalled = false
     private(set) var error: ResetPasswordStartError?
@@ -34,11 +35,16 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
 
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
     func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
         onResetPasswordErrorCalled = true
         self.error = error
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 
     func onResetPasswordCodeRequired(
@@ -54,10 +60,12 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
         self.codeLength = codeLength
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 }
 
 class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
+    let expectation: XCTestExpectation?
     private(set) var onResetPasswordResendCodeErrorCalled = false
     private(set) var onResetPasswordResendCodeRequiredCalled = false
     private(set) var error: ResendCodeError?
@@ -66,6 +74,10 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength: Int?
 
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
+
     func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?) {
         onResetPasswordResendCodeErrorCalled = true
 
@@ -73,6 +85,7 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.newState = newState
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 
     func onResetPasswordResendCodeRequired(newState: MSAL.ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
@@ -84,15 +97,21 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.codeLength = codeLength
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 }
 
 class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
+    let expectation: XCTestExpectation?
     private(set) var onResetPasswordVerifyCodeErrorCalled = false
     private(set) var onPasswordRequiredCalled = false
     private(set) var error: VerifyCodeError?
     private(set) var newCodeRequiredState: ResetPasswordCodeRequiredState?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
 
     func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?) {
         onResetPasswordVerifyCodeErrorCalled = true
@@ -100,6 +119,7 @@ class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
         newCodeRequiredState = newState
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 
     func onPasswordRequired(newState: ResetPasswordRequiredState) {
@@ -107,14 +127,20 @@ class ResetPasswordVerifyCodeDelegateSpy: ResetPasswordVerifyCodeDelegate {
         newPasswordRequiredState = newState
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 }
 
 class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
+    let expectation: XCTestExpectation?
     private(set) var onResetPasswordRequiredErrorCalled = false
     private(set) var onResetPasswordCompletedCalled = false
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
+
+    init(expectation: XCTestExpectation? = nil) {
+        self.expectation = expectation
+    }
 
     func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?) {
         onResetPasswordRequiredErrorCalled = true
@@ -123,11 +149,13 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
         newPasswordRequiredState = newState
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 
     func onResetPasswordCompleted() {
         onResetPasswordCompletedCalled = true
 
         XCTAssertTrue(Thread.isMainThread)
+        expectation?.fulfill()
     }
 }

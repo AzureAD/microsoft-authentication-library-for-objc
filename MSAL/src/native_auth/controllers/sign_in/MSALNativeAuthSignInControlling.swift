@@ -25,21 +25,29 @@
 import Foundation
 
 protocol MSALNativeAuthSignInControlling {
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async
-    func signIn(username: String, slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async
-    func submitCode(
-        _ code: String,
-        credentialToken: String,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInVerifyCodeDelegate) async
+    typealias SignInPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordStartResult>
+    typealias SignInCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
+
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInPasswordControllerResponse
+
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters) async -> SignInCodeControllerResponse
+
+    func signIn(
+        username: String,
+        slt: String?,
+        scopes: [String]?,
+        context: MSALNativeAuthRequestContext
+    ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>
+
+    func submitCode(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult
+
     func submitPassword(
         _ password: String,
         username: String,
         credentialToken: String,
         context: MSALNativeAuthRequestContext,
-        scopes: [String],
-        delegate: SignInPasswordRequiredDelegate) async
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async
+        scopes: [String]
+    ) async -> SignInPasswordRequiredResult
+
+    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeResult
 }

@@ -29,28 +29,81 @@ import XCTest
 
 final class SignUpAttributesRequiredStateTests: XCTestCase {
 
-    private var exp: XCTestExpectation!
-    private var correlationId: UUID!
-    private var controller: MSALNativeAuthSignUpControllerSpy!
+    private var controller: MSALNativeAuthSignUpControllerMock!
     private var sut: SignUpAttributesRequiredState!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        correlationId = UUID()
-        exp = expectation(description: "SignUpAttributesRequiredState expectation")
-        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
+        controller = .init()
         sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
     }
 
-    func test_submitAttributes_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitAttributesCalled)
+    // MARK: - Delegate
 
-        sut.submitAttributes(attributes: ["city": "Dublin"], delegate: SignUpAttributesRequiredDelegateSpy(), correlationId: correlationId)
+    func test_submitPassword_delegate_whenError_shouldReturnAttributesRequiredError() {
+        let expectedError = AttributesRequiredError()
 
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitAttributesCalled)
+        let expectedResult: SignUpAttributesRequiredResult = .error(error: expectedError)
+        controller.submitAttributesResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-up states")
+        let delegate = SignUpAttributesRequiredDelegateSpy(expectation: exp)
+
+        sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.error, expectedError)
+    }
+
+    func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
+        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+
+        let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
+        controller.submitAttributesResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-up states")
+        let delegate = SignUpAttributesRequiredDelegateSpy(expectation: exp)
+
+        sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.newSignInAfterSignUpState, expectedState)
+    }
+
+    func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt")
+        let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
+            .init(name: "anAttribute", type: "aType", required: true)
+        ]
+
+        let expectedResult: SignUpAttributesRequiredResult = .attributesRequired(attributes: expectedAttributes, state: expectedState)
+        controller.submitAttributesResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-up states")
+        let delegate = SignUpAttributesRequiredDelegateSpy(expectation: exp)
+
+        sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.attributes, expectedAttributes)
+        XCTAssertEqual(delegate.newState, expectedState)
+    }
+
+    func test_submitPassword_delegate_whenAttributesAreInvalud_shouldReturnAttributesInvalid() {
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt")
+        let expectedAttributes = ["anAttribute"]
+
+        let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)
+        controller.submitAttributesResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-up states")
+        let delegate = SignUpAttributesRequiredDelegateSpy(expectation: exp)
+
+        sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.invalidAttributes, expectedAttributes)
+        XCTAssertEqual(delegate.newState, expectedState)
     }
 }

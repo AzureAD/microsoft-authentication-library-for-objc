@@ -22,20 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@objcMembers
-public final class MSALNativeAuthenticationResult: NSObject {
+import Foundation
 
-    public let accessToken: String
-    public let idToken: String
-    public let scopes: [String]
-    public let expiresOn: Date
-    public let tenantId: String
+extension MSALNativeAuthUserAccountResult {
 
-    init(accessToken: String, idToken: String, scopes: [String], expiresOn: Date, tenantId: String) {
-        self.accessToken = accessToken
-        self.idToken = idToken
-        self.scopes = scopes
-        self.expiresOn = expiresOn
-        self.tenantId = tenantId
+    func getAccessTokenInternal(forceRefresh: Bool, correlationId: UUID?) async -> Result<String, RetrieveAccessTokenError> {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        if let accessToken = self.authTokens.accessToken {
+            if forceRefresh || accessToken.isExpired() {
+                let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
+                let credentialsController = controllerFactory.makeCredentialsController()
+                return await credentialsController.refreshToken(context: context, authTokens: authTokens)
+            } else {
+                return .success(accessToken.accessToken)
+            }
+        } else {
+            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
+            return .failure(RetrieveAccessTokenError(type: .tokenNotFound))
+        }
     }
 }

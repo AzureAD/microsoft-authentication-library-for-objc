@@ -28,8 +28,9 @@ import Foundation
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
     /// The account object that holds account information.
     @objc public let account: MSALAccount
-    private let authTokens: MSALNativeAuthTokens
-    private let configuration: MSALNativeAuthConfiguration
+
+    let authTokens: MSALNativeAuthTokens
+    let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
 
     /// Get the ID token for the account.
@@ -85,23 +86,14 @@ import Foundation
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     @objc public func getAccessToken(delegate: CredentialsDelegate, forceRefresh: Bool = false, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        if let accessToken = self.authTokens.accessToken {
-            if forceRefresh || accessToken.isExpired() {
-                let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-                let credentialsController = controllerFactory.makeCredentialsController()
-                Task {
-                    await credentialsController.refreshToken(context: context, authTokens: authTokens, delegate: delegate)
-                }
-            } else {
-                Task {
-                    await delegate.onAccessTokenRetrieveCompleted(accessToken: accessToken.accessToken)
-                }
-            }
-        } else {
-            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
-            Task {
-                await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .tokenNotFound))
+        Task {
+            let controllerResponse = await getAccessTokenInternal(forceRefresh: forceRefresh, correlationId: correlationId)
+
+            switch controllerResponse {
+            case .success(let accessToken):
+                await delegate.onAccessTokenRetrieveCompleted(accessToken: accessToken)
+            case .failure(let error):
+                await delegate.onAccessTokenRetrieveError(error: error)
             }
         }
     }

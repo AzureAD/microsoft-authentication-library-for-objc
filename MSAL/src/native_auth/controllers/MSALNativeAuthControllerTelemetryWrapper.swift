@@ -16,25 +16,23 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+/// The Controller sends this model to the public interface, which uses the `result` value to return to the user.
+/// The `telemetryUpdate` gets called from the public interface, if it needs to tell the controller to update the telemetry
+/// (ex: an optional delegate method not implemented by the external developer).
+struct MSALNativeAuthControllerTelemetryWrapper<R> {
+    let result: R
+    let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult
-
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult
-
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult
-
-    func submitPassword(
-        password: String,
-        passwordSubmitToken: String,
-        context: MSIDRequestContext
-    ) async -> ResetPasswordRequiredResult
+    init(_ result: R, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)? = nil) {
+        self.result = result
+        self.telemetryUpdate = telemetryUpdate
+    }
 }

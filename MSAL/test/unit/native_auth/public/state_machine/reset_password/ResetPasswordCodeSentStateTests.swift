@@ -28,39 +28,91 @@ import XCTest
 
 final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
-    private var correlationId: UUID!
-    private var exp: XCTestExpectation!
-    private var controller: MSALNativeAuthResetPasswordControllerSpy!
+    private var controller: MSALNativeAuthResetPasswordControllerMock!
     private var sut: ResetPasswordCodeRequiredState!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        correlationId = UUID()
-        exp = expectation(description: "ResetPasswordCodeSentState expectation")
-        controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
+        controller = .init()
         sut = ResetPasswordCodeRequiredState(controller: controller, flowToken: "<token>")
     }
 
-    func test_resendCode_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.resendCodeCalled)
+    // MARK: - Delegates
 
-        sut.resendCode(delegate: ResetPasswordResendCodeDelegateSpy(), correlationId: correlationId)
+    // ResendCode
 
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.resendCodeCalled)
+    func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
+        let expectedError = ResendCodeError(message: "test error")
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken")
+
+        let expectedResult: ResetPasswordResendCodeResult = .error(error: expectedError, newState: expectedState)
+        controller.resendCodeResult = .init(expectedResult)
+
+        let exp = expectation(description: "reset password states")
+        let delegate = ResetPasswordResendCodeDelegateSpy(expectation: exp)
+
+        sut.resendCode(delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.error, expectedError)
+        XCTAssertEqual(delegate.newState, expectedState)
     }
 
-    func test_submitCode_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitCodeCalled)
+    func test_resendCode_delegate_success_shouldReturnCodeRequired() {
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken 2")
 
-        sut.submitCode(code: "1234", delegate: ResetPasswordVerifyCodeDelegateSpy(), correlationId: correlationId)
+        let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
+            newState: expectedState,
+            sentTo: "sentTo",
+            channelTargetType: .email,
+            codeLength: 1
+        )
+        controller.resendCodeResult = .init(expectedResult)
 
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitCodeCalled)
+        let exp = expectation(description: "sign-in states")
+        let delegate = ResetPasswordResendCodeDelegateSpy(expectation: exp)
+
+        sut.resendCode(delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.newState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.sentTo, "sentTo")
+        XCTAssertEqual(delegate.channelTargetType, .email)
+        XCTAssertEqual(delegate.codeLength, 1)
+    }
+
+    // SubmitCode
+
+    func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
+        let expectedError = VerifyCodeError(type: .invalidCode)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken")
+
+        let expectedResult: ResetPasswordVerifyCodeResult = .error(error: expectedError, newState: expectedState)
+        controller.submitCodeResult = .init(expectedResult)
+
+        let exp = expectation(description: "reset password states")
+        let delegate = ResetPasswordVerifyCodeDelegateSpy(expectation: exp)
+
+        sut.submitCode(code: "1234", delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.error, expectedError)
+        XCTAssertEqual(delegate.newCodeRequiredState, expectedState)
+    }
+
+    func test_submitCode_delegate_success_shouldReturnPasswordRequired() {
+        let expectedState = ResetPasswordRequiredState(controller: controller, flowToken: "flowToken 2")
+
+        let expectedResult: ResetPasswordVerifyCodeResult = .passwordRequired(newState: expectedState)
+        controller.submitCodeResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-in states")
+        let delegate = ResetPasswordVerifyCodeDelegateSpy(expectation: exp)
+
+        sut.submitCode(code: "1234", delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.newPasswordRequiredState, expectedState)
     }
 }

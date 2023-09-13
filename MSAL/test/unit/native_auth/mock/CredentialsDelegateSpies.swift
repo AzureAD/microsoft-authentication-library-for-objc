@@ -57,3 +57,22 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
         }
     }
 }
+
+class CredentialsTestValidatorHelper: CredentialsDelegateSpy {
+
+    func onAccessTokenRetrieveCompleted(_ result: Result<String, RetrieveAccessTokenError>) {
+        guard case let .success(token) = result else {
+            return XCTFail("wrong result")
+        }
+
+        Task { await self.onAccessTokenRetrieveCompleted(accessToken: token) }
+    }
+
+    func onAccessTokenRetrieveError(_ result: Result<String, RetrieveAccessTokenError>) {
+        guard case let .failure(error) = result else {
+            return XCTFail("wrong result")
+        }
+
+        Task { await self.onAccessTokenRetrieveError(error: error) }
+    }
+}

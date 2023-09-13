@@ -22,19 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
+@testable import MSAL
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthResetPasswordControlling: AnyObject {
+class MSALNativeAuthCredentialsControllerMock: MSALNativeAuthCredentialsControlling {
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult
+    var refreshTokenResult: Result<String, RetrieveAccessTokenError>!
+    var accountResult: MSALNativeAuthUserAccountResult?
 
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult
+    func refreshToken(context: MSAL.MSALNativeAuthRequestContext, authTokens: MSAL.MSALNativeAuthTokens) async -> Result<String, MSAL.RetrieveAccessTokenError> {
+        return refreshTokenResult
+    }
 
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult
-
-    func submitPassword(
-        password: String,
-        passwordSubmitToken: String,
-        context: MSIDRequestContext
-    ) async -> ResetPasswordRequiredResult
+    func retrieveUserAccountResult(context: MSAL.MSALNativeAuthRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
+        return accountResult
+    }
 }

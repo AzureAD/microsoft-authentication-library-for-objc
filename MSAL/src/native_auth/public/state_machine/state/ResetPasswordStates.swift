@@ -26,8 +26,8 @@ import Foundation
 
 @objcMembers
 public class ResetPasswordBaseState: MSALNativeAuthBaseState {
-    fileprivate let controller: MSALNativeAuthResetPasswordControlling
-    fileprivate let inputValidator: MSALNativeAuthInputValidating
+    let controller: MSALNativeAuthResetPasswordControlling
+    let inputValidator: MSALNativeAuthInputValidating
 
     init(
         controller: MSALNativeAuthResetPasswordControlling,
@@ -47,10 +47,20 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
         Task {
-            await controller.resendCode(passwordResetToken: flowToken, context: context, delegate: delegate)
+            let result = await resendCodeInternal(correlationId: correlationId)
+
+            switch result {
+            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+                await delegate.onResetPasswordResendCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
+            case .error(let error, let newState):
+                await delegate.onResetPasswordResendCodeError(error: error, newState: newState)
+            }
         }
     }
 
@@ -60,16 +70,15 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        guard inputValidator.isInputValid(code) else {
-            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
-            Task {
-                await delegate.onResetPasswordVerifyCodeError(error: VerifyCodeError(type: .invalidCode), newState: self)
-            }
-            return
-        }
         Task {
-            await controller.submitCode(code: code, passwordResetToken: flowToken, context: context, delegate: delegate)
+            let result = await submitCodeInternal(code: code, correlationId: correlationId)
+
+            switch result {
+            case .passwordRequired(let newState):
+                await delegate.onPasswordRequired(newState: newState)
+            case .error(let error, let newState):
+                await delegate.onResetPasswordVerifyCodeError(error: error, newState: newState)
+            }
         }
     }
 }
@@ -82,17 +91,15 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        guard inputValidator.isInputValid(password) else {
-            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
-            Task {
-                await delegate.onResetPasswordRequiredError(error: PasswordRequiredError(type: .invalidPassword), newState: self)
-            }
-            return
-        }
         Task {
-            await controller.submitPassword(password: password, passwordSubmitToken: flowToken, context: context, delegate: delegate)
+            let result = await submitPasswordInternal(password: password, correlationId: correlationId)
+
+            switch result {
+            case .completed:
+                await delegate.onResetPasswordCompleted()
+            case .error(let error, let newState):
+                await delegate.onResetPasswordRequiredError(error: error, newState: newState)
+            }
         }
     }
 }

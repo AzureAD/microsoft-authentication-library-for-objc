@@ -26,32 +26,6 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthRequestControllerFactoryFail: MSALNativeAuthControllerBuildable {
-
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
-        MSALNativeAuthSignUpController(config: MSALNativeAuthConfigStubs.configuration)
-    }
-
-    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
-        XCTFail("This method should not be called")
-        return MSALNativeAuthSignInController(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-
-    func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
-        MSALNativeAuthResetPasswordController(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-
-    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
-        MSALNativeAuthCredentialsController(
-            config: MSALNativeAuthConfigStubs.configuration
-        )
-    }
-}
-
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
 
     var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
@@ -91,5 +65,29 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {
         return makeMsidConfigurationResult ?? MSALNativeAuthConfigStubs.msidConfiguration
+    }
+}
+
+class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
+
+    var signUpController = MSALNativeAuthSignUpControllerMock()
+    var signInController = MSALNativeAuthSignInControllerMock()
+    var resetPasswordController = MSALNativeAuthResetPasswordControllerMock()
+    var credentialsController = MSALNativeAuthCredentialsControllerMock()
+
+    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+        return signUpController
+    }
+
+    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
+        return signInController
+    }
+
+    func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
+        return resetPasswordController
+    }
+
+    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+        return credentialsController
     }
 }

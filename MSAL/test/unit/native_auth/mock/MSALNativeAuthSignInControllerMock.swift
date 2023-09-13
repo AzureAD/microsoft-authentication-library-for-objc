@@ -26,33 +26,43 @@
 import XCTest
 
 class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
+
     private(set) var username: String?
     private(set) var slt: String?
     var expectation: XCTestExpectation?
-    
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters, delegate: SignInPasswordStartDelegate) async {
-        XCTFail("This method should not be called")
+
+    var signInPasswordStartResult: MSALNativeAuthSignInControlling.SignInPasswordControllerResponse!
+    var signInStartResult: MSALNativeAuthSignInControlling.SignInCodeControllerResponse!
+    var signInSLTResult: Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError>!
+    var submitCodeResult: SignInVerifyCodeResult!
+    var submitPasswordResult: SignInPasswordRequiredResult!
+    var resendCodeResult: SignInResendCodeResult!
+
+    func signIn(params: MSAL.MSALNativeAuthSignInWithPasswordParameters) async -> MSALNativeAuthSignInControlling.SignInPasswordControllerResponse {
+        return signInPasswordStartResult
     }
-    
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters, delegate: SignInStartDelegate) async {
-        XCTFail("This method should not be called")
+
+    func signIn(params: MSAL.MSALNativeAuthSignInWithCodeParameters) async -> MSALNativeAuthSignInControlling.SignInCodeControllerResponse {
+        return signInStartResult
     }
-    
-    func signIn(username: String, slt: String?, scopes: [String]?, context: MSALNativeAuthRequestContext, delegate: SignInAfterSignUpDelegate) async {
+
+    func signIn(username: String, slt: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError> {
         self.username = username
         self.slt = slt
         expectation?.fulfill()
+
+        return signInSLTResult
     }
-    
-    func submitCode(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInVerifyCodeDelegate) async {
-        XCTFail("This method should not be called")
+
+    func submitCode(_ code: String, credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult {
+        submitCodeResult
     }
-    
-    func submitPassword(_ password: String, username: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInPasswordRequiredDelegate) async {
-        XCTFail("This method should not be called")
+
+    func submitPassword(_ password: String, username: String, credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInPasswordRequiredResult {
+        return submitPasswordResult
     }
-    
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String], delegate: SignInResendCodeDelegate) async {
-        XCTFail("This method should not be called")
+
+    func resendCode(credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeResult {
+        return resendCodeResult
     }
 }

@@ -29,28 +29,88 @@ import XCTest
 
 final class SignUpPasswordRequiredStateTests: XCTestCase {
 
-    private var exp: XCTestExpectation!
-    private var correlationId: UUID!
-    private var controller: MSALNativeAuthSignUpControllerSpy!
+    private var controller: MSALNativeAuthSignUpControllerMock!
     private var sut: SignUpPasswordRequiredState!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        correlationId = UUID()
-        exp = expectation(description: "SignUpPasswordRequiredState expectation")
-        controller = MSALNativeAuthSignUpControllerSpy(expectation: exp)
+        controller = .init()
         sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
     }
 
-    func test_submitPassword_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitPasswordCalled)
+    // MARK: - Delegate
 
-        sut.submitPassword(password: "1234", delegate: SignUpPasswordRequiredDelegateSpy(), correlationId: correlationId)
+    func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
+        let expectedError = PasswordRequiredError(type: .invalidPassword)
+        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
 
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitPasswordCalled)
+        let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)
+        controller.submitPasswordResult = .init(expectedResult)
+
+        let exp = expectation(description: "sign-up states")
+        let delegate = SignUpPasswordRequiredDelegateSpy(expectation: exp)
+
+        sut.submitPassword(password: "1234", delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.error, expectedError)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, expectedState.flowToken)
+    }
+
+    func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+
+        let exp = expectation(description: "sign-up states")
+        let exp2 = expectation(description: "exp telemetry is called")
+
+        let expectedResult: SignUpPasswordRequiredResult = .attributesRequired(attributes: [], newState: expectedAttributesRequiredState)
+        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+
+        let delegate = SignUpPasswordRequiredDelegateSpy(expectation: exp)
+
+        sut.submitPassword(password: "1234", delegate: delegate)
+        wait(for: [exp, exp2])
+
+        XCTAssertEqual(delegate.newAttributesRequiredState, expectedAttributesRequiredState)
+    }
+
+    func test_submitCode_delegate_whenAttributesRequired_ButUserHasNotImplementedOptionalDelegate_shouldReturnPasswordRequiredError() {
+        let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+
+        let exp = expectation(description: "sign-up states")
+        let exp2 = expectation(description: "exp telemetry is called")
+
+        let expectedResult: SignUpPasswordRequiredResult = .attributesRequired(attributes: [], newState: expectedAttributesRequiredState)
+        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+
+        let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        sut.submitPassword(password: "1234", delegate: delegate)
+        wait(for: [exp, exp2])
+
+        XCTAssertEqual(delegate.error?.type, expectedError.type)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.delegateNotImplemented)
+    }
+
+    func test_submitCode_delegate_whenSuccess_shouldReturnSignUpCompleted() {
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+
+        let exp = expectation(description: "sign-up states")
+
+        let expectedResult: SignUpPasswordRequiredResult = .completed(expectedSignInAfterSignUpState)
+        controller.submitPasswordResult = .init(expectedResult)
+
+        let delegate = SignUpPasswordRequiredDelegateSpy(expectation: exp)
+
+        sut.submitPassword(password: "1234", delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.signInAfterSignUpState, expectedSignInAfterSignUpState)
     }
 }

@@ -83,7 +83,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return nil
     }
 
-    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens, delegate: CredentialsDelegate) async {
+    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> Result<String, RetrieveAccessTokenError> {
         MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
         let scopes = authTokens.accessToken?.scopes.array as? [String] ?? []
@@ -93,18 +93,16 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             context: context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
-            await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError))
-            return
+            return .failure(RetrieveAccessTokenError(type: .generalError))
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
-        await handleTokenResponse(
+        return handleTokenResponse(
             response,
             scopes: scopes,
             context: context,
-            telemetryEvent: telemetryEvent,
-            onSuccess: delegate.onAccessTokenRetrieveCompleted,
-            onError: delegate.onAccessTokenRetrieveError)
+            telemetryEvent: telemetryEvent
+        )
     }
 
     // MARK: - Private
@@ -146,52 +144,49 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
-        telemetryEvent: MSIDTelemetryAPIEvent?,
-        onSuccess: @MainActor @escaping (String) -> Void,
-        onError: @MainActor @escaping (RetrieveAccessTokenError) -> Void) async {
-            let config = factory.makeMSIDConfiguration(scopes: scopes)
-            switch response {
-            case .success(let tokenResponse):
-                await handleMSIDTokenResponse(
-                    tokenResponse: tokenResponse,
-                    telemetryEvent: telemetryEvent,
-                    context: context,
-                    config: config,
-                    onSuccess: onSuccess,
-                    onError: onError)
-            case .error(let errorType):
-                let error = errorType.convertToRetrieveAccessTokenError()
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
-                stopTelemetryEvent(telemetryEvent, context: context, error: error)
-                await onError(error)
-            }
+        telemetryEvent: MSIDTelemetryAPIEvent?
+    ) -> Result<String, RetrieveAccessTokenError> {
+        let config = factory.makeMSIDConfiguration(scopes: scopes)
+        switch response {
+        case .success(let tokenResponse):
+            return handleMSIDTokenResponse(
+                tokenResponse: tokenResponse,
+                telemetryEvent: telemetryEvent,
+                context: context,
+                config: config
+            )
+        case .error(let errorType):
+            let error = errorType.convertToRetrieveAccessTokenError()
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+            return .failure(error)
         }
+    }
 
     private func handleMSIDTokenResponse(
         tokenResponse: MSIDTokenResponse,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration,
-        onSuccess: @MainActor @escaping (String) -> Void,
-        onError: @MainActor @escaping (RetrieveAccessTokenError) -> Void) async {
-            do {
-                let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-                telemetryEvent?.setUserInformation(tokenResult.account)
-                stopTelemetryEvent(telemetryEvent, context: context)
-                MSALLogger.log(
-                    level: .verbose,
-                    context: context,
-                    format: "Refresh Token completed successfully")
-                await onSuccess(tokenResult.accessToken.accessToken)
-            } catch {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "Token Result was not created properly error - \(error)")
-                await onError(RetrieveAccessTokenError(type: .generalError))
-            }
+        config: MSIDConfiguration
+    ) -> Result<String, RetrieveAccessTokenError> {
+        do {
+            let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+            telemetryEvent?.setUserInformation(tokenResult.account)
+            stopTelemetryEvent(telemetryEvent, context: context)
+            MSALLogger.log(
+                level: .verbose,
+                context: context,
+                format: "Refresh Token completed successfully")
+            return .success(tokenResult.accessToken.accessToken)
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Token Result was not created properly error - \(error)")
+            return .failure(RetrieveAccessTokenError(type: .generalError))
         }
+    }
 }
