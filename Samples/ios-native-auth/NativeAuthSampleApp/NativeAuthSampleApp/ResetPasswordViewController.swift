@@ -78,12 +78,12 @@ extension ResetPasswordViewController: ResetPasswordStartDelegate {
         print("ResetPasswordStartDelegate: onResetPasswordCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
-                                guard let self else { return }
+                                guard let self = self else { return }
 
                                 newState.submitCode(code: code, delegate: self)
                             },
                             resendCallback: { [weak self] in
-                                guard let self else { return }
+                                guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
                             })
@@ -120,11 +120,11 @@ extension ResetPasswordViewController: ResetPasswordResendCodeDelegate {
     ) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
-                                  guard let self else { return }
+                                  guard let self = self else { return }
 
                                   newState.submitCode(code: code, delegate: self)
                               }, resendCallback: { [weak self] in
-                                  guard let self else { return }
+                                  guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
                               })
@@ -138,7 +138,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
     ) {
         switch error.type {
         case .invalidCode:
-            guard let newState else {
+            guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
                 showResultText("Internal error verifying code")
@@ -147,11 +147,11 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
 
             updateVerifyCodeModal(errorMessage: "Check the code and try again",
                                   submitCallback: { [weak self] code in
-                                      guard let self else { return }
+                                      guard let self = self else { return }
 
                                       newState.submitCode(code: code, delegate: self)
                                   }, resendCallback: { [weak self] in
-                                      guard let self else { return }
+                                      guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
                                   })
@@ -167,7 +167,7 @@ extension ResetPasswordViewController: ResetPasswordVerifyCodeDelegate {
     func onPasswordRequired(newState: MSAL.ResetPasswordRequiredState) {
         dismissVerifyCodeModal { [self] in
             showNewPasswordModal { [weak self] password in
-                guard let self else { return }
+                guard let self = self else { return }
 
                 newState.submitPassword(password: password, delegate: self)
             }
@@ -179,7 +179,7 @@ extension ResetPasswordViewController: ResetPasswordRequiredDelegate {
     func onResetPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.ResetPasswordRequiredState?) {
         switch error.type {
         case .invalidPassword:
-            guard let newState else {
+            guard let newState = newState else {
                 print("Unexpected state. Received invalidPassword but newState is nil")
 
                 showResultText("Internal error verifying password")
@@ -212,7 +212,7 @@ extension ResetPasswordViewController {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
 
-        guard let verifyCodeViewController else {
+        guard let verifyCodeViewController = verifyCodeViewController else {
             print("Error creating Verify Code view controller")
             return
         }
@@ -229,11 +229,11 @@ extension ResetPasswordViewController {
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void
     ) {
-        guard let verifyCodeViewController else {
+        guard let verifyCodeViewController = verifyCodeViewController else {
             return
         }
 
-        if let errorMessage {
+        if let errorMessage = errorMessage {
             verifyCodeViewController.errorLabel.text = errorMessage
         }
 
@@ -268,7 +268,7 @@ extension ResetPasswordViewController {
         newPasswordViewController = storyboard?.instantiateViewController(
             withIdentifier: "NewPasswordViewController") as? NewPasswordViewController
 
-        guard let newPasswordViewController else {
+        guard let newPasswordViewController = newPasswordViewController else {
             print("Error creating password view controller")
             return
         }
@@ -282,11 +282,11 @@ extension ResetPasswordViewController {
         errorMessage: String?,
         submittedCallback: @escaping ((_ password: String) -> Void)
     ) {
-        guard let newPasswordViewController else {
+        guard let newPasswordViewController = newPasswordViewController else {
             return
         }
 
-        if let errorMessage {
+        if let errorMessage = errorMessage {
             newPasswordViewController.errorLabel.text = errorMessage
         }
 

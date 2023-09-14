@@ -142,12 +142,12 @@ extension EmailAndPasswordViewController: SignUpPasswordStartDelegate {
         print("SignUpPasswordStartDelegate: onSignUpCodeRequired: \(newState)")
 
         showVerifyCodeModal(submitCallback: { [weak self] code in
-                                guard let self else { return }
+                                guard let self = self else { return }
 
                                 newState.submitCode(code: code, delegate: self)
                             },
                             resendCallback: { [weak self] in
-                                guard let self else { return }
+                                guard let self = self else { return }
 
                                 newState.resendCode(delegate: self)
                             })
@@ -160,7 +160,7 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
     func onSignUpVerifyCodeError(error: MSAL.VerifyCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         switch error.type {
         case .invalidCode:
-            guard let newState else {
+            guard let newState = newState else {
                 print("Unexpected state. Received invalidCode but newState is nil")
 
                 showResultText("Internal error verifying code")
@@ -169,11 +169,11 @@ extension EmailAndPasswordViewController: SignUpVerifyCodeDelegate {
 
             updateVerifyCodeModal(errorMessage: "Invalid code",
                                   submitCallback: { [weak self] code in
-                                      guard let self else { return }
+                                      guard let self = self else { return }
 
                                       newState.submitCode(code: code, delegate: self)
                                   }, resendCallback: { [weak self] in
-                                      guard let self else { return }
+                                      guard let self = self else { return }
 
                                       newState.resendCode(delegate: self)
                                   })
@@ -209,11 +209,11 @@ extension EmailAndPasswordViewController: SignUpResendCodeDelegate {
     ) {
         updateVerifyCodeModal(errorMessage: nil,
                               submitCallback: { [weak self] code in
-                                  guard let self else { return }
+                                  guard let self = self else { return }
 
                                   newState.submitCode(code: code, delegate: self)
                               }, resendCallback: { [weak self] in
-                                  guard let self else { return }
+                                  guard let self = self else { return }
 
                                   newState.resendCode(delegate: self)
                               })
@@ -279,7 +279,7 @@ extension EmailAndPasswordViewController {
         verifyCodeViewController = storyboard?.instantiateViewController(
             withIdentifier: "VerifyCodeViewController") as? VerifyCodeViewController
 
-        guard let verifyCodeViewController else {
+        guard let verifyCodeViewController = verifyCodeViewController else {
             print("Error creating Verify Code view controller")
             return
         }
@@ -296,11 +296,11 @@ extension EmailAndPasswordViewController {
         submitCallback: @escaping (_ code: String) -> Void,
         resendCallback: @escaping () -> Void
     ) {
-        guard let verifyCodeViewController else {
+        guard let verifyCodeViewController = verifyCodeViewController else {
             return
         }
 
-        if let errorMessage {
+        if let errorMessage = errorMessage {
             verifyCodeViewController.errorLabel.text = errorMessage
         }
 

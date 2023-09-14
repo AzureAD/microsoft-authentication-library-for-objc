@@ -101,20 +101,20 @@ class WebFallbackViewController: UIViewController {
             guard let self = self else { return }
 
             if let error = error {
-                showResultText("Error acquiring token: \(error)")
+                self.showResultText("Error acquiring token: \(error)")
                 return
             }
 
-            msalAccount = result?.account
+            self.msalAccount = result?.account
 
-            guard let msalAccount else {
-                showResultText("Could not acquire token: No result or account returned")
+            guard let msalAccount = self.msalAccount else {
+                self.showResultText("Could not acquire token: No result or account returned")
                 return
             }
 
-            updateUI()
+            self.updateUI()
 
-            showResultText("Signed in successfully with Web UX: \(msalAccount.accountClaims!.description)")
+            self.showResultText("Signed in successfully with Web UX: \(msalAccount.accountClaims!.description)")
         }
     }
 
@@ -129,19 +129,19 @@ class WebFallbackViewController: UIViewController {
             guard let self = self else { return }
 
             if let error = error {
-                showResultText("Error signing out: \(error)")
+                self.showResultText("Error signing out: \(error)")
                 return
             }
 
             if !result {
-                showResultText("Error signing out: Method returned false")
+                self.showResultText("Error signing out: Method returned false")
                 return
             }
 
-            showResultText("Signed out successfully")
-            msalAccount = nil
+            self.showResultText("Signed out successfully")
+            self.msalAccount = nil
 
-            updateUI()
+            self.updateUI()
         }
     }
 }
