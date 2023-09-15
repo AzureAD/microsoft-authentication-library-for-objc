@@ -1,4 +1,7 @@
-## TBD
+## [1.2.16]
+* Expose APIs for manually setting time_Interval for request and session resource (#1288)
+
+## [1.2.15]
 * Moving master branch history to main (#1787)
 
 ## [1.2.14]

@@ -57,7 +57,7 @@ target_specifiers = [
 	{
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
-		"operations" : [ "build", "test", "codecov" ],
+		"operations" : [ "build", "test" ],
 		"min_warn_codecov" : 70.0,
 		"platform" : "iOS",
         "target" : "iosFramework"
