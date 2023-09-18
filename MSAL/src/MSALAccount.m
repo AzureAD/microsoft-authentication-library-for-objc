@@ -98,19 +98,12 @@
     return msalAccount;
 }
 
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account accountClaims:(NSDictionary *) accountClaims
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account
+                createTenantProfile:(BOOL) createTenantProfile
+                      accountClaims:(NSDictionary *) accountClaims
 {
-    NSArray *tenantProfiles = nil;
-    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:account.accountIdentifier.homeAccountId
-                                                                           objectId:account.accountIdentifier.uid
-                                                                           tenantId:account.accountIdentifier.utid];
-
-    MSALAccount *msalAccount = [self initWithUsername:account.username
-                                        homeAccountId:homeAccountId
-                                          environment:account.storageEnvironment ?: account.environment
-                                       tenantProfiles:tenantProfiles];
-    msalAccount.accountClaims = accountClaims;
-    msalAccount.isSSOAccount = account.isSSOAccount;
+    MSALAccount *msalAccount = [self initWithMSIDAccount:account createTenantProfile:createTenantProfile];
+    msalAccount.accountClaims = account.isHomeTenantAccount ? accountClaims : nil;
     return msalAccount;
 }
 

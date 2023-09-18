@@ -54,7 +54,9 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 context: context,
                 format: "Claims could not be created - \(error)" )
         }
-        guard let account = MSALAccount.init(msidAccount: tokenResult.account, accountClaims: jsonDictionary) else {
+        guard let account = MSALAccount.init(msidAccount: tokenResult.account,
+                                             createTenantProfile: false,
+                                             accountClaims: jsonDictionary) else {
             MSALLogger.log(
                 level: .error,
                 context: context,
