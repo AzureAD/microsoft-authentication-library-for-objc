@@ -58,6 +58,7 @@
  @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account accountClaims:(NSDictionary *) accountClaims;
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider;
 

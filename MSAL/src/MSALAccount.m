@@ -98,6 +98,22 @@
     return msalAccount;
 }
 
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account accountClaims:(NSDictionary *) accountClaims
+{
+    NSArray *tenantProfiles = nil;
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:account.accountIdentifier.homeAccountId
+                                                                           objectId:account.accountIdentifier.uid
+                                                                           tenantId:account.accountIdentifier.utid];
+
+    MSALAccount *msalAccount = [self initWithUsername:account.username
+                                        homeAccountId:homeAccountId
+                                          environment:account.storageEnvironment ?: account.environment
+                                       tenantProfiles:tenantProfiles];
+    msalAccount.accountClaims = accountClaims;
+    msalAccount.isSSOAccount = account.isSSOAccount;
+    return msalAccount;
+}
+
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {
