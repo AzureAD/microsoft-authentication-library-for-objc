@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
 
