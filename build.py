@@ -35,8 +35,9 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device = "iPhone 14"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=16.4'"
+ios_sim_device_type = "iPhone 14"
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(16.4\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=16.4'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
@@ -57,8 +58,8 @@ target_specifiers = [
 	{
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
-		"operations" : [ "build", "test" ],
-		"min_warn_codecov" : 70.0,
+		"operations" : [ "build", "test", "codecov" ],
+        "min_warn_codecov" : 70.0,
 		"platform" : "iOS",
         "target" : "iosFramework"
 	},
@@ -86,6 +87,16 @@ target_specifiers = [
         "platform" : "iOS",
         "target" : "sampleIosAppSwift"
     },
+	{
+		"name" : "Sample NativeAuth iOS App",
+		"scheme" : "NativeAuthSampleApp",
+		"project" : "Samples/ios-native-auth/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
+		"directory" : "Samples/ios-native-auth",
+		"linter" : "swiftlint",
+		"operations" : [ "build", "lint" ],
+		"platform" : "iOS",
+        "target" : "sampleNativeAuthIosApp"
+	},
 	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
@@ -126,6 +137,8 @@ class BuildTarget:
 		self.min_codecov = target.get("min_codecov")
 		self.min_warn_codecov = target.get("min_warn_codecov")
 		self.use_sonarcube = target.get("use_sonarcube")
+		self.directory = target.get("directory")
+		self.linter = target.get("linter")
 		self.coverage = None
 		self.failed = False
 		self.skipped = False
@@ -251,12 +264,25 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device)
+			return device_guids.get_ios(ios_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
 		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
+
+	def do_lint(self) :
+		if (self.linter != "swiftlint") :
+			sys.stdout.write("Unknown linter '" + self.linter + "'\n")
+			return
+
+		command = "swiftlint lint --strict " + self.directory
+
+		result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+
+		sys.stdout.write(result.stdout.decode(sys.stdout.encoding))
+
+		return result.returncode
 	
 	def do_codecov(self) :
 		"""
@@ -280,7 +306,7 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
@@ -308,6 +334,8 @@ class BuildTarget:
 		try :
 			if (operation == "codecov") :
 				exit_code = self.do_codecov()
+			elif (operation == "lint") :
+				exit_code = self.do_lint()
 			else :
 				command = self.xcodebuild_command(operation, use_xcpretty)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
@@ -344,7 +372,7 @@ def requires_simulator(targets) :
 
 def launch_simulator() :
 	print("Booting simulator...")
-	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device)
+	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
 	print(command)
 	
 	# This spawns a new process without us having to wait for it

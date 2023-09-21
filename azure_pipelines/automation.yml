@@ -66,10 +66,11 @@ jobs:
           -workspace MSAL.xcworkspace \
           -scheme "MSAL Test Automation (iOS)" \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
+      failOnStderr: true
   
   - task: Bash@3
     displayName: Run automations
@@ -78,8 +79,8 @@ jobs:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.4-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
+            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.2-x86_64.xctestrun' \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.2' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
