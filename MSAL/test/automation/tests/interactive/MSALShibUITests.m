@@ -72,7 +72,6 @@
     }
 
     [self shibEnterUsername];
-    [self hideKeyboard];
     [self shibEnterPassword];
 
     [self acceptMSSTSConsentIfNecessary:@"Accept"
@@ -165,9 +164,4 @@
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
 
-- (void)hideKeyboard
-{
-    XCUIElement *doneButton = self.testApp.toolbars.buttons[@"Done"];
-    [doneButton msidTap];
-}
 @end
