@@ -167,7 +167,7 @@
     MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
     XCTAssertNotNil(idTokenClaims);
     msidAccount.idTokenClaims = idTokenClaims;
-    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount accountClaims:[idTokenClaims jsonDictionary]];
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile: NO accountClaims:[idTokenClaims jsonDictionary]];
 
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
@@ -197,7 +197,7 @@
 
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     msidAccount.clientInfo = clientInfo;
-    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount accountClaims:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile: NO accountClaims:nil];
 
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
