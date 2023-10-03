@@ -457,8 +457,6 @@
 		9BD2765F2A0E81CE00FBD033 /* ResetPasswordRequiredStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD2765E2A0E81CE00FBD033 /* ResetPasswordRequiredStateTests.swift */; };
 		9BD78D822A126DC400AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9BD78D902A127F8000AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9BD78D982A127FA000AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9BD78D992A127FD300AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9BE7E3CB2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE7E3CA2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift */; };
 		9BE7E3CC2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE7E3CA2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift */; };
 		9BE7E3D52A1CF51500CC3A62 /* MSALNativeAuthResetPasswordValidatedResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE7E3D42A1CF51500CC3A62 /* MSALNativeAuthResetPasswordValidatedResponses.swift */; };
@@ -4205,7 +4203,6 @@
 				04A6B5CF226937800035C7C2 /* MSALRedirectUriVerifier.h in Headers */,
 				04A6B6152269383D0035C7C2 /* MSALOauth2ProviderFactory.h in Headers */,
 				B273D082226E850E005A7BB4 /* MSALTokenParameters.h in Headers */,
-				9BD78D982A127FA000AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */,
 				B273D0EE226E8606005A7BB4 /* MSALTokenParameters+Internal.h in Headers */,
 				2343CC2A2576C37C002D405A /* MSALParameters.h in Headers */,
 				B2D47881230E3DBE005AE186 /* MSALADFSOauth2Provider.h in Headers */,
@@ -4512,7 +4509,6 @@
 				B273D0E3226E85F2005A7BB4 /* MSALPromptType_Internal.h in Headers */,
 				B253153623DD692600432133 /* MSALDeviceInformation+Internal.h in Headers */,
 				23A68A8120F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
-				9BD78D992A127FD300AA7E12 /* MSALNativeAuthChallengeTypes.h in Headers */,
 				D65A6FAA1E3FF3D900C69FBA /* MSALLogger.h in Headers */,
 				96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */,
 				1EF395FE246DFAD200647FDB /* MSALAuthScheme.h in Headers */,
@@ -5658,7 +5654,6 @@
 				E235613129C9CEA8000E01CA /* MSALNativeAuthSignUpStartRequestParameters.swift in Sources */,
 				DE1D8AA829E6B7D900E11D48 /* MSALNativeAuthRequestConfigurator.swift in Sources */,
 				DEF1DD322AA9CBC300D22194 /* MSALNativeAuthESTSApiErrorDescriptions.swift in Sources */,
-				E282FB4D2943B1610014345B /* MSALNativeAuthenticationResult.swift in Sources */,
 				DE0D65BF29D30BAE005798B1 /* MSALNativeAuthResponseError.swift in Sources */,
 				8DDF473F2A98FE1C00126A47 /* MSALNativeAuthRequiredAttributes.swift in Sources */,
 				285F36082A24DF8300A2190F /* MSALNativeAuthSignInControlling.swift in Sources */,
