@@ -31,12 +31,6 @@ class VerifyCodeViewController: UIViewController {
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var codeTextField: UITextField!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
     @IBAction func resendPressed(_: Any) {
         onResend?()
     }
