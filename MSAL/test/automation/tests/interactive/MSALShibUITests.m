@@ -74,6 +74,10 @@
     [self shibEnterUsername];
     [self shibEnterPassword];
 
+    [self shibDismissRememberPassword];
+    
+    [self acceptSpeedBump];
+    
     [self acceptMSSTSConsentIfNecessary:@"Accept"
                         embeddedWebView:request.usesEmbeddedWebView];
     
@@ -162,6 +166,21 @@
     [passwordTextField msidTap];
     [passwordTextField activateTextField];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
+}
+
+- (void)hideKeyboard
+{
+    XCUIElement *doneButton = self.testApp.toolbars.buttons[@"Done"];
+    [doneButton msidTap];
+}
+
+- (void)shibDismissRememberPassword
+{
+    if ([self.testApp.scrollViews.otherElements.buttons[@"Not Now"] waitForExistenceWithTimeout:2.0])
+    {
+        XCUIElement *notNow = self.testApp.scrollViews.otherElements.buttons[@"Not Now"];
+        [notNow msidTap];
+    }
 }
 
 @end
