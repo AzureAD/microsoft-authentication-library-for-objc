@@ -46,10 +46,6 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
         return mockAuthTokens
     }
 
-    func getAccount(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, context: MSIDRequestContext) throws -> MSIDAccount? {
-        throw E.notImplemented
-    }
-
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
         guard let mockUserAccounts = mockUserAccounts else {
             throw E.noAccount

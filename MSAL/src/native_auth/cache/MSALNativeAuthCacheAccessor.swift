@@ -58,17 +58,6 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
             return MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: idToken.rawIdToken)
         }
 
-    func getAccount(
-        accountIdentifier: MSIDAccountIdentifier,
-        authority: MSIDAuthority,
-        context: MSIDRequestContext) throws -> MSIDAccount? {
-            return try tokenCacheAccessor.getAccountFor(
-                accountIdentifier,
-                authority: authority,
-                realmHint: nil,
-                context: context)
-        }
-
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
         let request = MSALAccountsProvider(tokenCache: tokenCacheAccessor,
                                            accountMetadataCache: accountMetadataCache,
