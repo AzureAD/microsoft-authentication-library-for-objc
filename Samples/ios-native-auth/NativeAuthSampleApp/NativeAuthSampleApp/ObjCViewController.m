@@ -106,7 +106,7 @@
 
 - (void)onSignInCompletedWithResult:(MSALNativeAuthUserAccountResult * _Nonnull)result {
     self.accountResult = result;
-    [result getAccessTokenWithDelegate:self forceRefresh:false correlationId:nil];
+    [result getAccessTokenWithForceRefresh:false correlationId:nil delegate:self];
 }
 
 - (void)onSignInPasswordErrorWithError:(SignInPasswordStartError * _Nonnull)error {

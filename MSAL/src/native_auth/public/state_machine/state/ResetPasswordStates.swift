@@ -44,9 +44,9 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
 @objcMembers public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
     /// Requests the server to resend the verification code to the user.
     /// - Parameters:
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func resendCode(delegate: ResetPasswordResendCodeDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func resendCode(correlationId: UUID? = nil, delegate: ResetPasswordResendCodeDelegate) {
         Task {
             let result = await resendCodeInternal(correlationId: correlationId)
 
@@ -67,9 +67,9 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// Submits the code to the server for verification.
     /// - Parameters:
     ///   - code: Verification code that the user supplied.
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func submitCode(code: String, correlationId: UUID? = nil, delegate: ResetPasswordVerifyCodeDelegate) {
         Task {
             let result = await submitCodeInternal(code: code, correlationId: correlationId)
 
@@ -88,9 +88,9 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplied.
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func submitPassword(password: String, correlationId: UUID? = nil, delegate: ResetPasswordRequiredDelegate) {
         Task {
             let result = await submitPasswordInternal(password: password, correlationId: correlationId)
 
