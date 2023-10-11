@@ -104,7 +104,9 @@ public protocol SignInResendCodeDelegate {
 @objc
 public protocol SignInVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 
     /// Notifies the delegate that the sign in operation completed successfully.
