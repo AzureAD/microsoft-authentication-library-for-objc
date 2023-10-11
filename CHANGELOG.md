@@ -1,3 +1,6 @@
+## [1.2.18]
+* Fix duplicate values for error JIT codes (#1893)
+
 ## [1.2.17]
 * Added ccs request id header (#1844)
 * Report WPJ v2 telemetry capability. (common core #1297)
