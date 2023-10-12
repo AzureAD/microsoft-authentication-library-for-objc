@@ -48,13 +48,13 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
                             responseSerializer: responseSerializer,
                             externalSSOContext: ssoContext,
                             context: context,
-                            handleAPIErrorBlock: {
-                                self.handleAPIError(data: data, completionBlock: completionBlock)
+                            handleCustomErrorBlock: {
+                                self.handleCustomError(data: data, completionBlock: completionBlock)
                             },
                             completionBlock: completionBlock)
     }
 
-    private func handleAPIError(
+    private func handleCustomError(
         data: Data?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
