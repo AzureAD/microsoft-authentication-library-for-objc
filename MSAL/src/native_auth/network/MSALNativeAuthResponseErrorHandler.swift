@@ -43,7 +43,7 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
                                                  httpResponse: httpResponse,
                                                  data: data,
                                                  httpRequest: httpRequest,
-                                                 responseSerializer: responseSerializer ?? NativeAuthCustomErrorSerializer<T>(),
+                                                 responseSerializer: responseSerializer ?? MSALNativeAuthCustomErrorSerializer<T>(),
                                                  externalSSOContext: ssoContext,
                                                  context: context,
                                                  completionBlock: completionBlock)

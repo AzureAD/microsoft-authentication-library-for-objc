@@ -26,7 +26,7 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class NativeAuthCustomErrorSerializer<T: Decodable & Error>: NSObject, MSIDResponseSerialization {
+final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error>: NSObject, MSIDResponseSerialization {
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         let customError = try JSONDecoder().decode(T.self, from: data ?? Data())
         throw customError
