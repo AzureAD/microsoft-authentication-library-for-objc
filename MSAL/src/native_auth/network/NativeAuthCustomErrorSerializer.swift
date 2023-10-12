@@ -26,27 +26,9 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, MSIDHttpRequestErrorHandling {
-    private var customError: T?
-
-    // swiftlint:disable:next function_parameter_count
-    func handleError(
-        _ error: Error?,
-        httpResponse: HTTPURLResponse?,
-        data: Data?,
-        httpRequest: MSIDHttpRequestProtocol?,
-        responseSerializer: MSIDResponseSerialization?,
-        externalSSOContext ssoContext: MSIDExternalSSOContext?,
-        context: MSIDRequestContext?,
-        completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) {
-        MSIDAADRequestErrorHandler().handleError(error,
-                                                 httpResponse: httpResponse,
-                                                 data: data,
-                                                 httpRequest: httpRequest,
-                                                 responseSerializer: responseSerializer ?? NativeAuthCustomErrorSerializer<T>(),
-                                                 externalSSOContext: ssoContext,
-                                                 context: context,
-                                                 completionBlock: completionBlock)
+final class NativeAuthCustomErrorSerializer<T: Decodable & Error>: NSObject, MSIDResponseSerialization {
+    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
+        let customError = try JSONDecoder().decode(T.self, from: data ?? Data())
+        throw customError
     }
 }
