@@ -1,13 +1,3 @@
-## [1.2.17]
-* Added ccs request id header (#1844)
-* Report WPJ v2 telemetry capability. (common core #1297)
-* Add separate error code for OneAuth telemetry purpose (common core #1292)
-* Logging improvements (common core #1290)
-* Rename some internal macro (common core #1300)
-
-## [1.2.16]
-* Expose APIs for manually setting time_Interval for request and session resource (#1288)
-
 ## [1.2.15]
 * Moving master branch history to main (#1787)
 

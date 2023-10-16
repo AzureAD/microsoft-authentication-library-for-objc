@@ -47,7 +47,9 @@ public protocol ResetPasswordStartDelegate {
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Notifies the delegate that a password is required from the user to continue.
@@ -58,7 +60,9 @@ public protocol ResetPasswordVerifyCodeDelegate {
 @objc
 public protocol ResetPasswordResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
@@ -78,7 +82,9 @@ public protocol ResetPasswordResendCodeDelegate {
 @objc
 public protocol ResetPasswordRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 
     /// Notifies the delegate that the reset password operation completed successfully.

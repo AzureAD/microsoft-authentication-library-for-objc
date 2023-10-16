@@ -454,7 +454,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
 
         let state = SignInCodeRequiredState(scopes: ["openid","profile","offline_access"], controller: sut, inputValidator: MSALNativeAuthInputValidator(), flowToken: credentialToken)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedUserAccountResult: userAccountResult), correlationId: defaultUUID)
+        state.submitCode(code: "code", correlationId: defaultUUID, delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedUserAccountResult: userAccountResult))
 
         wait(for: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
@@ -479,7 +479,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = nil
 
         let state = SignInCodeRequiredState(scopes: ["openid","profile","offline_access"], controller: sut, inputValidator: MSALNativeAuthInputValidator(), flowToken: credentialToken)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)), correlationId: defaultUUID)
+        state.submitCode(code: "code", correlationId: defaultUUID, delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)))
 
         wait(for: [expectation], timeout: 1)
 
@@ -625,7 +625,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
 
         let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
-        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+        state.submitPassword(password: expectedPassword, correlationId: defaultUUID, delegate: mockDelegate)
 
         await fulfillment(of: [exp], timeout: 1)
 
@@ -655,7 +655,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = nil
 
         let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
-        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+        state.submitPassword(password: expectedPassword, correlationId: defaultUUID, delegate: mockDelegate)
 
         await fulfillment(of: [exp], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitPassword, isSuccessful: false)
@@ -678,7 +678,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError))
 
         let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
-        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+        state.submitPassword(password: expectedPassword, correlationId: defaultUUID, delegate: mockDelegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertNotNil(mockDelegate.newPasswordRequiredState)
@@ -712,7 +712,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError()
 
         let state = SignInCodeRequiredState(scopes: [], controller: sut, flowToken: credentialToken)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)), correlationId: defaultUUID)
+        state.submitCode(code: "code", correlationId: defaultUUID, delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)))
 
         wait(for: [expectation], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -943,7 +943,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenResponseValidatorMock.tokenValidatedResponse = .error(validatorError)
         
         let state = SignInCodeRequiredState(scopes: [], controller: sut, flowToken: expectedCredentialToken)
-        state.submitCode(code: expectedOOBCode, delegate: mockDelegate, correlationId: defaultUUID)
+        state.submitCode(code: expectedOOBCode, correlationId: defaultUUID, delegate: mockDelegate)
 
         wait(for: [exp], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -969,7 +969,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenResponseValidatorMock.tokenValidatedResponse = .error(validatorError)
 
         let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, flowToken: expectedCredentialToken)
-        state.submitPassword(password: expectedPassword, delegate: mockDelegate, correlationId: defaultUUID)
+        state.submitPassword(password: expectedPassword, correlationId: defaultUUID, delegate: mockDelegate)
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)

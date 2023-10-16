@@ -57,10 +57,6 @@ class EmailAndCodeViewController: UIViewController {
         retrieveCachedAccount()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     @IBAction func signUpPressed(_: Any) {
         guard let email = emailTextField.text else {
             resultTextView.text = "Email not set"

@@ -82,10 +82,10 @@ import Foundation
 
     /// Retrieves an access token for the account.
     /// - Parameters:
-    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    @objc public func getAccessToken(delegate: CredentialsDelegate, forceRefresh: Bool = false, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(forceRefresh: forceRefresh, correlationId: correlationId)
 

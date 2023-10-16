@@ -30,12 +30,6 @@ class NewPasswordViewController: UIViewController {
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var passwordTextField: UITextField!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
     @IBAction func cancelPressed(_: Any) {
         dismiss(animated: true)
     }

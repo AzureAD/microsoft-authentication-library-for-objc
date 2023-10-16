@@ -158,6 +158,11 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
 
         return result
     }
+}
+
+// Extension is required because Swift compiler throws an error due to
+// name similarity with another Objective C function when building for Release
+extension MSALNativeAuthTokenController {
 
     private func cacheTokenResponseRetrieveTokenResult(
         _ tokenResponse: MSIDTokenResponse,
