@@ -219,6 +219,7 @@ jobs:
       releaseNotesFilePath: 'cc-release-notes.md'
       changeLogCompareToRelease: 'lastFullRelease'
       changeLogType: 'issueBased'
+      isDraft: true
       assets: |
         *.abcd
   - task: InstallSSHKey@0
