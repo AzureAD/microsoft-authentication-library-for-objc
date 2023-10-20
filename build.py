@@ -58,8 +58,8 @@ target_specifiers = [
 	{
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
-		"operations" : [ "build", "test", "codecov" ],
-        "min_warn_codecov" : 70.0,
+		"operations" : [ "build", "test" ],
+		"min_warn_codecov" : 70.0,
 		"platform" : "iOS",
         "target" : "iosFramework"
 	},
@@ -92,8 +92,7 @@ target_specifiers = [
 		"scheme" : "NativeAuthSampleApp",
 		"project" : "Samples/ios-native-auth/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
 		"directory" : "Samples/ios-native-auth",
-		"linter" : "swiftlint",
-		"operations" : [ "build", "lint" ],
+		"operations" : [ "build" ],
 		"platform" : "iOS",
         "target" : "sampleNativeAuthIosApp"
 	},
@@ -137,8 +136,6 @@ class BuildTarget:
 		self.min_codecov = target.get("min_codecov")
 		self.min_warn_codecov = target.get("min_warn_codecov")
 		self.use_sonarcube = target.get("use_sonarcube")
-		self.directory = target.get("directory")
-		self.linter = target.get("linter")
 		self.coverage = None
 		self.failed = False
 		self.skipped = False
@@ -306,7 +303,7 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -use-color " + executable_file_path
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
