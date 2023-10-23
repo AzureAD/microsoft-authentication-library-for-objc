@@ -27,7 +27,6 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, MSIDHttpRequestErrorHandling {
-    private var customError: T?
 
     // swiftlint:disable:next function_parameter_count
     func handleError(
@@ -40,154 +39,13 @@ final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error>: NSObject, 
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
-        guard let httpResponse = httpResponse else {
-            completionBlock?(nil, error)
-            return
-        }
-
-        if shouldRetry(httpResponse: httpResponse, httpRequest: httpRequest) {
-            retryRequest(httpRequest: httpRequest,
-                         context: context,
-                         completionBlock: completionBlock)
-            return
-        }
-
-        if httpResponse.statusCode == 400 || httpResponse.statusCode == 401 {
-            // PKeyAuth challenge
-            if let authValue = wwwAuthValue(httpResponse: httpResponse) {
-                handleAuthenticateHeader(wwwAuthValue: authValue,
-                                         httpRequest: httpRequest,
-                                         context: context,
-                                         ssoContext: ssoContext,
-                                         completionBlock: completionBlock)
-                return
-            }
-
-            handleAPIError(data: data, completionBlock: completionBlock)
-            return
-        }
-
-        handleHTTPError(httpResponse: httpResponse,
-                        context: context,
-                        completionBlock: completionBlock)
-    }
-
-    private func shouldRetry(httpResponse: HTTPURLResponse,
-                             httpRequest: MSIDHttpRequestProtocol?) -> Bool {
-        guard let httpRequest = httpRequest, httpRequest.retryCounter > 0 else {
-            return false
-        }
-        return httpResponse.statusCode >= 500 && httpResponse.statusCode <= 599
-    }
-
-    private func retryRequest(
-        httpRequest: MSIDHttpRequestProtocol?,
-        context: MSIDRequestContext?,
-        completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) {
-        httpRequest?.retryCounter -= 1
-        if let context = context {
-            MSALLogger.log(level: .verbose,
-                           context: context,
-                           format: "Retrying network request, retryCounter: %d", httpRequest?.retryCounter ?? 0)
-        }
-        let deadline = DispatchTime.now() + Double(UInt64(httpRequest?.retryInterval ?? 0) * NSEC_PER_SEC )
-        DispatchQueue.global().asyncAfter(deadline: deadline) {
-            httpRequest?.send(completionBlock)
-        }
-    }
-
-    private func wwwAuthValue(httpResponse: HTTPURLResponse) -> String? {
-        let wwwAuthKey = httpResponse.allHeaderFields.keys.first(where: {
-            if let keyNameUppercased = ($0 as? String)?.uppercased() {
-                return keyNameUppercased == kMSIDWwwAuthenticateHeader.uppercased()
-            }
-            return false
-        })
-        let wwwAuthValue = httpResponse
-                            .allHeaderFields[wwwAuthKey ?? "" as Dictionary<AnyHashable, Any>.Keys.Element] as? String
-
-        if !NSString.msidIsStringNilOrBlank(wwwAuthValue),
-            let wwwAuthValue = wwwAuthValue,
-            wwwAuthValue.contains(kMSIDPKeyAuthName) {
-            return wwwAuthValue
-        }
-        return nil
-    }
-
-    private func handleAuthenticateHeader(
-        wwwAuthValue: String,
-        httpRequest: MSIDHttpRequestProtocol?,
-        context: MSIDRequestContext?,
-        ssoContext: MSIDExternalSSOContext?,
-        completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) {
-        MSIDPKeyAuthHandler.handleWwwAuthenticateHeader(
-            wwwAuthValue,
-            request: httpRequest?.urlRequest.url,
-            externalSSOContext: ssoContext,
-            context: context) { authHeader, completionError in
-            if !NSString.msidIsStringNilOrBlank(authHeader) {
-                // Append Auth Header
-                if var newRequest = httpRequest?.urlRequest {
-                    newRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
-                    httpRequest?.urlRequest = newRequest as URLRequest
-
-                    DispatchQueue.global().async {
-                        httpRequest?.send(completionBlock)
-                    }
-                }
-                return
-            }
-            completionBlock?(nil, completionError)
-        }
-    }
-
-    private func handleAPIError(
-        data: Data?,
-        completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) {
-        do {
-            customError = try JSONDecoder().decode(T.self, from: data ?? Data())
-            completionBlock?(nil, customError)
-        } catch {
-            completionBlock?(nil, error)
-        }
-    }
-
-    private func handleHTTPError(
-        httpResponse: HTTPURLResponse,
-        context: MSIDRequestContext?,
-        completionBlock: MSIDHttpRequestDidCompleteBlock?
-    ) {
-        let statusCode = httpResponse.statusCode
-        let errorDescription = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-        if let context = context {
-            MSALLogger.log(level: .warning,
-                           context: context,
-                           format: "HTTP error raised. HTTP Code: %d Description %@", statusCode,
-                           MSALLogMask.maskPII(errorDescription))
-        }
-
-        var additionalInfo = [AnyHashable: Any]()
-        additionalInfo[MSIDHTTPHeadersKey] = httpResponse.allHeaderFields
-        additionalInfo[MSIDHTTPResponseCodeKey] = String(httpResponse.statusCode)
-
-        if statusCode >= 500 && statusCode <= 599 {
-            additionalInfo[MSIDServerUnavailableStatusKey] = NSNumber(value: 1)
-        }
-
-        if let context = context {
-            let httpError  = MSIDCreateError(MSIDHttpErrorCodeDomain,
-                                             MSIDErrorCode.serverUnhandledResponse.rawValue,
-                                             errorDescription,
-                                             nil,
-                                             nil,
-                                             nil,
-                                             context.correlationId(),
-                                             additionalInfo,
-                                             true)
-            completionBlock?(nil, httpError)
-        }
+        MSIDAADRequestErrorHandler().handleError(error,
+                                                 httpResponse: httpResponse,
+                                                 data: data,
+                                                 httpRequest: httpRequest,
+                                                 responseSerializer: MSALNativeAuthCustomErrorSerializer<T>(),
+                                                 externalSSOContext: ssoContext,
+                                                 context: context,
+                                                 completionBlock: completionBlock)
     }
 }

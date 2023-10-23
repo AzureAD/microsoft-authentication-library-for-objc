@@ -64,7 +64,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -114,7 +114,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -164,7 +164,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [credentialRequiredExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
@@ -180,8 +180,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
-            delegate: signUpPasswordDelegate,
-            correlationId: correlationId
+            correlationId: correlationId,
+            delegate: signUpPasswordDelegate
         )
 
         await fulfillment(of: [attributesRequiredExp], timeout: defaultTimeout)
@@ -232,7 +232,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
@@ -248,8 +248,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
-            delegate: signUpPasswordDelegate,
-            correlationId: correlationId
+            correlationId: correlationId,
+            delegate: signUpPasswordDelegate
         )
 
         await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
@@ -318,7 +318,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
@@ -334,8 +334,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
-            delegate: signUpPasswordDelegate,
-            correlationId: correlationId
+            correlationId: correlationId,
+            delegate: signUpPasswordDelegate
         )
 
         await fulfillment(of: [attributesRequiredExp1], timeout: defaultTimeout)
@@ -421,7 +421,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate, correlationId: correlationId)
+        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)

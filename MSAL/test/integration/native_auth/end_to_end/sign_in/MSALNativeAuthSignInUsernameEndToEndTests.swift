@@ -97,7 +97,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.invalidOOBValue, endpoint: .signInToken)
         }
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", correlationId: correlationId, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation], timeout: 2)
 
@@ -140,7 +140,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             XCTAssertNotEqual(otp, "<otp not set>")
         }
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy, correlationId: correlationId)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, correlationId: correlationId, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation], timeout: 2)
 
@@ -199,7 +199,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.invalidPassword, endpoint: .signInToken)
         }
 
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", correlationId: correlationId, delegate: signInPasswordRequiredDelegateSpy)
 
         await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
@@ -237,7 +237,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy, correlationId: correlationId)
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, correlationId: correlationId, delegate: signInPasswordRequiredDelegateSpy)
 
         await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
