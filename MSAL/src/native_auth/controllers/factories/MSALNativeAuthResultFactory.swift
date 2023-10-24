@@ -48,18 +48,18 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
         do {
             let claims = try MSIDIdTokenClaims.init(rawIdToken: tokenResult.rawIdToken)
             jsonDictionary = claims.jsonDictionary()
+            if jsonDictionary == nil {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "Initialising account without claims")
+            }
         } catch {
             MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Claims for account could not be created - \(error)" )
-        }
-        if jsonDictionary == nil {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Initialising account without claims")
-        }
+        }        
         guard let account = MSALAccount.init(msidAccount: tokenResult.account,
                                              createTenantProfile: false,
                                              accountClaims: jsonDictionary) else {
