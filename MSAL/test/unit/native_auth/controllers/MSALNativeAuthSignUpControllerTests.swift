@@ -1785,7 +1785,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
 
-    // MARK: - Sign-in with SLT
+    // MARK: - Sign-in with SLT (Short-Lived Token)
 
     func test_whenSignUpSucceeds_and_userCallsSignInWithSLT_signUpControllerPassesCorrectParams() async {
         let username = "username"
