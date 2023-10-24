@@ -88,15 +88,6 @@ target_specifiers = [
         "target" : "sampleIosAppSwift"
     },
 	{
-		"name" : "Sample NativeAuth iOS App",
-		"scheme" : "NativeAuthSampleApp",
-		"project" : "Samples/ios-native-auth/NativeAuthSampleApp/NativeAuthSampleApp.xcodeproj",
-		"directory" : "Samples/ios-native-auth",
-		"operations" : [ "build" ],
-		"platform" : "iOS",
-        "target" : "sampleNativeAuthIosApp"
-	},
-	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
 		"operations" : [ "build", "test", "codecov" ],

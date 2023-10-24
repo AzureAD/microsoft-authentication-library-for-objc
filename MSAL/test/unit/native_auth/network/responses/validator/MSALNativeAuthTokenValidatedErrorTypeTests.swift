@@ -116,7 +116,4 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }
-    
-    // MARK: - convertToSignInPasswordStartError tests
-    
 }

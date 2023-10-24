@@ -12,7 +12,6 @@ trigger:
     include:
     - main
     - release/*
-    - ciam-master
     exclude:
     - '*'
 
@@ -23,7 +22,7 @@ jobs:
     maxParallel: 2
     matrix:
       IOS_FRAMEWORK:
-        target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift sampleNativeAuthIosApp"
+        target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
       MAC_FRAMEWORK:
         target: "macFramework"
   displayName: Validate Pull Request

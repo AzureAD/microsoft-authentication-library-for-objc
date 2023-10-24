@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   }
   s.authors      = { "Microsoft" => "nugetaad@microsoft.com" }
   s.social_media_url   = "https://twitter.com/azuread"
-  s.platform     =  :ios, :osx 
+  s.platform     = :ios, :osx
   s.ios.deployment_target = "14.0"
   s.osx.deployment_target = "10.13"
   s.source       = { 
