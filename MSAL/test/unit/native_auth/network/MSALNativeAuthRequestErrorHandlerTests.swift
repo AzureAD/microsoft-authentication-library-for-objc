@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
     // MARK: - Variables
@@ -51,8 +52,13 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: nil
         ) { result, error in
-            XCTAssertEqual(self.error.domain, (error! as NSError).domain)
-            XCTAssertEqual(self.error.code, (error! as NSError).code)
+            guard let error = error as? NSError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(self.error.domain, error.domain)
+            XCTAssertEqual(self.error.code, error.code)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
@@ -107,11 +113,16 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error! as NSError).code, MSIDErrorCode.serverUnhandledResponse.rawValue)
-            XCTAssertEqual((error! as NSError).userInfo[MSIDHTTPResponseCodeKey] as! String, "500")
-            XCTAssertEqual((error! as NSError).userInfo[MSIDServerUnavailableStatusKey] as! Int, 1)
-            XCTAssertEqual((error! as NSError).userInfo[MSIDErrorDescriptionKey] as! String, "internal server error")
-            XCTAssertEqual(((error! as NSError).userInfo[MSIDHTTPHeadersKey] as! [String: String]).count, 0)
+            guard let error = error as? NSError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.code, MSIDErrorCode.serverUnhandledResponse.rawValue)
+            XCTAssertEqual(error.userInfo[MSIDHTTPResponseCodeKey] as! String, "500")
+            XCTAssertEqual(error.userInfo[MSIDServerUnavailableStatusKey] as! Int, 1)
+            XCTAssertEqual(error.userInfo[MSIDErrorDescriptionKey] as! String, "internal server error")
+            XCTAssertEqual((error.userInfo[MSIDHTTPHeadersKey] as! [String: String]).count, 0)
             MSIDTestURLSession.clearResponses()
             expectation.fulfill()
         }
@@ -151,13 +162,18 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((result as! NSDictionary)["Test"] as! String, "Response")
+            guard let result = result as? NSDictionary else {
+                XCTFail("Result type not expected, actual type: \(type(of: result))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(result["Test"] as! String, "Response")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_shouldCompleteWithAPIError_whenStatusCode400() {
+    func test_shouldCompleteWithAPIError_whenStatusCode400() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -173,7 +189,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         dictionary["error_uri"] = HttpModuleMockConfigurator.baseUrl.absoluteString
         dictionary["inner_errors"] = [["error": "invalid_username", "error_description":"Username was invalid"]]
 
-        let data = try! JSONSerialization.data(withJSONObject: dictionary)
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
 
         sut.handleError(
             error,
@@ -184,17 +200,64 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidRequest)
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).errorDescription, "Request parameter validation failed")
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).innerErrors![0].error, "invalid_username")
-            XCTAssertEqual((error as! MSALNativeAuthSignInInitiateResponseError).innerErrors![0].errorDescription, "Username was invalid")
+            guard let error = error as? MSALNativeAuthSignInInitiateResponseError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.error, MSALNativeAuthSignInInitiateOauth2ErrorCode.invalidRequest)
+            XCTAssertEqual(error.errorDescription, "Request parameter validation failed")
+            XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
+            XCTAssertEqual(error.innerErrors![0].error, "invalid_username")
+            XCTAssertEqual(error.innerErrors![0].errorDescription, "Username was invalid")
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1)
+    }
+    
+    func test_shouldCompleteWithAPIErrorUsingCorrectResponseSerializer_whenStatusCode400AndVerificationRequired() throws {
+        let expectation = expectation(description: "Handle Error Retry Success")
+
+        let httpResponse = HTTPURLResponse(
+            url: HttpModuleMockConfigurator.baseUrl,
+            statusCode: 400,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        var dictionary = [String: Any]()
+        dictionary["error"] = "verification_required"
+        dictionary["error_description"] = "AADSTS55102: Verification required."
+        dictionary["error_uri"] = HttpModuleMockConfigurator.baseUrl.absoluteString
+        dictionary["signup_token"] = "abcdef"
+
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
+
+        let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignUpStartResponseError>()
+        errorHandler.handleError(
+            error,
+            httpResponse: httpResponse,
+            data: data,
+            httpRequest: httpRequest,
+            responseSerializer: MSIDHttpResponseSerializer(), // Some transient response serializer
+            externalSSOContext: nil,
+            context: context
+        ) { result, error in
+            guard let error = error as? MSALNativeAuthSignUpStartResponseError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.error, MSALNativeAuthSignUpStartOauth2ErrorCode.verificationRequired)
+            XCTAssertEqual(error.errorDescription, "AADSTS55102: Verification required.")
+            XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
+            XCTAssertEqual(error.signUpToken, "abcdef")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONMissing() {
+    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONMissing() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -205,7 +268,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         )
 
         let dictionary = [String: Any]()
-        let data = try! JSONSerialization.data(withJSONObject: dictionary)
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
 
         sut.handleError(
             error,
@@ -216,13 +279,18 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error as! DecodingError).localizedDescription,"The data couldn’t be read because it is missing.")
+            guard let error = error as? DecodingError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.localizedDescription,"The data couldn’t be read because it is missing.")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONInvalid() {
+    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONInvalid() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -234,7 +302,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
 
         var dictionary = [String: Any]()
         dictionary["error_key_incorrect"] = "invalid_request"
-        let data = try! JSONSerialization.data(withJSONObject: dictionary)
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
 
         sut.handleError(
             error,
@@ -245,7 +313,12 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error as! DecodingError).localizedDescription,"The data couldn’t be read because it is missing.")
+            guard let error = error as? DecodingError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.localizedDescription,"The data couldn’t be read because it is missing.")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
@@ -270,10 +343,15 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual((error! as NSError).code, MSIDErrorCode.serverUnhandledResponse.rawValue)
-            XCTAssertEqual((error! as NSError).userInfo[MSIDHTTPResponseCodeKey] as! String, "600")
-            XCTAssertEqual((error! as NSError).userInfo[MSIDErrorDescriptionKey] as! String, "")
-            XCTAssertEqual(((error! as NSError).userInfo[MSIDHTTPHeadersKey] as! [String: String]).count, 0)
+            guard let error = error as? NSError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.code, MSIDErrorCode.serverUnhandledResponse.rawValue)
+            XCTAssertEqual(error.userInfo[MSIDHTTPResponseCodeKey] as! String, "600")
+            XCTAssertEqual(error.userInfo[MSIDErrorDescriptionKey] as! String, "")
+            XCTAssertEqual((error.userInfo[MSIDHTTPHeadersKey] as! [String: String]).count, 0)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)

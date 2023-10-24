@@ -161,7 +161,7 @@ open class SignInCodeStartDelegateSpy: SignInStartDelegate {
         XCTAssertEqual(codeLength, expectedCodeLength)
         XCTAssertTrue(Thread.isMainThread)
         if let verifyCodeDelegate = verifyCodeDelegate {
-            newState.submitCode(code: "code", delegate: verifyCodeDelegate, correlationId: correlationId)
+            newState.submitCode(code: "code", correlationId: correlationId, delegate: verifyCodeDelegate)
         } else {
             expectation.fulfill()
         }

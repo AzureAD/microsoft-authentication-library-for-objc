@@ -1,0 +1,706 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477329969264003BA4B4 /* AppDelegate.swift */; };
+		9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477529969264003BA4B4 /* SceneDelegate.swift */; };
+		9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */; };
+		9B08477B29969264003BA4B4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477929969264003BA4B4 /* Main.storyboard */; };
+		9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477C29969265003BA4B4 /* Assets.xcassets */; };
+		9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */; };
+		9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */; };
+		9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */; };
+		9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */; };
+		9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */; };
+		9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B9DD5192A053E8700042B43 /* ObjCViewController.m */; };
+		9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1949529F820980023905D /* EmailAndCodeViewController.swift */; };
+		9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; };
+		9BB32E4C29A6750800BD7D89 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB32E2029A674BB00BD7D89 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */; };
+		9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9BB32E1F29A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F431E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		9BB32E2129A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FC11E3FF47D00C69FBA;
+			remoteInfo = "MSAL iOS Unit Tests";
+		};
+		9BB32E2329A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F501E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
+		9BB32E2529A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FD01E3FF49C00C69FBA;
+			remoteInfo = "MSAL Mac Unit Tests";
+		};
+		9BB32E2729A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D61A64331E5A29580086D120;
+			remoteInfo = "MSAL Test App (iOS)";
+		};
+		9BB32E2929A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 962E37BC1E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
+		};
+		9BB32E2B29A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D672279F1EBD111900F3422A;
+			remoteInfo = "unit-test-host";
+		};
+		9BB32E2D29A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B2BB73702112C32C000EA4C5;
+			remoteInfo = InteractiveiOSTests;
+		};
+		9BB32E2F29A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B29E2ACE21238F5200B170ED;
+			remoteInfo = MultiAppiOSTests;
+		};
+		9BB32E3129A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1E614BDA22558D8300EBF62F;
+			remoteInfo = "MSAL Test App (Mac)";
+		};
+		9BB32E3329A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B57B226921890035C7C2;
+			remoteInfo = "MSAL (iOS Static Library)";
+		};
+		9BB32E3529A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B59C2269286F0035C7C2;
+			remoteInfo = "MSAL (Mac Static Library)";
+		};
+		9BB32E3729A674BB00BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B295A16422D0348400FFB313;
+			remoteInfo = "unit-test-host-mac";
+		};
+		9BB32E3B29A674F300BD7D89 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		9BFB690F29E0002B006F0CF4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 28D1D56C29BF62E900CE75F4;
+			remoteInfo = "MSAL iOS Native Auth Integration Tests";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9BB32E4D29A6750800BD7D89 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9BB32E4C29A6750800BD7D89 /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeAuthSampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B08477329969264003BA4B4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9B08477529969264003BA4B4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAndPasswordViewController.swift; sourceTree = "<group>"; };
+		9B08477A29969264003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		9B08477C29969265003BA4B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9B08477F29969265003BA4B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		9B08478129969265003BA4B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
+		9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordViewController.swift; sourceTree = "<group>"; };
+		9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPasswordViewController.swift; sourceTree = "<group>"; };
+		9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAttributesViewController.swift; sourceTree = "<group>"; };
+		9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NativeAuthSampleApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		9B9DD5182A053E8700042B43 /* ObjCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCViewController.h; sourceTree = "<group>"; };
+		9B9DD5192A053E8700042B43 /* ObjCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCViewController.m; sourceTree = "<group>"; };
+		9BA1949529F820980023905D /* EmailAndCodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailAndCodeViewController.swift; sourceTree = "<group>"; };
+		9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
+		9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFallbackViewController.swift; sourceTree = "<group>"; };
+		9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NativeAuthSampleApp.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9B08476D29969264003BA4B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9BB32E4B29A6750800BD7D89 /* MSAL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9B08476729969264003BA4B4 = {
+			isa = PBXGroup;
+			children = (
+				9B08477229969264003BA4B4 /* NativeAuthSampleApp */,
+				9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */,
+				9B08477129969264003BA4B4 /* Products */,
+				9BB32E4A29A6750800BD7D89 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		9B08477129969264003BA4B4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B08477229969264003BA4B4 /* NativeAuthSampleApp */ = {
+			isa = PBXGroup;
+			children = (
+				9B08477329969264003BA4B4 /* AppDelegate.swift */,
+				9B08477529969264003BA4B4 /* SceneDelegate.swift */,
+				9BE0CE5F29EEE00B00F2C77F /* Configuration.swift */,
+				9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */,
+				9B73CACB29F6DAA300FC7129 /* Modal View Controllers */,
+				9BFB690129E0002B006F0CF4 /* NativeAuthSampleApp.entitlements */,
+				9B08477929969264003BA4B4 /* Main.storyboard */,
+				9B08477C29969265003BA4B4 /* Assets.xcassets */,
+				9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */,
+				9B08478129969265003BA4B4 /* Info.plist */,
+			);
+			path = NativeAuthSampleApp;
+			sourceTree = "<group>";
+		};
+		9B73CACB29F6DAA300FC7129 /* Modal View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B14AE4C29D204EA006F7C51 /* VerifyCodeViewController.swift */,
+				9B14AE5C29D33CEB006F7C51 /* NewPasswordViewController.swift */,
+			);
+			name = "Modal View Controllers";
+			sourceTree = "<group>";
+		};
+		9B73CAD929F6DAC200FC7129 /* Scenario View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				9B08477729969264003BA4B4 /* EmailAndPasswordViewController.swift */,
+				9BA1949529F820980023905D /* EmailAndCodeViewController.swift */,
+				9B2B492D29F2D69000E586FA /* CustomAttributesViewController.swift */,
+				9B14AE5A29D33B0D006F7C51 /* ResetPasswordViewController.swift */,
+				9BFB68EB29DEE5BF006F0CF4 /* WebFallbackViewController.swift */,
+				9B9125012A0A90DB006F91E8 /* Objective-C Scenario */,
+			);
+			name = "Scenario View Controllers";
+			sourceTree = "<group>";
+		};
+		9B9125012A0A90DB006F91E8 /* Objective-C Scenario */ = {
+			isa = PBXGroup;
+			children = (
+				9B9DD5182A053E8700042B43 /* ObjCViewController.h */,
+				9B9DD5192A053E8700042B43 /* ObjCViewController.m */,
+				9B9DD5172A053E8600042B43 /* NativeAuthSampleApp-Bridging-Header.h */,
+			);
+			name = "Objective-C Scenario";
+			sourceTree = "<group>";
+		};
+		9BB32E1029A674BB00BD7D89 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BB32E2029A674BB00BD7D89 /* MSAL.framework */,
+				9BB32E2229A674BB00BD7D89 /* "MSAL-iOS-UI-Tests".xctest */,
+				9BB32E2429A674BB00BD7D89 /* MSAL.framework */,
+				9BB32E2629A674BB00BD7D89 /* "MSAL-Mac-Unit-Tests".xctest */,
+				9BB32E2829A674BB00BD7D89 /* MSAL Test App.app */,
+				9BB32E2A29A674BB00BD7D89 /* MSAL Test Automation (iOS).app */,
+				9BB32E2C29A674BB00BD7D89 /* unit-test-host.app */,
+				9BB32E2E29A674BB00BD7D89 /* InteractiveiOSTests.xctest */,
+				9BB32E3029A674BB00BD7D89 /* MultiAppiOSTests.xctest */,
+				9BB32E3229A674BB00BD7D89 /* MSAL Test App (Mac).app */,
+				9BB32E3429A674BB00BD7D89 /* libMSAL (iOS Static Library).a */,
+				9BB32E3629A674BB00BD7D89 /* libMSAL (macOS Static Library).a */,
+				9BB32E3829A674BB00BD7D89 /* unit-test-host-mac.app */,
+				9BFB691029E0002B006F0CF4 /* MSAL iOS Native Auth Integration Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9BB32E4A29A6750800BD7D89 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9B08476F29969264003BA4B4 /* NativeAuthSampleApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B08478429969265003BA4B4 /* Build configuration list for PBXNativeTarget "NativeAuthSampleApp" */;
+			buildPhases = (
+				9B08476C29969264003BA4B4 /* Sources */,
+				9B08476D29969264003BA4B4 /* Frameworks */,
+				9B08476E29969264003BA4B4 /* Resources */,
+				9BB32E4D29A6750800BD7D89 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9BB32E3C29A674F300BD7D89 /* PBXTargetDependency */,
+			);
+			name = NativeAuthSampleApp;
+			productName = NativeAuthSampleApp;
+			productReference = 9B08477029969264003BA4B4 /* NativeAuthSampleApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9B08476829969264003BA4B4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					9B08476F29969264003BA4B4 = {
+						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1430;
+					};
+				};
+			};
+			buildConfigurationList = 9B08476B29969264003BA4B4 /* Build configuration list for PBXProject "NativeAuthSampleApp" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9B08476729969264003BA4B4;
+			productRefGroup = 9B08477129969264003BA4B4 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 9BB32E1029A674BB00BD7D89 /* Products */;
+					ProjectRef = 9BB32E0F29A674BB00BD7D89 /* MSAL.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				9B08476F29969264003BA4B4 /* NativeAuthSampleApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		9BB32E2029A674BB00BD7D89 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = 9BB32E1F29A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2229A674BB00BD7D89 /* "MSAL-iOS-UI-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-iOS-UI-Tests\".xctest";
+			remoteRef = 9BB32E2129A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2429A674BB00BD7D89 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = 9BB32E2329A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2629A674BB00BD7D89 /* "MSAL-Mac-Unit-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-Mac-Unit-Tests\".xctest";
+			remoteRef = 9BB32E2529A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2829A674BB00BD7D89 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = 9BB32E2729A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2A29A674BB00BD7D89 /* MSAL Test Automation (iOS).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test Automation (iOS).app";
+			remoteRef = 9BB32E2929A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2C29A674BB00BD7D89 /* unit-test-host.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host.app";
+			remoteRef = 9BB32E2B29A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E2E29A674BB00BD7D89 /* InteractiveiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = InteractiveiOSTests.xctest;
+			remoteRef = 9BB32E2D29A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E3029A674BB00BD7D89 /* MultiAppiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MultiAppiOSTests.xctest;
+			remoteRef = 9BB32E2F29A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E3229A674BB00BD7D89 /* MSAL Test App (Mac).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App (Mac).app";
+			remoteRef = 9BB32E3129A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E3429A674BB00BD7D89 /* libMSAL (iOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (iOS Static Library).a";
+			remoteRef = 9BB32E3329A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E3629A674BB00BD7D89 /* libMSAL (macOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (macOS Static Library).a";
+			remoteRef = 9BB32E3529A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BB32E3829A674BB00BD7D89 /* unit-test-host-mac.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host-mac.app";
+			remoteRef = 9BB32E3729A674BB00BD7D89 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9BFB691029E0002B006F0CF4 /* MSAL iOS Native Auth Integration Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL iOS Native Auth Integration Tests.xctest";
+			remoteRef = 9BFB690F29E0002B006F0CF4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9B08476E29969264003BA4B4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B08478029969265003BA4B4 /* LaunchScreen.storyboard in Resources */,
+				9B08477D29969265003BA4B4 /* Assets.xcassets in Resources */,
+				9B08477B29969264003BA4B4 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9B08476C29969264003BA4B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9BFB68EC29DEE5BF006F0CF4 /* WebFallbackViewController.swift in Sources */,
+				9B14AE4D29D204EA006F7C51 /* VerifyCodeViewController.swift in Sources */,
+				9B08477829969264003BA4B4 /* EmailAndPasswordViewController.swift in Sources */,
+				9B9DD51A2A053E8700042B43 /* ObjCViewController.m in Sources */,
+				9B14AE5D29D33CEB006F7C51 /* NewPasswordViewController.swift in Sources */,
+				9B14AE5B29D33B0D006F7C51 /* ResetPasswordViewController.swift in Sources */,
+				9B2B493B29F2D69000E586FA /* CustomAttributesViewController.swift in Sources */,
+				9B08477429969264003BA4B4 /* AppDelegate.swift in Sources */,
+				9BE0CE6029EEE00B00F2C77F /* Configuration.swift in Sources */,
+				9BA194A329F820980023905D /* EmailAndCodeViewController.swift in Sources */,
+				9B08477629969264003BA4B4 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9BB32E3C29A674F300BD7D89 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = 9BB32E3B29A674F300BD7D89 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		9B08477929969264003BA4B4 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9B08477A29969264003BA4B4 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		9B08477E29969265003BA4B4 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9B08477F29969265003BA4B4 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		9B08478229969265003BA4B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		9B08478329969265003BA4B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9B08478529969265003BA4B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NativeAuthSampleApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9B08478629969265003BA4B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = NativeAuthSampleApp/NativeAuthSampleApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NativeAuthSampleApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.NativeAuthSampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NativeAuthSampleApp/NativeAuthSampleApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9B08476B29969264003BA4B4 /* Build configuration list for PBXProject "NativeAuthSampleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B08478229969265003BA4B4 /* Debug */,
+				9B08478329969265003BA4B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B08478429969265003BA4B4 /* Build configuration list for PBXNativeTarget "NativeAuthSampleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B08478529969265003BA4B4 /* Debug */,
+				9B08478629969265003BA4B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9B08476829969264003BA4B4 /* Project object */;
+}

@@ -47,9 +47,9 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
 @objcMembers public class SignUpCodeRequiredState: SignUpBaseState {
     /// Requests the server to resend the verification code to the user.
     /// - Parameters:
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func resendCode(delegate: SignUpResendCodeDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func resendCode(correlationId: UUID? = nil, delegate: SignUpResendCodeDelegate) {
         Task {
             let result = await resendCodeInternal(correlationId: correlationId)
 
@@ -70,9 +70,9 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// Submits the code to the server for verification.
     /// - Parameters:
     ///   - code: Verification code that the user supplies.
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func submitCode(code: String, correlationId: UUID? = nil, delegate: SignUpVerifyCodeDelegate) {
         Task {
             let controllerResponse = await submitCodeInternal(code: code, correlationId: correlationId)
 
@@ -110,9 +110,9 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplied.
-    ///   - delegate: Delegate that receives callbacks for the operation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate, correlationId: UUID? = nil) {
+    ///   - delegate: Delegate that receives callbacks for the operation.
+    public func submitPassword(password: String, correlationId: UUID? = nil, delegate: SignUpPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password, correlationId: correlationId)
 

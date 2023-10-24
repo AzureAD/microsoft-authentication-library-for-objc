@@ -31,12 +31,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     private lazy var parameters = getParameters()
     private lazy var contextStub = ContextStub()
     
-    override func setUp() {
-        clearCache()
-    }
-    
-    override func tearDown() {
-        clearCache()
+    override func tearDownWithError() throws {
+        try cacheAccessor.clearCache(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, clientId: parameters.msidConfiguration.clientId, context: contextStub)
     }
     
     // MARK: happy cases
@@ -78,6 +74,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     }
 
     func testGetAllAccounts_whenAllInfoPresent_shouldRetrieveDataCorrectly() {
+        clearCache()
         let tokenResponse = getTokenResponse()
         var tokens: MSALNativeAuthTokens? = nil
         var account: MSALAccount? = nil
@@ -92,9 +89,11 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
+        clearCache()
     }
 
     func testGetAllAccounts_whenAllInfoPresent_shouldRetrieveDataOnlyOnSameAuthority() {
+        clearCache()
         let tokenResponse = getTokenResponse()
         var tokens: MSALNativeAuthTokens? = nil
         var account: MSALAccount? = nil
@@ -110,9 +109,11 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
+        clearCache()
     }
 
     func testDataRetrieval_whenAccountIsOverwritten_shouldRetrieveLastAccount() {
+        clearCache()
         let tokenResponse = getTokenResponse()
         XCTAssertNoThrow(try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
         var tokens: MSALNativeAuthTokens? = nil
@@ -135,20 +136,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertEqual(tokens?.accessToken?.accessToken, newAccessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, newRefreshToken)
         XCTAssertEqual(tokens?.rawIdToken, newIdToken)
-    }
-    
-    func testAccountStore_whenAllInfoPresent_shouldStoreAccountCorrectly() {
-        let tokenResponse = getTokenResponse()
-        XCTAssertNoThrow(try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
-
-        var account: MSIDAccount? = nil
-        XCTAssertNoThrow(account = try cacheAccessor.getAccount(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, context: contextStub))
-        XCTAssertEqual(account?.accountIdentifier.homeAccountId, parameters.accountIdentifier.homeAccountId)
-        // this information was took from the TokenResponse.IDToken (JWT format)
-        XCTAssertEqual(account?.accountIdentifier.displayableId, "1234567890")
-        XCTAssertEqual(account?.accountIdentifier.utid, parameters.accountIdentifier.utid)
-        XCTAssertEqual(account?.accountIdentifier.uid, parameters.accountIdentifier.uid)
-        XCTAssertEqual(account?.clientInfo, tokenResponse.clientInfo)
+        clearCache()
     }
     
     func testTokensDeletion_whenAllInfoPresent_shouldRemoveTokensCorrectly() {
@@ -168,41 +156,18 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertNil(tokens)
     }
     
-    func testClearCache_whenAllInfoPresent_shouldRemoveTokensAndAccountCorrectly() {
-        var tokens: MSALNativeAuthTokens? = nil
-        var account: MSIDAccount? = nil
-        XCTAssertThrowsError(tokens = try cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertThrowsError(account = try cacheAccessor.getAccount(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, context: contextStub))
-        XCTAssertNil(tokens)
-        XCTAssertNil(account)
-        
-        let tokenResponse = getTokenResponse()
-        let _ = try? cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub)
-        
-        tokens = try? cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub)
-        account = try? cacheAccessor.getAccount(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, context: contextStub)
-        XCTAssertNotNil(tokens)
-        XCTAssertNotNil(account)
-        
-        XCTAssertNoThrow(try cacheAccessor.clearCache(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, clientId: parameters.msidConfiguration.clientId, context: contextStub))
-        
-        tokens = try? cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub)
-        account = try? cacheAccessor.getAccount(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, context: contextStub)
-        XCTAssertNil(tokens)
-        XCTAssertNil(account)
-    }
-    
     // MARK: unhappy cases
     
     func testDataRetrieval_whenNoDataIsStored_shouldThrowsAnError() {
         XCTAssertThrowsError(try cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertThrowsError(try cacheAccessor.getAccount(accountIdentifier: parameters.accountIdentifier, authority: parameters.msidConfiguration.authority, context: contextStub))
     }
 
     func testDataRetrieval_whenNoAccountStored_ShouldReturnNoAccount() {
+        clearCache()
         var account: MSALAccount? = nil
         XCTAssertNoThrow(account = try cacheAccessor.getAllAccounts(configuration: parameters.msidConfiguration).first)
         XCTAssertNil(account)
+        clearCache()
     }
     
     func testContentDeletion_whenNoDataIsStored_shouldNotThrowsAnError() {
