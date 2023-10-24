@@ -31,7 +31,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     private lazy var parameters = getParameters()
     private lazy var contextStub = ContextStub()
     
-    override func setUp() {    
+    override func setUp() {
         clearCache()
     }
     
