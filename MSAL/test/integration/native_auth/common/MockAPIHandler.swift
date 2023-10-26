@@ -26,7 +26,7 @@ import XCTest
 
 class MockAPIHandler {
     
-    private let baseURL = "https://native-ux-mock-api.azurewebsites.net/config/"
+    private let baseURL = "<mock_api_url>/config/"
 
     func clearQueues(correlationId: UUID) throws {
         guard let url = URL(string: baseURL + "all") else {
