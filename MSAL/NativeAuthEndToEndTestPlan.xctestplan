@@ -52,6 +52,10 @@
           {
             "key" : "useMockAPI",
             "value" : "true"
+          },
+          {
+            "key" : "mockAPIURL",
+            "value" : "<placeholder>"
           }
         ]
       }

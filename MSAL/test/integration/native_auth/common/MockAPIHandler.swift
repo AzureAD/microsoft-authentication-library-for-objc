@@ -26,7 +26,7 @@ import XCTest
 
 class MockAPIHandler {
     
-    private let baseURL = "<mock_api_url>/config/"
+    private let baseURL = (ProcessInfo.processInfo.environment["mockAPIURL"] ?? "<mock api url not set>") + "/config/"
 
     func clearQueues(correlationId: UUID) throws {
         guard let url = URL(string: baseURL + "all") else {
