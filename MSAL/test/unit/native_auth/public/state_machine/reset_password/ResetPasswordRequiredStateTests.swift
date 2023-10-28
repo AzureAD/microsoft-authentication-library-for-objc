@@ -47,7 +47,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         XCTAssertNil(controller.context)
         XCTAssertFalse(controller.submitPasswordCalled)
 
-        sut.submitPassword(password: "1234", delegate: ResetPasswordRequiredDelegateSpy(), correlationId: correlationId)
+        sut.submitPassword(password: "1234", correlationId: correlationId, delegate: ResetPasswordRequiredDelegateSpy())
 
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)
