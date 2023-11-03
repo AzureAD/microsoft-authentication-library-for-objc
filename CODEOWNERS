@@ -2,6 +2,12 @@
 # Unless a later match takes precedence, these users will be requested
 # for review whenever someone opens a pull request.
 *       @AzureAD/AppleIdentityTeam
+# @AzureAD/AppleCIAMTeam owns any files in the */native_auth
+# directory at the root of the repository and any of its
+# subdirectories.
+/MSAL/src/native_auth/ @AzureAD/AppleCIAMTeam
+/MSAL/test/unit/native_auth/ @AzureAD/AppleCIAMTeam
+/MSAL/test/integration/native_auth/ @AzureAD/AppleCIAMTeam
 # For more details about inheritance patterns, or to assign different
 # owners for individual file extensions, see:
 # https://help.github.com/articles/about-codeowners/
