@@ -3,8 +3,7 @@
 # for review whenever someone opens a pull request.
 *       @AzureAD/AppleIdentityTeam
 # @AzureAD/AppleCIAMTeam owns any files in the */native_auth
-# directory at the root of the repository and any of its
-# subdirectories.
+# directories and any of its subdirectories.
 /MSAL/src/native_auth/ @AzureAD/AppleCIAMTeam
 /MSAL/test/unit/native_auth/ @AzureAD/AppleCIAMTeam
 /MSAL/test/integration/native_auth/ @AzureAD/AppleCIAMTeam
