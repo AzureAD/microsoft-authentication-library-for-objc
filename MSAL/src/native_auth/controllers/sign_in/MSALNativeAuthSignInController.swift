@@ -115,7 +115,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         slt: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
-    ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError> {
+    ) async -> SignInSltControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
@@ -125,7 +125,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .error, context: context, format: "SignIn not available because SLT is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryInfo, error: error)
-            return .failure(error)
+            return .init(.failure(error))
         }
         let scopes = joinScopes(scopes)
         guard let request = createTokenRequest(
@@ -137,7 +137,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         ) else {
             let error = SignInAfterSignUpError()
             stopTelemetryEvent(telemetryInfo, error: error)
-            return .failure(error)
+            return .init(.failure(error))
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
@@ -148,10 +148,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 scopes: scopes,
                 telemetryInfo: telemetryInfo,
                 onSuccess: { accountResult in
-                    continuation.resume(returning: .success(accountResult))
+                    continuation.resume(returning: .init(.success(accountResult), telemetryUpdate: { [weak self] result in
+                        self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                    }))
                 },
                 onError: { error in
-                    continuation.resume(returning: .failure(SignInAfterSignUpError(message: error.errorDescription)))
+                    continuation.resume(returning: .init(.failure(SignInAfterSignUpError(message: error.errorDescription))))
                 }
             )
         }
@@ -163,7 +165,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         credentialToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> SignInVerifyCodeResult {
+    ) async -> SignInSubmitCodeControllerResponse {
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitCode, context: context),
             context: context
@@ -196,7 +198,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     telemetryInfo: telemetryInfo,
                     config: config,
                     onSuccess: { accountResult in
-                        continuation.resume(returning: .completed(accountResult))
+                        continuation.resume(returning: .init(.completed(accountResult), telemetryUpdate: { [weak self] result in
+                            self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                        }))
                     },
                     onError: { [weak self] error in
                         MSALLogger.log(level: .error, context: context, format: "SignIn submit code, token request failed with error \(error)")
@@ -229,7 +233,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         credentialToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> SignInPasswordRequiredResult {
+    ) async -> SignInSubmitPasswordControllerResponse {
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitPassword, context: context),
             context: context
@@ -261,7 +265,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     telemetryInfo: telemetryInfo,
                     config: config,
                     onSuccess: { accountResult in
-                        continuation.resume(returning: .completed(accountResult))
+                        continuation.resume(returning: .init(.completed(accountResult), telemetryUpdate: { [weak self] result in
+                            self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                        }))
                     },
                     onError: { [weak self] error in
                         MSALLogger.log(level: .error, context: context, format: "SignIn submit password, token request failed with error \(error)")
@@ -292,7 +298,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         credentialToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> SignInResendCodeResult {
+    ) async -> SignInResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInResendCode, context: context)
         let result = await performAndValidateChallengeRequest(credentialToken: credentialToken, context: context)
         switch result {
@@ -300,19 +306,31 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             let error = ResendCodeError()
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
-            return .error(error: error, newState: nil)
+            return .init(.error(error: error, newState: nil))
         case .error(let challengeError):
             let error = ResendCodeError()
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received challenge error response: \(challengeError)")
             stopTelemetryEvent(event, context: context, error: error)
-            return .error(error: error, newState: SignInCodeRequiredState(scopes: scopes,
-                                                                          controller: self,
-                                                                          flowToken: credentialToken,
-                                                                          correlationId: context.correlationId()))
+            return .init(.error(
+                error: error,
+                newState: SignInCodeRequiredState(
+                    scopes: scopes,
+                    controller: self,
+                    flowToken: credentialToken,
+                    correlationId: context.correlationId()))
+            )
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context)
-            return .codeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength)
+            return .init(
+                .codeRequired(
+                    newState: state,
+                    sentTo: sentTo,
+                    channelTargetType: channelType,
+                    codeLength: codeLength),
+                telemetryUpdate: { [weak self] result in
+                    self?.updateTelemetryEvent(event, context: context, result: result)
+                })
         }
     }
 
@@ -324,14 +342,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         credentialToken: String,
         context: MSALNativeAuthRequestContext
-    ) -> SignInVerifyCodeResult {
+    ) -> SignInSubmitCodeControllerResponse {
         MSALLogger.log(
             level: .error,
             context: context,
             format: "SignIn completed with errorType: \(errorType)")
         stopTelemetryEvent(telemetryInfo, error: errorType)
         let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken, correlationId: context.correlationId())
-        return .error(error: errorType.convertToVerifyCodeError(), newState: state)
+        return .init(.error(error: errorType.convertToVerifyCodeError(), newState: state))
     }
 
     private func processSubmitPasswordFailure(
@@ -340,18 +358,20 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         credentialToken: String,
         scopes: [String]
-    ) -> SignInPasswordRequiredResult {
+    ) -> SignInSubmitPasswordControllerResponse {
         MSALLogger.log(
             level: .error,
             context: telemetryInfo.context,
             format: "SignIn with username and password completed with errorType: \(errorType)")
         stopTelemetryEvent(telemetryInfo, error: errorType)
-        let state = SignInPasswordRequiredState(scopes: scopes,
-                                                username: username,
-                                                controller: self,
-                                                flowToken: credentialToken,
-                                                correlationId: telemetryInfo.context.correlationId())
-        return .error(error: errorType.convertToPasswordRequiredError(), newState: state)
+        let state = SignInPasswordRequiredState(
+            scopes: scopes,
+            username: username,
+            controller: self,
+            flowToken: credentialToken,
+            correlationId: telemetryInfo.context.correlationId()
+        )
+        return .init(.error(error: errorType.convertToPasswordRequiredError(), newState: state))
     }
 
     private func performAndValidateSignInInitiate(
@@ -464,18 +484,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
 
             return .init(.passwordRequired(newState: state), telemetryUpdate: { [weak self] result in
-                switch result {
-                case .success:
-                    MSALLogger.log(level: .verbose, context: telemetryInfo.context, format: "SignIn, password required")
-                    self?.stopTelemetryEvent(telemetryInfo)
-                case .failure(let error):
-                    MSALLogger.log(
-                        level: .error,
-                        context: telemetryInfo.context,
-                        format: "SignIn error: \(error.errorDescription ?? "No error description")"
-                    )
-                    self?.stopTelemetryEvent(telemetryInfo, error: error)
-                }
+                self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
             })
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             let state = SignInCodeRequiredState(scopes: scopes,
@@ -483,7 +492,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                 flowToken: credentialToken,
                                                 correlationId: params.context.correlationId())
             stopTelemetryEvent(telemetryInfo)
-            return .init(.codeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength))
+            return .init(
+                .codeRequired(
+                    newState: state,
+                    sentTo: sentTo,
+                    channelTargetType: channelType,
+                    codeLength: codeLength
+                ), telemetryUpdate: { [weak self] result in
+                    self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                })
         case .error(let challengeError):
             let error = challengeError.convertToSignInStartError()
             MSALLogger.log(level: .error,
@@ -516,17 +533,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
 
             return .init(result, telemetryUpdate: { [weak self] result in
-                switch result {
-                case .success:
-                    self?.stopTelemetryEvent(telemetryInfo)
-                case .failure(let error):
-                    MSALLogger.log(
-                        level: .error,
-                        context: telemetryInfo.context,
-                        format: "SignIn error \(error.errorDescription ?? "No error description")"
-                    )
-                    self?.stopTelemetryEvent(telemetryInfo, error: error)
-                }
+                self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
             })
         case .passwordRequired(let credentialToken):
             guard let request = createTokenRequest(
@@ -549,7 +556,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     scopes: scopes,
                     telemetryInfo: telemetryInfo,
                     onSuccess: { accountResult in
-                        continuation.resume(returning: SignInPasswordControllerResponse(.completed(accountResult)))
+                    continuation.resume(returning: SignInPasswordControllerResponse(.completed(accountResult),
+                                                                                    telemetryUpdate: { [weak self] result in
+                        self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                    }))
                     },
                     onError: { error in
                         continuation.resume(returning: SignInPasswordControllerResponse(.error(error)))

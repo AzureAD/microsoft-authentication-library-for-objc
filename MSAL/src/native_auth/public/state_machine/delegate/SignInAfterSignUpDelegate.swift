@@ -32,5 +32,5 @@ public protocol SignInAfterSignUpDelegate {
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }

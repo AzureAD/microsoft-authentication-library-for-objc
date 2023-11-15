@@ -1816,7 +1816,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.signInSLTResult = .failure(.init())
+        signInControllerMock.signInSLTResult = .init(.failure(.init()))
         helper.signInAfterSignUpState?.signIn(delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)
 

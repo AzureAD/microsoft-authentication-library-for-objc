@@ -115,6 +115,21 @@ class MSALNativeAuthBaseController {
         MSIDTelemetry.sharedInstance().flush(context.telemetryRequestId())
     }
 
+    func updateTelemetryEvent(
+        _ event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        result: Result<Void, MSALNativeAuthError>,
+        error: MSALNativeAuthError? = nil
+    ) {
+        switch result {
+        case .success:
+            stopTelemetryEvent(event, context: context, error: error)
+        case .failure(let error):
+            MSALLogger.log(level: .error, context: context, format: "Error \(error.errorDescription ?? "No error description")")
+            stopTelemetryEvent(event, context: context, error: error)
+        }
+    }
+
     func complete<T>(
         _ telemetryEvent: MSIDTelemetryAPIEvent?,
         response: T? = nil,

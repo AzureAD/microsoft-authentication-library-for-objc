@@ -36,7 +36,7 @@ public protocol ResetPasswordStartDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor func onResetPasswordCodeRequired(
+    @MainActor @objc optional func onResetPasswordCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
@@ -54,7 +54,7 @@ public protocol ResetPasswordVerifyCodeDelegate {
 
     /// Notifies the delegate that a password is required from the user to continue.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @MainActor func onPasswordRequired(newState: ResetPasswordRequiredState)
+    @MainActor @objc optional func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
@@ -71,7 +71,7 @@ public protocol ResetPasswordResendCodeDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor func onResetPasswordResendCodeRequired(
+    @MainActor @objc optional func onResetPasswordResendCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
@@ -88,5 +88,5 @@ public protocol ResetPasswordRequiredDelegate {
     @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 
     /// Notifies the delegate that the reset password operation completed successfully.
-    @MainActor func onResetPasswordCompleted()
+    @MainActor @objc optional func onResetPasswordCompleted()
 }

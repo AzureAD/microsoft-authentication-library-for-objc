@@ -28,24 +28,24 @@ import XCTest
 
 class MSALNativeAuthResetPasswordControllerMock: MSALNativeAuthResetPasswordControlling {
 
-    var resetPasswordResult: ResetPasswordStartResult!
-    var resendCodeResult: ResetPasswordResendCodeResult!
-    var submitCodeResult: ResetPasswordVerifyCodeResult!
-    var submitPasswordResult: ResetPasswordRequiredResult!
+    var resetPasswordResult: ResetPasswordStartControllerResponse!
+    var resendCodeResult: ResetPasswordResendCodeControllerResponse!
+    var submitCodeResult: ResetPasswordSubmitCodeControllerResponse!
+    var submitPasswordResult: ResetPasswordSubmitPasswordControllerResponse!
 
-    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult {
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartControllerResponse {
         return resetPasswordResult
     }
 
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult {
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
         return resendCodeResult
     }
 
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult {
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
         return submitCodeResult
     }
 
-    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordRequiredResult {
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
         return submitPasswordResult
     }
 }

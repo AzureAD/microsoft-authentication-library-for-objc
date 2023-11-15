@@ -62,11 +62,11 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         username: String,
         context: MSIDRequestContext,
         signUpToken: String
-    ) async -> SignUpResendCodeResult {
+    ) async -> SignUpResendCodeControllerResponse {
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
-        return .error(.init())
+        return .init(.error(.init()))
     }
 
     func submitCode(
@@ -98,10 +98,10 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         username: String,
         signUpToken: String,
         context: MSIDRequestContext
-    ) async -> SignUpAttributesRequiredResult {
+    ) async -> SignUpSubmitAttributesControllerResponse {
         self.context = context
         submitAttributesCalled = true
         expectation.fulfill()
-        return .error(error: .init())
+        return .init(.error(error: .init()))
     }
 }

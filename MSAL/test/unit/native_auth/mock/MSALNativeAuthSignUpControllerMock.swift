@@ -30,10 +30,10 @@ class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
 
     var startPasswordResult: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse!
     var startResult: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse!
-    var resendCodeResult: SignUpResendCodeResult!
+    var resendCodeResult: SignUpResendCodeControllerResponse!
     var submitCodeResult: MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse!
     var submitPasswordResult: MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse!
-    var submitAttributesResult: SignUpAttributesRequiredResult!
+    var submitAttributesResult: SignUpSubmitAttributesControllerResponse!
 
     func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
         return startPasswordResult
@@ -43,7 +43,7 @@ class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
         return startResult
     }
 
-    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeResult {
+    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeControllerResponse {
         return resendCodeResult
     }
 
@@ -55,7 +55,7 @@ class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
         return submitPasswordResult
     }
 
-    func submitAttributes(_ attributes: [String : Any], username: String, signUpToken: String, context: MSIDRequestContext) async -> SignUpAttributesRequiredResult {
+    func submitAttributes(_ attributes: [String : Any], username: String, signUpToken: String, context: MSIDRequestContext) async -> SignUpSubmitAttributesControllerResponse {
         return submitAttributesResult
     }
 }

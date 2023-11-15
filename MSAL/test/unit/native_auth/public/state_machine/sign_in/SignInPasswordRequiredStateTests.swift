@@ -60,15 +60,37 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_success_shouldReturnSuccess() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInPasswordRequiredResult = .completed(expectedAccountResult)
-        controller.submitPasswordResult = .init(expectedResult)
+        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
 
-        let exp = expectation(description: "sign-in states")
         let delegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedUserAccountResult: expectedAccountResult)
 
-        sut.submitPassword(password: "invalid password", delegate: delegate)
-        wait(for: [exp])
+        sut.submitPassword(password: "password", delegate: delegate)
+        wait(for: [exp, exp2])
+    }
+
+    func test_submitPassword_delegate_success_whenMethodsNotImplemented_shouldReturnCorrectError() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
+        let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
+
+        let expectedResult: SignInPasswordRequiredResult = .completed(expectedAccountResult)
+        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+
+        let delegate = SignInPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        sut.submitPassword(password: "password", delegate: delegate)
+        wait(for: [exp, exp2])
+
+        XCTAssertNil(delegate.newPasswordRequiredState)
+        XCTAssertEqual(delegate.delegateError?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignInCompleted"))
     }
 }

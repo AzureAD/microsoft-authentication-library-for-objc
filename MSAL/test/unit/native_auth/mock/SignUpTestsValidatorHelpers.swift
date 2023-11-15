@@ -99,8 +99,8 @@ class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
 
 class SignUpResendCodeTestsValidatorHelper: SignUpResendCodeDelegateSpy {
 
-    func onSignUpResendCodeError(_ input: SignUpResendCodeResult) {
-        guard case let .error(error) = input else {
+    func onSignUpResendCodeError(_ input: MSALNativeAuthSignUpController.SignUpResendCodeControllerResponse) {
+        guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
@@ -110,8 +110,8 @@ class SignUpResendCodeTestsValidatorHelper: SignUpResendCodeDelegateSpy {
         }
     }
 
-    func onSignUpResendCodeCodeRequired(_ input: SignUpResendCodeResult) {
-        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input else {
+    func onSignUpResendCodeCodeRequired(_ input: MSALNativeAuthSignUpController.SignUpResendCodeControllerResponse) {
+        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .codeRequired")
         }
@@ -221,8 +221,8 @@ class SignUpAttributesRequiredTestsValidatorHelper {
         self.expectation = expectation
     }
 
-    func onSignUpAttributesRequired(_ input: SignUpAttributesRequiredResult) {
-        guard case let .attributesRequired(attributes, state) = input else {
+    func onSignUpAttributesRequired(_ input: MSALNativeAuthSignUpController.SignUpSubmitAttributesControllerResponse) {
+        guard case let .attributesRequired(attributes, state) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .attributesInvalid")
         }
@@ -234,8 +234,8 @@ class SignUpAttributesRequiredTestsValidatorHelper {
         expectation?.fulfill()
     }
 
-    func onSignUpAttributesRequiredError(_ input: SignUpAttributesRequiredResult) {
-        guard case let .error(error) = input else {
+    func onSignUpAttributesRequiredError(_ input: MSALNativeAuthSignUpController.SignUpSubmitAttributesControllerResponse) {
+        guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
@@ -246,8 +246,8 @@ class SignUpAttributesRequiredTestsValidatorHelper {
         expectation?.fulfill()
     }
 
-    func onSignUpAttributesValidationFailed(_ input: SignUpAttributesRequiredResult) {
-        guard case let .attributesInvalid(attributes, state) = input else {
+    func onSignUpAttributesValidationFailed(_ input: MSALNativeAuthSignUpController.SignUpSubmitAttributesControllerResponse) {
+        guard case let .attributesInvalid(attributes, state) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
@@ -259,8 +259,8 @@ class SignUpAttributesRequiredTestsValidatorHelper {
         expectation?.fulfill()
     }
 
-    func onSignUpCompleted(_ input: SignUpAttributesRequiredResult) {
-        guard case .completed = input else {
+    func onSignUpCompleted(_ input: MSALNativeAuthSignUpController.SignUpSubmitAttributesControllerResponse) {
+        guard case .completed = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }

@@ -27,6 +27,10 @@ import Foundation
 protocol MSALNativeAuthSignInControlling {
     typealias SignInPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordStartResult>
     typealias SignInCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
+    typealias SignInSltControllerResponse = MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>>
+    typealias SignInSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInVerifyCodeResult>
+    typealias SignInSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordRequiredResult>
+    typealias SignInResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInResendCodeResult>
 
     func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInPasswordControllerResponse
 
@@ -37,9 +41,14 @@ protocol MSALNativeAuthSignInControlling {
         slt: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
-    ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>
+    ) async -> SignInSltControllerResponse
 
-    func submitCode(_ code: String, credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult
+    func submitCode(
+        _ code: String,
+        credentialToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> SignInSubmitCodeControllerResponse
 
     func submitPassword(
         _ password: String,
@@ -47,7 +56,7 @@ protocol MSALNativeAuthSignInControlling {
         credentialToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> SignInPasswordRequiredResult
+    ) async -> SignInSubmitPasswordControllerResponse
 
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeResult
+    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse
 }

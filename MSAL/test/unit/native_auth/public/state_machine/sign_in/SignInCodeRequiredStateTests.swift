@@ -43,6 +43,8 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     // ResendCode
 
     func test_resendCode_delegate_withError_shouldReturnSignInResendCodeError() {
+        let exp = expectation(description: "sign-in states")
+
         let expectedError = ResendCodeError(message: "test error")
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
 
@@ -52,7 +54,6 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         )
         controller.resendCodeResult = .init(expectedResult)
 
-        let exp = expectation(description: "sign-in states")
         let delegate = SignInResendCodeDelegateSpy(expectation: exp)
 
         sut.resendCode(delegate: delegate)
@@ -63,6 +64,8 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     }
 
     func test_resendCode_delegate_success_shouldReturnSignInResendCodeCodeRequired() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: SignInResendCodeResult = .codeRequired(
@@ -71,19 +74,43 @@ final class SignInCodeRequiredStateTests: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controller.resendCodeResult = .init(expectedResult)
+        controller.resendCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
 
-        let exp = expectation(description: "sign-in states")
         let delegate = SignInResendCodeDelegateSpy(expectation: exp, expectedSentTo: "sentTo", expectedChannelTargetType: .email, expectedCodeLength: 1)
 
         sut.resendCode(delegate: delegate)
-        wait(for: [exp])
+        wait(for: [exp, exp2])
         XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+    }
+
+    func test_resendCode_delegate_success_butMethodNotImplemented_shouldReturnCorrectError() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: UUID())
+
+        let expectedResult: SignInResendCodeResult = .codeRequired(
+            newState: expectedState,
+            sentTo: "sentTo",
+            channelTargetType: .email,
+            codeLength: 1
+        )
+        controller.resendCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+
+        let delegate = SignInResendCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        sut.resendCode(delegate: delegate)
+        wait(for: [exp, exp2])
+        XCTAssertEqual(delegate.newSignInResendCodeError?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignInResendCodeCodeRequired"))
     }
 
     // SubmitCode
 
     func test_submitCode_delegate_withError_shouldReturnSignInVerifyCodeError() {
+        let exp = expectation(description: "sign-in states")
         let expectedError = VerifyCodeError(type: .invalidCode)
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
 
@@ -93,7 +120,6 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         )
         controller.submitCodeResult = .init(expectedResult)
 
-        let exp = expectation(description: "sign-in states")
         let delegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedError: expectedError)
         delegate.expectedNewState = expectedState
 
@@ -102,15 +128,36 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_success_shouldReturnAccountResult() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInVerifyCodeResult = .completed(expectedAccountResult)
-        controller.submitCodeResult = .init(expectedResult)
+        controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
 
-        let exp = expectation(description: "sign-in states")
         let delegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedUserAccountResult: expectedAccountResult)
 
         sut.submitCode(code: "1234", delegate: delegate)
-        wait(for: [exp])
+        wait(for: [exp, exp2])
+    }
+
+    func test_submitCode_delegate_success_whenMethodsNotImplemented_shouldReturnCorrectError() {
+        let exp = expectation(description: "sign-in states")
+        let exp2 = expectation(description: "expectation Telemetry")
+        let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
+
+        let expectedResult: SignInVerifyCodeResult = .completed(expectedAccountResult)
+        controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+
+        let delegate = SignInVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        sut.submitCode(code: "1234", delegate: delegate)
+        wait(for: [exp, exp2])
+        XCTAssertEqual(delegate.expectedError?.type, .generalError)
+        XCTAssertEqual(delegate.expectedError?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignInCompleted"))
     }
 }

@@ -31,25 +31,80 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
 
     private var correlationId: UUID = UUID()
     private var exp: XCTestExpectation!
-    private var controller: MSALNativeAuthResetPasswordControllerSpy!
+    private var controllerSpy: MSALNativeAuthResetPasswordControllerSpy!
+    private var controllerMock: MSALNativeAuthResetPasswordControllerMock!
     private var sut: ResetPasswordRequiredState!
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-
-        exp = expectation(description: "ResetPasswordRequiredState expectation")
-        controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
-        sut = ResetPasswordRequiredState(controller: controller, flowToken: "<token>", correlationId: correlationId)
-    }
-
     func test_submitPassword_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitPasswordCalled)
+        exp = expectation(description: "ResetPasswordRequiredState expectation")
+        controllerSpy = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
+        XCTAssertNil(controllerSpy.context)
+        XCTAssertFalse(controllerSpy.submitPasswordCalled)
 
+        let sut = ResetPasswordRequiredState(controller: controllerSpy, flowToken: "<token>", correlationId: correlationId)
         sut.submitPassword(password: "1234", delegate: ResetPasswordRequiredDelegateSpy())
 
         wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitPasswordCalled)
+        XCTAssertEqual(controllerSpy.context?.correlationId(), correlationId)
+        XCTAssertTrue(controllerSpy.submitPasswordCalled)
+    }
+
+    func test_submitPassword_delegate_whenError_shouldReturnCorrectError() {
+        controllerMock = MSALNativeAuthResetPasswordControllerMock()
+        let sut = ResetPasswordRequiredState(controller: controllerMock, flowToken: "<token>", correlationId: correlationId)
+
+        let expectedError = PasswordRequiredError(type: .invalidPassword, message: nil)
+        let expectedState = ResetPasswordRequiredState(controller: controllerMock, flowToken: "flowToken", correlationId: correlationId)
+
+        let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.error(error: expectedError, newState: expectedState))
+        controllerMock.submitPasswordResult = expectedResult
+
+        let exp = expectation(description: "reset password states")
+        let delegate = ResetPasswordRequiredDelegateSpy(expectation: exp)
+
+        sut.submitPassword(password: "incorrect", delegate: delegate)
+        wait(for: [exp])
+
+        XCTAssertEqual(delegate.error?.type, expectedError.type)
+        XCTAssertEqual(delegate.newPasswordRequiredState, expectedState)
+    }
+
+    func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
+        let exp = expectation(description: "reset password states")
+        let exp2 = expectation(description: "telemetry expectation")
+        controllerMock = MSALNativeAuthResetPasswordControllerMock()
+        let sut = ResetPasswordRequiredState(controller: controllerMock, flowToken: "<token>", correlationId: correlationId)
+
+        let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.completed, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+        controllerMock.submitPasswordResult = expectedResult
+
+        let delegate = ResetPasswordRequiredDelegateSpy(expectation: exp)
+
+        sut.submitPassword(password: "incorrect", delegate: delegate)
+        wait(for: [exp, exp2])
+
+        XCTAssertTrue(delegate.onResetPasswordCompletedCalled)
+    }
+
+    func test_submitPassword_delegate_whenSuccess_butOptionalMethodsNotImplemented_shouldReturnCorrectError() {
+        let exp = expectation(description: "reset password states")
+        let exp2 = expectation(description: "telemetry expectation")
+        controllerMock = MSALNativeAuthResetPasswordControllerMock()
+        let sut = ResetPasswordRequiredState(controller: controllerMock, flowToken: "<token>", correlationId: correlationId)
+
+        let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.completed, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+        controllerMock.submitPasswordResult = expectedResult
+
+        let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
+
+        sut.submitPassword(password: "incorrect", delegate: delegate)
+        wait(for: [exp, exp2])
+
+        XCTAssertEqual(delegate.error?.type, .generalError)
+        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onResetPasswordCompleted"))
     }
 }

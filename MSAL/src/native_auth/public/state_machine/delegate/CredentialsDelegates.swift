@@ -28,7 +28,7 @@ import Foundation
 public protocol CredentialsDelegate {
     /// Notifies the delegate that the operation completed successfully.
     /// - Parameter accessToken: The access token string.
-    @MainActor func onAccessTokenRetrieveCompleted(accessToken: String)
+    @MainActor @objc optional func onAccessTokenRetrieveCompleted(accessToken: String)
 
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
