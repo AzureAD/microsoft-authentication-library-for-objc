@@ -58,18 +58,39 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
     }
 }
 
+final class CredentialsDelegateOptionalMethodsNotImplemented: CredentialsDelegate {
+
+    private let expectation: XCTestExpectation
+    var expectedError: RetrieveAccessTokenError?
+
+    init(expectation: XCTestExpectation, expectedError: RetrieveAccessTokenError? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+
+    public func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
+        if let expectedError = expectedError {
+            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertEqual(error.type, expectedError.type)
+            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            expectation.fulfill()
+            return
+        }
+    }
+}
+
 class CredentialsTestValidatorHelper: CredentialsDelegateSpy {
 
-    func onAccessTokenRetrieveCompleted(_ result: Result<String, RetrieveAccessTokenError>) {
-        guard case let .success(token) = result else {
+    func onAccessTokenRetrieveCompleted(_ response: MSALNativeAuthCredentialsController.RefreshTokenCredentialControllerResponse) {
+        guard case let .success(token) = response.result else {
             return XCTFail("wrong result")
         }
 
         Task { await self.onAccessTokenRetrieveCompleted(accessToken: token) }
     }
 
-    func onAccessTokenRetrieveError(_ result: Result<String, RetrieveAccessTokenError>) {
-        guard case let .failure(error) = result else {
+    func onAccessTokenRetrieveError(_ response: MSALNativeAuthCredentialsController.RefreshTokenCredentialControllerResponse) {
+        guard case let .failure(error) = response.result else {
             return XCTFail("wrong result")
         }
 

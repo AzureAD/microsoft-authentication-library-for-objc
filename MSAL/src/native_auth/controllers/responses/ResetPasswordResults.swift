@@ -24,38 +24,19 @@
 
 import Foundation
 
-/// Represents the result of starting the reset password process.
 enum ResetPasswordStartResult {
-    /// Returned if a user has received an email with code.
-    ///
-    /// - newState: An object representing the new state of the flow with follow on methods.
-    /// - sentTo: The email/phone number that the code was sent to.
-    /// - channelTargetType: The channel (email/phone) the code was sent through.
-    /// - codeLength: The length of the code required.
     case codeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-
-    /// An error object indicating why the operation failed.
     case error(ResetPasswordStartError)
 }
 
-/// Result type that contains information about the code sent, the next state of the reset password process and possible errors.
-/// See ``CodeRequiredGenericResult`` for more information.
 typealias ResetPasswordResendCodeResult = CodeRequiredGenericResult<ResetPasswordCodeRequiredState, ResendCodeError>
 
-/// Represents the result of verifying a reset password verification code.
-enum ResetPasswordVerifyCodeResult {
-    /// Returned when a password is required.
+enum ResetPasswordSubmitCodeResult {
     case passwordRequired(newState: ResetPasswordRequiredState)
-
-    /// An error object indicating why the operation failed.
     case error(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
 }
 
-/// Represents the result of verifying a reset password verification code.
-enum ResetPasswordRequiredResult {
-    /// Returned after the reset password operation completed successfully.
+enum ResetPasswordSubmitPasswordResult {
     case completed
-
-    /// An error object indicating why the operation failed.
     case error(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 }

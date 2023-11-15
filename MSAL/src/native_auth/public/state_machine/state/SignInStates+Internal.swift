@@ -26,18 +26,18 @@ import Foundation
 
 extension SignInCodeRequiredState {
 
-    func submitCodeInternal(code: String) async -> SignInVerifyCodeResult {
+    func submitCodeInternal(code: String) async -> MSALNativeAuthSignInControlling.SignInSubmitCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
-            return .error(error: VerifyCodeError(type: .invalidCode), newState: self)
+            return .init(.error(error: VerifyCodeError(type: .invalidCode), newState: self))
         }
 
         return await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes)
     }
 
-    func resendCodeInternal() async -> SignInResendCodeResult {
+    func resendCodeInternal() async -> MSALNativeAuthSignInControlling.SignInResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
 
@@ -47,15 +47,13 @@ extension SignInCodeRequiredState {
 
 extension SignInPasswordRequiredState {
 
-    func submitPasswordInternal(
-        password: String
-    ) async -> SignInPasswordRequiredResult {
+    func submitPasswordInternal(password: String) async -> MSALNativeAuthSignInControlling.SignInSubmitPasswordControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
 
         guard inputValidator.isInputValid(password) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
-            return .error(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            return .init(.error(error: PasswordRequiredError(type: .invalidPassword), newState: self))
         }
 
         return await controller.submitPassword(password, username: username, credentialToken: flowToken, context: context, scopes: scopes)

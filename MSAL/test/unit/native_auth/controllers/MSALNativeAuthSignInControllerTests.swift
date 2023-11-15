@@ -394,6 +394,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInResponseValidatorMock.challengeValidatedResponse = .codeRequired(credentialToken: credentialToken, sentTo: sentTo, channelType: channelTargetType, codeLength: codeLength)
 
         let result = await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil))
+        result.telemetryUpdate?(.success(()))
 
         helper.onSignInCodeRequired(result)
 
@@ -697,6 +698,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInResponseValidatorMock.challengeValidatedResponse = .codeRequired(credentialToken: credentialToken, sentTo: sentTo, channelType: channelTargetType, codeLength: codeLength)
 
         let result = await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [])
+        result.telemetryUpdate?(.success(()))
 
         helper.onSignInResendCodeCodeRequired(result)
 
