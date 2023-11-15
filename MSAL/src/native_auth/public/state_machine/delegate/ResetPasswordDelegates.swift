@@ -28,15 +28,16 @@ import Foundation
 public protocol ResetPasswordStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onResetPasswordError(error: ResetPasswordStartError)
+    @MainActor func onResetPasswordStartError(error: ResetPasswordStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordStartError(error:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor func onResetPasswordCodeRequired(
+    @MainActor @objc optional func onResetPasswordCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
@@ -53,8 +54,9 @@ public protocol ResetPasswordVerifyCodeDelegate {
     @MainActor func onResetPasswordVerifyCodeError(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Notifies the delegate that a password is required from the user to continue.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordVerifyCodeError(error:newState:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @MainActor func onPasswordRequired(newState: ResetPasswordRequiredState)
+    @MainActor @objc optional func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
 @objc
@@ -66,12 +68,13 @@ public protocol ResetPasswordResendCodeDelegate {
     @MainActor func onResetPasswordResendCodeError(error: ResendCodeError, newState: ResetPasswordCodeRequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordResendCodeError(error:newState:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor func onResetPasswordResendCodeRequired(
+    @MainActor @objc optional func onResetPasswordResendCodeRequired(
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
@@ -88,5 +91,6 @@ public protocol ResetPasswordRequiredDelegate {
     @MainActor func onResetPasswordRequiredError(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
 
     /// Notifies the delegate that the reset password operation completed successfully.
-    @MainActor func onResetPasswordCompleted()
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordRequiredError(error:newState:)`` will be called.
+    @MainActor @objc optional func onResetPasswordCompleted()
 }

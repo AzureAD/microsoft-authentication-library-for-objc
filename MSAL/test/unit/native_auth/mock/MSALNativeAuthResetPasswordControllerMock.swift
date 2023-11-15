@@ -28,24 +28,24 @@ import XCTest
 
 class MSALNativeAuthResetPasswordControllerMock: MSALNativeAuthResetPasswordControlling {
 
-    var resetPasswordResult: ResetPasswordStartResult!
-    var resendCodeResult: ResetPasswordResendCodeResult!
-    var submitCodeResult: ResetPasswordVerifyCodeResult!
-    var submitPasswordResult: ResetPasswordRequiredResult!
+    var resetPasswordResponse: ResetPasswordStartControllerResponse!
+    var resendCodeResponse: ResetPasswordResendCodeControllerResponse!
+    var submitCodeResponse: ResetPasswordSubmitCodeControllerResponse!
+    var submitPasswordResponse: ResetPasswordSubmitPasswordControllerResponse!
 
-    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartResult {
-        return resetPasswordResult
+    func resetPassword(parameters: MSAL.MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartControllerResponse {
+        return resetPasswordResponse
     }
 
-    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeResult {
-        return resendCodeResult
+    func resendCode(passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+        return resendCodeResponse
     }
 
-    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordVerifyCodeResult {
-        return submitCodeResult
+    func submitCode(code: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
+        return submitCodeResponse
     }
 
-    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordRequiredResult {
-        return submitPasswordResult
+    func submitPassword(password: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
+        return submitPasswordResponse
     }
 }

@@ -28,10 +28,10 @@ import XCTest
 
 class MSALNativeAuthCredentialsControllerMock: MSALNativeAuthCredentialsControlling {
 
-    var refreshTokenResult: Result<String, RetrieveAccessTokenError>!
+    var refreshTokenResult: RefreshTokenCredentialControllerResponse!
     var accountResult: MSALNativeAuthUserAccountResult?
 
-    func refreshToken(context: MSAL.MSALNativeAuthRequestContext, authTokens: MSAL.MSALNativeAuthTokens) async -> Result<String, MSAL.RetrieveAccessTokenError> {
+    func refreshToken(context: MSAL.MSALNativeAuthRequestContext, authTokens: MSAL.MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
         return refreshTokenResult
     }
 

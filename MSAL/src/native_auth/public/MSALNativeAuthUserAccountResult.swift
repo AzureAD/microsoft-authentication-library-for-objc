@@ -88,10 +88,11 @@ import Foundation
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(forceRefresh: forceRefresh, correlationId: correlationId)
+            let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch controllerResponse {
+            switch controllerResponse.result {
             case .success(let accessToken):
-                await delegate.onAccessTokenRetrieveCompleted(accessToken: accessToken)
+                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(accessToken: accessToken)
             case .failure(let error):
                 await delegate.onAccessTokenRetrieveError(error: error)
             }

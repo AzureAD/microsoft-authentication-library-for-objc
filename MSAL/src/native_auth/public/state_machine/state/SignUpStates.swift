@@ -50,18 +50,19 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func resendCode(delegate: SignUpResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal()
+            let controllerResponse = await resendCodeInternal()
+            let delegateDispatcher = SignUpResendCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignUpResendCodeCodeRequired(
+                await delegateDispatcher.dispatchSignUpResendCodeCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
                     codeLength: codeLength
                 )
-            case .error(let error):
-                await delegate.onSignUpResendCodeError(error: error)
+            case .error(let error, let newState):
+                await delegate.onSignUpResendCodeError(error: error, newState: newState)
             }
         }
     }
@@ -73,28 +74,15 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate) {
         Task {
             let controllerResponse = await submitCodeInternal(code: code)
+            let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .completed(let state):
-                await delegate.onSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
             case .passwordRequired(let state):
-                if let function = delegate.onSignUpPasswordRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await function(state)
-                } else {
-                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
-                }
+                await delegateDispatcher.dispatchSignUpPasswordRequired(newState: state)
             case .attributesRequired(let attributes, let state):
-                if let function = delegate.onSignUpAttributesRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await function(attributes, state)
-                } else {
-                    let error = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
-                }
+                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
             case .error(let error, let state):
                 await delegate.onSignUpVerifyCodeError(error: error, newState: state)
             }
@@ -112,19 +100,13 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
+            let delegateDispatcher = SignUpPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .completed(let state):
-                await delegate.onSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
             case .attributesRequired(let attributes, let state):
-                if let function = delegate.onSignUpAttributesRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await function(attributes, state)
-                } else {
-                    let error = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
-                }
+                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
             case .error(let error, let state):
                 await delegate.onSignUpPasswordRequiredError(error: error, newState: state)
             }
@@ -143,17 +125,21 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         delegate: SignUpAttributesRequiredDelegate
     ) {
         Task {
-            let result = await submitAttributesInternal(attributes: attributes)
+            let controllerResponse = await submitAttributesInternal(attributes: attributes)
+            let delegateDispatcher = SignUpAttributesRequiredDelegateDispatcher(
+                delegate: delegate,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
-            switch result {
+            switch controllerResponse.result {
             case .completed(let state):
-                await delegate.onSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
             case .error(let error):
                 await delegate.onSignUpAttributesRequiredError(error: error)
             case .attributesRequired(let attributes, let state):
-                await delegate.onSignUpAttributesRequired(attributes: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
             case .attributesInvalid(let attributes, let state):
-                await delegate.onSignUpAttributesInvalid(attributeNames: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes, newState: state)
             }
         }
     }

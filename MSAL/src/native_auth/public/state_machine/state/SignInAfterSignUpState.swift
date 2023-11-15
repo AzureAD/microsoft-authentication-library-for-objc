@@ -48,11 +48,12 @@ import Foundation
         delegate: SignInAfterSignUpDelegate
     ) {
         Task {
-            let controllerResult = await signInInternal(scopes: scopes)
+            let controllerResponse = await signInInternal(scopes: scopes)
+            let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch controllerResult {
+            switch controllerResponse.result {
             case .success(let accountResult):
-                await delegate.onSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
             case .failure(let error):
                 await delegate.onSignInAfterSignUpError(error: error)
             }

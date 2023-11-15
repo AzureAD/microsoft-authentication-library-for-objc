@@ -26,17 +26,17 @@ import Foundation
 
 extension ResetPasswordCodeRequiredState {
 
-    func resendCodeInternal() async -> ResetPasswordResendCodeResult {
+    func resendCodeInternal() async -> MSALNativeAuthResetPasswordControlling.ResetPasswordResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.resendCode(passwordResetToken: flowToken, context: context)
     }
 
-    func submitCodeInternal(code: String) async -> ResetPasswordVerifyCodeResult {
+    func submitCodeInternal(code: String) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
             MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
-            return .error(error: VerifyCodeError(type: .invalidCode), newState: self)
+            return .init(.error(error: VerifyCodeError(type: .invalidCode), newState: self))
         }
 
         return await controller.submitCode(code: code, passwordResetToken: flowToken, context: context)
@@ -45,12 +45,12 @@ extension ResetPasswordCodeRequiredState {
 
 extension ResetPasswordRequiredState {
 
-    func submitPasswordInternal(password: String) async -> ResetPasswordRequiredResult {
+    func submitPasswordInternal(password: String) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {
             MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
-            return .error(error: PasswordRequiredError(type: .invalidPassword), newState: self)
+            return .init(.error(error: PasswordRequiredError(type: .invalidPassword), newState: self))
         }
 
         return await controller.submitPassword(password: password, passwordSubmitToken: flowToken, context: context)
