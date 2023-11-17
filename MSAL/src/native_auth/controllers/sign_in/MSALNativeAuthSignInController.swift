@@ -581,7 +581,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 context: context,
-                credentialToken: credentialToken
+                continuationToken: credentialToken
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)
         } catch {

@@ -34,7 +34,7 @@ import Foundation
         flowToken: String) {
         self.controller = controller
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken)
+        super.init(continuationToken: flowToken)
     }
 }
 

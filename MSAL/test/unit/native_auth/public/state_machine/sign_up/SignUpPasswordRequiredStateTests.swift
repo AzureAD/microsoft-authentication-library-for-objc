@@ -55,7 +55,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {

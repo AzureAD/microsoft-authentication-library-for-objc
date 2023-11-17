@@ -73,7 +73,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            passwordResetToken: passwordResetToken,
+            continuationToken: passwordResetToken,
             grantType: .oobCode,
             oobCode: code
         )
@@ -91,7 +91,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
         let params = MSALNativeAuthResetPasswordSubmitRequestParameters(
             context: context,
-            passwordSubmitToken: passwordSubmitToken,
+            continuationToken: passwordSubmitToken,
             newPassword: password
         )
         let submitRequestResponse = await performSubmitRequest(parameters: params)
@@ -407,7 +407,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     ) async -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
-            passwordResetToken: passwordResetToken
+            continuationToken: passwordResetToken
         )
         let request: MSIDHttpRequest
 

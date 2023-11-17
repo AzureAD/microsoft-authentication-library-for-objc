@@ -340,7 +340,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newState?.continuationToken, "signUpToken 2")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -724,7 +724,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newState?.continuationToken, "signUpToken 2")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -875,7 +875,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpResendCodeCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "signUpToken")
+        XCTAssertEqual(helper.newState?.continuationToken, "signUpToken")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -1041,7 +1041,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
-        XCTAssertEqual(helper.newCodeRequiredState?.flowToken, "signUpToken")
+        XCTAssertEqual(helper.newCodeRequiredState?.continuationToken, "signUpToken")
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .invalidCode)
 
@@ -1063,7 +1063,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(helper.newAttributesRequiredState?.flowToken, "signUpToken")
+        XCTAssertEqual(helper.newAttributesRequiredState?.continuationToken, "signUpToken")
         XCTAssertNil(helper.newCodeRequiredState)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertNil(helper.error)
@@ -1086,7 +1086,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(helper.newAttributesRequiredState?.flowToken, "signUpToken")
+        XCTAssertEqual(helper.newAttributesRequiredState?.continuationToken, "signUpToken")
         XCTAssertNil(helper.newCodeRequiredState)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertNil(helper.error)
@@ -1139,7 +1139,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
-        XCTAssertNil(helper.newCodeRequiredState?.flowToken)
+        XCTAssertNil(helper.newCodeRequiredState?.continuationToken)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
 
@@ -1160,7 +1160,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpVerifyCodeErrorCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
-        XCTAssertNil(helper.newCodeRequiredState?.flowToken)
+        XCTAssertNil(helper.newCodeRequiredState?.continuationToken)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
 
@@ -1237,7 +1237,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onSignUpPasswordRequiredCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
         XCTAssertNil(helper.newCodeRequiredState)
-        XCTAssertEqual(helper.newPasswordRequiredState?.flowToken, "signUpToken 3")
+        XCTAssertEqual(helper.newPasswordRequiredState?.continuationToken, "signUpToken 3")
         XCTAssertNil(helper.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: true)
@@ -1266,7 +1266,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onSignUpPasswordRequiredCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
         XCTAssertNil(helper.newCodeRequiredState)
-        XCTAssertEqual(helper.newPasswordRequiredState?.flowToken, "signUpToken 3")
+        XCTAssertEqual(helper.newPasswordRequiredState?.continuationToken, "signUpToken 3")
         XCTAssertNil(helper.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
@@ -1444,7 +1444,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpPasswordRequiredErrorCalled)
         XCTAssertNil(helper.newAttributesRequiredState)
-        XCTAssertEqual(helper.newPasswordRequiredState?.flowToken, "signUpToken")
+        XCTAssertEqual(helper.newPasswordRequiredState?.continuationToken, "signUpToken")
         XCTAssertEqual(helper.error?.type, .invalidPassword)
         XCTAssertEqual(helper.error?.errorDescription, "Password too weak")
 
@@ -1466,7 +1466,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(helper.newAttributesRequiredState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newAttributesRequiredState?.continuationToken, "signUpToken 2")
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertNil(helper.error)
 
@@ -1488,7 +1488,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(helper.newAttributesRequiredState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newAttributesRequiredState?.continuationToken, "signUpToken 2")
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertNil(helper.error)
 
@@ -1713,7 +1713,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpAttributesRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newState?.continuationToken, "signUpToken 2")
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
@@ -1779,7 +1779,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpInvalidAttributesCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "signUpToken 2")
+        XCTAssertEqual(helper.newState?.continuationToken, "signUpToken 2")
         XCTAssertEqual(helper.invalidAttributes, ["attribute"])
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)

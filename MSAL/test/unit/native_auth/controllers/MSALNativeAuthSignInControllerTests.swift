@@ -573,7 +573,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: true)
-        XCTAssertEqual(helper.passwordRequiredState?.flowToken, expectedCredentialToken)
+        XCTAssertEqual(helper.passwordRequiredState?.continuationToken, expectedCredentialToken)
     }
 
     func test_whenSignInWithCodePasswordIsRequired_newStateIsPropagatedToUser_butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
@@ -600,7 +600,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
-        XCTAssertEqual(helper.passwordRequiredState?.flowToken, expectedCredentialToken)
+        XCTAssertEqual(helper.passwordRequiredState?.continuationToken, expectedCredentialToken)
     }
     
     func test_whenSignInWithCodeSubmitPassword_signInIsCompletedSuccessfully() async {
@@ -830,7 +830,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertNotNil(helper.newSignInCodeRequiredState)
-        XCTAssertEqual(helper.newSignInCodeRequiredState?.flowToken, credentialToken)
+        XCTAssertEqual(helper.newSignInCodeRequiredState?.continuationToken, credentialToken)
         checkTelemetryEventResult(id: .telemetryApiIdSignInResendCode, isSuccessful: false)
     }
     

@@ -74,7 +74,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         sut.resendCode(delegate: delegate)
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newState?.continuationToken, expectedState.continuationToken)
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -99,7 +99,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
-        XCTAssertEqual(delegate.newCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitCode_delegate_whenPasswordRequired_AndUserHasImplementedOptionalDelegate_shouldReturnPasswordRequired() {

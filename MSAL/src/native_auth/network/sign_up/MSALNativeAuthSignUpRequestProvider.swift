@@ -62,7 +62,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
 
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
-            signUpToken: token,
+            continuationToken: token,
             context: context
         )
 
@@ -78,7 +78,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
 
         let params = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: parameters.grantType,
-            signUpToken: parameters.signUpToken,
+            continuationToken: parameters.signUpToken,
             password: parameters.password,
             oobCode: parameters.oobCode,
             attributes: attributesFormatted,

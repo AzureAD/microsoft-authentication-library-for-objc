@@ -26,9 +26,9 @@ import Foundation
 
 @objc
 public class MSALNativeAuthBaseState: NSObject {
-    let flowToken: String
+    let continuationToken: String
 
-    init(flowToken: String) {
-        self.flowToken = flowToken
+    init(continuationToken: String) {
+        self.continuationToken = continuationToken
     }
 }

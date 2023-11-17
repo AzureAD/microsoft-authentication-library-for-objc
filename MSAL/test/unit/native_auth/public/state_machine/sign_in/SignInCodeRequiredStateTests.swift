@@ -58,7 +58,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.newSignInResendCodeError, expectedError)
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_resendCode_delegate_success_shouldReturnSignInResendCodeCodeRequired() {
@@ -77,7 +77,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
         sut.resendCode(delegate: delegate)
         wait(for: [exp])
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     // SubmitCode

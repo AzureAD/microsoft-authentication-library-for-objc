@@ -39,7 +39,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         self.controller = controller
         self.username = username
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken)
+        super.init(continuationToken: flowToken)
     }
 }
 

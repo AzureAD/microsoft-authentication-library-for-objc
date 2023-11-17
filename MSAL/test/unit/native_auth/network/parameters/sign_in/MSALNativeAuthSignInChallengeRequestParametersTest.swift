@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": config.clientId,
-            "credential_token": params.credentialToken,
+            "credential_token": params.continuationToken,
             "challenge_type": "password redirect",
         ]
 

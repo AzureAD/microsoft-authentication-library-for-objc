@@ -90,7 +90,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -153,7 +153,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -310,7 +310,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp1, exp2], timeout: 1)
 
-        XCTAssertEqual(delegate.passwordRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.passwordRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func testSignIn_delegate_whenPasswordIsRequiredButUserHasNotImplementedOptionalDelegate_shouldReturnError() {
@@ -359,7 +359,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [expectation], timeout: 1)
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)

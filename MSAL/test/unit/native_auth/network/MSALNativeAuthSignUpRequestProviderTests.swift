@@ -104,14 +104,14 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         case .signUpChallenge:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
-                Key.signUpToken.rawValue: "sign-up-token",
+                Key.continuationToken.rawValue: "sign-up-token",
                 Key.challengeType.rawValue: "redirect"
             ]
         case .signUpContinue:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.grantType.rawValue: "password",
-                Key.signUpToken.rawValue: "sign-up-token",
+                Key.continuationToken.rawValue: "sign-up-token",
                 Key.password.rawValue: "1234"
             ]
         default:

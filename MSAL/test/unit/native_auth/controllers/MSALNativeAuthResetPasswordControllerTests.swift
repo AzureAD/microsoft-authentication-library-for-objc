@@ -200,7 +200,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "resetPasswordToken")
+        XCTAssertEqual(helper.newState?.continuationToken, "resetPasswordToken")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -328,7 +328,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordResendCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.flowToken, "flowToken response")
+        XCTAssertEqual(helper.newState?.continuationToken, "flowToken response")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -461,7 +461,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordVerifyCodeErrorCalled)
-        XCTAssertEqual(helper.newCodeRequiredState?.flowToken, "passwordResetToken")
+        XCTAssertEqual(helper.newCodeRequiredState?.continuationToken, "passwordResetToken")
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .invalidCode)
 
@@ -489,7 +489,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordVerifyCodeErrorCalled)
-        XCTAssertNil(helper.newCodeRequiredState?.flowToken)
+        XCTAssertNil(helper.newCodeRequiredState?.continuationToken)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
 
@@ -509,7 +509,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordVerifyCodeErrorCalled)
-        XCTAssertNil(helper.newCodeRequiredState?.flowToken)
+        XCTAssertNil(helper.newCodeRequiredState?.continuationToken)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
 
@@ -578,7 +578,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordRequiredErrorCalled)
-        XCTAssertEqual(helper.newPasswordRequiredState?.flowToken, "passwordSubmitToken")
+        XCTAssertEqual(helper.newPasswordRequiredState?.continuationToken, "passwordSubmitToken")
         XCTAssertEqual(helper.error?.type, .invalidPassword)
         XCTAssertEqual(helper.error?.errorDescription, "Password too weak")
 
@@ -699,7 +699,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordRequiredErrorCalled)
-        XCTAssertEqual(helper.newPasswordRequiredState?.flowToken, "passwordResetToken")
+        XCTAssertEqual(helper.newPasswordRequiredState?.continuationToken, "passwordResetToken")
         XCTAssertEqual(helper.error?.type, .invalidPassword)
         XCTAssertEqual(helper.error?.errorDescription, "Password banned")
 

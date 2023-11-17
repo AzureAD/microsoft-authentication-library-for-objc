@@ -55,7 +55,7 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         sut.submitPassword(password: "invalid password", delegate: delegate)
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitPassword_delegate_success_shouldReturnSuccess() {

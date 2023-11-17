@@ -87,7 +87,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                 let params = MSALNativeAuthTokenRequestParameters(
                     context: context,
                     username: username,
-                    credentialToken: credentialToken,
+                    continutationToken: credentialToken,
                     signInSLT: signInSLT,
                     grantType: grantType,
                     scope: scopes.joinScopes(),
@@ -114,7 +114,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                 let params = MSALNativeAuthTokenRequestParameters(
                     context: context,
                     username: nil,
-                    credentialToken: nil,
+                    continutationToken: nil,
                     signInSLT: nil,
                     grantType: .refreshToken,
                     scope: scopes.joinScopes(),
