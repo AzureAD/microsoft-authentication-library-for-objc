@@ -100,7 +100,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenSuccess_shouldReturnSignUpCompleted() {
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
 

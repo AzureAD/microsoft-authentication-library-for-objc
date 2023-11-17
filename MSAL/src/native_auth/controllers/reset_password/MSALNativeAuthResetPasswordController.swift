@@ -276,7 +276,9 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .success(let passwordSubmitToken):
             stopTelemetryEvent(event, context: context)
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/continue request")
-            return .passwordRequired(newState: ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken, correlationId: context.correlationId()))
+            return .passwordRequired(newState: ResetPasswordRequiredState(controller: self,
+                                                                          flowToken: passwordSubmitToken,
+                                                                          correlationId: context.correlationId()))
         case .error(let apiError):
             let error = apiError.toVerifyCodePublicError()
             stopTelemetryEvent(event, context: context, error: error)
@@ -351,7 +353,9 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                            context: context,
                            format: "Password error calling resetpassword/submit \(error.errorDescription ?? "No error description")")
 
-            return .error(error: error, newState: ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken, correlationId: context.correlationId()))
+            return .error(error: error, newState: ResetPasswordRequiredState(controller: self,
+                                                                             flowToken: passwordSubmitToken,
+                                                                             correlationId: context.correlationId()))
         case .error(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
             self.stopTelemetryEvent(event, context: context, error: error)
@@ -469,7 +473,9 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                            context: context,
                            format: "Password error calling resetpassword/poll_completion \(error.errorDescription ?? "No error description")")
 
-            return .error(error: error, newState: ResetPasswordRequiredState(controller: self, flowToken: passwordResetToken, correlationId: context.correlationId()))
+            return .error(error: error, newState: ResetPasswordRequiredState(controller: self,
+                                                                             flowToken: passwordResetToken,
+                                                                             correlationId: context.correlationId()))
         case .error(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
             self.stopTelemetryEvent(event, context: context, error: error)

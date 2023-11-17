@@ -45,9 +45,7 @@ extension SignUpCodeRequiredState {
 
 extension SignUpPasswordRequiredState {
 
-    func submitPasswordInternal(
-        password: String
-    ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse {
+    func submitPasswordInternal(password: String) async -> MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {

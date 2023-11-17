@@ -35,7 +35,7 @@ import Foundation
         correlationId: UUID) {
         self.controller = controller
         self.inputValidator = inputValidator
-            super.init(flowToken: flowToken, correlationId: correlationId)
+        super.init(flowToken: flowToken, correlationId: correlationId)
     }
 }
 
@@ -51,12 +51,11 @@ import Foundation
         flowToken: String,
         correlationId: UUID) {
         self.scopes = scopes
-            super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
     }
 
     /// Requests the server to resend the verification code to the user.
-    /// - Parameters:
-    ///   - delegate: Delegate that receives callbacks for the operation.
+    /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func resendCode(delegate: SignInResendCodeDelegate) {
         Task {
             let result = await resendCodeInternal()
@@ -108,7 +107,7 @@ import Foundation
         correlationId: UUID) {
         self.scopes = scopes
         self.username = username
-            super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
     }
 
     /// Submits the password to the server for verification.

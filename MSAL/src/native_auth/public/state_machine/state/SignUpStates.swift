@@ -47,8 +47,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
 /// An object of this type is created when a user is required to supply a verification code to continue a sign up flow.
 @objcMembers public class SignUpCodeRequiredState: SignUpBaseState {
     /// Requests the server to resend the verification code to the user.
-    /// - Parameters:
-    ///   - delegate: Delegate that receives callbacks for the operation.
+    /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func resendCode(delegate: SignUpResendCodeDelegate) {
         Task {
             let result = await resendCodeInternal()

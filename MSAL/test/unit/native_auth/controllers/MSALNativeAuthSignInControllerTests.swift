@@ -856,8 +856,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
         
-        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
-        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt, correlationId: defaultUUID)
+        state.signIn(delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -878,8 +878,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError())
 
-        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
-        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt, correlationId: defaultUUID)
+        state.signIn(delegate: mockDelegate)
         
         wait(for: [exp], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -902,8 +902,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         tokenResponseValidatorMock.tokenValidatedResponse = .error(.invalidClient(message: "Invalid Client ID"))
 
-        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt)
-        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+        let state = SignInAfterSignUpState(controller: sut, username: "", slt: slt, correlationId: defaultUUID)
+        state.signIn(delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -915,8 +915,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods"))
 
-        let state = SignInAfterSignUpState(controller: sut, username: "username", slt: nil)
-        state.signIn(correlationId: defaultUUID, delegate: mockDelegate)
+        let state = SignInAfterSignUpState(controller: sut, username: "username", slt: nil, correlationId: defaultUUID)
+        state.signIn(delegate: mockDelegate)
 
         wait(for: [expectation], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
