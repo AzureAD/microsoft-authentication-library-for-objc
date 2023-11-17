@@ -24,41 +24,44 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class ResetPasswordStartError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: ResetPasswordStartErrorType
+    let type: ResetPasswordStartErrorType
 
     init(type: ResetPasswordStartErrorType, message: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
 
+    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+        return super.errorDescription ?? type.rawValue
+    }
 
-        switch type {
-        case .browserRequired:
-            return "Browser required"
-        case .generalError:
-            return "General error"
-        case .userDoesNotHavePassword:
-            return "User does not have a password"
-        case .userNotFound:
-            return "User not found"
-        case .invalidUsername:
-            return "Invalid username"
-        }
+    /// Returns `true` if the error requires to use a browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    public var isUserDoesNotHavePassword: Bool {
+        return type == .userDoesNotHavePassword
+    }
+
+    /// Returns `true` if the user that is trying to sign in cannot be found.
+    public var isUserNotFound: Bool {
+        return type == .userNotFound
+    }
+
+    /// Returns `true` when the username introduced is not valid.
+    public var isInvalidUsername: Bool {
+        return type == .invalidUsername
     }
 }
 
-@objc
-public enum ResetPasswordStartErrorType: Int {
-    case browserRequired
-    case generalError
-    case userDoesNotHavePassword
-    case userNotFound
-    case invalidUsername
+public enum ResetPasswordStartErrorType: String, CaseIterable {
+    case browserRequired = "Browser required"
+    case userDoesNotHavePassword = "User does not have a password"
+    case userNotFound = "User not found"
+    case invalidUsername = "Invalid username"
+    case generalError = "General error"
 }

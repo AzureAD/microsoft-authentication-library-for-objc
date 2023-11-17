@@ -24,38 +24,39 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class SignUpStartError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: SignUpStartErrorType
+    let type: SignUpStartErrorType
 
     init(type: SignUpStartErrorType, message: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
 
+    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+        return super.errorDescription ?? type.rawValue
+    }
 
-        switch type {
-        case .browserRequired:
-            return "Browser required"
-        case .userAlreadyExists:
-            return "User already exists"
-        case .invalidUsername:
-            return "Invalid username"
-        case .generalError:
-            return "General error"
-        }
+    /// Returns `true` if the error requires to use a browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` when the user is trying to register an existing email
+    public var isUserAlreadyExists: Bool {
+        return type == .userAlreadyExists
+    }
+
+    /// Returns `true` when the username introduced is not valid.
+    public var isInvalidUsername: Bool {
+        return type == .invalidUsername
     }
 }
 
-@objc
-public enum SignUpStartErrorType: Int {
-    case browserRequired
-    case userAlreadyExists
-    case invalidUsername
-    case generalError
+public enum SignUpStartErrorType: String, CaseIterable {
+    case browserRequired = "Browser required"
+    case userAlreadyExists = "User already exists"
+    case invalidUsername = "Invalid username"
+    case generalError = "General error"
 }

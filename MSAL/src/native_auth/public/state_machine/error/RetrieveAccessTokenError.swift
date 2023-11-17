@@ -24,38 +24,39 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class RetrieveAccessTokenError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: RetrieveAccessTokenErrorType
+    let type: RetrieveAccessTokenErrorType
 
     init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
 
+    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+        return super.errorDescription ?? type.rawValue
+    }
 
-        switch type {
-        case .generalError:
-            return "General error"
-        case .refreshTokenExpired:
-            return "Refresh token expired"
-        case .tokenNotFound:
-            return "Token not found"
-        case .browserRequired:
-            return "Browser required"
-        }
+    /// Returns `true` if the error requires to use a browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` if the refresh token has expired.
+    public var isRefreshTokenExpired: Bool {
+        return type == .refreshTokenExpired
+    }
+
+    /// Returns `true` if the existing token cannot be found.
+    public var isTokenNotFound: Bool {
+        return type == .tokenNotFound
     }
 }
 
-@objc
-public enum RetrieveAccessTokenErrorType: Int {
-    case generalError
-    case refreshTokenExpired
-    case tokenNotFound
-    case browserRequired
+public enum RetrieveAccessTokenErrorType: String, CaseIterable {
+    case browserRequired = "Browser required"
+    case refreshTokenExpired = "Refresh token expired"
+    case tokenNotFound = "Token not found"
+    case generalError = "General error"
 }

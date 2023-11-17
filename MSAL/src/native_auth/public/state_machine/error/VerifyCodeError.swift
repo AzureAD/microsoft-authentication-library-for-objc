@@ -24,35 +24,33 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class VerifyCodeError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: VerifyCodeErrorType
+    let type: VerifyCodeErrorType
 
     init(type: VerifyCodeErrorType, message: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
 
+    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+        return super.errorDescription ?? type.rawValue
+    }
 
-        switch type {
-        case .browserRequired:
-            return "Browser required"
-        case .generalError:
-            return "General error"
-        case .invalidCode:
-            return "Invalid code"
-        }
+    /// Returns `true` if the error requires to use a browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` when the code introduced is not valid.
+    public var isInvalidCode: Bool {
+        return type == .invalidCode
     }
 }
 
-@objc
-public enum VerifyCodeErrorType: Int {
-    case browserRequired
-    case generalError
-    case invalidCode
+public enum VerifyCodeErrorType: String, CaseIterable {
+    case browserRequired = "Browser required"
+    case invalidCode = "Invalid code"
+    case generalError = "General error"
 }

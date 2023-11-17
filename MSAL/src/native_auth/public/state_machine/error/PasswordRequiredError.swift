@@ -24,14 +24,13 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class PasswordRequiredError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: PasswordRequiredErrorType
+    let type: PasswordRequiredErrorType
 
     init(type: PasswordRequiredErrorType, message: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
 
     init(signInPasswordError: SignInPasswordStartError) {
@@ -43,28 +42,27 @@ public class PasswordRequiredError: MSALNativeAuthError {
         default:
             self.type = .generalError
         }
-        super.init(message: signInPasswordError.errorDescription)
+        super.init(identifier: signInPasswordError.type.rawValue, message: signInPasswordError.errorDescription)
     }
 
+    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+        return super.errorDescription ?? type.rawValue
+    }
 
-        switch type {
-        case .browserRequired:
-            return "Browser required"
-        case .invalidPassword:
-            return "Invalid password"
-        case .generalError:
-            return "General error"
-        }
+    /// Returns `true` if the error requires to use a browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` when the password introduced is not valid.
+    public var isInvalidPassword: Bool {
+        return type == .invalidPassword
     }
 }
 
-@objc
-public enum PasswordRequiredErrorType: Int {
-    case browserRequired
-    case generalError
-    case invalidPassword
+public enum PasswordRequiredErrorType: String, CaseIterable {
+    case browserRequired = "Browser required"
+    case invalidPassword = "Invalid password"
+    case generalError = "General error"
 }

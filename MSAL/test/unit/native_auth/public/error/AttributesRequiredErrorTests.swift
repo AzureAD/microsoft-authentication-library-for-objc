@@ -16,23 +16,32 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-@objc
-public class MSALNativeAuthError: NSObject, LocalizedError {
-    public let identifier: String
-    @objc public var errorDescription: String? { message }
+final class AttributesRequiredErrorTests: XCTestCase {
 
-    private let message: String?
+    private var sut: AttributesRequiredError!
 
-    init(identifier: String, message: String?) {
-        self.identifier = identifier
-        self.message = message
+    func test_customErrorDescription() {
+        let expectedMessage = "Custom error message"
+        sut = .init(message: expectedMessage)
+        XCTAssertEqual(sut.errorDescription, expectedMessage)
+    }
+
+    func test_defaultErrorDescription() {
+        sut = .init()
+        XCTAssertEqual(sut.errorDescription, "General error")
+    }
+
+    func test_identifier() {
+        sut = .init()
+        XCTAssertEqual(sut.identifier, "Attributes required")
     }
 }
