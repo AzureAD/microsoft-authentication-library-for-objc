@@ -26,12 +26,12 @@ import Foundation
 
 extension SignUpCodeRequiredState {
 
-    func resendCodeInternal(correlationId: UUID?) async -> SignUpResendCodeResult {
+    func resendCodeInternal() async -> SignUpResendCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.resendCode(username: username, context: context, signUpToken: flowToken)
     }
 
-    func submitCodeInternal(code: String, correlationId: UUID?) async -> MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse {
+    func submitCodeInternal(code: String) async -> MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
@@ -46,8 +46,7 @@ extension SignUpCodeRequiredState {
 extension SignUpPasswordRequiredState {
 
     func submitPasswordInternal(
-        password: String,
-        correlationId: UUID?
+        password: String
     ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
@@ -62,7 +61,7 @@ extension SignUpPasswordRequiredState {
 
 extension SignUpAttributesRequiredState {
 
-    func submitAttributesInternal(attributes: [String: Any], correlationId: UUID?) async -> SignUpAttributesRequiredResult {
+    func submitAttributesInternal(attributes: [String: Any]) async -> SignUpAttributesRequiredResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.submitAttributes(attributes, username: username, signUpToken: flowToken, context: context)
     }

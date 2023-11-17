@@ -26,12 +26,12 @@ import Foundation
 
 extension ResetPasswordCodeRequiredState {
 
-    func resendCodeInternal(correlationId: UUID?) async -> ResetPasswordResendCodeResult {
+    func resendCodeInternal() async -> ResetPasswordResendCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.resendCode(passwordResetToken: flowToken, context: context)
     }
 
-    func submitCodeInternal(code: String, correlationId: UUID?) async -> ResetPasswordVerifyCodeResult {
+    func submitCodeInternal(code: String) async -> ResetPasswordVerifyCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
@@ -45,7 +45,7 @@ extension ResetPasswordCodeRequiredState {
 
 extension ResetPasswordRequiredState {
 
-    func submitPasswordInternal(password: String, correlationId: UUID?) async -> ResetPasswordRequiredResult {
+    func submitPasswordInternal(password: String) async -> ResetPasswordRequiredResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {

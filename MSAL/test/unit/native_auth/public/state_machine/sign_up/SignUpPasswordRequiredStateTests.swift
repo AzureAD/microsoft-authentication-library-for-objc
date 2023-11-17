@@ -31,19 +31,20 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
     private var controller: MSALNativeAuthSignUpControllerMock!
     private var sut: SignUpPasswordRequiredState!
+    private var correlationId: UUID = UUID()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
+        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
         let expectedError = PasswordRequiredError(type: .invalidPassword)
-        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)
         controller.submitPasswordResult = .init(expectedResult)
@@ -59,7 +60,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -79,7 +80,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
     func test_submitCode_delegate_whenAttributesRequired_ButUserHasNotImplementedOptionalDelegate_shouldReturnPasswordRequiredError() {
         let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")

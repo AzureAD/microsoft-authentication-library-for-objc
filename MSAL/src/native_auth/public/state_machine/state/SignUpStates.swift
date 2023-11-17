@@ -34,12 +34,13 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         controller: MSALNativeAuthSignUpControlling,
         username: String,
         flowToken: String,
-        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        correlationId: UUID
     ) {
         self.controller = controller
         self.username = username
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken)
+        super.init(flowToken: flowToken, correlationId: correlationId)
     }
 }
 
@@ -47,11 +48,10 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
 @objcMembers public class SignUpCodeRequiredState: SignUpBaseState {
     /// Requests the server to resend the verification code to the user.
     /// - Parameters:
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func resendCode(correlationId: UUID? = nil, delegate: SignUpResendCodeDelegate) {
+    public func resendCode(delegate: SignUpResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal(correlationId: correlationId)
+            let result = await resendCodeInternal()
 
             switch result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -70,11 +70,10 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// Submits the code to the server for verification.
     /// - Parameters:
     ///   - code: Verification code that the user supplies.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitCode(code: String, correlationId: UUID? = nil, delegate: SignUpVerifyCodeDelegate) {
+    public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate) {
         Task {
-            let controllerResponse = await submitCodeInternal(code: code, correlationId: correlationId)
+            let controllerResponse = await submitCodeInternal(code: code)
 
             switch controllerResponse.result {
             case .completed(let state):
@@ -110,11 +109,10 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplied.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitPassword(password: String, correlationId: UUID? = nil, delegate: SignUpPasswordRequiredDelegate) {
+    public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate) {
         Task {
-            let controllerResponse = await submitPasswordInternal(password: password, correlationId: correlationId)
+            let controllerResponse = await submitPasswordInternal(password: password)
 
             switch controllerResponse.result {
             case .completed(let state):
@@ -141,14 +139,12 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - attributes: Dictionary of attributes that the user supplied.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     public func submitAttributes(
         attributes: [String: Any],
-        delegate: SignUpAttributesRequiredDelegate,
-        correlationId: UUID? = nil
+        delegate: SignUpAttributesRequiredDelegate
     ) {
         Task {
-            let result = await submitAttributesInternal(attributes: attributes, correlationId: correlationId)
+            let result = await submitAttributesInternal(attributes: attributes)
 
             switch result {
             case .completed(let state):
