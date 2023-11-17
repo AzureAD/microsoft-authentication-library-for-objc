@@ -318,7 +318,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
 
-        validatorMock.mockValidateResetPasswordChallengeFunc(.success("sentTo", .email, 4, "flowToken response"))
+        validatorMock.mockValidateResetPasswordChallengeFunc(.success("sentTo", .email, 4, "continuationToken response"))
 
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
@@ -328,7 +328,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp])
         XCTAssertTrue(helper.onResetPasswordResendCodeRequiredCalled)
-        XCTAssertEqual(helper.newState?.continuationToken, "flowToken response")
+        XCTAssertEqual(helper.newState?.continuationToken, "continuationToken response")
         XCTAssertEqual(helper.sentTo, "sentTo")
         XCTAssertEqual(helper.channelTargetType, .email)
         XCTAssertEqual(helper.codeLength, 4)
@@ -884,7 +884,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     ) -> MSALNativeAuthResetPasswordContinueRequestParameters {
         .init(
             context: contextMock,
-            passwordResetToken: token,
+            continuationToken: token,
             grantType: grantType,
             oobCode: oobCode
         )
@@ -896,7 +896,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     ) -> MSALNativeAuthResetPasswordSubmitRequestParameters {
         .init(
             context: contextMock,
-            passwordSubmitToken: token,
+            continuationToken: token,
             newPassword: password)
     }
 
@@ -905,7 +905,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     ) -> MSALNativeAuthResetPasswordPollCompletionRequestParameters {
         .init(
             context: contextMock,
-            passwordResetToken: token)
+            continuationToken: token)
     }
 
     private func prepareMockRequest() -> MSIDHttpRequest {

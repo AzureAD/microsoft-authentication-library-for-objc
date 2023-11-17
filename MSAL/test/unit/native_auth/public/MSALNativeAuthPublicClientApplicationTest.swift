@@ -79,7 +79,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
 
         let expectedResult: SignUpPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "<continuation_token>"),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -90,7 +90,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "<continuation_token>")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -142,7 +142,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpCodeStartDelegateSpy(expectation: exp)
 
         let expectedResult: SignUpStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "<continuation_token>"),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -153,7 +153,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "<continuation_token>")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -226,7 +226,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = .email
 
         let expectedResult: SignInPasswordStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: ""),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: ""),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -249,7 +249,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInPasswordStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: ""),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: ""),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -281,7 +281,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = .email
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: ""),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: ""),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -299,7 +299,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let delegate = SignInCodeStartDelegateWithPasswordRequiredSpy(expectation: exp1)
 
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, flowToken: "flowToken")
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "<continuation_token>")
         let expectedResult: SignInStartResult = .passwordRequired(newState: expectedState)
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
@@ -321,7 +321,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
-            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, flowToken: "")
+            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "")
         )
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
@@ -348,7 +348,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = ResetPasswordStartDelegateSpy(expectation: expectation)
 
         let expectedResult: ResetPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken"),
+            newState: .init(controller: controllerFactoryMock.resetPasswordController, continuationToken: "<continuation_token>"),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -359,7 +359,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [expectation], timeout: 1)
 
-        XCTAssertEqual(delegate.newState?.continuationToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.continuationToken, "<continuation_token>")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)

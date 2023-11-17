@@ -75,7 +75,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignInChallengeRequestParameters(context: context,
-                                                                    credentialToken: "Test Credential Token")
+                                                                    continuationToken: "<credential_token>")
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.challenge(params)),
                           request: request,
@@ -83,7 +83,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "credential_token": "Test Credential Token",
+            "continuation_token": "<credential_token>",
             "challenge_type": "otp"
         ]
 
@@ -103,8 +103,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthTokenRequestParameters(context: context,
                                                           username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-                                                          credentialToken: "Test Credential Token",
-                                                          signInSLT: "Test SignIn SLT",
+                                                          continutationToken: "<credential_token>",
+                                                          signInSLT: "<signin_slt>",
                                                           grantType: .password,
                                                           scope: "<scope-1>",
                                                           password: "password",
@@ -120,8 +120,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
-            "credential_token": "Test Credential Token",
-            "signin_slt": "Test SignIn SLT",
+            "continuation_token": "<credential_token>",
+            "signin_slt": "<signin_slt>",
             "grant_type": "password",
             "challenge_type": "password",
             "scope": "<scope-1>",
@@ -176,7 +176,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         )
 
         let request = MSIDHttpRequest()
-        let params = MSALNativeAuthSignUpChallengeRequestParameters(signUpToken: "<sign-up-token>",
+        let params = MSALNativeAuthSignUpChallengeRequestParameters(continuationToken: "<sign-up-token>",
                                                                     context: context)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
@@ -186,7 +186,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "signup_token": "<sign-up-token>",
+            "continuation_token": "<sign-up-token>",
             "challenge_type": "password oob redirect"
         ]
 
@@ -205,7 +205,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignUpContinueRequestParameters(grantType: .oobCode,
-                                                                   signUpToken: "<sign-up-token>",
+                                                                   continuationToken: "<sign-up-token>",
                                                                    password: "<strong-password>",
                                                                    oobCode: "0000",
                                                                    attributes: "<attributes>",
@@ -218,7 +218,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "signup_token": "<sign-up-token>",
+            "continuation_token": "<sign-up-token>",
             "password": "<strong-password>",
             "oob": "0000",
             "grant_type": "oob",
@@ -269,7 +269,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(context: context,
-                                                                           passwordResetToken: "<password-reset-token>")
+                                                                           continuationToken: "<password-reset-token>")
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.challenge(params)),
@@ -278,7 +278,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "password_reset_token": "<password-reset-token>",
+            "continuation_token": "<password-reset-token>",
             "challenge_type": "password oob redirect"
         ]
 
@@ -297,7 +297,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(context: context,
-                                                                          passwordResetToken: "<password-reset-token>",
+                                                                          continuationToken: "<password-reset-token>",
                                                                           grantType: .oobCode,
                                                                           oobCode: "0000")
 
@@ -308,7 +308,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "password_reset_token": "<password-reset-token>",
+            "continuation_token": "<password-reset-token>",
             "grant_type": "oob",
             "oob": "0000"
         ]
@@ -328,7 +328,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordSubmitRequestParameters(context: context,
-                                                                        passwordSubmitToken: "<password-submit-token>",
+                                                                        continuationToken: "<password-submit-token>",
                                                                         newPassword:"new-password")
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
@@ -338,7 +338,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "password_submit_token": "<password-submit-token>",
+            "continuation_token": "<password-submit-token>",
             "new_password": "new-password"
         ]
 
@@ -357,7 +357,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(context: context,
-                                                                                passwordResetToken: "<password-reset-token")
+                                                                                continuationToken: "<password-reset-token")
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .resetPassword(.pollCompletion(params)),
@@ -366,7 +366,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "password_reset_token": "<password-reset-token"
+            "continuation_token": "<password-reset-token"
         ]
 
         XCTAssertEqual(request.parameters, expectedBodyParams)
@@ -385,7 +385,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthTokenRequestParameters(context: context,
                                                           username: nil,
-                                                          credentialToken: nil,
+                                                          continutationToken: nil,
                                                           signInSLT: nil,
                                                           grantType: .refreshToken,
                                                           scope: "<scope-1>",

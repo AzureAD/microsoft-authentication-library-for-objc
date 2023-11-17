@@ -192,7 +192,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(error)
@@ -223,7 +223,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(invalidUsername)
@@ -254,7 +254,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(invalidClientId)
@@ -576,7 +576,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(error)
@@ -607,7 +607,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(invalidUsername)
@@ -638,7 +638,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    errorCodes: nil,
                                                    errorURI: nil,
                                                    innerErrors: nil,
-                                                   signUpToken: nil,
+                                                   continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
         validatorMock.mockValidateSignUpStartFunc(invalidClientId)

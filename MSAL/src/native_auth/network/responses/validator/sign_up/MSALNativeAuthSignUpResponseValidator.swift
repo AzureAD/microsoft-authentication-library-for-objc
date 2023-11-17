@@ -75,7 +75,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
         switch apiError.error {
         case .verificationRequired:
-            if let signUpToken = apiError.signUpToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
+            if let signUpToken = apiError.continuationToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
                 return .verificationRequired(signUpToken: signUpToken, unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes))
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/start for verification_required error")

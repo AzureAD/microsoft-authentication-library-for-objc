@@ -40,7 +40,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         sut = try provider.challenge(
             parameters: .init(
                 context: context,
-                credentialToken: "Test Credential Token"
+                continuationToken: "<credential_token>"
             ),
             context: context
         )

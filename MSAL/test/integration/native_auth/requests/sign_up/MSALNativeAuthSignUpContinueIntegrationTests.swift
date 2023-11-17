@@ -43,7 +43,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "<token>",
+            signUpToken: "<signup_token>",
             password: "12345",
             context: context
         )
@@ -54,7 +54,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withPassword_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "<token>",
+            signUpToken: "<signup_token>",
             password: "12345",
             context: context
         )
@@ -65,7 +65,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withOOB_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .oobCode,
-            signUpToken: "<token>",
+            signUpToken: "<signup_token>",
             oobCode: "1234",
             context: context
         )
@@ -76,7 +76,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withAttributes_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .attributes,
-            signUpToken: "<token>",
+            signUpToken: "<signup_token>",
             attributes: ["key": "value"],
             context: context
         )

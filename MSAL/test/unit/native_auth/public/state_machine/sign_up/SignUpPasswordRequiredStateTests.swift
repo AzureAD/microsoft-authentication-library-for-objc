@@ -36,14 +36,14 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
+        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", continuationToken: "<continuation_token>")
     }
 
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
         let expectedError = PasswordRequiredError(type: .invalidPassword)
-        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", continuationToken: "<continuation_token2>")
 
         let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)
         controller.submitPasswordResult = .init(expectedResult)
@@ -59,7 +59,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", continuationToken: "<continuation_token2>")
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -79,7 +79,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
     func test_submitCode_delegate_whenAttributesRequired_ButUserHasNotImplementedOptionalDelegate_shouldReturnPasswordRequiredError() {
         let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.delegateNotImplemented)
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2")
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", continuationToken: "<continuation_token2>")
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")

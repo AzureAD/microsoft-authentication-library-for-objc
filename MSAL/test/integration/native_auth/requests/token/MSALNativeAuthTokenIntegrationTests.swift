@@ -40,7 +40,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
             parameters: .init(
                 context: context,
                 username: "test@contoso.com",
-                credentialToken: nil,
+                continutationToken: nil,
                 signInSLT: nil,
                 grantType: .otp,
                 scope: nil,
@@ -71,7 +71,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let parameters = MSALNativeAuthTokenRequestParameters(context: context,
                                                               username: "test@contoso.com",
-                                                              credentialToken: nil,
+                                                              continutationToken: nil,
                                                               signInSLT: nil,
                                                               grantType: .otp,
                                                               scope: "test & alt test",

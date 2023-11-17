@@ -305,9 +305,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             let error = ResendCodeError()
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received challenge error response: \(challengeError)")
             stopTelemetryEvent(event, context: context, error: error)
-            return .error(error: error, newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken))
+            return .error(error: error, newState: SignInCodeRequiredState(scopes: scopes, controller: self, continuationToken: credentialToken))
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
-            let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)
+            let state = SignInCodeRequiredState(scopes: scopes, controller: self, continuationToken: credentialToken)
             stopTelemetryEvent(event, context: context)
             return .codeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength)
         }
@@ -327,7 +327,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             context: context,
             format: "SignIn completed with errorType: \(errorType)")
         stopTelemetryEvent(telemetryInfo, error: errorType)
-        let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)
+        let state = SignInCodeRequiredState(scopes: scopes, controller: self, continuationToken: credentialToken)
         return .error(error: errorType.convertToVerifyCodeError(), newState: state)
     }
 
@@ -343,7 +343,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             context: telemetryInfo.context,
             format: "SignIn with username and password completed with errorType: \(errorType)")
         stopTelemetryEvent(telemetryInfo, error: errorType)
-        let state = SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, flowToken: credentialToken)
+        let state = SignInPasswordRequiredState(scopes: scopes, username: username, controller: self, continuationToken: credentialToken)
         return .error(error: errorType.convertToPasswordRequiredError(), newState: state)
     }
 
@@ -452,7 +452,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 scopes: scopes,
                 username: params.username,
                 controller: self,
-                flowToken: credentialToken
+                continuationToken: credentialToken
             )
 
             return .init(.passwordRequired(newState: state), telemetryUpdate: { [weak self] result in
@@ -470,7 +470,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 }
             })
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
-            let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken)
+            let state = SignInCodeRequiredState(scopes: scopes, controller: self, continuationToken: credentialToken)
             stopTelemetryEvent(telemetryInfo)
             return .init(.codeRequired(newState: state, sentTo: sentTo, channelTargetType: channelType, codeLength: codeLength))
         case .error(let challengeError):
@@ -495,7 +495,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             MSALLogger.log(level: .warning, context: telemetryInfo.context, format: MSALNativeAuthErrorMessage.codeRequiredForPasswordUserLog)
             let result: SignInPasswordStartResult = .codeRequired(
-                newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken),
+                newState: SignInCodeRequiredState(scopes: scopes, controller: self, continuationToken: credentialToken),
                 sentTo: sentTo,
                 channelTargetType: channelType,
                 codeLength: codeLength

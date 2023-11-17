@@ -40,7 +40,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         correlationId = UUID()
         exp = expectation(description: "ResetPasswordRequiredState expectation")
         controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
-        sut = ResetPasswordRequiredState(controller: controller, flowToken: "<token>")
+        sut = ResetPasswordRequiredState(controller: controller, continuationToken: "<continuation_token>")
     }
 
     func test_submitPassword_usesControllerSuccessfully() {

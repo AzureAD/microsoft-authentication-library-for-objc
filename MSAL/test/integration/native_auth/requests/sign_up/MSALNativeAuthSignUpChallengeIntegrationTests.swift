@@ -39,7 +39,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         )
 
         sut = try provider.challenge(
-            token: "<token>",
+            token: "<continuation_token>",
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }

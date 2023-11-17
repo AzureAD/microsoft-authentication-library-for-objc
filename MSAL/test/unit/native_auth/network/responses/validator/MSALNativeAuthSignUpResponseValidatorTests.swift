@@ -237,7 +237,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(resultError.errorDescription, "aDescription")
         XCTAssertEqual(resultError.errorCodes, errorCodes)
         XCTAssertEqual(resultError.errorURI, "aURI")
-        XCTAssertEqual(resultError.signUpToken, "aToken")
+        XCTAssertEqual(resultError.continuationToken, "aToken")
         XCTAssertEqual(resultError.unverifiedAttributes, attributes)
         XCTAssertEqual(resultError.invalidAttributes, attributes)
     }
@@ -694,7 +694,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             errorCodes: errorCodes,
             errorURI: errorURI,
             innerErrors: innerErrors,
-            signUpToken: signUpToken,
+            continuationToken: signUpToken,
             unverifiedAttributes: unverifiedAttributes,
             invalidAttributes: invalidAttributes
         )

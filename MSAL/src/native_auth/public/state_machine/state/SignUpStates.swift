@@ -33,13 +33,13 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     init(
         controller: MSALNativeAuthSignUpControlling,
         username: String,
-        flowToken: String,
+        continuationToken: String,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
     ) {
         self.controller = controller
         self.username = username
         self.inputValidator = inputValidator
-        super.init(continuationToken: flowToken)
+        super.init(continuationToken: continuationToken)
     }
 }
 
