@@ -290,7 +290,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     
     func testSignInPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidPassword))
+        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials))
         sut.signInUsingPassword(username: "correct", password: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
