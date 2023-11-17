@@ -36,7 +36,7 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     func test_convertToSignInStartError_redirect() {
         let error = sut.redirect.convertToSignInStartError()
         XCTAssertEqual(error.type, .browserRequired)
-        XCTAssertEqual(error.errorDescription, "Browser required")
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
     }
     
     func test_convertToSignInStartError_invalidClient() {
@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     func test_convertToSignInPasswordStartError_redirect() {
         let error = sut.redirect.convertToSignInPasswordStartError()
         XCTAssertEqual(error.type, .browserRequired)
-        XCTAssertEqual(error.errorDescription, "Browser required")
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
     }
     
     func test_convertToSignInPasswordStartError_invalidClient() {
@@ -92,7 +92,7 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     func test_convertToSignInPasswordStartError_invalidServerResponse() {
         let error = sut.invalidServerResponse.convertToSignInPasswordStartError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.generalError)
     }
     
     func test_convertToSignInPasswordStartError_userNotFound() {

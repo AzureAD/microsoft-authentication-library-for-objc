@@ -24,16 +24,24 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class SignInPasswordStartError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: SignInPasswordStartErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case userNotFound
+        case invalidCredentials
+        case invalidUsername
+        case generalError
+    }
 
-    init(type: SignInPasswordStartErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
@@ -41,24 +49,35 @@ public class SignInPasswordStartError: MSALNativeAuthError {
 
         switch type {
         case .browserRequired:
-            return "Browser required"
+            return MSALNativeAuthErrorMessage.browserRequired
         case .userNotFound:
-            return "User not found"
-        case .invalidPassword:
-            return "Invalid password"
+            return MSALNativeAuthErrorMessage.userNotFound
+        case .invalidCredentials:
+            return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
-            return "Invalid username"
+            return MSALNativeAuthErrorMessage.invalidUsername
         case .generalError:
-            return "General error"
+            return MSALNativeAuthErrorMessage.generalError
         }
     }
-}
 
-@objc
-public enum SignInPasswordStartErrorType: Int {
-    case browserRequired
-    case userNotFound
-    case invalidPassword
-    case invalidUsername
-    case generalError
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` if the user that is trying to sign in cannot be found.
+    public var isUserNotFound: Bool {
+        return type == .userNotFound
+    }
+
+    /// Returns `true` when the credentials are not valid.
+    public var isInvalidCredentials: Bool {
+        return type == .invalidCredentials
+    }
+
+    /// Returns `true` when the username is not valid.
+    public var isInvalidUsername: Bool {
+        return type == .invalidUsername
+    }
 }

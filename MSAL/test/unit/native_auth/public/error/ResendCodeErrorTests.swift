@@ -16,22 +16,27 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-@objc
-public class AttributesRequiredError: MSALNativeAuthError {
-    /// Describes why an error occurred and provides more information about the error.
-    public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+final class ResendCodeErrorTests: XCTestCase {
 
-        return MSALNativeAuthErrorMessage.generalError
+    private var sut: ResendCodeError!
+
+    func test_customErrorDescription() {
+        let expectedMessage = "Custom error message"
+        sut = .init(message: expectedMessage)
+        XCTAssertEqual(sut.errorDescription, expectedMessage)
+    }
+
+    func test_defaultErrorDescription() {
+        sut = .init()
+        XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
     }
 }

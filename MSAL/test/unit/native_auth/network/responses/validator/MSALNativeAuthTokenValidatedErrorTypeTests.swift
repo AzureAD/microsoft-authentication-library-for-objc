@@ -77,7 +77,7 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
     
     func test_convertToSignInPasswordStartError_invalidPassword() {
         let error = sut.invalidPassword(message: testDescription).convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .invalidPassword)
+        XCTAssertEqual(error.type, .invalidCredentials)
         XCTAssertEqual(error.errorDescription, testDescription)
     }
     

@@ -85,7 +85,7 @@ extension MSALNativeAuthPublicClientApplication {
         }
 
         guard inputValidator.isInputValid(password) else {
-            return .init(.error(SignInPasswordStartError(type: .invalidPassword)))
+            return .init(.error(SignInPasswordStartError(type: .invalidCredentials)))
         }
 
         let controller = controllerFactory.makeSignInController()
