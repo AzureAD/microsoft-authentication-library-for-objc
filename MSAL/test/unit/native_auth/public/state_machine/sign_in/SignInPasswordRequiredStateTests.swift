@@ -29,19 +29,20 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
 
     private var sut: SignInPasswordRequiredState!
     private var controller: MSALNativeAuthSignInControllerMock!
+    private var correlationId: UUID = UUID()
 
     override func setUp() {
         super.setUp()
 
         controller = .init()
-        sut = .init(scopes: [], username: "username", controller: controller, flowToken: "flowToken")
+        sut = .init(scopes: [], username: "username", controller: controller, flowToken: "flowToken", correlationId: correlationId)
     }
 
     // MARK: - Delegates
 
     func test_submitPassword_delegate_withError_shouldReturnError() {
         let expectedError = PasswordRequiredError(type: .invalidPassword)
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controller, flowToken: "flowToken 2")
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: SignInPasswordRequiredResult = .error(
             error: expectedError,

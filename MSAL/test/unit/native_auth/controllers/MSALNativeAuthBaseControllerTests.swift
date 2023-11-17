@@ -241,8 +241,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_performRequest_withSuccess() async {
-        let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(request: request, responseJson: ["response"])
+        let request = MSALNativeAuthHTTPRequestMock.prepareMockRequest(responseJson: ["response"])
 
         let result: Result<[String], Error> = await sut.performRequest(request, context: contextMock)
 
@@ -255,8 +254,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_performRequest_withUnexpectedError() async {
-        let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(request: request, responseJson: [nil] as [Any?])
+        let request = MSALNativeAuthHTTPRequestMock.prepareMockRequest(responseJson: [nil])
 
         let result: Result<[String], Error> = await sut.performRequest(request, context: contextMock)
 

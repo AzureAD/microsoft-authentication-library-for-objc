@@ -26,7 +26,7 @@ import Foundation
 
 extension SignInAfterSignUpState {
 
-    func signInInternal(scopes: [String]?, correlationId: UUID?) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError> {
+    func signInInternal(scopes: [String]?) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError> {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.signIn(username: username, slt: slt, scopes: scopes, context: context)
     }
