@@ -40,7 +40,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            continuationToken: "<password-reset-token>",
+            continuationToken: "<passwordResetToken>",
             grantType: .oobCode,
             oobCode: "0000"
         )
@@ -54,7 +54,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            continuationToken: "<password-reset-token>",
+            continuationToken: "<passwordResetToken>",
             grantType: .oobCode,
             oobCode: "0000"
         )
@@ -63,7 +63,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<password-reset-token>",
+            "continuation_token": "<passwordResetToken>",
             "grant_type": "oob",
             "oob": "0000"
         ]
@@ -75,7 +75,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            continuationToken: "<password-reset-token>",
+            continuationToken: "<passwordResetToken>",
             grantType: .oobCode,
             oobCode: nil
         )
@@ -84,7 +84,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<password-reset-token>",
+            "continuation_token": "<passwordResetToken>",
             "grant_type": "oob"
         ]
 

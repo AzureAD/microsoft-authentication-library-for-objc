@@ -40,7 +40,7 @@ final class MSALNativeAuthResetPasswordSubmitRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordSubmitRequestParameters(
             context: context,
-            continuationToken: "<password-submit-token>",
+            continuationToken: "<passwordSubmitToken>",
             newPassword:"new-password"
         )
 
@@ -53,7 +53,7 @@ final class MSALNativeAuthResetPasswordSubmitRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordSubmitRequestParameters(
             context: context,
-            continuationToken: "<password-submit-token>",
+            continuationToken: "<passwordSubmitToken>",
             newPassword:"new-password"
         )
 
@@ -61,7 +61,7 @@ final class MSALNativeAuthResetPasswordSubmitRequestParametersTest: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<password-submit-token>",
+            "continuation_token": "<passwordSubmitToken>",
             "new_password": "new-password"
         ]
 

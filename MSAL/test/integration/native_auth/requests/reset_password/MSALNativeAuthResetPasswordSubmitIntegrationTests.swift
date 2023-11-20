@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
 
         sut = try provider.submit(
             parameters: MSALNativeAuthResetPasswordSubmitRequestParameters(context: context,
-                                                                           continuationToken: "<password-submit-token>",
+                                                                           continuationToken: "<passwordSubmitToken>",
                                                                            newPassword:"new-password")
         )
     }

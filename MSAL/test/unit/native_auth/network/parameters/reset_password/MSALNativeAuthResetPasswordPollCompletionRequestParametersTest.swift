@@ -40,7 +40,7 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
-            continuationToken: "<password-reset-token"
+            continuationToken: "<passwordResetToken>"
         )
 
         var resultUrl: URL? = nil
@@ -52,14 +52,14 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
-            continuationToken: "<password-reset-token"
+            continuationToken: "<passwordResetToken>"
         )
 
         let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<password-reset-token"
+            "continuation_token": "<passwordResetToken>"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)

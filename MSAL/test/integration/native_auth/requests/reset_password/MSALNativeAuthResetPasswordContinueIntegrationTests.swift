@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
 
         sut = try provider.continue(
             parameters: MSALNativeAuthResetPasswordContinueRequestParameters(context: context,
-                                                                             continuationToken: "<password-reset-token>",
+                                                                             continuationToken: "<passwordResetToken>",
                                                                              grantType: .oobCode,
                                                                              oobCode: "0000")
         )
