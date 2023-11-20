@@ -54,7 +54,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypePassword_validationShouldReturnPasswordRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "credentialToken"
+        let credentialToken = "<continuation_token>"
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
         if case .passwordRequired(credentialToken: credentialToken) = result {} else {
@@ -73,7 +73,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypeOOB_validationShouldReturnCodeRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "credentialToken"
+        let credentialToken = "<continuation_token>"
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelType = MSALNativeAuthInternalChannelType.email
@@ -86,7 +86,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypeOOBButMissingAttributes_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "credentialToken"
+        let credentialToken = "<continuation_token>"
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelType = MSALNativeAuthInternalChannelType.email
@@ -125,7 +125,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenInitiateResponseIsValid_validationShouldBeSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "credentialToken"
+        let credentialToken = "<continuation_token>"
         let initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: credentialToken, challengeType: nil)
         let result = sut.validate(context: context, result: .success(initiateResponse))
         if case .success(credentialToken: credentialToken) = result {} else {
