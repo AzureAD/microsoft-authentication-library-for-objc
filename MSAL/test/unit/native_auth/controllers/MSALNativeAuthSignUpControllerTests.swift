@@ -1025,7 +1025,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))
@@ -1124,7 +1124,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))
@@ -1429,7 +1429,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))
@@ -1504,7 +1504,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))
@@ -1645,7 +1645,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))
@@ -1677,7 +1677,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                       errorCodes: nil,
                                                       errorURI: nil,
                                                       innerErrors: nil,
-                                                      signUpToken: nil,
+                                                      continuationToken: nil,
                                                       requiredAttributes: nil,
                                                       unverifiedAttributes: nil,
                                                       invalidAttributes: nil))

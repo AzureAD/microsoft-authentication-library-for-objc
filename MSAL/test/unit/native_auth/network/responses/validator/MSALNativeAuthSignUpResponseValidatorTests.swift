@@ -42,7 +42,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseContainsRedirect_it_returns_redirect() {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(
-            .init(signupToken: nil, challengeType: .redirect)
+            .init(continuationToken: nil, challengeType: .redirect)
         )
 
         let result = sut.validate(response, with: context)
@@ -51,7 +51,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseDoesNotContainsTokenOrRedirect_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(
-            .init(signupToken: nil, challengeType: .otp)
+            .init(continuationToken: nil, challengeType: .otp)
         )
 
         let result = sut.validate(response, with: context)
@@ -251,7 +251,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: nil,
-            signUpToken: "token",
+            continuationToken: "token",
             codeLength: nil)
         )
 
@@ -266,7 +266,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: nil,
-            signUpToken: "token",
+            continuationToken: "token",
             codeLength: nil)
         )
 
@@ -281,7 +281,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            signUpToken: "token",
+            continuationToken: "token",
             codeLength: 6)
         )
 
@@ -304,7 +304,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            signUpToken: "token",
+            continuationToken: "token",
             codeLength: nil)
         )
 
@@ -324,7 +324,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            signUpToken: nil,
+            continuationToken: nil,
             codeLength: nil)
         )
 
@@ -339,7 +339,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: nil,
-            signUpToken: "token",
+            continuationToken: "token",
             codeLength: 6)
         )
 
@@ -354,7 +354,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: nil,
-            signUpToken: nil,
+            continuationToken: nil,
             codeLength: 6)
         )
 
@@ -387,7 +387,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseContainsSLT_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(signinSLT: "<signin_slt>", expiresIn: nil, signupToken: nil)
+            .init(signinSLT: "<signin_slt>", expiresIn: nil, continuationToken: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -396,7 +396,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseButDoesNotContainSLT_it_returns_successWithNoSLT() throws {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(signinSLT: nil, expiresIn: nil, signupToken: nil)
+            .init(signinSLT: nil, expiresIn: nil, continuationToken: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -733,7 +733,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             errorCodes: errorCodes,
             errorURI: errorURI,
             innerErrors: innerErrors,
-            signUpToken: signUpToken,
+            continuationToken: signUpToken,
             requiredAttributes: requiredAttributes,
             unverifiedAttributes: unverifiedAttributes,
             invalidAttributes: invalidAttributes

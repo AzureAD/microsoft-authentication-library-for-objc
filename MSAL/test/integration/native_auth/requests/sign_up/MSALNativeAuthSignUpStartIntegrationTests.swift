@@ -180,7 +180,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             errorCodes: nil,
             errorURI: nil,
             innerErrors: nil,
-            signUpToken: nil,
+            continuationToken: nil,
             unverifiedAttributes: nil,
             invalidAttributes: nil
         )

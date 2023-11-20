@@ -153,7 +153,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: "token",
+            continuationToken: "token",
             codeLength: nil)
         )
 
@@ -167,7 +167,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: "token",
+            continuationToken: "token",
             codeLength: 6)
         )
 
@@ -189,7 +189,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: nil,
+            continuationToken: nil,
             codeLength: 6)
         )
 
@@ -203,7 +203,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .none,
-            passwordResetToken: nil,
+            continuationToken: nil,
             codeLength: 6)
         )
 
@@ -235,7 +235,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Continue Response
 
     func test_whenResetPasswordContinueSuccessResponseContainsValidAttributesAndOOB_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .success(.init(passwordSubmitToken: "passwordSubmitToken", expiresIn: 300))
+        let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .success(.init(continuationToken: "passwordSubmitToken", expiresIn: 300))
 
         let result = sut.validate(response, with: context)
 
@@ -312,7 +312,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Submit Response
 
     func test_whenResetPasswordSubmitSuccessResponseContainsToken_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(passwordResetToken: "passwordResetToken", pollInterval: 1))
+        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(continuationToken: "passwordResetToken", pollInterval: 1))
 
         let result = sut.validate(response, with: context)
 
@@ -620,7 +620,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             errorURI: errorURI,
             innerErrors: innerErrors,
             target: target,
-            passwordResetToken: passwordResetToken
+            continuationToken: passwordResetToken
         )
     }
 

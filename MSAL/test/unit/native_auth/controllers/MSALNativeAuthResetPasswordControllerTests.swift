@@ -478,7 +478,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
                                                              errorURI: nil,
                                                              innerErrors: nil,
                                                              target: nil,
-                                                             passwordResetToken: nil))
+                                                             continuationToken: nil))
         validatorMock.mockValidateResetPasswordContinueFunc(error)
 
         let exp = expectation(description: "ResetPasswordController expectation")
