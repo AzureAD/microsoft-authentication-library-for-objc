@@ -55,7 +55,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                                     with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         if response.challengeType == .redirect {
             return .redirect
-        } else if let passwordResetToken = response.passwordResetToken {
+        } else if let passwordResetToken = response.continuationToken {
             return .success(passwordResetToken: passwordResetToken)
         } else {
             MSALLogger.log(level: .error,
@@ -117,7 +117,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             if let sentTo = response.challengeTargetLabel,
                let channelTargetType = response.challengeChannel?.toPublicChannelType(),
                let codeLength = response.codeLength,
-               let passwordResetToken = response.passwordResetToken {
+               let passwordResetToken = response.continuationToken {
                 return .success(
                     sentTo,
                     channelTargetType,
@@ -161,7 +161,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleContinueSuccess(
         _ response: MSALNativeAuthResetPasswordContinueResponse
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
-        return .success(passwordSubmitToken: response.passwordSubmitToken)
+        return .success(passwordSubmitToken: response.continuationToken)
     }
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
@@ -202,7 +202,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         _ response: MSALNativeAuthResetPasswordSubmitResponse
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
-            passwordResetToken: response.passwordResetToken,
+            passwordResetToken: response.continuationToken,
             pollInterval: response.pollInterval
         )
     }

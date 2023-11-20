@@ -135,14 +135,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             if let sentTo = response.challengeTargetLabel,
                let channelType = response.challengeChannel?.toPublicChannelType(),
                let codeLength = response.codeLength,
-               let signUpChallengeToken = response.signUpToken {
+               let signUpChallengeToken = response.continuationToken {
                 return .codeRequired(sentTo, channelType, codeLength, signUpChallengeToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = oob")
                 return .unexpectedError
             }
         case .password:
-            if let signUpToken = response.signUpToken {
+            if let signUpToken = response.continuationToken {
                 return .passwordRequired(signUpToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = password")
@@ -193,7 +193,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .passwordBanned:
             return .invalidUserInput(apiError)
         case .attributeValidationFailed:
-            if let signUpToken = apiError.signUpToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
+            if let signUpToken = apiError.continuationToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
                 return .attributeValidationFailed(signUpToken: signUpToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
                 MSALLogger.log(
@@ -204,14 +204,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 return .unexpectedError
             }
         case .credentialRequired:
-            if let signUpToken = apiError.signUpToken {
+            if let signUpToken = apiError.continuationToken {
                 return .credentialRequired(signUpToken: signUpToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for credential_required error")
                 return .unexpectedError
             }
         case .attributesRequired:
-            if let signUpToken = apiError.signUpToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
+            if let signUpToken = apiError.continuationToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
                 return .attributesRequired(signUpToken: signUpToken, requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() })
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
@@ -246,7 +246,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                     errorCodes: error.errorCodes,
                     errorURI: error.errorURI,
                     innerErrors: error.innerErrors,
-                    signUpToken: error.signUpToken,
+                    continuationToken: error.continuationToken,
                     requiredAttributes: error.requiredAttributes,
                     unverifiedAttributes: error.unverifiedAttributes,
                     invalidAttributes: error.invalidAttributes))

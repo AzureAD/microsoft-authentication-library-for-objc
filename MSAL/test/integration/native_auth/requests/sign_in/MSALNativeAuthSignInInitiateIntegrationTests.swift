@@ -53,14 +53,14 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
             responses: []
         )
         let response: MSALNativeAuthSignInInitiateResponse? = try await performTestSucceed()
-        XCTAssertNotNil(response?.credentialToken)
+        XCTAssertNotNil(response?.continuationToken)
     }
 
     func test_succeedRequest_challengeTypeRedirect() async throws {
         try await mockResponse(.challengeTypeRedirect, endpoint: .signInInitiate)
         let response: MSALNativeAuthSignInInitiateResponse? = try await performTestSucceed()
 
-        XCTAssertNil(response?.credentialToken)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 

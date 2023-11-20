@@ -508,7 +508,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             XCTAssertNil(error.errorDescription)
             XCTAssertNil(error.errorURI)
             XCTAssertNil(error.innerErrors)
-            XCTAssertEqual(error.signUpToken, signUpToken)
+            XCTAssertEqual(error.continuationToken, signUpToken)
             XCTAssertNil(error.requiredAttributes)
             XCTAssertNil(error.unverifiedAttributes)
             XCTAssertNil(error.invalidAttributes)

@@ -27,16 +27,16 @@ import Foundation
 struct MSALNativeAuthResetPasswordStartResponse: Decodable {
 
     // MARK: - Variables
-    let passwordResetToken: String?
+    let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
 
     enum CodingKeys: String, CodingKey {
-        case passwordResetToken
+        case continuationToken
         case challengeType
     }
 
-    init(passwordResetToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
-        self.passwordResetToken = passwordResetToken
+    init(continuationToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
+        self.continuationToken = continuationToken
         self.challengeType = challengeType
     }
 }

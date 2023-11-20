@@ -57,7 +57,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
 
         let response: MSALNativeAuthResetPasswordContinueResponse? = try await performTestSucceed()
 
-        XCTAssertNotNil(response?.passwordSubmitToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNotNil(response?.expiresIn)
     }
 

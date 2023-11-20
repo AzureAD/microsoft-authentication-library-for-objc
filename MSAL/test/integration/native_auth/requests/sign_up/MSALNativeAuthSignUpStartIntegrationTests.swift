@@ -52,7 +52,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await mockResponse(.challengeTypeRedirect, endpoint: .signUpStart)
         let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
 
-        XCTAssertNil(response?.signupToken)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 

@@ -67,7 +67,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             if initiateResponse.challengeType == .redirect {
                 return .error(.redirect)
             }
-            if let credentialToken = initiateResponse.credentialToken {
+            if let credentialToken = initiateResponse.continuationToken {
                 return .success(credentialToken: credentialToken)
             }
             MSALLogger.log(level: .error, context: context, format: "SignIn Initiate: challengeType and credential token empty")
@@ -97,7 +97,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 format: "SignIn Challenge: Received unexpected challenge type: \(response.challengeType)")
             return .error(.invalidServerResponse)
         case .oob:
-            guard let credentialToken = response.credentialToken,
+            guard let credentialToken = response.continuationToken,
                     let targetLabel = response.challengeTargetLabel,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
@@ -113,7 +113,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 channelType: channelType.toPublicChannelType(),
                 codeLength: codeLength)
         case .password:
-            guard let credentialToken = response.credentialToken else {
+            guard let credentialToken = response.continuationToken else {
                 MSALLogger.log(
                     level: .error,
                     context: context,

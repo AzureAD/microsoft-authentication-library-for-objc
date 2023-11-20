@@ -51,7 +51,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
 
         XCTAssertTrue(response?.challengeType == .password)
-        XCTAssertNotNil(response?.credentialToken)
+        XCTAssertNotNil(response?.continuationToken)
     }
 
     func test_succeedRequest_challengeTypeOOB() async throws {
@@ -59,7 +59,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
 
         XCTAssertTrue(response?.challengeType == .oob)
-        XCTAssertNotNil(response?.credentialToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNotNil(response?.bindingMethod)
         XCTAssertNotNil(response?.challengeTargetLabel)
         XCTAssertNotNil(response?.codeLength)
@@ -71,7 +71,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .redirect)
-        XCTAssertNil(response?.credentialToken)
+        XCTAssertNil(response?.continuationToken)
     }
 
 

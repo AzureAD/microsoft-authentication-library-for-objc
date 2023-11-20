@@ -181,7 +181,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             expectedError: createError(.attributesRequired)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
     }
 
     func test_signUpContinue_verificationRequired() async throws {
@@ -191,7 +191,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             expectedError: createError(.verificationRequired)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
         XCTAssertNotNil(response.unverifiedAttributes)
     }
 
@@ -202,7 +202,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             expectedError: createError(.attributeValidationFailed)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
     }
 
     func test_signUpContinue_credentialRequired() async throws {
@@ -212,7 +212,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
             expectedError: createError(.credentialRequired)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
     }
 
     func performSuccessfulTestCase(with params: MSALNativeAuthSignUpContinueRequestProviderParams) async throws {
@@ -222,7 +222,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.signinSLT)
-        XCTAssertNil(response?.signupToken)
+        XCTAssertNil(response?.continuationToken)
     }
 
     private func createError(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode) -> MSALNativeAuthSignUpContinueResponseError {

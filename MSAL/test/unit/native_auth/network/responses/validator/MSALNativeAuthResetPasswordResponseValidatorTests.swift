@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseContainsRedirect_itReturnsRedirect() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: nil, challengeType: .redirect)
+            .init(continuationToken: nil, challengeType: .redirect)
         )
 
         let result = sut.validate(response, with: context)
@@ -53,7 +53,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseDoesNotContainsTokenOrRedirect_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: nil, challengeType: .otp)
+            .init(continuationToken: nil, challengeType: .otp)
         )
 
         let result = sut.validate(response, with: context)
@@ -64,7 +64,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseContainsToken_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: "passwordResetToken", challengeType: .otp)
+            .init(continuationToken: "passwordResetToken", challengeType: .otp)
         )
 
         let result = sut.validate(response, with: context)

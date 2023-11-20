@@ -90,7 +90,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         checkConfAndContext(context)
         if case .success(let successChallengeResponse) = result, let expectedChallengeResponse = expectedChallengeResponse {
             XCTAssertEqual(successChallengeResponse.challengeType, expectedChallengeResponse.challengeType)
-            XCTAssertEqual(successChallengeResponse.credentialToken, expectedChallengeResponse.credentialToken)
+            XCTAssertEqual(successChallengeResponse.continuationToken, expectedChallengeResponse.continuationToken)
             XCTAssertEqual(successChallengeResponse.challengeTargetLabel, expectedChallengeResponse.challengeTargetLabel)
             XCTAssertEqual(successChallengeResponse.challengeChannel, expectedChallengeResponse.challengeChannel)
             XCTAssertEqual(successChallengeResponse.codeLength, expectedChallengeResponse.codeLength)
@@ -106,7 +106,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         checkConfAndContext(context)
         if case .success(let successInitiateResponse) = result, let expectedInitiateResponse = expectedInitiateResponse {
             XCTAssertEqual(successInitiateResponse.challengeType, expectedInitiateResponse.challengeType)
-            XCTAssertEqual(successInitiateResponse.credentialToken, expectedInitiateResponse.credentialToken)
+            XCTAssertEqual(successInitiateResponse.continuationToken, expectedInitiateResponse.continuationToken)
         }
         if case .failure(let initiateResponseError) = result, let expectedInitiateResponseError = expectedResponseError {
             XCTAssertTrue(type(of: initiateResponseError) == type(of: expectedInitiateResponseError))
