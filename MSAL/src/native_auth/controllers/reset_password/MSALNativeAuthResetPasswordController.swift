@@ -181,7 +181,6 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         switch response {
         case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/challenge request")
-            stopTelemetryEvent(event, context: context)
 
             return .init(.codeRequired(
                 newState: ResetPasswordCodeRequiredState(controller: self, flowToken: challengeToken, correlationId: context.correlationId()),
@@ -189,7 +188,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 channelTargetType: channelTargetType,
                 codeLength: codeLength
             ), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toResetPasswordStartPublicError()
@@ -222,7 +221,6 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     ) async -> ResetPasswordResendCodeControllerResponse {
         switch response {
         case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
-            stopTelemetryEvent(event, context: context)
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/challenge (resend code) request")
             return .init(.codeRequired(
                 newState: ResetPasswordCodeRequiredState(controller: self, flowToken: challengeToken, correlationId: context.correlationId()),
@@ -230,7 +228,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 channelTargetType: channelTargetType,
                 codeLength: codeLength
             ), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toResendCodePublicError()
@@ -278,12 +276,11 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     ) async -> ResetPasswordSubmitCodeControllerResponse {
         switch response {
         case .success(let passwordSubmitToken):
-            stopTelemetryEvent(event, context: context)
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/continue request")
             let newState = ResetPasswordRequiredState(controller: self, flowToken: passwordSubmitToken, correlationId: context.correlationId())
             return .init(.passwordRequired(newState: newState),
                          telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toVerifyCodePublicError()
@@ -459,10 +456,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                     context: context
                 )
             case .succeeded:
-                stopTelemetryEvent(event, context: context)
-
                 return .init(.completed, telemetryUpdate: { [weak self] result in
-                    self?.updateTelemetryEvent(event, context: context, result: result)
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
             case .failed:
                 let error = PasswordRequiredError(type: .generalError)

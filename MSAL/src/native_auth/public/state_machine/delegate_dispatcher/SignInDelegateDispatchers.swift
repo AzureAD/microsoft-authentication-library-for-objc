@@ -36,7 +36,7 @@ final class SignInPasswordStartDelegateDispatcher: DelegateDispatcher<SignInPass
             telemetryUpdate?(.success(()))
             await onSignInCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = SignInPasswordStartError(type: .generalError, message: errorMessage(for: "onSignInCodeRequired"))
+            let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCodeRequired"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInPasswordError(error: error)
         }
@@ -47,7 +47,7 @@ final class SignInPasswordStartDelegateDispatcher: DelegateDispatcher<SignInPass
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = SignInPasswordStartError(type: .generalError, message: errorMessage(for: "onSignInCompleted"))
+            let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInPasswordError(error: error)
         }
@@ -66,7 +66,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
             telemetryUpdate?(.success(()))
             await onSignInCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = SignInStartError(type: .generalError, message: errorMessage(for: "onSignInCodeRequired"))
+            let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCodeRequired"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInError(error: error)
         }
@@ -77,7 +77,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
             telemetryUpdate?(.success(()))
             await onSignInPasswordRequired(newState)
         } else {
-            let error = SignInStartError(type: .generalError, message: errorMessage(for: "onSignInPasswordRequired"))
+            let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInPasswordRequired"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInError(error: error)
         }
@@ -91,7 +91,7 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: errorMessage(for: "onSignInCompleted"))
+            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
         }
@@ -110,7 +110,7 @@ final class SignInResendCodeDelegateDispatcher: DelegateDispatcher<SignInResendC
             telemetryUpdate?(.success(()))
             await onSignInResendCodeCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: errorMessage(for: "onSignInResendCodeCodeRequired"))
+            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignInResendCodeCodeRequired"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInResendCodeError(error: error, newState: nil)
         }
@@ -124,7 +124,7 @@ final class SignInVerifyCodeDelegateDispatcher: DelegateDispatcher<SignInVerifyC
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: errorMessage(for: "onSignInCompleted"))
+            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInVerifyCodeError(error: error, newState: nil)
         }

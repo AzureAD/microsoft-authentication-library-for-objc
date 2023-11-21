@@ -24,16 +24,16 @@
 
 import Foundation
 
-class DelegateDispatcher<T> {
-    let delegate: T
-    let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
+final class CredentialsDelegateDispatcher: DelegateDispatcher<CredentialsDelegate> {
 
-    init(delegate: T, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?) {
-        self.delegate = delegate
-        self.telemetryUpdate = telemetryUpdate
-    }
-
-    func errorMessage(for method: String) -> String {
-        return MSALNativeAuthErrorMessage.requiredDelegateMethod(method)
+    func dispatchAccessTokenRetrieveCompleted(accessToken: String) async {
+        if let onAccessTokenRetrieveCompleted = delegate.onAccessTokenRetrieveCompleted {
+            telemetryUpdate?(.success(()))
+            await onAccessTokenRetrieveCompleted(accessToken)
+        } else {
+            let error = RetrieveAccessTokenError(type: .generalError, message: requiredErrorMessage(for: "onAccessTokenRetrieveCompleted"))
+            telemetryUpdate?(.failure(error))
+            await delegate.onAccessTokenRetrieveError(error: error)
+        }
     }
 }

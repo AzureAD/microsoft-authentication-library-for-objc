@@ -336,6 +336,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
         let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        result.telemetryUpdate?(.success(()))
         helper.onSignUpCodeRequired(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -720,6 +721,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
         let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        result.telemetryUpdate?(.success(()))
         helper.onSignUpCodeRequired(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -871,6 +873,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
         let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        result.telemetryUpdate?(.success(()))
         helper.onSignUpResendCodeCodeRequired(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1709,6 +1712,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
         let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        result.telemetryUpdate?(.success(()))
         helper.onSignUpAttributesRequired(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1775,6 +1779,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
         let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        result.telemetryUpdate?(.success(()))
         helper.onSignUpAttributesValidationFailed(result)
 
         await fulfillment(of: [exp], timeout: 1)

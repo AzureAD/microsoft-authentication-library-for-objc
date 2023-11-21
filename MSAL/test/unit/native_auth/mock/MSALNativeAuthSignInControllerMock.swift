@@ -33,7 +33,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
 
     var signInPasswordStartResult: MSALNativeAuthSignInControlling.SignInPasswordControllerResponse!
     var signInStartResult: MSALNativeAuthSignInControlling.SignInCodeControllerResponse!
-    var signInSLTResult: SignInSltControllerResponse!
+    var signInSLTResult: SignInAfterSignUpControllerResponse!
     var submitCodeResult: SignInSubmitCodeControllerResponse!
     var submitPasswordResult: SignInSubmitPasswordControllerResponse!
     var resendCodeResult: SignInResendCodeControllerResponse!
@@ -46,7 +46,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
         return signInStartResult
     }
 
-    func signIn(username: String, slt: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> SignInSltControllerResponse {
+    func signIn(username: String, slt: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> SignInAfterSignUpControllerResponse {
         self.username = username
         self.slt = slt
         expectation?.fulfill()

@@ -105,6 +105,6 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onResetPasswordCompleted"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onResetPasswordCompleted"))
     }
 }

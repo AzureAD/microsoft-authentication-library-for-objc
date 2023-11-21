@@ -43,7 +43,7 @@ enum ResetPasswordStartResult {
 typealias ResetPasswordResendCodeResult = CodeRequiredGenericResult<ResetPasswordCodeRequiredState, ResendCodeError>
 
 /// Represents the result of verifying a reset password verification code.
-enum ResetPasswordVerifyCodeResult {
+enum ResetPasswordSubmitCodeResult {
     /// Returned when a password is required.
     case passwordRequired(newState: ResetPasswordRequiredState)
 
@@ -52,7 +52,7 @@ enum ResetPasswordVerifyCodeResult {
 }
 
 /// Represents the result of verifying a reset password verification code.
-enum ResetPasswordRequiredResult {
+enum ResetPasswordSubmitPasswordResult {
     /// Returned after the reset password operation completed successfully.
     case completed
 

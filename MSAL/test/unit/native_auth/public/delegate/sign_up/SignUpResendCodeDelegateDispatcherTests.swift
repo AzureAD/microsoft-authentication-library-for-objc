@@ -71,7 +71,7 @@ final class SignUpResendCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpResendCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpResendCodeDelegateMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResendCodeError(message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpResendCodeCodeRequired"))
+        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpResendCodeCodeRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResendCodeError else {

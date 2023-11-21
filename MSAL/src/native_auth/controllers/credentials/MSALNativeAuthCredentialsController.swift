@@ -174,21 +174,22 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
     ) -> RefreshTokenCredentialControllerResponse {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            telemetryEvent?.setUserInformation(tokenResult.account)
-            stopTelemetryEvent(telemetryEvent, context: context)
             MSALLogger.log(
                 level: .verbose,
                 context: context,
                 format: "Refresh Token completed successfully")
             return .init(.success(tokenResult.accessToken.accessToken), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(telemetryEvent, context: context, result: result)
+                telemetryEvent?.setUserInformation(tokenResult.account)
+                self?.stopTelemetryEvent(telemetryEvent, context: context, delegateDispatcherResult: result)
             })
         } catch {
+            let error = RetrieveAccessTokenError(type: .generalError)
             MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Token Result was not created properly error - \(error)")
-            return .init(.failure(RetrieveAccessTokenError(type: .generalError)))
+            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+            return .init(.failure(error))
         }
     }
 }

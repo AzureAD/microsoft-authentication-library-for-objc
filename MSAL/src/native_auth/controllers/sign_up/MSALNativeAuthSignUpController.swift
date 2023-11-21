@@ -169,7 +169,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
             let error = SignUpPasswordStartError(type: .generalError, message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result, error: error)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
             let error = SignUpPasswordStartError(type: .browserRequired)
@@ -234,7 +234,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
             let error = SignUpStartError(type: .generalError, message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result, error: error)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
             let error = SignUpStartError(type: .browserRequired)
@@ -304,7 +304,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge password request")
-            stopTelemetryEvent(event, context: context)
             return SignUpStartPasswordControllerResponse(
                 .codeRequired(
                     newState: SignUpCodeRequiredState(controller: self,
@@ -315,7 +314,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                     channelTargetType: challengeType,
                     codeLength: codeLength
                 ), telemetryUpdate: { [weak self] result in
-                    self?.updateTelemetryEvent(event, context: context, result: result)
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 }
             )
         case .error(let apiError):
@@ -352,7 +351,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request")
-            stopTelemetryEvent(event, context: context)
             return SignUpStartCodeControllerResponse(
                 .codeRequired(
                     newState: SignUpCodeRequiredState(controller: self,
@@ -363,7 +361,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                     channelTargetType: challengeType,
                     codeLength: codeLength
                 ), telemetryUpdate: { [weak self] result in
-                    self?.updateTelemetryEvent(event, context: context, result: result)
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 }
             )
         case .error(let apiError):
@@ -400,7 +398,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge resendCode request")
-            stopTelemetryEvent(event, context: context)
             return .init(.codeRequired(
                 newState: SignUpCodeRequiredState(
                     controller: self,
@@ -411,7 +408,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 channelTargetType: challengeType,
                 codeLength: codeLength
             ), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toResendCodePublicError()
@@ -449,7 +446,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                     correlationId: context.correlationId())
 
             return .init(.passwordRequired(state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .redirect:
             let error = VerifyCodeError(type: .browserRequired)
@@ -501,7 +498,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .success(let slt):
             let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .invalidUserInput:
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
@@ -524,7 +521,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                       correlationId: context.correlationId())
 
             return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toVerifyCodePublicError()
@@ -555,7 +552,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .success(let slt):
             let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .invalidUserInput(let error):
             let error = error.toPasswordRequiredPublicError()
@@ -581,7 +578,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                       correlationId: context.correlationId())
 
             return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
             let error = apiError.toPasswordRequiredPublicError()
@@ -614,11 +611,10 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .success(let slt):
             let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .attributesRequired(let signUpToken, let attributes):
             let error = AttributesRequiredError()
-            stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
@@ -629,7 +625,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.attributesRequired(attributes: attributes, state: state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result, error: error)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .attributeValidationFailed(let signUpToken, let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
@@ -637,7 +633,6 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
             let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
             let error = AttributesRequiredError(message: errorMessage)
-            stopTelemetryEvent(event, context: context, error: error)
 
             let state = SignUpAttributesRequiredState(
                 controller: self,
@@ -646,7 +641,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.attributesInvalid(attributes: invalidAttributes, newState: state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(event, context: context, result: result, error: error)
+                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .error(let apiError):
             let error = apiError.toAttributesRequiredPublicError()

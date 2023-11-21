@@ -66,7 +66,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpVerifyCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesRequired"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
@@ -116,7 +116,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCompleted_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {

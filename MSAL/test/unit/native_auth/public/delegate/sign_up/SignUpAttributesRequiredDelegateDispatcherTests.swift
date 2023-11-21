@@ -66,7 +66,7 @@ final class SignUpAttributesRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpAttributesRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = AttributesRequiredError(message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesRequired"))
+        let expectedError = AttributesRequiredError(message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? AttributesRequiredError else {
@@ -118,7 +118,7 @@ final class SignUpAttributesRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpAttributesRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = AttributesRequiredError(message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesInvalid"))
+        let expectedError = AttributesRequiredError(message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? AttributesRequiredError else {
@@ -164,7 +164,7 @@ final class SignUpAttributesRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCompleted_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpAttributesRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = AttributesRequiredError(message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpCompleted"))
+        let expectedError = AttributesRequiredError(message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? AttributesRequiredError else {

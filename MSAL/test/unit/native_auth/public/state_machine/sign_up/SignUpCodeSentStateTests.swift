@@ -104,7 +104,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.error?.errorDescription, MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpResendCodeCodeRequired"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpResendCodeCodeRequired"))
     }
 
     // SubmitCode
@@ -165,7 +165,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpPasswordRequired")
+            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpPasswordRequired")
         )
     }
 
@@ -205,7 +205,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesRequired")
+            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired")
         )
     }
 
@@ -244,7 +244,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpCompleted")
+            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted")
         )
     }
 }

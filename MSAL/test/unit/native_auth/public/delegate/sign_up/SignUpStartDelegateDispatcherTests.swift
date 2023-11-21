@@ -71,7 +71,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpStartError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpCodeRequired"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCodeRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
@@ -124,7 +124,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpStartError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesInvalid"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {

@@ -2606,6 +2606,7 @@
 		28DCD08829D70FA000C4601E /* state_machine */ = {
 			isa = PBXGroup;
 			children = (
+				E2CE91372B0D077C0009AEDD /* delegate_dispatcher */,
 				8DDF473E2A98FE1C00126A47 /* MSALNativeAuthRequiredAttributes.swift */,
 				28DCD09629D7171600C4601E /* error */,
 				28DCD09529D7170F00C4601E /* state */,
@@ -2622,12 +2623,6 @@
 				28DCD0B329D73BCE00C4601E /* ResetPasswordDelegates.swift */,
 				DE9245112A38736600C0389F /* CredentialsDelegates.swift */,
 				28FDC4A52A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift */,
-				E22427C72B0526660006C55E /* SignUpDelegateDispatchers.swift */,
-				E22427D12B0577920006C55E /* SignInDelegateDispatchers.swift */,
-				E22427D42B05886B0006C55E /* ResetPasswordDelegateDispatchers.swift */,
-				E22427D72B0588AD0006C55E /* DelegateDispatcher.swift */,
-				E22427DA2B0594670006C55E /* CredentialsDelegateDispatcher.swift */,
-				E22427DD2B05981A0006C55E /* SignInAfterSignUpDelegateDispatcher.swift */,
 			);
 			path = delegate;
 			sourceTree = "<group>";
@@ -4234,6 +4229,19 @@
 				E2CD2E5029FC087A009F8FFA /* SignUpAttributesRequiredStateTests.swift */,
 			);
 			path = sign_up;
+			sourceTree = "<group>";
+		};
+		E2CE91372B0D077C0009AEDD /* delegate_dispatcher */ = {
+			isa = PBXGroup;
+			children = (
+				E22427D72B0588AD0006C55E /* DelegateDispatcher.swift */,
+				E22427C72B0526660006C55E /* SignUpDelegateDispatchers.swift */,
+				E22427D12B0577920006C55E /* SignInDelegateDispatchers.swift */,
+				E22427D42B05886B0006C55E /* ResetPasswordDelegateDispatchers.swift */,
+				E22427DA2B0594670006C55E /* CredentialsDelegateDispatcher.swift */,
+				E22427DD2B05981A0006C55E /* SignInAfterSignUpDelegateDispatcher.swift */,
+			);
+			path = delegate_dispatcher;
 			sourceTree = "<group>";
 		};
 		E2EFAD072A69A2C300D6C3DE /* responses */ = {

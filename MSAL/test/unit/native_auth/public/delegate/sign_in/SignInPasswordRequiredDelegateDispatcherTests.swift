@@ -56,7 +56,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = PasswordRequiredError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignInCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
         let delegate = SignInPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
 
 

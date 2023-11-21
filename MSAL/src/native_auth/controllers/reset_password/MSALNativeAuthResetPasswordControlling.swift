@@ -28,8 +28,8 @@ protocol MSALNativeAuthResetPasswordControlling: AnyObject {
 
     typealias ResetPasswordStartControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordStartResult>
     typealias ResetPasswordResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordResendCodeResult>
-    typealias ResetPasswordSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordVerifyCodeResult>
-    typealias ResetPasswordSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordRequiredResult>
+    typealias ResetPasswordSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordSubmitCodeResult>
+    typealias ResetPasswordSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<ResetPasswordSubmitPasswordResult>
 
     func resetPassword(parameters: MSALNativeAuthResetPasswordStartRequestProviderParameters) async -> ResetPasswordStartControllerResponse
 

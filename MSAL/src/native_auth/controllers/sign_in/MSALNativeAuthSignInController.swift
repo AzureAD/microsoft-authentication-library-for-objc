@@ -115,7 +115,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         slt: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
-    ) async -> SignInSltControllerResponse {
+    ) async -> SignInAfterSignUpControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
@@ -149,7 +149,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 telemetryInfo: telemetryInfo,
                 onSuccess: { accountResult in
                     continuation.resume(returning: .init(.success(accountResult), telemetryUpdate: { [weak self] result in
-                        self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                        self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                     }))
                 },
                 onError: { error in
@@ -199,7 +199,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     config: config,
                     onSuccess: { accountResult in
                         continuation.resume(returning: .init(.completed(accountResult), telemetryUpdate: { [weak self] result in
-                            self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                            self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         }))
                     },
                     onError: { [weak self] error in
@@ -266,7 +266,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     config: config,
                     onSuccess: { accountResult in
                         continuation.resume(returning: .init(.completed(accountResult), telemetryUpdate: { [weak self] result in
-                            self?.updateTelemetryEvent(telemetryInfo.event, context: context, result: result)
+                            self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         }))
                     },
                     onError: { [weak self] error in
@@ -321,7 +321,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken, correlationId: context.correlationId())
-            stopTelemetryEvent(event, context: context)
             return .init(
                 .codeRequired(
                     newState: state,
@@ -329,7 +328,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     channelTargetType: channelType,
                     codeLength: codeLength),
                 telemetryUpdate: { [weak self] result in
-                    self?.updateTelemetryEvent(event, context: context, result: result)
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
         }
     }
@@ -484,14 +483,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
 
             return .init(.passwordRequired(newState: state), telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
             })
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             let state = SignInCodeRequiredState(scopes: scopes,
                                                 controller: self,
                                                 flowToken: credentialToken,
                                                 correlationId: params.context.correlationId())
-            stopTelemetryEvent(telemetryInfo)
             return .init(
                 .codeRequired(
                     newState: state,
@@ -499,7 +497,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     channelTargetType: channelType,
                     codeLength: codeLength
                 ), telemetryUpdate: { [weak self] result in
-                    self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                 })
         case .error(let challengeError):
             let error = challengeError.convertToSignInStartError()
@@ -533,7 +531,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
 
             return .init(result, telemetryUpdate: { [weak self] result in
-                self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
             })
         case .passwordRequired(let credentialToken):
             guard let request = createTokenRequest(
@@ -558,7 +556,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     onSuccess: { accountResult in
                     continuation.resume(returning: SignInPasswordControllerResponse(.completed(accountResult),
                                                                                     telemetryUpdate: { [weak self] result in
-                        self?.updateTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, result: result)
+                        self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                     }))
                     },
                     onError: { error in

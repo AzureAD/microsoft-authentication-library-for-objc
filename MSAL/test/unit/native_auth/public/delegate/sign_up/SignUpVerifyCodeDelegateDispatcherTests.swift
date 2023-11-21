@@ -66,7 +66,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpVerifyCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpAttributesRequired"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
@@ -116,7 +116,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpPasswordRequired"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpPasswordRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
@@ -161,7 +161,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCompleted_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.requiredDelegateMethod("onSignUpCompleted"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
