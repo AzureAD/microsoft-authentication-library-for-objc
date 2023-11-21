@@ -33,9 +33,22 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
         super.init(identifier: type.rawValue, message: message)
     }
 
-    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        return super.errorDescription ?? type.rawValue
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .refreshTokenExpired:
+            return MSALNativeAuthErrorMessage.refreshTokenExpired
+        case .tokenNotFound:
+            return MSALNativeAuthErrorMessage.tokenNotFound
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
     }
 
     /// Returns `true` if the error requires to use a browser.
@@ -55,8 +68,8 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
 }
 
 public enum RetrieveAccessTokenErrorType: String, CaseIterable {
-    case browserRequired = "Browser required"
-    case refreshTokenExpired = "Refresh token expired"
-    case tokenNotFound = "Token not found"
-    case generalError = "General error"
+    case browserRequired = "browser_required"
+    case refreshTokenExpired = "refresh_token_expired"
+    case tokenNotFound = "token_not_found"
+    case generalError = "general_error"
 }

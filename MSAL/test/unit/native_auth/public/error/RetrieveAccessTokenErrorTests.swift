@@ -56,8 +56,25 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(type: .generalError)
-        XCTAssertEqual(sut.errorDescription, RetrieveAccessTokenErrorType.generalError.rawValue)
+        let sut: [RetrieveAccessTokenError] = [
+            .init(type: .browserRequired),
+            .init(type: .refreshTokenExpired),
+            .init(type: .tokenNotFound),
+            .init(type: .generalError)
+        ]
+
+        let expectedIdentifiers = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.refreshTokenExpired,
+            MSALNativeAuthErrorMessage.tokenNotFound,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+
+        zip(errorDescriptions, expectedIdentifiers).forEach {
+            XCTAssertEqual($0, $1)
+        }
     }
 
     func test_isBrowserRequired() {

@@ -45,9 +45,20 @@ public class PasswordRequiredError: MSALNativeAuthError {
         super.init(identifier: signInPasswordError.type.rawValue, message: signInPasswordError.errorDescription)
     }
 
-    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        return super.errorDescription ?? type.rawValue
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .invalidPassword:
+            return MSALNativeAuthErrorMessage.invalidPassword
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
     }
 
     /// Returns `true` if the error requires to use a browser.
@@ -55,14 +66,14 @@ public class PasswordRequiredError: MSALNativeAuthError {
         return type == .browserRequired
     }
 
-    /// Returns `true` when the password introduced is not valid.
+    /// Returns `true` when the password is not valid.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
 }
 
 public enum PasswordRequiredErrorType: String, CaseIterable {
-    case browserRequired = "Browser required"
-    case invalidPassword = "Invalid password"
-    case generalError = "General error"
+    case browserRequired = "browser_required"
+    case invalidPassword = "invalid_password"
+    case generalError = "general_error"
 }

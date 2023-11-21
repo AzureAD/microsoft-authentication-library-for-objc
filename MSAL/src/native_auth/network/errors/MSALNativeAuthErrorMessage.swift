@@ -37,6 +37,13 @@ enum MSALNativeAuthErrorMessage {
     static let passwordRequiredNotImplemented = "Implementation of onSignInPasswordRequired required"
     static let codeRequiredNotImplemented = "Implementation of onSignInCodeRequired required"
     static let codeRequiredForPasswordUserLog = "This user does not have a password associated with their account. SDK will call `delegate.onSignInCodeRequired()` and the entered password will be ignored"
+    static let userAlreadyExists = "User already exists"
+    static let invalidPassword = "Invalid password"
+    static let invalidUsername = "Invalid username"
+    static let generalError = "General error"
+    static let invalidCode = "Invalid code"
+    static let refreshTokenExpired = "Refresh token is expired"
+    static let tokenNotFound = "Token not found"
 }
 
 // swiftlint:enable line_length

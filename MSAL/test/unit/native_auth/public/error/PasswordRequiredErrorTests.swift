@@ -55,8 +55,23 @@ final class PasswordRequiredErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(type: .generalError)
-        XCTAssertEqual(sut.errorDescription, PasswordRequiredErrorType.generalError.rawValue)
+        let sut: [PasswordRequiredError] = [
+            .init(type: .browserRequired),
+            .init(type: .invalidPassword),
+            .init(type: .generalError)
+        ]
+
+        let expectedErrorDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.invalidPassword,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+        
+        zip(errorDescriptions, expectedErrorDescriptions).forEach {
+            XCTAssertEqual($0, $1)
+        }
     }
 
     func test_isBrowserRequired() {

@@ -55,14 +55,30 @@ final class SignInStartErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(type: .generalError)
-        XCTAssertEqual(sut.errorDescription, SignInStartErrorType.generalError.rawValue)
+        let sut: [SignInStartError] = [
+            .init(type: .browserRequired),
+            .init(type: .userNotFound),
+            .init(type: .invalidUsername),
+            .init(type: .generalError)
+        ]
+
+        let expectedDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.userNotFound,
+            MSALNativeAuthErrorMessage.invalidUsername,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+
+        zip(errorDescriptions, expectedDescriptions).forEach {
+            XCTAssertEqual($0, $1)
+        }
     }
 
 
     func test_isBrowserRequired() {
         sut = .init(type: .browserRequired)
-        
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
         XCTAssertFalse(sut.isInvalidUsername)
@@ -70,17 +86,15 @@ final class SignInStartErrorTests: XCTestCase {
 
     func test_isUserNotFound() {
         sut = .init(type: .userNotFound)
-        
-        XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertTrue(sut.isUserNotFound)
+        XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
     func test_isInvalidUsername() {
         sut = .init(type: .invalidUsername)
-        
+        XCTAssertTrue(sut.isInvalidUsername)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
-        XCTAssertTrue(sut.isInvalidUsername)
     }
 }

@@ -57,13 +57,31 @@ final class SignUpPasswordStartErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(type: .generalError)
-        XCTAssertEqual(sut.errorDescription, SignUpPasswordStartErrorType.generalError.rawValue)
+        let sut: [SignUpPasswordStartError] = [
+            .init(type: .browserRequired),
+            .init(type: .userAlreadyExists),
+            .init(type: .invalidPassword),
+            .init(type: .invalidUsername),
+            .init(type: .generalError)
+        ]
+
+        let expectedDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.userAlreadyExists,
+            MSALNativeAuthErrorMessage.invalidPassword,
+            MSALNativeAuthErrorMessage.invalidUsername,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+
+        zip(errorDescriptions, expectedDescriptions).forEach {
+            XCTAssertEqual($0, $1)
+        }
     }
 
     func test_isBrowserRequired() {
         sut = .init(type: .browserRequired)
-        
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserAlreadyExists)
         XCTAssertFalse(sut.isInvalidPassword)
@@ -72,28 +90,25 @@ final class SignUpPasswordStartErrorTests: XCTestCase {
 
     func test_isUserAlreadyExists() {
         sut = .init(type: .userAlreadyExists)
-
-        XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertTrue(sut.isUserAlreadyExists)
+        XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isInvalidPassword)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
     func test_isInvalidPassword() {
         sut = .init(type: .invalidPassword)
-
+        XCTAssertTrue(sut.isInvalidPassword)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserAlreadyExists)
-        XCTAssertTrue(sut.isInvalidPassword)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
     func test_isInvalidUsername() {
         sut = .init(type: .invalidUsername)
-
+        XCTAssertTrue(sut.isInvalidUsername)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserAlreadyExists)
         XCTAssertFalse(sut.isInvalidPassword)
-        XCTAssertTrue(sut.isInvalidUsername)
     }
 }

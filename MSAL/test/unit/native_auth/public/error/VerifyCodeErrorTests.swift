@@ -55,8 +55,23 @@ final class VerifyCodeErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(type: .generalError)
-        XCTAssertEqual(sut.errorDescription, VerifyCodeErrorType.generalError.rawValue)
+        let sut: [VerifyCodeError] = [
+            .init(type: .browserRequired),
+            .init(type: .invalidCode),
+            .init(type: .generalError)
+        ]
+
+        let expectedDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.invalidCode,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+
+        zip(errorDescriptions, expectedDescriptions).forEach {
+            XCTAssertEqual($0, $1)
+        }
     }
 
     func test_isBrowserRequired() {

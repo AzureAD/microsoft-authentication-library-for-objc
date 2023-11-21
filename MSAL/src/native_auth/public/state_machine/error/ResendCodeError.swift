@@ -26,16 +26,22 @@ import Foundation
 
 @objc
 public class ResendCodeError: MSALNativeAuthError {
-    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
+    let type: ResendCodeErrorType = .generalError
+
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
         }
 
-        return "General error"
+        return MSALNativeAuthErrorMessage.generalError
     }
 
     init(message: String? = nil) {
-        super.init(identifier: "Resend code", message: message)
+        super.init(identifier: type.rawValue, message: message)
     }
+}
+
+public enum ResendCodeErrorType: String, CaseIterable {
+    case generalError = "general_error"
 }

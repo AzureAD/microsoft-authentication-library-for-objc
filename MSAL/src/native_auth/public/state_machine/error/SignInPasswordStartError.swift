@@ -33,9 +33,24 @@ public class SignInPasswordStartError: MSALNativeAuthError {
         super.init(identifier: type.rawValue, message: message)
     }
 
-    /// Describes an error that provides messages describing why an error occurred and provides more information about the error.
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
-        return super.errorDescription ?? type.rawValue
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .userNotFound:
+            return MSALNativeAuthErrorMessage.userNotFound
+        case .invalidPassword:
+            return MSALNativeAuthErrorMessage.invalidPassword
+        case .invalidUsername:
+            return MSALNativeAuthErrorMessage.invalidUsername
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
     }
 
     /// Returns `true` if the error requires to use a browser.
@@ -48,21 +63,21 @@ public class SignInPasswordStartError: MSALNativeAuthError {
         return type == .userNotFound
     }
 
-    /// Returns `true` when the password introduced is not valid.
+    /// Returns `true` when the password is not valid.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
 
-    /// Returns `true` when the username introduced is not valid.
+    /// Returns `true` when the username is not valid.
     public var isInvalidUsername: Bool {
         return type == .invalidUsername
     }
 }
 
 public enum SignInPasswordStartErrorType: String, CaseIterable {
-    case browserRequired = "Browser required"
-    case userNotFound = "User not found"
-    case invalidPassword = "Invalid password"
-    case invalidUsername = "Invalid username"
-    case generalError = "General error"
+    case browserRequired = "browser_required"
+    case userNotFound = "user_not_found"
+    case invalidPassword = "invalid_password"
+    case invalidUsername = "invalid_username"
+    case generalError = "general_error"
 }
