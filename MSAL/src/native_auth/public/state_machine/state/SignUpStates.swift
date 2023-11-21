@@ -61,8 +61,8 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
                     channelTargetType: channelTargetType,
                     codeLength: codeLength
                 )
-            case .error(let error):
-                await delegate.onSignUpResendCodeError(error: error)
+            case .error(let error, let newState):
+                await delegate.onSignUpResendCodeError(error: error, newState: newState)
             }
         }
     }

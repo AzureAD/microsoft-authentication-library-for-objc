@@ -134,7 +134,7 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
         } else {
             let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignUpResendCodeError(error: error)
+            await delegate.onSignUpResendCodeError(error: error, newState: nil)
         }
     }
 }

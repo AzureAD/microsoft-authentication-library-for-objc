@@ -100,13 +100,13 @@ class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
 class SignUpResendCodeTestsValidatorHelper: SignUpResendCodeDelegateSpy {
 
     func onSignUpResendCodeError(_ input: MSALNativeAuthSignUpController.SignUpResendCodeControllerResponse) {
-        guard case let .error(error) = input.result else {
+        guard case let .error(error, newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
 
         Task {
-            await self.onSignUpResendCodeError(error: error)
+            await self.onSignUpResendCodeError(error: error, newState: newState)
         }
     }
 

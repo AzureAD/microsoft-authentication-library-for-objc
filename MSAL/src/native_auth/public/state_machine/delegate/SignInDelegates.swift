@@ -89,7 +89,9 @@ public protocol SignInPasswordRequiredDelegate {
 @objc
 public protocol SignInResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.

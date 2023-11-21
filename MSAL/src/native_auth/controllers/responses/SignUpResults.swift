@@ -72,18 +72,9 @@ enum SignUpVerifyCodeResult {
     case error(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
 }
 
-enum SignUpResendCodeResult {
-    /// Returned if a user has received an email with code.
-    ///
-    /// - newState: An object representing the new state of the flow with follow on methods.
-    /// - sentTo: The email/phone number that the code was sent to.
-    /// - channelTargetType: The channel (email/phone) the code was sent through.
-    /// - codeLength: The length of the code required.
-    case codeRequired(newState: SignUpCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-
-    /// An error object indicating why the operation failed.
-    case error(ResendCodeError)
-}
+/// Result type that contains information about the code sent, the next state of the reset password process and possible errors.
+/// See ``CodeRequiredGenericResult`` for more information.
+typealias SignUpResendCodeResult = CodeRequiredGenericResult<SignUpCodeRequiredState, ResendCodeError>
 
 /// An object of this type is returned after a user submits their password.
 /// It contains the next state of the flow with follow on methods, depending on the server's response.

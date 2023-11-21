@@ -66,7 +66,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
-        return .init(.error(.init()))
+        return .init(.error(error: .init(), newState: nil))
     }
 
     func submitCode(

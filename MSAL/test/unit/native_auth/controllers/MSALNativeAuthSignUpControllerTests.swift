@@ -927,7 +927,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [exp], timeout: 1)
         XCTAssertTrue(helper.onSignUpResendCodeErrorCalled)
-        XCTAssertNil(helper.newState)
+        XCTAssertNotNil(helper.newState)
         XCTAssertNil(helper.sentTo)
         XCTAssertNil(helper.codeLength)
         XCTAssertNotNil(helper.error)

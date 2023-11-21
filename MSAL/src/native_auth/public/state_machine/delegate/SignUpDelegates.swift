@@ -101,8 +101,10 @@ public protocol SignUpVerifyCodeDelegate {
 @objc
 public protocol SignUpResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignUpResendCodeError(error: ResendCodeError)
+    /// - Parameters:
+    ///   - error: An error object indicating why the operation failed.
+    ///   - newState: An object representing the new state of the flow with follow on methods.
+    @MainActor func onSignUpResendCodeError(error: ResendCodeError, newState: SignUpCodeRequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpResendCodeError(error:)`` will be called.

@@ -127,8 +127,9 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpResendCodeError(error: ResendCodeError) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         onSignUpResendCodeErrorCalled = true
+        self.newState = newState
         self.error = error
 
         XCTAssertTrue(Thread.isMainThread)
@@ -155,7 +156,7 @@ class SignUpResendCodeDelegateMethodsNotImplemented: SignUpResendCodeDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpResendCodeError(error: ResendCodeError) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         self.error = error
 
         XCTAssertTrue(Thread.isMainThread)

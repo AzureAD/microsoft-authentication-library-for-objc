@@ -77,7 +77,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpResendCode, context: context)
         let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
-        return handleResendCodeResult(challengeResult, username: username, event: event, context: context)
+        return handleResendCodeResult(challengeResult, username: username, event: event, signupToken: signUpToken, context: context)
     }
 
     func submitCode(_ code: String, username: String, signUpToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse {
@@ -393,6 +393,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
         username: String,
         event: MSIDTelemetryAPIEvent?,
+        signupToken: String,
         context: MSIDRequestContext
     ) -> SignUpResendCodeControllerResponse {
         switch result {
@@ -416,7 +417,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/challenge resendCode request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            let newState = SignUpCodeRequiredState(
+                controller: self,
+                username: username,
+                flowToken: signupToken,
+                correlationId: context.correlationId()
+            )
+            return .init(.error(error: error, newState: newState))
         case .redirect,
              .unexpectedError,
              .passwordRequired:
@@ -425,7 +432,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/challenge resendCode request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            return .init(.error(error: error, newState: nil))
         }
     }
 
