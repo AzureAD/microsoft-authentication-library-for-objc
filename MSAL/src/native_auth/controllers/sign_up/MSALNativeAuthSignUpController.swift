@@ -169,6 +169,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
             let error = SignUpPasswordStartError(type: .generalError, message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
+                // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
@@ -234,6 +235,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
             let error = SignUpStartError(type: .generalError, message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
+                // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
@@ -632,6 +634,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.attributesRequired(attributes: attributes, state: state), telemetryUpdate: { [weak self] result in
+                // The telemetry event always fails because more attributes are required (we consider this an error after having sent attributes)
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .attributeValidationFailed(let signUpToken, let invalidAttributes):
@@ -648,6 +651,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.attributesInvalid(attributes: invalidAttributes, newState: state), telemetryUpdate: { [weak self] result in
+                // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .error(let apiError):
