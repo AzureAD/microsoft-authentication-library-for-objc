@@ -450,7 +450,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                                                               responseValidator: signUpResponseValidatorMock,
                                                               signInController: signInAfterSignUpController)
         
-        let controllerFactory = MSALNativeAuthControllerFactoryRequestProviderMock(signUpController: signUpController)
+        let controllerFactory = MSALNativeAuthControllerRequestProviderFactoryMock(signUpController: signUpController)
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
@@ -547,7 +547,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                                                               responseValidator: signUpResponseValidatorMock,
                                                               signInController: signInAfterSignUpController)
         
-        let controllerFactory = MSALNativeAuthControllerFactoryRequestProviderMock(signUpController: signUpController)
+        let controllerFactory = MSALNativeAuthControllerRequestProviderFactoryMock(signUpController: signUpController)
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
@@ -633,7 +633,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                                                                          factory: authResultFactoryMock,
                                                                          signInResponseValidator: signInResponseValidatorMock,
                                                                          tokenResponseValidator: tokenResponseValidatorMock)
-        let controllerFactory = MSALNativeAuthControllerFactoryRequestProviderMock(signInController: signInController)
+        let controllerFactory = MSALNativeAuthControllerRequestProviderFactoryMock(signInController: signInController)
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
@@ -718,7 +718,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                                                                          factory: authResultFactoryMock,
                                                                          signInResponseValidator: signInResponseValidatorMock,
                                                                          tokenResponseValidator: tokenResponseValidatorMock)
-        let controllerFactory = MSALNativeAuthControllerFactoryRequestProviderMock(signInController: signInController)
+        let controllerFactory = MSALNativeAuthControllerRequestProviderFactoryMock(signInController: signInController)
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
@@ -772,7 +772,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
                                                                             requestProvider: resetPasswordRequestProviderMock,
                                                                             responseValidator: resetPasswordResponseValidator)
         
-        let controllerFactory = MSALNativeAuthControllerFactoryRequestProviderMock(resetPasswordController: resetPasswordController)
+        let controllerFactory = MSALNativeAuthControllerRequestProviderFactoryMock(resetPasswordController: resetPasswordController)
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
