@@ -115,7 +115,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
 
         requestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: nil, signInSLT: nil, grantType: MSALNativeAuthGrantType.refreshToken, scope: "" , password: nil, oobCode: nil, includeChallengeType: true, refreshToken: "refreshToken")
-        requestProviderMock.throwingTokenError = ErrorMock.error
+        requestProviderMock.throwingRefreshTokenError = ErrorMock.error
 
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError))
 
@@ -135,12 +135,9 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
                                                                 authTokens: authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock())
 
-        let request = MSIDHttpRequest()
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
-        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
-
-        requestProviderMock.result = request
+        requestProviderMock.mockeRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let expectedAccessToken = "accessToken"
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedAccessToken: expectedAccessToken)
@@ -182,7 +179,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "CredentialsController")
 
-        requestProviderMock.result = request
+        requestProviderMock.mockeRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: publicError)
         responseValidatorMock.tokenValidatedResponse = .error(validatorError)
