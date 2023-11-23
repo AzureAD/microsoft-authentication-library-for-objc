@@ -74,10 +74,11 @@ public class ResetPasswordStartError: MSALNativeAuthError {
     }
 }
 
-public enum ResetPasswordStartErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case userDoesNotHavePassword = "user_does_not_have_password"
-    case userNotFound = "user_not_found"
-    case invalidUsername = "invalid_username"
-    case generalError = "general_error"
+@objc
+public enum ResetPasswordStartErrorType: Int, CaseIterable {
+    case browserRequired
+    case userDoesNotHavePassword
+    case userNotFound
+    case invalidUsername
+    case generalError
 }

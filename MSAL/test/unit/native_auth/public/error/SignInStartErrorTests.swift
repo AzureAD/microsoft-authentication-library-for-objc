@@ -32,22 +32,6 @@ final class SignInStartErrorTests: XCTestCase {
         XCTAssertEqual(SignInStartErrorType.allCases.count, 4)
     }
 
-    func test_identifier() {
-        let sut: [SignInStartError] = [
-            .init(type: .browserRequired),
-            .init(type: .userNotFound),
-            .init(type: .invalidUsername),
-            .init(type: .generalError)
-        ]
-
-        let identifiers = sut.map { $0.identifier }
-        let expectedIdentifiers = SignInStartErrorType.allCases.map { $0.rawValue }
-
-        zip(identifiers, expectedIdentifiers).forEach {
-            XCTAssertEqual($0, $1)
-        }
-    }
-
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
         sut = .init(type: .generalError, message: expectedMessage)

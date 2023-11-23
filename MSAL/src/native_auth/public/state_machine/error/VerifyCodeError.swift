@@ -60,8 +60,9 @@ public class VerifyCodeError: MSALNativeAuthError {
     }
 }
 
-public enum VerifyCodeErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case invalidCode = "invalid_code"
-    case generalError = "general_error"
+@objc
+public enum VerifyCodeErrorType: Int, CaseIterable {
+    case browserRequired
+    case invalidCode
+    case generalError
 }

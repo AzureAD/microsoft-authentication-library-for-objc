@@ -72,8 +72,9 @@ public class PasswordRequiredError: MSALNativeAuthError {
     }
 }
 
-public enum PasswordRequiredErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case invalidPassword = "invalid_password"
-    case generalError = "general_error"
+@objc
+public enum PasswordRequiredErrorType: Int, CaseIterable {
+    case browserRequired
+    case invalidPassword
+    case generalError
 }

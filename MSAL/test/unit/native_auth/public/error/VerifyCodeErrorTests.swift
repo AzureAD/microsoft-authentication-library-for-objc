@@ -33,21 +33,6 @@ final class VerifyCodeErrorTests: XCTestCase {
         XCTAssertEqual(VerifyCodeErrorType.allCases.count, 3)
     }
 
-    func test_identifier() {
-        let sut: [VerifyCodeError] = [
-            .init(type: .browserRequired),
-            .init(type: .invalidCode),
-            .init(type: .generalError)
-        ]
-
-        let identifiers = sut.map { $0.identifier }
-        let expectedIdentifiers = VerifyCodeErrorType.allCases.map { $0.rawValue }
-
-        zip(identifiers, expectedIdentifiers).forEach {
-            XCTAssertEqual($0, $1)
-        }
-    }
-
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
         sut = .init(type: .generalError, message: expectedMessage)

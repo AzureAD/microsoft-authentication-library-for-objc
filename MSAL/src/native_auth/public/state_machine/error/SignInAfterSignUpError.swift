@@ -42,6 +42,7 @@ public class SignInAfterSignUpError: MSALNativeAuthError {
     }
 }
 
-public enum SignInAfterSignUpErrorType: String, CaseIterable {
-    case generalError = "general_error"
+@objc
+public enum SignInAfterSignUpErrorType: Int, CaseIterable {
+    case generalError
 }

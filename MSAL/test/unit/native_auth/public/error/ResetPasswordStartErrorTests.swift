@@ -33,23 +33,6 @@ final class ResetPasswordStartErrorTests: XCTestCase {
         XCTAssertEqual(ResetPasswordStartErrorType.allCases.count, 5)
     }
 
-    func test_identifier() {
-        let sut: [ResetPasswordStartError] = [
-            .init(type: .browserRequired),
-            .init(type: .userDoesNotHavePassword),
-            .init(type: .userNotFound),
-            .init(type: .invalidUsername),
-            .init(type: .generalError)
-        ]
-
-        let identifiers = sut.map { $0.identifier }
-        let expectedIdentifiers = ResetPasswordStartErrorType.allCases.map { $0.rawValue }
-
-        zip(identifiers, expectedIdentifiers).forEach {
-            XCTAssertEqual($0, $1)
-        }
-    }
-
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
         sut = .init(type: .generalError, message: expectedMessage)

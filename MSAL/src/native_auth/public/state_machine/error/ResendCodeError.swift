@@ -42,6 +42,7 @@ public class ResendCodeError: MSALNativeAuthError {
     }
 }
 
-public enum ResendCodeErrorType: String, CaseIterable {
-    case generalError = "general_error"
+@objc
+public enum ResendCodeErrorType: Int, CaseIterable {
+    case generalError
 }

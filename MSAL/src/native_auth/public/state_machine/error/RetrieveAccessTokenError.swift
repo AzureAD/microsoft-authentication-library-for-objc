@@ -67,9 +67,10 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     }
 }
 
-public enum RetrieveAccessTokenErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case refreshTokenExpired = "refresh_token_expired"
-    case tokenNotFound = "token_not_found"
-    case generalError = "general_error"
+@objc
+public enum RetrieveAccessTokenErrorType: Int, CaseIterable {
+    case browserRequired
+    case refreshTokenExpired
+    case tokenNotFound
+    case generalError
 }

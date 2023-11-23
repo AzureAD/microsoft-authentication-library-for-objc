@@ -74,10 +74,11 @@ public class SignUpPasswordStartError: MSALNativeAuthError {
     }
 }
 
-public enum SignUpPasswordStartErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case userAlreadyExists = "user_already_exists"
-    case invalidPassword = "invalid_password"
-    case invalidUsername = "invalid_username"
-    case generalError = "general_error"
+@objc
+public enum SignUpPasswordStartErrorType: Int, CaseIterable {
+    case browserRequired
+    case userAlreadyExists
+    case invalidPassword
+    case invalidUsername
+    case generalError
 }

@@ -33,21 +33,6 @@ final class PasswordRequiredErrorTests: XCTestCase {
         XCTAssertEqual(PasswordRequiredErrorType.allCases.count, 3)
     }
 
-    func test_identifier() {
-        let sut: [PasswordRequiredError] = [
-            .init(type: .browserRequired),
-            .init(type: .invalidPassword),
-            .init(type: .generalError)
-        ]
-
-        let identifiers = sut.map { $0.identifier }
-        let expectedIdentifiers = PasswordRequiredErrorType.allCases.map { $0.rawValue }
-
-        zip(identifiers, expectedIdentifiers).forEach {
-            XCTAssertEqual($0, $1)
-        }
-    }
-
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
         sut = .init(type: .generalError, message: expectedMessage)

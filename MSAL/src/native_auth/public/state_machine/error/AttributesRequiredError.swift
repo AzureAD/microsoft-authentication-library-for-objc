@@ -42,6 +42,7 @@ public class AttributesRequiredError: MSALNativeAuthError {
     }
 }
 
-public enum AttributesRequiredErrorType: String, CaseIterable {
-    case generalError = "general_error"
+@objc
+public enum AttributesRequiredErrorType: Int, CaseIterable {
+    case generalError
 }

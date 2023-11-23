@@ -39,9 +39,4 @@ final class SignInAfterSignUpErrorTests: XCTestCase {
         sut = .init()
         XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
     }
-
-    func test_identifier() {
-        sut = .init()
-        XCTAssertEqual(sut.identifier, "general_error")
-    }
 }

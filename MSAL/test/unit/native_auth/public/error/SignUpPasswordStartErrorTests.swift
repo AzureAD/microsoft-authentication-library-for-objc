@@ -33,23 +33,6 @@ final class SignUpPasswordStartErrorTests: XCTestCase {
         XCTAssertEqual(SignUpPasswordStartErrorType.allCases.count, 5)
     }
 
-    func test_identifier() {
-        let sut: [SignUpPasswordStartError] = [
-            .init(type: .browserRequired),
-            .init(type: .userAlreadyExists),
-            .init(type: .invalidPassword),
-            .init(type: .invalidUsername),
-            .init(type: .generalError)
-        ]
-
-        let identifiers = sut.map { $0.identifier }
-        let expectedIdentifiers = SignUpPasswordStartErrorType.allCases.map { $0.rawValue }
-
-        zip(identifiers, expectedIdentifiers).forEach {
-            XCTAssertEqual($0, $1)
-        }
-    }
-
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
         sut = .init(type: .generalError, message: expectedMessage)

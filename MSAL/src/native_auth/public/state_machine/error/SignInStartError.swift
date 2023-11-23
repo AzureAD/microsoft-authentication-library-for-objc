@@ -67,9 +67,10 @@ public class SignInStartError: MSALNativeAuthError {
     }
 }
 
-public enum SignInStartErrorType: String, CaseIterable {
-    case browserRequired = "browser_required"
-    case userNotFound = "user_not_found"
-    case invalidUsername = "invalid_username"
-    case generalError = "general_error"
+@objc
+public enum SignInStartErrorType: Int, CaseIterable {
+    case browserRequired
+    case userNotFound
+    case invalidUsername
+    case generalError
 }
