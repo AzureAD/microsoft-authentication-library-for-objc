@@ -30,7 +30,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
-    private let cacheAccessor: MSALNativeAuthCacheInterface
+
+    private lazy var cacheAccessor =
+        MSALNativeAuthCacheAccessor(tokenCache: self.tokenCache, accountMetadataCache: self.accountMetadataCache)
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
@@ -56,12 +58,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
-
-        do {
-            self.cacheAccessor = try MSALNativeAuthCacheAccessor(keychainSharingGroup: config.cacheConfig.keychainSharingGroup)
-        } catch {
-            throw MSALNativeAuthInternalError.cacheInitialzationError
-        }
 
         try super.init(configuration: config)
     }
@@ -102,12 +98,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let defaultRedirectUri = String(format: "msauth.%@://auth", Bundle.main.bundleIdentifier ?? "<bundle_id>")
         // we need to set a default redirect URI value to ensure IdentityCore checks the bypassRedirectURIValidation flag
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
-
-        do {
-            self.cacheAccessor = try MSALNativeAuthCacheAccessor(keychainSharingGroup: configuration.cacheConfig.keychainSharingGroup)
-        } catch {
-            throw MSALNativeAuthInternalError.cacheInitialzationError
-        }
 
         try super.init(configuration: configuration)
     }

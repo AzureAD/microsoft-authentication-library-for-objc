@@ -33,10 +33,9 @@ class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
     private let externalAccountProvider: MSALExternalAccountHandler = MSALExternalAccountHandler()
     private let validator = MSIDTokenResponseValidator()
 
-    init(keychainSharingGroup: String?) throws {
-        let dataSource = try MSIDKeychainTokenCache(group: keychainSharingGroup)
-        tokenCacheAccessor = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
-        accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: dataSource)
+    init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor) {
+        self.tokenCacheAccessor = tokenCache
+        self.accountMetadataCache = accountMetadataCache
     }
 
     func getTokens(
