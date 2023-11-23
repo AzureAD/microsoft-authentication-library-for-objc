@@ -30,7 +30,8 @@ extension MSALNativeAuthPublicClientApplication {
         username: String,
         password: String,
         attributes: [String: Any]?,
-        correlationId: UUID?
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignUpPasswordStartError(type: .invalidUsername)))
@@ -39,7 +40,7 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(SignUpPasswordStartError(type: .invalidPassword)))
         }
 
-        let controller = controllerFactory.makeSignUpController()
+        let controller = controllerFactory.makeSignUpController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
@@ -55,13 +56,14 @@ extension MSALNativeAuthPublicClientApplication {
     func signUpInternal(
         username: String,
         attributes: [String: Any]?,
-        correlationId: UUID?
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignUpStartError(type: .invalidUsername)))
         }
 
-        let controller = controllerFactory.makeSignUpController()
+        let controller = controllerFactory.makeSignUpController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
@@ -78,7 +80,8 @@ extension MSALNativeAuthPublicClientApplication {
         username: String,
         password: String,
         scopes: [String]?,
-        correlationId: UUID?
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthSignInControlling.SignInPasswordControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignInPasswordStartError(type: .invalidUsername)))
@@ -88,7 +91,7 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(SignInPasswordStartError(type: .invalidPassword)))
         }
 
-        let controller = controllerFactory.makeSignInController()
+        let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
 
         let params = MSALNativeAuthSignInWithPasswordParameters(
             username: username,
@@ -103,12 +106,13 @@ extension MSALNativeAuthPublicClientApplication {
     func signInInternal(
         username: String,
         scopes: [String]?,
-        correlationId: UUID?
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthSignInControlling.SignInCodeControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignInStartError(type: .invalidUsername)))
         }
-        let controller = controllerFactory.makeSignInController()
+        let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
         let params = MSALNativeAuthSignInWithCodeParameters(
             username: username,
             context: MSALNativeAuthRequestContext(correlationId: correlationId),

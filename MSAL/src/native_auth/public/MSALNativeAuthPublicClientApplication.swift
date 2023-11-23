@@ -30,6 +30,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
@@ -55,6 +56,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
         self.inputValidator = MSALNativeAuthInputValidator()
+
+        do {
+            self.cacheAccessor = try MSALNativeAuthCacheAccessor(keychainSharingGroup: config.cacheConfig.keychainSharingGroup)
+        } catch {
+            throw MSALNativeAuthInternalError.cacheInitialzationError
+        }
 
         try super.init(configuration: config)
     }
@@ -96,20 +103,26 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         // we need to set a default redirect URI value to ensure IdentityCore checks the bypassRedirectURIValidation flag
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
 
+        do {
+            self.cacheAccessor = try MSALNativeAuthCacheAccessor(keychainSharingGroup: configuration.cacheConfig.keychainSharingGroup)
+        } catch {
+            throw MSALNativeAuthInternalError.cacheInitialzationError
+        }
+
         try super.init(configuration: configuration)
     }
 
-    init(
-        controllerFactory: MSALNativeAuthControllerBuildable,
-        inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
-    ) {
-        self.controllerFactory = controllerFactory
-        self.inputValidator = inputValidator
-        self.internalChallengeTypes = internalChallengeTypes
-
-        super.init()
-    }
+//    init(
+//        controllerFactory: MSALNativeAuthControllerBuildable,
+//        inputValidator: MSALNativeAuthInputValidating,
+//        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+//    ) {
+//        self.controllerFactory = controllerFactory
+//        self.inputValidator = inputValidator
+//        self.internalChallengeTypes = internalChallengeTypes
+//
+//        super.init()
+//    }
 
     // MARK: delegate methods
 
@@ -132,7 +145,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 username: username,
                 password: password,
                 attributes: attributes,
-                correlationId: correlationId
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
             )
 
             switch controllerResponse.result {
@@ -171,7 +185,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         Task {
-            let controllerResponse = await signUpInternal(username: username, attributes: attributes, correlationId: correlationId)
+            let controllerResponse = await signUpInternal(
+                username: username,
+                attributes: attributes,
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
+            )
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -215,7 +234,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 username: username,
                 password: password,
                 scopes: scopes,
-                correlationId: correlationId
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
             )
 
             switch controllerResponse.result {
@@ -252,7 +272,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             let controllerResponse = await signInInternal(
                 username: username,
                 scopes: scopes,
-                correlationId: correlationId
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
             )
 
             switch controllerResponse.result {
@@ -304,8 +325,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
     /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
-        let controller = controllerFactory.makeCredentialsController()
+
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+
+        let controller =  controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
 
         return controller.retrieveUserAccountResult(context: context)
     }

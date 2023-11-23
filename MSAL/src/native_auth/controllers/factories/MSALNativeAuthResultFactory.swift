@@ -38,9 +38,11 @@ protocol MSALNativeAuthResultBuildable {
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
     let config: MSALNativeAuthConfiguration
+    let cacheAccessor: MSALNativeAuthCacheInterface
 
-    init(config: MSALNativeAuthConfiguration) {
+    init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.config = config
+        self.cacheAccessor = cacheAccessor
     }
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult? {
@@ -79,11 +81,11 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
         let authTokens = MSALNativeAuthTokens(accessToken: tokenResult.accessToken,
                                               refreshToken: refreshToken,
                                               rawIdToken: tokenResult.rawIdToken)
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: MSALNativeAuthCacheAccessor())
+        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
     }
 
     func makeUserAccountResult(account: MSALAccount, authTokens: MSALNativeAuthTokens) -> MSALNativeAuthUserAccountResult? {
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: MSALNativeAuthCacheAccessor())
+        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
     }
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {

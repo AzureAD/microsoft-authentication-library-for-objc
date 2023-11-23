@@ -26,15 +26,18 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
+    private let tokenCacheAccessor: MSIDDefaultTokenCacheAccessor
 
-    private let tokenCacheAccessor: MSIDDefaultTokenCacheAccessor = {
-        let dataSource = MSIDKeychainTokenCache()
-        return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
-    }()
+    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor
 
-    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
     private let externalAccountProvider: MSALExternalAccountHandler = MSALExternalAccountHandler()
     private let validator = MSIDTokenResponseValidator()
+
+    init(keychainSharingGroup: String?) throws {
+        let dataSource = try MSIDKeychainTokenCache(group: keychainSharingGroup)
+        tokenCacheAccessor = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
+        accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: dataSource)
+    }
 
     func getTokens(
         account: MSALAccount,

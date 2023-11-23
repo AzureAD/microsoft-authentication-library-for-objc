@@ -32,7 +32,7 @@ extension MSALNativeAuthUserAccountResult {
         if let accessToken = self.authTokens.accessToken {
             if forceRefresh || accessToken.isExpired() {
                 let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-                let credentialsController = controllerFactory.makeCredentialsController()
+                let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
                 return await credentialsController.refreshToken(context: context, authTokens: authTokens)
             } else {
                 return .success(accessToken.accessToken)
