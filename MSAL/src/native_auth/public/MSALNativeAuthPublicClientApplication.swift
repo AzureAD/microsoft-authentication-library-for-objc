@@ -102,17 +102,17 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         try super.init(configuration: configuration)
     }
 
-//    init(
-//        controllerFactory: MSALNativeAuthControllerBuildable,
-//        inputValidator: MSALNativeAuthInputValidating,
-//        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
-//    ) {
-//        self.controllerFactory = controllerFactory
-//        self.inputValidator = inputValidator
-//        self.internalChallengeTypes = internalChallengeTypes
-//
-//        super.init()
-//    }
+    init(
+        controllerFactory: MSALNativeAuthControllerBuildable,
+        inputValidator: MSALNativeAuthInputValidating,
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    ) {
+        self.controllerFactory = controllerFactory
+        self.inputValidator = inputValidator
+        self.internalChallengeTypes = internalChallengeTypes
+
+        super.init()
+    }
 
     // MARK: delegate methods
 

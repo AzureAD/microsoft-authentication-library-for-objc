@@ -75,11 +75,11 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
     var resetPasswordController = MSALNativeAuthResetPasswordControllerMock()
     var credentialsController = MSALNativeAuthCredentialsControllerMock()
 
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+    func makeSignUpController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignUpControlling {
         return signUpController
     }
 
-    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
+    func makeSignInController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignInControlling {
         return signInController
     }
 
@@ -87,7 +87,7 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
         return resetPasswordController
     }
 
-    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+    func makeCredentialsController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthCredentialsControlling {
         return credentialsController
     }
 }
