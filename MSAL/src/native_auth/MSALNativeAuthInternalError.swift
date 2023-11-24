@@ -36,5 +36,4 @@ enum MSALNativeAuthInternalError: Error, Equatable {
     case invalidRequest
     case generalError
     case invalidAttributes
-    case cacheInitialzationError
 }
