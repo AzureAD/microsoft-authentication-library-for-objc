@@ -458,22 +458,26 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             internalChallengeTypes: []
         )
         
-        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters
+        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
+        // MSALNativeAuthSignUpRequestProviderMock class - checkStartParameters and checkChallengeParameters functions
         sut.signUpUsingPassword(username: "username", password: "password", attributes: ["key": "value"], correlationId: correlationId, delegate: delegatePasswordStart)
         
         wait(for: [expectationPasswordStart])
         
-        // Correlation Id is validated internally against expectedContinueRequestParameters
+        // Correlation Id is validated internally against expectedContinueRequestParameters in the
+        // MSALNativeAuthSignUpRequestProviderMock class - checkContinueParameters function
         delegatePasswordStart.newState?.submitCode(code: "1234", delegate: delegateVerifyCode)
         
         wait(for: [expectationVerifyCode])
         
-        // Correlation Id is validated internally against expectedTokenParams
+        // Correlation Id is validated internally against expectedTokenParams in the
+        // MSALNativeAuthTokenRequestProviderMock class - checkContext function
         delegateVerifyCode.newSignInAfterSignUpState?.signIn(scopes: ["scope1", "scope2"], delegate: delegateSignInAfterSignUp)
         
         wait(for: [expectationSignInAfterSingUp])
         
-        // User account result is validated internally against expectedUserAccountResult
+        // User account result is validated internally against expectedUserAccountResult in the
+        // SignInAfterSignUpDelegateSpy class - onSignInCompleted function
         XCTAssertTrue(delegateSignInAfterSignUp.onSignInCompletedCalled)
     }
     
@@ -555,21 +559,25 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             internalChallengeTypes: []
         )
         
-        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters
+        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
+        // MSALNativeAuthSignUpRequestProviderMock class - checkStartParameters and checkChallengeParameters functions
         sut.signUp(username: "username", attributes: ["key": "value"], correlationId: correlationId, delegate: delegateCodeStart)
         
         wait(for: [expectationCodeStart])
         
-        // Correlation Id is validated internally against expectedContinueRequestParameters
+        // Correlation Id is validated internally against expectedContinueRequestParameters in the
+        // MSALNativeAuthSignUpRequestProviderMock class - checkContinueParameters function
         delegateCodeStart.newState?.submitCode(code: "1234", delegate: delegateVerifyCode)
         
         wait(for: [expectationVerifyCode])
         
-        // Correlation Id is validated internally against expectedTokenParams
+        // Correlation Id is validated internally against expectedTokenParams in the
+        // MSALNativeAuthTokenRequestProviderMock class - checkContext function
         delegateVerifyCode.newSignInAfterSignUpState?.signIn(scopes: ["scope1", "scope2"], delegate: delegateSignInAfterSignUp)
         wait(for: [expectationSignInAfterSingUp])
         
-        // User account result is validated internally against expectedUserAccountResult
+        // User account result is validated internally against expectedUserAccountResult in the
+        // SignInAfterSignUpDelegateSpy class - onSignInCompleted function
         XCTAssertTrue(delegateSignInAfterSignUp.onSignInCompletedCalled)
     }
     
@@ -641,16 +649,19 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             internalChallengeTypes: []
         )
         
-        // Correlation Id is validated internally against contextMock on both initiate and challenge
+        // Correlation Id is validated internally against contextMock on both initiate and challenge in the
+        // MSALNativeAuthSignInRequestProviderMock class - checkContext function
         sut.signInUsingPassword(username: "username", password: "password", scopes: ["scope1", "scope2"], correlationId: correlationId, delegate: delegatePasswordStart)
         
         wait(for: [expectationPasswordStart])
         
         // Correlation Id is validated internally against expectedTokenParams
+        // MSALNativeAuthTokenRequestProviderMock class - checkContext function
         delegatePasswordStart.newSignInCodeRequiredState?.submitCode(code: "1234", delegate: delegateVerifyCode)
         wait(for: [expectationVerifyCode])
         
-        // User account result is validated internally against expectedUserAccountResult
+        // User account result is validated internally against expectedUserAccountResult in the
+        // SignInVerifyCodeDelegateSpy class - onSignInCompleted function
         XCTAssertTrue(delegateVerifyCode.onSignInCompletedCalled)
     }
     
@@ -726,15 +737,18 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             internalChallengeTypes: []
         )
         
-        // Correlation Id is validated internally against contextMock on both initiate and challenge
+        // Correlation Id is validated internally against contextMock on both initiate and challenge in the
+        // MSALNativeAuthSignInRequestProviderMock class - checkContext function
         sut.signIn(username: "username", scopes: ["scope1", "scope2"], correlationId: correlationId, delegate: delegateCodeStart)
         wait(for: [expectationCodeStart])
         
         // Correlation Id is validated internally against expectedTokenParams
+        // MSALNativeAuthTokenRequestProviderMock class - checkContext function
         delegateCodeStart.newSignInCodeRequiredState?.submitCode(code: "1234", delegate: delegateVerifyCode)
         wait(for: [expectationVerifyCode])
         
-        // User account result is validated internally against expectedUserAccountResult
+        // User account result is validated internally against expectedUserAccountResult in the
+        // SignInVerifyCodeDelegateSpy class - onSignInCompleted function
         XCTAssertTrue(delegateVerifyCode.onSignInCompletedCalled)
     }
     
@@ -780,17 +794,22 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             internalChallengeTypes: []
         )
         
-        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters
+        // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
+        // MSALNativeAuthResetPasswordRequestProviderMock class - checkParameters(params: MSALNativeAuthResetPasswordStartRequestProviderParameters)
+        // and checkParameters(token: String, context: MSIDRequestContext) functions
         sut.resetPassword(username: "username", correlationId: correlationId, delegate: delegatePasswordResetStart)
         
         wait(for: [expectationPasswordResetStart])
         
-        // Correlation Id is validated internally against expectedContinueRequestParameters
+        // Correlation Id is validated internally against expectedContinueRequestParameters in the
+        // MSALNativeAuthResetPasswordRequestProviderMock class - checkParameters(_ params: MSALNativeAuthResetPasswordContinueRequestParameters) function
         delegatePasswordResetStart.newState?.submitCode(code: "1234", delegate: delegatePasswordResetVerifyCode)
         
         wait(for: [expectationPasswordResetVerifyCode])
         
         // Correlation Id is validated internally against expectedSubmitRequestParameters and expectedPollCompletionParameters
+        // MSALNativeAuthResetPasswordRequestProviderMock class - checkParameters(_ params: MSALNativeAuthResetPasswordSubmitRequestParameters) function
+        // and checkParameters(_ params: MSALNativeAuthResetPasswordPollCompletionRequestParameters) function
         delegatePasswordResetVerifyCode.newPasswordRequiredState?.submitPassword(password: "password", delegate: delegatePasswordResetRequired)
         
         wait(for: [expectationPasswordResetRequired])
