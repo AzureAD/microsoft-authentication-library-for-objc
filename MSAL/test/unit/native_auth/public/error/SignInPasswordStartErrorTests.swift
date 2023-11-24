@@ -51,7 +51,7 @@ final class SignInPasswordStartErrorTests: XCTestCase {
         let expectedDescriptions = [
             MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.userNotFound,
-            MSALNativeAuthErrorMessage.invalidPassword,
+            MSALNativeAuthErrorMessage.invalidCredentials,
             MSALNativeAuthErrorMessage.invalidUsername,
             MSALNativeAuthErrorMessage.generalError
         ]

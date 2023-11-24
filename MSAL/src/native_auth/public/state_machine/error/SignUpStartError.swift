@@ -51,7 +51,7 @@ public class SignUpStartError: MSALNativeAuthError {
         }
     }
 
-    /// Returns `true` if the error requires to use a browser.
+    /// Returns `true` if a browser is required to continue the operation.
     public var isBrowserRequired: Bool {
         return type == .browserRequired
     }
