@@ -137,7 +137,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
-        requestProviderMock.mockeRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.mockRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let expectedAccessToken = "accessToken"
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedAccessToken: expectedAccessToken)
@@ -179,7 +179,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "CredentialsController")
 
-        requestProviderMock.mockeRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.mockRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: publicError)
         responseValidatorMock.tokenValidatedResponse = .error(validatorError)

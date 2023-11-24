@@ -231,7 +231,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
     var expectedContext: MSIDRequestContext?
     var expectedTokenParams: MSALNativeAuthTokenRequestParameters?
 
-    func mockeRequestTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+    func mockRequestTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
         self.requestToken = request
         self.throwingTokenError = throwError
     }
@@ -253,11 +253,11 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         } else if throwingTokenError != nil {
             throw throwingTokenError!
         } else {
-            fatalError("Make sure to use mockeRequestTokenFunc()")
+            fatalError("Make sure to use mockRequestTokenFunc()")
         }
     }
     
-    func mockeRequestRefreshTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+    func mockRequestRefreshTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
         self.requestRefreshToken = request
         self.throwingRefreshTokenError = throwError
     }
@@ -279,7 +279,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         } else if throwingRefreshTokenError != nil {
             throw throwingRefreshTokenError!
         } else {
-            fatalError("Make sure to use mockeRequestRefreshTokenFunc()")
+            fatalError("Make sure to use mockRequestRefreshTokenFunc()")
         }
     }
 

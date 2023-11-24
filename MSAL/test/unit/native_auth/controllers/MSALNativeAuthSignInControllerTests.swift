@@ -108,7 +108,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedCredentialToken = credentialToken
         signInRequestProviderMock.expectedContext = expectedContext
 
-        tokenRequestProviderMock.mockeRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: credentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: expectedScopes, password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
 
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInPasswordStartError(type: .generalError))
@@ -166,7 +166,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedCredentialToken = credentialToken
         signInRequestProviderMock.expectedContext = expectedContext
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedUsername = expectedUsername
         tokenRequestProviderMock.expectedContext = expectedContext
 
@@ -203,7 +203,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedCredentialToken = credentialToken
         signInRequestProviderMock.expectedContext = expectedContext
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedUsername = expectedUsername
         tokenRequestProviderMock.expectedContext = expectedContext
 
@@ -238,7 +238,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedUsername = expectedUsername
         signInRequestProviderMock.expectedContext = expectedContext
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedUsername = expectedUsername
         tokenRequestProviderMock.expectedContext = expectedContext
 
@@ -285,7 +285,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedCredentialToken = credentialToken
         signInRequestProviderMock.expectedContext = expectedContext
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedCredentialToken = credentialToken
 
         let expectation = expectation(description: "SignInController")
@@ -407,7 +407,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: credentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.oobCode, scope: defaultScopes, password: nil, oobCode: "code", includeChallengeType: false, refreshToken: nil)
 
@@ -431,7 +431,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: credentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.oobCode, scope: defaultScopes, password: nil, oobCode: "code", includeChallengeType: false, refreshToken: nil)
 
@@ -562,7 +562,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
 
@@ -590,7 +590,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
 
@@ -687,7 +687,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
         signInRequestProviderMock.expectedCredentialToken = credentialToken
@@ -729,7 +728,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedContext = expectedContext
 
@@ -752,7 +750,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedContext = expectedContext
 
@@ -778,7 +775,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: "", credentialToken: nil, signInSLT: slt, grantType: .slt, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: false, refreshToken: nil)
 
@@ -822,7 +819,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
 
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Invalid Client ID"))
@@ -860,7 +857,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.oobCode, scope: "", password: nil, oobCode: expectedOOBCode, includeChallengeType: true, refreshToken: nil)
         let mockDelegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedError: VerifyCodeError(type: delegateError))
@@ -883,7 +880,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, credentialToken: expectedCredentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
         let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: publicError)
@@ -959,7 +956,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        tokenRequestProviderMock.mockeRequestTokenFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: delegateError)
         tokenResponseValidatorMock.tokenValidatedResponse = .error(validatorError)

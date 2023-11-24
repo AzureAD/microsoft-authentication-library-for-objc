@@ -418,7 +418,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, credentialToken: nil, signInSLT: "signInSLT", grantType: MSALNativeAuthGrantType.slt, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
         tokenRequestProviderMock.expectedContext = contextMock
-        tokenRequestProviderMock.mockeRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
@@ -515,7 +515,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, credentialToken: nil, signInSLT: "signInSLT", grantType: MSALNativeAuthGrantType.slt, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
         tokenRequestProviderMock.expectedContext = contextMock
-        tokenRequestProviderMock.mockeRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
@@ -606,7 +606,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, credentialToken: credentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
         tokenRequestProviderMock.expectedContext = contextMock
-        tokenRequestProviderMock.mockeRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
@@ -691,7 +691,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, credentialToken: credentialToken, signInSLT: nil, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
         tokenRequestProviderMock.expectedContext = contextMock
-        tokenRequestProviderMock.mockeRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
