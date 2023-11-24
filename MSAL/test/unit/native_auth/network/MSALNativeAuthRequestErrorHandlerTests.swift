@@ -32,12 +32,10 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
 
     private var sut: MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>!
     private let error = NSError(domain:"Test Error Domain", code:400, userInfo:nil)
-    private var httpRequest: MSIDHttpRequest!
     private let context = MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
     override func setUpWithError() throws {
         sut = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInInitiateResponseError>()
-        httpRequest = MSIDHttpRequest()
         try super.setUpWithError()
     }
 
@@ -73,7 +71,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             httpVersion: nil,
             headerFields: nil
         )
-        HttpModuleMockConfigurator.configure(request: httpRequest, response: httpResponse, responseJson: [])
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest(response: httpResponse, responseJson: [])
         httpRequest.retryCounter = 5
 
         sut.handleError(
@@ -85,7 +83,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            XCTAssertEqual(self.httpRequest.retryCounter, 4)
+            XCTAssertEqual(httpRequest.retryCounter, 4)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
@@ -101,7 +99,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             headerFields: nil
         )
 
-        HttpModuleMockConfigurator.configure(request: httpRequest, response: httpResponse, responseJson: [])
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest(response: httpResponse, responseJson: [])
         httpRequest.retryCounter = 0
 
         sut.handleError(
@@ -138,8 +136,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             httpVersion: nil,
             headerFields: [kMSIDWwwAuthenticateHeader: "PKeyAuth Context=TestContext,Version=1.0"]
         )
-
-        HttpModuleMockConfigurator.configure(request: httpRequest, response: httpResponse, responseJson: [])
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest(response: httpResponse, responseJson: [])
 
         let secondHttpResponse = HTTPURLResponse(
             url: HttpModuleMockConfigurator.baseUrl,
@@ -183,6 +180,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             headerFields: nil
         )
 
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
+        
         var dictionary = [String: Any]()
         dictionary["error"] = "invalid_request"
         dictionary["error_description"] = "Request parameter validation failed"
@@ -225,6 +224,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             headerFields: nil
         )
 
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
+        
         var dictionary = [String: Any]()
         dictionary["error"] = "verification_required"
         dictionary["error_description"] = "AADSTS55102: Verification required."
@@ -266,6 +267,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             httpVersion: nil,
             headerFields: nil
         )
+        
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
 
         let dictionary = [String: Any]()
         let data = try JSONSerialization.data(withJSONObject: dictionary)
@@ -300,6 +303,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             headerFields: nil
         )
 
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
+        
         var dictionary = [String: Any]()
         dictionary["error_key_incorrect"] = "invalid_request"
         let data = try JSONSerialization.data(withJSONObject: dictionary)
@@ -333,6 +338,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             httpVersion: nil,
             headerFields: nil
         )
+        
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
 
         sut.handleError(
             error,

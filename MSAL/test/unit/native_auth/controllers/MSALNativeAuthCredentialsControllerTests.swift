@@ -171,11 +171,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     }
 
     private func checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError, validatorError: MSALNativeAuthTokenValidatedErrorType) async {
-        let request = MSIDHttpRequest()
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-
-        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
 
         let expectation = expectation(description: "CredentialsController")
 
