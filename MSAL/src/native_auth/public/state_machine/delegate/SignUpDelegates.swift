@@ -28,7 +28,7 @@ import Foundation
 public protocol SignUpPasswordStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignUpPasswordError(error: SignUpPasswordStartError)
+    @MainActor func onSignUpPasswordStartError(error: SignUpPasswordStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpPasswordError(error:)`` will be called.
@@ -43,7 +43,7 @@ public protocol SignUpPasswordStartDelegate {
                                                         codeLength: Int)
 
     /// Notifies the delegate that invalid attributes were sent.
-    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordError(error)`` will be called.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpPasswordStartError(error)`` will be called.
     /// - Parameter attributeNames: List of attribute names that failed validation.
     @MainActor @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
@@ -52,7 +52,7 @@ public protocol SignUpPasswordStartDelegate {
 public protocol SignUpStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignUpError(error: SignUpStartError)
+    @MainActor func onSignUpStartError(error: SignUpStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpError(error:)`` will be called.
@@ -67,7 +67,7 @@ public protocol SignUpStartDelegate {
                                                         codeLength: Int)
 
     /// Notifies the delegate that invalid attributes were sent.
-    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpError(error)`` will be called.
+    /// - Note: If a flow requires attributes but this optional method is not implemented, then ``onSignUpStartError(error)`` will be called.
     /// - Parameter attributeNames: List of attribute names that failed validation.
     @MainActor @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }

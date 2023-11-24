@@ -27,14 +27,14 @@ import XCTest
 
 class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
 
-    func onSignUpPasswordError(_ input: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse) {
+    func onSignUpPasswordStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
 
         Task {
-            await self.onSignUpPasswordError(error: error)
+            await self.onSignUpPasswordStartError(error: error)
         }
     }
 
@@ -63,14 +63,14 @@ class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
 
 class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
 
-    func onSignUpError(_ input: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse) {
+    func onSignUpStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
 
         Task {
-            await self.onSignUpError(error: error)
+            await self.onSignUpStartError(error: error)
         }
     }
 

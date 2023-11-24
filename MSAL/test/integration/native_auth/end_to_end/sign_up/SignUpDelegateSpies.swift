@@ -40,7 +40,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: SignUpPasswordStartError) {
+    func onSignUpPasswordStartError(error: SignUpPasswordStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
@@ -72,7 +72,7 @@ class SignUpStartDelegateSpy: SignUpStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpError(error: SignUpStartError) {
+    func onSignUpStartError(error: SignUpStartError) {
         onSignUpErrorCalled = true
         self.error = error
 

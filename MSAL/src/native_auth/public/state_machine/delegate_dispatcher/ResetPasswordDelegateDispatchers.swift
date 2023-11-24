@@ -38,7 +38,7 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
         } else {
             let error = ResetPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onResetPasswordError(error: error)
+            await delegate.onResetPasswordStartError(error: error)
         }
     }
 }

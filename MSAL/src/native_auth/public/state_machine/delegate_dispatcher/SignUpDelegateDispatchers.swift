@@ -38,7 +38,7 @@ final class SignUpPasswordStartDelegateDispatcher: DelegateDispatcher<SignUpPass
         } else {
             let error = SignUpPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignUpPasswordError(error: error)
+            await delegate.onSignUpPasswordStartError(error: error)
         }
     }
 
@@ -49,7 +49,7 @@ final class SignUpPasswordStartDelegateDispatcher: DelegateDispatcher<SignUpPass
         } else {
             let error = SignUpPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignUpPasswordError(error: error)
+            await delegate.onSignUpPasswordStartError(error: error)
         }
     }
 }
@@ -68,7 +68,7 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
         } else {
             let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignUpError(error: error)
+            await delegate.onSignUpStartError(error: error)
         }
     }
 
@@ -79,7 +79,7 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
         } else {
             let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignUpError(error: error)
+            await delegate.onSignUpStartError(error: error)
         }
     }
 }

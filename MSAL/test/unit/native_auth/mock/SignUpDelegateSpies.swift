@@ -41,7 +41,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
@@ -85,7 +85,7 @@ class SignUpCodeStartDelegateSpy: SignUpStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpError(error: MSAL.SignUpStartError) {
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
         onSignUpCodeErrorCalled = true
         self.error = error
 
@@ -346,7 +346,7 @@ class SignUpPasswordStartDelegateOptionalMethodsNotImplemented: SignUpPasswordSt
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
@@ -364,7 +364,7 @@ class SignUpStartDelegateOptionalMethodsNotImplemented: SignUpStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpError(error: MSAL.SignUpStartError) {
+    func onSignUpStartError(error: MSAL.SignUpStartError) {
         onSignUpStartErrorCalled = true
         self.error = error
 

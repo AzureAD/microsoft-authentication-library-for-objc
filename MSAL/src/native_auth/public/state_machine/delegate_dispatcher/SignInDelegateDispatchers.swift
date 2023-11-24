@@ -38,7 +38,7 @@ final class SignInPasswordStartDelegateDispatcher: DelegateDispatcher<SignInPass
         } else {
             let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignInPasswordError(error: error)
+            await delegate.onSignInPasswordStartError(error: error)
         }
     }
 
@@ -49,7 +49,7 @@ final class SignInPasswordStartDelegateDispatcher: DelegateDispatcher<SignInPass
         } else {
             let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignInPasswordError(error: error)
+            await delegate.onSignInPasswordStartError(error: error)
         }
     }
 }
@@ -68,7 +68,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         } else {
             let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCodeRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignInError(error: error)
+            await delegate.onSignInStartError(error: error)
         }
     }
 
@@ -79,7 +79,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         } else {
             let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInPasswordRequired"))
             telemetryUpdate?(.failure(error))
-            await delegate.onSignInError(error: error)
+            await delegate.onSignInStartError(error: error)
         }
     }
 }

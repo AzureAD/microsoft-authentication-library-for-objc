@@ -40,7 +40,7 @@ class ResetPasswordStartDelegateSpy: ResetPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    func onResetPasswordError(error: MSAL.ResetPasswordStartError) {
+    func onResetPasswordStartError(error: MSAL.ResetPasswordStartError) {
         onResetPasswordErrorCalled = true
         self.error = error
 

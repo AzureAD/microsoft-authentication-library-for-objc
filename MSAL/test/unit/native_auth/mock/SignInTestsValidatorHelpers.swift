@@ -34,7 +34,7 @@ class SignInPasswordStartTestsValidatorHelper: SignInPasswordStartDelegateSpy {
         }
 
         self.expectedError = error
-        Task { await self.onSignInPasswordError(error: error) }
+        Task { await self.onSignInPasswordStartError(error: error) }
     }
 
     func onSignInCodeRequired(_ input: MSALNativeAuthSignInController.SignInPasswordControllerResponse) {
@@ -86,7 +86,7 @@ class SignInCodeStartTestsValidatorHelper: SignInCodeStartDelegateSpy {
             return XCTFail("input should be .error")
         }
 
-        Task { await self.onSignInError(error: error) }
+        Task { await self.onSignInStartError(error: error) }
     }
     
     func onSignInCodeRequired(_ input: MSALNativeAuthSignInControlling.SignInCodeControllerResponse) {

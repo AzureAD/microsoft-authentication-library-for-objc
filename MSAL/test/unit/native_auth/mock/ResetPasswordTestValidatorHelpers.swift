@@ -33,7 +33,7 @@ class ResetPasswordStartTestsValidatorHelper: ResetPasswordStartDelegateSpy {
             return XCTFail("Should be an .error")
         }
 
-        Task { await self.onResetPasswordError(error: error) }
+        Task { await self.onResetPasswordStartError(error: error) }
     }
 
     func onResetPasswordCodeRequired(_ input: MSALNativeAuthResetPasswordController.ResetPasswordStartControllerResponse) {

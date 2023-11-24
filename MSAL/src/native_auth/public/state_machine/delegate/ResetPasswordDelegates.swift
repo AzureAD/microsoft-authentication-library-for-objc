@@ -28,10 +28,10 @@ import Foundation
 public protocol ResetPasswordStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onResetPasswordError(error: ResetPasswordStartError)
+    @MainActor func onResetPasswordStartError(error: ResetPasswordStartError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordError(error:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordStartError(error:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.

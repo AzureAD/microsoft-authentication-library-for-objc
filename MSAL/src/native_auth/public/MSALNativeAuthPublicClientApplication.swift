@@ -148,7 +148,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             case .attributesInvalid(let attributes):
                 await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
             case .error(let error):
-                await delegate.onSignUpPasswordError(error: error)
+                await delegate.onSignUpPasswordStartError(error: error)
             }
         }
     }
@@ -180,7 +180,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             case .attributesInvalid(let attributes):
                 await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
             case .error(let error):
-                await delegate.onSignUpError(error: error)
+                await delegate.onSignUpStartError(error: error)
             }
         }
     }
@@ -220,7 +220,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     codeLength: codeLength
                 )
             case .error(let error):
-                await delegate.onSignInPasswordError(error: error)
+                await delegate.onSignInPasswordStartError(error: error)
             }
         }
     }
@@ -257,7 +257,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             case .passwordRequired(let newState):
                 await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState)
             case .error(let error):
-                await delegate.onSignInError(error: error)
+                await delegate.onSignInStartError(error: error)
             }
         }
     }
@@ -285,7 +285,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     codeLength: codeLength
                 )
             case .error(let error):
-                await delegate.onResetPasswordError(error: error)
+                await delegate.onResetPasswordStartError(error: error)
             }
         }
     }

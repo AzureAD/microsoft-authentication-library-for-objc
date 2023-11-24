@@ -40,7 +40,7 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
@@ -135,7 +135,7 @@ final class SignInPasswordRequiredDelegateOptionalMethodsNotImplemented: SignInP
 
 open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
 
-    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         XCTFail("This method should not be called")
     }
 
@@ -169,7 +169,7 @@ open class SignInCodeStartDelegateSpy: SignInStartDelegate {
         self.expectedError = expectedError
     }
 
-    public func onSignInError(error: SignInStartError) {
+    public func onSignInStartError(error: SignInStartError) {
         XCTAssertEqual(error.type, expectedError?.type)
         XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
         XCTAssertTrue(Thread.isMainThread)
@@ -364,7 +364,7 @@ final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPassw
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
@@ -387,7 +387,7 @@ final class SignInCodeStartDelegateOptionalMethodNotImplemented: SignInStartDele
         self.expectedError = expectedError
     }
 
-    public func onSignInError(error: SignInStartError) {
+    public func onSignInStartError(error: SignInStartError) {
         XCTAssertEqual(error.type, expectedError?.type)
         XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
         XCTAssertTrue(Thread.isMainThread)
