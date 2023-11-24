@@ -43,7 +43,7 @@ final class SignInPasswordStartErrorTests: XCTestCase {
         let sut: [SignInPasswordStartError] = [
             .init(type: .browserRequired),
             .init(type: .userNotFound),
-            .init(type: .invalidPassword),
+            .init(type: .invalidCredentials),
             .init(type: .invalidUsername),
             .init(type: .generalError)
         ]
@@ -67,7 +67,7 @@ final class SignInPasswordStartErrorTests: XCTestCase {
         sut = .init(type: .browserRequired)
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
-        XCTAssertFalse(sut.isInvalidPassword)
+        XCTAssertFalse(sut.isInvalidCredentials)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
@@ -75,13 +75,13 @@ final class SignInPasswordStartErrorTests: XCTestCase {
         sut = .init(type: .userNotFound)
         XCTAssertTrue(sut.isUserNotFound)
         XCTAssertFalse(sut.isBrowserRequired)
-        XCTAssertFalse(sut.isInvalidPassword)
+        XCTAssertFalse(sut.isInvalidCredentials)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
     func test_isInvalidPassword() {
-        sut = .init(type: .invalidPassword)
-        XCTAssertTrue(sut.isInvalidPassword)
+        sut = .init(type: .invalidCredentials)
+        XCTAssertTrue(sut.isInvalidCredentials)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
         XCTAssertFalse(sut.isInvalidUsername)
@@ -92,6 +92,6 @@ final class SignInPasswordStartErrorTests: XCTestCase {
         XCTAssertTrue(sut.isInvalidUsername)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
-        XCTAssertFalse(sut.isInvalidPassword)
+        XCTAssertFalse(sut.isInvalidCredentials)
     }
 }

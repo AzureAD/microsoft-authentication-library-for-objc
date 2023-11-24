@@ -44,8 +44,8 @@ public class SignInPasswordStartError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.browserRequired
         case .userNotFound:
             return MSALNativeAuthErrorMessage.userNotFound
-        case .invalidPassword:
-            return MSALNativeAuthErrorMessage.invalidPassword
+        case .invalidCredentials:
+            return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
         case .generalError:
@@ -63,9 +63,9 @@ public class SignInPasswordStartError: MSALNativeAuthError {
         return type == .userNotFound
     }
 
-    /// Returns `true` when the password is not valid.
-    public var isInvalidPassword: Bool {
-        return type == .invalidPassword
+    /// Returns `true` when the credentials are not valid.
+    public var isInvalidCredentials: Bool {
+        return type == .invalidCredentials
     }
 
     /// Returns `true` when the username is not valid.
@@ -78,7 +78,7 @@ public class SignInPasswordStartError: MSALNativeAuthError {
 public enum SignInPasswordStartErrorType: Int, CaseIterable {
     case browserRequired
     case userNotFound
-    case invalidPassword
+    case invalidCredentials
     case invalidUsername
     case generalError
 }

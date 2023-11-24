@@ -288,7 +288,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkDelegateErrorWithValidatorError(delegateError: SignInPasswordStartError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
         await checkDelegateErrorWithValidatorError(delegateError: SignInPasswordStartError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
         await checkDelegateErrorWithValidatorError(delegateError: SignInPasswordStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInPasswordStartError(type: .invalidPassword), validatorError: .invalidPassword(message: nil))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInPasswordStartError(type: .invalidCredentials), validatorError: .invalidPassword(message: nil))
     }
     
     func test_whenCredentialsAreRequired_browserRequiredErrorIsReturned() async {
@@ -364,7 +364,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
 
-    func test_whenSignInUsingPassword_apiReturnsChallengeTypeOOB__butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
+    func test_whenSignInUsingPassword_apiReturnsChallengeTypeOOB_butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
         let request = MSIDHttpRequest()
         let expectedUsername = "username"
         let expectedPassword = "password"
@@ -393,7 +393,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         helper.expectedCodeLength = expectedCodeLength
 
         let result = await sut.signIn(params: MSALNativeAuthSignInWithPasswordParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
-        result.telemetryUpdate?(.failure(.init(identifier: 1, message: "error")))
+        result.telemetryUpdate?(.failure(.init(identifier: SignInPasswordStartErrorType.browserRequired.rawValue, message: "error")))
 
         helper.onSignInCodeRequired(result)
 
@@ -594,7 +594,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let helper = SignInCodeStartWithPasswordRequiredTestsValidatorHelper(expectation: expectation)
 
         let result = await sut.signIn(params: MSALNativeAuthSignInWithCodeParameters(username: expectedUsername, context: expectedContext, scopes: nil))
-        result.telemetryUpdate?(.failure(.init(identifier: 1, message: "error")))
+        result.telemetryUpdate?(.failure(.init(identifier: SignInStartErrorType.browserRequired.rawValue, message: "error")))
 
         helper.onSignInPasswordRequired(result.result)
 
