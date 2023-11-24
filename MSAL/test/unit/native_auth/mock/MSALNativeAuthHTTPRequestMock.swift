@@ -28,9 +28,9 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthHTTPRequestMock {
-    static func prepareMockRequest() -> MSIDHttpRequest {
-        let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])        
+    static func prepareMockRequest(request: MSIDHttpRequest = MSIDHttpRequest(), 
+                                   responseJson: [String] = [""]) -> MSIDHttpRequest {
+        HttpModuleMockConfigurator.configure(request: request, responseJson: responseJson)
         return request
     }
 }
