@@ -595,6 +595,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = "username"
         
+        signInRequestProviderMock.expectedContext = contextMock
         let credentialToken = "<credentialToken>"
         let expectedSentTo = "sentTo"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
@@ -678,6 +679,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = "username"
+        signInRequestProviderMock.expectedContext = contextMock
         
         let credentialToken = "<credentialToken>"
         let expectedSentTo = "sentTo"
