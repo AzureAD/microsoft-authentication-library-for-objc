@@ -92,7 +92,7 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
     }
 }
 
-class MSALNativeAuthControllerRequestProviderFactoryMock: MSALNativeAuthControllerBuildable {
+class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuildable {
     
     var signUpController: MSALNativeAuthSignUpControlling!
     var signInController: MSALNativeAuthSignInControlling!
