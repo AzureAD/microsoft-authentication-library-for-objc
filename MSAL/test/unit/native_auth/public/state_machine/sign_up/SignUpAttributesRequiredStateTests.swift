@@ -90,7 +90,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
     }
 
     func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
@@ -133,7 +133,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
     }
 
     func test_submitPassword_delegate_whenAttributesAreInvalid_shouldReturnAttributesInvalid() {
@@ -172,6 +172,6 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         sut.submitAttributes(attributes: ["key":"value"], delegate: delegate)
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
     }
 }

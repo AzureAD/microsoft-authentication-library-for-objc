@@ -91,6 +91,6 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertNil(delegate.newPasswordRequiredState)
-        XCTAssertEqual(delegate.delegateError?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
+        XCTAssertEqual(delegate.delegateError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
     }
 }

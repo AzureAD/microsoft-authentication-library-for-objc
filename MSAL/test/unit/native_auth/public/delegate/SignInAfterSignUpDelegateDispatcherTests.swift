@@ -56,7 +56,7 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInAfterSignUpError(message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
+        let expectedError = SignInAfterSignUpError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
         let delegate = SignInAfterSignUpDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in

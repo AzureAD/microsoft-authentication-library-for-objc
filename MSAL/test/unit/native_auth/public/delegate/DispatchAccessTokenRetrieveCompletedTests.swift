@@ -56,7 +56,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     }
 
     func test_dispatchAccessTokenRetrieveCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onAccessTokenRetrieveCompleted"))
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"))
         let delegate = CredentialsDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in

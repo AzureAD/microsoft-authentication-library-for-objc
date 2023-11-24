@@ -134,7 +134,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCodeRequired")
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired")
         )
     }
 
@@ -174,7 +174,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription, 
-            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid")
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid")
         )
     }
 
@@ -235,7 +235,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCodeRequired")
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired")
         )
     }
 
@@ -275,7 +275,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid")
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid")
         )
     }
 
@@ -312,7 +312,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
+        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInPasswordStartResult = .completed(MSALNativeAuthUserAccountResultStub.result)
@@ -355,7 +355,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCodeRequired"))
+        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInPasswordStartResult = .codeRequired(
@@ -410,7 +410,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
@@ -453,7 +453,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInPasswordRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"))
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
@@ -491,7 +491,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
 
-        controllerFactoryMock.resetPasswordController.resetPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
         sut.resetPassword(username: "correct", delegate: delegate)
@@ -515,7 +515,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.resetPasswordController.resetPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -526,7 +526,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
-            String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onResetPasswordCodeRequired")
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCodeRequired")
         )
     }
     

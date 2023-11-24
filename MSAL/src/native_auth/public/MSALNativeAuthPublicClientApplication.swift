@@ -139,7 +139,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegateDispatcher.dispatchSignUpCodeRequired(
+                await delegateDispatcher.dispatchSignUpPasswordCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,

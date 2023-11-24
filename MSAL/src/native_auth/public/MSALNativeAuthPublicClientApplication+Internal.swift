@@ -117,7 +117,10 @@ extension MSALNativeAuthPublicClientApplication {
         return await controller.signIn(params: params)
     }
 
-    func resetPasswordInternal(username: String, correlationId: UUID?) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordStartControllerResponse {
+    func resetPasswordInternal(
+        username: String,
+        correlationId: UUID?
+    ) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordStartControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(ResetPasswordStartError(type: .invalidUsername)))
         }

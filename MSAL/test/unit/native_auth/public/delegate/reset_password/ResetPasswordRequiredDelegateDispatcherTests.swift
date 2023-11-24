@@ -56,7 +56,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onResetPasswordCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {

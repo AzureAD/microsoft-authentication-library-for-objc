@@ -405,7 +405,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 newState: SignUpCodeRequiredState(
                     controller: self,
                     username: username,
-                    flowToken: signUpToken, correlationId: context.correlationId()
+                    flowToken: signUpToken, 
+                    correlationId: context.correlationId()
                 ),
                 sentTo: sentTo,
                 channelTargetType: challengeType,

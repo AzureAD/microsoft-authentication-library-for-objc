@@ -27,7 +27,8 @@ import Foundation
 protocol MSALNativeAuthSignInControlling {
     typealias SignInPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordStartResult>
     typealias SignInCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
-    typealias SignInAfterSignUpControllerResponse = MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>>
+    typealias SignInAfterSignUpControllerResponse =
+        MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>>
     typealias SignInSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInVerifyCodeResult>
     typealias SignInSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordRequiredResult>
     typealias SignInResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInResendCodeResult>

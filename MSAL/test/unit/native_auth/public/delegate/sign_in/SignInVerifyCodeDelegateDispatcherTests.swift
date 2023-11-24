@@ -57,7 +57,7 @@ final class SignInVerifyCodeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
         let delegate = SignInVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
 
 

@@ -68,8 +68,8 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
         XCTAssertEqual(delegate.expectedCodeLength, expectedCodeLength)
     }
 
-    func test_dispatchSignUpCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCodeRequired"))
+    func test_dispatchSignInCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
@@ -123,7 +123,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInPasswordRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"))
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 

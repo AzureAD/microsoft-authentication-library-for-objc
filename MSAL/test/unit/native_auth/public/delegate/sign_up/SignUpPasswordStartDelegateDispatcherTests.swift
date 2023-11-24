@@ -39,7 +39,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         delegateExp = expectation(description: "delegateDispatcher delegate exp")
     }
 
-    func test_dispatchSignUpCodeRequired_whenDelegateMethodsAreImplemented() async {
+    func test_dispatchSignUpPasswordCodeRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: delegateExp)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
@@ -54,7 +54,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
 
-        await sut.dispatchSignUpCodeRequired(
+        await sut.dispatchSignUpPasswordCodeRequired(
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
@@ -69,9 +69,9 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         XCTAssertEqual(delegate.codeLength, expectedCodeLength)
     }
 
-    func test_dispatchSignUpCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
+    func test_dispatchSignUpPasswordCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCodeRequired"))
+        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpPasswordStartError else {
@@ -87,7 +87,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
 
-        await sut.dispatchSignUpCodeRequired(
+        await sut.dispatchSignUpPasswordCodeRequired(
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
@@ -124,7 +124,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesInvalid"))
+        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpPasswordStartError else {

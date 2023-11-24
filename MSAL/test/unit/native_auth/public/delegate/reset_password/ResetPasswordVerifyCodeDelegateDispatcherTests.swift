@@ -60,7 +60,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onPasswordRequired"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onPasswordRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {

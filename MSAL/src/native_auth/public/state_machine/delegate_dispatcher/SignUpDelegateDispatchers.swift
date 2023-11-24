@@ -26,7 +26,7 @@ import Foundation
 
 final class SignUpPasswordStartDelegateDispatcher: DelegateDispatcher<SignUpPasswordStartDelegate> {
 
-    func dispatchSignUpCodeRequired(
+    func dispatchSignUpPasswordCodeRequired(
         newState: SignUpCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,

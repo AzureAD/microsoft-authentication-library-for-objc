@@ -104,7 +104,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
-        XCTAssertEqual(delegate.newSignInResendCodeError?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInResendCodeCodeRequired"))
+        XCTAssertEqual(delegate.newSignInResendCodeError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInResendCodeCodeRequired"))
     }
 
     // SubmitCode
@@ -158,6 +158,6 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         sut.submitCode(code: "1234", delegate: delegate)
         wait(for: [exp, exp2])
         XCTAssertEqual(delegate.expectedError?.type, .generalError)
-        XCTAssertEqual(delegate.expectedError?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignInCompleted"))
+        XCTAssertEqual(delegate.expectedError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
     }
 }

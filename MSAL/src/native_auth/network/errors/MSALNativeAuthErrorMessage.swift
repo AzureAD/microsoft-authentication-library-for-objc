@@ -25,7 +25,7 @@
 // swiftlint:disable line_length
 enum MSALNativeAuthErrorMessage {
     static let invalidScope = "Invalid scope"
-    static let requiredDelegateMethod = "MSALNativeAuth has called the delegate method %@ that has not been implemented"
+    static let delegateNotImplemented = "MSALNativeAuth has called the delegate method %@ that has not been implemented"
     static let unsupportedMFA = "MFA currently not supported. Use the browser instead"
     static let browserRequired = "Browser required. Use acquireTokenInteractively instead"
     static let userDoesNotHavePassword = "User does not have password associated with account"

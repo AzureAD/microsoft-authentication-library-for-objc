@@ -95,7 +95,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpAttributesRequired"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
     }
 
     func test_submitCode_delegate_whenSuccess_shouldReturnSignUpCompleted() {
@@ -134,6 +134,6 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onSignUpCompleted"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
     }
 }

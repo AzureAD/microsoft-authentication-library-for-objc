@@ -57,7 +57,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         let expectedState = ResetPasswordRequiredState(controller: controllerMock, flowToken: "flowToken", correlationId: correlationId)
 
         let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.error(error: expectedError, newState: expectedState))
-        controllerMock.submitPasswordResult = expectedResult
+        controllerMock.submitPasswordResponse = expectedResult
 
         let exp = expectation(description: "reset password states")
         let delegate = ResetPasswordRequiredDelegateSpy(expectation: exp)
@@ -78,7 +78,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.completed, telemetryUpdate: { _ in
             exp2.fulfill()
         })
-        controllerMock.submitPasswordResult = expectedResult
+        controllerMock.submitPasswordResponse = expectedResult
 
         let delegate = ResetPasswordRequiredDelegateSpy(expectation: exp)
 
@@ -97,7 +97,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.completed, telemetryUpdate: { _ in
             exp2.fulfill()
         })
-        controllerMock.submitPasswordResult = expectedResult
+        controllerMock.submitPasswordResponse = expectedResult
 
         let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: exp)
 
@@ -105,6 +105,6 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.type, .generalError)
-        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, "onResetPasswordCompleted"))
+        XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"))
     }
 }

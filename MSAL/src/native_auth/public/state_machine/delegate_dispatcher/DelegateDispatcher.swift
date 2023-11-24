@@ -34,6 +34,6 @@ class DelegateDispatcher<T> {
     }
 
     func requiredErrorMessage(for method: String) -> String {
-        return String(format: MSALNativeAuthErrorMessage.requiredDelegateMethod, method)
+        return String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, method)
     }
 }
