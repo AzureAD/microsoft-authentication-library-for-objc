@@ -103,7 +103,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthTokenRequestParameters(context: context,
                                                           username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-                                                          continutationToken: "<credential_token>",
+                                                          continuationToken: "<credential_token>",
                                                           signInSLT: "<signin_slt>",
                                                           grantType: .password,
                                                           scope: "<scope-1>",
@@ -385,7 +385,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthTokenRequestParameters(context: context,
                                                           username: nil,
-                                                          continutationToken: nil,
+                                                          continuationToken: nil,
                                                           signInSLT: nil,
                                                           grantType: .refreshToken,
                                                           scope: "<scope-1>",

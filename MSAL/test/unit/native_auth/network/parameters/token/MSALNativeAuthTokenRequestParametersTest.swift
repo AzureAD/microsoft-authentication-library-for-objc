@@ -39,7 +39,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let parameters = MSALNativeAuthTokenRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                     username: "username",
-                                                                    continutationToken: "<credential_token>",
+                                                                    continuationToken: "<credential_token>",
                                                                     signInSLT: "<signin_slt>",
                                                                     grantType: .password,
                                                                     scope: "scope",
@@ -57,7 +57,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            continutationToken: "<credential_token>",
+            continuationToken: "<credential_token>",
             signInSLT: "<signin_slt>",
             grantType: .password,
             scope: "<scope-1>",
@@ -90,7 +90,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: nil,
-            continutationToken: nil,
+            continuationToken: nil,
             signInSLT: nil,
             grantType: .password,
             scope: nil,

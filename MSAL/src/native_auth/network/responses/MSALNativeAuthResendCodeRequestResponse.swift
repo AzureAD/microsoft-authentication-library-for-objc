@@ -28,8 +28,4 @@ struct MSALNativeAuthResendCodeRequestResponse: Decodable {
 
     // MARK: - Variables
     let continuationToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case continuationToken = "continuation_token"
-    }
 }

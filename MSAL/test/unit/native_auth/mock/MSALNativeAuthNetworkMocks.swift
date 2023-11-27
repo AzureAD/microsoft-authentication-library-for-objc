@@ -223,7 +223,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
-            XCTAssertEqual(expectedTokenParams.continutationToken, parameters.continutationToken)
+            XCTAssertEqual(expectedTokenParams.continuationToken, parameters.continuationToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
             XCTAssertEqual(expectedTokenParams.scope, parameters.scope)
@@ -238,7 +238,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
-            XCTAssertEqual(expectedTokenParams.continutationToken, parameters.continutationToken)
+            XCTAssertEqual(expectedTokenParams.continuationToken, parameters.continuationToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
             XCTAssertEqual(expectedTokenParams.scope, parameters.scope)
