@@ -37,7 +37,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
     private(set) var challengeCalled = false
     private(set) var continueCalled = false
     var expectedStartRequestParameters: MSALNativeAuthSignUpStartRequestProviderParameters!
-    var expectedChallengeRequestParameters: (token: String, context: MSIDRequestContext)!
+    var expectedChallengeRequestParameters: (continuationToken: String, context: MSIDRequestContext)!
     var expectedContinueRequestParameters: MSALNativeAuthSignUpContinueRequestProviderParams!
 
     func mockStartRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
@@ -70,9 +70,9 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         self.throwErrorChallenge = throwError
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(continuationToken: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
-        checkChallengeParameters(token: token, context: context)
+        checkChallengeParameters(continuationToken: continuationToken, context: context)
 
         if let request = requestChallenge {
             return request
@@ -83,8 +83,8 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         }
     }
 
-    private func checkChallengeParameters(token: String, context: MSIDRequestContext) {
-        XCTAssertEqual(token, expectedChallengeRequestParameters.token)
+    private func checkChallengeParameters(continuationToken: String, context: MSIDRequestContext) {
+        XCTAssertEqual(continuationToken, expectedChallengeRequestParameters.continuationToken)
         XCTAssertEqual(context.correlationId(), expectedChallengeRequestParameters.context.correlationId())
     }
 
@@ -108,7 +108,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
 
     private func checkContinueParameters(_ params: MSALNativeAuthSignUpContinueRequestProviderParams) {
         XCTAssertEqual(params.grantType, expectedContinueRequestParameters.grantType)
-        XCTAssertEqual(params.signUpToken, expectedContinueRequestParameters.signUpToken)
+        XCTAssertEqual(params.continuationToken, expectedContinueRequestParameters.continuationToken)
         XCTAssertEqual(params.password, expectedContinueRequestParameters.password)
         XCTAssertEqual(params.oobCode, expectedContinueRequestParameters.oobCode)
         XCTAssertEqual(params.attributes?["key"] as? String, expectedContinueRequestParameters.attributes?["key"] as? String)

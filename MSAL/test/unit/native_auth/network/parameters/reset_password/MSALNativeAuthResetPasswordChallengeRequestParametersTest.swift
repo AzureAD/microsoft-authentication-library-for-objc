@@ -40,7 +40,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect]))
         let parameters = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
-            continuationToken: "<passwordResetToken>"
+            continuationToken: "<continuation_token>"
         )
 
         var resultUrl: URL? = nil
@@ -52,14 +52,14 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect]))
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
-            continuationToken: "<passwordResetToken>"
+            continuationToken: "<continuation_token>"
         )
 
         let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<passwordResetToken>",
+            "continuation_token": "<continuation_token>",
             "challenge_type": "password oob redirect"
         ]
 
@@ -70,14 +70,14 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect]))
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
-            continuationToken: "<passwordResetToken>"
+            continuationToken: "<continuation_token>"
         )
 
         let body = params.makeRequestBody(config: config)
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<passwordResetToken>",
+            "continuation_token": "<continuation_token>",
             "challenge_type": "password redirect"
         ]
 

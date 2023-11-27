@@ -43,7 +43,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "<signup_token>",
+            continuationToken: "<continuation_token>",
             password: "12345",
             context: context
         )
@@ -54,7 +54,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withPassword_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "<signup_token>",
+            continuationToken: "<continuation_token>",
             password: "12345",
             context: context
         )
@@ -65,7 +65,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withOOB_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .oobCode,
-            signUpToken: "<signup_token>",
+            continuationToken: "<continuation_token>",
             oobCode: "1234",
             context: context
         )
@@ -76,7 +76,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_withAttributes_succeeds() async throws {
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .attributes,
-            signUpToken: "<signup_token>",
+            continuationToken: "<continuation_token>",
             attributes: ["key": "value"],
             context: context
         )
@@ -102,10 +102,10 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         )
     }
 
-    func test_signUpContinue_invalidSignUpToken() async throws {
+    func test_signUpContinue_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .invalidSignUpToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }

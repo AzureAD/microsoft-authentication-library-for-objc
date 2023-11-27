@@ -27,11 +27,11 @@ import Foundation
 @objcMembers
 final public class MSALNativeAuthResendCodeParameters: MSALNativeAuthParameters {
 
-    public let credentialToken: String
+    public let continuationToken: String
 
-    public init(credentialToken: String,
+    public init(continuationToken: String,
                 correlationId: UUID? = nil) {
-        self.credentialToken = credentialToken
+        self.continuationToken = continuationToken
         super.init(correlationId: correlationId)
     }
 }

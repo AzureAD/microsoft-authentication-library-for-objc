@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
 
         sut = try provider.pollCompletion(
             parameters: MSALNativeAuthResetPasswordPollCompletionRequestParameters(context: context,
-                                                                                   continuationToken: "<passwordResetToken>")
+                                                                                   continuationToken: "<continuation_token>")
 
         )
     }
@@ -111,10 +111,10 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         )
     }
 
-    func test_resetPasswordPollCompletion_invalidPasswordResetToken() async throws {
+    func test_resetPasswordPollCompletion_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
-            response: .invalidPasswordResetToken,
+            response: .invalidContinuationToken,
             expectedError: createResetPasswordPollCompletionError(error: .invalidRequest)
         )
     }

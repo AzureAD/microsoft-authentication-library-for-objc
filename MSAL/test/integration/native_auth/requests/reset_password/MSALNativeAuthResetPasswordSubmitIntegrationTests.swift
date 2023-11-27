@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
 
         sut = try provider.submit(
             parameters: MSALNativeAuthResetPasswordSubmitRequestParameters(context: context,
-                                                                           continuationToken: "<passwordSubmitToken>",
+                                                                           continuationToken: "<continuation_token>",
                                                                            newPassword:"new-password")
         )
     }
@@ -68,10 +68,10 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         )
     }
 
-    func test_resetPasswordSubmit_invalidPasswordResetToken() async throws {
+    func test_resetPasswordSubmit_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
-            response: .invalidPasswordResetToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }

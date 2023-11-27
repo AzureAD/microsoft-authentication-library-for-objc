@@ -40,7 +40,7 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let parameters = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: .oobCode,
-            continuationToken: "<sign-up-token>",
+            continuationToken: "<continuation_token>",
             password: nil,
             oobCode: "1234",
             attributes: nil,
@@ -55,7 +55,7 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
         let params = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: .oobCode,
-            continuationToken: "<sign-up-token>",
+            continuationToken: "<continuation_token>",
             password: "<strong-password>",
             oobCode: "0000",
             attributes: "<attributes>",
@@ -66,7 +66,7 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
 
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "<sign-up-token>",
+            "continuation_token": "<continuation_token>",
             "password": "<strong-password>",
             "oob": "0000",
             "grant_type": "oob",

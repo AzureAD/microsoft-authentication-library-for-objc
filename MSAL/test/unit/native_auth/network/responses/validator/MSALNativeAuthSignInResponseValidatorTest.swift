@@ -54,15 +54,15 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypePassword_validationShouldReturnPasswordRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "<credentialToken>"
-        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
+        let continuationToken = "<continuation_token>"
+        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .passwordRequired(credentialToken: credentialToken) = result {} else {
+        if case .passwordRequired(continuationToken: continuationToken) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
     
-    func test_whenChallengeTypePasswordAndNoCredentialToken_validationShouldFail() {
+    func test_whenChallengeTypePasswordAndNoContinuationToken_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
@@ -73,39 +73,39 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypeOOB_validationShouldReturnCodeRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "<credentialToken>"
+        let continuationToken = "<continuation_token>"
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelType = MSALNativeAuthInternalChannelType.email
-        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .codeRequired(credentialToken: credentialToken, sentTo: targetLabel, channelType: .email, codeLength: codeLength) = result {} else {
+        if case .codeRequired(continuationToken: continuationToken, sentTo: targetLabel, channelType: .email, codeLength: codeLength) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
     
     func test_whenChallengeTypeOOBButMissingAttributes_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "<credentialToken>"
+        let continuationToken = "<continuation_token>"
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelType = MSALNativeAuthInternalChannelType.email
-        let missingCredentialToken = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
-        var result = sut.validate(context: context, result: .success(missingCredentialToken))
+        let missingContinuationToken = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        var result = sut.validate(context: context, result: .success(missingContinuationToken))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingTargetLabel = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        let missingTargetLabel = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         result = sut.validate(context: context, result: .success(missingTargetLabel))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingChannelType = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: nil, codeLength: codeLength, interval: nil)
+        let missingChannelType = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: nil, codeLength: codeLength, interval: nil)
         result = sut.validate(context: context, result: .success(missingChannelType))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingCodeLength = MSALNativeAuthSignInChallengeResponse(continuationToken: credentialToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
+        let missingCodeLength = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
         result = sut.validate(context: context, result: .success(missingCodeLength))
         if case .error(.invalidServerResponse) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -125,10 +125,10 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenInitiateResponseIsValid_validationShouldBeSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let credentialToken = "<credentialToken>"
-        let initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: credentialToken, challengeType: nil)
+        let continuationToken = "<continuation_token>"
+        let initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: continuationToken, challengeType: nil)
         let result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .success(credentialToken: credentialToken) = result {} else {
+        if case .success(continuationToken: continuationToken) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

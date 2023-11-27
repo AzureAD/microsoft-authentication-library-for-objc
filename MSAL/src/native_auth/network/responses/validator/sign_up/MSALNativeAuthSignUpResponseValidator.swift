@@ -75,8 +75,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
         switch apiError.error {
         case .verificationRequired:
-            if let signUpToken = apiError.continuationToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
-                return .verificationRequired(signUpToken: signUpToken, unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes))
+            if let continuationToken = apiError.continuationToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
+                return .verificationRequired(continuationToken: continuationToken, unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes))
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/start for verification_required error")
                 return .unexpectedError
@@ -142,8 +142,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 return .unexpectedError
             }
         case .password:
-            if let signUpToken = response.continuationToken {
-                return .passwordRequired(signUpToken)
+            if let continuationToken = response.continuationToken {
+                return .passwordRequired(continuationToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = password")
                 return .unexpectedError
@@ -193,8 +193,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .passwordBanned:
             return .invalidUserInput(apiError)
         case .attributeValidationFailed:
-            if let signUpToken = apiError.continuationToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
-                return .attributeValidationFailed(signUpToken: signUpToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
+            if let continuationToken = apiError.continuationToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
+                return .attributeValidationFailed(continuationToken: continuationToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
                 MSALLogger.log(
                     level: .error,
@@ -204,15 +204,15 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 return .unexpectedError
             }
         case .credentialRequired:
-            if let signUpToken = apiError.continuationToken {
-                return .credentialRequired(signUpToken: signUpToken)
+            if let continuationToken = apiError.continuationToken {
+                return .credentialRequired(continuationToken: continuationToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for credential_required error")
                 return .unexpectedError
             }
         case .attributesRequired:
-            if let signUpToken = apiError.continuationToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
-                return .attributesRequired(signUpToken: signUpToken, requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() })
+            if let continuationToken = apiError.continuationToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
+                return .attributesRequired(continuationToken: continuationToken, requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() })
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
                 return .unexpectedError

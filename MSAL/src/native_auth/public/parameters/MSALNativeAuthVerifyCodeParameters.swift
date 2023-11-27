@@ -27,13 +27,13 @@ import Foundation
 @objcMembers
 final public class MSALNativeAuthVerifyCodeParameters: MSALNativeAuthParameters {
 
-    public let credentialToken: String
+    public let continuationToken: String
     public let otp: String
 
-    public init(credentialToken: String,
+    public init(continuationToken: String,
                 otp: String,
                 correlationId: UUID? = nil) {
-        self.credentialToken = credentialToken
+        self.continuationToken = continuationToken
         self.otp = otp
         super.init(correlationId: correlationId)
     }

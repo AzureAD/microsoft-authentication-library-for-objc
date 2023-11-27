@@ -39,7 +39,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         )
 
         sut = try provider.challenge(
-            token: "<passwordResetToken>",
+            token: "<continuation_token>",
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }
@@ -90,10 +90,10 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         )
     }
 
-    func test_resetPasswordChallenge_invalidPasswordResetToken() async throws {
+    func test_resetPasswordChallenge_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
-            response: .invalidPasswordResetToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }

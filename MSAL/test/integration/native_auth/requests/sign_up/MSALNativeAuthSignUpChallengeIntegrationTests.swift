@@ -39,7 +39,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         )
 
         sut = try provider.challenge(
-            token: "<signUp_token>", 
+            continuationToken: "<continuation_token>", 
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }
@@ -98,10 +98,10 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         )
     }
 
-    func test_signUpChallenge_invalidSignUpToken() async throws {
+    func test_signUpChallenge_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .signUpChallenge,
-            response: .invalidSignUpToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }

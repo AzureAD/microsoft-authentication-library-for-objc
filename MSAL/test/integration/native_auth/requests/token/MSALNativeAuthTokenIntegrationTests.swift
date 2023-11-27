@@ -101,23 +101,6 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         await fulfillment(of: [expectation], timeout: defaultTimeout)
     }
 
-    func test_failRequest_invalidPurposeToken() async throws {
-        throw XCTSkip()
-        
-        let response = try await perform_testFail(
-            endpoint: .signInToken,
-            response: .invalidPurposeToken,
-            expectedError: createError(.invalidRequest)
-        )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
-    }
-
     func test_failRequest_invalidPassword() async throws {
         try await perform_testFail(
             endpoint: .signInToken,

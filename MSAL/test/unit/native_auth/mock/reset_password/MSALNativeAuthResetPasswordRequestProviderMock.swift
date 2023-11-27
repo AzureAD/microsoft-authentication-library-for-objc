@@ -62,16 +62,16 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
     var requestChallenge: MSIDHttpRequest?
     var throwErrorChallenge = false
     private(set) var challengeCalled = false
-    var expectedChallengeRequestParameters: (token: String, context: MSIDRequestContext)!
+    var expectedChallengeRequestParameters: (continuationToken: String, context: MSIDRequestContext)!
 
     func mockChallengeRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
         requestChallenge = request
         throwErrorChallenge = throwError
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(continuationToken: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
-        checkParameters(token: token, context: context)
+        checkParameters(continuationToken: continuationToken, context: context)
 
         if let request = requestChallenge {
             return request
@@ -82,8 +82,8 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         }
     }
 
-    private func checkParameters(token: String, context: MSIDRequestContext) {
-        XCTAssertEqual(token, expectedChallengeRequestParameters.token)
+    private func checkParameters(continuationToken: String, context: MSIDRequestContext) {
+        XCTAssertEqual(continuationToken, expectedChallengeRequestParameters.continuationToken)
         XCTAssertEqual(context.correlationId(), expectedChallengeRequestParameters.context.correlationId())
     }
 

@@ -67,8 +67,8 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             if initiateResponse.challengeType == .redirect {
                 return .error(.redirect)
             }
-            if let credentialToken = initiateResponse.continuationToken {
-                return .success(credentialToken: credentialToken)
+            if let continuationToken = initiateResponse.continuationToken {
+                return .success(continuationToken: continuationToken)
             }
             MSALLogger.log(level: .error, context: context, format: "SignIn Initiate: challengeType and credential token empty")
             return .error(.invalidServerResponse)
@@ -97,7 +97,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 format: "SignIn Challenge: Received unexpected challenge type: \(response.challengeType)")
             return .error(.invalidServerResponse)
         case .oob:
-            guard let credentialToken = response.continuationToken,
+            guard let continuationToken = response.continuationToken,
                     let targetLabel = response.challengeTargetLabel,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
@@ -108,19 +108,19 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .error(.invalidServerResponse)
             }
             return .codeRequired(
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 sentTo: targetLabel,
                 channelType: channelType.toPublicChannelType(),
                 codeLength: codeLength)
         case .password:
-            guard let credentialToken = response.continuationToken else {
+            guard let continuationToken = response.continuationToken else {
                 MSALLogger.log(
                     level: .error,
                     context: context,
                     format: "SignIn Challenge: Expected credential token not nil with credential type password")
                 return .error(.invalidServerResponse)
             }
-            return .passwordRequired(credentialToken: credentialToken)
+            return .passwordRequired(continuationToken: continuationToken)
         case .redirect:
             return .error(.redirect)
         }
