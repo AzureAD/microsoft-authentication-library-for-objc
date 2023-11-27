@@ -30,7 +30,7 @@ final class VerifyCodeErrorTests: XCTestCase {
     private var sut: VerifyCodeError!
 
     func test_totalCases() {
-        XCTAssertEqual(VerifyCodeErrorType.allCases.count, 3)
+        XCTAssertEqual(VerifyCodeError.ErrorType.allCases.count, 3)
     }
 
     func test_customErrorDescription() {

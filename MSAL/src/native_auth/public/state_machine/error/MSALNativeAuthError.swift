@@ -26,16 +26,12 @@ import Foundation
 
 @objcMembers
 public class MSALNativeAuthError: NSObject, LocalizedError {
-    /// Provides an identifier of the type of error.
-    public let identifier: Int
-
     /// Describes why an error occurred and provides more information about the error.
     public var errorDescription: String? { message }
 
     private let message: String?
 
-    init(identifier: Int, message: String?) {
-        self.identifier = identifier
+    init(message: String? = nil) {
         self.message = message
     }
 }

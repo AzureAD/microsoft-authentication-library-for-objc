@@ -30,7 +30,7 @@ final class ResetPasswordStartErrorTests: XCTestCase {
     private var sut: ResetPasswordStartError!
 
     func test_totalCases() {
-        XCTAssertEqual(ResetPasswordStartErrorType.allCases.count, 5)
+        XCTAssertEqual(ResetPasswordStartError.ErrorType.allCases.count, 5)
     }
 
     func test_customErrorDescription() {

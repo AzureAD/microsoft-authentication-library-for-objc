@@ -26,11 +26,18 @@ import Foundation
 
 @objcMembers
 public class RetrieveAccessTokenError: MSALNativeAuthError {
-    let type: RetrieveAccessTokenErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case refreshTokenExpired
+        case tokenNotFound
+        case generalError
+    }
 
-    init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
-        super.init(identifier: type.rawValue, message: message)
+        super.init(message: message)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -65,12 +72,4 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     public var isTokenNotFound: Bool {
         return type == .tokenNotFound
     }
-}
-
-@objc
-public enum RetrieveAccessTokenErrorType: Int, CaseIterable {
-    case browserRequired
-    case refreshTokenExpired
-    case tokenNotFound
-    case generalError
 }

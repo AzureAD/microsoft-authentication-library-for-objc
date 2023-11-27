@@ -30,7 +30,7 @@ final class PasswordRequiredErrorTests: XCTestCase {
     private var sut: PasswordRequiredError!
 
     func test_totalCases() {
-        XCTAssertEqual(PasswordRequiredErrorType.allCases.count, 3)
+        XCTAssertEqual(PasswordRequiredError.ErrorType.allCases.count, 3)
     }
 
     func test_customErrorDescription() {

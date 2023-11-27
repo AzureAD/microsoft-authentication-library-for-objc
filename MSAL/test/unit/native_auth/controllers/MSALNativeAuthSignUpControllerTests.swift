@@ -146,7 +146,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
         let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
-        result.telemetryUpdate?(.failure(.init(identifier: 1, message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesInvalid(result)
 
@@ -531,7 +531,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
         let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
-        result.telemetryUpdate?(.failure(.init(identifier: 1, message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error")))
         helper.onSignUpAttributesInvalid(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1080,7 +1080,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
         let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
-        result.telemetryUpdate?(.failure(.init(identifier: VerifyCodeErrorType.generalError.rawValue, message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesRequired(result)
 
@@ -1257,7 +1257,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
         let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
-        result.telemetryUpdate?(.failure(.init(identifier: VerifyCodeErrorType.generalError.rawValue, message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpPasswordRequired(result)
 
@@ -1482,7 +1482,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
         let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
-        result.telemetryUpdate?(.failure(.init(identifier: VerifyCodeErrorType.generalError.rawValue, message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesRequired(result)
 

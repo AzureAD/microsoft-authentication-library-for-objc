@@ -26,11 +26,17 @@ import Foundation
 
 @objcMembers
 public class VerifyCodeError: MSALNativeAuthError {
-    let type: VerifyCodeErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case invalidCode
+        case generalError
+    }
 
-    init(type: VerifyCodeErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
-        super.init(identifier: type.rawValue, message: message)
+        super.init(message: message)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -58,11 +64,4 @@ public class VerifyCodeError: MSALNativeAuthError {
     public var isInvalidCode: Bool {
         return type == .invalidCode
     }
-}
-
-@objc
-public enum VerifyCodeErrorType: Int, CaseIterable {
-    case browserRequired
-    case invalidCode
-    case generalError
 }

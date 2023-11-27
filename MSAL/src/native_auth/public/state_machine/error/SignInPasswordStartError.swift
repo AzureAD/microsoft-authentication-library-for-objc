@@ -26,11 +26,19 @@ import Foundation
 
 @objcMembers
 public class SignInPasswordStartError: MSALNativeAuthError {
-    let type: SignInPasswordStartErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case userNotFound
+        case invalidCredentials
+        case invalidUsername
+        case generalError
+    }
 
-    init(type: SignInPasswordStartErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
-        super.init(identifier: type.rawValue, message: message)
+        super.init(message: message)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -72,13 +80,4 @@ public class SignInPasswordStartError: MSALNativeAuthError {
     public var isInvalidUsername: Bool {
         return type == .invalidUsername
     }
-}
-
-@objc
-public enum SignInPasswordStartErrorType: Int, CaseIterable {
-    case browserRequired
-    case userNotFound
-    case invalidCredentials
-    case invalidUsername
-    case generalError
 }

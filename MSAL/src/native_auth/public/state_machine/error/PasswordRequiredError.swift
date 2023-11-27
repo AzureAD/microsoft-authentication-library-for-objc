@@ -26,11 +26,17 @@ import Foundation
 
 @objcMembers
 public class PasswordRequiredError: MSALNativeAuthError {
-    let type: PasswordRequiredErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case invalidPassword
+        case generalError
+    }
 
-    init(type: PasswordRequiredErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
-        super.init(identifier: type.rawValue, message: message)
+        super.init(message: message)
     }
 
     init(signInPasswordError: SignInPasswordStartError) {
@@ -42,7 +48,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         default:
             self.type = .generalError
         }
-        super.init(identifier: signInPasswordError.type.rawValue, message: signInPasswordError.errorDescription)
+        super.init(message: signInPasswordError.errorDescription)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -70,11 +76,4 @@ public class PasswordRequiredError: MSALNativeAuthError {
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
-}
-
-@objc
-public enum PasswordRequiredErrorType: Int, CaseIterable {
-    case browserRequired
-    case invalidPassword
-    case generalError
 }

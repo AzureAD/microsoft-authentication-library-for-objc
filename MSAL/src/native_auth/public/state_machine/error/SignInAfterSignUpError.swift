@@ -26,8 +26,6 @@ import Foundation
 
 @objc
 public class SignInAfterSignUpError: MSALNativeAuthError {
-    let type: AttributesRequiredErrorType = .generalError
-
     /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
@@ -36,13 +34,4 @@ public class SignInAfterSignUpError: MSALNativeAuthError {
 
         return MSALNativeAuthErrorMessage.generalError
     }
-
-    init(message: String? = nil) {
-        super.init(identifier: type.rawValue, message: message)
-    }
-}
-
-@objc
-public enum SignInAfterSignUpErrorType: Int, CaseIterable {
-    case generalError
 }

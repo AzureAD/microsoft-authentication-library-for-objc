@@ -30,7 +30,7 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     private var sut: RetrieveAccessTokenError!
 
     func test_totalCases() {
-        XCTAssertEqual(RetrieveAccessTokenErrorType.allCases.count, 4)
+        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 4)
     }
 
     func test_customErrorDescription() {

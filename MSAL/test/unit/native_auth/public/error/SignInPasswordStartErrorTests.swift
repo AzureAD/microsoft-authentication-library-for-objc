@@ -30,7 +30,7 @@ final class SignInPasswordStartErrorTests: XCTestCase {
     private var sut: SignInPasswordStartError!
 
     func test_totalCases() {
-        XCTAssertEqual(SignInPasswordStartErrorType.allCases.count, 5)
+        XCTAssertEqual(SignInPasswordStartError.ErrorType.allCases.count, 5)
     }
 
     func test_customErrorDescription() {
