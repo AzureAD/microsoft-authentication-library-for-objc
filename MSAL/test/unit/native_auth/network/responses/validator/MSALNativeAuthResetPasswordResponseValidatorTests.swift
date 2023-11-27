@@ -153,7 +153,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            continuationToken: "<token>",
+            continuationToken: "<continuation_token>",
             codeLength: nil)
         )
 
@@ -167,7 +167,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            continuationToken: "<token>",
+            continuationToken: "<continuation_token>",
             codeLength: 6)
         )
 
@@ -180,7 +180,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(sentTo, "challenge-type-label")
         XCTAssertEqual(channelTargetType, .email)
         XCTAssertEqual(codeLength, 6)
-        XCTAssertEqual(continuationToken, "<token>")
+        XCTAssertEqual(continuationToken, "<continuation_token>")
     }
 
     func test_whenResetPasswordChallengeSuccessResponseOmitsSomeAttributes_itReturnsUnexpectedError() {

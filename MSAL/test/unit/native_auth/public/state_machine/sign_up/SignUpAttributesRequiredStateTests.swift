@@ -72,7 +72,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "slt")
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "<continuation_token>")
         let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
@@ -91,7 +91,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenAttributesAreInvalud_shouldReturnAttributesInvalid() {
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "slt")
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "<continuation_token>")
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)
