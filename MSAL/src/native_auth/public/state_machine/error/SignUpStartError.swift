@@ -63,7 +63,7 @@ public class SignUpStartError: MSALNativeAuthError {
         return type == .browserRequired
     }
 
-    /// Returns `true` when the user is trying to register an existing email
+    /// Returns `true` when the user is trying to register an existing username.
     public var isUserAlreadyExists: Bool {
         return type == .userAlreadyExists
     }
