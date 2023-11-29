@@ -24,12 +24,17 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class PasswordRequiredError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: PasswordRequiredErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case invalidPassword
+        case generalError
+    }
 
-    init(type: PasswordRequiredErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
@@ -38,7 +43,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         switch signInPasswordError.type {
         case .browserRequired:
             self.type = .browserRequired
-        case .invalidPassword:
+        case .invalidCredentials:
             self.type = .invalidPassword
         default:
             self.type = .generalError
@@ -46,6 +51,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         super.init(message: signInPasswordError.errorDescription)
     }
 
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
@@ -53,18 +59,21 @@ public class PasswordRequiredError: MSALNativeAuthError {
 
         switch type {
         case .browserRequired:
-            return "Browser required"
+            return MSALNativeAuthErrorMessage.browserRequired
         case .invalidPassword:
-            return "Invalid password"
+            return MSALNativeAuthErrorMessage.invalidPassword
         case .generalError:
-            return "General error"
+            return MSALNativeAuthErrorMessage.generalError
         }
     }
-}
 
-@objc
-public enum PasswordRequiredErrorType: Int {
-    case browserRequired
-    case generalError
-    case invalidPassword
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` when the password is not valid.
+    public var isInvalidPassword: Bool {
+        return type == .invalidPassword
+    }
 }

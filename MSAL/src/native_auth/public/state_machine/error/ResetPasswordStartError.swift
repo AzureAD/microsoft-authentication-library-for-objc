@@ -24,16 +24,24 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class ResetPasswordStartError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: ResetPasswordStartErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case userDoesNotHavePassword
+        case userNotFound
+        case invalidUsername
+        case generalError
+    }
 
-    init(type: ResetPasswordStartErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
@@ -41,24 +49,35 @@ public class ResetPasswordStartError: MSALNativeAuthError {
 
         switch type {
         case .browserRequired:
-            return "Browser required"
-        case .generalError:
-            return "General error"
+            return MSALNativeAuthErrorMessage.browserRequired
         case .userDoesNotHavePassword:
-            return "User does not have a password"
+            return MSALNativeAuthErrorMessage.userDoesNotHavePassword
         case .userNotFound:
-            return "User not found"
+            return MSALNativeAuthErrorMessage.userNotFound
         case .invalidUsername:
-            return "Invalid username"
+            return MSALNativeAuthErrorMessage.invalidUsername
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
         }
     }
-}
 
-@objc
-public enum ResetPasswordStartErrorType: Int {
-    case browserRequired
-    case generalError
-    case userDoesNotHavePassword
-    case userNotFound
-    case invalidUsername
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` if the user does not have a password.
+    public var isUserDoesNotHavePassword: Bool {
+        return type == .userDoesNotHavePassword
+    }
+
+    /// Returns `true` if the user that is trying to reset their password cannot be found.
+    public var isUserNotFound: Bool {
+        return type == .userNotFound
+    }
+
+    /// Returns `true` when the username is not valid.
+    public var isInvalidUsername: Bool {
+        return type == .invalidUsername
+    }
 }

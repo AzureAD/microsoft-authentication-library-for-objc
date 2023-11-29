@@ -24,38 +24,52 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class RetrieveAccessTokenError: MSALNativeAuthError {
-    /// An error type indicating the type of error that occurred
-    @objc public let type: RetrieveAccessTokenErrorType
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case refreshTokenExpired
+        case tokenNotFound
+        case generalError
+    }
 
-    init(type: RetrieveAccessTokenErrorType, message: String? = nil) {
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil) {
         self.type = type
         super.init(message: message)
     }
 
+    /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
             return description
         }
 
         switch type {
-        case .generalError:
-            return "General error"
-        case .refreshTokenExpired:
-            return "Refresh token expired"
-        case .tokenNotFound:
-            return "Token not found"
         case .browserRequired:
-            return "Browser required"
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .refreshTokenExpired:
+            return MSALNativeAuthErrorMessage.refreshTokenExpired
+        case .tokenNotFound:
+            return MSALNativeAuthErrorMessage.tokenNotFound
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
         }
     }
-}
 
-@objc
-public enum RetrieveAccessTokenErrorType: Int {
-    case generalError
-    case refreshTokenExpired
-    case tokenNotFound
-    case browserRequired
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` if the refresh token has expired.
+    public var isRefreshTokenExpired: Bool {
+        return type == .refreshTokenExpired
+    }
+
+    /// Returns `true` if the existing token cannot be found.
+    public var isTokenNotFound: Bool {
+        return type == .tokenNotFound
+    }
 }

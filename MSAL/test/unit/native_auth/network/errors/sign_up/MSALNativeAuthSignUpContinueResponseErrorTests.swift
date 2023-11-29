@@ -218,14 +218,14 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     
     // MARK: private methods
     
-    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: VerifyCodeErrorType) {
+    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, signUpToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toVerifyCodePublicError()
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
-    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredErrorType) {
+    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, signUpToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, expectedErrorType)
