@@ -1,3 +1,6 @@
+## [1.2.19]
+* Introduce a way to inject external WKWebviewConfiguration for MSIDWebviewUIController - needed for MSAL C++ (#1308)
+
 ## [1.2.18]
 * Fix duplicate values for error JIT codes (#1893)
 
