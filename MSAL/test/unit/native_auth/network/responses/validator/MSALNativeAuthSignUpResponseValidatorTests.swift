@@ -65,7 +65,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpStart_verificationRequiredErrorWithSignUpTokenAndUnverifiedAttributes_it_returns_verificationRequired() {
+    func test_whenSignUpStart_verificationRequiredErrorWithContinuationTokenAndUnverifiedAttributes_it_returns_verificationRequired() {
         let error = createSignUpStartError(
             error: .verificationRequired,
             continuationToken: "<continuation_token>",
@@ -83,7 +83,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(unverifiedAttributes.first, "username")
     }
 
-    func test_whenSignUpStart_verificationRequiredErrorWithSignUpToken_but_unverifiedAttributesIsEmpty_it_returns_unexpectedError() {
+    func test_whenSignUpStart_verificationRequiredErrorWithContinuationToken_but_unverifiedAttributesIsEmpty_it_returns_unexpectedError() {
         let error = createSignUpStartError(
             error: .verificationRequired,
             continuationToken: "<continuation_token>",
@@ -95,7 +95,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpStart_verificationRequiredErrorWithSignUpToken_but_unverifiedAttributesIsNil_it_returns_unexpectedError() {
+    func test_whenSignUpStart_verificationRequiredErrorWithContinuationToken_but_unverifiedAttributesIsNil_it_returns_unexpectedError() {
         let error = createSignUpStartError(
             error: .verificationRequired,
             continuationToken: "<continuation_token>",
@@ -107,7 +107,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpStart_attributeValidationFailedWithSignUpTokenAndInvalidAttributes_it_returns_attributeValidationFailed() {
+    func test_whenSignUpStart_attributeValidationFailedWithContinuationTokenAndInvalidAttributes_it_returns_attributeValidationFailed() {
         let error = createSignUpStartError(
             error: .attributeValidationFailed,
             invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "city")]
@@ -123,7 +123,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(invalidAttributes.first, "city")
     }
 
-    func test_whenSignUpStart_attributeValidationFailedWithSignUpToken_but_invalidAttributesIsEmpty_it_returns_attributeValidationFailed() {
+    func test_whenSignUpStart_attributeValidationFailedWithContinuationToken_but_invalidAttributesIsEmpty_it_returns_attributeValidationFailed() {
         let error = createSignUpStartError(
             error: .attributeValidationFailed,
             invalidAttributes: []
@@ -134,7 +134,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpStart_attributeValidationFailedWithSignUpToken_but_invalidAttributesIsNil_it_returns_attributeValidationFailed() {
+    func test_whenSignUpStart_attributeValidationFailedWithContinuationToken_but_invalidAttributesIsNil_it_returns_attributeValidationFailed() {
         let error = createSignUpStartError(
             error: .verificationRequired,
             invalidAttributes: nil
@@ -145,7 +145,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenSignUpStart_expectedVerificationRequiredErrorWithoutSignUpToken_it_returns_unexpectedError() {
+    func test_whenSignUpStart_expectedVerificationRequiredErrorWithoutContinuationToken_it_returns_unexpectedError() {
         let error = createSignUpStartError(error: .verificationRequired, continuationToken: nil)
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
@@ -411,7 +411,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_invalidOOBValue_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .invalidOOBValue, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .invalidOOBValue, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -422,7 +422,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooWeak_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .passwordTooWeak, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .passwordTooWeak, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -433,7 +433,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooShort_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .passwordTooShort, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .passwordTooShort, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -444,7 +444,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordTooLong_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .passwordTooLong, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .passwordTooLong, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -455,7 +455,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordRecentlyUsed_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .passwordRecentlyUsed, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .passwordRecentlyUsed, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -466,7 +466,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_passwordBanned_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .passwordBanned, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .passwordBanned, expectedContinuationToken: "<continuation_token>")
 
         guard case .invalidUserInput(let error) = result else {
             return XCTFail("Unexpected response")
@@ -477,7 +477,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: "<continuation_token>", invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
+        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedContinuationToken: "<continuation_token>", invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
 
         guard case .attributeValidationFailed(let continuationToken, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
@@ -490,13 +490,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_invalidRequestWithInvalidOTPErrorCode_it_returns_expectedError() {
         let continuationToken = "<continuation_token>"
         var errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue, Int.max]
-        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: continuationToken, errorCodes: errorCodes)
+        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: continuationToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.incorrectOTP.rawValue]
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: continuationToken, errorCodes: errorCodes)
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: continuationToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.OTPNoCacheEntryForUser.rawValue]
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: continuationToken, errorCodes: errorCodes)
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: continuationToken, errorCodes: errorCodes)
         checkInvalidOOBValue()
         func checkInvalidOOBValue() {
             guard case .invalidUserInput(let error) = result else {
@@ -517,11 +517,11 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
     
     func test_whenSignUpContinueErrorResponseIs_invalidRequestWithGenericErrorCode_it_returns_expectedError() {
-        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "<continuation_token>", errorCodes: [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue])
+        var result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: "<continuation_token>", errorCodes: [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue])
         checkValidatedErrorResult()
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "<continuation_token>", errorCodes: [Int.max])
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: "<continuation_token>", errorCodes: [Int.max])
         checkValidatedErrorResult()
-        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedSignUpToken: "<continuation_token>", errorCodes: [MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue])
+        result = buildContinueErrorResponse(expectedError: .invalidRequest, expectedContinuationToken: "<continuation_token>", errorCodes: [MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue])
         checkValidatedErrorResult()
         func checkValidatedErrorResult() {
             guard case .error(let error) = result else {
@@ -535,7 +535,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_but_continuationTokenIsNil_it_returns_unexpectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedSignUpToken: nil, invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
+        let result = buildContinueErrorResponse(expectedError: .attributeValidationFailed, expectedContinuationToken: nil, invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
 
         XCTAssertEqual(result, .unexpectedError)
     }
@@ -553,7 +553,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_credentialRequired_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedSignUpToken: "<continuation_token>")
+        let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedContinuationToken: "<continuation_token>")
 
         guard case .credentialRequired(let continuationToken) = result else {
             return XCTFail("Unexpected response")
@@ -563,12 +563,12 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_credentialRequired_but_continuationToken_isNil_it_returns_unexpectedError() {
-        let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedSignUpToken: nil)
+        let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedContinuationToken: nil)
         XCTAssertEqual(result, .unexpectedError)
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedSignUpToken: "<continuation_token>", requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
+        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "<continuation_token>", requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 
         guard case .attributesRequired(let continuationToken, let requiredAttributes) = result else {
             return XCTFail("Unexpected response")
@@ -581,19 +581,19 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_continuationToken_IsNil_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedSignUpToken: nil, requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
+        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: nil, requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 
         XCTAssertEqual(result, .unexpectedError)
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_requiredAttributesIsNil_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedSignUpToken: "<continuation_token>", requiredAttributes: nil)
+        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "<continuation_token>", requiredAttributes: nil)
 
         XCTAssertEqual(result, .unexpectedError)
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_requiredAttributes_IsEmpty_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedSignUpToken: "<continuation_token>", requiredAttributes: [])
+        let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "<continuation_token>", requiredAttributes: [])
 
         XCTAssertEqual(result, .unexpectedError)
     }
@@ -660,7 +660,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthSignUpContinueOauth2ErrorCode,
-        expectedSignUpToken: String? = nil,
+        expectedContinuationToken: String? = nil,
         requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
         invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
         errorCodes: [Int]? = nil
@@ -669,7 +669,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             createSignUpContinueError(
                 error: expectedError,
                 errorCodes: errorCodes,
-                continuationToken: expectedSignUpToken,
+                continuationToken: expectedContinuationToken,
                 requiredAttributes: requiredAttributes,
                 invalidAttributes: invalidAttributes
             )
