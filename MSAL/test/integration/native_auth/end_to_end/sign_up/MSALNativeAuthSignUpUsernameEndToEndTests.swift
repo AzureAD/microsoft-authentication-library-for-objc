@@ -73,7 +73,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -178,7 +178,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -256,7 +256,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
