@@ -43,7 +43,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
-        XCTAssertEqual(signInDelegateSpy.error?.type, .userNotFound)
+        XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
     func test_signInWithKnownUsernameResultsInOTPSent() async throws {
@@ -103,7 +103,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
-        XCTAssertEqual(signInVerifyCodeDelegateSpy.error?.type, .invalidCode)
+        XCTAssertTrue(signInVerifyCodeDelegateSpy.error!.isInvalidCode)
     }
 
     // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
@@ -204,7 +204,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.type, .invalidPassword)
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.error!.isInvalidPassword)
     }
 
     // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
