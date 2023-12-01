@@ -95,6 +95,8 @@ Modal presentation style for displaying authentication web content.
  */
 @property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+@property (nonatomic) MSALPreferredAuthMethod preferredAuthMethod;
+
 #pragma mark - Constructing MSALInteractiveTokenParameters
 
 #if TARGET_OS_IPHONE

@@ -87,7 +87,8 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
 #if TARGET_OS_OSX
         _platformSSOStatus = [self msalPlatformSSOStatusFromMSIDPlatformSSOStatus:deviceInfo.platformSSOStatus];
 #endif
-
+        _qrpinAvailable = [self msalQRPinAvailabilityFromMSIDQRPinAvailability:deviceInfo.qrPinAvailability];
+        
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
     }
@@ -132,6 +133,17 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
             
         default:
             return MSALPlatformSSONotEnabled;
+    }
+}
+
+- (MSALQRPinAvailability)msalQRPinAvailabilityFromMSIDQRPinAvailability:(MSIDQRPinAvailability)msidQRPinAvailability
+{
+    switch (msidQRPinAvailability) {
+        case MSIDQRPinAvailable:
+            return MSALQRPinAvailable;
+            
+        default:
+            return MSALQRPinNotAvailable;
     }
 }
 

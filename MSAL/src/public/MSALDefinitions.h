@@ -179,6 +179,29 @@ typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
 };
 
 /**
+ Device mode configured by the administrator
+ */
+typedef NS_ENUM(NSUInteger, MSALQRPinAvailability)
+{
+    /*
+        Administrator hasn't configured QR+PIN as an authentication method for this device.
+    */
+    MSALQRPinNotAvailable,
+    
+    /*
+     Administrator has configured QR+PIN as an authentication method for this device.
+     */
+    MSALQRPinAvailable
+};
+
+typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
+{
+    MSALPreferredAuthMethodNone,
+    
+    MSALPreferredAuthMethodQRPIN
+};
+
+/**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.

@@ -1206,6 +1206,11 @@
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
     
+    if (parameters.preferredAuthMethod == MSALPreferredAuthMethodQRPIN)
+    {
+        msidParams.preferredAuthMethod = MSIDPreferredAuthMethodQRPIN;
+    }
+    
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
     if (signInState == MSIDAccountMetadataStateSignedOut && msidParams.promptType != MSIDPromptTypeConsent)
