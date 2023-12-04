@@ -24,22 +24,6 @@
 
 import Foundation
 
-enum SignUpPasswordStartResult {
-    /// Returned if a user has received an email with code.
-    ///
-    /// - newState: An object representing the new state of the flow with follow on methods.
-    /// - sentTo: The email/phone number that the code was sent to.
-    /// - channelTargetType: The channel (email/phone) the code was sent through.
-    /// - codeLength: The length of the code required.
-    case codeRequired(newState: SignUpCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-
-    /// Returned when the attributes sent are invalid.
-    case attributesInvalid([String])
-
-    /// An error object indicating why the operation failed.
-    case error(SignUpPasswordStartError)
-}
-
 enum SignUpStartResult {
     /// Returned if a user has received an email with code.
     ///

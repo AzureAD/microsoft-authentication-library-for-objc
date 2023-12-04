@@ -49,7 +49,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpStartResponseError {
 
-    func toSignUpStartPasswordPublicError() -> SignUpPasswordStartError {
+    func toSignUpStartPasswordPublicError() -> SignUpStartError {
         switch error {
         case .passwordTooWeak,
              .passwordTooShort,

@@ -61,7 +61,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        sut.signUpUsingPassword(username: "", password: "", delegate: delegate)
+        sut.signUp(username: "", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
     }
@@ -69,7 +69,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        sut.signUpUsingPassword(username: "correct", password: "", delegate: delegate)
+        sut.signUp(username: "correct", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
     }
@@ -78,7 +78,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
 
-        let expectedResult: SignUpPasswordStartResult = .codeRequired(
+        let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
             sentTo: "sentTo",
             channelTargetType: .email,
@@ -86,7 +86,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         )
         controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult)
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp])
 
@@ -101,10 +101,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
         let expectedInvalidAttributes = ["attribute"]
 
-        let expectedResult: SignUpPasswordStartResult = .attributesInvalid(expectedInvalidAttributes)
+        let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
         controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult)
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp])
 
@@ -116,10 +116,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: exp)
         let expectedInvalidAttributes = ["attribute"]
 
-        let expectedResult: SignUpPasswordStartResult = .attributesInvalid(expectedInvalidAttributes)
+        let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
         controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult)
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp])
 

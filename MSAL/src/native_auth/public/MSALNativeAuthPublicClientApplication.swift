@@ -116,62 +116,24 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Sign up a user with a given username and password.
     /// - Parameters:
     ///   - username: Username for the new account.
-    ///   - password: Password to be used for the new account.
-    ///   - attributes: Optional. User attributes to be used during account creation.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
-    public func signUpUsingPassword(
-        username: String,
-        password: String,
-        attributes: [String: Any]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignUpPasswordStartDelegate
-    ) {
-        Task {
-            let controllerResponse = await signUpUsingPasswordInternal(
-                username: username,
-                password: password,
-                attributes: attributes,
-                correlationId: correlationId
-            )
-
-            switch controllerResponse.result {
-            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignUpCodeRequired(
-                    newState: newState,
-                    sentTo: sentTo,
-                    channelTargetType: channelTargetType,
-                    codeLength: codeLength
-                )
-            case .attributesInvalid(let attributes):
-                if let signUpAttributesMethod = delegate.onSignUpAttributesInvalid {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await signUpAttributesMethod(attributes)
-                } else {
-                    let error = SignUpPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpPasswordError(error: error)
-                }
-            case .error(let error):
-                await delegate.onSignUpPasswordError(error: error)
-            }
-        }
-    }
-
-    /// Sign up a user with a given username.
-    /// - Parameters:
-    ///   - username: Username for the new account.
+    ///   - password: Optional. Password to be used for the new account.
     ///   - attributes: Optional. User attributes to be used during account creation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUp(
         username: String,
+        password: String? = nil,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
     ) {
         Task {
-            let controllerResponse = await signUpInternal(username: username, attributes: attributes, correlationId: correlationId)
+            var controllerResponse = await signUpInternal(
+                username: username,
+                password: password,
+                attributes: attributes,
+                correlationId: correlationId
+            )
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):

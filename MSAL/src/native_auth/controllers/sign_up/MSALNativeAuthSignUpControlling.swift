@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthSignUpControlling: AnyObject {
 
-    typealias SignUpStartPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpPasswordStartResult>
+    typealias SignUpStartPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpStartResult>
     typealias SignUpStartCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpStartResult>
     typealias SignUpSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpVerifyCodeResult>
     typealias SignUpSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpPasswordRequiredResult>

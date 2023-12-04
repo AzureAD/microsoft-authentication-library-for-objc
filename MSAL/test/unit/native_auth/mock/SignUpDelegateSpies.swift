@@ -25,12 +25,12 @@
 import XCTest
 @testable import MSAL
 
-class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
+class SignUpPasswordStartDelegateSpy: SignUpStartDelegate {
     let expectation: XCTestExpectation?
     private(set) var onSignUpPasswordErrorCalled = false
     private(set) var onSignUpCodeRequiredCalled = false
     private(set) var onSignUpAttributesInvalidCalled = false
-    private(set) var error: SignUpPasswordStartError?
+    private(set) var error: SignUpStartError?
     private(set) var newState: SignUpCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
@@ -41,7 +41,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+    func onSignUpError(error: MSAL.SignUpStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
@@ -304,16 +304,16 @@ class SignUpVerifyCodeDelegateOptionalMethodsNotImplemented: SignUpVerifyCodeDel
     }
 }
 
-class SignUpPasswordStartDelegateOptionalMethodsNotImplemented: SignUpPasswordStartDelegate {
+class SignUpPasswordStartDelegateOptionalMethodsNotImplemented: SignUpStartDelegate {
     private let expectation: XCTestExpectation?
     private(set) var onSignUpPasswordErrorCalled = false
-    private(set) var error: SignUpPasswordStartError?
+    private(set) var error: SignUpStartError?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: MSAL.SignUpPasswordStartError) {
+    func onSignUpError(error: MSAL.SignUpStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 

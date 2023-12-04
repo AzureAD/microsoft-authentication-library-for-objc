@@ -167,7 +167,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 format: "attribute_validation_failed received from signup/start with password request for attributes: \(invalidAttributes)"
             )
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = SignUpPasswordStartError(type: .generalError, message: message)
+            let error = SignUpStartError(type: .generalError, message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
                 switch result {
                 case .success:
@@ -182,7 +182,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 }
             })
         case .redirect:
-            let error = SignUpPasswordStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -196,21 +196,21 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            format: "Error in signup/start with password request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .invalidUsername(let apiError):
-            let error = SignUpPasswordStartError(type: .invalidUsername, message: apiError.errorDescription)
+            let error = SignUpStartError(type: .invalidUsername, message: apiError.errorDescription)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "InvalidUsername in signup/start with password request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .invalidClientId(let apiError):
-            let error = SignUpPasswordStartError(type: .generalError, message: apiError.errorDescription)
+            let error = SignUpStartError(type: .generalError, message: apiError.errorDescription)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Invalid Client Id in signup/start with password request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .unexpectedError:
-            let error = SignUpPasswordStartError(type: .generalError)
+            let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -337,7 +337,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            format: "Error in signup/challenge password request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .redirect:
-            let error = SignUpPasswordStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -345,7 +345,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error))
         case .unexpectedError,
              .passwordRequired:
-            let error = SignUpPasswordStartError(type: .generalError)
+            let error = SignUpStartError(type: .generalError)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,

@@ -104,7 +104,7 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
         
     // MARK: private methods
     
-    private func testSignUpChallengeErrorToSignUpPasswordStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: SignUpPasswordStartErrorType) {
+    private func testSignUpChallengeErrorToSignUpPasswordStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartErrorType) {
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
         let error = sut.toSignUpPasswordStartPublicError()
         XCTAssertEqual(error.type, expectedErrorType)

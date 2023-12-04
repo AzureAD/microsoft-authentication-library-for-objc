@@ -26,17 +26,20 @@ import Foundation
 
 extension MSALNativeAuthPublicClientApplication {
 
-    func signUpUsingPasswordInternal(
+    func signUpInternal(
         username: String,
-        password: String,
+        password: String?,
         attributes: [String: Any]?,
         correlationId: UUID?
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
+    ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
         guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignUpPasswordStartError(type: .invalidUsername)))
+            return .init(.error(SignUpStartError(type: .invalidUsername)))
         }
-        guard inputValidator.isInputValid(password) else {
-            return .init(.error(SignUpPasswordStartError(type: .invalidPassword)))
+
+        if let password = password {
+            guard inputValidator.isInputValid(password) else {
+                return .init(.error(SignUpStartError(type: .invalidPassword)))
+            }
         }
 
         let controller = controllerFactory.makeSignUpController()
@@ -49,29 +52,11 @@ extension MSALNativeAuthPublicClientApplication {
             context: context
         )
 
-        return await controller.signUpStartPassword(parameters: parameters)
-    }
-
-    func signUpInternal(
-        username: String,
-        attributes: [String: Any]?,
-        correlationId: UUID?
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
-        guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignUpStartError(type: .invalidUsername)))
+        if let password = password {
+            return await controller.signUpStartPassword(parameters: parameters)
+        } else {
+            return await controller.signUpStartCode(parameters: parameters)
         }
-
-        let controller = controllerFactory.makeSignUpController()
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
-            username: username,
-            password: nil,
-            attributes: attributes ?? [:],
-            context: context
-        )
-
-        return await controller.signUpStartCode(parameters: parameters)
     }
 
     func signInUsingPasswordInternal(

@@ -34,7 +34,7 @@ class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
         }
 
         Task {
-            await self.onSignUpPasswordError(error: error)
+            await self.onSignUpError(error: error)
         }
     }
 
