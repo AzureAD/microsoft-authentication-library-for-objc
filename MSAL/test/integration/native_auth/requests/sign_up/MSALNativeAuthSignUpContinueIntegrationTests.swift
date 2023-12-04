@@ -121,8 +121,8 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
     func test_signUpContinue_explicitInvalidOOBValue() async throws {
         try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .explicitInvalidOOBValue,
-            expectedError: createError(.invalidOOBValue)
+            response: .invalidOOBValue,
+            expectedError: createError(.invalidRequest)
         )
     }
 

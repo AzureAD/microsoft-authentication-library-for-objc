@@ -130,7 +130,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
+            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
         )
     }
 
