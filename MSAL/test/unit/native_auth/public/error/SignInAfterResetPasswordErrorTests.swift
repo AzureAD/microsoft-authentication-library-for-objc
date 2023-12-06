@@ -16,27 +16,27 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-enum ResetPasswordStartResult {
-    case codeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-    case error(ResetPasswordStartError)
-}
+final class SignInAfterResetPasswordErrorTests: XCTestCase {
 
-typealias ResetPasswordResendCodeResult = CodeRequiredGenericResult<ResetPasswordCodeRequiredState, ResendCodeError>
+    private var sut: SignInAfterResetPasswordError!
 
-enum ResetPasswordSubmitCodeResult {
-    case passwordRequired(newState: ResetPasswordRequiredState)
-    case error(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
-}
+    func test_customErrorDescription() {
+        let expectedMessage = "Custom error message"
+        sut = .init(message: expectedMessage)
+        XCTAssertEqual(sut.errorDescription, expectedMessage)
+    }
 
-enum ResetPasswordSubmitPasswordResult {
-    case completed(SignInAfterResetPasswordState)
-    case error(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    func test_defaultErrorDescription() {
+        sut = .init()
+        XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
+    }
 }

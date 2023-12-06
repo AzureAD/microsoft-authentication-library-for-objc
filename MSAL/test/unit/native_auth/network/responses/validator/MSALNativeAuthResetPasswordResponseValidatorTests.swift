@@ -422,15 +422,16 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Poll Completion Response
 
     func test_whenResetPasswordPollCompletionSuccessResponse_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .success(.init(status: .succeeded, signInSLT: nil, expiresIn: nil))
+        let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .success(.init(status: .succeeded, signInSLT: "signInSLT", expiresIn: nil))
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let status) = result else {
+        guard case .success(let status, let slt) = result else {
             return XCTFail("Unexpected response")
         }
 
         XCTAssertEqual(status, .succeeded)
+        XCTAssertEqual(slt, "signInSLT")
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooWeak_itReturnsExpectedError() {

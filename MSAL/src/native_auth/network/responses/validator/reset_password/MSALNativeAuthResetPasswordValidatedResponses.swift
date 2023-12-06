@@ -72,7 +72,8 @@ enum MSALNativeAuthResetPasswordSubmitValidatedResponse: Equatable {
 }
 
 enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse: Equatable {
-    case success(status: MSALNativeAuthResetPasswordPollCompletionStatus)
+    // TODO: Update to continuation_token
+    case success(status: MSALNativeAuthResetPasswordPollCompletionStatus, slt: String?)
     case passwordError(error: MSALNativeAuthResetPasswordPollCompletionResponseError)
     case error(MSALNativeAuthResetPasswordPollCompletionResponseError)
     case unexpectedError

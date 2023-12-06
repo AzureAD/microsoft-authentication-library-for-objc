@@ -92,5 +92,6 @@ public protocol ResetPasswordRequiredDelegate {
 
     /// Notifies the delegate that the reset password operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onResetPasswordRequiredError(error:newState:)`` will be called.
-    @MainActor @objc optional func onResetPasswordCompleted()
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
+    @MainActor @objc optional func onResetPasswordCompleted(newState: SignInAfterResetPasswordState)
 }

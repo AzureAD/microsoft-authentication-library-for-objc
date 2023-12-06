@@ -24,10 +24,26 @@
 
 import Foundation
 
-extension SignInAfterSignUpState {
+/// An object of this type is created when a user has reset their password successfully.
+@objcMembers public class SignInAfterResetPasswordState: SignInAfterPreviousFlowBaseState {
+    /// Sign in the user that signed up.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
+        Task {
+            let controllerResponse = await signInInternal(scopes: scopes)
+            let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
+                delegate: delegate,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
-    func signInInternal(scopes: [String]?) async -> MSALNativeAuthSignInControlling.SignInAfterSignUpControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        return await controller.signIn(username: username, slt: slt, scopes: scopes, context: context)
+            switch controllerResponse.result {
+            case .success(let accountResult):
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+            case .failure(let error):
+                await delegate.onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError(message: error.errorDescription))
+            }
+        }
     }
 }

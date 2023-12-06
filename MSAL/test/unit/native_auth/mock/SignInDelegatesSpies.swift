@@ -336,6 +336,38 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     }
 }
 
+class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
+    private let expectation: XCTestExpectation
+    var expectedError: SignInAfterResetPasswordError?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    private(set) var onSignInCompletedCalled = false
+
+    init(expectation: XCTestExpectation, expectedError: SignInAfterResetPasswordError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedUserAccountResult = expectedUserAccountResult
+    }
+
+    func onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError) {
+        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+
+    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
+        onSignInCompletedCalled = true
+        guard let expectedUserAccountResult = expectedUserAccountResult else {
+            XCTFail("expectedUserAccount expected not nil")
+            expectation.fulfill()
+            return
+        }
+        XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}
+
 final class SignInAfterSignUpDelegateOptionalMethodsNotImplemented: SignInAfterSignUpDelegate {
 
     private let expectation: XCTestExpectation

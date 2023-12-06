@@ -115,14 +115,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         slt: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
-    ) async -> SignInAfterSignUpControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn after signUp started")
+    ) async -> SignInAfterPreviousFlowControllerResponse {
+        MSALLogger.log(level: .verbose, context: context, format: "SignIn after previous flow started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
             context: context
         )
         guard let slt = slt else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn not available because SLT is nil")
+            MSALLogger.log(level: .error, context: context, format: "SignIn after previous flow not available because signInSLT is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.failure(error))

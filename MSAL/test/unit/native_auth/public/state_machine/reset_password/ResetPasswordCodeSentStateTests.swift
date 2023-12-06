@@ -36,7 +36,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = ResetPasswordCodeRequiredState(controller: controller, flowToken: "<token>", correlationId: correlationId)
+        sut = ResetPasswordCodeRequiredState(controller: controller, username: "username", flowToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegates
@@ -45,7 +45,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
     func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
         let expectedError = ResendCodeError(message: "test error")
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", flowToken: "flowToken", correlationId: correlationId)
 
         let expectedResult: ResetPasswordResendCodeResult = .error(error: expectedError, newState: expectedState)
         controller.resendCodeResponse = .init(expectedResult)
@@ -63,7 +63,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_success_shouldReturnCodeRequired() {
         let exp = expectation(description: "reset password states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -89,7 +89,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_success_whenOptionalMethodNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "reset password states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -113,7 +113,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
     func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
         let expectedError = VerifyCodeError(type: .invalidCode)
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", flowToken: "flowToken", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .error(error: expectedError, newState: expectedState)
         controller.submitCodeResponse = .init(expectedResult)
@@ -131,7 +131,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     func test_submitCode_delegate_success_shouldReturnPasswordRequired() {
         let exp = expectation(description: "reset password states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = ResetPasswordRequiredState(controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = ResetPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .passwordRequired(newState: expectedState)
         controller.submitCodeResponse = .init(expectedResult, telemetryUpdate: { _ in
@@ -149,7 +149,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     func test_submitCode_delegate_success_whenOptionalMethodsNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "reset password states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = ResetPasswordRequiredState(controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = ResetPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .passwordRequired(newState: expectedState)
         controller.submitCodeResponse = .init(expectedResult, telemetryUpdate: { _ in

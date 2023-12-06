@@ -244,7 +244,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handlePollCompletionSuccess(
         _ response: MSALNativeAuthResetPasswordPollCompletionResponse
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
-        return .success(status: response.status)
+        // Even if the `signInSLT` is nil, the ResetPassword flow is considered successfully completed
+        // TODO: Update to continuation_token
+        return .success(status: response.status, slt: response.signInSLT)
     }
 
     private func handlePollCompletionError(
