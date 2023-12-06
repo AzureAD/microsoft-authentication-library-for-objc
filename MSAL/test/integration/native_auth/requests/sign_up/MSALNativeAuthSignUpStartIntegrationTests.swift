@@ -52,7 +52,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await mockResponse(.challengeTypeRedirect, endpoint: .signUpStart)
         let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
 
-        XCTAssertNil(response?.signupToken)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 
@@ -129,7 +129,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             expectedError: createError(.attributesRequired)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
     }
 
     func test_signUpStart_verificationRequired() async throws {
@@ -139,7 +139,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             expectedError: createError(.verificationRequired)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
         XCTAssertNotNil(response.unverifiedAttributes)
     }
 
@@ -150,7 +150,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             expectedError: createError(.attributeValidationFailed)
         )
 
-        XCTAssertNotNil(response.signUpToken)
+        XCTAssertNotNil(response.continuationToken)
     }
 
     func test_signUpStart_unsupportedAuthMethod() async throws {
@@ -180,7 +180,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
             errorCodes: nil,
             errorURI: nil,
             innerErrors: nil,
-            signUpToken: nil,
+            continuationToken: nil,
             unverifiedAttributes: nil,
             invalidAttributes: nil
         )

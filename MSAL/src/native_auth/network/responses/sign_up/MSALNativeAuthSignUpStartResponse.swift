@@ -25,6 +25,6 @@
 import Foundation
 
 struct MSALNativeAuthSignUpStartResponse: Decodable {
-    let signupToken: String?
+    let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
 }

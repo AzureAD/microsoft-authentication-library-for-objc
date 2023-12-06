@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
 
         sut = try provider.continue(
             parameters: MSALNativeAuthResetPasswordContinueRequestParameters(context: context,
-                                                                             passwordResetToken: "<password-reset-token>",
+                                                                             continuationToken: "<continuation_token>",
                                                                              grantType: .oobCode,
                                                                              oobCode: "0000")
         )
@@ -57,7 +57,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
 
         let response: MSALNativeAuthResetPasswordContinueResponse? = try await performTestSucceed()
 
-        XCTAssertNotNil(response?.passwordSubmitToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNotNil(response?.expiresIn)
     }
 
@@ -77,10 +77,10 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         )
     }
 
-    func test_resetPasswordContinue_invalidPasswordResetToken() async throws {
+    func test_resetPasswordContinue_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
-            response: .invalidPasswordResetToken,
+            response: .invalidContinuationToken,
             expectedError: createResetPasswordContinueError(error: .invalidRequest)
         )
     }
@@ -116,7 +116,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         target: String? = nil,
-        passwordResetToken: String? = nil
+        continuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueResponseError {
         .init(
             error: error,
@@ -125,7 +125,7 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
             errorURI: errorURI,
             innerErrors: innerErrors,
             target: target,
-            passwordResetToken: passwordResetToken
+            continuationToken: continuationToken
         )
     }
 }

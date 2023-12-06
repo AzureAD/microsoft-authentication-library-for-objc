@@ -27,9 +27,5 @@ import Foundation
 struct MSALNativeAuthResendCodeRequestResponse: Decodable {
 
     // MARK: - Variables
-    let credentialToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case credentialToken = "flowToken"
-    }
+    let continuationToken: String
 }

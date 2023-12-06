@@ -34,14 +34,14 @@ extension SignInCodeRequiredState {
             return .error(error: VerifyCodeError(type: .invalidCode), newState: self)
         }
 
-        return await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes)
+        return await controller.submitCode(code, continuationToken: continuationToken, context: context, scopes: scopes)
     }
 
     func resendCodeInternal(correlationId: UUID?) async -> SignInResendCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
 
-        return await controller.resendCode(credentialToken: flowToken, context: context, scopes: scopes)
+        return await controller.resendCode(continuationToken: continuationToken, context: context, scopes: scopes)
     }
 }
 
@@ -59,6 +59,6 @@ extension SignInPasswordRequiredState {
             return .error(error: PasswordRequiredError(type: .invalidPassword), newState: self)
         }
 
-        return await controller.submitPassword(password, username: username, credentialToken: flowToken, context: context, scopes: scopes)
+        return await controller.submitPassword(password, username: username, continuationToken: continuationToken, context: context, scopes: scopes)
     }
 }

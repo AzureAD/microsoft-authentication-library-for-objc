@@ -90,7 +90,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         checkConfAndContext(context)
         if case .success(let successChallengeResponse) = result, let expectedChallengeResponse = expectedChallengeResponse {
             XCTAssertEqual(successChallengeResponse.challengeType, expectedChallengeResponse.challengeType)
-            XCTAssertEqual(successChallengeResponse.credentialToken, expectedChallengeResponse.credentialToken)
+            XCTAssertEqual(successChallengeResponse.continuationToken, expectedChallengeResponse.continuationToken)
             XCTAssertEqual(successChallengeResponse.challengeTargetLabel, expectedChallengeResponse.challengeTargetLabel)
             XCTAssertEqual(successChallengeResponse.challengeChannel, expectedChallengeResponse.challengeChannel)
             XCTAssertEqual(successChallengeResponse.codeLength, expectedChallengeResponse.codeLength)
@@ -106,7 +106,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         checkConfAndContext(context)
         if case .success(let successInitiateResponse) = result, let expectedInitiateResponse = expectedInitiateResponse {
             XCTAssertEqual(successInitiateResponse.challengeType, expectedInitiateResponse.challengeType)
-            XCTAssertEqual(successInitiateResponse.credentialToken, expectedInitiateResponse.credentialToken)
+            XCTAssertEqual(successInitiateResponse.continuationToken, expectedInitiateResponse.continuationToken)
         }
         if case .failure(let initiateResponseError) = result, let expectedInitiateResponseError = expectedResponseError {
             XCTAssertTrue(type(of: initiateResponseError) == type(of: expectedInitiateResponseError))
@@ -172,7 +172,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     var result: MSIDHttpRequest?
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
-    var expectedCredentialToken: String?
+    var expectedContinuationToken: String?
     
     func inititate(parameters: MSAL.MSALNativeAuthSignInInitiateRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
@@ -184,8 +184,8 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
-        if let expectedCredentialToken = expectedCredentialToken {
-            XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
+        if let expectedContinuationToken = expectedContinuationToken {
+            XCTAssertEqual(expectedContinuationToken, parameters.continuationToken)
         }
         return try returnMockedResult(throwingChallengeError)
     }
@@ -215,7 +215,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
     var throwingTokenError: Error?
     var result: MSIDHttpRequest?
     var expectedUsername: String?
-    var expectedCredentialToken: String?
+    var expectedContinuationToken: String?
     var expectedContext: MSIDRequestContext?
     var expectedTokenParams: MSALNativeAuthTokenRequestParameters?
 
@@ -223,7 +223,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
-            XCTAssertEqual(expectedTokenParams.credentialToken, parameters.credentialToken)
+            XCTAssertEqual(expectedTokenParams.continuationToken, parameters.continuationToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
             XCTAssertEqual(expectedTokenParams.scope, parameters.scope)
@@ -238,7 +238,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
         checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)
-            XCTAssertEqual(expectedTokenParams.credentialToken, parameters.credentialToken)
+            XCTAssertEqual(expectedTokenParams.continuationToken, parameters.continuationToken)
             XCTAssertEqual(expectedTokenParams.signInSLT, parameters.signInSLT)
             XCTAssertEqual(expectedTokenParams.grantType, parameters.grantType)
             XCTAssertEqual(expectedTokenParams.scope, parameters.scope)

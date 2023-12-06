@@ -35,7 +35,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = ResetPasswordCodeRequiredState(controller: controller, flowToken: "<token>")
+        sut = ResetPasswordCodeRequiredState(controller: controller, continuationToken: "<continuation_token>")
     }
 
     // MARK: - Delegates
@@ -44,7 +44,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
     func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
         let expectedError = ResendCodeError(message: "test error")
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken")
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, continuationToken: "<continuation_token>")
 
         let expectedResult: ResetPasswordResendCodeResult = .error(error: expectedError, newState: expectedState)
         controller.resendCodeResult = .init(expectedResult)
@@ -60,7 +60,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     }
 
     func test_resendCode_delegate_success_shouldReturnCodeRequired() {
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken 2")
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, continuationToken: "<continuation_token2>")
 
         let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -76,7 +76,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         sut.resendCode(delegate: delegate)
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newState?.continuationToken, expectedState.continuationToken)
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -86,7 +86,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
     func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
         let expectedError = VerifyCodeError(type: .invalidCode)
-        let expectedState = ResetPasswordCodeRequiredState(controller: controller, flowToken: "flowToken")
+        let expectedState = ResetPasswordCodeRequiredState(controller: controller, continuationToken: "<continuation_token>")
 
         let expectedResult: ResetPasswordVerifyCodeResult = .error(error: expectedError, newState: expectedState)
         controller.submitCodeResult = .init(expectedResult)
@@ -102,7 +102,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_success_shouldReturnPasswordRequired() {
-        let expectedState = ResetPasswordRequiredState(controller: controller, flowToken: "flowToken 2")
+        let expectedState = ResetPasswordRequiredState(controller: controller, continuationToken: "<continuation_token2>")
 
         let expectedResult: ResetPasswordVerifyCodeResult = .passwordRequired(newState: expectedState)
         controller.submitCodeResult = .init(expectedResult)

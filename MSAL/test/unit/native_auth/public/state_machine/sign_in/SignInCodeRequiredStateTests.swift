@@ -34,7 +34,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         super.setUp()
 
         controller = .init()
-        sut = .init(scopes: [], controller: controller, flowToken: "flowToken")
+        sut = .init(scopes: [], controller: controller, continuationToken: "<continuation_token>")
     }
 
     // MARK: - Delegates
@@ -43,7 +43,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
     func test_resendCode_delegate_withError_shouldReturnSignInResendCodeError() {
         let expectedError = ResendCodeError(message: "test error")
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2")
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "<continuation_token2>")
 
         let expectedResult: SignInResendCodeResult = .error(
             error: expectedError,
@@ -58,11 +58,11 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.newSignInResendCodeError, expectedError)
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_resendCode_delegate_success_shouldReturnSignInResendCodeCodeRequired() {
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2")
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "<continuation_token2>")
 
         let expectedResult: SignInResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -77,14 +77,14 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
         sut.resendCode(delegate: delegate)
         wait(for: [exp])
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     // SubmitCode
 
     func test_submitCode_delegate_withError_shouldReturnSignInVerifyCodeError() {
         let expectedError = VerifyCodeError(type: .invalidCode)
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2")
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "<continuation_token2>")
 
         let expectedResult: SignInVerifyCodeResult = .error(
             error: expectedError,

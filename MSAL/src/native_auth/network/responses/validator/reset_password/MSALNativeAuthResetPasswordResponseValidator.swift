@@ -55,8 +55,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                                     with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         if response.challengeType == .redirect {
             return .redirect
-        } else if let passwordResetToken = response.passwordResetToken {
-            return .success(passwordResetToken: passwordResetToken)
+        } else if let continuationToken = response.continuationToken {
+            return .success(continuationToken: continuationToken)
         } else {
             MSALLogger.log(level: .error,
                            context: context,
@@ -117,12 +117,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             if let sentTo = response.challengeTargetLabel,
                let channelTargetType = response.challengeChannel?.toPublicChannelType(),
                let codeLength = response.codeLength,
-               let passwordResetToken = response.passwordResetToken {
+               let continuationToken = response.continuationToken {
                 return .success(
                     sentTo,
                     channelTargetType,
                     codeLength,
-                    passwordResetToken
+                    continuationToken
                 )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields from backend")
@@ -161,7 +161,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleContinueSuccess(
         _ response: MSALNativeAuthResetPasswordContinueResponse
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
-        return .success(passwordSubmitToken: response.passwordSubmitToken)
+        return .success(continuationToken: response.continuationToken)
     }
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
@@ -202,7 +202,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         _ response: MSALNativeAuthResetPasswordSubmitResponse
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
-            passwordResetToken: response.passwordResetToken,
+            continuationToken: response.continuationToken,
             pollInterval: response.pollInterval
         )
     }

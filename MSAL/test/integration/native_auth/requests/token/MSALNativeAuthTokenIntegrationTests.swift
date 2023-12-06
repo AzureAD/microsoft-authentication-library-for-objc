@@ -40,7 +40,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
             parameters: .init(
                 context: context,
                 username: "test@contoso.com",
-                credentialToken: nil,
+                continuationToken: nil,
                 signInSLT: nil,
                 grantType: .otp,
                 scope: nil,
@@ -71,7 +71,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let parameters = MSALNativeAuthTokenRequestParameters(context: context,
                                                               username: "test@contoso.com",
-                                                              credentialToken: nil,
+                                                              continuationToken: nil,
                                                               signInSLT: nil,
                                                               grantType: .otp,
                                                               scope: "test & alt test",
@@ -101,28 +101,11 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         await fulfillment(of: [expectation], timeout: defaultTimeout)
     }
 
-    func test_failRequest_invalidPurposeToken() async throws {
-        throw XCTSkip()
-        
-        let response = try await perform_testFail(
-            endpoint: .signInToken,
-            response: .invalidPurposeToken,
-            expectedError: createError(.invalidRequest)
-        )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
-    }
-
     func test_failRequest_invalidPassword() async throws {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
         )
     }
 
@@ -130,7 +113,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
         )
     }
 
@@ -176,6 +159,6 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
     }
 
     private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        .init(error: code, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
     }
 }

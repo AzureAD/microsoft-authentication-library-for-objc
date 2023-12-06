@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 enum MSALNativeAuthResetPasswordStartValidatedResponse {
-    case success(passwordResetToken: String)
+    case success(continuationToken: String)
     case redirect
     case error(MSALNativeAuthResetPasswordStartValidatedErrorType)
     case unexpectedError
@@ -51,21 +51,21 @@ enum MSALNativeAuthResetPasswordStartValidatedErrorType: Error {
 }
 
 enum MSALNativeAuthResetPasswordChallengeValidatedResponse: Equatable {
-    case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ resetPasswordChallengeToken: String)
+    case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ continuationToken: String)
     case redirect
     case error(MSALNativeAuthResetPasswordChallengeResponseError)
     case unexpectedError
 }
 
 enum MSALNativeAuthResetPasswordContinueValidatedResponse: Equatable {
-    case success(passwordSubmitToken: String)
+    case success(continuationToken: String)
     case invalidOOB
     case error(MSALNativeAuthResetPasswordContinueResponseError)
     case unexpectedError
 }
 
 enum MSALNativeAuthResetPasswordSubmitValidatedResponse: Equatable {
-    case success(passwordResetToken: String, pollInterval: Int)
+    case success(continuationToken: String, pollInterval: Int)
     case passwordError(error: MSALNativeAuthResetPasswordSubmitResponseError)
     case error(MSALNativeAuthResetPasswordSubmitResponseError)
     case unexpectedError

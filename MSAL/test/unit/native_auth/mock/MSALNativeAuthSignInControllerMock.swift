@@ -54,15 +54,15 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
         return signInSLTResult
     }
 
-    func submitCode(_ code: String, credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult {
+    func submitCode(_ code: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult {
         submitCodeResult
     }
 
-    func submitPassword(_ password: String, username: String, credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInPasswordRequiredResult {
+    func submitPassword(_ password: String, username: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInPasswordRequiredResult {
         return submitPasswordResult
     }
 
-    func resendCode(credentialToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeResult {
+    func resendCode(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeResult {
         return resendCodeResult
     }
 }
