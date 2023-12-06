@@ -57,7 +57,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
-        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "<continuation_token>")
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
         controller.submitAttributesResult = .init(expectedResult)

@@ -517,8 +517,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) async -> SignUpSubmitCodeControllerResponse {
         switch result {
-        case .success(let slt):
-            let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
+        case .success(let continuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
             return .init(.completed(state))
         case .invalidUserInput:
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
@@ -571,8 +571,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) -> SignUpSubmitPasswordControllerResponse {
         switch result {
-        case .success(let slt):
-            let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
+        case .success(let continuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
             return .init(.completed(state))
         case .invalidUserInput(let error):
             let error = error.toPasswordRequiredPublicError()
@@ -626,8 +626,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) -> SignUpAttributesRequiredResult {
         switch result {
-        case .success(let slt):
-            let state = createSignInAfterSignUpStateUsingSLT(slt, username: username, event: event, context: context)
+        case .success(let continuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
             return .completed(state)
         case .attributesRequired(let continuationToken, let attributes):
             let error = AttributesRequiredError()
@@ -667,14 +667,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    private func createSignInAfterSignUpStateUsingSLT(
-        _ slt: String?,
+    private func createSignInAfterSignUpStateUsingContinuationToken(
+        _ continuationToken: String?,
         username: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext
     ) -> SignInAfterSignUpState {
         MSALLogger.log(level: .info, context: context, format: "SignUp completed successfully")
         stopTelemetryEvent(event, context: context)
-        return SignInAfterSignUpState(controller: signInController, username: username, slt: slt)
+        return SignInAfterSignUpState(controller: signInController, username: username, continuationToken: continuationToken)
     }
 }

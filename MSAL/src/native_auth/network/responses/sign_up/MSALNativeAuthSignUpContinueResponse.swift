@@ -25,13 +25,6 @@
 import Foundation
 
 struct MSALNativeAuthSignUpContinueResponse: Decodable {
-    let signinSLT: String?
     let expiresIn: Int?
     let continuationToken: String?
-
-    enum CodingKeys: String, CodingKey {
-        case expiresIn, continuationToken
-        // API returns signin_slt not sign_in_slt
-        case signinSLT = "signinSlt"
-    }
 }

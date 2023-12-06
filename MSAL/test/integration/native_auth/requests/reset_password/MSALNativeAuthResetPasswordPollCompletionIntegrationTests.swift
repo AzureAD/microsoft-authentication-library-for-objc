@@ -57,7 +57,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.status)
-        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertNil(response?.expiresIn)
     }
 
@@ -71,7 +71,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.status)
-        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertNil(response?.expiresIn)
     }
 
@@ -85,7 +85,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.status)
-        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertNil(response?.expiresIn)
     }
 
@@ -99,7 +99,7 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         let response: MSALNativeAuthResetPasswordPollCompletionResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.status)
-        XCTAssertNil(response?.signInSLT)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertNil(response?.expiresIn)
     }
 

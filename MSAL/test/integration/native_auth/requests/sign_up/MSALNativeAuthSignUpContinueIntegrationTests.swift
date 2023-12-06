@@ -221,7 +221,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 
-        XCTAssertNotNil(response?.signinSLT)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNil(response?.continuationToken)
     }
 

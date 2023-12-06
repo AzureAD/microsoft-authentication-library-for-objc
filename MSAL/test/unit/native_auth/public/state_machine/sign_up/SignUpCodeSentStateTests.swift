@@ -181,7 +181,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenSuccess_shouldReturnAccountResult() {
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "<continuation_token>")
 
         let expectedResult: SignUpVerifyCodeResult = .completed(expectedSignInAfterSignUpState)
         controller.submitCodeResult = .init(expectedResult)

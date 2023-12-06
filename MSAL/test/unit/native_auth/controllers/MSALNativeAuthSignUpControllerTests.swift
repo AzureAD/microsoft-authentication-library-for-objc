@@ -1403,7 +1403,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSubmitPassword_succeeds_it_continuesTheFlow() async {
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-        validatorMock.mockValidateSignUpContinueFunc(.success("signInSLT"))
+        validatorMock.mockValidateSignUpContinueFunc(.success("<continuation_token>"))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
@@ -1785,11 +1785,11 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
 
-    // MARK: - Sign-in with SLT (Short-Lived Token)
+    // MARK: - Sign-in with Continuation Token
 
-    func test_whenSignUpSucceeds_and_userCallsSignInWithSLT_signUpControllerPassesCorrectParams() async {
+    func test_whenSignUpSucceeds_and_userCallsSignInWithContinuationToken_signUpControllerPassesCorrectParams() async {
         let username = "username"
-        let slt = "signInSLT"
+        let continuationToken = "<continuation_token>"
 
         class SignInAfterSignUpDelegateStub: SignInAfterSignUpDelegate {
             func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {}
@@ -1798,7 +1798,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
-        validatorMock.mockValidateSignUpContinueFunc(.success(slt))
+        validatorMock.mockValidateSignUpContinueFunc(.success(continuationToken))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
@@ -1816,12 +1816,12 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.signInSLTResult = .failure(.init())
+        signInControllerMock.signInContinuationTokenResult = .failure(.init())
         helper.signInAfterSignUpState?.signIn(delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)
 
         XCTAssertEqual(signInControllerMock.username, username)
-        XCTAssertEqual(signInControllerMock.slt, slt)
+        XCTAssertEqual(signInControllerMock.continuationToken, continuationToken)
     }
 
     // MARK: - Common Methods

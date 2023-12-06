@@ -29,7 +29,6 @@ struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
     let context: MSIDRequestContext
     let username: String?
     let continuationToken: String?
-    let signInSLT: String?
     let grantType: MSALNativeAuthGrantType
     let scope: String?
     let password: String?
@@ -44,7 +43,6 @@ struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
             Key.clientId.rawValue: config.clientId,
             Key.username.rawValue: username,
             Key.continuationToken.rawValue: continuationToken,
-            Key.signInSLT.rawValue: signInSLT,
             Key.grantType.rawValue: grantType.rawValue,
             Key.scope.rawValue: scope,
             Key.password.rawValue: password,

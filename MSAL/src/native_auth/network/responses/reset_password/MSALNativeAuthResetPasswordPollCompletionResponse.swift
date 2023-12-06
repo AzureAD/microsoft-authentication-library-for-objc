@@ -28,6 +28,6 @@ struct MSALNativeAuthResetPasswordPollCompletionResponse: Decodable {
 
     // MARK: - Variables
     let status: MSALNativeAuthResetPasswordPollCompletionStatus
-    let signInSLT: String?
+    let continuationToken: String?
     let expiresIn: Int?
 }

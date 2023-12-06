@@ -422,7 +422,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Poll Completion Response
 
     func test_whenResetPasswordPollCompletionSuccessResponse_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .success(.init(status: .succeeded, signInSLT: nil, expiresIn: nil))
+        let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .success(.init(status: .succeeded, continuationToken: nil, expiresIn: nil))
 
         let result = sut.validate(response, with: context)
 
