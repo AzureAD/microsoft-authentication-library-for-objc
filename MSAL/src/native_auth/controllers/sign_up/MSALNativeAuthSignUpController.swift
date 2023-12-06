@@ -80,9 +80,19 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return handleResendCodeResult(challengeResult, username: username, event: event, context: context)
     }
 
-    func submitCode(_ code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse {
+    func submitCode(
+        _ code: String,
+        username: String,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) async -> SignUpSubmitCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitCode, context: context)
-        let params = MSALNativeAuthSignUpContinueRequestProviderParams(grantType: .oobCode, continuationToken: continuationToken, oobCode: code, context: context)
+        let params = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .oobCode,
+            continuationToken: continuationToken,
+            oobCode: code,
+            context: context
+        )
 
         let result = await performAndValidateContinueRequest(parameters: params)
         return await handleSubmitCodeResult(result, username: username, continuationToken: continuationToken, event: event, context: context)
@@ -103,7 +113,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             context: context
         )
         let continueRequestResult = await performAndValidateContinueRequest(parameters: params)
-        return handleSubmitPasswordResult(continueRequestResult, username: username, continuationToken: continuationToken, event: event, context: context)
+        return handleSubmitPasswordResult(
+            continueRequestResult,
+            username: username,
+            continuationToken: continuationToken,
+            event: event,
+            context: context
+        )
     }
 
     func submitAttributes(

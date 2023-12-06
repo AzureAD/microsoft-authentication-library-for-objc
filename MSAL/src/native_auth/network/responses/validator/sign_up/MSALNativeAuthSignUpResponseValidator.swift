@@ -75,8 +75,13 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
         switch apiError.error {
         case .verificationRequired:
-            if let continuationToken = apiError.continuationToken, let unverifiedAttributes = apiError.unverifiedAttributes, !unverifiedAttributes.isEmpty {
-                return .verificationRequired(continuationToken: continuationToken, unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes))
+            if let continuationToken = apiError.continuationToken,
+                let unverifiedAttributes = apiError.unverifiedAttributes,
+                !unverifiedAttributes.isEmpty {
+                return .verificationRequired(
+                    continuationToken: continuationToken,
+                    unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes)
+                )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/start for verification_required error")
                 return .unexpectedError
@@ -178,7 +183,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
             return .unexpectedError
@@ -194,7 +199,10 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .invalidUserInput(apiError)
         case .attributeValidationFailed:
             if let continuationToken = apiError.continuationToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
-                return .attributeValidationFailed(continuationToken: continuationToken, invalidAttributes: extractAttributeNames(from: invalidAttributes))
+                return .attributeValidationFailed(
+                    continuationToken: continuationToken,
+                    invalidAttributes: extractAttributeNames(from: invalidAttributes)
+                )
             } else {
                 MSALLogger.log(
                     level: .error,
@@ -212,7 +220,10 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             }
         case .attributesRequired:
             if let continuationToken = apiError.continuationToken, let requiredAttributes = apiError.requiredAttributes, !requiredAttributes.isEmpty {
-                return .attributesRequired(continuationToken: continuationToken, requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() })
+                return .attributesRequired(
+                    continuationToken: continuationToken,
+                    requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() }
+                )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
                 return .unexpectedError

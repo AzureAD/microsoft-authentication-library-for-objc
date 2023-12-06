@@ -39,7 +39,12 @@ protocol MSALNativeAuthSignInControlling {
         context: MSALNativeAuthRequestContext
     ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>
 
-    func submitCode(_ code: String, continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult
+    func submitCode(
+        _ code: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> SignInVerifyCodeResult
 
     func submitPassword(
         _ password: String,

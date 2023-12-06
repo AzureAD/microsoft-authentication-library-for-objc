@@ -34,9 +34,4 @@ struct MSALNativeAuthResetPasswordStartResponse: Decodable {
         case continuationToken
         case challengeType
     }
-
-    init(continuationToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
-        self.continuationToken = continuationToken
-        self.challengeType = challengeType
-    }
 }
