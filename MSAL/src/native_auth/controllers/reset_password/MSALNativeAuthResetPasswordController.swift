@@ -179,12 +179,12 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext
     ) async -> ResetPasswordStartResult {
         switch response {
-        case .success(let sentTo, let channelTargetType, let codeLength, let challengeToken):
+        case .success(let sentTo, let channelTargetType, let codeLength, let continuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/challenge request")
             stopTelemetryEvent(event, context: context)
 
             return .codeRequired(
-                newState: ResetPasswordCodeRequiredState(controller: self, continuationToken: challengeToken),
+                newState: ResetPasswordCodeRequiredState(controller: self, continuationToken: continuationToken),
                 sentTo: sentTo,
                 channelTargetType: channelTargetType,
                 codeLength: codeLength

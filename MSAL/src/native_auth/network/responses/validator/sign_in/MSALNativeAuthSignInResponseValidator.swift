@@ -70,7 +70,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
-            MSALLogger.log(level: .error, context: context, format: "SignIn Initiate: challengeType and credential token empty")
+            MSALLogger.log(level: .error, context: context, format: "SignIn Initiate: challengeType and continuation token empty")
             return .error(.invalidServerResponse)
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "SignIn Challenge: Expected credential token not nil with credential type password")
+                    format: "SignIn Challenge: Expected continuation token not nil with credential type password")
                 return .error(.invalidServerResponse)
             }
             return .passwordRequired(continuationToken: continuationToken)
