@@ -97,6 +97,7 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
     private(set) var onResetPasswordCompletedCalled = false
     private(set) var error: MSAL.PasswordRequiredError?
     private(set) var newPasswordRequiredState: MSAL.ResetPasswordRequiredState?
+    private(set) var signInAfterResetPasswordState: SignInAfterResetPasswordState?
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
@@ -111,9 +112,37 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
         expectation.fulfill()
     }
 
-    func onResetPasswordCompleted() {
+    func onResetPasswordCompleted(newState: SignInAfterResetPasswordState) {
         onResetPasswordCompletedCalled = true
 
+        signInAfterResetPasswordState = newState
+
+        expectation.fulfill()
+    }
+}
+
+class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
+    private let expectation: XCTestExpectation
+    private(set) var onSignInAfterResetPasswordErrorCalled = false
+    private(set) var error: SignInAfterResetPasswordError?
+    private(set) var onSignInCompletedCalled = false
+    private(set) var result: MSALNativeAuthUserAccountResult?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignInAfterResetPasswordError(error: MSAL.SignInAfterResetPasswordError) {
+        onSignInCompletedCalled = true
+        self.error = error
+
+        expectation.fulfill()
+    }
+
+    func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        onSignInCompletedCalled = true
+        self.result = result
+        
         expectation.fulfill()
     }
 }

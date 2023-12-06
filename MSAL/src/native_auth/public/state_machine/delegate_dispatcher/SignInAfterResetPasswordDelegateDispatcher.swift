@@ -24,10 +24,16 @@
 
 import Foundation
 
-extension SignInAfterSignUpState {
+final class SignInAfterResetPasswordDelegateDispatcher: DelegateDispatcher<SignInAfterResetPasswordDelegate> {
 
-    func signInInternal(scopes: [String]?) async -> MSALNativeAuthSignInControlling.SignInAfterSignUpControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        return await controller.signIn(username: username, slt: slt, scopes: scopes, context: context)
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+        if let onSignInCompleted = delegate.onSignInCompleted {
+            telemetryUpdate?(.success(()))
+            await onSignInCompleted(result)
+        } else {
+            let error = SignInAfterResetPasswordError(message: requiredErrorMessage(for: "onSignInCompleted"))
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInAfterResetPasswordError(error: error)
+        }
     }
 }

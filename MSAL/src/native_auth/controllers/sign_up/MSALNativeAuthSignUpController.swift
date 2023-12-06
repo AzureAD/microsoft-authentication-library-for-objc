@@ -405,7 +405,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 newState: SignUpCodeRequiredState(
                     controller: self,
                     username: username,
-                    flowToken: signUpToken, 
+                    flowToken: signUpToken,
                     correlationId: context.correlationId()
                 ),
                 sentTo: sentTo,
@@ -682,6 +682,11 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) -> SignInAfterSignUpState {
         MSALLogger.log(level: .info, context: context, format: "SignUp completed successfully")
         stopTelemetryEvent(event, context: context)
-        return SignInAfterSignUpState(controller: signInController, username: username, slt: slt, correlationId: context.correlationId())
+        return SignInAfterSignUpState(
+            controller: signInController,
+            username: username,
+            slt: slt,
+            correlationId: context.correlationId()
+        )
     }
 }

@@ -49,7 +49,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId)
 
         await sut.dispatchPasswordRequired(newState: expectedState)
 
@@ -71,7 +71,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId)
 
         await sut.dispatchPasswordRequired(newState: expectedState)
 

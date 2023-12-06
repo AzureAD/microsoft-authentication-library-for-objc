@@ -189,6 +189,7 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
     private(set) var onResetPasswordCompletedCalled = false
     private(set) var error: PasswordRequiredError?
     private(set) var newPasswordRequiredState: ResetPasswordRequiredState?
+    private(set) var signInAfterResetPasswordState: SignInAfterResetPasswordState?
 
     init(expectation: XCTestExpectation? = nil) {
         self.expectation = expectation
@@ -204,8 +205,9 @@ class ResetPasswordRequiredDelegateSpy: ResetPasswordRequiredDelegate {
         expectation?.fulfill()
     }
 
-    func onResetPasswordCompleted() {
+    func onResetPasswordCompleted(newState: SignInAfterResetPasswordState) {
         onResetPasswordCompletedCalled = true
+        signInAfterResetPasswordState = newState
 
         XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
@@ -227,5 +229,22 @@ class ResetPasswordRequiredDelegateOptionalMethodsNotImplemented: ResetPasswordR
 
         XCTAssertTrue(Thread.isMainThread)
         expectation?.fulfill()
+    }
+}
+
+class SignInAfterResetPasswordDelegateOptionalMethodsNotImplemented: SignInAfterResetPasswordDelegate {
+
+    private let expectation: XCTestExpectation
+    var expectedError: SignInAfterResetPasswordError?
+
+    init(expectation: XCTestExpectation, expectedError: SignInAfterResetPasswordError? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+
+    public func onSignInAfterResetPasswordError(error: MSAL.SignInAfterResetPasswordError) {
+        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
     }
 }

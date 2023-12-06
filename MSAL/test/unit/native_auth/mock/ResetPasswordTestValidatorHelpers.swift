@@ -104,11 +104,11 @@ class ResetPasswordRequiredTestsValidatorHelper: ResetPasswordRequiredDelegateSp
     }
 
     func onResetPasswordCompleted(_ input: MSALNativeAuthResetPasswordController.ResetPasswordSubmitPasswordControllerResponse) {
-        guard case .completed = input.result else {
+        guard case let .completed(newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .success")
         }
 
-        Task { await self.onResetPasswordCompleted() }
+        Task { await self.onResetPasswordCompleted(newState: newState) }
     }
 }

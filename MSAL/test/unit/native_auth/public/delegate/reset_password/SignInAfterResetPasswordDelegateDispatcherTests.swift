@@ -25,13 +25,11 @@
 @testable import MSAL
 import XCTest
 
-final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
+final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
 
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
-    private var sut: ResetPasswordRequiredDelegateDispatcher!
-    private let signInControllerMock = MSALNativeAuthSignInControllerMock()
-    private let correlationId = UUID()
+    private var sut: SignInAfterResetPasswordDelegateDispatcher!
 
     override func setUp() {
         super.setUp()
@@ -39,8 +37,9 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
         delegateExp = expectation(description: "delegateDispatcher delegate exp")
     }
 
-    func test_dispatchPasswordRequired_whenDelegateMethodsAreImplemented() async {
-        let delegate = ResetPasswordRequiredDelegateSpy(expectation: delegateExp)
+    func test_dispatchSignInCompleted_whenDelegateMethodsAreImplemented() async {
+        let expectedResult = MSALNativeAuthUserAccountResultStub.result
+        let delegate = SignInAfterResetPasswordDelegateSpy(expectation: delegateExp, expectedUserAccountResult: expectedResult)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
@@ -49,27 +48,19 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInAfterResetPasswordState(
-            controller: signInControllerMock,
-            username: "username",
-            slt: "slt",
-            correlationId: correlationId
-        )
-
-        await sut.dispatchResetPasswordCompleted(newState: expectedState)
+        await sut.dispatchSignInCompleted(result: expectedResult)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
-        XCTAssertTrue(delegate.onResetPasswordCompletedCalled)
-        XCTAssertEqual(delegate.signInAfterResetPasswordState, expectedState)
+        XCTAssertEqual(delegate.expectedUserAccountResult, expectedResult)
     }
 
-    func test_dispatchPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"))
+    func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
+        let expectedError = SignInAfterResetPasswordError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let delegate = SignInAfterResetPasswordDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
+            guard case let .failure(error) = result, let customError = error as? SignInAfterResetPasswordError else {
                 return XCTFail("wrong result")
             }
 
@@ -77,20 +68,13 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInAfterResetPasswordState(
-            controller: signInControllerMock,
-            username: "username",
-            slt: "slt",
-            correlationId: correlationId
-        )
+        let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchResetPasswordCompleted(newState: expectedState)
+        await sut.dispatchSignInCompleted(result: expectedResult)
 
         await fulfillment(of: [telemetryExp, delegateExp])
-        checkError(delegate.error)
 
-        func checkError(_ error: PasswordRequiredError?) {
-            XCTAssertEqual(error?.type, expectedError.type)
+        func checkError(_ error: SignInAfterResetPasswordError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
         }
     }

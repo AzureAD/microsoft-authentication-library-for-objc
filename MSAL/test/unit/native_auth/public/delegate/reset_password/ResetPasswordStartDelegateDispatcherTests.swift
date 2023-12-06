@@ -49,7 +49,7 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
@@ -82,7 +82,7 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
