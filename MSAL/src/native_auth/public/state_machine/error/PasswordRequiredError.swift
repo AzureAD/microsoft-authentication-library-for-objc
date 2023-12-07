@@ -34,7 +34,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         super.init(message: message)
     }
 
-    init(signInPasswordError: SignInPasswordStartError) {
+    init(signInPasswordError: SignInStartError) {
         switch signInPasswordError.type {
         case .browserRequired:
             self.type = .browserRequired

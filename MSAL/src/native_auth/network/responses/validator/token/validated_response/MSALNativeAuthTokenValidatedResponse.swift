@@ -45,7 +45,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case authorizationPending(message: String?)
     case slowDown(message: String?)
 
-    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
+    func convertToSignInPasswordStartError() -> SignInStartError {
         switch self {
         case .expiredToken(let message),
              .authorizationPending(let message),
@@ -55,20 +55,20 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
              .invalidClient(let message),
              .unsupportedChallengeType(let message),
              .invalidScope(let message):
-            return SignInPasswordStartError(type: .generalError, message: message)
+            return SignInStartError(type: .generalError, message: message)
         case .generalError:
-            return SignInPasswordStartError(type: .generalError)
+            return SignInStartError(type: .generalError)
         case .invalidServerResponse:
-            return SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
+            return SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
         case .userNotFound(let message):
-            return SignInPasswordStartError(type: .userNotFound, message: message)
+            return SignInStartError(type: .userNotFound, message: message)
         case .invalidPassword(let message):
-            return SignInPasswordStartError(type: .invalidPassword, message: message)
+            return SignInStartError(type: .invalidPassword, message: message)
         case .strongAuthRequired(let message):
-            return SignInPasswordStartError(type: .browserRequired, message: message)
+            return SignInStartError(type: .browserRequired, message: message)
         case .expiredRefreshToken(let message):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return SignInPasswordStartError(type: .generalError, message: message)
+            return SignInStartError(type: .generalError, message: message)
         }
     }
 

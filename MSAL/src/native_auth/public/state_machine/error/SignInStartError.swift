@@ -44,6 +44,8 @@ public class SignInStartError: MSALNativeAuthError {
             return "Browser required"
         case .userNotFound:
             return "User not found"
+        case .invalidPassword:
+            return "Invalid password"
         case .invalidUsername:
             return "Invalid username"
         case .generalError:
@@ -56,6 +58,7 @@ public class SignInStartError: MSALNativeAuthError {
 public enum SignInStartErrorType: Int {
     case browserRequired
     case userNotFound
+    case invalidPassword
     case invalidUsername
     case generalError
 }

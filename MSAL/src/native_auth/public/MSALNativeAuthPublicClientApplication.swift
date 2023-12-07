@@ -128,7 +128,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         Task {
-            var controllerResponse = await signUpInternal(
+            let controllerResponse = await signUpInternal(
                 username: username,
                 password: password,
                 attributes: attributes,
@@ -160,20 +160,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Sign in a user with a given username and password.
     /// - Parameters:
-    ///   - username: Username for the account.
+    ///   - username: Username for the account
     ///   - password: Password for the account.
     ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signInUsingPassword(
+    public func signIn(
         username: String,
-        password: String,
+        password: String? = nil,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
-        delegate: SignInPasswordStartDelegate
+        delegate: SignInStartDelegate
     ) {
         Task {
-            let controllerResponse = await signInUsingPasswordInternal(
+            let controllerResponse = await signInInternal(
                 username: username,
                 password: password,
                 scopes: scopes,
@@ -183,41 +183,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             switch controllerResponse.result {
             case .completed(let result):
                 await delegate.onSignInCompleted(result: result)
-            case .codeRequired(let newState, let sentTo, let channelType, let codeLength):
-                if let codeRequiredMethod = delegate.onSignInCodeRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await codeRequiredMethod(newState, sentTo, channelType, codeLength)
-                } else {
-                    let error = SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignInPasswordError(error: error)
-                }
-            case .error(let error):
-                await delegate.onSignInPasswordError(error: error)
-            }
-        }
-    }
-
-    /// Sign in a user with a given username.
-    /// - Parameters:
-    ///   - username: Username for the account
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signIn(
-        username: String,
-        scopes: [String]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignInStartDelegate
-    ) {
-        Task {
-            let controllerResponse = await signInInternal(
-                username: username,
-                scopes: scopes,
-                correlationId: correlationId
-            )
-
-            switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
                 await delegate.onSignInCodeRequired(newState: newState, sentTo: sentTo, channelTargetType: channelTargetType, codeLength: codeLength)
             case .passwordRequired(let newState):

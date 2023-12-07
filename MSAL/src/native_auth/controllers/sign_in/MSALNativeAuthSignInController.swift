@@ -386,7 +386,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
-        onError: @escaping (SignInPasswordStartError) -> Void
+        onError: @escaping (SignInStartError) -> Void
     ) {
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         switch response {
@@ -415,7 +415,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo,
         config: MSIDConfiguration,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
-        onError: @escaping (SignInPasswordStartError) -> Void
+        onError: @escaping (SignInStartError) -> Void
     ) {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
@@ -494,7 +494,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         switch validatedResponse {
         case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
             MSALLogger.log(level: .warning, context: telemetryInfo.context, format: MSALNativeAuthErrorMessage.codeRequiredForPasswordUserLog)
-            let result: SignInPasswordStartResult = .codeRequired(
+            let result: SignInStartResult = .codeRequired(
                 newState: SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken),
                 sentTo: sentTo,
                 channelTargetType: channelType,
@@ -524,7 +524,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 context: telemetryInfo.context
             ) else {
                 stopTelemetryEvent(telemetryInfo, error: MSALNativeAuthInternalError.invalidRequest)
-                return .init(.error(SignInPasswordStartError(type: .generalError)))
+                return .init(.error(SignInStartError(type: .generalError)))
             }
 
             let config = factory.makeMSIDConfiguration(scopes: scopes)
