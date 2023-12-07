@@ -68,15 +68,15 @@ extension MSALNativeAuthPublicClientApplication {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignInStartError(type: .invalidUsername)))
         }
-        
+
         if let password = password {
             guard inputValidator.isInputValid(password) else {
                 return .init(.error(SignInStartError(type: .invalidPassword)))
             }
         }
-        
+
         let controller = controllerFactory.makeSignInController()
-        
+
         if let password = password {
             let params = MSALNativeAuthSignInWithPasswordParameters(
                 username: username,
