@@ -34,9 +34,4 @@ struct MSALNativeAuthResetPasswordStartResponse: Decodable {
         case passwordResetToken
         case challengeType
     }
-
-    init(passwordResetToken: String?, challengeType: MSALNativeAuthInternalChallengeType?) {
-        self.passwordResetToken = passwordResetToken
-        self.challengeType = challengeType
-    }
 }
