@@ -494,7 +494,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/poll_completion")
 
         switch response {
-        case .success(let status, let slt):
+        case .success(let status, let continuationToken):
             switch status {
             case .inProgress,
                  .notStarted:
@@ -511,7 +511,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 let signInAfterResetPasswordState = SignInAfterResetPasswordState(
                     controller: signInController,
                     username: username,
-                    slt: slt,
+                    slt: continuationToken,
                     correlationId: context.correlationId()
                 )
                 return .init(.completed(signInAfterResetPasswordState), telemetryUpdate: { [weak self] result in
@@ -558,6 +558,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             return .init(.error(error: error, newState: nil))
         }
     }
+    // swiftlint:enable function_body_length
 
     private func retryPollCompletion(
         passwordResetToken: String,

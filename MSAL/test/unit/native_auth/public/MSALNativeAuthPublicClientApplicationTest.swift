@@ -937,7 +937,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         resetPasswordResponseValidator.mockValidateResetPasswordChallengeFunc(.success("sentTo", .email, 4, "passwordResetToken 2"))
         resetPasswordResponseValidator.mockValidateResetPasswordContinueFunc(.success(passwordSubmitToken: "passwordSubmitToken"))
         resetPasswordResponseValidator.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken 3", pollInterval: 0))
-        resetPasswordResponseValidator.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded, slt: "slt"))
+        resetPasswordResponseValidator.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded, continuationToken: "slt"))
 
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"

@@ -26,7 +26,7 @@ import Foundation
 
 /// An object of this type is created when a user has reset their password successfully.
 @objcMembers public class SignInAfterResetPasswordState: SignInAfterPreviousFlowBaseState {
-    /// Sign in the user that signed up.
+    /// Sign in the user that just reset the password.
     /// - Parameters:
     ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
