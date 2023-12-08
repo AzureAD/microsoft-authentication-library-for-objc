@@ -112,7 +112,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     func signIn(
         username: String,
-        slt: String?,
+        continuationToken: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
     ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError> {
@@ -121,8 +121,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
             context: context
         )
-        guard let slt = slt else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn not available because SLT is nil")
+        guard let continuationToken = continuationToken else {
+            MSALLogger.log(level: .error, context: context, format: "SignIn not available because Continuation Token is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryInfo, error: error)
             return .failure(error)
@@ -131,8 +131,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         guard let request = createTokenRequest(
             username: username,
             scopes: scopes,
-            signInSLT: slt,
-            grantType: .slt,
+            continuationToken: continuationToken,
+            grantType: .continuationToken,
             context: context
         ) else {
             let error = SignInAfterSignUpError()

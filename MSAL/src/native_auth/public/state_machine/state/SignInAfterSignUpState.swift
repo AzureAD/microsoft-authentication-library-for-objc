@@ -29,11 +29,11 @@ import Foundation
 
     let controller: MSALNativeAuthSignInControlling
     let username: String
-    let slt: String?
+    let continuationToken: String?
 
-    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?) {
+    init(controller: MSALNativeAuthSignInControlling, username: String, continuationToken: String?) {
         self.username = username
-        self.slt = slt
+        self.continuationToken = continuationToken
         self.controller = controller
     }
 

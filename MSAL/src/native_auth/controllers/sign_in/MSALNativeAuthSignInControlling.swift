@@ -34,7 +34,7 @@ protocol MSALNativeAuthSignInControlling {
 
     func signIn(
         username: String,
-        slt: String?,
+        continuationToken: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
     ) async -> Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>

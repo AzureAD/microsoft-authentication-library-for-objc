@@ -385,18 +385,18 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     // MARK: - Continue Response
 
-    func test_whenSignUpStartSuccessResponseContainsSLT_it_returns_success() {
+    func test_whenSignUpStartSuccessResponseContainsContinuationToken_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(signinSLT: "<signin_slt>", expiresIn: nil, continuationToken: nil)
+            .init(expiresIn: nil, continuationToken: "<continuation_token>")
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .success("<signin_slt>"))
+        XCTAssertEqual(result, .success("<continuation_token>"))
     }
 
-    func test_whenSignUpStartSuccessResponseButDoesNotContainSLT_it_returns_successWithNoSLT() throws {
+    func test_whenSignUpStartSuccessResponseButDoesNotContainContinuationToken_it_returns_successWithNoContinuationToken() throws {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(signinSLT: nil, expiresIn: nil, continuationToken: nil)
+            .init(expiresIn: nil, continuationToken: nil)
         )
 
         let result = sut.validate(response, with: context)

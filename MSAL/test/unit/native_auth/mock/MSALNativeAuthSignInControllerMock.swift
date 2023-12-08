@@ -28,12 +28,12 @@ import XCTest
 class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
 
     private(set) var username: String?
-    private(set) var slt: String?
+    private(set) var continuationToken: String?
     var expectation: XCTestExpectation?
 
     var signInPasswordStartResult: MSALNativeAuthSignInControlling.SignInPasswordControllerResponse!
     var signInStartResult: MSALNativeAuthSignInControlling.SignInCodeControllerResponse!
-    var signInSLTResult: Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError>!
+    var signInContinuationTokenResult: Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError>!
     var submitCodeResult: SignInVerifyCodeResult!
     var submitPasswordResult: SignInPasswordRequiredResult!
     var resendCodeResult: SignInResendCodeResult!
@@ -46,12 +46,12 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
         return signInStartResult
     }
 
-    func signIn(username: String, slt: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError> {
+    func signIn(username: String, continuationToken: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> Result<MSAL.MSALNativeAuthUserAccountResult, MSAL.SignInAfterSignUpError> {
         self.username = username
-        self.slt = slt
+        self.continuationToken = continuationToken
         expectation?.fulfill()
 
-        return signInSLTResult
+        return signInContinuationTokenResult
     }
 
     func submitCode(_ code: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInVerifyCodeResult {
