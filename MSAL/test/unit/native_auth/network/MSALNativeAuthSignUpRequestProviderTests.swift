@@ -57,6 +57,17 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpStart).telemetryString()
         checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
     }
+    
+    func test_signUpStartRequestWithInvalidAttributes_throwAnError() throws {
+        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "1234",
+            attributes: ["invalid attribute": Data()],
+            context: MSALNativeAuthRequestContext(correlationId: context.correlationId())
+        )
+        
+        XCTAssertThrowsError(try sut.start(parameters: parameters))
+    }
 
     func test_signUpChallengeRequest_is_created_successfully() throws {
         let request = try sut.challenge(token: "sign-up-token", context: context)
@@ -85,6 +96,19 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
 
         let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpContinue).telemetryString()
         checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+    }
+    
+    func test_signUpContinueRequestWithInvalidAttributes_throwAnError() throws {
+        let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .password,
+            signUpToken: "sign-up-token",
+            password: "1234",
+            oobCode: nil,
+            attributes: ["invalid attribute": Data()],
+            context: context
+        )
+
+        XCTAssertThrowsError(try sut.continue(parameters: parameters))
     }
 
     private func checkBodyParams(_ bodyParams: [String: String]?, for endpoint: MSALNativeAuthEndpoint) {
