@@ -76,6 +76,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
         sut.signUpUsingPassword(username: "", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
     }
 
@@ -84,6 +85,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
         sut.signUpUsingPassword(username: "correct", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
     }
 
@@ -106,6 +108,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp1, exp2])
 
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
@@ -131,6 +134,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         wait(for: [exp, exp2])
 
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
@@ -185,6 +189,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpCodeStartDelegateSpy(expectation: exp)
         sut.signUp(username: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
     }
 
@@ -207,6 +212,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp, exp2])
 
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
@@ -232,6 +238,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp, exp2])
 
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(
             delegate.error?.errorDescription,
