@@ -45,7 +45,7 @@ extension MSALNativeAuthPublicClientApplication {
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
             username: username,
             password: password,
-            attributes: attributes ?? [:],
+            attributes: attributes,
             context: context
         )
 
@@ -67,7 +67,7 @@ extension MSALNativeAuthPublicClientApplication {
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
             username: username,
             password: nil,
-            attributes: attributes ?? [:],
+            attributes: attributes,
             context: context
         )
 

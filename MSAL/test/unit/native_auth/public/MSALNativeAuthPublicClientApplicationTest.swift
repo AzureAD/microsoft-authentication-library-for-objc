@@ -95,6 +95,25 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
     }
+    
+    func testSignUpPassword_whenNoAttributesAreSpecified_AttributesShouldBeNil() {
+        let exp = expectation(description: "sign-up public interface")
+        let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
+
+        let expectedResult: SignUpPasswordStartResult = .codeRequired(
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            sentTo: "sentTo",
+            channelTargetType: .email,
+            codeLength: 1
+        )
+        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult)
+
+        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+
+        wait(for: [exp])
+
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
+    }
 
     func testSignUpPassword_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
         let exp = expectation(description: "sign-up public interface")
@@ -157,6 +176,25 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
+    }
+    
+    func testSignUp_whenNoAttributesAreSpecified_AttributesShouldBeNil() {
+        let exp = expectation(description: "sign-up public interface")
+        let delegate = SignUpCodeStartDelegateSpy(expectation: exp)
+
+        let expectedResult: SignUpStartResult = .codeRequired(
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            sentTo: "sentTo",
+            channelTargetType: .email,
+            codeLength: 1
+        )
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult)
+
+        sut.signUp(username: "correct", delegate: delegate)
+
+        wait(for: [exp])
+
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
     }
 
     func testSignUp_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
