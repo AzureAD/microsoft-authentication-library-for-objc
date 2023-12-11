@@ -45,7 +45,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: password,
             correlationId: correlationId,
@@ -94,7 +94,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: "1234",
             attributes: attributes,
@@ -144,7 +144,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: password,
             correlationId: correlationId,
@@ -212,7 +212,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: password,
             correlationId: correlationId,
@@ -298,7 +298,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: password,
             correlationId: correlationId,
@@ -402,7 +402,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
-        sut.signUpUsingPassword(
+        sut.signUp(
             username: usernamePassword,
             password: password,
             correlationId: correlationId,

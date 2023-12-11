@@ -40,7 +40,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.userNotFound, endpoint: .signInToken)
         }
 
-        sut.signInUsingPassword(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
 
@@ -62,7 +62,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.invalidPassword, endpoint: .signInToken)
         }
 
-        sut.signInUsingPassword(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
 
@@ -86,7 +86,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
 

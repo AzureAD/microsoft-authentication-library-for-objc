@@ -173,7 +173,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignInStartDelegate
     ) {
         Task {
-            let controllerResponse = await signInInternal(
+            let controllerResponse = await self.signInInternal(
                 username: username,
                 password: password,
                 scopes: scopes,
@@ -182,9 +182,23 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
             switch controllerResponse.result {
             case .completed(let result):
-                await delegate.onSignInCompleted(result: result)
+                if let completedMethod = delegate.onSignInCompleted {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await completedMethod(result)
+                } else {
+                    let error = SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.completedNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignInError(error: error)
+                }
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignInCodeRequired(newState: newState, sentTo: sentTo, channelTargetType: channelTargetType, codeLength: codeLength)
+                if let codeRequiredMethod = delegate.onSignInCodeRequired {
+                    controllerResponse.telemetryUpdate?(.success(()))
+                    await codeRequiredMethod(newState, sentTo, channelTargetType, codeLength)
+                } else {
+                    let error = SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
+                    controllerResponse.telemetryUpdate?(.failure(error))
+                    await delegate.onSignInError(error: error)
+                }
             case .passwordRequired(let newState):
                 if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
                     controllerResponse.telemetryUpdate?(.success(()))

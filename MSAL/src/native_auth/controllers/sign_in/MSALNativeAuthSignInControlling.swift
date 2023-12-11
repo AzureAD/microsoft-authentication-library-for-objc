@@ -25,12 +25,11 @@
 import Foundation
 
 protocol MSALNativeAuthSignInControlling {
-    typealias SignInPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
-    typealias SignInCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
+    typealias SignInControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
 
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInPasswordControllerResponse
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInControllerResponse
 
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters) async -> SignInCodeControllerResponse
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters) async -> SignInControllerResponse
 
     func signIn(
         username: String,

@@ -143,7 +143,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
@@ -175,7 +175,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        sut.signInUsingPassword(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 

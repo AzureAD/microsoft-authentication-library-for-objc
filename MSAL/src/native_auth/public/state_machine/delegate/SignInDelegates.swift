@@ -36,19 +36,19 @@ public protocol SignInStartDelegate {
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                         sentTo: String,
-                                         channelTargetType: MSALNativeAuthChannelType,
-                                         codeLength: Int)
+    @MainActor @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
+                                                        sentTo: String,
+                                                        channelTargetType: MSALNativeAuthChannelType,
+                                                        codeLength: Int)
 
     /// Notifies the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires a password but this optional method is not implemented, then ``onSignInError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
-    
+
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
 @objc

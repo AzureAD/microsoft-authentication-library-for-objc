@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     // MARK: - Internal
 
-    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInPasswordControllerResponse {
+    func signIn(params: MSALNativeAuthSignInWithPasswordParameters) async -> SignInControllerResponse {
         MSALLogger.log(level: .verbose, context: params.context, format: "SignIn with username and password started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithPasswordStart, context: params.context),
@@ -92,7 +92,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    func signIn(params: MSALNativeAuthSignInWithCodeParameters) async -> SignInCodeControllerResponse {
+    func signIn(params: MSALNativeAuthSignInWithCodeParameters) async -> SignInControllerResponse {
         MSALLogger.log(level: .verbose, context: params.context, format: "SignIn started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInWithCodeStart, context: params.context),
@@ -443,7 +443,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         params: MSALNativeAuthSignInWithCodeParameters,
         telemetryInfo: TelemetryInfo
-    ) async -> SignInCodeControllerResponse {
+    ) async -> SignInControllerResponse {
         let scopes = joinScopes(params.scopes)
 
         switch validatedResponse {
@@ -488,7 +488,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         params: MSALNativeAuthSignInWithPasswordParameters,
         telemetryInfo: TelemetryInfo
-    ) async -> SignInPasswordControllerResponse {
+    ) async -> SignInControllerResponse {
         let scopes = joinScopes(params.scopes)
 
         switch validatedResponse {
@@ -535,10 +535,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     scopes: scopes,
                     telemetryInfo: telemetryInfo,
                     onSuccess: { accountResult in
-                        continuation.resume(returning: SignInPasswordControllerResponse(.completed(accountResult)))
+                        continuation.resume(returning: SignInControllerResponse(.completed(accountResult)))
                     },
                     onError: { error in
-                        continuation.resume(returning: SignInPasswordControllerResponse(.error(error)))
+                        continuation.resume(returning: SignInControllerResponse(.error(error)))
                     }
                 )
             }

@@ -36,6 +36,7 @@ enum MSALNativeAuthErrorMessage {
     static let signInNotAvailable = "Sign In is not available at this point, please use the standalone sign in methods"
     static let passwordRequiredNotImplemented = "Implementation of onSignInPasswordRequired required"
     static let codeRequiredNotImplemented = "Implementation of onSignInCodeRequired required"
+    static let completedNotImplemented = "Implementation of onSignInCompleted required"
     static let codeRequiredForPasswordUserLog = "This user does not have a password associated with their account. SDK will call `delegate.onSignInCodeRequired()` and the entered password will be ignored"
 }
 

@@ -146,10 +146,6 @@ open class SignInCodeStartDelegateSpy: SignInStartDelegate {
         self.correlationId = correlationId
         self.expectedError = expectedError
     }
-    
-    public func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        expectation.fulfill()
-    }
 
     public func onSignInError(error: SignInStartError) {
         XCTAssertEqual(error.type, expectedError?.type)
@@ -282,15 +278,16 @@ final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInStart
     private let expectation: XCTestExpectation
     var expectedError: SignInStartError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    var expectedSentTo: String?
+    var expectedChannelTargetType: MSALNativeAuthChannelType?
+    var expectedCodeLength: Int?
+    var verifyCodeDelegate: SignInVerifyCodeDelegate?
+    var correlationId: UUID?
 
     init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
         self.expectedUserAccountResult = expectedUserAccountResult
-    }
-    
-    func onSignInCodeRequired(newState: MSAL.SignInCodeRequiredState, sentTo: String, channelTargetType: MSAL.MSALNativeAuthChannelType, codeLength: Int) {
-        expectation.fulfill()
     }
 
     func onSignInError(error: MSAL.SignInStartError) {

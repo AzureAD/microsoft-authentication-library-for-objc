@@ -28,18 +28,17 @@ import XCTest
 
 class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
 
-    var startPasswordResult: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse!
-    var startResult: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse!
+    var startResult: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse!
     var resendCodeResult: SignUpResendCodeResult!
     var submitCodeResult: MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse!
     var submitPasswordResult: MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse!
     var submitAttributesResult: SignUpAttributesRequiredResult!
 
-    func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
-        return startPasswordResult
+    func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
+        return startResult
     }
 
-    func signUpStartCode(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+    func signUpStartCode(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         return startResult
     }
 

@@ -31,7 +31,7 @@ extension MSALNativeAuthPublicClientApplication {
         password: String?,
         attributes: [String: Any]?,
         correlationId: UUID?
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+    ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignUpStartError(type: .invalidUsername)))
         }
@@ -64,7 +64,7 @@ extension MSALNativeAuthPublicClientApplication {
         password: String?,
         scopes: [String]?,
         correlationId: UUID?
-    ) async -> MSALNativeAuthSignInControlling.SignInCodeControllerResponse {
+    ) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignInStartError(type: .invalidUsername)))
         }
