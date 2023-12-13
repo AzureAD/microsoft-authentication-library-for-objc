@@ -168,18 +168,35 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     var throwingInitError: Error?
     var throwingChallengeError: Error?
-    var throwingTokenError: Error?
-    var result: MSIDHttpRequest?
+    private var requestInitiate: MSIDHttpRequest?
+    private var requestChallenge: MSIDHttpRequest?
+    
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
     var expectedCredentialToken: String?
+    
+    func mockInitiateRequestFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+        self.requestInitiate = request
+        self.throwingInitError = throwError
+    }
     
     func inititate(parameters: MSAL.MSALNativeAuthSignInInitiateRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
         if let expectedUsername = expectedUsername {
             XCTAssertEqual(expectedUsername, parameters.username)
         }
-        return try returnMockedResult(throwingInitError)
+        if let request = requestInitiate {
+            return request
+        } else if throwingInitError != nil {
+            throw throwingInitError!
+        } else {
+            fatalError("Make sure to use mockInitiateRequestFunc()")
+        }
+    }
+    
+    func mockChallengeRequestFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+        self.requestChallenge = request
+        self.throwingChallengeError = throwError
     }
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
@@ -187,7 +204,13 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
         if let expectedCredentialToken = expectedCredentialToken {
             XCTAssertEqual(expectedCredentialToken, parameters.credentialToken)
         }
-        return try returnMockedResult(throwingChallengeError)
+        if let request = requestChallenge {
+            return request
+        } else if throwingChallengeError != nil {
+            throw throwingChallengeError!
+        } else {
+            fatalError("Make sure to use mockChallengeRequestFunc()")
+        }
     }
     
     fileprivate func checkContext(_ context: MSIDRequestContext) {
@@ -195,30 +218,24 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
             XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
         }
     }
-    
-    private func returnMockedResult(_ error: Error?) throws -> MSIDHttpRequest  {
-        if let throwingError = error {
-            throw throwingError
-        }
-        if let result = result {
-            return result
-        }
-        XCTFail("Both parameters are nil")
-        throw ErrorMock.error
-    }
 }
 
-class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProviding {
-
-    var throwingInitError: Error?
-    var throwingChallengeError: Error?
+class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProviding {    
+        
+    var requestToken: MSIDHttpRequest?
+    var requestRefreshToken: MSIDHttpRequest?
     var throwingTokenError: Error?
-    var result: MSIDHttpRequest?
+    var throwingRefreshTokenError: Error?
     var expectedUsername: String?
     var expectedCredentialToken: String?
     var expectedContext: MSIDRequestContext?
     var expectedTokenParams: MSALNativeAuthTokenRequestParameters?
 
+    func mockRequestTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+        self.requestToken = request
+        self.throwingTokenError = throwError
+    }
+    
     func signInWithPassword(parameters: MSAL.MSALNativeAuthTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
         if let expectedTokenParams = expectedTokenParams {
@@ -231,7 +248,18 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
         }
-        return try returnMockedResult(throwingTokenError)
+        if let request = requestToken {
+            return request
+        } else if throwingTokenError != nil {
+            throw throwingTokenError!
+        } else {
+            fatalError("Make sure to use mockRequestTokenFunc()")
+        }
+    }
+    
+    func mockRequestRefreshTokenFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+        self.requestRefreshToken = request
+        self.throwingRefreshTokenError = throwError
     }
     
     func refreshToken(parameters: MSAL.MSALNativeAuthTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
@@ -246,26 +274,19 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
         }
-        return try returnMockedResult(throwingTokenError)
+        if let request = requestRefreshToken {
+            return request
+        } else if throwingRefreshTokenError != nil {
+            throw throwingRefreshTokenError!
+        } else {
+            fatalError("Make sure to use mockRequestRefreshTokenFunc()")
+        }
     }
-
-
 
     fileprivate func checkContext(_ context: MSIDRequestContext) {
         if let expectedContext = expectedContext {
             XCTAssertEqual(expectedContext.correlationId(), context.correlationId())
         }
-    }
-
-    private func returnMockedResult(_ error: Error?) throws -> MSIDHttpRequest  {
-        if let throwingError = error {
-            throw throwingError
-        }
-        if let result = result {
-            return result
-        }
-        XCTFail("Both parameters are nil")
-        throw ErrorMock.error
     }
 }
 

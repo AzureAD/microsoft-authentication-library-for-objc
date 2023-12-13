@@ -26,7 +26,7 @@ import Foundation
 
 extension SignInCodeRequiredState {
 
-    func submitCodeInternal(code: String, correlationId: UUID?) async -> SignInVerifyCodeResult {
+    func submitCodeInternal(code: String) async -> SignInVerifyCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
@@ -37,7 +37,7 @@ extension SignInCodeRequiredState {
         return await controller.submitCode(code, credentialToken: flowToken, context: context, scopes: scopes)
     }
 
-    func resendCodeInternal(correlationId: UUID?) async -> SignInResendCodeResult {
+    func resendCodeInternal() async -> SignInResendCodeResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
 
@@ -48,8 +48,7 @@ extension SignInCodeRequiredState {
 extension SignInPasswordRequiredState {
 
     func submitPasswordInternal(
-        password: String,
-        correlationId: UUID?
+        password: String
     ) async -> SignInPasswordRequiredResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")

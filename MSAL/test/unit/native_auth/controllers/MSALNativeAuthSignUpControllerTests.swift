@@ -94,10 +94,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_returnsVerificationRequired_it_returnsChallenge() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -113,7 +113,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpStartPassword_returnsAttributeValidationFailed_it_returnsChallenge() async {
         let invalidAttributes = ["name"]
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
 
@@ -138,7 +138,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpStartPassword_telemetryUpdateFails_it_updatesTelemetryCorrectly() async {
         let invalidAttributes = ["name"]
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
 
@@ -162,7 +162,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_returns_redirect_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.redirect)
 
@@ -184,7 +184,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         let error : MSALNativeAuthSignUpStartValidatedResponse = .error(
             MSALNativeAuthSignUpStartResponseError(error: .passwordTooLong,
@@ -215,7 +215,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_returns_invalidUsername_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         let invalidUsername : MSALNativeAuthSignUpStartValidatedResponse = .invalidUsername(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
@@ -246,7 +246,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignUpStartPassword_returns_invalidClientId_it_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
@@ -277,7 +277,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenValidatorInSignUpStartPassword_returns_unexpectedError_it_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.unexpectedError)
 
@@ -301,7 +301,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     // MARK: - SignUpPasswordStart (/challenge request) tests
 
     func test_whenSignUpStartPassword_challenge_cantCreateRequest_it_returns_unexpectedError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
         requestProviderMock.mockChallengeRequestFunc(nil, throwError: true)
@@ -325,10 +325,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_challenge_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "signUpToken 2"))
 
@@ -350,10 +350,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_challenge_returns_passwordRequired_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.passwordRequired(""))
 
@@ -375,10 +375,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_challenge_returns_redirect_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.redirect)
 
@@ -400,10 +400,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_challenge_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
             MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
@@ -432,10 +432,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenValidatorInSignUpStartPassword_challenge_returns_unexpectedError_it_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -480,10 +480,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_returnsVerificationRequired_it_returnsChallenge() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -499,7 +499,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpStartCode_returnsAttributeValidationFailed_it_returnsCorrectError() async {
         let invalidAttributes = ["name"]
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
 
@@ -523,7 +523,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
     func test_whenSignUpStartCode_telemetryUpdateFails_it_updatesTelemetryCorrectly() async {
         let invalidAttributes = ["name"]
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.attributeValidationFailed(invalidAttributes: invalidAttributes))
 
@@ -546,7 +546,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_returns_redirect_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.redirect)
 
@@ -568,7 +568,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         let error : MSALNativeAuthSignUpStartValidatedResponse = .error(
             MSALNativeAuthSignUpStartResponseError(error: .userAlreadyExists,
@@ -599,7 +599,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_returns_invalidUsername_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         let invalidUsername : MSALNativeAuthSignUpStartValidatedResponse = .invalidUsername(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
@@ -630,7 +630,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignUpStartCode_returns_invalidClientId_it_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
@@ -661,7 +661,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenValidatorInSignUpStartCode_returns_unexpectedError_it_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.unexpectedError)
 
@@ -685,7 +685,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     // MARK: - SignUpCodeStart (/challenge request) tests
 
     func test_whenSignUpStartCode_challenge_cantCreateRequest_it_returns_unexpectedError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
         requestProviderMock.mockChallengeRequestFunc(nil, throwError: true)
@@ -709,10 +709,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_challenge_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken 1", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 1")
         validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "signUpToken 2"))
 
@@ -734,10 +734,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_challenge_succeedsPassword_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.passwordRequired(""))
 
@@ -759,10 +759,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_challenge_returns_redirect_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.redirect)
 
@@ -784,10 +784,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_challenge_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
             MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
@@ -816,10 +816,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenValidatorInSignUpStartCode_challenge_it_returns_unexpectedError_returnsGeneralError() async {
-        requestProviderMock.mockStartRequestFunc(prepareMockRequest())
+        requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.verificationRequired(signUpToken: "signUpToken", unverifiedAttributes: [""]))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -863,7 +863,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpResendCode_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "signUpToken"))
 
@@ -885,7 +885,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpResendCode_succeedsPassword_it_returnsCorrectError() async {
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.passwordRequired("signUpToken 1"))
 
@@ -906,7 +906,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpResendCode_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
             MSALNativeAuthSignUpChallengeResponseError(error: .invalidRequest,
@@ -933,7 +933,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpResendCode_returns_redirect_it_returnsCorrectError() async {
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.redirect)
 
@@ -954,7 +954,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpResendCode_returns_unexpectedError_it_returnsCorrectError() async {
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -997,7 +997,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSubmitCode_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         validatorMock.mockValidateSignUpContinueFunc(.success(""))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
 
@@ -1018,7 +1018,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_invalidUserInput_it_returnsInvalidCode() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         let error : MSALNativeAuthSignUpContinueValidatedResponse = .invalidUserInput(
             MSALNativeAuthSignUpContinueResponseError(error: .invalidOOBValue,
                                                       errorDescription: nil,
@@ -1049,7 +1049,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_attributesRequired_it_returnsAttributesRequired() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken", requiredAttributes: []))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
 
@@ -1072,7 +1072,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_attributesRequired_butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken", requiredAttributes: []))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
 
@@ -1095,7 +1095,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_attributeValidationFailed_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["name"]))
 
@@ -1116,7 +1116,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         let error : MSALNativeAuthSignUpContinueValidatedResponse = .error(
             MSALNativeAuthSignUpContinueResponseError(error: .invalidRequest,
@@ -1147,7 +1147,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_unexpectedError_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.unexpectedError)
 
@@ -1170,10 +1170,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     // MARK: - SubmitCode + credential_required error tests
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -1192,7 +1192,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andCantCreateRequest() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.mockChallengeRequestFunc(nil, throwError: true)
@@ -1215,10 +1215,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andSucceeds() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.passwordRequired("signUpToken 3"))
 
@@ -1244,10 +1244,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.passwordRequired("signUpToken 3"))
 
@@ -1273,10 +1273,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andSucceedOOB_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("", .email, 4, "signUpToken 3"))
 
@@ -1296,10 +1296,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andRedirects() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.redirect)
 
@@ -1322,10 +1322,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andReturnsError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         let error : MSALNativeAuthSignUpChallengeValidatedResponse = .error(
             MSALNativeAuthSignUpChallengeResponseError(error: .expiredToken,
@@ -1354,10 +1354,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andReturnsUnexpectedError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
-        requestProviderMock.mockChallengeRequestFunc(prepareMockRequest())
+        requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "signUpToken 2")
         validatorMock.mockValidateSignUpChallengeFunc(.unexpectedError)
 
@@ -1401,7 +1401,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSubmitPassword_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.success("signInSLT"))
 
@@ -1421,7 +1421,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_invalidUserInput_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         let error : MSALNativeAuthSignUpContinueValidatedResponse = .invalidUserInput(
             MSALNativeAuthSignUpContinueResponseError(error: .passwordTooWeak,
@@ -1452,7 +1452,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_attributesRequired_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken 2", requiredAttributes: []))
 
@@ -1474,7 +1474,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_attributesRequired_butTelemetryUpdateFails_it_updatesTelemetryCorrectly() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.attributesRequired(signUpToken: "signUpToken 2", requiredAttributes: []))
 
@@ -1496,7 +1496,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         let error : MSALNativeAuthSignUpContinueValidatedResponse = .error(
             MSALNativeAuthSignUpContinueResponseError(error: .invalidRequest,
@@ -1526,7 +1526,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_credentialRequired_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(signUpToken: "signUpToken 2"))
 
@@ -1546,7 +1546,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_unexpectedError_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.unexpectedError)
 
@@ -1566,7 +1566,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitPassword_returns_attributeValidationFailed_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.attributeValidationFailed(signUpToken: "signUpToken 2", invalidAttributes: ["key"]))
 
@@ -1610,7 +1610,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSubmitAttributes_succeeds_it_continuesTheFlow() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1633,7 +1633,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_invalidUserInput_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1665,7 +1665,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_error_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1697,7 +1697,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_attributesRequired_it_returnsAttributesRequiredError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1719,7 +1719,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_credentialRequired_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1741,7 +1741,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_unexpectedError_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1763,7 +1763,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitAttributes_returns_attributeValidationFailed_it_returnsCorrectError() async {
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
             grantType: .attributes,
             oobCode: nil,
@@ -1796,7 +1796,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
             func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {}
         }
 
-        requestProviderMock.mockContinueRequestFunc(prepareMockRequest())
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
         validatorMock.mockValidateSignUpContinueFunc(.success(slt))
 
@@ -1917,13 +1917,6 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.error)
 
         return helper
-    }
-
-    private func prepareMockRequest() -> MSIDHttpRequest {
-        let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(request: request, responseJson: [""])
-        
-        return request
     }
 
     private func expectedChallengeParams(token: String = "signUpToken") -> (token: String, context: MSIDRequestContext) {

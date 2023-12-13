@@ -32,23 +32,22 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     init(
         controller: MSALNativeAuthResetPasswordControlling,
         flowToken: String,
-        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        correlationId: UUID
     ) {
         self.controller = controller
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken)
+        super.init(flowToken: flowToken, correlationId: correlationId)
     }
 }
 
 /// An object of this type is created when a user is required to supply a verification code to continue a reset password flow.
 @objcMembers public class ResetPasswordCodeRequiredState: ResetPasswordBaseState {
     /// Requests the server to resend the verification code to the user.
-    /// - Parameters:
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the operation.
-    public func resendCode(correlationId: UUID? = nil, delegate: ResetPasswordResendCodeDelegate) {
+    /// - Parameter delegate: Delegate that receives callbacks for the operation.
+    public func resendCode(delegate: ResetPasswordResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal(correlationId: correlationId)
+            let result = await resendCodeInternal()
 
             switch result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -67,11 +66,10 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// Submits the code to the server for verification.
     /// - Parameters:
     ///   - code: Verification code that the user supplied.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitCode(code: String, correlationId: UUID? = nil, delegate: ResetPasswordVerifyCodeDelegate) {
+    public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate) {
         Task {
-            let result = await submitCodeInternal(code: code, correlationId: correlationId)
+            let result = await submitCodeInternal(code: code)
 
             switch result {
             case .passwordRequired(let newState):
@@ -88,11 +86,10 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplied.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitPassword(password: String, correlationId: UUID? = nil, delegate: ResetPasswordRequiredDelegate) {
+    public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate) {
         Task {
-            let result = await submitPasswordInternal(password: password, correlationId: correlationId)
+            let result = await submitPasswordInternal(password: password)
 
             switch result {
             case .completed:

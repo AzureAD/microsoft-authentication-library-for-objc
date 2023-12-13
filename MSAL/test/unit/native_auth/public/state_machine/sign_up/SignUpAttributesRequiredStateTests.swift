@@ -31,12 +31,13 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
 
     private var controller: MSALNativeAuthSignUpControllerMock!
     private var sut: SignUpAttributesRequiredState!
+    private var correlationId: UUID = UUID()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", flowToken: "<token>")
+        sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", flowToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegate
@@ -57,7 +58,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
-        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt")
+        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
         controller.submitAttributesResult = .init(expectedResult)
@@ -72,7 +73,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt")
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
         let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
@@ -91,7 +92,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     }
 
     func test_submitPassword_delegate_whenAttributesAreInvalud_shouldReturnAttributesInvalid() {
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt")
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)

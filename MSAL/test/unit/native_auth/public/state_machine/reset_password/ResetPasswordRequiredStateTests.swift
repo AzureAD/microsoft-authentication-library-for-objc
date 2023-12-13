@@ -29,7 +29,7 @@ import XCTest
 
 final class ResetPasswordRequiredStateTests: XCTestCase {
 
-    private var correlationId: UUID!
+    private var correlationId: UUID = UUID()
     private var exp: XCTestExpectation!
     private var controller: MSALNativeAuthResetPasswordControllerSpy!
     private var sut: ResetPasswordRequiredState!
@@ -37,17 +37,16 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        correlationId = UUID()
         exp = expectation(description: "ResetPasswordRequiredState expectation")
         controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
-        sut = ResetPasswordRequiredState(controller: controller, flowToken: "<token>")
+        sut = ResetPasswordRequiredState(controller: controller, flowToken: "<token>", correlationId: correlationId)
     }
 
     func test_submitPassword_usesControllerSuccessfully() {
         XCTAssertNil(controller.context)
         XCTAssertFalse(controller.submitPasswordCalled)
 
-        sut.submitPassword(password: "1234", correlationId: correlationId, delegate: ResetPasswordRequiredDelegateSpy())
+        sut.submitPassword(password: "1234", delegate: ResetPasswordRequiredDelegateSpy())
 
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(controller.context?.correlationId(), correlationId)

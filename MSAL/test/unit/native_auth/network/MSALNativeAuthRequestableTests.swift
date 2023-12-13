@@ -67,7 +67,7 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
         }
         
         let authority = try MSALCIAMAuthority(url: authorityUrl)
-        var config = try MSALNativeAuthConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
+        let config = try MSALNativeAuthConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
                                                       authority: authority,
                                                       challengeTypes: [.redirect])
         

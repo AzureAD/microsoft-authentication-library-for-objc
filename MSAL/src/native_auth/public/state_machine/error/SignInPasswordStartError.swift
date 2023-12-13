@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -22,22 +21,44 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       1
-#define MSAL_VER_LOW        2
-#define MSAL_VER_PATCH      20
+import Foundation
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@objc
+public class SignInPasswordStartError: MSALNativeAuthError {
+    /// An error type indicating the type of error that occurred
+    @objc public let type: SignInPasswordStartErrorType
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+    init(type: SignInPasswordStartErrorType, message: String? = nil) {
+        self.type = type
+        super.init(message: message)
+    }
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return "Browser required"
+        case .userNotFound:
+            return "User not found"
+        case .invalidPassword:
+            return "Invalid password"
+        case .invalidUsername:
+            return "Invalid username"
+        case .generalError:
+            return "General error"
+        }
+    }
+}
+
+@objc
+public enum SignInPasswordStartErrorType: Int {
+    case browserRequired
+    case userNotFound
+    case invalidPassword
+    case invalidUsername
+    case generalError
+}

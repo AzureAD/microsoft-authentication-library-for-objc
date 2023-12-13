@@ -490,4 +490,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorJITTroubleshootingResultUnknown         = -42735,
     
+    /**
+     Device is not PSSO registered
+     */
+    MSALErrorDeviceNotPSSORegistered                    = -42736,
+    
 };
