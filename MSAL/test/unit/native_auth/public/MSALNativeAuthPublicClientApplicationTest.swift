@@ -113,6 +113,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         wait(for: [exp])
 
         XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
+        XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
     }
 
     func testSignUpPassword_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
@@ -195,6 +196,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         wait(for: [exp])
 
         XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
+        XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
     }
 
     func testSignUp_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
