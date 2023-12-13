@@ -93,6 +93,9 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
     }
 
     private func formatAttributes(_ attributes: [String: Any]) throws -> String? {
+        guard JSONSerialization.isValidJSONObject(attributes) else {
+            throw MSALNativeAuthInternalError.invalidAttributes
+        }
         let data = try JSONSerialization.data(withJSONObject: attributes)
         return String(data: data, encoding: .utf8)
     }
