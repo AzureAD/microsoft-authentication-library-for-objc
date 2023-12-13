@@ -59,7 +59,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -73,7 +73,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -103,7 +103,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -117,7 +117,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -147,7 +147,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
@@ -163,8 +163,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
             attributes: attributes,
-            delegate: signUpAttributesRequiredDelegate,
-            correlationId: correlationId
+            delegate: signUpAttributesRequiredDelegate
         )
 
         await fulfillment(of: [attributesExp], timeout: defaultTimeout)
@@ -179,7 +178,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -209,7 +208,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
@@ -225,8 +224,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
             attributes: attributes,
-            delegate: signUpAttributesRequiredDelegate,
-            correlationId: correlationId
+            delegate: signUpAttributesRequiredDelegate
         )
 
         await fulfillment(of: [submitAttributesExp1], timeout: defaultTimeout)
@@ -243,8 +241,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
             attributes: attributes,
-            delegate: signUpAttributesRequiredDelegate,
-            correlationId: correlationId
+            delegate: signUpAttributesRequiredDelegate
         )
 
         await fulfillment(of: [submitAttributesExp2], timeout: defaultTimeout)
@@ -259,7 +256,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.tokenSuccess, endpoint: .signInToken)
         }
 
-        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(correlationId: correlationId, delegate: signInAfterSignUpDelegate)
+        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
@@ -289,7 +286,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", correlationId: correlationId, delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)

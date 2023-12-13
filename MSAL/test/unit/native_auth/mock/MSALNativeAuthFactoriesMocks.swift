@@ -91,3 +91,37 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
         return credentialsController
     }
 }
+
+class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuildable {
+    
+    var signUpController: MSALNativeAuthSignUpControlling!
+    var signInController: MSALNativeAuthSignInControlling!
+    var resetPasswordController: MSALNativeAuthResetPasswordControlling!
+    var credentialsController: MSALNativeAuthCredentialsControlling!
+    
+    init (signUpController: MSALNativeAuthSignUpControlling = MSALNativeAuthSignUpControllerMock(),
+          signInController: MSALNativeAuthSignInControlling = MSALNativeAuthSignInControllerMock(),
+          resetPasswordController: MSALNativeAuthResetPasswordControlling = MSALNativeAuthResetPasswordControllerMock(),
+          credentialsController: MSALNativeAuthCredentialsControlling = MSALNativeAuthCredentialsControllerMock()) {
+        self.signUpController = signUpController
+        self.signInController = signInController
+        self.resetPasswordController = resetPasswordController
+        self.credentialsController = credentialsController
+    }
+    
+    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+        return signUpController
+    }
+    
+    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
+        return signInController
+    }
+    
+    func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
+        return resetPasswordController
+    }
+    
+    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+        return credentialsController
+    }
+}
