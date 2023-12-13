@@ -31,10 +31,11 @@ import Foundation
     init(
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String) {
+        flowToken: String,
+        correlationId: UUID) {
         self.controller = controller
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken)
+        super.init(flowToken: flowToken, correlationId: correlationId)
     }
 }
 
@@ -47,18 +48,17 @@ import Foundation
         scopes: [String],
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String) {
+        flowToken: String,
+        correlationId: UUID) {
         self.scopes = scopes
-        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
     }
 
     /// Requests the server to resend the verification code to the user.
-    /// - Parameters:
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the operation.
-    public func resendCode(correlationId: UUID? = nil, delegate: SignInResendCodeDelegate) {
+    /// - Parameter delegate: Delegate that receives callbacks for the operation.
+    public func resendCode(delegate: SignInResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal(correlationId: correlationId)
+            let result = await resendCodeInternal()
 
             switch result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -77,11 +77,10 @@ import Foundation
     /// Submits the code to the server for verification.
     /// - Parameters:
     ///   - code: Verification code that the user supplies.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitCode(code: String, correlationId: UUID? = nil, delegate: SignInVerifyCodeDelegate) {
+    public func submitCode(code: String, delegate: SignInVerifyCodeDelegate) {
         Task {
-            let result = await submitCodeInternal(code: code, correlationId: correlationId)
+            let result = await submitCodeInternal(code: code)
 
             switch result {
             case .completed(let accountResult):
@@ -104,20 +103,20 @@ import Foundation
         username: String,
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String) {
+        flowToken: String,
+        correlationId: UUID) {
         self.scopes = scopes
         self.username = username
-        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken)
+        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
     }
 
     /// Submits the password to the server for verification.
     /// - Parameters:
     ///   - password: Password that the user supplied.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitPassword(password: String, correlationId: UUID? = nil, delegate: SignInPasswordRequiredDelegate) {
+    public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate) {
         Task {
-            let result = await submitPasswordInternal(password: password, correlationId: correlationId)
+            let result = await submitPasswordInternal(password: password)
 
             switch result {
             case .completed(let accountResult):

@@ -59,7 +59,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
             XCTAssertNotEqual(otp, "<otp not set>")
         }
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, correlationId: correlationId, delegate: signInVerifyCodeDelegateSpy)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 
@@ -110,7 +110,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
             XCTAssertNotEqual(otp, "<otp not set>")
         }
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, correlationId: correlationId, delegate: signInVerifyCodeDelegateSpy)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 

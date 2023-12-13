@@ -20,36 +20,19 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-import Foundation
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
-final class ResetPasswordRequiredStateTests: XCTestCase {
-
-    private var correlationId: UUID = UUID()
-    private var exp: XCTestExpectation!
-    private var controller: MSALNativeAuthResetPasswordControllerSpy!
-    private var sut: ResetPasswordRequiredState!
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-
-        exp = expectation(description: "ResetPasswordRequiredState expectation")
-        controller = MSALNativeAuthResetPasswordControllerSpy(expectation: exp)
-        sut = ResetPasswordRequiredState(controller: controller, flowToken: "<token>", correlationId: correlationId)
-    }
-
-    func test_submitPassword_usesControllerSuccessfully() {
-        XCTAssertNil(controller.context)
-        XCTAssertFalse(controller.submitPasswordCalled)
-
-        sut.submitPassword(password: "1234", delegate: ResetPasswordRequiredDelegateSpy())
-
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(controller.context?.correlationId(), correlationId)
-        XCTAssertTrue(controller.submitPasswordCalled)
+class MSALNativeAuthHTTPRequestMock {
+    static func prepareMockRequest(request: MSIDHttpRequest = MSIDHttpRequest(), 
+                                   response: HTTPURLResponse? = nil,
+                                   responseJson: [Any?] = [""]) -> MSIDHttpRequest {
+        HttpModuleMockConfigurator.configure(request: request, response: response, responseJson: responseJson)
+        return request
     }
 }
+

@@ -30,25 +30,25 @@ import Foundation
     let controller: MSALNativeAuthSignInControlling
     let username: String
     let slt: String?
+    let correlationId: UUID
 
-    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?) {
+    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?, correlationId: UUID) {
         self.username = username
         self.slt = slt
         self.controller = controller
+        self.correlationId = correlationId
     }
 
     /// Sign in the user that signed up.
     /// - Parameters:
     ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         scopes: [String]? = nil,
-        correlationId: UUID? = nil,
         delegate: SignInAfterSignUpDelegate
     ) {
         Task {
-            let controllerResult = await signInInternal(scopes: scopes, correlationId: correlationId)
+            let controllerResult = await signInInternal(scopes: scopes)
 
             switch controllerResult {
             case .success(let accountResult):
