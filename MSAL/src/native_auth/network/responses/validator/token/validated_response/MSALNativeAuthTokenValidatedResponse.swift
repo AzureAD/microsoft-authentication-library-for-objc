@@ -63,7 +63,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .userNotFound(let message):
             return SignInPasswordStartError(type: .userNotFound, message: message)
         case .invalidPassword(let message):
-            return SignInPasswordStartError(type: .invalidPassword, message: message)
+            return SignInPasswordStartError(type: .invalidCredentials, message: message)
         case .strongAuthRequired(let message):
             return SignInPasswordStartError(type: .browserRequired, message: message)
         case .expiredRefreshToken(let message):
