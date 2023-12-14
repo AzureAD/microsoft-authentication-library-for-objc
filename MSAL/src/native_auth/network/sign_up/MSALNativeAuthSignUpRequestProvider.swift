@@ -42,14 +42,11 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
     }
 
     func start(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) throws -> MSIDHttpRequest {
-        guard let attributes = try formatAttributes(parameters.attributes) else {
-            throw MSALNativeAuthInternalError.invalidAttributes
-        }
-
+        let formattedAttributes = try formatAttributes(parameters.attributes)
         let params = MSALNativeAuthSignUpStartRequestParameters(
             username: parameters.username,
             password: parameters.password,
-            attributes: attributes,
+            attributes: formattedAttributes,
             context: parameters.context
         )
 
@@ -74,14 +71,14 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
     }
 
     func `continue`(parameters: MSALNativeAuthSignUpContinueRequestProviderParams) throws -> MSIDHttpRequest {
-        let attributesFormatted = try parameters.attributes.map { try formatAttributes($0) } ?? nil
+        let formattedAttributes = try formatAttributes(parameters.attributes)
 
         let params = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: parameters.grantType,
             signUpToken: parameters.signUpToken,
             password: parameters.password,
             oobCode: parameters.oobCode,
-            attributes: attributesFormatted,
+            attributes: formattedAttributes,
             context: parameters.context
         )
 
@@ -92,7 +89,10 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
         return request
     }
 
-    private func formatAttributes(_ attributes: [String: Any]) throws -> String? {
+    private func formatAttributes(_ attributes: [String: Any]?) throws -> String? {
+        guard let attributes = attributes else {
+            return nil
+        }
         guard JSONSerialization.isValidJSONObject(attributes) else {
             throw MSALNativeAuthInternalError.invalidAttributes
         }

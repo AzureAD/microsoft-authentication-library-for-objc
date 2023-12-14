@@ -62,7 +62,8 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         XCTAssertEqual(params.username, expectedStartRequestParameters.username)
         XCTAssertEqual(params.password, expectedStartRequestParameters.password)
         XCTAssertEqual(params.context.correlationId(), expectedStartRequestParameters.context.correlationId())
-        XCTAssertEqual(params.attributes["key"] as? String, expectedStartRequestParameters.attributes["key"] as? String)
+        XCTAssertNotNil(params.attributes)
+        XCTAssertEqual(params.attributes?["key"] as? String, expectedStartRequestParameters.attributes?["key"] as? String)
     }
 
     func mockChallengeRequestFunc(_ request: MSIDHttpRequest?, throwError: Bool = false) {
