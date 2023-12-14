@@ -34,7 +34,7 @@ class SignInPasswordStartTestsValidatorHelper: SignInPasswordStartDelegateSpy {
         }
 
         self.expectedError = error
-        Task { await self.onSignInPasswordError(error: error) }
+        Task { await self.onSignInPasswordStartError(error: error) }
     }
 
     func onSignInCodeRequired(_ input: MSALNativeAuthSignInController.SignInPasswordControllerResponse) {
@@ -86,7 +86,7 @@ class SignInCodeStartTestsValidatorHelper: SignInCodeStartDelegateSpy {
             return XCTFail("input should be .error")
         }
 
-        Task { await self.onSignInError(error: error) }
+        Task { await self.onSignInStartError(error: error) }
     }
     
     func onSignInCodeRequired(_ input: MSALNativeAuthSignInControlling.SignInCodeControllerResponse) {
@@ -101,8 +101,8 @@ class SignInCodeStartTestsValidatorHelper: SignInCodeStartDelegateSpy {
 
 class SignInResendCodeTestsValidatorHelper: SignInResendCodeDelegateSpy {
     
-    func onSignInResendCodeError(_ input: SignInResendCodeResult) {
-        guard case let .error(error, newState) = input else {
+    func onSignInResendCodeError(_ input: MSALNativeAuthSignInController.SignInResendCodeControllerResponse) {
+        guard case let .error(error, newState) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .error")
         }
@@ -110,8 +110,8 @@ class SignInResendCodeTestsValidatorHelper: SignInResendCodeDelegateSpy {
         Task { await self.onSignInResendCodeError(error: error, newState: newState) }
     }
 
-    func onSignInResendCodeCodeRequired(_ input: SignInResendCodeResult) {
-        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input else {
+    func onSignInResendCodeCodeRequired(_ input: MSALNativeAuthSignInController.SignInResendCodeControllerResponse) {
+        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .codeRequired")
         }

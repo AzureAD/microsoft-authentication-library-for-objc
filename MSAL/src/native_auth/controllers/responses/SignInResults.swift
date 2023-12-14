@@ -24,59 +24,26 @@
 
 import Foundation
 
-/// Represents the result of sign in using password.
 enum SignInPasswordStartResult {
-    /// Returned after the sign in operation completed successfully. An object representing the signed in user account is returned.
     case completed(MSALNativeAuthUserAccountResult)
-
-    /// Returned if a user registered with email and code tries to sign in using password.
-    /// In this case MSAL will discard the password and will continue the sign in flow with code.
-    ///
-    /// - newState: An object representing the new state of the flow with follow on methods.
-    /// - sentTo: The email/phone number that the code was sent to.
-    /// - channelTargetType: The channel (email/phone) the code was sent through.
-    /// - codeLength: The length of the code required.
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-
-    /// An error object indicating why the operation failed.
     case error(SignInPasswordStartError)
 }
 
-/// Represents the result of sign in using code.
 enum SignInStartResult {
-    /// Returned if a user has received an email with code.
-    ///
-    /// - newState: An object representing the new state of the flow with follow on methods.
-    /// - sentTo: The email/phone number that the code was sent to.
-    /// - channelTargetType: The channel (email/phone) the code was sent through.
-    /// - codeLength: The length of the code required.
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-
-    /// Returned if a user registered with email and password tries to sign in using code.
     case passwordRequired(newState: SignInPasswordRequiredState)
-
-    /// An error object indicating why the operation failed.
     case error(SignInStartError)
 }
 
-/// Result type that contains information about the code sent, the next state of the reset password process and possible errors.
-/// See ``CodeRequiredGenericResult`` for more information.
 typealias SignInResendCodeResult = CodeRequiredGenericResult<SignInCodeRequiredState, ResendCodeError>
 
-/// Result type that contains information about the state of the sign in process.
 enum SignInPasswordRequiredResult {
-    /// Returned after the sign in operation completed successfully. An object representing the signed in user account is returned.
     case completed(MSALNativeAuthUserAccountResult)
-
-    /// An error object indicating why the operation failed. It may contain a ``SignInPasswordRequiredState`` to continue the flow.
     case error(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 }
 
-/// Result type that contains information about the state of the sign in process.
 enum SignInVerifyCodeResult {
-    /// Returned after the sign in operation completed successfully. An object representing the signed in user account is returned.
     case completed(MSALNativeAuthUserAccountResult)
-
-    /// An error object indicating why the operation failed. It may contain a ``SignInPasswordRequiredState`` to continue the flow.
     case error(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 }

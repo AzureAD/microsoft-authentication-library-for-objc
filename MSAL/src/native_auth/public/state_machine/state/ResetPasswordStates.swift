@@ -47,11 +47,15 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func resendCode(delegate: ResetPasswordResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal()
+            let controllerResponse = await resendCodeInternal()
+            let delegateDispatcher = ResetPasswordResendCodeDelegateDispatcher(
+                delegate: delegate,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
-            switch result {
+            switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onResetPasswordResendCodeRequired(
+                await delegateDispatcher.dispatchResetPasswordResendCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
@@ -69,11 +73,15 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitCode(code: String, delegate: ResetPasswordVerifyCodeDelegate) {
         Task {
-            let result = await submitCodeInternal(code: code)
+            let controllerResponse = await submitCodeInternal(code: code)
+            let delegateDispatcher = ResetPasswordVerifyCodeDelegateDispatcher(
+                delegate: delegate,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
-            switch result {
+            switch controllerResponse.result {
             case .passwordRequired(let newState):
-                await delegate.onPasswordRequired(newState: newState)
+                await delegateDispatcher.dispatchPasswordRequired(newState: newState)
             case .error(let error, let newState):
                 await delegate.onResetPasswordVerifyCodeError(error: error, newState: newState)
             }
@@ -89,11 +97,12 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate) {
         Task {
-            let result = await submitPasswordInternal(password: password)
+            let controllerResponse = await submitPasswordInternal(password: password)
+            let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .completed:
-                await delegate.onResetPasswordCompleted()
+                await delegateDispatcher.dispatchResetPasswordCompleted()
             case .error(let error, let newState):
                 await delegate.onResetPasswordRequiredError(error: error, newState: newState)
             }

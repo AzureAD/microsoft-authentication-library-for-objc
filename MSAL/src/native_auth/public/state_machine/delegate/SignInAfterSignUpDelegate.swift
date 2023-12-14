@@ -31,6 +31,7 @@ public protocol SignInAfterSignUpDelegate {
     @MainActor func onSignInAfterSignUpError(error: SignInAfterSignUpError)
 
     /// Notifies the delegate that the sign in operation completed successfully.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInAfterSignUpError(error:)`` will be called.
     /// - Parameter result: An object representing the signed in user account.
-    @MainActor func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }

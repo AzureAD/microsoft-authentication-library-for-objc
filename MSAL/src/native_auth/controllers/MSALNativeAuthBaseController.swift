@@ -115,6 +115,29 @@ class MSALNativeAuthBaseController {
         MSIDTelemetry.sharedInstance().flush(context.telemetryRequestId())
     }
 
+    /// Stops a telemetry event.
+    /// - Parameters:
+    ///   - event: The local event to be stopped.
+    ///   - context: The context object.
+    ///   - delegateDispatcherResult: The result sent by the ``DelegateDispatcher`` that contains whether the developer
+    ///                               has implemented the optional delegate or not.
+    ///   - controllerError: Optional error set by the Controller when handles the response from API.
+    ///                      (ex: SignUpController gets an .attributeValidationFailed. The controller will generate and error and send it here).
+    func stopTelemetryEvent(
+        _ event: MSIDTelemetryAPIEvent?,
+        context: MSIDRequestContext,
+        delegateDispatcherResult: Result<Void, MSALNativeAuthError>,
+        controllerError: MSALNativeAuthError? = nil
+    ) {
+        switch delegateDispatcherResult {
+        case .success:
+            stopTelemetryEvent(event, context: context, error: controllerError)
+        case .failure(let error):
+            MSALLogger.log(level: .error, context: context, format: "Error \(error.errorDescription ?? "No error description")")
+            stopTelemetryEvent(event, context: context, error: error)
+        }
+    }
+
     func complete<T>(
         _ telemetryEvent: MSIDTelemetryAPIEvent?,
         response: T? = nil,

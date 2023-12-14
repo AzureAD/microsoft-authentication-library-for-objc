@@ -37,7 +37,7 @@ class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         onSignInPasswordErrorCalled = true
         self.error = error
 
@@ -71,7 +71,7 @@ class SignInStartDelegateSpy: SignInStartDelegate {
         self.expectation = expectation
     }
 
-    public func onSignInError(error: MSAL.SignInStartError) {
+    public func onSignInStartError(error: MSAL.SignInStartError) {
         onSignInErrorCalled = true
         self.error = error
 

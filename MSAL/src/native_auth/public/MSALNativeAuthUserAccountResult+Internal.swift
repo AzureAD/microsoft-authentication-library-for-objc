@@ -26,7 +26,10 @@ import Foundation
 
 extension MSALNativeAuthUserAccountResult {
 
-    func getAccessTokenInternal(forceRefresh: Bool, correlationId: UUID?) async -> Result<String, RetrieveAccessTokenError> {
+    func getAccessTokenInternal(
+        forceRefresh: Bool,
+        correlationId: UUID?
+    ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         if let accessToken = self.authTokens.accessToken {
@@ -35,11 +38,11 @@ extension MSALNativeAuthUserAccountResult {
                 let credentialsController = controllerFactory.makeCredentialsController()
                 return await credentialsController.refreshToken(context: context, authTokens: authTokens)
             } else {
-                return .success(accessToken.accessToken)
+                return .init(.success(accessToken.accessToken))
             }
         } else {
             MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
-            return .failure(RetrieveAccessTokenError(type: .tokenNotFound))
+            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound)))
         }
     }
 }
