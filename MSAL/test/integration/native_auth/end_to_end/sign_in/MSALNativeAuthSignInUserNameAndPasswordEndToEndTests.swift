@@ -45,7 +45,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
-        XCTAssertEqual(signInDelegateSpy.error?.type, .userNotFound)
+        XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
@@ -67,7 +67,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [signInExpectation], timeout: 2)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
-        XCTAssertEqual(signInDelegateSpy.error?.type, .invalidPassword)
+        XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
     }
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)

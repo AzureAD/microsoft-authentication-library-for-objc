@@ -24,15 +24,14 @@
 
 import Foundation
 
-@objc
+@objcMembers
 public class MSALNativeAuthError: NSObject, LocalizedError {
+    /// Describes why an error occurred and provides more information about the error.
+    public var errorDescription: String? { message }
+
     private let message: String?
 
     init(message: String? = nil) {
         self.message = message
-    }
-
-    public var errorDescription: String? {
-        message
     }
 }
