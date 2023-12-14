@@ -27,17 +27,17 @@ import XCTest
 
 class ResetPasswordStartTestsValidatorHelper: ResetPasswordStartDelegateSpy {
 
-    func onResetPasswordError(_ input: ResetPasswordStartResult) {
-        guard case let .error(error) = input else {
+    func onResetPasswordError(_ input: MSALNativeAuthResetPasswordController.ResetPasswordStartControllerResponse) {
+        guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
 
-        Task { await self.onResetPasswordError(error: error) }
+        Task { await self.onResetPasswordStartError(error: error) }
     }
 
-    func onResetPasswordCodeRequired(_ input: ResetPasswordStartResult) {
-        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input else {
+    func onResetPasswordCodeRequired(_ input: MSALNativeAuthResetPasswordController.ResetPasswordStartControllerResponse) {
+        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .codeRequired")
         }
@@ -50,8 +50,8 @@ class ResetPasswordStartTestsValidatorHelper: ResetPasswordStartDelegateSpy {
 
 class ResetPasswordResendCodeTestsValidatorHelper: ResetPasswordResendCodeDelegateSpy {
 
-    func onResetPasswordResendCodeError(_ input: ResetPasswordResendCodeResult) {
-        guard case let .error(error, newState) = input else {
+    func onResetPasswordResendCodeError(_ input: MSALNativeAuthResetPasswordController.ResetPasswordResendCodeControllerResponse) {
+        guard case let .error(error, newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .error")
         }
@@ -59,8 +59,8 @@ class ResetPasswordResendCodeTestsValidatorHelper: ResetPasswordResendCodeDelega
         Task { await self.onResetPasswordResendCodeError(error: error, newState: newState) }
     }
 
-    func onResetPasswordResendCodeRequired(_ input: ResetPasswordResendCodeResult) {
-        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input else {
+    func onResetPasswordResendCodeRequired(_ input: MSALNativeAuthResetPasswordController.ResetPasswordResendCodeControllerResponse) {
+        guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .codeRequired")
         }
@@ -73,8 +73,8 @@ class ResetPasswordResendCodeTestsValidatorHelper: ResetPasswordResendCodeDelega
 
 class ResetPasswordVerifyCodeTestsValidatorHelper: ResetPasswordVerifyCodeDelegateSpy {
 
-    func onResetPasswordVerifyCodeError(_ input: ResetPasswordVerifyCodeResult) {
-        guard case let .error(error, newState) = input else {
+    func onResetPasswordVerifyCodeError(_ input: MSALNativeAuthResetPasswordController.ResetPasswordSubmitCodeControllerResponse) {
+        guard case let .error(error, newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .error")
         }
@@ -82,8 +82,8 @@ class ResetPasswordVerifyCodeTestsValidatorHelper: ResetPasswordVerifyCodeDelega
         Task { await self.onResetPasswordVerifyCodeError(error: error, newState: newState) }
     }
 
-    func onPasswordRequired(_ input: ResetPasswordVerifyCodeResult) {
-        guard case let .passwordRequired(newState) = input else {
+    func onPasswordRequired(_ input: MSALNativeAuthResetPasswordController.ResetPasswordSubmitCodeControllerResponse) {
+        guard case let .passwordRequired(newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .success")
         }
@@ -94,8 +94,8 @@ class ResetPasswordVerifyCodeTestsValidatorHelper: ResetPasswordVerifyCodeDelega
 
 class ResetPasswordRequiredTestsValidatorHelper: ResetPasswordRequiredDelegateSpy {
 
-    func onResetPasswordRequiredError(_ input: ResetPasswordRequiredResult) {
-        guard case let .error(error, newState) = input else {
+    func onResetPasswordRequiredError(_ input: MSALNativeAuthResetPasswordController.ResetPasswordSubmitPasswordControllerResponse) {
+        guard case let .error(error, newState) = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .error")
         }
@@ -103,8 +103,8 @@ class ResetPasswordRequiredTestsValidatorHelper: ResetPasswordRequiredDelegateSp
         Task { await self.onResetPasswordRequiredError(error: error, newState: newState) }
     }
 
-    func onResetPasswordCompleted(_ input: ResetPasswordRequiredResult) {
-        guard case .completed = input else {
+    func onResetPasswordCompleted(_ input: MSALNativeAuthResetPasswordController.ResetPasswordSubmitPasswordControllerResponse) {
+        guard case .completed = input.result else {
             expectation?.fulfill()
             return XCTFail("should be .success")
         }

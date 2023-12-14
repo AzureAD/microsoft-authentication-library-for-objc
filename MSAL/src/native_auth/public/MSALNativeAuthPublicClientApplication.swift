@@ -135,25 +135,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 correlationId: correlationId
             )
 
+            let delegateDispatcher = SignUpPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignUpCodeRequired(
+                await delegateDispatcher.dispatchSignUpPasswordCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
                     codeLength: codeLength
                 )
             case .attributesInvalid(let attributes):
-                if let signUpAttributesMethod = delegate.onSignUpAttributesInvalid {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await signUpAttributesMethod(attributes)
-                } else {
-                    let error = SignUpPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpPasswordError(error: error)
-                }
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
             case .error(let error):
-                await delegate.onSignUpPasswordError(error: error)
+                await delegate.onSignUpPasswordStartError(error: error)
             }
         }
     }
@@ -172,26 +167,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ) {
         Task {
             let controllerResponse = await signUpInternal(username: username, attributes: attributes, correlationId: correlationId)
+            let delegateDispatcher = SignUpStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignUpCodeRequired(
+                await delegateDispatcher.dispatchSignUpCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
                     codeLength: codeLength
                 )
             case .attributesInvalid(let attributes):
-                if let signUpAttributesMethod = delegate.onSignUpAttributesInvalid {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await signUpAttributesMethod(attributes)
-                } else {
-                    let error = SignUpStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignUpError(error: error)
-                }
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
             case .error(let error):
-                await delegate.onSignUpError(error: error)
+                await delegate.onSignUpStartError(error: error)
             }
         }
     }
@@ -218,20 +207,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 correlationId: correlationId
             )
 
+            let delegateDispatcher = SignInPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
             switch controllerResponse.result {
             case .completed(let result):
-                await delegate.onSignInCompleted(result: result)
+                await delegateDispatcher.dispatchSignInCompleted(result: result)
             case .codeRequired(let newState, let sentTo, let channelType, let codeLength):
-                if let codeRequiredMethod = delegate.onSignInCodeRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await codeRequiredMethod(newState, sentTo, channelType, codeLength)
-                } else {
-                    let error = SignInPasswordStartError(type: .generalError, message: MSALNativeAuthErrorMessage.codeRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignInPasswordError(error: error)
-                }
+                await delegateDispatcher.dispatchSignInCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelType,
+                    codeLength: codeLength
+                )
             case .error(let error):
-                await delegate.onSignInPasswordError(error: error)
+                await delegate.onSignInPasswordStartError(error: error)
             }
         }
     }
@@ -255,20 +244,20 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 correlationId: correlationId
             )
 
+            let delegateDispatcher = SignInStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignInCodeRequired(newState: newState, sentTo: sentTo, channelTargetType: channelTargetType, codeLength: codeLength)
+                await delegateDispatcher.dispatchSignInCodeRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength
+                )
             case .passwordRequired(let newState):
-                if let passwordRequiredMethod = delegate.onSignInPasswordRequired {
-                    controllerResponse.telemetryUpdate?(.success(()))
-                    await passwordRequiredMethod(newState)
-                } else {
-                    let error = SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.passwordRequiredNotImplemented)
-                    controllerResponse.telemetryUpdate?(.failure(error))
-                    await delegate.onSignInError(error: error)
-                }
+                await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState)
             case .error(let error):
-                await delegate.onSignInError(error: error)
+                await delegate.onSignInStartError(error: error)
             }
         }
     }
@@ -284,18 +273,19 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         Task {
-            let result = await resetPasswordInternal(username: username, correlationId: correlationId)
+            let controllerResponse = await resetPasswordInternal(username: username, correlationId: correlationId)
+            let delegateDispatcher = ResetPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onResetPasswordCodeRequired(
+                await delegateDispatcher.dispatchResetPasswordCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
                     codeLength: codeLength
                 )
             case .error(let error):
-                await delegate.onResetPasswordError(error: error)
+                await delegate.onResetPasswordStartError(error: error)
             }
         }
     }

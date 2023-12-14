@@ -26,7 +26,7 @@ import Foundation
 import XCTest
 import MSAL
 
-class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
+class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {    
     private let expectation: XCTestExpectation
     private(set) var onSignUpPasswordErrorCalled = false
     private(set) var error: MSAL.SignUpPasswordStartError?
@@ -40,7 +40,7 @@ class SignUpPasswordStartDelegateSpy: SignUpPasswordStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpPasswordError(error: SignUpPasswordStartError) {
+    func onSignUpPasswordStartError(error: MSAL.SignUpPasswordStartError) {
         onSignUpPasswordErrorCalled = true
         self.error = error
 
@@ -72,7 +72,7 @@ class SignUpStartDelegateSpy: SignUpStartDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpError(error: SignUpStartError) {
+    func onSignUpStartError(error: SignUpStartError) {
         onSignUpErrorCalled = true
         self.error = error
 
@@ -148,7 +148,7 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
         self.expectation = expectation
     }
 
-    func onSignUpResendCodeError(error: ResendCodeError) {
+    func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         onSignUpResendCodeErrorCalled = true
         self.error = error
     }

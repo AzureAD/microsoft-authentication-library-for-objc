@@ -58,11 +58,12 @@ import Foundation
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func resendCode(delegate: SignInResendCodeDelegate) {
         Task {
-            let result = await resendCodeInternal()
+            let controllerResponse = await resendCodeInternal()
+            let delegateDispatcher = SignInResendCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegate.onSignInResendCodeCodeRequired(
+                await delegateDispatcher.dispatchSignInResendCodeCodeRequired(
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
@@ -80,11 +81,12 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate) {
         Task {
-            let result = await submitCodeInternal(code: code)
+            let controllerResponse = await submitCodeInternal(code: code)
+            let delegateDispatcher = SignInVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .completed(let accountResult):
-                await delegate.onSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
             case .error(let error, let newState):
                 await delegate.onSignInVerifyCodeError(error: error, newState: newState)
             }
@@ -116,11 +118,12 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate) {
         Task {
-            let result = await submitPasswordInternal(password: password)
+            let controllerResponse = await submitPasswordInternal(password: password)
+            let delegateDispatcher = SignInPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
-            switch result {
+            switch controllerResponse.result {
             case .completed(let accountResult):
-                await delegate.onSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
             case .error(let error, let newState):
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
             }

@@ -40,7 +40,7 @@ open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
@@ -115,9 +115,27 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
     }
 }
 
+final class SignInPasswordRequiredDelegateOptionalMethodsNotImplemented: SignInPasswordRequiredDelegate {
+
+    private(set) var newPasswordRequiredState: SignInPasswordRequiredState?
+    let expectation: XCTestExpectation
+    var delegateError: PasswordRequiredError?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
+        XCTAssertTrue(Thread.isMainThread)
+        delegateError = error
+        newPasswordRequiredState = newState
+        expectation.fulfill()
+    }
+}
+
 open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
 
-    public func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         XCTFail("This method should not be called")
     }
 
@@ -151,7 +169,7 @@ open class SignInCodeStartDelegateSpy: SignInStartDelegate {
         self.expectedError = expectedError
     }
 
-    public func onSignInError(error: SignInStartError) {
+    public func onSignInStartError(error: SignInStartError) {
         XCTAssertEqual(error.type, expectedError?.type)
         XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
         XCTAssertTrue(Thread.isMainThread)
@@ -204,6 +222,23 @@ class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
     }
 }
 
+class SignInResendCodeDelegateOptionalMethodsNotImplemented: SignInResendCodeDelegate {
+
+    private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
+    private(set) var newSignInResendCodeError: ResendCodeError?
+    let expectation: XCTestExpectation
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignInResendCodeError(error: ResendCodeError, newState: SignInCodeRequiredState?) {
+        newSignInCodeRequiredState = newState
+        newSignInResendCodeError = error
+        expectation.fulfill()
+    }
+}
+
 class SignInCodeStartDelegateWithPasswordRequiredSpy: SignInCodeStartDelegateSpy {
     var passwordRequiredState: SignInPasswordRequiredState?
 
@@ -250,6 +285,24 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
     }
 }
 
+final class SignInVerifyCodeDelegateOptionalMethodsNotImplemented: SignInVerifyCodeDelegate {
+
+    private let expectation: XCTestExpectation
+    var expectedError: VerifyCodeError?
+    var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    var expectedNewState: SignInCodeRequiredState?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    public func onSignInVerifyCodeError(error: VerifyCodeError, newState: SignInCodeRequiredState?) {
+        expectedError = error
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}
+
 open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
 
     private let expectation: XCTestExpectation
@@ -283,6 +336,23 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     }
 }
 
+final class SignInAfterSignUpDelegateOptionalMethodsNotImplemented: SignInAfterSignUpDelegate {
+
+    private let expectation: XCTestExpectation
+    var expectedError: SignInAfterSignUpError?
+
+    init(expectation: XCTestExpectation, expectedError: SignInAfterSignUpError? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+
+    public func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
+        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+}
+
 final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPasswordStartDelegate {
     private let expectation: XCTestExpectation
     var expectedError: SignInPasswordStartError?
@@ -294,7 +364,7 @@ final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPassw
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    func onSignInPasswordError(error: MSAL.SignInPasswordStartError) {
+    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
@@ -305,15 +375,22 @@ final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPassw
         XCTFail("This method should not be called")
         expectation.fulfill()
     }
+}
 
-    func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {
-        if let expectedUserAccountResult = expectedUserAccountResult {
-            XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
-        } else {
-            XCTFail("This method should not be called")
-        }
+final class SignInCodeStartDelegateOptionalMethodNotImplemented: SignInStartDelegate {
+
+    let expectation: XCTestExpectation
+    var expectedError: SignInStartError?
+
+    init(expectation: XCTestExpectation, expectedError: SignInStartError) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+
+    public func onSignInStartError(error: SignInStartError) {
+        XCTAssertEqual(error.type, expectedError?.type)
+        XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
+        XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
 }
