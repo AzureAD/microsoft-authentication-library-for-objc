@@ -29,7 +29,7 @@ final class SignInStartErrorTests: XCTestCase {
     private var sut: SignInStartError!
 
     func test_totalCases() {
-        XCTAssertEqual(SignInStartError.ErrorType.allCases.count, 4)
+        XCTAssertEqual(SignInStartError.ErrorType.allCases.count, 5)
     }
 
     func test_customErrorDescription() {
