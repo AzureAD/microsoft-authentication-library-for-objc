@@ -114,7 +114,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
 
         let expectedResult: SignUpPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: UUID()),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -197,7 +197,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpCodeStartDelegateSpy(expectation: exp)
 
         let expectedResult: SignUpStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken"),
+            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: UUID()),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
