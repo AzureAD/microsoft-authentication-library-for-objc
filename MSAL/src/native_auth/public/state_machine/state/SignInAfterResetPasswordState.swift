@@ -24,14 +24,26 @@
 
 import Foundation
 
-struct MSALNativeAuthResetPasswordStartResponse: Decodable {
+/// An object of this type is created when a user has reset their password successfully.
+@objcMembers public class SignInAfterResetPasswordState: SignInAfterPreviousFlowBaseState {
+    /// Sign in the user that just reset the password.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
+        Task {
+            let controllerResponse = await signInInternal(scopes: scopes)
+            let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
+                delegate: delegate,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
-    // MARK: - Variables
-    let passwordResetToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
-
-    enum CodingKeys: String, CodingKey {
-        case passwordResetToken
-        case challengeType
+            switch controllerResponse.result {
+            case .success(let accountResult):
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+            case .failure(let error):
+                await delegate.onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError(message: error.errorDescription))
+            }
+        }
     }
 }

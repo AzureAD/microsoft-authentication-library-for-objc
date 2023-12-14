@@ -28,7 +28,7 @@ extension ResetPasswordCodeRequiredState {
 
     func resendCodeInternal() async -> MSALNativeAuthResetPasswordControlling.ResetPasswordResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        return await controller.resendCode(passwordResetToken: flowToken, context: context)
+        return await controller.resendCode(username: username, passwordResetToken: flowToken, context: context)
     }
 
     func submitCodeInternal(code: String) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitCodeControllerResponse {
@@ -39,7 +39,7 @@ extension ResetPasswordCodeRequiredState {
             return .init(.error(error: VerifyCodeError(type: .invalidCode), newState: self))
         }
 
-        return await controller.submitCode(code: code, passwordResetToken: flowToken, context: context)
+        return await controller.submitCode(code: code, username: username, passwordResetToken: flowToken, context: context)
     }
 }
 
@@ -53,6 +53,6 @@ extension ResetPasswordRequiredState {
             return .init(.error(error: PasswordRequiredError(type: .invalidPassword), newState: self))
         }
 
-        return await controller.submitPassword(password: password, passwordSubmitToken: flowToken, context: context)
+        return await controller.submitPassword(password: password, username: username, passwordSubmitToken: flowToken, context: context)
     }
 }

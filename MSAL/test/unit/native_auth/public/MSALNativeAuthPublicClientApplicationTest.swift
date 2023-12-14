@@ -106,28 +106,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp1, exp2])
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
-        XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
-        XCTAssertEqual(delegate.codeLength, 1)
-    }
-    
-    func testSignUpPassword_whenNoAttributesAreSpecified_AttributesShouldBeNil() {
-        let exp = expectation(description: "sign-up public interface")
-        let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-
-        let expectedResult: SignUpPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: UUID()),
-            sentTo: "sentTo",
-            channelTargetType: .email,
-            codeLength: 1
-        )
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult)
-
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
-
-        wait(for: [exp])
-
         XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
     }
@@ -226,28 +204,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         sut.signUp(username: "correct", delegate: delegate)
 
         wait(for: [exp, exp2])
-
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
-        XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
-        XCTAssertEqual(delegate.codeLength, 1)
-    }
-    
-    func testSignUp_whenNoAttributesAreSpecified_AttributesShouldBeNil() {
-        let exp = expectation(description: "sign-up public interface")
-        let delegate = SignUpCodeStartDelegateSpy(expectation: exp)
-
-        let expectedResult: SignUpStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: UUID()),
-            sentTo: "sentTo",
-            channelTargetType: .email,
-            codeLength: 1
-        )
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult)
-
-        sut.signUp(username: "correct", delegate: delegate)
-
-        wait(for: [exp])
 
         XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
         XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
@@ -525,7 +481,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = ResetPasswordStartDelegateSpy(expectation: exp1)
 
         let expectedResult: ResetPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId),
+            newState: .init(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -539,6 +495,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         wait(for: [exp1, exp2], timeout: 1)
 
         XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
+        XCTAssertEqual(delegate.newState?.username, "username")
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -550,7 +507,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = ResetPasswordStartDelegateOptionalMethodsNotImplemented(expectation: exp)
 
         let expectedResult: ResetPasswordStartResult = .codeRequired(
-            newState: .init(controller: controllerFactoryMock.resetPasswordController, flowToken: "flowToken", correlationId: correlationId),
+            newState: .init(controller: controllerFactoryMock.resetPasswordController, username: "username", flowToken: "flowToken", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
@@ -956,7 +913,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegatePasswordResetVerifyCode = ResetPasswordVerifyCodeDelegateSpy(expectation: expectationPasswordResetVerifyCode)
         let expectationPasswordResetRequired = expectation(description: "Password Reset Required")
         let delegatePasswordResetRequired = ResetPasswordRequiredDelegateSpy(expectation: expectationPasswordResetRequired)
-        
+        let expectationSignInAfterResetPassword = expectation(description: "Sign In After Reset Password")
+        let delegateSignInAfterResetPassword = SignInAfterResetPasswordDelegateSpy(expectation: expectationSignInAfterResetPassword)
+
         let resetPasswordRequestProviderMock = MSALNativeAuthResetPasswordRequestProviderMock ()
         resetPasswordRequestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         resetPasswordRequestProviderMock.expectedStartRequestParameters = expectedResetPasswordStartParams
@@ -974,12 +933,53 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         resetPasswordResponseValidator.mockValidateResetPasswordChallengeFunc(.success("sentTo", .email, 4, "passwordResetToken 2"))
         resetPasswordResponseValidator.mockValidateResetPasswordContinueFunc(.success(passwordSubmitToken: "passwordSubmitToken"))
         resetPasswordResponseValidator.mockValidateResetPasswordSubmitFunc(.success(passwordResetToken: "passwordResetToken 3", pollInterval: 0))
-        resetPasswordResponseValidator.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded))
-        
+        resetPasswordResponseValidator.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded, continuationToken: "slt"))
+
+        let expectedUsername = "username"
+        let expectedScopes = "scope1 scope2 openid profile offline_access"
+
+        let tokenResult = MSIDTokenResult()
+        tokenResult.rawIdToken = "idToken"
+        let cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
+        cacheAccessorMock.expectedMSIDTokenResult = tokenResult
+
+        let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, credentialToken: nil, signInSLT: "slt", grantType: .slt, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedContext = contextMock
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+
+        let tokenResponse = MSIDCIAMTokenResponse()
+        tokenResponse.accessToken = "accessToken"
+        tokenResponse.scope = "openid profile email"
+        tokenResponse.idToken = "idToken"
+        tokenResponse.refreshToken = "refreshToken"
+
+        let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
+        tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
+
+        let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
+        let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
+                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
+                                                                                                 refreshToken: nil,
+                                                                                                 rawIdToken: nil),
+                                                                configuration: MSALNativeAuthConfigStubs.configuration,
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+        authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
+        delegateSignInAfterResetPassword.expectedUserAccountResult = userAccountResult
+
+        let signInAfterResetPasswordController = MSALNativeAuthSignInController(clientId: clientId,
+                                                                                signInRequestProvider: MSALNativeAuthSignInRequestProviderMock(),
+                                                                                tokenRequestProvider: tokenRequestProviderMock,
+                                                                                cacheAccessor: cacheAccessorMock,
+                                                                                factory: authResultFactoryMock,
+                                                                                signInResponseValidator: MSALNativeAuthSignInResponseValidatorMock(),
+                                                                                tokenResponseValidator: tokenResponseValidatorMock)
+
         let resetPasswordController = MSALNativeAuthResetPasswordController(config: configuration,
                                                                             requestProvider: resetPasswordRequestProviderMock,
-                                                                            responseValidator: resetPasswordResponseValidator)
-        
+                                                                            responseValidator: resetPasswordResponseValidator, 
+                                                                            signInController: signInAfterResetPasswordController)
+
         let controllerFactory = MSALNativeAuthControllerProtocolFactoryMock(resetPasswordController: resetPasswordController)
         
         sut = MSALNativeAuthPublicClientApplication(
@@ -1009,6 +1009,15 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         wait(for: [expectationPasswordResetRequired])
         
         XCTAssertTrue(delegatePasswordResetRequired.onResetPasswordCompletedCalled)
+
+        // Correlation Id is validated internally against expectedTokenParams in the
+        // MSALNativeAuthTokenRequestProviderMock class - checkContext function
+        delegatePasswordResetRequired.signInAfterResetPasswordState?.signIn(scopes: ["scope1", "scope2"], delegate: delegateSignInAfterResetPassword)
+        wait(for: [expectationSignInAfterResetPassword])
+
+        // User account result is validated internally against expectedUserAccountResult in the
+        // SignInAfterSignUpDelegateSpy class - onSignInCompleted function
+        XCTAssertTrue(delegateSignInAfterResetPassword.onSignInCompletedCalled)
     }
     
     private var expectedSignUpStartPasswordParams: MSALNativeAuthSignUpStartRequestProviderParameters {

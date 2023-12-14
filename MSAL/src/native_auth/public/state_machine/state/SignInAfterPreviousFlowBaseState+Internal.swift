@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,19 +24,10 @@
 
 import Foundation
 
-enum ResetPasswordStartResult {
-    case codeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-    case error(ResetPasswordStartError)
-}
+extension SignInAfterPreviousFlowBaseState {
 
-typealias ResetPasswordResendCodeResult = CodeRequiredGenericResult<ResetPasswordCodeRequiredState, ResendCodeError>
-
-enum ResetPasswordSubmitCodeResult {
-    case passwordRequired(newState: ResetPasswordRequiredState)
-    case error(error: VerifyCodeError, newState: ResetPasswordCodeRequiredState?)
-}
-
-enum ResetPasswordSubmitPasswordResult {
-    case completed(SignInAfterResetPasswordState)
-    case error(error: PasswordRequiredError, newState: ResetPasswordRequiredState?)
+    func signInInternal(scopes: [String]?) async -> MSALNativeAuthSignInControlling.SignInAfterPreviousFlowControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        return await controller.signIn(username: username, slt: slt, scopes: scopes, context: context)
+    }
 }

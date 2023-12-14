@@ -79,4 +79,69 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
     }
 
+    // SSPR - with automatic sign in
+    func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
+        try XCTSkipIf(true) // TODO: Remove once we update to continuation_token
+
+        let codeRequiredExp = expectation(description: "code required")
+        let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
+
+        if usingMockAPI {
+            try await mockResponse(.ssprStartSuccess, endpoint: .resetPasswordStart)
+        }
+
+        sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
+
+        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
+        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
+        XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
+        XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
+
+        // Now submit the code...
+
+        let passwordRequiredExp = expectation(description: "password required")
+        let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
+
+        if usingMockAPI {
+            try await mockResponse(.ssprContinueSuccess, endpoint: .resetPasswordContinue)
+        }
+
+        resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
+
+        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
+
+        // Now submit the password...
+        let resetPasswordCompletedExp = expectation(description: "reset password completed")
+        let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
+
+        if usingMockAPI {
+            try await mockResponse(.ssprSubmitSuccess, endpoint: .resetPasswordSubmit)
+        }
+
+        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
+
+        await fulfillment(of: [resetPasswordCompletedExp], timeout: defaultTimeout)
+        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
+
+        // Now sign in...
+
+        let signInAfterResetPasswordExp = expectation(description: "sign in after reset password")
+        let signInAfterResetPasswordDelegate = SignInAfterResetPasswordDelegateSpy(expectation: signInAfterResetPasswordExp)
+
+        if usingMockAPI {
+            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
+        }
+
+        resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(delegate: signInAfterResetPasswordDelegate)
+
+        await fulfillment(of: [signInAfterResetPasswordExp], timeout: defaultTimeout)
+        XCTAssertTrue(signInAfterResetPasswordDelegate.onSignInCompletedCalled)
+        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
+        XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
+        XCTAssertNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
+        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[0], "openid")
+        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[1], "offline_access")
+    }
 }

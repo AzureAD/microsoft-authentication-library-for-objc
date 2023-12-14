@@ -25,28 +25,12 @@
 import Foundation
 
 /// An object of this type is created when a user has signed up successfully.
-@objcMembers public class SignInAfterSignUpState: NSObject {
-
-    let controller: MSALNativeAuthSignInControlling
-    let username: String
-    let slt: String?
-    let correlationId: UUID
-
-    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?, correlationId: UUID) {
-        self.username = username
-        self.slt = slt
-        self.controller = controller
-        self.correlationId = correlationId
-    }
-
+@objcMembers public class SignInAfterSignUpState: SignInAfterPreviousFlowBaseState {
     /// Sign in the user that signed up.
     /// - Parameters:
     ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signIn(
-        scopes: [String]? = nil,
-        delegate: SignInAfterSignUpDelegate
-    ) {
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
         Task {
             let controllerResponse = await signInInternal(scopes: scopes)
             let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
@@ -55,7 +39,7 @@ import Foundation
             case .success(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
             case .failure(let error):
-                await delegate.onSignInAfterSignUpError(error: error)
+                await delegate.onSignInAfterSignUpError(error: SignInAfterSignUpError(message: error.errorDescription))
             }
         }
     }

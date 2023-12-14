@@ -78,10 +78,10 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
 
 final class ResetPasswordRequiredDelegateDispatcher: DelegateDispatcher<ResetPasswordRequiredDelegate> {
 
-    func dispatchResetPasswordCompleted() async {
+    func dispatchResetPasswordCompleted(newState: SignInAfterResetPasswordState) async {
         if let onResetPasswordCompleted = delegate.onResetPasswordCompleted {
             telemetryUpdate?(.success(()))
-            await onResetPasswordCompleted()
+            await onResetPasswordCompleted(newState)
         } else {
             let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCompleted"))
             telemetryUpdate?(.failure(error))

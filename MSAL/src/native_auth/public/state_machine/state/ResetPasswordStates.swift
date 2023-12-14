@@ -27,15 +27,18 @@ import Foundation
 @objcMembers
 public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthResetPasswordControlling
+    let username: String
     let inputValidator: MSALNativeAuthInputValidating
 
     init(
         controller: MSALNativeAuthResetPasswordControlling,
+        username: String,
         flowToken: String,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         correlationId: UUID
     ) {
         self.controller = controller
+        self.username = username
         self.inputValidator = inputValidator
         super.init(flowToken: flowToken, correlationId: correlationId)
     }
@@ -101,8 +104,8 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
             let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
-            case .completed:
-                await delegateDispatcher.dispatchResetPasswordCompleted()
+            case .completed(let newState):
+                await delegateDispatcher.dispatchResetPasswordCompleted(newState: newState)
             case .error(let error, let newState):
                 await delegate.onResetPasswordRequiredError(error: error, newState: newState)
             }

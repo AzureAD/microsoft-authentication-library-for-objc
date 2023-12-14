@@ -27,8 +27,8 @@ import Foundation
 protocol MSALNativeAuthSignInControlling {
     typealias SignInPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordStartResult>
     typealias SignInCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
-    typealias SignInAfterSignUpControllerResponse =
-        MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, SignInAfterSignUpError>>
+    typealias SignInAfterPreviousFlowControllerResponse =
+        MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, MSALNativeAuthError>>
     typealias SignInSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInVerifyCodeResult>
     typealias SignInSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordRequiredResult>
     typealias SignInResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInResendCodeResult>
@@ -42,7 +42,7 @@ protocol MSALNativeAuthSignInControlling {
         slt: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
-    ) async -> SignInAfterSignUpControllerResponse
+    ) async -> SignInAfterPreviousFlowControllerResponse
 
     func submitCode(
         _ code: String,
