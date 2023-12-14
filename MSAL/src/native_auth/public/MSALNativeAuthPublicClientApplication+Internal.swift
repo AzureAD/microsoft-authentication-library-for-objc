@@ -26,95 +26,74 @@ import Foundation
 
 extension MSALNativeAuthPublicClientApplication {
 
-    func signUpUsingPasswordInternal(
-        username: String,
-        password: String,
-        attributes: [String: Any]?,
-        correlationId: UUID?
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
-        guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignUpPasswordStartError(type: .invalidUsername)))
-        }
-        guard inputValidator.isInputValid(password) else {
-            return .init(.error(SignUpPasswordStartError(type: .invalidPassword)))
-        }
-
-        let controller = controllerFactory.makeSignUpController()
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-
-        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
-            username: username,
-            password: password,
-            attributes: attributes,
-            context: context
-        )
-
-        return await controller.signUpStartPassword(parameters: parameters)
-    }
-
     func signUpInternal(
         username: String,
+        password: String?,
         attributes: [String: Any]?,
         correlationId: UUID?
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+    ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignUpStartError(type: .invalidUsername)))
         }
 
+        if let password = password {
+            guard inputValidator.isInputValid(password) else {
+                return .init(.error(SignUpStartError(type: .invalidPassword)))
+            }
+        }
+
         let controller = controllerFactory.makeSignUpController()
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
             username: username,
-            password: nil,
+            password: password,
             attributes: attributes,
             context: context
         )
 
-        return await controller.signUpStartCode(parameters: parameters)
-    }
-
-    func signInUsingPasswordInternal(
-        username: String,
-        password: String,
-        scopes: [String]?,
-        correlationId: UUID?
-    ) async -> MSALNativeAuthSignInControlling.SignInPasswordControllerResponse {
-        guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignInPasswordStartError(type: .invalidUsername)))
+        if password != nil {
+            return await controller.signUpStartPassword(parameters: parameters)
+        } else {
+            return await controller.signUpStartCode(parameters: parameters)
         }
-
-        guard inputValidator.isInputValid(password) else {
-            return .init(.error(SignInPasswordStartError(type: .invalidCredentials)))
-        }
-
-        let controller = controllerFactory.makeSignInController()
-
-        let params = MSALNativeAuthSignInWithPasswordParameters(
-            username: username,
-            password: password,
-            context: MSALNativeAuthRequestContext(correlationId: correlationId),
-            scopes: scopes
-        )
-
-        return await controller.signIn(params: params)
     }
 
     func signInInternal(
         username: String,
+        password: String?,
         scopes: [String]?,
         correlationId: UUID?
-    ) async -> MSALNativeAuthSignInControlling.SignInCodeControllerResponse {
+    ) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         guard inputValidator.isInputValid(username) else {
             return .init(.error(SignInStartError(type: .invalidUsername)))
         }
+
+        if let password = password {
+            guard inputValidator.isInputValid(password) else {
+                return .init(.error(SignInStartError(type: .invalidCredentials)))
+            }
+        }
+
         let controller = controllerFactory.makeSignInController()
-        let params = MSALNativeAuthSignInWithCodeParameters(
-            username: username,
-            context: MSALNativeAuthRequestContext(correlationId: correlationId),
-            scopes: scopes
-        )
-        return await controller.signIn(params: params)
+
+        if let password = password {
+            let params = MSALNativeAuthSignInWithPasswordParameters(
+                username: username,
+                password: password,
+                context: MSALNativeAuthRequestContext(correlationId: correlationId),
+                scopes: scopes
+            )
+
+            return await controller.signIn(params: params)
+        } else {
+            let params = MSALNativeAuthSignInWithCodeParameters(
+                username: username,
+                context: MSALNativeAuthRequestContext(correlationId: correlationId),
+                scopes: scopes
+            )
+            return await controller.signIn(params: params)
+        }
     }
 
     func resetPasswordInternal(

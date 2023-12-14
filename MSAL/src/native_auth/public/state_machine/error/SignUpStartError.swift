@@ -29,6 +29,7 @@ public class SignUpStartError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case userAlreadyExists
+        case invalidPassword
         case invalidUsername
         case generalError
     }
@@ -51,6 +52,8 @@ public class SignUpStartError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.browserRequired
         case .userAlreadyExists:
             return MSALNativeAuthErrorMessage.userAlreadyExists
+        case .invalidPassword:
+            return MSALNativeAuthErrorMessage.invalidPassword
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
         case .generalError:
@@ -66,6 +69,11 @@ public class SignUpStartError: MSALNativeAuthError {
     /// Returns `true` when the user is trying to register an existing username.
     public var isUserAlreadyExists: Bool {
         return type == .userAlreadyExists
+    }
+    
+    /// Returns `true` when the password is not valid.
+    public var isInvalidPassword: Bool {
+        return type == .invalidPassword
     }
 
     /// Returns `true` when the username is not valid.

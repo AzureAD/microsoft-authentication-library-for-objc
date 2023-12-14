@@ -59,7 +59,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
         }
     }
 
-    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
+    func convertToSignInPasswordStartError() -> SignInStartError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)

@@ -25,30 +25,6 @@
 import Foundation
 
 @objc
-public protocol SignInPasswordStartDelegate {
-    /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignInPasswordStartError(error: SignInPasswordStartError)
-
-    /// Notifies the delegate that a verification code is required from the user to continue.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordStartError(error:)`` will be called.
-    /// - Parameters:
-    ///   - newState: An object representing the new state of the flow with follow on methods.
-    ///   - sentTo: The email/phone number that the code was sent to.
-    ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: The length of the code required.
-    @MainActor @objc optional func onSignInCodeRequired(newState: SignInCodeRequiredState,
-                                                        sentTo: String,
-                                                        channelTargetType: MSALNativeAuthChannelType,
-                                                        codeLength: Int)
-
-    /// Notifies the delegate that the sign in operation completed successfully.
-    /// - Parameter result: An object representing the signed in user account.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordStartError(error:)`` will be called.
-    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
-}
-
-@objc
 public protocol SignInStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
@@ -70,6 +46,11 @@ public protocol SignInStartDelegate {
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
+    
+    /// Notifies the delegate that the sign in operation completed successfully.
+    /// - Parameter result: An object representing the signed in user account.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordStartError(error:)`` will be called.
+    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
 @objc

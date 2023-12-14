@@ -24,13 +24,8 @@
 
 import Foundation
 
-enum SignInPasswordStartResult {
-    case completed(MSALNativeAuthUserAccountResult)
-    case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-    case error(SignInPasswordStartError)
-}
-
 enum SignInStartResult {
+    case completed(MSALNativeAuthUserAccountResult)
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(newState: SignInPasswordRequiredState)
     case error(SignInStartError)

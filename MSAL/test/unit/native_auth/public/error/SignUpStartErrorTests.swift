@@ -40,7 +40,7 @@ final class SignUpStartErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        let sut: [SignUpPasswordStartError] = [
+        let sut: [SignUpStartError] = [
             .init(type: .browserRequired),
             .init(type: .userAlreadyExists),
             .init(type: .invalidUsername),

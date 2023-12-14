@@ -27,10 +27,10 @@ import XCTest
 
 final class SignInPasswordStartErrorTests: XCTestCase {
 
-    private var sut: SignInPasswordStartError!
+    private var sut: SignInStartError!
 
     func test_totalCases() {
-        XCTAssertEqual(SignInPasswordStartError.ErrorType.allCases.count, 5)
+        XCTAssertEqual(SignInStartError.ErrorType.allCases.count, 5)
     }
 
     func test_customErrorDescription() {
@@ -40,7 +40,7 @@ final class SignInPasswordStartErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        let sut: [SignInPasswordStartError] = [
+        let sut: [SignInStartError] = [
             .init(type: .browserRequired),
             .init(type: .userNotFound),
             .init(type: .invalidCredentials),

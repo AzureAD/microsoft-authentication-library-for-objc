@@ -29,6 +29,7 @@ public class SignInStartError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case userNotFound
+        case invalidCredentials
         case invalidUsername
         case generalError
     }
@@ -51,6 +52,8 @@ public class SignInStartError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.browserRequired
         case .userNotFound:
             return MSALNativeAuthErrorMessage.userNotFound
+        case .invalidCredentials:
+            return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
         case .generalError:
@@ -66,6 +69,11 @@ public class SignInStartError: MSALNativeAuthError {
     /// Returns `true` if the user that is trying to sign in cannot be found.
     public var isUserNotFound: Bool {
         return type == .userNotFound
+    }
+    
+    /// Returns `true` when the credentials are not valid.
+    public var isInvalidCredentials: Bool {
+        return type == .invalidCredentials
     }
 
     /// Returns `true` when the username is not valid.

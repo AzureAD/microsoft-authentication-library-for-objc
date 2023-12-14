@@ -31,18 +31,17 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
     private(set) var slt: String?
     var expectation: XCTestExpectation?
 
-    var signInPasswordStartResult: MSALNativeAuthSignInControlling.SignInPasswordControllerResponse!
-    var signInStartResult: MSALNativeAuthSignInControlling.SignInCodeControllerResponse!
+    var signInStartResult: MSALNativeAuthSignInControlling.SignInControllerResponse!
     var signInSLTResult: SignInAfterPreviousFlowControllerResponse!
     var submitCodeResult: SignInSubmitCodeControllerResponse!
     var submitPasswordResult: SignInSubmitPasswordControllerResponse!
     var resendCodeResult: SignInResendCodeControllerResponse!
 
-    func signIn(params: MSAL.MSALNativeAuthSignInWithPasswordParameters) async -> MSALNativeAuthSignInControlling.SignInPasswordControllerResponse {
-        return signInPasswordStartResult
+    func signIn(params: MSAL.MSALNativeAuthSignInWithPasswordParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
+        return signInStartResult
     }
 
-    func signIn(params: MSAL.MSALNativeAuthSignInWithCodeParameters) async -> MSALNativeAuthSignInControlling.SignInCodeControllerResponse {
+    func signIn(params: MSAL.MSALNativeAuthSignInWithCodeParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         return signInStartResult
     }
 

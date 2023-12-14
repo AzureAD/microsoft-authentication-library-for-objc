@@ -27,17 +27,17 @@ import XCTest
 
 class SignInPasswordStartTestsValidatorHelper: SignInPasswordStartDelegateSpy {
 
-    func onSignInPasswordError(_ input: MSALNativeAuthSignInController.SignInPasswordControllerResponse) {
+    func onSignInPasswordError(_ input: MSALNativeAuthSignInController.SignInControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .error")
         }
 
         self.expectedError = error
-        Task { await self.onSignInPasswordStartError(error: error) }
+        Task { await self.onSignInStartError(error: error) }
     }
 
-    func onSignInCodeRequired(_ input: MSALNativeAuthSignInController.SignInPasswordControllerResponse) {
+    func onSignInCodeRequired(_ input: MSALNativeAuthSignInController.SignInControllerResponse) {
 
         guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation.fulfill()
@@ -47,7 +47,7 @@ class SignInPasswordStartTestsValidatorHelper: SignInPasswordStartDelegateSpy {
         Task { await self.onSignInCodeRequired(newState: newState, sentTo: sentTo, channelTargetType: channelTargetType, codeLength: codeLength) }
     }
     
-    func onSignInCompleted(_ input: MSALNativeAuthSignInController.SignInPasswordControllerResponse) {
+    func onSignInCompleted(_ input: MSALNativeAuthSignInController.SignInControllerResponse) {
         guard case let .completed(result) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .success")
@@ -80,7 +80,7 @@ class SignInPasswordRequiredTestsValidatorHelper: SignInPasswordRequiredDelegate
 
 class SignInCodeStartTestsValidatorHelper: SignInCodeStartDelegateSpy {
     
-    func onSignInError(_ input: MSALNativeAuthSignInControlling.SignInCodeControllerResponse) {
+    func onSignInError(_ input: MSALNativeAuthSignInControlling.SignInControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .error")
@@ -89,7 +89,7 @@ class SignInCodeStartTestsValidatorHelper: SignInCodeStartDelegateSpy {
         Task { await self.onSignInStartError(error: error) }
     }
     
-    func onSignInCodeRequired(_ input: MSALNativeAuthSignInControlling.SignInCodeControllerResponse) {
+    func onSignInCodeRequired(_ input: MSALNativeAuthSignInControlling.SignInControllerResponse) {
         guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation.fulfill()
             return XCTFail("input should be .codeRequired")

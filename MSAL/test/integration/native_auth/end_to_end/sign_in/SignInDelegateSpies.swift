@@ -26,18 +26,18 @@ import Foundation
 import XCTest
 import MSAL
 
-class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
+class SignInPasswordStartDelegateSpy: SignInStartDelegate {
     private let expectation: XCTestExpectation
     private(set) var onSignInPasswordErrorCalled = false
     private(set) var onSignInCompletedCalled = false
-    private(set) var error: MSAL.SignInPasswordStartError?
+    private(set) var error: MSAL.SignInStartError?
     private(set) var result: MSAL.MSALNativeAuthUserAccountResult?
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
     }
 
-    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInStartError(error: MSAL.SignInStartError) {
         onSignInPasswordErrorCalled = true
         self.error = error
 

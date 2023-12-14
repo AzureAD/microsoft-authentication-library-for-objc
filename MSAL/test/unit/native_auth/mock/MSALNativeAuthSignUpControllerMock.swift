@@ -28,20 +28,20 @@ import XCTest
 
 class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
 
-    var startPasswordResult: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse!
-    var startResult: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse!
+    var startPasswordResult: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse!
+    var startResult: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse!
     var resendCodeResult: SignUpResendCodeControllerResponse!
     var submitCodeResult: MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse!
     var submitPasswordResult: MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse!
     var signUpStartRequestParameters: MSALNativeAuthSignUpStartRequestProviderParameters?
     var submitAttributesResult: SignUpSubmitAttributesControllerResponse!
 
-    func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
+    func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         signUpStartRequestParameters = parameters
         return startPasswordResult
     }
 
-    func signUpStartCode(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+    func signUpStartCode(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         signUpStartRequestParameters = parameters
         return startResult
     }
