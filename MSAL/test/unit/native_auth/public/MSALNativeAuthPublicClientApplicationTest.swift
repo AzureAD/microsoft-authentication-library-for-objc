@@ -106,10 +106,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp1, exp2])
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
-        XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
-        XCTAssertEqual(delegate.codeLength, 1)
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
+        XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
     }
 
     func testSignUpPassword_delegate_butDelegateMethodIsNotImplemented_shouldReturnError() {
@@ -207,10 +205,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.newState?.flowToken, "flowToken")
-        XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
-        XCTAssertEqual(delegate.codeLength, 1)
+        XCTAssertNil(controllerFactoryMock.signUpController.signUpStartRequestParameters?.attributes)
+        XCTAssertNotNil(controllerFactoryMock.signUpController.signUpStartRequestParameters)
     }
 
     func testSignUp_delegate_butDelegateMethodIsNotImplemented_shouldReturnError() {

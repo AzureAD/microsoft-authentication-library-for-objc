@@ -25,6 +25,6 @@
 struct MSALNativeAuthSignUpStartRequestProviderParameters {
     let username: String
     let password: String?
-    let attributes: [String: Any]
+    let attributes: [String: Any]?
     let context: MSALNativeAuthRequestContext
 }

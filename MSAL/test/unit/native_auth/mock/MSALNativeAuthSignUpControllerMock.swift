@@ -33,13 +33,16 @@ class MSALNativeAuthSignUpControllerMock: MSALNativeAuthSignUpControlling {
     var resendCodeResult: SignUpResendCodeControllerResponse!
     var submitCodeResult: MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse!
     var submitPasswordResult: MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse!
+    var signUpStartRequestParameters: MSALNativeAuthSignUpStartRequestProviderParameters?
     var submitAttributesResult: SignUpSubmitAttributesControllerResponse!
 
     func signUpStartPassword(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
+        signUpStartRequestParameters = parameters
         return startPasswordResult
     }
 
     func signUpStartCode(parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+        signUpStartRequestParameters = parameters
         return startResult
     }
 

@@ -57,6 +57,34 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpStart).telemetryString()
         checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
     }
+    
+    func test_signUpStartRequestWithNoAttributes_is_created_successfully() throws {
+        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "1234",
+            attributes: nil,
+            context: MSALNativeAuthRequestContext(correlationId: context.correlationId())
+        )
+
+        let request = try sut.start(parameters: parameters)
+
+        checkBodyParams(request.parameters, for: .signUpStart, expectAttributes: false)
+        checkUrlRequest(request.urlRequest!, for: .signUpStart)
+
+        let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpStart).telemetryString()
+        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+    }
+    
+    func test_signUpStartRequestWithInvalidAttributes_throwAnError() throws {
+        let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "1234",
+            attributes: ["invalid attribute": Data()],
+            context: MSALNativeAuthRequestContext(correlationId: context.correlationId())
+        )
+        
+        XCTAssertThrowsError(try sut.start(parameters: parameters))
+    }
 
     func test_signUpChallengeRequest_is_created_successfully() throws {
         let request = try sut.challenge(token: "sign-up-token", context: context)
@@ -74,7 +102,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             signUpToken: "sign-up-token",
             password: "1234",
             oobCode: nil,
-            attributes: nil,
+            attributes: ["city": "dublin"],
             context: context
         )
 
@@ -86,8 +114,40 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpContinue).telemetryString()
         checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
     }
+    
+    func test_signUpContinueRequestWithNoAttributes_is_created_successfully() throws {
+        let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .password,
+            signUpToken: "sign-up-token",
+            password: "1234",
+            oobCode: nil,
+            attributes: nil,
+            context: context
+        )
 
-    private func checkBodyParams(_ bodyParams: [String: String]?, for endpoint: MSALNativeAuthEndpoint) {
+        let request = try sut.continue(parameters: parameters)
+
+        checkBodyParams(request.parameters, for: .signUpContinue, expectAttributes: false)
+        checkUrlRequest(request.urlRequest!, for: .signUpContinue)
+
+        let expectedTelemetryResult = telemetryProvider.telemetryForSignUp(type: .signUpContinue).telemetryString()
+        checkServerTelemetry(request.serverTelemetry, expectedTelemetryResult: expectedTelemetryResult)
+    }
+    
+    func test_signUpContinueRequestWithInvalidAttributes_throwAnError() throws {
+        let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
+            grantType: .password,
+            signUpToken: "sign-up-token",
+            password: "1234",
+            oobCode: nil,
+            attributes: ["invalid attribute": Data()],
+            context: context
+        )
+
+        XCTAssertThrowsError(try sut.continue(parameters: parameters))
+    }
+
+    private func checkBodyParams(_ bodyParams: [String: String]?, for endpoint: MSALNativeAuthEndpoint, expectAttributes: Bool = true) {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         var expectedBodyParams: [String: String]!
@@ -98,9 +158,11 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.username.rawValue: DEFAULT_TEST_ID_TOKEN_USERNAME,
                 Key.challengeType.rawValue: "redirect",
-                Key.attributes.rawValue: "{\"city\":\"dublin\"}",
                 Key.password.rawValue: "1234"
             ]
+            if expectAttributes {
+                expectedBodyParams[Key.attributes.rawValue] = "{\"city\":\"dublin\"}"
+            }
         case .signUpChallenge:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
@@ -114,6 +176,9 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
                 Key.signUpToken.rawValue: "sign-up-token",
                 Key.password.rawValue: "1234"
             ]
+            if expectAttributes {
+                expectedBodyParams[Key.attributes.rawValue] = "{\"city\":\"dublin\"}"
+            }
         default:
             XCTFail("Case not tested")
         }
