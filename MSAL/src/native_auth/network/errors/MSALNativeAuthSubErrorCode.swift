@@ -24,9 +24,28 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordSubmitOauth2ErrorCode: String, Decodable, CaseIterable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case expiredToken = "expired_token"
-    case invalidGrant = "invalid_grant"
+enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable {
+    case passwordTooWeak = "password_too_weak"
+    case passwordTooShort = "password_too_short"
+    case passwordTooLong = "password_too_long"
+    case passwordInvalid = "password_is_invalid"
+    case passwordRecentlyUsed = "password_recently_used"
+    case passwordBanned = "password_banned"
+    case attributeValidationFailed = "attribute_validation_failed"
+    case invalidOOBValue = "invalid_oob_value"
+
+    var isAnyPasswordError: Bool {
+        switch self {
+        case .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordInvalid,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return true
+        case .attributeValidationFailed,
+             .invalidOOBValue:
+            return false
+        }
+    }
 }

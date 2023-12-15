@@ -25,17 +25,11 @@
 import Foundation
 
 enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable, Equatable {
+    case invalidGrant = "invalid_grant"
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
     case unsupportedChallengeType = "unsupported_challenge_type"
-    case passwordTooWeak = "password_too_weak"
-    case passwordTooShort = "password_too_short"
-    case passwordTooLong = "password_too_long"
-    case passwordRecentlyUsed = "password_recently_used"
-    case passwordBanned = "password_banned"
     case userAlreadyExists = "user_already_exists"
     case attributesRequired = "attributes_required"
-    case verificationRequired = "verification_required"
     case unsupportedAuthMethod = "unsupported_auth_method"
-    case attributeValidationFailed = "attribute_validation_failed"
 }

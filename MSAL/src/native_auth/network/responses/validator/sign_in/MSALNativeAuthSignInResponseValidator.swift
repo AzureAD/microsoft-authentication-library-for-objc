@@ -153,7 +153,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .error(.invalidClient(message: error.errorDescription))
             case .unsupportedChallengeType:
                 return .error(.unsupportedChallengeType(message: error.errorDescription))
-            case .invalidGrant:
+            case .invalidGrant, .userNotFound:
                 return .error(.userNotFound(message: error.errorDescription))
             }
     }

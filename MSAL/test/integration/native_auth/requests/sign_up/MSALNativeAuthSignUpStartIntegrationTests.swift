@@ -48,6 +48,13 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         )
     }
 
+    func test_whenSignUpStart_succeeds() async throws {
+        try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
+        let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.continuationToken)
+    }
+
     func test_whenSignUpStart_redirects() async throws {
         try await mockResponse(.challengeTypeRedirect, endpoint: .signUpStart)
         let response: MSALNativeAuthSignUpStartResponse? = try await performTestSucceed()
@@ -78,7 +85,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooWeak,
-            expectedError: createError(.passwordTooWeak)
+            expectedError: createError(.invalidGrant, subError: .passwordTooWeak)
         )
     }
 
@@ -86,7 +93,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooShort,
-            expectedError: createError(.passwordTooShort)
+            expectedError: createError(.invalidGrant, subError: .passwordTooShort)
         )
     }
 
@@ -94,7 +101,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordTooLong,
-            expectedError: createError(.passwordTooLong)
+            expectedError: createError(.invalidGrant, subError: .passwordTooLong)
         )
     }
 
@@ -102,7 +109,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordRecentlyUsed,
-            expectedError: createError(.passwordRecentlyUsed)
+            expectedError: createError(.invalidGrant, subError: .passwordRecentlyUsed)
         )
     }
 
@@ -110,7 +117,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .passwordBanned,
-            expectedError: createError(.passwordBanned)
+            expectedError: createError(.invalidGrant, subError: .passwordBanned)
         )
     }
 
@@ -132,30 +139,17 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         XCTAssertNotNil(response.continuationToken)
     }
 
-    func test_signUpStart_verificationRequired() async throws {
-        let response = try await perform_testFail(
-            endpoint: .signUpStart,
-            response: .verificationRequired,
-            expectedError: createError(.verificationRequired)
-        )
-
-        XCTAssertNotNil(response.continuationToken)
-        XCTAssertNotNil(response.unverifiedAttributes)
-    }
-
     func test_signUpStart_validationFailed() async throws {
         let response = try await perform_testFail(
             endpoint: .signUpStart,
             response: .attributeValidationFailed,
-            expectedError: createError(.attributeValidationFailed)
+            expectedError: createError(.invalidGrant, subError: .attributeValidationFailed)
         )
 
-        XCTAssertNotNil(response.continuationToken)
+        XCTAssertNotNil(response.invalidAttributes)
     }
 
     func test_signUpStart_unsupportedAuthMethod() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .unsupportedAuthMethod,
@@ -164,8 +158,6 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     }
 
     func test_signUpStart_invalidRequest_withESTSErrorInvalidEmail() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .invalidUsername,
@@ -173,9 +165,10 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         )
     }
 
-    private func createError(_ error: MSALNativeAuthSignUpStartOauth2ErrorCode, errorCodes: [Int]? = nil) -> MSALNativeAuthSignUpStartResponseError {
+    private func createError(_ error: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, errorCodes: [Int]? = nil) -> MSALNativeAuthSignUpStartResponseError {
         .init(
             error: error,
+            subError: subError,
             errorDescription: nil,
             errorCodes: nil,
             errorURI: nil,

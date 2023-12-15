@@ -49,23 +49,23 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toVerifyCodePublicError_passwordTooWeak() {
-        testSignUpContinueErrorToVerifyCode(code: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordTooShort() {
-        testSignUpContinueErrorToVerifyCode(code: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordTooLong() {
-        testSignUpContinueErrorToVerifyCode(code: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToVerifyCode(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordBanned() {
-        testSignUpContinueErrorToVerifyCode(code: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_userAlreadyExists() {
@@ -81,7 +81,7 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toVerifyCodePublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToVerifyCode(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_credentialRequired() {
@@ -89,7 +89,7 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toVerifyCodePublicError_invalidOOBValue() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidOOBValue, description: testDescription, expectedErrorType: .invalidCode)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription, expectedErrorType: .invalidCode)
     }
     
     // MARK: - toPasswordRequiredPublicError tests
@@ -111,23 +111,23 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        testSignUpContinueErrorToPasswordRequired(code: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordTooShort() {
-        testSignUpContinueErrorToPasswordRequired(code: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordTooLong() {
-        testSignUpContinueErrorToPasswordRequired(code: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToPasswordRequired(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordBanned() {
-        testSignUpContinueErrorToPasswordRequired(code: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_userAlreadyExists() {
@@ -143,7 +143,7 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toPasswordRequiredPublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToPasswordRequired(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_credentialRequired() {
@@ -151,7 +151,7 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toPasswordRequiredPublicError_invalidOOBValue() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidOOBValue, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription, expectedErrorType: .generalError)
     }
     
     // MARK: - toAttributesRequiredPublicError tests
@@ -173,23 +173,23 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toAttributesRequiredPublicError_passwordTooWeak() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooWeak, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooShort() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooShort, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooShort, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooLong() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordTooLong, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooLong, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordRecentlyUsed, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_passwordBanned() {
-        testSignUpContinueErrorToAttributesRequired(code: .passwordBanned, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordBanned, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_userAlreadyExists() {
@@ -205,7 +205,7 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toAttributesRequiredPublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToAttributesRequired(code: .attributeValidationFailed, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription)
     }
     
     func test_toAttributesRequiredPublicError_credentialRequired() {
@@ -213,27 +213,27 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     }
     
     func test_toAttributesRequiredPublicError_invalidOOBValue() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidOOBValue, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription)
     }
     
     // MARK: private methods
     
-    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
+    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toVerifyCodePublicError()
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
-    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
+    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
-    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, description: String?) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
+    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toAttributesRequiredPublicError()
         XCTAssertEqual(error.errorDescription, description)
     }

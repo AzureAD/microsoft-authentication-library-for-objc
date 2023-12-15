@@ -254,7 +254,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordContinueErrorResponseIs_invalidOOBValue_itReturnsExpectedError() {
-        let result = buildContinueErrorResponse(expectedError: .invalidOOBValue)
+        let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .invalidOOBValue)
 
         XCTAssertEqual(result, .invalidOOB)
     }
@@ -325,56 +325,56 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordTooWeak_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .passwordTooWeak)
+        let result = buildSubmitErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooWeak)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooWeak = error.error {} else {
+        if case .passwordTooWeak = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordTooShort_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .passwordTooShort)
+        let result = buildSubmitErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooShort)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooShort = error.error {} else {
+        if case .passwordTooShort = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordTooLong_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .passwordTooLong)
+        let result = buildSubmitErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooLong)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooLong = error.error {} else {
+        if case .passwordTooLong = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordRecentlyUsed_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .passwordRecentlyUsed)
+        let result = buildSubmitErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordRecentlyUsed)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordRecentlyUsed = error.error {} else {
+        if case .passwordRecentlyUsed = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordSubmitErrorResponseIs_passwordBanned_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .passwordBanned)
+        let result = buildSubmitErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordBanned)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordBanned = error.error {} else {
+        if case .passwordBanned = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
@@ -435,56 +435,56 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooWeak_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .passwordTooWeak)
+        let result = buildPollCompletionErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooWeak)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooWeak = error.error {} else {
+        if case .passwordTooWeak = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooShort_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .passwordTooShort)
+        let result = buildPollCompletionErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooShort)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooShort = error.error {} else {
+        if case .passwordTooShort = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordTooLong_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .passwordTooLong)
+        let result = buildPollCompletionErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordTooLong)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordTooLong = error.error {} else {
+        if case .passwordTooLong = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordRecentlyUsed_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .passwordRecentlyUsed)
+        let result = buildPollCompletionErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordRecentlyUsed)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordRecentlyUsed = error.error {} else {
+        if case .passwordRecentlyUsed = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsPasswordBanned_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .passwordBanned)
+        let result = buildPollCompletionErrorResponse(expectedError: .invalidGrant, expectedSubError: .passwordBanned)
 
         guard case .passwordError(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .passwordBanned = error.error {} else {
+        if case .passwordBanned = error.subError {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
@@ -533,11 +533,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
+        expectedSubError: MSALNativeAuthSubErrorCode? = nil,
         expectedContinuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(
             createResetPasswordContinueError(
                 error: expectedError,
+                subError: expectedSubError,
                 continuationToken: expectedContinuationToken
             )
         )
@@ -546,11 +548,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     private func buildSubmitErrorResponse(
-        expectedError: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode
+        expectedError: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode,
+        expectedSubError: MSALNativeAuthSubErrorCode? = nil
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(
             createResetPasswordSubmitError(
-                error: expectedError
+                error: expectedError,
+                subError: expectedSubError
             )
         )
 
@@ -558,11 +562,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     private func buildPollCompletionErrorResponse(
-        expectedError: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode
+        expectedError: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode,
+        expectedSubError: MSALNativeAuthSubErrorCode? = nil
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(
             createResetPasswordPollCompletionError(
-                error: expectedError
+                error: expectedError,
+                subError: expectedSubError
             )
         )
 
@@ -607,6 +613,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func createResetPasswordContinueError(
         error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
+        subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,
@@ -616,6 +623,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     ) -> MSALNativeAuthResetPasswordContinueResponseError {
         .init(
             error: error,
+            subError: subError,
             errorDescription: errorDescription,
             errorCodes: errorCodes,
             errorURI: errorURI,
@@ -627,6 +635,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func createResetPasswordSubmitError(
         error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode,
+        subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,
@@ -635,6 +644,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     ) -> MSALNativeAuthResetPasswordSubmitResponseError {
         .init(
             error: error,
+            subError: subError,
             errorDescription: errorDescription,
             errorCodes: errorCodes,
             errorURI: errorURI,
@@ -645,6 +655,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func createResetPasswordPollCompletionError(
         error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode,
+        subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,
@@ -653,6 +664,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     ) -> MSALNativeAuthResetPasswordPollCompletionResponseError {
         .init(
             error: error,
+            subError: subError,
             errorDescription: errorDescription,
             errorCodes: errorCodes,
             errorURI: errorURI,

@@ -164,12 +164,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) async -> SignUpStartControllerResponse {
         switch result {
-        case .verificationRequired(let continuationToken, let unverifiedAttributes):
-            MSALLogger.log(
-                level: .info,
-                context: context,
-                format: "verification_required received from signup/start request for attributes: \(unverifiedAttributes)"
-            )
+        case .success(let continuationToken):
             let challengeResult = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
             return handleSignUpChallengeResult(challengeResult, username: username, event: event, context: context)
         case .attributeValidationFailed(let invalidAttributes):
@@ -542,7 +537,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 // The telemetry event always fails because more attributes are required (we consider this an error after having sent attributes)
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .attributeValidationFailed(let newContinuationToken, let invalidAttributes):
+        case .attributeValidationFailed(let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
             MSALLogger.log(level: .error, context: context, format: message)
 
@@ -552,7 +547,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let state = SignUpAttributesRequiredState(
                 controller: self,
                 username: username,
-                continuationToken: newContinuationToken,
+                continuationToken: continuationToken,
                 correlationId: context.correlationId()
             )
             return .init(.attributesInvalid(attributes: invalidAttributes, newState: state), telemetryUpdate: { [weak self] result in

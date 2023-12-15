@@ -99,7 +99,11 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 .unauthorizedClient:
                 return .error(.invalidClient(message: responseError.errorDescription))
             case .invalidGrant:
-                return handleInvalidGrantErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
+                if responseError.subError == .invalidOOBValue {
+                    return .error(.invalidOOBCode(message: responseError.errorDescription))
+                } else {
+                    return handleInvalidGrantErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
+                }
             case .expiredToken:
                 return .error(.expiredToken(message: responseError.errorDescription))
             case .expiredRefreshToken:
@@ -112,6 +116,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 return .error(.authorizationPending(message: responseError.errorDescription))
             case .slowDown:
                 return .error(.slowDown(message: responseError.errorDescription))
+            case .userNotFound:
+                return .error(.userNotFound(message: responseError.errorDescription))
             }
         }
 
