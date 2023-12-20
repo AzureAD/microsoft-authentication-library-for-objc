@@ -46,7 +46,7 @@ public protocol SignInStartDelegate {
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
-    
+
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
