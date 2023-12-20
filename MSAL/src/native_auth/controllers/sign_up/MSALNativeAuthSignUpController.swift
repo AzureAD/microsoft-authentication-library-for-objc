@@ -320,7 +320,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 }
             )
         case .error(let apiError):
-            let error = apiError.toSignUpPasswordStartPublicError()
+            let error = apiError.toSignUpStartPublicError()
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,

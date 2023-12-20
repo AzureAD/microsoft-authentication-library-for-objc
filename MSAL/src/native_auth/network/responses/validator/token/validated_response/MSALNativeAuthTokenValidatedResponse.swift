@@ -123,6 +123,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     }
 
     func convertToPasswordRequiredError() -> PasswordRequiredError {
-        return PasswordRequiredError(signInPasswordError: convertToSignInPasswordStartError())
+        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError())
     }
 }

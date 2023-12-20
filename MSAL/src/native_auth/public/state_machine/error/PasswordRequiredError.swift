@@ -39,8 +39,8 @@ public class PasswordRequiredError: MSALNativeAuthError {
         super.init(message: message)
     }
 
-    init(signInPasswordError: SignInStartError) {
-        switch signInPasswordError.type {
+    init(signInStartError: SignInStartError) {
+        switch signInStartError.type {
         case .browserRequired:
             self.type = .browserRequired
         case .invalidCredentials:
@@ -48,7 +48,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         default:
             self.type = .generalError
         }
-        super.init(message: signInPasswordError.errorDescription)
+        super.init(message: signInStartError.errorDescription)
     }
 
     /// Describes why an error occurred and provides more information about the error.

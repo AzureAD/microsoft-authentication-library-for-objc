@@ -42,16 +42,6 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpChallengeResponseError {
 
-    func toSignUpPasswordStartPublicError() -> SignUpStartError {
-        switch error {
-        case .unauthorizedClient,
-             .unsupportedChallengeType,
-             .expiredToken,
-             .invalidRequest:
-            return .init(type: .generalError, message: errorDescription)
-        }
-    }
-
     func toSignUpStartPublicError() -> SignUpStartError {
         switch error {
         case .unauthorizedClient,

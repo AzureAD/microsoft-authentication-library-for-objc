@@ -30,24 +30,6 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
     private var sut: MSALNativeAuthSignUpChallengeResponseError!
     private let testDescription = "testDescription"
 
-    // MARK: - to toSignUpPasswordStartPublicError tests
-
-    func test_toSignUpPasswordStartPublicError_unauthorizedClient() {
-        testSignUpChallengeErrorToSignUpPasswordStart(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
-    }
-
-    func test_toSignUpPasswordStartPublicError_unsupportedChallengeType() {
-        testSignUpChallengeErrorToSignUpPasswordStart(code: .unsupportedChallengeType, description: "General error", expectedErrorType: .generalError)
-    }
-
-    func test_toSignUpPasswordStartPublicError_expiredToken() {
-        testSignUpChallengeErrorToSignUpPasswordStart(code: .expiredToken, description: testDescription, expectedErrorType: .generalError)
-    }
-
-    func test_toSignUpPasswordStartPublicError_invalidRequest() {
-        testSignUpChallengeErrorToSignUpPasswordStart(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
-    }
-
     // MARK: - to SignUpCodeStartError tests
 
     func test_toSignUpCodeStartPublicError_unauthorizedClient() {
@@ -103,13 +85,6 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
     }
         
     // MARK: private methods
-    
-    private func testSignUpChallengeErrorToSignUpPasswordStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
-        sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let error = sut.toSignUpPasswordStartPublicError()
-        XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
-    }
     
     private func testSignUpChallengeErrorToSignUpStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)

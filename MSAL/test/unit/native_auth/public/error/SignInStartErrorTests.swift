@@ -25,7 +25,8 @@
 import XCTest
 @testable import MSAL
 
-final class SignInStartErrorTests: XCTestCase {
+final class SignInPasswordStartErrorTests: XCTestCase {
+
     private var sut: SignInStartError!
 
     func test_totalCases() {
@@ -42,6 +43,7 @@ final class SignInStartErrorTests: XCTestCase {
         let sut: [SignInStartError] = [
             .init(type: .browserRequired),
             .init(type: .userNotFound),
+            .init(type: .invalidCredentials),
             .init(type: .invalidUsername),
             .init(type: .generalError)
         ]
@@ -49,6 +51,7 @@ final class SignInStartErrorTests: XCTestCase {
         let expectedDescriptions = [
             MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.userNotFound,
+            MSALNativeAuthErrorMessage.invalidCredentials,
             MSALNativeAuthErrorMessage.invalidUsername,
             MSALNativeAuthErrorMessage.generalError
         ]
@@ -60,11 +63,11 @@ final class SignInStartErrorTests: XCTestCase {
         }
     }
 
-
     func test_isBrowserRequired() {
         sut = .init(type: .browserRequired)
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
+        XCTAssertFalse(sut.isInvalidCredentials)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
@@ -72,6 +75,15 @@ final class SignInStartErrorTests: XCTestCase {
         sut = .init(type: .userNotFound)
         XCTAssertTrue(sut.isUserNotFound)
         XCTAssertFalse(sut.isBrowserRequired)
+        XCTAssertFalse(sut.isInvalidCredentials)
+        XCTAssertFalse(sut.isInvalidUsername)
+    }
+
+    func test_isInvalidPassword() {
+        sut = .init(type: .invalidCredentials)
+        XCTAssertTrue(sut.isInvalidCredentials)
+        XCTAssertFalse(sut.isBrowserRequired)
+        XCTAssertFalse(sut.isUserNotFound)
         XCTAssertFalse(sut.isInvalidUsername)
     }
 
@@ -80,5 +92,6 @@ final class SignInStartErrorTests: XCTestCase {
         XCTAssertTrue(sut.isInvalidUsername)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
+        XCTAssertFalse(sut.isInvalidCredentials)
     }
 }

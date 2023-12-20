@@ -49,7 +49,7 @@ public protocol SignInStartDelegate {
     
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Parameter result: An object representing the signed in user account.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordStartError(error:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
     @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
