@@ -15,12 +15,8 @@ let scopes = ["your-scope1-here", "your-scope2-here"]
         
 if let application = try? MSALPublicClientApplication(configuration: config) {
             
-	#if os(iOS)
 	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
 	let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
-	#else
-	let webviewParameters = MSALWebviewParameters()
-	#endif
 	
 	let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
 	application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
@@ -51,12 +47,8 @@ NSArray<NSString *> *scopes = @[@"your-scope1-here", @"your-scope2-here"];
     
 MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
     
-#if TARGET_OS_IPHONE
-    UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif
+MSALViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
+MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
     
 MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
 [application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
@@ -242,12 +234,9 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
 
 #### Swift
 ```swift
-#if os(iOS)
-	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-	let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
-#else
-	let webviewParameters = MSALWebviewParameters()
-#endif
+let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
+
 let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
 application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
@@ -262,16 +251,12 @@ application.acquireToken(with: interactiveParameters, completionBlock: { (result
 	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
 	let accountIdentifier = authResult.account.identifier
 })
-```
+``
 
 #### Objective-C
 ```obj-c
-#if TARGET_OS_IPHONE
-    UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif 
+MSALViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
+MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
 
 MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
 [application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
