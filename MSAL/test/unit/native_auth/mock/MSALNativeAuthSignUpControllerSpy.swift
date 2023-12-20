@@ -49,7 +49,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         return .init(.error(.init(type: .generalError)))
     }
 
-    func signUpStartCode(
+    func signUpStart(
         parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters
     ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         self.context = parameters.context

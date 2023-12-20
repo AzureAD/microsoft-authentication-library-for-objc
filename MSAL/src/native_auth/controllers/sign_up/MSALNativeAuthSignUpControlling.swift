@@ -32,9 +32,7 @@ protocol MSALNativeAuthSignUpControlling: AnyObject {
     typealias SignUpSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpPasswordRequiredResult>
     typealias SignUpSubmitAttributesControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignUpAttributesRequiredResult>
 
-    func signUpStartPassword(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartControllerResponse
-
-    func signUpStartCode(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartControllerResponse
+    func signUpStart(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartControllerResponse
 
     func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeControllerResponse
 

@@ -78,7 +78,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
 
         helper.onSignUpPasswordStartError(result)
 
@@ -103,7 +103,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let helper = prepareSignUpPasswordStartValidatorHelper()
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -120,7 +120,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         result.telemetryUpdate?(.success(()))
 
         helper.onSignUpAttributesInvalid(result)
@@ -145,7 +145,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesInvalid(result)
@@ -169,7 +169,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -200,7 +200,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
         
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
         
         await fulfillment(of: [exp], timeout: 1)
@@ -231,7 +231,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -262,7 +262,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
         
         await fulfillment(of: [exp], timeout: 1)
@@ -284,7 +284,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -310,7 +310,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -335,7 +335,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         result.telemetryUpdate?(.success(()))
         helper.onSignUpCodeRequired(result)
 
@@ -361,7 +361,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -386,7 +386,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -417,7 +417,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -443,7 +443,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartPassword(parameters: signUpStartPasswordParams)
+        let result = await sut.signUpStart(parameters: signUpStartPasswordParams)
         helper.onSignUpPasswordStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -466,7 +466,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -490,7 +490,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let helper = prepareSignUpCodeStartValidatorHelper()
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -507,7 +507,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         result.telemetryUpdate?(.success(()))
         helper.onSignUpAttributesInvalid(result)
 
@@ -531,7 +531,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         result.telemetryUpdate?(.failure(.init(message: "error")))
         helper.onSignUpAttributesInvalid(result)
 
@@ -554,7 +554,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -585,7 +585,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -616,7 +616,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -647,7 +647,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
         
         await fulfillment(of: [exp], timeout: 1)
@@ -669,7 +669,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -695,7 +695,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -720,7 +720,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         result.telemetryUpdate?(.success(()))
         helper.onSignUpCodeRequired(result)
 
@@ -746,7 +746,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -771,7 +771,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -802,7 +802,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -828,7 +828,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
 
-        let result = await sut.signUpStartCode(parameters: signUpStartCodeParams)
+        let result = await sut.signUpStart(parameters: signUpStartCodeParams)
         helper.onSignUpStartError(result)
 
         await fulfillment(of: [exp], timeout: 1)

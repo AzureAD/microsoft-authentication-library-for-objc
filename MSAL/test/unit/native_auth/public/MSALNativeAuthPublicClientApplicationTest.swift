@@ -98,7 +98,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -121,10 +121,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
-
+        
         sut.signUp(username: "correct", password: "correct", delegate: delegate)
         
         wait(for: [exp, exp2])
@@ -143,7 +143,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -161,7 +161,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 

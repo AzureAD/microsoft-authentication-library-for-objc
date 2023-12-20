@@ -49,12 +49,7 @@ extension MSALNativeAuthPublicClientApplication {
             attributes: attributes,
             context: context
         )
-
-        if password != nil {
-            return await controller.signUpStartPassword(parameters: parameters)
-        } else {
-            return await controller.signUpStartCode(parameters: parameters)
-        }
+        return await controller.signUpStart(parameters: parameters)
     }
 
     func signInInternal(
