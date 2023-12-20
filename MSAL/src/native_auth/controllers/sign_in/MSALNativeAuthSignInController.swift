@@ -75,7 +75,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     // MARK: - Internal
 
     func signIn(params: MSALNativeAuthSignInParameters) async -> SignInControllerResponse {
-        let eventId: MSALNativeAuthTelemetryApiId = params.password == nil ? .telemetryApiIdSignInWithCodeStart : .telemetryApiIdSignInWithPasswordStart
+        let eventId: MSALNativeAuthTelemetryApiId =
+        params.password == nil ? .telemetryApiIdSignInWithCodeStart : .telemetryApiIdSignInWithPasswordStart
         MSALLogger.log(level: .verbose, context: params.context, format: "SignIn started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: eventId, context: params.context),

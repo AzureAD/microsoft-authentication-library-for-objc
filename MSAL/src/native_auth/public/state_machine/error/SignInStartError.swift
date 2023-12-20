@@ -70,7 +70,7 @@ public class SignInStartError: MSALNativeAuthError {
     public var isUserNotFound: Bool {
         return type == .userNotFound
     }
-    
+
     /// Returns `true` when the credentials are not valid.
     public var isInvalidCredentials: Bool {
         return type == .invalidCredentials

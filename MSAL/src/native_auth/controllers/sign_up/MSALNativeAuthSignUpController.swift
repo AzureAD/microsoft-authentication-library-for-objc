@@ -63,7 +63,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Internal
 
     func signUpStart(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartControllerResponse {
-        let eventId: MSALNativeAuthTelemetryApiId = 
+        let eventId: MSALNativeAuthTelemetryApiId =
         parameters.password != nil ? .telemetryApiIdSignUpPasswordStart : .telemetryApiIdSignUpCodeStart
         let event = makeAndStartTelemetryEvent(id: eventId, context: parameters.context)
         let result = await performAndValidateStartRequest(parameters: parameters)

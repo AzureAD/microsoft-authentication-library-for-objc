@@ -70,7 +70,7 @@ public class SignUpStartError: MSALNativeAuthError {
     public var isUserAlreadyExists: Bool {
         return type == .userAlreadyExists
     }
-    
+
     /// Returns `true` when the password is not valid.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword

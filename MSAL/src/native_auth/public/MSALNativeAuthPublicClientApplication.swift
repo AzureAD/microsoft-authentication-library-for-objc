@@ -128,7 +128,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         Task {
-            let controllerResponse = await signUpInternal(username: username, password: password, attributes: attributes, correlationId: correlationId)
+            let controllerResponse = await signUpInternal(
+                username: username,
+                password: password,
+                attributes: attributes,
+                correlationId: correlationId
+            )
             let delegateDispatcher = SignUpStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
