@@ -24,18 +24,20 @@
 
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthSignInWithPasswordParameters: MSALNativeAuthSignInWithCodeParameters {
-    let password: String
+class MSALNativeAuthSignInParameters {
+    let username: String
+    let password: String?
+    let context: MSALNativeAuthRequestContext
+    let scopes: [String]?
 
     init(
         username: String,
-        password: String,
+        password: String?,
         context: MSALNativeAuthRequestContext,
         scopes: [String]?) {
+        self.username = username
         self.password = password
-        super.init(
-            username: username,
-            context: context,
-            scopes: scopes)
+        self.context = context
+        self.scopes = scopes
     }
 }

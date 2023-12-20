@@ -73,23 +73,13 @@ extension MSALNativeAuthPublicClientApplication {
 
         let controller = controllerFactory.makeSignInController()
 
-        if let password = password {
-            let params = MSALNativeAuthSignInWithPasswordParameters(
-                username: username,
-                password: password,
-                context: MSALNativeAuthRequestContext(correlationId: correlationId),
-                scopes: scopes
-            )
-
-            return await controller.signIn(params: params)
-        } else {
-            let params = MSALNativeAuthSignInWithCodeParameters(
-                username: username,
-                context: MSALNativeAuthRequestContext(correlationId: correlationId),
-                scopes: scopes
-            )
-            return await controller.signIn(params: params)
-        }
+        let params = MSALNativeAuthSignInParameters(
+            username: username,
+            password: password,
+            context: MSALNativeAuthRequestContext(correlationId: correlationId),
+            scopes: scopes
+        )
+        return await controller.signIn(params: params)
     }
 
     func resetPasswordInternal(

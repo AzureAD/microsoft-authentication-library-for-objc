@@ -37,11 +37,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
     var submitPasswordResult: SignInSubmitPasswordControllerResponse!
     var resendCodeResult: SignInResendCodeControllerResponse!
 
-    func signIn(params: MSAL.MSALNativeAuthSignInWithPasswordParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
-        return signInStartResult
-    }
-
-    func signIn(params: MSAL.MSALNativeAuthSignInWithCodeParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
+    func signIn(params: MSAL.MSALNativeAuthSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         return signInStartResult
     }
 
