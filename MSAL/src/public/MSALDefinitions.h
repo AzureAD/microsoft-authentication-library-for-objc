@@ -179,25 +179,34 @@ typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
 };
 
 /**
- Device mode configured by the administrator
+ Preferred auth method configuration determined by administrator
  */
-typedef NS_ENUM(NSUInteger, MSALQRPinAvailability)
+typedef NS_ENUM(NSUInteger, MSALPreferredAuthConfiguration)
 {
     /*
         Administrator hasn't configured QR+PIN as an authentication method for this device.
     */
-    MSALQRPinNotAvailable,
+    MSALPreferredAuthConfigurationNotConfigured,
     
     /*
      Administrator has configured QR+PIN as an authentication method for this device.
      */
-    MSALQRPinAvailable
+    MSALPreferredAuthConfigurationQRPIN
 };
 
+/**
+ Preferred auth method to be passed to the authentication server
+ */
 typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
 {
+    /*
+        No preferred auth method passed with the request to the authetication server.
+    */
     MSALPreferredAuthMethodNone,
     
+    /*
+        QR+PIN preferred as the auth method.
+    */
     MSALPreferredAuthMethodQRPIN
 };
 

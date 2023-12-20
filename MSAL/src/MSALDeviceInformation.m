@@ -87,7 +87,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
 #if TARGET_OS_OSX
         _platformSSOStatus = [self msalPlatformSSOStatusFromMSIDPlatformSSOStatus:deviceInfo.platformSSOStatus];
 #endif
-        _qrpinAvailable = [self msalQRPinAvailabilityFromMSIDQRPinAvailability:deviceInfo.qrPinAvailability];
+        _preferredAuthConfiguration = [self msalPreferredAuthConfigurationFromMSIDPreferredAuthConfiguration:deviceInfo.preferredAuthConfig];
         
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
@@ -136,14 +136,14 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
     }
 }
 
-- (MSALQRPinAvailability)msalQRPinAvailabilityFromMSIDQRPinAvailability:(MSIDQRPinAvailability)msidQRPinAvailability
+- (MSALPreferredAuthConfiguration)msalPreferredAuthConfigurationFromMSIDPreferredAuthConfiguration:(MSIDPreferredAuthConfiguration)msidPreferredAuthConfig
 {
-    switch (msidQRPinAvailability) {
-        case MSIDQRPinAvailable:
-            return MSALQRPinAvailable;
+    switch (msidPreferredAuthConfig) {
+        case MSIDPreferredAuthConfigurationQRPIN:
+            return MSALPreferredAuthConfigurationQRPIN;
             
         default:
-            return MSALQRPinNotAvailable;
+            return MSALPreferredAuthConfigurationNotConfigured;
     }
 }
 
