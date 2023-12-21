@@ -495,4 +495,8 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorDeviceNotPSSORegistered                    = -42736,
     
+    /**
+     // In PSSO, KeyId stored in passkey provider storage does not match NGC key, needs to configure and retry
+     */
+    MSALErrorPSSOKeyIdMissmatch                         = -42737,
 };
