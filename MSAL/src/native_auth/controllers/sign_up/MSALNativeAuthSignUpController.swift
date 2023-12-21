@@ -62,16 +62,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Internal
 
-    func signUpStartPassword(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartPasswordControllerResponse {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpPasswordStart, context: parameters.context)
+    func signUpStart(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartControllerResponse {
+        let eventId: MSALNativeAuthTelemetryApiId =
+        parameters.password != nil ? .telemetryApiIdSignUpPasswordStart : .telemetryApiIdSignUpCodeStart
+        let event = makeAndStartTelemetryEvent(id: eventId, context: parameters.context)
         let result = await performAndValidateStartRequest(parameters: parameters)
-        return await handleSignUpStartPasswordResult(result, username: parameters.username, event: event, context: parameters.context)
-    }
-
-    func signUpStartCode(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) async -> SignUpStartCodeControllerResponse {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpCodeStart, context: parameters.context)
-        let result = await performAndValidateStartRequest(parameters: parameters)
-        return await handleSignUpStartCodeResult(result, username: parameters.username, event: event, context: parameters.context)
+        return await handleSignUpStartResult(result, username: parameters.username, event: event, context: parameters.context)
     }
 
     func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeControllerResponse {
@@ -145,78 +141,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     }
 
     // swiftlint:disable:next function_body_length
-    private func handleSignUpStartPasswordResult(
+    private func handleSignUpStartResult(
         _ result: MSALNativeAuthSignUpStartValidatedResponse,
         username: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext
-    ) async -> SignUpStartPasswordControllerResponse {
-        switch result {
-        case .verificationRequired(let signUpToken, let attributes):
-            MSALLogger.log(
-                level: .info,
-                context: context,
-                format: "verification_required received from signup/start with password request for attributes: \(attributes)"
-            )
-            let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
-            return handleSignUpPasswordChallengeResult(challengeResult, username: username, event: event, context: context)
-        case .attributeValidationFailed(let invalidAttributes):
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "attribute_validation_failed received from signup/start with password request for attributes: \(invalidAttributes)"
-            )
-            let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = SignUpPasswordStartError(type: .generalError, message: message)
-            return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
-                // The telemetry event always fails because the attribute validation failed
-                self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
-            })
-        case .redirect:
-            let error = SignUpPasswordStartError(type: .browserRequired)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "redirect error in signup/start with password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .error(let apiError):
-            let error = apiError.toSignUpStartPasswordPublicError()
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Error in signup/start with password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .invalidUsername(let apiError):
-            let error = SignUpPasswordStartError(type: .invalidUsername, message: apiError.errorDescription)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "InvalidUsername in signup/start with password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .invalidClientId(let apiError):
-            let error = SignUpPasswordStartError(type: .generalError, message: apiError.errorDescription)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Invalid Client Id in signup/start with password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .unexpectedError:
-            let error = SignUpPasswordStartError(type: .generalError)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Unexpected error in signup/start with password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        }
-    }
-
-    // swiftlint:disable:next function_body_length
-    private func handleSignUpStartCodeResult(
-        _ result: MSALNativeAuthSignUpStartValidatedResponse,
-        username: String,
-        event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
-    ) async -> SignUpStartCodeControllerResponse {
+    ) async -> SignUpStartControllerResponse {
         switch result {
         case .verificationRequired(let signUpToken, let unverifiedAttributes):
             MSALLogger.log(
@@ -225,7 +155,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 format: "verification_required received from signup/start request for attributes: \(unverifiedAttributes)"
             )
             let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
-            return handleSignUpCodeChallengeResult(challengeResult, username: username, event: event, context: context)
+            return handleSignUpChallengeResult(challengeResult, username: username, event: event, context: context)
         case .attributeValidationFailed(let invalidAttributes):
             MSALLogger.log(
                 level: .error,
@@ -297,63 +227,16 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return responseValidator.validate(result, with: context)
     }
 
-    private func handleSignUpPasswordChallengeResult(
+    private func handleSignUpChallengeResult(
         _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
         username: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext
-    ) -> SignUpStartPasswordControllerResponse {
-        switch result {
-        case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
-            MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge password request")
-            return SignUpStartPasswordControllerResponse(
-                .codeRequired(
-                    newState: SignUpCodeRequiredState(controller: self,
-                                                      username: username,
-                                                      flowToken: signUpToken,
-                                                      correlationId: context.correlationId()),
-                    sentTo: sentTo,
-                    channelTargetType: challengeType,
-                    codeLength: codeLength
-                ), telemetryUpdate: { [weak self] result in
-                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
-                }
-            )
-        case .error(let apiError):
-            let error = apiError.toSignUpPasswordStartPublicError()
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Error in signup/challenge password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .redirect:
-            let error = SignUpPasswordStartError(type: .browserRequired)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Redirect error in signup/challenge password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .unexpectedError,
-             .passwordRequired:
-            let error = SignUpPasswordStartError(type: .generalError)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Unexpected error in signup/challenge password request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        }
-    }
-
-    private func handleSignUpCodeChallengeResult(
-        _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
-        username: String,
-        event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
-    ) -> SignUpStartCodeControllerResponse {
+    ) -> SignUpStartControllerResponse {
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let signUpToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request")
-            return SignUpStartCodeControllerResponse(
+            return SignUpStartControllerResponse(
                 .codeRequired(
                     newState: SignUpCodeRequiredState(controller: self,
                                                       username: username,

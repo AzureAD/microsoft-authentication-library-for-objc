@@ -29,7 +29,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
-    private var sut: SignUpPasswordStartDelegateDispatcher!
+    private var sut: SignUpStartDelegateDispatcher!
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
     private let correlationId = UUID()
 
@@ -54,7 +54,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
 
-        await sut.dispatchSignUpPasswordCodeRequired(
+        await sut.dispatchSignUpCodeRequired(
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
@@ -71,10 +71,10 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpPasswordCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? SignUpPasswordStartError else {
+            guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
                 return XCTFail("wrong result")
             }
 
@@ -87,7 +87,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
 
-        await sut.dispatchSignUpPasswordCodeRequired(
+        await sut.dispatchSignUpCodeRequired(
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
@@ -97,7 +97,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
 
-        func checkError(_ error: SignUpPasswordStartError?) {
+        func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
         }
@@ -124,10 +124,10 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? SignUpPasswordStartError else {
+            guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
                 return XCTFail("wrong result")
             }
 
@@ -142,7 +142,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
 
-        func checkError(_ error: SignUpPasswordStartError?) {
+        func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
         }

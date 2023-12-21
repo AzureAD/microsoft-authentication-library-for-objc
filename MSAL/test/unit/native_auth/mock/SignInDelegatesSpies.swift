@@ -25,22 +25,22 @@
 @testable import MSAL
 import XCTest
 
-open class SignInPasswordStartDelegateSpy: SignInPasswordStartDelegate {
+open class SignInPasswordStartDelegateSpy: SignInStartDelegate {
     let expectation: XCTestExpectation
-    var expectedError: SignInPasswordStartError?
+    var expectedError: SignInStartError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     var expectedSentTo: String?
     var expectedChannelTargetType: MSALNativeAuthChannelType?
     var expectedCodeLength: Int?
     private(set) var newSignInCodeRequiredState: SignInCodeRequiredState?
     
-    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInStartError(error: MSAL.SignInStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
@@ -133,9 +133,9 @@ final class SignInPasswordRequiredDelegateOptionalMethodsNotImplemented: SignInP
     }
 }
 
-open class SignInPasswordStartDelegateFailureSpy: SignInPasswordStartDelegate {
+open class SignInPasswordStartDelegateFailureSpy: SignInStartDelegate {
 
-    public func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    public func onSignInStartError(error: MSAL.SignInStartError) {
         XCTFail("This method should not be called")
     }
 
@@ -385,18 +385,18 @@ final class SignInAfterSignUpDelegateOptionalMethodsNotImplemented: SignInAfterS
     }
 }
 
-final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInPasswordStartDelegate {
+final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInStartDelegate {
     private let expectation: XCTestExpectation
-    var expectedError: SignInPasswordStartError?
+    var expectedError: SignInStartError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
 
-    init(expectation: XCTestExpectation, expectedError: SignInPasswordStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
+    init(expectation: XCTestExpectation, expectedError: SignInStartError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
         self.expectedUserAccountResult = expectedUserAccountResult
     }
 
-    func onSignInPasswordStartError(error: MSAL.SignInPasswordStartError) {
+    func onSignInStartError(error: MSAL.SignInStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)

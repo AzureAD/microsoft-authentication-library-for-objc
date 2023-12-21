@@ -30,60 +30,6 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     private var sut: MSALNativeAuthSignUpStartResponseError!
     private let testDescription = "testDescription"
 
-    // MARK: - to toSignUpStartPasswordPublicError tests
-
-    func test_toSignUpStartPasswordPublicError_invalidRequest() {
-        testSignUpStartErrorToSignUpStartPassword(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_unauthorizedClient() {
-        testSignUpStartErrorToSignUpStartPassword(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
-    }
-
-    func test_toSignUpStartPasswordPublicError_unsupportedChallengeType() {
-        testSignUpStartErrorToSignUpStartPassword(code: .unsupportedChallengeType, description: "General error", expectedErrorType: .generalError)
-    }
-
-    func test_toSignUpStartPasswordPublicError_passwordTooWeak() {
-        testSignUpStartErrorToSignUpStartPassword(code: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_passwordTooShort() {
-        testSignUpStartErrorToSignUpStartPassword(code: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_passwordTooLong() {
-        testSignUpStartErrorToSignUpStartPassword(code: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_passwordRecentlyUsed() {
-        testSignUpStartErrorToSignUpStartPassword(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_passwordBanned() {
-        testSignUpStartErrorToSignUpStartPassword(code: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_userAlreadyExists() {
-        testSignUpStartErrorToSignUpStartPassword(code: .userAlreadyExists, description: testDescription, expectedErrorType: .userAlreadyExists)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_attributesRequired() {
-        testSignUpStartErrorToSignUpStartPassword(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_verificationRequired() {
-        testSignUpStartErrorToSignUpStartPassword(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_unsupportedAuthMethod() {
-        testSignUpStartErrorToSignUpStartPassword(code: .unsupportedAuthMethod, description: testDescription, expectedErrorType: .generalError)
-    }
-    
-    func test_toSignUpStartPasswordPublicError_attributeValidationFailed() {
-        testSignUpStartErrorToSignUpStartPassword(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
-    }
-
     // MARK: - to toSignUpStartPublicError tests
 
     func test_toSignUpStartPublicError_invalidRequest() {
@@ -99,23 +45,23 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPublicError_passwordTooWeak() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooShort() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooLong() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordRecentlyUsed() {
-        testSignUpStartErrorToSignUpStart(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordBanned() {
-        testSignUpStartErrorToSignUpStart(code: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_userAlreadyExists() {
@@ -139,13 +85,6 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
 
     // MARK: private methods
-    
-    private func testSignUpStartErrorToSignUpStartPassword(code: MSALNativeAuthSignUpStartOauth2ErrorCode, description: String?, expectedErrorType: SignUpPasswordStartError.ErrorType) {
-        sut = MSALNativeAuthSignUpStartResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, signUpToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toSignUpStartPasswordPublicError()
-        XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
-    }
     
     private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
         sut = MSALNativeAuthSignUpStartResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, signUpToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)

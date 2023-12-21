@@ -116,57 +116,24 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Sign up a user with a given username and password.
     /// - Parameters:
     ///   - username: Username for the new account.
-    ///   - password: Password to be used for the new account.
-    ///   - attributes: Optional. User attributes to be used during account creation.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
-    public func signUpUsingPassword(
-        username: String,
-        password: String,
-        attributes: [String: Any]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignUpPasswordStartDelegate
-    ) {
-        Task {
-            let controllerResponse = await signUpUsingPasswordInternal(
-                username: username,
-                password: password,
-                attributes: attributes,
-                correlationId: correlationId
-            )
-
-            let delegateDispatcher = SignUpPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
-
-            switch controllerResponse.result {
-            case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
-                await delegateDispatcher.dispatchSignUpPasswordCodeRequired(
-                    newState: newState,
-                    sentTo: sentTo,
-                    channelTargetType: channelTargetType,
-                    codeLength: codeLength
-                )
-            case .attributesInvalid(let attributes):
-                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
-            case .error(let error):
-                await delegate.onSignUpPasswordStartError(error: error)
-            }
-        }
-    }
-
-    /// Sign up a user with a given username.
-    /// - Parameters:
-    ///   - username: Username for the new account.
+    ///   - password: Optional. Password to be used for the new account.
     ///   - attributes: Optional. User attributes to be used during account creation.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUp(
         username: String,
+        password: String? = nil,
         attributes: [String: Any]? = nil,
         correlationId: UUID? = nil,
         delegate: SignUpStartDelegate
     ) {
         Task {
-            let controllerResponse = await signUpInternal(username: username, attributes: attributes, correlationId: correlationId)
+            let controllerResponse = await signUpInternal(
+                username: username,
+                password: password,
+                attributes: attributes,
+                correlationId: correlationId
+            )
             let delegateDispatcher = SignUpStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
@@ -187,52 +154,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Sign in a user with a given username and password.
     /// - Parameters:
-    ///   - username: Username for the account.
-    ///   - password: Password for the account.
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signInUsingPassword(
-        username: String,
-        password: String,
-        scopes: [String]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignInPasswordStartDelegate
-    ) {
-        Task {
-            let controllerResponse = await signInUsingPasswordInternal(
-                username: username,
-                password: password,
-                scopes: scopes,
-                correlationId: correlationId
-            )
-
-            let delegateDispatcher = SignInPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
-
-            switch controllerResponse.result {
-            case .completed(let result):
-                await delegateDispatcher.dispatchSignInCompleted(result: result)
-            case .codeRequired(let newState, let sentTo, let channelType, let codeLength):
-                await delegateDispatcher.dispatchSignInCodeRequired(
-                    newState: newState,
-                    sentTo: sentTo,
-                    channelTargetType: channelType,
-                    codeLength: codeLength
-                )
-            case .error(let error):
-                await delegate.onSignInPasswordStartError(error: error)
-            }
-        }
-    }
-
-    /// Sign in a user with a given username.
-    /// - Parameters:
     ///   - username: Username for the account
+    ///   - password: Optional. Password for the account.
     ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         username: String,
+        password: String? = nil,
         scopes: [String]? = nil,
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
@@ -240,6 +169,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         Task {
             let controllerResponse = await signInInternal(
                 username: username,
+                password: password,
                 scopes: scopes,
                 correlationId: correlationId
             )
@@ -256,6 +186,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 )
             case .passwordRequired(let newState):
                 await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState)
+            case .completed(let result):
+                await delegateDispatcher.dispatchSignInCompleted(result: result)
             case .error(let error):
                 await delegate.onSignInStartError(error: error)
             }

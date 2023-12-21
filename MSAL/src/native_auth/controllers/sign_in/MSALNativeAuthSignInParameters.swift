@@ -22,16 +22,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-@objcMembers
-final public class MSALNativeAuthResendCodeParameters: MSALNativeAuthParameters {
+class MSALNativeAuthSignInParameters {
+    let username: String
+    let password: String?
+    let context: MSALNativeAuthRequestContext
+    let scopes: [String]?
 
-    public let credentialToken: String
-
-    public init(credentialToken: String,
-                correlationId: UUID? = nil) {
-        self.credentialToken = credentialToken
-        super.init(correlationId: correlationId)
+    init(
+        username: String,
+        password: String?,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]?) {
+        self.username = username
+        self.password = password
+        self.context = context
+        self.scopes = scopes
     }
 }

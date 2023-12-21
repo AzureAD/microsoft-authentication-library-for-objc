@@ -25,30 +25,6 @@
 import Foundation
 
 @objc
-public protocol SignUpPasswordStartDelegate {
-    /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignUpPasswordStartError(error: SignUpPasswordStartError)
-
-    /// Notifies the delegate that a verification code is required from the user to continue.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpPasswordStartError(error:)`` will be called.
-    /// - Parameters:
-    ///   - newState: An object representing the new state of the flow with follow on methods.
-    ///   - sentTo: The email/phone number that the code was sent to.
-    ///   - channelTargetType: The channel (email/phone) the code was sent through.
-    ///   - codeLength: The length of the code required.
-    @MainActor @objc optional func onSignUpCodeRequired(newState: SignUpCodeRequiredState,
-                                                        sentTo: String,
-                                                        channelTargetType: MSALNativeAuthChannelType,
-                                                        codeLength: Int)
-
-    /// Notifies the delegate that invalid attributes were sent.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpPasswordStartError(error:)`` will be called.
-    /// - Parameter attributeNames: List of attribute names that failed validation.
-    @MainActor @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
-}
-
-@objc
 public protocol SignUpStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.

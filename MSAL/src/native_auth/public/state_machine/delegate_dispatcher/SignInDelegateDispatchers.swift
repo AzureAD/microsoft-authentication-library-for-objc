@@ -24,36 +24,6 @@
 
 import Foundation
 
-final class SignInPasswordStartDelegateDispatcher: DelegateDispatcher<SignInPasswordStartDelegate> {
-
-    func dispatchSignInCodeRequired(
-        newState: SignInCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
-    ) async {
-        if let onSignInCodeRequired = delegate.onSignInCodeRequired {
-            telemetryUpdate?(.success(()))
-            await onSignInCodeRequired(newState, sentTo, channelTargetType, codeLength)
-        } else {
-            let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCodeRequired"))
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignInPasswordStartError(error: error)
-        }
-    }
-
-    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
-        if let onSignInCompleted = delegate.onSignInCompleted {
-            telemetryUpdate?(.success(()))
-            await onSignInCompleted(result)
-        } else {
-            let error = SignInPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignInPasswordStartError(error: error)
-        }
-    }
-}
-
 final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegate> {
 
     func dispatchSignInCodeRequired(
@@ -78,6 +48,17 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
             await onSignInPasswordRequired(newState)
         } else {
             let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInPasswordRequired"))
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInStartError(error: error)
+        }
+    }
+
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+        if let onSignInCompleted = delegate.onSignInCompleted {
+            telemetryUpdate?(.success(()))
+            await onSignInCompleted(result)
+        } else {
+            let error = SignInStartError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"))
             telemetryUpdate?(.failure(error))
             await delegate.onSignInStartError(error: error)
         }

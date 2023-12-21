@@ -42,16 +42,16 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
 
     func signUpStartPassword(
         parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse {
+    ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         self.context = parameters.context
         signUpStartPasswordCalled = true
         expectation.fulfill()
         return .init(.error(.init(type: .generalError)))
     }
 
-    func signUpStartCode(
+    func signUpStart(
         parameters: MSAL.MSALNativeAuthSignUpStartRequestProviderParameters
-    ) async -> MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse {
+    ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         self.context = parameters.context
         signUpStartCalled = true
         expectation.fulfill()

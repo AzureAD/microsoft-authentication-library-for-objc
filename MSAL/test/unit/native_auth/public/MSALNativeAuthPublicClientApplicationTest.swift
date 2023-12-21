@@ -74,7 +74,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        sut.signUpUsingPassword(username: "", password: "", delegate: delegate)
+        sut.signUp(username: "", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
     }
@@ -82,7 +82,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        sut.signUpUsingPassword(username: "correct", password: "", delegate: delegate)
+        sut.signUp(username: "correct", password: "", delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
     }
@@ -92,17 +92,17 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp2 = expectation(description: "sign-up public interface telemetry")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp1)
 
-        let expectedResult: SignUpPasswordStartResult = .codeRequired(
+        let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp1, exp2])
 
@@ -115,17 +115,17 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp2 = expectation(description: "sign-up public interface telemetry")
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: exp)
         
-        let expectedResult: SignUpPasswordStartResult = .codeRequired(
+        let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
-
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
         
         wait(for: [exp, exp2])
 
@@ -142,12 +142,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
         let expectedInvalidAttributes = ["attribute"]
 
-        let expectedResult: SignUpPasswordStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp, exp2])
 
@@ -160,12 +160,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: exp)
         let expectedInvalidAttributes = ["attribute"]
 
-        let expectedResult: SignUpPasswordStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signUpUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signUp(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp, exp2])
 
@@ -280,14 +280,14 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignInPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
         let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername))
-        sut.signInUsingPassword(username: "", password: "", delegate: delegate)
+        sut.signIn(username: "", password: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
     
     func testSignInPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
         let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials))
-        sut.signInUsingPassword(username: "correct", password: "", delegate: delegate)
+        sut.signIn(username: "correct", password: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
 
@@ -296,10 +296,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp2 = expectation(description: "expectation Telemetry")
         let delegate = SignInPasswordStartDelegateSpy(expectation: exp1, expectedUserAccountResult: MSALNativeAuthUserAccountResultStub.result)
 
-        controllerFactoryMock.signInController.signInPasswordStartResult = .init(.init(.completed(MSALNativeAuthUserAccountResultStub.result), telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(.init(.completed(MSALNativeAuthUserAccountResultStub.result), telemetryUpdate: { _ in
             exp2.fulfill()
         }))
-        sut.signInUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signIn(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp1, exp2], timeout: 1)
     }
@@ -308,16 +308,16 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
-        let expectedResult: SignInPasswordStartResult = .completed(MSALNativeAuthUserAccountResultStub.result)
+        let expectedResult: SignInStartResult = .completed(MSALNativeAuthUserAccountResultStub.result)
 
-        controllerFactoryMock.signInController.signInPasswordStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signInUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signIn(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp, exp2], timeout: 1)
     }
@@ -331,18 +331,18 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedCodeLength = 1
         delegate.expectedChannelTargetType = .email
 
-        let expectedResult: SignInPasswordStartResult = .codeRequired(
+        let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
         )
         
-        controllerFactoryMock.signInController.signInPasswordStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signInUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signIn(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp1, exp2], timeout: 1)
     }
@@ -351,21 +351,21 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
-        let expectedResult: SignInPasswordStartResult = .codeRequired(
+        let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: .email,
             codeLength: 1
         )
 
-        controllerFactoryMock.signInController.signInPasswordStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        sut.signInUsingPassword(username: "correct", password: "correct", delegate: delegate)
+        sut.signIn(username: "correct", password: "correct", delegate: delegate)
 
         wait(for: [exp, exp2], timeout: 1)
     }
@@ -609,7 +609,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
         // MSALNativeAuthSignUpRequestProviderMock class - checkStartParameters and checkChallengeParameters functions
-        sut.signUpUsingPassword(username: "username", password: "password", attributes: ["key": "value"], correlationId: correlationId, delegate: delegatePasswordStart)
+        sut.signUp(username: "username", password: "password", attributes: ["key": "value"], correlationId: correlationId, delegate: delegatePasswordStart)
         
         wait(for: [expectationPasswordStart])
         
@@ -801,7 +801,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         // Correlation Id is validated internally against contextMock on both initiate and challenge in the
         // MSALNativeAuthSignInRequestProviderMock class - checkContext function
-        sut.signInUsingPassword(username: "username", password: "password", scopes: ["scope1", "scope2"], correlationId: correlationId, delegate: delegatePasswordStart)
+        sut.signIn(username: "username", password: "password", scopes: ["scope1", "scope2"], correlationId: correlationId, delegate: delegatePasswordStart)
         
         wait(for: [expectationPasswordStart])
         

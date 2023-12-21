@@ -29,7 +29,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
 
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
-    private var sut: SignInPasswordStartDelegateDispatcher!
+    private var sut: SignInStartDelegateDispatcher!
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
     private let correlationId = UUID()
 
@@ -70,12 +70,12 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? SignInPasswordStartError else {
+            guard case let .failure(error) = result, let customError = error as? SignInStartError else {
                 return XCTFail("wrong result")
             }
 
@@ -98,7 +98,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
 
-        func checkError(_ error: SignInPasswordStartError?) {
+        func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
         }
@@ -123,12 +123,12 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? SignInPasswordStartError else {
+            guard case let .failure(error) = result, let customError = error as? SignInStartError else {
                 return XCTFail("wrong result")
             }
 
@@ -143,7 +143,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
 
-        func checkError(_ error: SignInPasswordStartError?) {
+        func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
         }

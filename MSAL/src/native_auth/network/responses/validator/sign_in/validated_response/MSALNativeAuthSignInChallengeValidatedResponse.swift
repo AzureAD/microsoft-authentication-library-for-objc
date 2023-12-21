@@ -58,19 +58,4 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             return .init(type: .generalError, message: message)
         }
     }
-
-    func convertToSignInPasswordStartError() -> SignInPasswordStartError {
-        switch self {
-        case .redirect:
-            return .init(type: .browserRequired)
-        case .expiredToken, .invalidToken, .invalidRequest, .invalidServerResponse:
-            return .init(type: .generalError)
-        case .invalidClient(let message):
-            return .init(type: .generalError, message: message)
-        case .userNotFound:
-            return .init(type: .userNotFound)
-        case .unsupportedChallengeType(let message):
-            return .init(type: .generalError, message: message)
-        }
-    }
 }

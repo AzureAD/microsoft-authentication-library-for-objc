@@ -24,36 +24,6 @@
 
 import Foundation
 
-final class SignUpPasswordStartDelegateDispatcher: DelegateDispatcher<SignUpPasswordStartDelegate> {
-
-    func dispatchSignUpPasswordCodeRequired(
-        newState: SignUpCodeRequiredState,
-        sentTo: String,
-        channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
-    ) async {
-        if let onSignUpCodeRequired = delegate.onSignUpCodeRequired {
-            telemetryUpdate?(.success(()))
-            await onSignUpCodeRequired(newState, sentTo, channelTargetType, codeLength)
-        } else {
-            let error = SignUpPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCodeRequired"))
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignUpPasswordStartError(error: error)
-        }
-    }
-
-    func dispatchSignUpAttributesInvalid(attributeNames: [String]) async {
-        if let onSignUpAttributesInvalid = delegate.onSignUpAttributesInvalid {
-            telemetryUpdate?(.success(()))
-            await onSignUpAttributesInvalid(attributeNames)
-        } else {
-            let error = SignUpPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignUpPasswordStartError(error: error)
-        }
-    }
-}
-
 final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegate> {
 
     func dispatchSignUpCodeRequired(

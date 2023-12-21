@@ -68,8 +68,6 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedResult = MSALNativeAuthUserAccountResultStub.result
-
         await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token")
 
         await fulfillment(of: [telemetryExp, delegateExp])

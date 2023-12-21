@@ -27,18 +27,18 @@ import XCTest
 
 class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
 
-    func onSignUpPasswordStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse) {
+    func onSignUpPasswordStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
         }
 
         Task {
-            await self.onSignUpPasswordStartError(error: error)
+            await self.onSignUpStartError(error: error)
         }
     }
 
-    func onSignUpCodeRequired(_ input: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse) {
+    func onSignUpCodeRequired(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .codeRequired")
@@ -49,7 +49,7 @@ class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
         }
     }
 
-    func onSignUpAttributesInvalid(_ input: MSALNativeAuthSignUpControlling.SignUpStartPasswordControllerResponse) {
+    func onSignUpAttributesInvalid(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .attributesInvalid(attributes) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .attributeValidationFailed")
@@ -63,7 +63,7 @@ class SignUpPasswordStartTestsValidatorHelper: SignUpPasswordStartDelegateSpy {
 
 class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
 
-    func onSignUpStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse) {
+    func onSignUpStartError(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .error(error) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be an .error")
@@ -74,7 +74,7 @@ class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
         }
     }
 
-    func onSignUpCodeRequired(_ input: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse) {
+    func onSignUpCodeRequired(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .codeRequired(newState, sentTo, channelTargetType, codeLength) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .codeRequired")
@@ -85,7 +85,7 @@ class SignUpCodeStartTestsValidatorHelper: SignUpCodeStartDelegateSpy {
         }
     }
 
-    func onSignUpAttributesInvalid(_ input: MSALNativeAuthSignUpControlling.SignUpStartCodeControllerResponse) {
+    func onSignUpAttributesInvalid(_ input: MSALNativeAuthSignUpControlling.SignUpStartControllerResponse) {
         guard case let .attributesInvalid(attributes) = input.result else {
             expectation?.fulfill()
             return XCTFail("Should be .attributeValidationFailed")

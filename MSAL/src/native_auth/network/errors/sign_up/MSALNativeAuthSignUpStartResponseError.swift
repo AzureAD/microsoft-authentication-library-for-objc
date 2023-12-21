@@ -49,7 +49,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpStartResponseError {
 
-    func toSignUpStartPasswordPublicError() -> SignUpPasswordStartError {
+    func toSignUpStartPublicError() -> SignUpStartError {
         switch error {
         case .passwordTooWeak,
              .passwordTooShort,
@@ -65,26 +65,6 @@ extension MSALNativeAuthSignUpStartResponseError {
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
              .invalidRequest,
-             .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
-            return .init(type: .generalError, message: errorDescription)
-        }
-    }
-
-    func toSignUpStartPublicError() -> SignUpStartError {
-        switch error {
-        case .userAlreadyExists:
-            return .init(type: .userAlreadyExists, message: errorDescription)
-        case .attributeValidationFailed,
-             .attributesRequired,
-             .unauthorizedClient,
-             .invalidRequest,
-             .passwordTooWeak, /// password errors should not occur when signing up code
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned,
-             .unsupportedAuthMethod,
-             .unsupportedChallengeType,
              .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
             return .init(type: .generalError, message: errorDescription)
         }
