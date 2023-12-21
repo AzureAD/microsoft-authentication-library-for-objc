@@ -1,3 +1,6 @@
+[TBD]
+* Add additional error codes for PSSO KeyId missmatch (#1946)
+
 ## [1.2.20]
 * Updated common core submodule with changes for platform sso and mapping broker version in token result 
 
