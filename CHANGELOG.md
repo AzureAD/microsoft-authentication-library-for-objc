@@ -1,4 +1,4 @@
-[TBD]
+[1.2.21]
 * Add additional error codes for PSSO KeyId missmatch (#1946)
 
 ## [1.2.20]
