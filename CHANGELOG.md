@@ -1,5 +1,5 @@
 [1.2.21]
-* Add additional error codes for PSSO KeyId missmatch (#1946)
+* Add additional error codes for PSSO KeyId mismatch (#1946)
 
 ## [1.2.20]
 * Updated common core submodule with changes for platform sso and mapping broker version in token result 

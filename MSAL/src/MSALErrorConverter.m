@@ -111,7 +111,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITTroubleshootingResultUnknown) : @(MSALErrorJITTroubleshootingResultUnknown),
                                    @(MSIDErrorJITTroubleshootingAcquireToken) : @(MSALErrorJITTroubleshootingAcquireToken),
                                    @(MSIDErrorDeviceNotPSSORegistered) : @(MSALErrorDeviceNotPSSORegistered),
-                                   @(MSIDErrorPSSOKeyIdMissmatch) : @(MSALErrorPSSOKeyIdMissmatch),
+                                   @(MSIDErrorPSSOKeyIdMismatch) : @(MSALErrorPSSOKeyIdMismatch),
                                    
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
