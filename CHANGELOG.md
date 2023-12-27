@@ -1,4 +1,4 @@
-[1.2.21]
+## [1.2.21]
 * Add additional error codes for PSSO KeyId mismatch (#1946)
 
 ## [1.2.20]
