@@ -42,7 +42,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     ]
 
     override func setUpWithError() throws {
-        sut = .init(config: MSALNativeAuthConfigStubs.configuration)
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorStub())
     }
 
     func test_makeMsidConfiguration() {
@@ -115,5 +115,27 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(accountResult.expiresOn, expiresOn)
         XCTAssertEqual(accountResult.scopes, scopes)
         XCTAssertNil(accountResult.account.accountClaims)
+    }
+}
+
+private class MSALNativeAuthCacheAccessorStub: MSALNativeAuthCacheInterface {
+    func getTokens(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
+        return MSALNativeAuthTokens(accessToken: nil,
+                                    refreshToken: nil,
+                                    rawIdToken: nil)
+    }
+
+    func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
+        return [MSALNativeAuthUserAccountResultStub.account]
+    }
+
+    func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
+        return MSIDTokenResult()
+    }
+
+    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
+    }
+
+    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
     }
 }

@@ -30,6 +30,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    
+    lazy var cacheAccessor =
+        MSALNativeAuthCacheAccessor(tokenCache: self.tokenCache, accountMetadataCache: self.accountMetadataCache)
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
@@ -226,7 +229,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
     /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
-        let controller = controllerFactory.makeCredentialsController()
+        let controller = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
