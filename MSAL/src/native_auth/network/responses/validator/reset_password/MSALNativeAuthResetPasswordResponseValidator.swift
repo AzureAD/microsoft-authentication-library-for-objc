@@ -166,7 +166,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordContinueResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "continue returned unexpected error type")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/continue returned unexpected error type")
             return .unexpectedError
         }
 
@@ -209,7 +209,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleSubmitError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordSubmitResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "submit returned unexpected error type")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/submit returned unexpected error type")
             return .unexpectedError
         }
 

@@ -150,7 +150,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
-                           format: "redirect error in resetpassword/start request \(error.errorDescription ?? "No error description")")
+                           format: "Redirect error in resetpassword/start request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .error(let apiError):
             let error = apiError.toResetPasswordStartPublicError()
@@ -435,14 +435,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         event: MSIDTelemetryAPIEvent?,
         context: MSIDRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "performing poll completion request...")
+        MSALLogger.log(level: .verbose, context: context, format: "Performing poll completion request")
 
         let pollCompletionResponse = await performPollCompletionRequest(
             passwordResetToken: passwordResetToken,
             context: context
         )
 
-        MSALLogger.log(level: .verbose, context: context, format: "handling poll completion response...")
+        MSALLogger.log(level: .verbose, context: context, format: "Handling poll completion response")
 
         return await handlePollCompletionResponse(
             pollCompletionResponse,
@@ -520,7 +520,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             case .failed:
                 let error = PasswordRequiredError(type: .generalError)
                 self.stopTelemetryEvent(event, context: context, error: error)
-                MSALLogger.log(level: .error, context: context, format: "password poll success returned status 'failed'")
+                MSALLogger.log(level: .error, context: context, format: "Password poll success returned status 'failed'")
 
                 return .init(.error(error: error, newState: nil))
             }
@@ -571,7 +571,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         guard retriesRemaining > 0 else {
             let error = PasswordRequiredError(type: .generalError)
             self.stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error, context: context, format: "password poll completion did not complete in time")
+            MSALLogger.log(level: .error, context: context, format: "Password poll completion did not complete in time")
 
             return .init(.error(error: error, newState: nil))
         }
@@ -579,7 +579,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         MSALLogger.log(
             level: .info,
             context: context,
-            format: "resetpassword: waiting for \(pollInterval) seconds before retrying"
+            format: "Reset password: waiting for \(pollInterval) seconds before retrying"
         )
 
         do {
@@ -591,7 +591,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             MSALLogger.log(
                 level: .error,
                 context: context,
-                format: "resetpassword: Task.sleep unexpectedly threw an error: \(error). Ignoring..."
+                format: "Reset Password: Task.sleep unexpectedly threw an error: \(error). Ignoring"
             )
         }
 
