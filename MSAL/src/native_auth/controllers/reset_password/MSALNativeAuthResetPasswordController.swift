@@ -520,7 +520,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             case .failed:
                 let error = PasswordRequiredError(type: .generalError)
                 self.stopTelemetryEvent(event, context: context, error: error)
-                MSALLogger.log(level: .error, context: context, format: "Password poll success returned status 'failed'")
+                MSALLogger.log(level: .error, context: context, format: "Password poll completion returned status 'failed'")
 
                 return .init(.error(error: error, newState: nil))
             }
