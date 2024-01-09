@@ -27,7 +27,7 @@
 struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .signUpContinue
     let grantType: MSALNativeAuthGrantType
-    let signUpToken: String
+    let continuationToken: String
     let password: String?
     let oobCode: String?
     let attributes: String?
@@ -39,7 +39,7 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
         return [
             Key.clientId.rawValue: config.clientId,
             Key.grantType.rawValue: grantType.rawValue,
-            Key.signUpToken.rawValue: signUpToken,
+            Key.continuationToken.rawValue: continuationToken,
             Key.password.rawValue: password,
             Key.oobCode.rawValue: oobCode,
             Key.attributes.rawValue: attributes

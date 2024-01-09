@@ -52,7 +52,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
         let expectedState = SignInAfterResetPasswordState(
             controller: signInControllerMock,
             username: "username",
-            slt: "slt",
+            continuationToken: "continuationToken",
             correlationId: correlationId
         )
 
@@ -80,7 +80,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
         let expectedState = SignInAfterResetPasswordState(
             controller: signInControllerMock,
             username: "username",
-            slt: "slt",
+            continuationToken: "continuationToken",
             correlationId: correlationId
         )
 

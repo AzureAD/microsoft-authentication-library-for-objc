@@ -29,7 +29,7 @@ import XCTest
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
     private let expectation: XCTestExpectation
     private(set) var context: MSIDRequestContext?
-    private(set) var flowToken: String?
+    private(set) var continuationToken: String?
     private(set) var resetPasswordCalled = false
     private(set) var resendCodeCalled = false
     private(set) var submitCodeCalled = false
@@ -49,7 +49,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
     }
 
     func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
-        self.flowToken = continuationToken
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         resendCodeCalled = true
@@ -59,7 +59,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
     }
 
     func submitCode(code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
-        self.flowToken = continuationToken
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitCodeCalled = true
@@ -69,7 +69,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
     }
 
     func submitPassword(password: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
-        self.flowToken = continuationToken
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitPasswordCalled = true

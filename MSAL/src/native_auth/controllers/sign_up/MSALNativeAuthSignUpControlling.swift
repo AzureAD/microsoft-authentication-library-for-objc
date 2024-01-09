@@ -36,7 +36,12 @@ protocol MSALNativeAuthSignUpControlling: AnyObject {
 
     func resendCode(username: String, context: MSIDRequestContext, continuationToken: String) async -> SignUpResendCodeControllerResponse
 
-    func submitCode(_ code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse
+    func submitCode(
+        _ code: String,
+        username: String,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) async -> SignUpSubmitCodeControllerResponse
 
     func submitPassword(
         _ password: String,

@@ -31,11 +31,11 @@ import Foundation
     init(
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String,
+        continuationToken: String,
         correlationId: UUID) {
         self.controller = controller
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken, correlationId: correlationId)
+        super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 }
 
@@ -48,10 +48,10 @@ import Foundation
         scopes: [String],
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String,
+        continuationToken: String,
         correlationId: UUID) {
         self.scopes = scopes
-        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
+        super.init(controller: controller, inputValidator: inputValidator, continuationToken: continuationToken, correlationId: correlationId)
     }
 
     /// Requests the server to resend the verification code to the user.
@@ -105,11 +105,11 @@ import Foundation
         username: String,
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        flowToken: String,
+        continuationToken: String,
         correlationId: UUID) {
         self.scopes = scopes
         self.username = username
-        super.init(controller: controller, inputValidator: inputValidator, flowToken: flowToken, correlationId: correlationId)
+        super.init(controller: controller, inputValidator: inputValidator, continuationToken: continuationToken, correlationId: correlationId)
     }
 
     /// Submits the password to the server for verification.

@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthSignUpContinueRequestProviderParams {
     let grantType: MSALNativeAuthGrantType
-    let signUpToken: String
+    let continuationToken: String
     let password: String?
     let oobCode: String?
     let attributes: [String: Any]?
@@ -34,14 +34,14 @@ struct MSALNativeAuthSignUpContinueRequestProviderParams {
 
     init(
         grantType: MSALNativeAuthGrantType,
-        signUpToken: String,
+        continuationToken: String,
         password: String? = nil,
         oobCode: String? = nil,
         attributes: [String: Any]? = nil,
         context: MSIDRequestContext
     ) {
         self.grantType = grantType
-        self.signUpToken = signUpToken
+        self.continuationToken = continuationToken
         self.password = password
         self.oobCode = oobCode
         self.attributes = attributes

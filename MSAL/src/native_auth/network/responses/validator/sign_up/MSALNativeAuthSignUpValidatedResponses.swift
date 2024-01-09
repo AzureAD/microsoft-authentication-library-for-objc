@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
-    case verificationRequired(signUpToken: String, unverifiedAttributes: [String])
+    case verificationRequired(continuationToken: String, unverifiedAttributes: [String])
     case attributeValidationFailed(invalidAttributes: [String])
     case redirect
     case error(MSALNativeAuthSignUpStartResponseError)
@@ -42,12 +42,12 @@ enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
 }
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
-    case success(_ signInSLT: String?)
+    case success(_ continuationToken: String?)
     /// error that represents invalidOOB or invalidPassword, depending on which State the input comes from.
     case invalidUserInput(_ error: MSALNativeAuthSignUpContinueResponseError)
-    case credentialRequired(signUpToken: String)
-    case attributesRequired(signUpToken: String, requiredAttributes: [MSALNativeAuthRequiredAttributes])
-    case attributeValidationFailed(signUpToken: String, invalidAttributes: [String])
+    case credentialRequired(continuationToken: String)
+    case attributesRequired(continuationToken: String, requiredAttributes: [MSALNativeAuthRequiredAttributes])
+    case attributeValidationFailed(continuationToken: String, invalidAttributes: [String])
     case error(MSALNativeAuthSignUpContinueResponseError)
     case unexpectedError
 }

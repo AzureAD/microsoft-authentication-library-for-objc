@@ -39,8 +39,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
         let parameters = MSALNativeAuthTokenRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                     username: "username",
-                                                                    credentialToken: "Test Credential Token",
-                                                                    signInSLT: "Test SignIn SLT",
+                                                                    continuationToken: "Test Credential Token",
                                                                     grantType: .password,
                                                                     scope: "scope",
                                                                     password: "password",
@@ -57,8 +56,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
-            credentialToken: "Test Credential Token",
-            signInSLT: "Test SignIn SLT",
+            continuationToken: "Test continuation Token",
             grantType: .password,
             scope: "<scope-1>",
             password: "password",
@@ -72,8 +70,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
-            "credential_token": "Test Credential Token",
-            "signin_slt": "Test SignIn SLT",
+            "continuation_token": "Test continuation Token",
             "grant_type": "password",
             "challenge_type": "password",
             "scope": "<scope-1>",
@@ -90,8 +87,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: nil,
-            credentialToken: nil,
-            signInSLT: nil,
+            continuationToken: nil,
             grantType: .password,
             scope: nil,
             password: nil,

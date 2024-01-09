@@ -54,7 +54,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             .init(name: "attribute2", type: "", required: true),
         ]
 
-        let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState)
 
@@ -82,7 +82,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             .init(name: "attribute2", type: "", required: true),
         ]
 
-        let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState)
 
@@ -105,7 +105,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpPasswordRequired(newState: expectedState)
 
@@ -127,7 +127,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpPasswordRequired(newState: expectedState)
 
@@ -150,7 +150,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", slt: "flowToken", correlationId: correlationId)
+        let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpCompleted(newState: expectedState)
 
@@ -172,7 +172,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", slt: "flowToken", correlationId: correlationId)
+        let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignUpCompleted(newState: expectedState)
 

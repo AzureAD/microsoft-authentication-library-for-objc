@@ -26,11 +26,11 @@ import Foundation
 
 @objc
 public class MSALNativeAuthBaseState: NSObject {
-    let flowToken: String
+    let continuationToken: String
     let correlationId: UUID
 
-    init(flowToken: String, correlationId: UUID) {
-        self.flowToken = flowToken
+    init(continuationToken: String, correlationId: UUID) {
+        self.continuationToken = continuationToken
         self.correlationId = correlationId
     }
 }

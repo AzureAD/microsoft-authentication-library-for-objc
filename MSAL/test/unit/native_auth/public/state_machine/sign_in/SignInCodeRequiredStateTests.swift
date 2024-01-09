@@ -35,7 +35,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         super.setUp()
 
         controller = .init()
-        sut = .init(scopes: [], controller: controller, flowToken: "flowToken", correlationId: correlationId)
+        sut = .init(scopes: [], controller: controller, continuationToken: "continuationToken", correlationId: correlationId)
     }
 
     // MARK: - Delegates
@@ -46,7 +46,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         let exp = expectation(description: "sign-in states")
 
         let expectedError = ResendCodeError(message: "test error")
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInResendCodeResult = .error(
             error: expectedError,
@@ -60,13 +60,13 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.newSignInResendCodeError, expectedError)
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_resendCode_delegate_success_shouldReturnSignInResendCodeCodeRequired() {
         let exp = expectation(description: "sign-in states")
         let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -82,13 +82,13 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
-        XCTAssertEqual(delegate.newSignInCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_resendCode_delegate_success_butMethodNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-in states")
         let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: UUID())
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: UUID())
 
         let expectedResult: SignInResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -112,7 +112,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     func test_submitCode_delegate_withError_shouldReturnSignInVerifyCodeError() {
         let exp = expectation(description: "sign-in states")
         let expectedError = VerifyCodeError(type: .invalidCode)
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInVerifyCodeResult = .error(
             error: expectedError,

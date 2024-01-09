@@ -57,7 +57,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
 
         let response: MSALNativeAuthResetPasswordStartResponse? = try await performTestSucceed()
 
-        XCTAssertNotNil(response?.passwordResetToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNil(response?.challengeType)
     }
 
@@ -65,7 +65,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
         try await mockResponse(.challengeTypeRedirect, endpoint: .resetPasswordStart)
         let response: MSALNativeAuthResetPasswordStartResponse? = try await performTestSucceed()
 
-        XCTAssertNil(response?.passwordResetToken)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 

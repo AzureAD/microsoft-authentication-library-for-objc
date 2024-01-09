@@ -32,7 +32,7 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
-    let passwordResetToken: String?
+    let continuationToken: String?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -41,7 +41,7 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case target
-        case passwordResetToken = "password_reset_token"
+        case continuationToken = "continuation_token"
     }
 }
 
