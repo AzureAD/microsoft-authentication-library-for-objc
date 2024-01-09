@@ -70,54 +70,54 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return await handleSignUpStartResult(result, username: parameters.username, event: event, context: parameters.context)
     }
 
-    func resendCode(username: String, context: MSIDRequestContext, signUpToken: String) async -> SignUpResendCodeControllerResponse {
+    func resendCode(username: String, context: MSIDRequestContext, continuationToken: String) async -> SignUpResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpResendCode, context: context)
-        let challengeResult = await performAndValidateChallengeRequest(signUpToken: signUpToken, context: context)
-        return handleResendCodeResult(challengeResult, username: username, event: event, signupToken: signUpToken, context: context)
+        let challengeResult = await performAndValidateChallengeRequest(signUpToken: continuationToken, context: context)
+        return handleResendCodeResult(challengeResult, username: username, event: event, signupToken: continuationToken, context: context)
     }
 
-    func submitCode(_ code: String, username: String, signUpToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse {
+    func submitCode(_ code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> SignUpSubmitCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitCode, context: context)
-        let params = MSALNativeAuthSignUpContinueRequestProviderParams(grantType: .oobCode, signUpToken: signUpToken, oobCode: code, context: context)
+        let params = MSALNativeAuthSignUpContinueRequestProviderParams(grantType: .oobCode, signUpToken: continuationToken, oobCode: code, context: context)
 
         let result = await performAndValidateContinueRequest(parameters: params)
-        return await handleSubmitCodeResult(result, username: username, signUpToken: signUpToken, event: event, context: context)
+        return await handleSubmitCodeResult(result, username: username, signUpToken: continuationToken, event: event, context: context)
     }
 
     func submitPassword(
         _ password: String,
         username: String,
-        signUpToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> SignUpSubmitPasswordControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitPassword, context: context)
 
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: signUpToken,
+            signUpToken: continuationToken,
             password: password,
             context: context
         )
         let continueRequestResult = await performAndValidateContinueRequest(parameters: params)
-        return handleSubmitPasswordResult(continueRequestResult, username: username, signUpToken: signUpToken, event: event, context: context)
+        return handleSubmitPasswordResult(continueRequestResult, username: username, signUpToken: continuationToken, event: event, context: context)
     }
 
     func submitAttributes(
         _ attributes: [String: Any],
         username: String,
-        signUpToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> SignUpSubmitAttributesControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitAttributes, context: context)
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .attributes,
-            signUpToken: signUpToken,
+            signUpToken: continuationToken,
             attributes: attributes,
             context: context
         )
 
         let result = await performAndValidateContinueRequest(parameters: params)
-        return handleSubmitAttributesResult(result, username: username, signUpToken: signUpToken, event: event, context: context)
+        return handleSubmitAttributesResult(result, username: username, signUpToken: continuationToken, event: event, context: context)
     }
 
     // MARK: - Start Request handling

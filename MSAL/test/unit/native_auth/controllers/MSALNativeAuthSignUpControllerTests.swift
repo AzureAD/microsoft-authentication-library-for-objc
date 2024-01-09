@@ -851,7 +851,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken")
         helper.onSignUpResendCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -872,7 +872,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken")
         result.telemetryUpdate?(.success(()))
         helper.onSignUpResendCodeCodeRequired(result)
 
@@ -895,7 +895,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken 2")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken 2")
         helper.onSignUpResendCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -922,7 +922,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken")
         helper.onSignUpResendCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -943,7 +943,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken")
         helper.onSignUpResendCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -964,7 +964,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", context: contextMock, signUpToken: "signUpToken")
+        let result = await sut.resendCode(username: "", context: contextMock, continuationToken: "signUpToken")
         helper.onSignUpResendCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -986,7 +986,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1007,7 +1007,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpCompleted(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1038,7 +1038,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1059,7 +1059,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
 
         helper.onSignUpAttributesRequired(result)
@@ -1082,7 +1082,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesRequired(result)
@@ -1105,7 +1105,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         
         helper.onSignUpVerifyCodeError(result)
@@ -1136,7 +1136,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1157,7 +1157,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1185,7 +1185,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1204,7 +1204,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1230,7 +1230,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
 
         helper.onSignUpPasswordRequired(result)
@@ -1259,7 +1259,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpPasswordRequired(result)
@@ -1288,7 +1288,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1311,7 +1311,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1343,7 +1343,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1369,7 +1369,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode("1234", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitCode("1234", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpVerifyCodeError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1391,7 +1391,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpPasswordRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1411,7 +1411,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpCompleted(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1441,7 +1441,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpPasswordRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1462,7 +1462,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
 
         helper.onSignUpAttributesRequired(result)
@@ -1484,7 +1484,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.failure(.init(message: "error")))
 
         helper.onSignUpAttributesRequired(result)
@@ -1516,7 +1516,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpPasswordRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1536,7 +1536,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpPasswordRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1556,7 +1556,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpPasswordRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1576,7 +1576,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
 
         helper.onSignUpPasswordRequiredError(result)
@@ -1602,7 +1602,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpAttributesRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1624,7 +1624,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpCompleted(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1657,7 +1657,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpAttributesRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1689,7 +1689,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpAttributesRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1711,7 +1711,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         helper.onSignUpAttributesRequired(result)
 
@@ -1734,7 +1734,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpAttributesRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1756,7 +1756,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpAttributesRequiredError(result)
 
         await fulfillment(of: [exp], timeout: 1)
@@ -1778,7 +1778,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
 
-        let result = await sut.submitAttributes(["key": "value"], username: "", signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "signUpToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         helper.onSignUpAttributesValidationFailed(result)
 
@@ -1808,7 +1808,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword("password", username: username, signUpToken: "signUpToken", context: contextMock)
+        let result = await sut.submitPassword("password", username: username, continuationToken: "signUpToken", context: contextMock)
         helper.onSignUpCompleted(result)
 
         await fulfillment(of: [exp], timeout: 1)

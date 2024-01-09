@@ -66,49 +66,49 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         return await handleStartResponse(response, username: parameters.username, event: event, context: parameters.context)
     }
 
-    func resendCode(username: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+    func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
-        let response = await performChallengeRequest(passwordResetToken: passwordResetToken, context: context)
+        let response = await performChallengeRequest(passwordResetToken: continuationToken, context: context)
         return await handleResendCodeChallengeResponse(response, username: username, event: event, context: context)
     }
 
     func submitCode(
         code: String,
         username: String,
-        passwordResetToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> ResetPasswordSubmitCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
 
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
-            passwordResetToken: passwordResetToken,
+            passwordResetToken: continuationToken,
             grantType: .oobCode,
             oobCode: code
         )
 
         let response = await performContinueRequest(parameters: params)
-        return await handleSubmitCodeResponse(response, username: username, passwordResetToken: passwordResetToken, event: event, context: context)
+        return await handleSubmitCodeResponse(response, username: username, passwordResetToken: continuationToken, event: event, context: context)
     }
 
     func submitPassword(
         password: String,
         username: String,
-        passwordSubmitToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmit, context: context)
 
         let params = MSALNativeAuthResetPasswordSubmitRequestParameters(
             context: context,
-            passwordSubmitToken: passwordSubmitToken,
+            passwordSubmitToken: continuationToken,
             newPassword: password
         )
         let submitRequestResponse = await performSubmitRequest(parameters: params)
         return await handleSubmitPasswordResponse(
             submitRequestResponse,
             username: username,
-            passwordSubmitToken: passwordSubmitToken,
+            passwordSubmitToken: continuationToken,
             event: event,
             context: context
         )

@@ -697,7 +697,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInResponseValidatorMock.challengeValidatedResponse = .codeRequired(credentialToken: credentialToken, sentTo: sentTo, channelType: channelTargetType, codeLength: codeLength)
 
-        let result = await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [])
+        let result = await sut.resendCode(continuationToken: credentialToken, context: expectedContext, scopes: [])
         result.telemetryUpdate?(.success(()))
 
         helper.onSignInResendCodeCodeRequired(result)
@@ -715,7 +715,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let helper = SignInResendCodeTestsValidatorHelper(expectation: expectation)
 
-        let result = await sut.resendCode(credentialToken: "credentialToken", context: expectedContext, scopes: [])
+        let result = await sut.resendCode(continuationToken: "credentialToken", context: expectedContext, scopes: [])
 
         helper.onSignInResendCodeError(result)
 
@@ -737,7 +737,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(credentialToken: credentialToken)
 
-        let result = await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [])
+        let result = await sut.resendCode(continuationToken: credentialToken, context: expectedContext, scopes: [])
 
         helper.onSignInResendCodeError(result)
 
@@ -759,7 +759,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInResponseValidatorMock.challengeValidatedResponse = .error(.userNotFound(message: nil))
 
-        let result = await sut.resendCode(credentialToken: credentialToken, context: expectedContext, scopes: [])
+        let result = await sut.resendCode(continuationToken: credentialToken, context: expectedContext, scopes: [])
 
         helper.onSignInResendCodeError(result)
 

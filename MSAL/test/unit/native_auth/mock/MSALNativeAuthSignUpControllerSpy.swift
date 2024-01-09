@@ -61,7 +61,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     func resendCode(
         username: String,
         context: MSIDRequestContext,
-        signUpToken: String
+        continuationToken: String
     ) async -> SignUpResendCodeControllerResponse {
         self.context = context
         resendCodeCalled = true
@@ -72,7 +72,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     func submitCode(
         _ code: String,
         username: String,
-        signUpToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse {
         self.context = context
@@ -84,7 +84,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     func submitPassword(
         _ password: String,
         username: String,
-        signUpToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse {
         self.context = context
@@ -96,7 +96,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
     func submitAttributes(
         _ attributes: [String: Any],
         username: String,
-        signUpToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) async -> SignUpSubmitAttributesControllerResponse {
         self.context = context

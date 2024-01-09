@@ -303,7 +303,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.resendCode(username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordResendCodeError(result)
 
         await fulfillment(of: [exp])
@@ -325,7 +325,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.resendCode(username: "", continuationToken: "passwordResetToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         helper.onResetPasswordResendCodeRequired(result)
 
@@ -355,7 +355,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.resendCode(username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordResendCodeError(result)
 
         await fulfillment(of: [exp])
@@ -376,7 +376,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.resendCode(username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordResendCodeError(result)
 
         await fulfillment(of: [exp])
@@ -397,7 +397,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
 
-        let result = await sut.resendCode(username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.resendCode(username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordResendCodeError(result)
 
         await fulfillment(of: [exp])
@@ -419,7 +419,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode(code: "1234", username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.submitCode(code: "1234", username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordVerifyCodeError(result)
 
         await fulfillment(of: [exp])
@@ -439,7 +439,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode(code: "1234", username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.submitCode(code: "1234", username: "", continuationToken: "passwordResetToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         helper.onPasswordRequired(result)
 
@@ -460,7 +460,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode(code: "1234", username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.submitCode(code: "1234", username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordVerifyCodeError(result)
 
         await fulfillment(of: [exp])
@@ -488,7 +488,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode(code: "1234", username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.submitCode(code: "1234", username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordVerifyCodeError(result)
 
         await fulfillment(of: [exp])
@@ -508,7 +508,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitCodeValidatorHelper(exp)
 
-        let result = await sut.submitCode(code: "1234", username: "", passwordResetToken: "passwordResetToken", context: contextMock)
+        let result = await sut.submitCode(code: "1234", username: "", continuationToken: "passwordResetToken", context: contextMock)
         helper.onResetPasswordVerifyCodeError(result)
 
         await fulfillment(of: [exp])
@@ -529,7 +529,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -551,7 +551,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
         helper.onResetPasswordCompleted(result)
 
@@ -578,7 +578,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -605,7 +605,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -624,7 +624,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -648,7 +648,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -669,7 +669,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -699,7 +699,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -729,7 +729,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -754,7 +754,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -777,7 +777,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -800,7 +800,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: "", passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "passwordSubmitToken", context: contextMock)
         helper.onResetPasswordRequiredError(result)
 
         await fulfillment(of: [exp])
@@ -839,7 +839,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
 
-        let result = await sut.submitPassword(password: "password", username: username, passwordSubmitToken: "passwordSubmitToken", context: contextMock)
+        let result = await sut.submitPassword(password: "password", username: username, continuationToken: "passwordSubmitToken", context: contextMock)
         result.telemetryUpdate?(.success(()))
 
         helper.onResetPasswordCompleted(result)

@@ -37,14 +37,14 @@ protocol MSALNativeAuthSignInControlling {
 
     func signIn(
         username: String,
-        slt: String?,
+        continuationToken: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse
 
     func submitCode(
         _ code: String,
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitCodeControllerResponse
@@ -52,10 +52,10 @@ protocol MSALNativeAuthSignInControlling {
     func submitPassword(
         _ password: String,
         username: String,
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitPasswordControllerResponse
 
-    func resendCode(credentialToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse
+    func resendCode(continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse
 }
