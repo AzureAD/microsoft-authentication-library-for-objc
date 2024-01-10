@@ -303,11 +303,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()))
             )
-        case .codeRequired(let continuationToken, let sentTo, let channelType, let codeLength):
+        case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
             let state = SignInCodeRequiredState(
                 scopes: scopes,
                 controller: self,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
             return .init(

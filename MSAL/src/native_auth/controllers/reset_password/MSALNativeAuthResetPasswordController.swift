@@ -305,12 +305,12 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         context: MSIDRequestContext
     ) async -> ResetPasswordSubmitCodeControllerResponse {
         switch response {
-        case .success(let continuationToken):
+        case .success(let newContinuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful resetpassword/continue request")
             let newState = ResetPasswordRequiredState(
                 controller: self,
                 username: username,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
             return .init(.passwordRequired(newState: newState),
@@ -381,10 +381,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/submit request")
 
         switch response {
-        case .success(let continuationToken, let pollInterval):
+        case .success(let newContinuationToken, let pollInterval):
             return await doPollCompletionLoop(
                 username: username,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 pollInterval: pollInterval,
                 retriesRemaining: kNumberOfTimesToRetryPollCompletionCall,
                 event: event,

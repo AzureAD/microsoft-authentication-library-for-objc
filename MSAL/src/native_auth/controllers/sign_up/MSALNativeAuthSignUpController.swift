@@ -298,13 +298,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) -> SignUpResendCodeControllerResponse {
         switch result {
-        case .codeRequired(let sentTo, let challengeType, let codeLength, let continuationToken):
+        case .codeRequired(let sentTo, let challengeType, let codeLength, let newContinuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge resendCode request")
             return .init(.codeRequired(
                 newState: SignUpCodeRequiredState(
                     controller: self,
                     username: username,
-                    continuationToken: continuationToken,
+                    continuationToken: newContinuationToken,
                     correlationId: context.correlationId()
                 ),
                 sentTo: sentTo,
@@ -404,8 +404,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) async -> SignUpSubmitCodeControllerResponse {
         switch result {
-        case .success(let continuationToken):
-            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
+        case .success(let newContinuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
@@ -421,17 +421,17 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.error(error: error, newState: state))
-        case .credentialRequired(let continuationToken):
+        case .credentialRequired(let newContinuationToken):
             MSALLogger.log(level: .verbose, context: context, format: "credential_required received in signup/continue request")
 
-            let result = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
+            let result = await performAndValidateChallengeRequest(continuationToken: newContinuationToken, context: context)
             return handlePerformChallengeAfterContinueRequest(result, username: username, event: event, context: context)
-        case .attributesRequired(let continuationToken, let attributes):
+        case .attributesRequired(let newContinuationToken, let attributes):
             MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
                                                       username: username,
-                                                      continuationToken: continuationToken,
+                                                      continuationToken: newContinuationToken,
                                                       correlationId: context.correlationId())
 
             return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
@@ -463,8 +463,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) -> SignUpSubmitPasswordControllerResponse {
         switch result {
-        case .success(let continuationToken):
-            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
+        case .success(let newContinuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
@@ -483,12 +483,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                     correlationId: context.correlationId())
 
             return .init(.error(error: error, newState: state))
-        case .attributesRequired(let continuationToken, let attributes):
+        case .attributesRequired(let newContinuationToken, let attributes):
             MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
                                                       username: username,
-                                                      continuationToken: continuationToken,
+                                                      continuationToken: newContinuationToken,
                                                       correlationId: context.correlationId())
 
             return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
@@ -522,12 +522,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         context: MSIDRequestContext
     ) -> SignUpSubmitAttributesControllerResponse {
         switch result {
-        case .success(let continuationToken):
-            let state = createSignInAfterSignUpStateUsingContinuationToken(continuationToken, username: username, event: event, context: context)
+        case .success(let newContinuationToken):
+            let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
             return .init(.completed(state), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .attributesRequired(let continuationToken, let attributes):
+        case .attributesRequired(let newContinuationToken, let attributes):
             let error = AttributesRequiredError()
             MSALLogger.log(level: .error,
                            context: context,
@@ -535,14 +535,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let state = SignUpAttributesRequiredState(
                 controller: self,
                 username: username,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
             return .init(.attributesRequired(attributes: attributes, state: state), telemetryUpdate: { [weak self] result in
                 // The telemetry event always fails because more attributes are required (we consider this an error after having sent attributes)
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .attributeValidationFailed(let continuationToken, let invalidAttributes):
+        case .attributeValidationFailed(let newContinuationToken, let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
             MSALLogger.log(level: .error, context: context, format: message)
 
@@ -552,7 +552,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let state = SignUpAttributesRequiredState(
                 controller: self,
                 username: username,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
             return .init(.attributesInvalid(attributes: invalidAttributes, newState: state), telemetryUpdate: { [weak self] result in
