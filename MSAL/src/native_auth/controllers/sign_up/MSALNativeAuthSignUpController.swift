@@ -73,7 +73,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     func resendCode(username: String, context: MSIDRequestContext, continuationToken: String) async -> SignUpResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpResendCode, context: context)
         let challengeResult = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
-        return handleResendCodeResult(challengeResult, username: username, event: event, signupToken: continuationToken, context: context)
+        return handleResendCodeResult(challengeResult, username: username, event: event, continuationToken: continuationToken, context: context)
     }
 
     func submitCode(
@@ -294,7 +294,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ result: MSALNativeAuthSignUpChallengeValidatedResponse,
         username: String,
         event: MSIDTelemetryAPIEvent?,
-        signupToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) -> SignUpResendCodeControllerResponse {
         switch result {
@@ -322,7 +322,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let newState = SignUpCodeRequiredState(
                 controller: self,
                 username: username,
-                continuationToken: signupToken,
+                continuationToken: continuationToken,
                 correlationId: context.correlationId()
             )
             return .init(.error(error: error, newState: newState))
