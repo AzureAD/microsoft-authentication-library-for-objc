@@ -25,8 +25,8 @@
 import Foundation
 
 enum MSALNativeAuthSignInChallengeValidatedResponse {
-    case codeRequired(credentialToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
-    case passwordRequired(credentialToken: String)
+    case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
+    case passwordRequired(continuationToken: String)
     case error(MSALNativeAuthSignInChallengeValidatedErrorType)
 }
 

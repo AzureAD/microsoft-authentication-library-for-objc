@@ -33,14 +33,14 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     init(
         controller: MSALNativeAuthResetPasswordControlling,
         username: String,
-        flowToken: String,
+        continuationToken: String,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         correlationId: UUID
     ) {
         self.controller = controller
         self.username = username
         self.inputValidator = inputValidator
-        super.init(flowToken: flowToken, correlationId: correlationId)
+        super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 }
 

@@ -87,7 +87,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     }
 
     func test_signUpChallengeRequest_is_created_successfully() throws {
-        let request = try sut.challenge(token: "sign-up-token", context: context)
+        let request = try sut.challenge(token: "continuation-token", context: context)
 
         checkBodyParams(request.parameters, for: .signUpChallenge)
         checkUrlRequest(request.urlRequest!, for: .signUpChallenge)
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     func test_signUpContinueRequest_is_created_successfully() throws {
         let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "sign-up-token",
+            continuationToken: "continuation-token",
             password: "1234",
             oobCode: nil,
             attributes: ["city": "dublin"],
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     func test_signUpContinueRequestWithNoAttributes_is_created_successfully() throws {
         let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "sign-up-token",
+            continuationToken: "continuation-token",
             password: "1234",
             oobCode: nil,
             attributes: nil,
@@ -137,7 +137,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
     func test_signUpContinueRequestWithInvalidAttributes_throwAnError() throws {
         let parameters = MSALNativeAuthSignUpContinueRequestProviderParams(
             grantType: .password,
-            signUpToken: "sign-up-token",
+            continuationToken: "continuation-token",
             password: "1234",
             oobCode: nil,
             attributes: ["invalid attribute": Data()],
@@ -166,14 +166,14 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
         case .signUpChallenge:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
-                Key.signUpToken.rawValue: "sign-up-token",
+                Key.continuationToken.rawValue: "continuation-token",
                 Key.challengeType.rawValue: "redirect"
             ]
         case .signUpContinue:
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.grantType.rawValue: "password",
-                Key.signUpToken.rawValue: "sign-up-token",
+                Key.continuationToken.rawValue: "continuation-token",
                 Key.password.rawValue: "1234"
             ]
             if expectAttributes {

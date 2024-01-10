@@ -86,7 +86,7 @@ final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPassw
     func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         let requestParams = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: context,
-            passwordResetToken: token
+            continuationToken: token
         )
 
         let request = MSIDHttpRequest()

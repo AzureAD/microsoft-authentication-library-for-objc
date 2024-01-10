@@ -77,9 +77,8 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         username: String? = nil,
         password: String? = nil,
         scopes: [String],
-        credentialToken: String? = nil,
+        continuationToken: String? = nil,
         oobCode: String? = nil,
-        signInSLT: String? = nil,
         grantType: MSALNativeAuthGrantType,
         includeChallengeType: Bool = true,
         context: MSIDRequestContext) -> MSIDHttpRequest? {
@@ -87,8 +86,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                 let params = MSALNativeAuthTokenRequestParameters(
                     context: context,
                     username: username,
-                    credentialToken: credentialToken,
-                    signInSLT: signInSLT,
+                    continuationToken: continuationToken,
                     grantType: grantType,
                     scope: scopes.joinScopes(),
                     password: password,
@@ -114,8 +112,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                 let params = MSALNativeAuthTokenRequestParameters(
                     context: context,
                     username: nil,
-                    credentialToken: nil,
-                    signInSLT: nil,
+                    continuationToken: nil,
                     grantType: .refreshToken,
                     scope: scopes.joinScopes(),
                     password: nil,

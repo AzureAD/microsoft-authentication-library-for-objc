@@ -40,8 +40,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
             parameters: .init(
                 context: context,
                 username: "test@contoso.com",
-                credentialToken: nil,
-                signInSLT: nil,
+                continuationToken: nil,
                 grantType: .otp,
                 scope: nil,
                 password: nil,
@@ -71,8 +70,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let parameters = MSALNativeAuthTokenRequestParameters(context: context,
                                                               username: "test@contoso.com",
-                                                              credentialToken: nil,
-                                                              signInSLT: nil,
+                                                              continuationToken: nil,
                                                               grantType: .otp,
                                                               scope: "test & alt test",
                                                               password: nil,
@@ -122,7 +120,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
         )
     }
 
@@ -130,7 +128,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, credentialToken: nil)
+            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
         )
     }
 
@@ -176,6 +174,6 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
     }
 
     private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, credentialToken: nil)
+        .init(error: code, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
     }
 }

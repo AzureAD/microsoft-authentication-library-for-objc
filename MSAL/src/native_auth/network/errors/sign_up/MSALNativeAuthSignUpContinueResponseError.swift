@@ -30,7 +30,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
-    let signUpToken: String?
+    let continuationToken: String?
     let requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]?
     let unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttributes]?
@@ -41,7 +41,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
-        case signUpToken = "signup_token"
+        case continuationToken = "continuation_token"
         case requiredAttributes = "required_attributes"
         case unverifiedAttributes = "unverified_attributes"
         case invalidAttributes = "invalid_attributes"

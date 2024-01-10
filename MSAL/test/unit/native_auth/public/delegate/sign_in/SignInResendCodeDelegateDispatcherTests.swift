@@ -40,7 +40,7 @@ final class SignInResendCodeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInResendCodeCodeRequired_whenDelegateMethodsAreImplemented() async {
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
@@ -79,7 +79,7 @@ final class SignInResendCodeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4

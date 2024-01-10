@@ -35,14 +35,14 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         super.setUp()
 
         controller = .init()
-        sut = .init(scopes: [], username: "username", controller: controller, flowToken: "flowToken", correlationId: correlationId)
+        sut = .init(scopes: [], username: "username", controller: controller, continuationToken: "continuationToken", correlationId: correlationId)
     }
 
     // MARK: - Delegates
 
     func test_submitPassword_delegate_withError_shouldReturnError() {
         let expectedError = PasswordRequiredError(type: .invalidPassword)
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controller, flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInPasswordRequiredResult = .error(
             error: expectedError,
@@ -56,7 +56,7 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         sut.submitPassword(password: "invalid password", delegate: delegate)
         wait(for: [exp])
 
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitPassword_delegate_success_shouldReturnSuccess() {

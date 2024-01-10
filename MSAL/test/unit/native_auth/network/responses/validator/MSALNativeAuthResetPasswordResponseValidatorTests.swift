@@ -42,7 +42,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseContainsRedirect_itReturnsRedirect() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: nil, challengeType: .redirect)
+            .init(continuationToken: nil, challengeType: .redirect)
         )
 
         let result = sut.validate(response, with: context)
@@ -53,7 +53,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseDoesNotContainsTokenOrRedirect_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: nil, challengeType: .otp)
+            .init(continuationToken: nil, challengeType: .otp)
         )
 
         let result = sut.validate(response, with: context)
@@ -64,16 +64,16 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseContainsToken_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(passwordResetToken: "passwordResetToken", challengeType: .otp)
+            .init(continuationToken: "continuationToken", challengeType: .otp)
         )
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let passwordResetToken) = result else {
+        guard case .success(let continuationToken) = result else {
             return XCTFail("Unexpected response")
         }
 
-        XCTAssertEqual(passwordResetToken, "passwordResetToken")
+        XCTAssertEqual(continuationToken, "continuationToken")
     }
 
     func test_whenResetPasswordStartErrorResponseIsNotExpected_itReturnsUnexpectedError() {
@@ -153,7 +153,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: "token",
+            continuationToken: "token",
             codeLength: nil)
         )
 
@@ -167,20 +167,20 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: "token",
+            continuationToken: "token",
             codeLength: 6)
         )
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let sentTo, let channelTargetType, let codeLength, let passwordResetToken) = result else {
+        guard case .success(let sentTo, let channelTargetType, let codeLength, let continuationToken) = result else {
             return XCTFail("Unexpected response")
         }
 
         XCTAssertEqual(sentTo, "challenge-type-label")
         XCTAssertEqual(channelTargetType, .email)
         XCTAssertEqual(codeLength, 6)
-        XCTAssertEqual(passwordResetToken, "token")
+        XCTAssertEqual(continuationToken, "token")
     }
 
     func test_whenResetPasswordChallengeSuccessResponseOmitsSomeAttributes_itReturnsUnexpectedError() {
@@ -189,7 +189,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
-            passwordResetToken: nil,
+            continuationToken: nil,
             codeLength: 6)
         )
 
@@ -203,7 +203,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .none,
-            passwordResetToken: nil,
+            continuationToken: nil,
             codeLength: 6)
         )
 
@@ -235,15 +235,15 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Continue Response
 
     func test_whenResetPasswordContinueSuccessResponseContainsValidAttributesAndOOB_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .success(.init(passwordSubmitToken: "passwordSubmitToken", expiresIn: 300))
+        let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .success(.init(continuationToken: "continuationToken", expiresIn: 300))
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let passwordSubmitToken) = result else {
+        guard case .success(let continuationToken) = result else {
             return XCTFail("Unexpected response")
         }
 
-        XCTAssertEqual(passwordSubmitToken, "passwordSubmitToken")
+        XCTAssertEqual(continuationToken, "continuationToken")
     }
 
     func test_whenResetPasswordContinueErrorResponseIsNotExpected_itReturnsUnexpectedError() {
@@ -312,15 +312,15 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     // MARK: - Submit Response
 
     func test_whenResetPasswordSubmitSuccessResponseContainsToken_itReturnsSuccess() {
-        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(passwordResetToken: "passwordResetToken", pollInterval: 1))
+        let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .success(.init(continuationToken: "continuationToken", pollInterval: 1))
 
         let result = sut.validate(response, with: context)
 
-        guard case .success(let passwordResetToken, let pollInterval) = result else {
+        guard case .success(let continuationToken, let pollInterval) = result else {
             return XCTFail("Unexpected response")
         }
 
-        XCTAssertEqual(passwordResetToken, "passwordResetToken")
+        XCTAssertEqual(continuationToken, "continuationToken")
         XCTAssertEqual(pollInterval, 1)
     }
 
@@ -533,12 +533,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
-        expectedPasswordResetToken: String? = nil
+        expectedContinuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(
             createResetPasswordContinueError(
                 error: expectedError,
-                passwordResetToken: expectedPasswordResetToken
+                continuationToken: expectedContinuationToken
             )
         )
 
@@ -612,7 +612,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         target: String? = nil,
-        passwordResetToken: String? = nil
+        continuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueResponseError {
         .init(
             error: error,
@@ -621,7 +621,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             errorURI: errorURI,
             innerErrors: innerErrors,
             target: target,
-            passwordResetToken: passwordResetToken
+            continuationToken: continuationToken
         )
     }
 

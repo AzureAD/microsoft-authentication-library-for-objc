@@ -27,11 +27,6 @@ import Foundation
 struct MSALNativeAuthSignInInitiateResponse: Decodable {
 
     // MARK: - Variables
-    let credentialToken: String?
+    let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
-
-    enum CodingKeys: String, CodingKey {
-        case credentialToken
-        case challengeType
-    }
 }

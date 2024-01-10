@@ -96,7 +96,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     func signIn(
         username: String,
-        slt: String?,
+        continuationToken: String?,
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
@@ -105,8 +105,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
             context: context
         )
-        guard let slt = slt else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn after previous flow not available because signInSLT is nil")
+        guard let continuationToken = continuationToken else {
+            MSALLogger.log(level: .error, context: context, format: "SignIn after previous flow not available because continuationToken is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable)
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.failure(error))
@@ -115,8 +115,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         guard let request = createTokenRequest(
             username: username,
             scopes: scopes,
-            signInSLT: slt,
-            grantType: .slt,
+            continuationToken: continuationToken,
+            grantType: .continuationToken,
             context: context
         ) else {
             let error = SignInAfterSignUpError()
@@ -146,7 +146,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     // swiftlint:disable:next function_body_length
     func submitCode(
         _ code: String,
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitCodeControllerResponse {
@@ -156,7 +156,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
         guard let request = createTokenRequest(
             scopes: scopes,
-            credentialToken: credentialToken,
+            continuationToken: continuationToken,
             oobCode: code,
             grantType: .oobCode,
             includeChallengeType: false,
@@ -167,7 +167,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 errorType: .generalError,
                 telemetryInfo: telemetryInfo,
                 scopes: scopes,
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 context: context
             )
         }
@@ -193,7 +193,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             errorType: .generalError,
                             telemetryInfo: telemetryInfo,
                             scopes: scopes,
-                            credentialToken: credentialToken,
+                            continuationToken: continuationToken,
                             context: context
                         ))
                     }
@@ -204,7 +204,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 errorType: errorType,
                 telemetryInfo: telemetryInfo,
                 scopes: scopes,
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 context: context
             )
         }
@@ -214,7 +214,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     func submitPassword(
         _ password: String,
         username: String,
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitPasswordControllerResponse {
@@ -226,7 +226,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             username: username,
             password: password,
             scopes: scopes,
-            credentialToken: credentialToken,
+            continuationToken: continuationToken,
             grantType: .password,
             context: context) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn, submit password: unable to create token request")
@@ -234,7 +234,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 errorType: .generalError,
                 telemetryInfo: telemetryInfo,
                 username: username,
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 scopes: scopes
             )
         }
@@ -260,7 +260,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             errorType: .generalError,
                             telemetryInfo: telemetryInfo,
                             username: username,
-                            credentialToken: credentialToken,
+                            continuationToken: continuationToken,
                             scopes: scopes
                         ))
                     }
@@ -272,19 +272,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 errorType: errorType,
                 telemetryInfo: telemetryInfo,
                 username: username,
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 scopes: scopes
             )
         }
     }
 
     func resendCode(
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInResendCode, context: context)
-        let result = await performAndValidateChallengeRequest(credentialToken: credentialToken, context: context)
+        let result = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
         switch result {
         case .passwordRequired:
             let error = ResendCodeError()
@@ -300,11 +300,16 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 newState: SignInCodeRequiredState(
                     scopes: scopes,
                     controller: self,
-                    flowToken: credentialToken,
+                    continuationToken: continuationToken,
                     correlationId: context.correlationId()))
             )
-        case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
-            let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken, correlationId: context.correlationId())
+        case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
+            let state = SignInCodeRequiredState(
+                scopes: scopes,
+                controller: self,
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
             return .init(
                 .codeRequired(
                     newState: state,
@@ -323,7 +328,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         errorType: MSALNativeAuthTokenValidatedErrorType,
         telemetryInfo: TelemetryInfo,
         scopes: [String],
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext
     ) -> SignInSubmitCodeControllerResponse {
         MSALLogger.log(
@@ -331,7 +336,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             context: context,
             format: "SignIn completed with errorType: \(errorType)")
         stopTelemetryEvent(telemetryInfo, error: errorType)
-        let state = SignInCodeRequiredState(scopes: scopes, controller: self, flowToken: credentialToken, correlationId: context.correlationId())
+        let state = SignInCodeRequiredState(
+            scopes: scopes,
+            controller: self,
+            continuationToken: continuationToken,
+            correlationId: context.correlationId()
+        )
         return .init(.error(error: errorType.convertToVerifyCodeError(), newState: state))
     }
 
@@ -339,7 +349,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         errorType: MSALNativeAuthTokenValidatedErrorType,
         telemetryInfo: TelemetryInfo,
         username: String,
-        credentialToken: String,
+        continuationToken: String,
         scopes: [String]
     ) -> SignInSubmitPasswordControllerResponse {
         MSALLogger.log(
@@ -351,7 +361,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             scopes: scopes,
             username: username,
             controller: self,
-            flowToken: credentialToken,
+            continuationToken: continuationToken,
             correlationId: telemetryInfo.context.correlationId()
         )
         return .init(.error(error: errorType.convertToPasswordRequiredError(), newState: state))
@@ -378,9 +388,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo
     ) async -> Result<MSALNativeAuthSignInChallengeValidatedResponse, MSALNativeAuthSignInInitiateValidatedErrorType> {
         switch validatedResponse {
-        case .success(let credentialToken):
+        case .success(let continuationToken):
             let challengeValidatedResponse = await performAndValidateChallengeRequest(
-                credentialToken: credentialToken,
+                continuationToken: continuationToken,
                 context: telemetryInfo.context
             )
             return .success(challengeValidatedResponse)
@@ -458,13 +468,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let scopes = joinScopes(params.scopes)
         let isSignInUsingPassword = params.password != nil
         switch validatedResponse {
-        case .passwordRequired(let credentialToken):
+        case .passwordRequired(let continuationToken):
             if isSignInUsingPassword {
                 guard let request = createTokenRequest(
                     username: params.username,
                     password: params.password,
                     scopes: scopes,
-                    credentialToken: credentialToken,
+                    continuationToken: continuationToken,
                     grantType: .password,
                     context: telemetryInfo.context
                 ) else {
@@ -495,7 +505,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     scopes: scopes,
                     username: params.username,
                     controller: self,
-                    flowToken: credentialToken,
+                    continuationToken: continuationToken,
                     correlationId: params.context.correlationId()
                 )
 
@@ -503,13 +513,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                 })
             }
-        case .codeRequired(let credentialToken, let sentTo, let channelType, let codeLength):
+        case .codeRequired(let continuationToken, let sentTo, let channelType, let codeLength):
             if isSignInUsingPassword {
                 MSALLogger.log(level: .warning, context: telemetryInfo.context, format: MSALNativeAuthErrorMessage.codeRequiredForPasswordUserLog)
             }
             let state = SignInCodeRequiredState(scopes: scopes,
                                                 controller: self,
-                                                flowToken: credentialToken,
+                                                continuationToken: continuationToken,
                                                 correlationId: params.context.correlationId())
             return .init(
                 .codeRequired(
@@ -531,10 +541,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     }
 
     private func performAndValidateChallengeRequest(
-        credentialToken: String,
+        continuationToken: String,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthSignInChallengeValidatedResponse {
-        guard let challengeRequest = createChallengeRequest(credentialToken: credentialToken, context: context) else {
+        guard let challengeRequest = createChallengeRequest(continuationToken: continuationToken, context: context) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: Cannot create Challenge request object")
             return .error(.invalidRequest(message: nil))
         }
@@ -553,13 +563,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     }
 
     private func createChallengeRequest(
-        credentialToken: String,
+        continuationToken: String,
         context: MSIDRequestContext
     ) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 context: context,
-                credentialToken: credentialToken
+                continuationToken: continuationToken
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)
         } catch {

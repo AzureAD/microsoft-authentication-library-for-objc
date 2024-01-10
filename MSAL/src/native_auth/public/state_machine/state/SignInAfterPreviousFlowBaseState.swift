@@ -27,13 +27,13 @@ import Foundation
 @objcMembers public class SignInAfterPreviousFlowBaseState: NSObject {
     let controller: MSALNativeAuthSignInControlling
     let username: String
-    let slt: String? // TODO: Update to continuation_token
+    let continuationToken: String?
     let correlationId: UUID
 
-    init(controller: MSALNativeAuthSignInControlling, username: String, slt: String?, correlationId: UUID) {
+    init(controller: MSALNativeAuthSignInControlling, username: String, continuationToken: String?, correlationId: UUID) {
         self.username = username
         self.controller = controller
-        self.slt = slt
+        self.continuationToken = continuationToken
         self.correlationId = correlationId
     }
 }

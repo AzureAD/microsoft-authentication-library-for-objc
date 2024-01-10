@@ -27,6 +27,6 @@ enum MSALNativeAuthGrantType: String {
     case otp = "passwordless_otp"
     case oobCode = "oob"
     case refreshToken = "refresh_token"
-    case slt
+    case continuationToken = "continuation_token"
     case attributes
 }

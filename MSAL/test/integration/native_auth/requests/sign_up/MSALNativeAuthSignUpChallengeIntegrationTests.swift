@@ -49,7 +49,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .password)
-        XCTAssertNotNil(response?.signUpToken)
+        XCTAssertNotNil(response?.continuationToken)
     }
 
     func test_whenSignUpChallengeOOB_succeeds() async throws {
@@ -57,7 +57,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .oob)
-        XCTAssertNotNil(response?.signUpToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNotNil(response?.bindingMethod)
         XCTAssertNotNil(response?.challengeTargetLabel)
         XCTAssertNotNil(response?.codeLength)
@@ -69,7 +69,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         let response: MSALNativeAuthSignUpChallengeResponse? = try await performTestSucceed()
 
         XCTAssertEqual(response?.challengeType, .redirect)
-        XCTAssertNil(response?.signUpToken)
+        XCTAssertNil(response?.continuationToken)
     }
 
     func test_signUpChallenge_unauthorizedClient() async throws {

@@ -25,7 +25,7 @@
 import Foundation
 
 enum MSALNativeAuthSignInInitiateValidatedResponse {
-    case success(credentialToken: String)
+    case success(continuationToken: String)
     case error(MSALNativeAuthSignInInitiateValidatedErrorType)
 }
 
