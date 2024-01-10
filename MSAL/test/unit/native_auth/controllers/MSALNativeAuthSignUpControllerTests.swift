@@ -720,7 +720,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken 1"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(continuationToken: "continuationToken 1")
+        requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "continuationToken 1")
         validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
 
         let exp = expectation(description: "SignUpController expectation")

@@ -33,6 +33,10 @@ final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTes
         XCTAssertEqual(sut.allCases.count, 5)
     }
 
+    func test_invalidGrant() {
+        XCTAssertEqual(sut.invalidGrant.rawValue, "invalid_grant")
+    }
+
     func test_invalidRequest() {
         XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
@@ -47,9 +51,5 @@ final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTes
     
     func test_userNotFound() {
         XCTAssertEqual(sut.userNotFound.rawValue, "user_not_found")
-    }
-
-    func test_invalidGrant() {
-        XCTAssertEqual(sut.invalidGrant.rawValue, "invalid_grant")
     }
 }

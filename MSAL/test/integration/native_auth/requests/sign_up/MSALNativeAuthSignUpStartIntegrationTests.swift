@@ -152,7 +152,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
     func test_signUpStart_unsupportedAuthMethod() async throws {
         try await perform_testFail(
             endpoint: .signUpStart,
-            response: .unsupportedAuthMethod,
+            response: .authNotSupported,
             expectedError: createError(.unsupportedAuthMethod)
         )
     }

@@ -53,7 +53,7 @@ enum MockAPIResponse: String {
     case invalidScope = "InvalidScope"
     case expiredToken = "ExpiredToken"
     case invalidPurposeToken = "InvalidPurposeToken"
-    case unsupportedAuthMethod = "AuthNotSupported"
+    case authNotSupported = "AuthNotSupported"
     case userAlreadyExists = "UserAlreadyExists"
     case userNotFound = "UserNotFound"
     case slowDown = "SlowDown"

@@ -203,10 +203,9 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .unexpectedError
         case .unauthorizedClient,
              .expiredToken,
-             .userAlreadyExists:
+             .userAlreadyExists,
+             .invalidRequest:
             return .error(apiError)
-        case .invalidRequest:
-            return handleInvalidRequestError(apiError)
         }
     }
 
@@ -238,35 +237,6 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError
             }
-        }
-    }
-
-    private func handleInvalidRequestError(_ error: MSALNativeAuthSignUpContinueResponseError) -> MSALNativeAuthSignUpContinueValidatedResponse {
-        guard let errorCode = error.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
-            return .error(error)
-        }
-        switch knownErrorCode {
-        case .invalidOTP,
-            .incorrectOTP,
-            .OTPNoCacheEntryForUser:
-            return .invalidUserInput(
-                MSALNativeAuthSignUpContinueResponseError(
-                    error: .invalidGrant,
-                    subError: error.subError,
-                    errorDescription: error.errorDescription,
-                    errorCodes: error.errorCodes,
-                    errorURI: error.errorURI,
-                    innerErrors: error.innerErrors,
-                    continuationToken: error.continuationToken,
-                    requiredAttributes: error.requiredAttributes,
-                    unverifiedAttributes: error.unverifiedAttributes,
-                    invalidAttributes: error.invalidAttributes))
-        case .userNotFound,
-            .invalidCredentials,
-            .strongAuthRequired,
-            .userNotHaveAPassword,
-            .invalidRequestParameter:
-            return .error(error)
         }
     }
 

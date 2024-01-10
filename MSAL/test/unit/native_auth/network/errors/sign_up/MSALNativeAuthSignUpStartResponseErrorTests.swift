@@ -45,23 +45,23 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPublicError_passwordTooWeak() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooShort() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooLong() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordRecentlyUsed() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordBanned() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_userAlreadyExists() {

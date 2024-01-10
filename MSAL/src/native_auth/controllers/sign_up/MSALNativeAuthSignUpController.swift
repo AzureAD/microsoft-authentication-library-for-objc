@@ -165,6 +165,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     ) async -> SignUpStartControllerResponse {
         switch result {
         case .success(let continuationToken):
+            MSALLogger.log(level: .info, context: context, format: "Successful signup/start request")
             let challengeResult = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
             return handleSignUpChallengeResult(challengeResult, username: username, event: event, context: context)
         case .attributeValidationFailed(let invalidAttributes):

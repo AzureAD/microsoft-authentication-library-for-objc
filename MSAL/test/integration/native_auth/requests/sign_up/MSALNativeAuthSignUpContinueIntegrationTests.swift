@@ -226,7 +226,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
 
-        XCTAssertNil(response?.continuationToken)
+        XCTAssertNotNil(response?.continuationToken)
     }
 
     private func createError(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil) -> MSALNativeAuthSignUpContinueResponseError {

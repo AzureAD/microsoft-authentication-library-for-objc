@@ -196,10 +196,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound(message: errorDescription)
         case .invalidCredentials:
             return .invalidPassword(message: errorDescription)
-        case .invalidOTP,
-            .incorrectOTP,
-            .OTPNoCacheEntryForUser:
-            return .invalidOOBCode(message: errorDescription)
         case .strongAuthRequired:
             return .strongAuthRequired(message: errorDescription)
         case .userNotHaveAPassword,
@@ -213,10 +209,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         errorDescription: String?
     ) -> MSALNativeAuthTokenValidatedErrorType {
         switch errorCode {
-        case .invalidOTP,
-            .incorrectOTP,
-            .OTPNoCacheEntryForUser:
-            return .invalidOOBCode(message: errorDescription)
         case .userNotFound,
             .invalidCredentials,
             .strongAuthRequired,
