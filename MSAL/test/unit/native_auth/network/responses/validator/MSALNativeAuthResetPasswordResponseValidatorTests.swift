@@ -533,12 +533,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthResetPasswordContinueOauth2ErrorCode,
-        expectedPasswordResetToken: String? = nil
+        expectedContinuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(
             createResetPasswordContinueError(
                 error: expectedError,
-                continuationToken: expectedPasswordResetToken
+                continuationToken: expectedContinuationToken
             )
         )
 

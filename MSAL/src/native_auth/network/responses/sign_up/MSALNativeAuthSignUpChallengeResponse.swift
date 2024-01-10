@@ -32,9 +32,4 @@ struct MSALNativeAuthSignUpChallengeResponse: Decodable {
     let challengeChannel: MSALNativeAuthInternalChannelType?
     let continuationToken: String?
     let codeLength: Int?
-
-    enum CodingKeys: String, CodingKey {
-        case challengeType, bindingMethod, interval, challengeTargetLabel, challengeChannel, codeLength
-        case continuationToken
-    }
 }
