@@ -214,7 +214,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
     
-    func test_shouldCompleteWithAPIErrorUsingCorrectResponseSerializer_whenStatusCode400AndVerificationRequired() throws {
+    func test_shouldCompleteWithAPIErrorUsingCorrectResponseSerializer_whenStatusCode400AndAttributesRequired() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -227,8 +227,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
         
         var dictionary = [String: Any]()
-        dictionary["error"] = "verification_required"
-        dictionary["error_description"] = "AADSTS55102: Verification required."
+        dictionary["error"] = "attributes_required"
+        dictionary["error_description"] = "AADSTS55102: Attributes Required."
         dictionary["error_uri"] = HttpModuleMockConfigurator.baseUrl.absoluteString
         dictionary["continuation_token"] = "abcdef"
 
@@ -249,8 +249,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
                 expectation.fulfill()
                 return
             }
-            XCTAssertEqual(error.error, MSALNativeAuthSignUpStartOauth2ErrorCode.verificationRequired)
-            XCTAssertEqual(error.errorDescription, "AADSTS55102: Verification required.")
+            XCTAssertEqual(error.error, MSALNativeAuthSignUpStartOauth2ErrorCode.attributesRequired)
+            XCTAssertEqual(error.errorDescription, "AADSTS55102: Attributes Required.")
             XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
             XCTAssertEqual(error.continuationToken, "abcdef")
             expectation.fulfill()

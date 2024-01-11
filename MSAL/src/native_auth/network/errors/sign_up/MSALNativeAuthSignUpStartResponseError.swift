@@ -27,6 +27,7 @@ import Foundation
 struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthSignUpStartOauth2ErrorCode
+    let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -37,6 +38,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
     enum CodingKeys: String, CodingKey {
         case error
+        case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -51,21 +53,19 @@ extension MSALNativeAuthSignUpStartResponseError {
 
     func toSignUpStartPublicError() -> SignUpStartError {
         switch error {
-        case .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .init(type: .invalidPassword, message: errorDescription)
+        case .invalidGrant:
+            if let subError, subError.isAnyPasswordError {
+                return .init(type: .invalidPassword, message: errorDescription)
+            } else {
+                return .init(type: .generalError, message: errorDescription)
+            }
         case .userAlreadyExists:
             return .init(type: .userAlreadyExists, message: errorDescription)
-        case .attributeValidationFailed,
-             .attributesRequired,
+        case .attributesRequired,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
-             .invalidRequest,
-             .verificationRequired: /// .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError in the validator
+             .invalidRequest:
             return .init(type: .generalError, message: errorDescription)
         }
     }

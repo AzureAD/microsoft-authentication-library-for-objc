@@ -27,6 +27,7 @@ import Foundation
 struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode
+    let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -35,6 +36,7 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
 
     enum CodingKeys: String, CodingKey {
         case error
+        case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -47,12 +49,12 @@ extension MSALNativeAuthResetPasswordSubmitResponseError {
 
     func toPasswordRequiredPublicError() -> PasswordRequiredError {
         switch error {
-        case .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .init(type: .invalidPassword, message: errorDescription)
+        case .invalidGrant:
+            if let subError, subError.isAnyPasswordError {
+                return .init(type: .invalidPassword, message: errorDescription)
+            } else {
+                return .init(type: .generalError, message: errorDescription)
+            }
         case .invalidClient,
              .expiredToken,
              .invalidRequest:

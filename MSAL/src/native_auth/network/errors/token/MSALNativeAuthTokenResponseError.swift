@@ -27,6 +27,7 @@ import Foundation
 struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthTokenOauth2ErrorCode
+    let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -35,6 +36,7 @@ struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
 
     enum CodingKeys: String, CodingKey {
         case error
+        case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"

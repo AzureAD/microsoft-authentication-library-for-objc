@@ -45,23 +45,23 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     }
     
     func test_toSignUpStartPublicError_passwordTooWeak() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooShort() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooLong() {
-        testSignUpStartErrorToSignUpStart(code: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordRecentlyUsed() {
-        testSignUpStartErrorToSignUpStart(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordBanned() {
-        testSignUpStartErrorToSignUpStart(code: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_userAlreadyExists() {
@@ -72,22 +72,18 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStart(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
     }
     
-    func test_toSignUpStartPublicError_verificationRequired() {
-        testSignUpStartErrorToSignUpStart(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
-    }
-    
     func test_toSignUpStartPublicError_unsupportedAuthMethod() {
         testSignUpStartErrorToSignUpStart(code: .unsupportedAuthMethod, description: testDescription, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_attributeValidationFailed() {
-        testSignUpStartErrorToSignUpStart(code: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
     }
 
     // MARK: private methods
     
-    private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
-        sut = MSALNativeAuthSignUpStartResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)
+    private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
+        sut = MSALNativeAuthSignUpStartResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)
         let error = sut.toSignUpStartPublicError()
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)

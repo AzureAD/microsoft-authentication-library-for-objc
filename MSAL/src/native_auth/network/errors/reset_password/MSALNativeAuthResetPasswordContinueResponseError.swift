@@ -27,6 +27,7 @@ import Foundation
 struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseError {
 
     let error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode
+    let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -36,6 +37,7 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
 
     enum CodingKeys: String, CodingKey {
         case error
+        case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -49,12 +51,12 @@ extension MSALNativeAuthResetPasswordContinueResponseError {
 
     func toVerifyCodePublicError() -> VerifyCodeError {
         switch error {
-        case .invalidOOBValue:
-            return .init(type: .invalidCode, message: errorDescription)
+        case .invalidGrant:
+            return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
+                                                : .init(type: .generalError, message: errorDescription)
         case .invalidClient,
              .expiredToken,
              .invalidRequest,
-             .invalidGrant,
              .verificationRequired:
             return .init(type: .generalError, message: errorDescription)
         }

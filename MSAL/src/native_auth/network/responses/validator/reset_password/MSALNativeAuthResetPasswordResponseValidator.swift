@@ -171,10 +171,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
 
         switch apiError.error {
-        case .invalidOOBValue:
-            return .invalidOOB
+        case .invalidGrant:
+            return apiError.subError == .invalidOOBValue ? .invalidOOB : .error(apiError)
         case .invalidClient,
-             .invalidGrant,
              .expiredToken,
              .invalidRequest:
             return .error(apiError)
@@ -214,12 +213,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
 
         switch apiError.error {
-        case .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .passwordError(error: apiError)
+        case .invalidGrant:
+            if let subError = apiError.subError, subError.isAnyPasswordError {
+                return .passwordError(error: apiError)
+            } else {
+                return .error(apiError)
+            }
         case .invalidRequest,
              .invalidClient,
              .expiredToken:
@@ -258,12 +257,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         }
 
         switch apiError.error {
-        case .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .passwordError(error: apiError)
+        case .invalidGrant:
+            if let subError = apiError.subError, subError.isAnyPasswordError {
+                return .passwordError(error: apiError)
+            } else {
+                return .error(apiError)
+            }
         case .userNotFound,
              .invalidRequest,
              .invalidClient,

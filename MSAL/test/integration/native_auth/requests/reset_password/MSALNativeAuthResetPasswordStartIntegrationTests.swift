@@ -80,7 +80,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
     func test_resetPasswordStart_userNotFound() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordStart,
-            response: .explicityUserNotFound,
+            response: .userNotFound,
             expectedError: createResetPasswordStartError(error: .userNotFound)
         )
     }

@@ -30,7 +30,11 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpStartOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 13)
+        XCTAssertEqual(sut.allCases.count, 7)
+    }
+
+    func test_invalidGrant() {
+        XCTAssertEqual(sut.invalidGrant.rawValue, "invalid_grant")
     }
 
     func test_invalidRequest() {
@@ -45,26 +49,6 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
         XCTAssertEqual(sut.unsupportedChallengeType.rawValue, "unsupported_challenge_type")
     }
 
-    func test_passwordTooWeak() {
-        XCTAssertEqual(sut.passwordTooWeak.rawValue, "password_too_weak")
-    }
-
-    func test_passwordTooShort() {
-        XCTAssertEqual(sut.passwordTooShort.rawValue, "password_too_short")
-    }
-
-    func test_passwordTooLong() {
-        XCTAssertEqual(sut.passwordTooLong.rawValue, "password_too_long")
-    }
-
-    func test_passwordRecentlyUsed() {
-        XCTAssertEqual(sut.passwordRecentlyUsed.rawValue, "password_recently_used")
-    }
-
-    func test_passwordBanned() {
-        XCTAssertEqual(sut.passwordBanned.rawValue, "password_banned")
-    }
-
     func test_userAlreadyExists() {
         XCTAssertEqual(sut.userAlreadyExists.rawValue, "user_already_exists")
     }
@@ -72,16 +56,8 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     func test_attributesRequired() {
         XCTAssertEqual(sut.attributesRequired.rawValue, "attributes_required")
     }
-
-    func test_verificationRequired() {
-        XCTAssertEqual(sut.verificationRequired.rawValue, "verification_required")
-    }
     
     func test_unsupportedAuthMethod() {
         XCTAssertEqual(sut.unsupportedAuthMethod.rawValue, "unsupported_auth_method")
-    }
-
-    func test_attributeValidationFailed() {
-        XCTAssertEqual(sut.attributeValidationFailed.rawValue, "attribute_validation_failed")
     }
 }

@@ -120,7 +120,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidPassword,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
+            expectedError: createError(.invalidGrant, subError: .passwordInvalid)
         )
     }
 
@@ -128,7 +128,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         try await perform_testFail(
             endpoint: .signInToken,
             response: .invalidOOBValue,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidOTP.rawValue], errorURI: nil, innerErrors: nil, continuationToken: nil)
+            expectedError: createError(.invalidGrant, subError: .invalidOOBValue)
         )
     }
 
@@ -173,7 +173,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
     }
 
-    private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode) -> Error {
-        .init(error: code, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
+    private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes]? = nil) -> Error {
+        .init(error: code, subError: subError, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
     }
 }

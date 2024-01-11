@@ -549,7 +549,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         signUpRequestProviderMock.expectedContinueRequestParameters = expectedSignUpContinueParams(token: "continuationToken 2")
         
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
-        signUpResponseValidatorMock.mockValidateSignUpStartFunc((.verificationRequired(continuationToken: "continuationToken", unverifiedAttributes: [""])))
+        signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
         signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
         
@@ -650,7 +650,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         signUpRequestProviderMock.expectedContinueRequestParameters = expectedSignUpContinueParams(token: "continuationToken 2")
         
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
-        signUpResponseValidatorMock.mockValidateSignUpStartFunc((.verificationRequired(continuationToken: "continuationToken", unverifiedAttributes: [""])))
+        signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
         signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
         

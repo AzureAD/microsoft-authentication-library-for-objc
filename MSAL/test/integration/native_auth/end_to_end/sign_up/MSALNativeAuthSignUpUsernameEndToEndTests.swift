@@ -41,7 +41,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -85,7 +85,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -129,7 +129,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -190,7 +190,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -268,7 +268,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 

@@ -22,11 +22,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-enum MSALNativeAuthResetPasswordSubmitOauth2ErrorCode: String, Decodable, CaseIterable {
-    case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
-    case expiredToken = "expired_token"
-    case invalidGrant = "invalid_grant"
+final class MSALNativeAuthSubErrorCodeTests: XCTestCase {
+    private typealias sut = MSALNativeAuthSubErrorCode
+
+    func test_allCases() {
+        XCTAssertEqual(sut.allCases.count, 8)
+    }
+
+    func test_passwordTooWeak() {
+        XCTAssertEqual(sut.passwordTooWeak.rawValue, "password_too_weak")
+    }
+
+    func test_passwordTooShort() {
+        XCTAssertEqual(sut.passwordTooShort.rawValue, "password_too_short")
+    }
+
+    func test_passwordTooLong() {
+        XCTAssertEqual(sut.passwordTooLong.rawValue, "password_too_long")
+    }
+
+    func test_passwordRecentlyUsed() {
+        XCTAssertEqual(sut.passwordRecentlyUsed.rawValue, "password_recently_used")
+    }
+
+    func test_passwordBanned() {
+        XCTAssertEqual(sut.passwordBanned.rawValue, "password_banned")
+    }
+
+    func test_passwordInvalid() {
+        XCTAssertEqual(sut.passwordInvalid.rawValue, "password_is_invalid")
+    }
+
+    func test_attributeValidationFailed() {
+        XCTAssertEqual(sut.attributeValidationFailed.rawValue, "attribute_validation_failed")
+    }
+
+    func test_invalidOOBValue() {
+        XCTAssertEqual(sut.invalidOOBValue.rawValue, "invalid_oob_value")
+    }
 }

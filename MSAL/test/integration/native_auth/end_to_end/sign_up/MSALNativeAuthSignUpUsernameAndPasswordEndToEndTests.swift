@@ -41,7 +41,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -90,7 +90,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -140,7 +140,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -207,7 +207,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -291,7 +291,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
@@ -392,7 +392,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         if usingMockAPI {
-            try await mockResponse(.verificationRequired, endpoint: .signUpStart)
+            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
 
