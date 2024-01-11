@@ -24,6 +24,7 @@
 
 import Foundation
 
+///  Class that defines the structure and type of a RetrieveAccessToken error
 @objcMembers
 public class RetrieveAccessTokenError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {

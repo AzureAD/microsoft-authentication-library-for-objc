@@ -661,7 +661,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     private func buildContinueErrorResponse(
         expectedError: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         expectedContinuationToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
+        requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]? = nil,
         invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
         errorCodes: [Int]? = nil
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
@@ -723,7 +723,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         continuationToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
+        requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]? = nil,
         unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
         invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
     ) -> MSALNativeAuthSignUpContinueResponseError {

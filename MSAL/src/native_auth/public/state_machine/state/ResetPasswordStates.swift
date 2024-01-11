@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Base class for the ResetPassword state
 @objcMembers
 public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthResetPasswordControlling

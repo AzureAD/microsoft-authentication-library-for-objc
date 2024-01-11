@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a SignInAfterResetPassword delegate
 @objc
 public protocol SignInAfterResetPasswordDelegate {
     /// Notifies the delegate that the operation resulted in an error.

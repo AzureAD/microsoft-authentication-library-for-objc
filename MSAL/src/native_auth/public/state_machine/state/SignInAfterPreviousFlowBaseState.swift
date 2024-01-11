@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Base class for the SignInAfterPreviousFlow state
 @objcMembers public class SignInAfterPreviousFlowBaseState: NSObject {
     let controller: MSALNativeAuthSignInControlling
     let username: String

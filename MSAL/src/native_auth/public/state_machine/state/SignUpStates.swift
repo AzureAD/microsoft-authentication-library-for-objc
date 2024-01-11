@@ -24,6 +24,7 @@
 
 import Foundation
 
+///  Base class for the SignUp state
 @objcMembers
 public class SignUpBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthSignUpControlling

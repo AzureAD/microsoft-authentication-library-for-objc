@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Class that defines the structure and type of a PasswordRequired error
 @objcMembers
 public class PasswordRequiredError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {

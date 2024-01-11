@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a ResetPasswordStart delegate
 @objc
 public protocol ResetPasswordStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -45,6 +46,7 @@ public protocol ResetPasswordStartDelegate {
     )
 }
 
+/// Protocol that defines the methods of a ResetPasswordVerifyCode delegate
 @objc
 public protocol ResetPasswordVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -59,6 +61,7 @@ public protocol ResetPasswordVerifyCodeDelegate {
     @MainActor @objc optional func onPasswordRequired(newState: ResetPasswordRequiredState)
 }
 
+/// Protocol that defines the methods of a ResetPasswordResendCode delegate
 @objc
 public protocol ResetPasswordResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -82,6 +85,7 @@ public protocol ResetPasswordResendCodeDelegate {
     )
 }
 
+/// Protocol that defines the methods of a ResetPasswordRequired delegate
 @objc
 public protocol ResetPasswordRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.

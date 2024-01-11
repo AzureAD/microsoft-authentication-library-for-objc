@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let continuationToken: String?
-    let requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]?
+    let requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]?
     let unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttributes]?
 

@@ -24,7 +24,7 @@
 
 import Foundation
 
-class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
+class MSALNativeAuthRequiredAttributeInternal: NSObject, Decodable {
     let name: String
     let type: String
     let required: Bool
@@ -41,7 +41,7 @@ class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
         return "\(name)"
     }
 
-    func toRequiredAttributesPublic() -> MSALNativeAuthRequiredAttributes {
-        MSALNativeAuthRequiredAttributes(name: name, type: type, required: required, regex: options?.regex)
+    func toRequiredAttributePublic() -> MSALNativeAuthRequiredAttribute {
+        MSALNativeAuthRequiredAttribute(name: name, type: type, required: required, regex: options?.regex)
     }
 }

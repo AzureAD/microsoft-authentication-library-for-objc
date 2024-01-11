@@ -49,7 +49,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
+        let expectedAttributes: [MSALNativeAuthRequiredAttribute] = [
             .init(name: "attribute1", type: "", required: true),
             .init(name: "attribute2", type: "", required: true),
         ]
@@ -77,7 +77,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
+        let expectedAttributes: [MSALNativeAuthRequiredAttribute] = [
             .init(name: "attribute1", type: "", required: true),
             .init(name: "attribute2", type: "", required: true),
         ]
