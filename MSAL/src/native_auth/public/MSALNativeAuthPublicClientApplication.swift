@@ -82,6 +82,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
         self.inputValidator = MSALNativeAuthInputValidator()
 
+        if config.redirectUri == nil {
+            print(MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+        }
+
         try super.init(configuration: config)
     }
 
@@ -116,6 +120,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
+
+        if redirectUri == nil {
+            print(MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+        }
 
         // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios
         configuration.bypassRedirectURIValidation = redirectUri == nil
