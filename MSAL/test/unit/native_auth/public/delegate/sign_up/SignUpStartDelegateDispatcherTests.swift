@@ -49,7 +49,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignUpCodeRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpCodeRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4
@@ -82,7 +82,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignUpCodeRequiredState(controller: controllerFactoryMock.signUpController, username: "", flowToken: "flowToken", correlationId: correlationId)
+        let expectedState = SignUpCodeRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType.email
         let expectedCodeLength = 4

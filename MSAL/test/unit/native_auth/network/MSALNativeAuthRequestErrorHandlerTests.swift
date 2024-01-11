@@ -230,7 +230,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         dictionary["error"] = "verification_required"
         dictionary["error_description"] = "AADSTS55102: Verification required."
         dictionary["error_uri"] = HttpModuleMockConfigurator.baseUrl.absoluteString
-        dictionary["signup_token"] = "abcdef"
+        dictionary["continuation_token"] = "abcdef"
 
         let data = try JSONSerialization.data(withJSONObject: dictionary)
 
@@ -252,7 +252,7 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             XCTAssertEqual(error.error, MSALNativeAuthSignUpStartOauth2ErrorCode.verificationRequired)
             XCTAssertEqual(error.errorDescription, "AADSTS55102: Verification required.")
             XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
-            XCTAssertEqual(error.signUpToken, "abcdef")
+            XCTAssertEqual(error.continuationToken, "abcdef")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)

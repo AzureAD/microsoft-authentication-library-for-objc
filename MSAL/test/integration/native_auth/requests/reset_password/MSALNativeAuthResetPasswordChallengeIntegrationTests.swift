@@ -39,7 +39,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         )
 
         sut = try provider.challenge(
-            token: "<password-reset-token>",
+            token: "<continuation-token>",
             context: MSALNativeAuthRequestContext(correlationId: correlationId)
         )
     }
@@ -57,7 +57,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         XCTAssertNotNil(response?.bindingMethod)
         XCTAssertNotNil(response?.challengeTargetLabel)
         XCTAssertNotNil(response?.challengeChannel)
-        XCTAssertNotNil(response?.passwordResetToken)
+        XCTAssertNotNil(response?.continuationToken)
         XCTAssertNotNil(response?.codeLength)
     }
 
@@ -70,7 +70,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         XCTAssertNil(response?.bindingMethod)
         XCTAssertNil(response?.challengeTargetLabel)
         XCTAssertNil(response?.challengeChannel)
-        XCTAssertNil(response?.passwordResetToken)
+        XCTAssertNil(response?.continuationToken)
         XCTAssertNil(response?.codeLength)
     }
 

@@ -29,7 +29,7 @@ import XCTest
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
     private let expectation: XCTestExpectation
     private(set) var context: MSIDRequestContext?
-    private(set) var flowToken: String?
+    private(set) var continuationToken: String?
     private(set) var resetPasswordCalled = false
     private(set) var resendCodeCalled = false
     private(set) var submitCodeCalled = false
@@ -48,8 +48,8 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         return .init(.error(.init(type: .generalError)))
     }
 
-    func resendCode(username: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
-        self.flowToken = passwordResetToken
+    func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         resendCodeCalled = true
@@ -58,8 +58,8 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         return .init(.error(error: .init(), newState: nil))
     }
 
-    func submitCode(code: String, username: String, passwordResetToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
-        self.flowToken = passwordResetToken
+    func submitCode(code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitCodeCalled = true
@@ -68,8 +68,8 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         return .init(.error(error: .init(type: .generalError), newState: nil))
     }
 
-    func submitPassword(password: String, username: String, passwordSubmitToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
-        self.flowToken = passwordSubmitToken
+    func submitPassword(password: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
+        self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitPasswordCalled = true

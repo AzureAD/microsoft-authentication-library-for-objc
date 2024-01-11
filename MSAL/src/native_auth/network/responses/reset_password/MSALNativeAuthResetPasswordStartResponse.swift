@@ -27,11 +27,6 @@ import Foundation
 struct MSALNativeAuthResetPasswordStartResponse: Decodable {
 
     // MARK: - Variables
-    let passwordResetToken: String?
+    let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
-
-    enum CodingKeys: String, CodingKey {
-        case passwordResetToken
-        case challengeType
-    }
 }

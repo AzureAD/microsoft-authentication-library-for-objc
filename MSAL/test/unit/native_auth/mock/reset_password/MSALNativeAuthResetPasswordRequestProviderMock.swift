@@ -114,7 +114,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
 
     private func checkParameters(_ params: MSALNativeAuthResetPasswordContinueRequestParameters) {
         XCTAssertEqual(params.grantType, expectedContinueRequestParameters.grantType)
-        XCTAssertEqual(params.passwordResetToken, expectedContinueRequestParameters.passwordResetToken)
+        XCTAssertEqual(params.continuationToken, expectedContinueRequestParameters.continuationToken)
         XCTAssertEqual(params.oobCode, expectedContinueRequestParameters.oobCode)
         XCTAssertEqual(params.context.correlationId(), expectedContinueRequestParameters.context.correlationId())
     }
@@ -145,7 +145,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
     }
 
     private func checkParameters(_ params: MSALNativeAuthResetPasswordSubmitRequestParameters) {
-        XCTAssertEqual(params.passwordSubmitToken, expectedSubmitRequestParameters.passwordSubmitToken)
+        XCTAssertEqual(params.continuationToken, expectedSubmitRequestParameters.continuationToken)
         XCTAssertEqual(params.newPassword, expectedSubmitRequestParameters.newPassword)
         XCTAssertEqual(params.context.correlationId(), expectedSubmitRequestParameters.context.correlationId())
     }
@@ -176,7 +176,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
     }
 
     private func checkParameters(_ params: MSALNativeAuthResetPasswordPollCompletionRequestParameters) {
-        XCTAssertEqual(params.passwordResetToken, expectedPollCompletionParameters.passwordResetToken)
+        XCTAssertEqual(params.continuationToken, expectedPollCompletionParameters.continuationToken)
         XCTAssertEqual(params.context.correlationId(), expectedPollCompletionParameters.context.correlationId())
     }
 }

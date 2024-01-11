@@ -36,7 +36,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpCodeRequiredState(controller: controller, username: "<username>", flowToken: "<token>", correlationId: correlationId)
+        sut = SignUpCodeRequiredState(controller: controller, username: "<username>", continuationToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegates
@@ -61,7 +61,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_success_shouldReturnCodeRequired() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -78,7 +78,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
 
-        XCTAssertEqual(delegate.newState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newState?.continuationToken, expectedState.continuationToken)
         XCTAssertEqual(delegate.sentTo, "sentTo")
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertEqual(delegate.codeLength, 1)
@@ -87,7 +87,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_success_butMethodNotImplemented() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpResendCodeResult = .codeRequired(
             newState: expectedState,
@@ -111,7 +111,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
 
     func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
         let expectedError = VerifyCodeError(type: .invalidCode)
-        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignUpCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpVerifyCodeResult = .error(
             error: expectedError,
@@ -126,11 +126,11 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
-        XCTAssertEqual(delegate.newCodeRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newCodeRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitCode_delegate_whenPasswordRequired_AndUserHasImplementedOptionalDelegate_shouldReturnPasswordRequired() {
-        let expectedPasswordRequiredState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedPasswordRequiredState = SignUpPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -152,7 +152,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
 
-        let expectedResult: SignUpVerifyCodeResult = .passwordRequired(.init(controller: controller, username: "", flowToken: "", correlationId: correlationId))
+        let expectedResult: SignUpVerifyCodeResult = .passwordRequired(.init(controller: controller, username: "", continuationToken: "", correlationId: correlationId))
         controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
@@ -170,7 +170,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -192,7 +192,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
 
-        let expectedResult: SignUpVerifyCodeResult = .attributesRequired(attributes: [], newState: .init(controller: controller, username: "", flowToken: "", correlationId: correlationId))
+        let expectedResult: SignUpVerifyCodeResult = .attributesRequired(attributes: [], newState: .init(controller: controller, username: "", continuationToken: "", correlationId: correlationId))
         controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
             exp2.fulfill()
         })
@@ -212,7 +212,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     func test_submitCode_delegate_whenSuccess_shouldReturnAccountResult() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: SignUpVerifyCodeResult = .completed(expectedSignInAfterSignUpState)
         controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
@@ -230,7 +230,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     func test_submitCode_delegate_whenSuccess_ButUserHasNotImplementedOptionalDelegate_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let result: SignUpVerifyCodeResult = .completed(expectedSignInAfterSignUpState)
         controller.submitCodeResult = .init(result, telemetryUpdate: { _ in
             exp2.fulfill()

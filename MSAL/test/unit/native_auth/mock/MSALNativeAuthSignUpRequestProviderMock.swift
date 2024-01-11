@@ -109,7 +109,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
 
     private func checkContinueParameters(_ params: MSALNativeAuthSignUpContinueRequestProviderParams) {
         XCTAssertEqual(params.grantType, expectedContinueRequestParameters.grantType)
-        XCTAssertEqual(params.signUpToken, expectedContinueRequestParameters.signUpToken)
+        XCTAssertEqual(params.continuationToken, expectedContinueRequestParameters.continuationToken)
         XCTAssertEqual(params.password, expectedContinueRequestParameters.password)
         XCTAssertEqual(params.oobCode, expectedContinueRequestParameters.oobCode)
         XCTAssertEqual(params.attributes?["key"] as? String, expectedContinueRequestParameters.attributes?["key"] as? String)

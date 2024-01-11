@@ -37,14 +37,14 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", flowToken: "<token>", correlationId: correlationId)
+        sut = SignUpPasswordRequiredState(controller: controller, username: "<username>", continuationToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
         let expectedError = PasswordRequiredError(type: .invalidPassword)
-        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)
         controller.submitPasswordResult = .init(expectedResult)
@@ -56,11 +56,11 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
-        XCTAssertEqual(delegate.newPasswordRequiredState?.flowToken, expectedState.flowToken)
+        XCTAssertEqual(delegate.newPasswordRequiredState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -79,7 +79,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenAttributesRequired_ButUserHasNotImplementedOptionalDelegate_shouldReturnPasswordRequiredError() {
-        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", flowToken: "flowToken 2", correlationId: correlationId)
+        let expectedAttributesRequiredState = SignUpAttributesRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "exp telemetry is called")
@@ -99,7 +99,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenSuccess_shouldReturnSignUpCompleted() {
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
@@ -118,7 +118,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     }
 
     func test_submitCode_delegate_whenSuccess_ButUserHasNotImplementedOptionalDelegate_shouldReturnCorrectError() {
-        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
+        let expectedSignInAfterSignUpState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")

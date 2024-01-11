@@ -37,7 +37,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         try super.setUpWithError()
 
         controller = .init()
-        sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", flowToken: "<token>", correlationId: correlationId)
+        sut = SignUpAttributesRequiredState(controller: controller, username: "<username>", continuationToken: "<token>", correlationId: correlationId)
     }
 
     // MARK: - Delegate
@@ -60,7 +60,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: correlationId)
+        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
         controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
@@ -78,7 +78,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenSuccess_butMethodNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", slt: "slt", correlationId: UUID())
+        let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: UUID())
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
         controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
@@ -96,7 +96,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
@@ -118,7 +118,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenAttributesRequired_butMethodNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
@@ -139,7 +139,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenAttributesAreInvalid_shouldReturnAttributesInvalid() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)
@@ -159,7 +159,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     func test_submitPassword_delegate_whenAttributesAreInvalid_butMethodNotImplemented_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
-        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", flowToken: "slt", correlationId: correlationId)
+        let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)

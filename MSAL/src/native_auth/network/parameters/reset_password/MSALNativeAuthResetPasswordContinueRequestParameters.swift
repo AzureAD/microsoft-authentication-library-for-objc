@@ -27,7 +27,7 @@
 struct MSALNativeAuthResetPasswordContinueRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .resetPasswordContinue
     let context: MSIDRequestContext
-    let passwordResetToken: String
+    let continuationToken: String
     let grantType: MSALNativeAuthGrantType
     let oobCode: String?
 
@@ -36,7 +36,7 @@ struct MSALNativeAuthResetPasswordContinueRequestParameters: MSALNativeAuthReque
 
         return [
             Key.clientId.rawValue: config.clientId,
-            Key.passwordResetToken.rawValue: passwordResetToken,
+            Key.continuationToken.rawValue: continuationToken,
             Key.grantType.rawValue: grantType.rawValue,
             Key.oobCode.rawValue: oobCode
         ].compactMapValues { $0 }
