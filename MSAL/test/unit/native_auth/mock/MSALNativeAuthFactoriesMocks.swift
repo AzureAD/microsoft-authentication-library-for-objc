@@ -125,3 +125,15 @@ class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuild
         return credentialsController
     }
 }
+
+class MSALNativeAuthCacheAccessorFactoryMock: MSALNativeAuthCacheAccessorBuildable {
+    var tokenCache: MSIDDefaultTokenCacheAccessor?
+    var accountMetadataCache: MSIDAccountMetadataCacheAccessor?
+
+    func makeCacheAccessor(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor) -> MSAL.MSALNativeAuthCacheAccessor {
+        self.tokenCache = tokenCache
+        self.accountMetadataCache = accountMetadataCache
+
+        return MSALNativeAuthCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
+    }
+}

@@ -119,6 +119,23 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
 }
 
 private class MSALNativeAuthCacheAccessorStub: MSALNativeAuthCacheInterface {
+    var tokenCache: MSIDDefaultTokenCacheAccessor
+    var accountMetadataCache: MSIDAccountMetadataCacheAccessor
+
+    required init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor) {
+        self.tokenCache = tokenCache
+        self.accountMetadataCache = accountMetadataCache
+    }
+
+    convenience init() {
+        let dataSource = MSIDKeychainTokenCache()
+        let tokenCache = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
+
+        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
+
+        self.init(tokenCache: tokenCache!, accountMetadataCache: accountMetadataCache!)
+    }
+
     func getTokens(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
         return MSALNativeAuthTokens(accessToken: nil,
                                     refreshToken: nil,

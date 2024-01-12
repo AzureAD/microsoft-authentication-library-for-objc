@@ -30,9 +30,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
-    
-    lazy var cacheAccessor =
-        MSALNativeAuthCacheAccessor(tokenCache: self.tokenCache, accountMetadataCache: self.accountMetadataCache)
+
+    private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
+    lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
+        return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
+    }()
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
@@ -57,6 +59,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         nativeConfiguration.sliceConfig = config.sliceConfig
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
         self.inputValidator = MSALNativeAuthInputValidator()
 
         try super.init(configuration: config)
@@ -85,6 +88,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
         self.inputValidator = MSALNativeAuthInputValidator()
 
         let configuration = MSALPublicClientApplicationConfig(
@@ -105,11 +109,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     init(
         controllerFactory: MSALNativeAuthControllerBuildable,
         inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType],
+        cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
     ) {
         self.controllerFactory = controllerFactory
         self.inputValidator = inputValidator
         self.internalChallengeTypes = internalChallengeTypes
+        self.cacheAccessorFactory = cacheAccessorFactory
 
         super.init()
     }

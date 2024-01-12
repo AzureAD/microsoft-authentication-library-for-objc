@@ -25,7 +25,7 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
+final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
     private let tokenCacheAccessor: MSIDDefaultTokenCacheAccessor
 
     private let accountMetadataCache: MSIDAccountMetadataCacheAccessor
