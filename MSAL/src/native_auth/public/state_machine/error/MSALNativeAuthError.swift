@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// Class that defines the basic strucutre of a Native Auth error
+/// Class that defines the basic structure of a Native Auth error
 @objcMembers
 public class MSALNativeAuthError: NSObject, LocalizedError {
     /// Describes why an error occurred and provides more information about the error.

@@ -25,7 +25,6 @@
 import Foundation
 
 /// The possible Channel Types via which an OOB was sent
-
 @objc
 public enum MSALNativeAuthChannelType: Int {
     
