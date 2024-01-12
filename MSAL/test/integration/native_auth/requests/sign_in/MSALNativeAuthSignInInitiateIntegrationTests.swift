@@ -78,7 +78,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         try await perform_testFail(
             endpoint: .signInInitiate,
             response: .userNotFound,
-            expectedError: Error(error: .invalidGrant, errorDescription: nil, errorCodes:[MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue], errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .userNotFound, errorDescription: nil, errorCodes:[MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue], errorURI: nil, innerErrors: nil)
         )
     }
 

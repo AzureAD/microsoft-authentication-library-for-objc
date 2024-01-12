@@ -45,29 +45,29 @@ final class MSALNativeAuthResetPasswordSubmitResponseErrorTests: XCTestCase {
     }
 
     func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        testPasswordRequiredError(code: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordTooShort() {
-        testPasswordRequiredError(code: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordTooLong() {
-        testPasswordRequiredError(code: .passwordTooLong, description: "General error", expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooLong, description: "General error", expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        testPasswordRequiredError(code: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordBanned() {
-        testPasswordRequiredError(code: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
     }
     
     // MARK: private methods
     
-    private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
-        sut = MSALNativeAuthResetPasswordSubmitResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
+    private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
+        sut = MSALNativeAuthResetPasswordSubmitResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
         let error = sut.toPasswordRequiredPublicError()
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)

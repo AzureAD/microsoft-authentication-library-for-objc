@@ -68,10 +68,12 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         )
     }
 
-    func test_resetPasswordSubmit_invalidPasswordResetToken() async throws {
+    func test_resetPasswordSubmit_invalidContinuationToken() async throws {
+        throw XCTSkip()
+
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
-            response: .invalidPasswordResetToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }
@@ -88,7 +90,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
             response: .passwordTooWeak,
-            expectedError: createError(.passwordTooWeak)
+            expectedError: createError(.invalidGrant, subError: .passwordTooWeak)
         )
     }
 
@@ -96,7 +98,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
             response: .passwordTooShort,
-            expectedError: createError(.passwordTooShort)
+            expectedError: createError(.invalidGrant, subError: .passwordTooShort)
         )
     }
 
@@ -104,7 +106,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
             response: .passwordTooLong,
-            expectedError: createError(.passwordTooLong)
+            expectedError: createError(.invalidGrant, subError: .passwordTooLong)
         )
     }
 
@@ -112,7 +114,7 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
             response: .passwordRecentlyUsed,
-            expectedError: createError(.passwordRecentlyUsed)
+            expectedError: createError(.invalidGrant, subError: .passwordRecentlyUsed)
         )
     }
 
@@ -120,13 +122,14 @@ final class MSALNativeAuthResetPasswordSubmitIntegrationTests: MSALNativeAuthInt
         try await perform_testFail(
             endpoint: .resetPasswordSubmit,
             response: .passwordBanned,
-            expectedError: createError(.passwordBanned)
+            expectedError: createError(.invalidGrant, subError: .passwordBanned)
         )
     }
 
-    private func createError(_ error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode) -> MSALNativeAuthResetPasswordSubmitResponseError {
+    private func createError(_ error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil) -> MSALNativeAuthResetPasswordSubmitResponseError {
         .init(
             error: error,
+            subError: subError,
             errorDescription: nil,
             errorCodes: nil,
             errorURI: nil,

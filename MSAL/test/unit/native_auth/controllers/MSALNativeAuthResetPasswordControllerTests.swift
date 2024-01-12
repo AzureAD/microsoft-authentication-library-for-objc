@@ -477,6 +477,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         let error : MSALNativeAuthResetPasswordContinueValidatedResponse = .error(
             MSALNativeAuthResetPasswordContinueResponseError(error: .invalidRequest,
+                                                             subError: nil,
                                                              errorDescription: nil,
                                                              errorCodes: nil,
                                                              errorURI: nil,
@@ -567,7 +568,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
         let error : MSALNativeAuthResetPasswordSubmitValidatedResponse = .passwordError(error:
-            MSALNativeAuthResetPasswordSubmitResponseError(error: .passwordTooWeak,
+            MSALNativeAuthResetPasswordSubmitResponseError(error: .invalidGrant,
+                                                           subError: .passwordTooWeak,
                                                            errorDescription: "Password too weak",
                                                            errorCodes: nil,
                                                            errorURI: nil,
@@ -595,6 +597,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
         let error : MSALNativeAuthResetPasswordSubmitValidatedResponse = .error(
             MSALNativeAuthResetPasswordSubmitResponseError(error: .invalidRequest,
+                                                           subError: nil,
                                                            errorDescription: nil,
                                                            errorCodes: nil,
                                                            errorURI: nil,
@@ -687,7 +690,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         let error : MSALNativeAuthResetPasswordPollCompletionValidatedResponse =
             .passwordError(error:
-                            MSALNativeAuthResetPasswordPollCompletionResponseError(error: .passwordBanned,
+                            MSALNativeAuthResetPasswordPollCompletionResponseError(error: .invalidGrant,
+                                                                                   subError: .passwordBanned,
                                                                                    errorDescription: "Password banned",
                                                                                    errorCodes: nil,
                                                                                    errorURI: nil,
@@ -719,6 +723,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
         let error : MSALNativeAuthResetPasswordPollCompletionValidatedResponse = .error(
             MSALNativeAuthResetPasswordPollCompletionResponseError(error: .expiredToken,
+                                                             subError: nil,
                                                              errorDescription: "Expired Token",
                                                              errorCodes: nil,
                                                              errorURI: nil,

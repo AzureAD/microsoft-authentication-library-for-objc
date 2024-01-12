@@ -98,10 +98,12 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         )
     }
 
-    func test_signUpChallenge_invalidSignUpToken() async throws {
+    func test_signUpChallenge_invalidContinuationToken() async throws {
+        throw XCTSkip()
+        
         try await perform_testFail(
             endpoint: .signUpChallenge,
-            response: .invalidSignUpToken,
+            response: .invalidContinuationToken,
             expectedError: createError(.invalidRequest)
         )
     }

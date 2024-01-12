@@ -26,6 +26,7 @@ import Foundation
 
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
+    let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -37,6 +38,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
 
     enum CodingKeys: String, CodingKey {
         case error
+        case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -52,44 +54,35 @@ extension MSALNativeAuthSignUpContinueResponseError {
 
     func toVerifyCodePublicError() -> VerifyCodeError {
         switch error {
-        case .invalidOOBValue:
-            return .init(type: .invalidCode, message: errorDescription)
+        case .invalidGrant:
+            return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
+                                                : .init(type: .generalError, message: errorDescription)
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
-             .invalidGrant,
-             .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned,
              .userAlreadyExists,
              .attributesRequired,
              .verificationRequired,
-             .credentialRequired,
-             .attributeValidationFailed:
+             .credentialRequired:
             return .init(type: .generalError, message: errorDescription)
         }
     }
 
     func toPasswordRequiredPublicError() -> PasswordRequiredError {
         switch error {
-        case .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .init(type: .invalidPassword, message: errorDescription)
+        case .invalidGrant:
+            if let subError, subError.isAnyPasswordError {
+                return .init(type: .invalidPassword, message: errorDescription)
+            } else {
+                return .init(type: .generalError, message: errorDescription)
+            }
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
-             .invalidGrant,
              .userAlreadyExists,
              .attributesRequired,
              .verificationRequired,
-             .credentialRequired,
-             .attributeValidationFailed,
-             .invalidOOBValue:
+             .credentialRequired:
             return .init(type: .generalError, message: errorDescription)
         }
     }

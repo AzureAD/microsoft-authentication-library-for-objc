@@ -45,6 +45,7 @@ enum MockAPIEndpoint: String {
 }
 
 enum MockAPIResponse: String {
+    case signUpStartSuccess = "SignUpStartSuccess"
     case invalidRequest = "InvalidRequest"
     case invalidToken = "InvalidToken"
     case invalidClient = "InvalidClient"
@@ -52,10 +53,9 @@ enum MockAPIResponse: String {
     case invalidScope = "InvalidScope"
     case expiredToken = "ExpiredToken"
     case invalidPurposeToken = "InvalidPurposeToken"
-    case unsupportedAuthMethod = "UnsupportedAuthMethod"
+    case authNotSupported = "AuthNotSupported"
     case userAlreadyExists = "UserAlreadyExists"
     case userNotFound = "UserNotFound"
-    case explicityUserNotFound = "ExplicityUserNotFound"
     case slowDown = "SlowDown"
     case invalidPassword = "InvalidPassword"
     case invalidOOBValue = "InvalidOOBValue"
@@ -76,9 +76,7 @@ enum MockAPIResponse: String {
     case invalidAttributes = "InvalidAttributes"
     case verificationRequired = "VerificationRequired"
     case attributeValidationFailed = "AttributeValidationFailed"
-    case invalidSignUpToken = "InvalidSignupToken"
-    case explicitInvalidOOBValue = "ExplicitInvalidOOBValue"
-    case invalidPasswordResetToken = "InvalidPasswordResetToken"
+    case invalidContinuationToken = "InvalidContinuationToken"
     case ssprStartSuccess = "SSPRStartSuccess"
     case ssprContinueSuccess = "SSPRContinueSuccess"
     case ssprSubmitSuccess = "SSPRSubmitSuccess"

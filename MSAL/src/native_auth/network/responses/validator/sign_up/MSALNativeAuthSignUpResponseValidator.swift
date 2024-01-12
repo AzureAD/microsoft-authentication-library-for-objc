@@ -53,16 +53,15 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
     }
 
     private func handleStartSuccess(
-        _ response: MSALNativeAuthSignUpStartResponse, with context: MSIDRequestContext
+        _ response: MSALNativeAuthSignUpStartResponse,
+        with context: MSIDRequestContext
     ) -> MSALNativeAuthSignUpStartValidatedResponse {
         if response.challengeType == .redirect {
             return .redirect
+        } else if let continuationToken = response.continuationToken {
+            return .success(continuationToken: continuationToken)
         } else {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Unexpected response in signup/start. SDK expects only 200 with redirect challenge_type"
-            )
+            MSALLogger.log(level: .error, context: context, format: "signup/start returned success with unexpected response body")
             return .unexpectedError
         }
     }
@@ -74,19 +73,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
 
         switch apiError.error {
-        case .verificationRequired:
-            if let continuationToken = apiError.continuationToken,
-                let unverifiedAttributes = apiError.unverifiedAttributes,
-                !unverifiedAttributes.isEmpty {
-                return .verificationRequired(
-                    continuationToken: continuationToken,
-                    unverifiedAttributes: extractAttributeNames(from: unverifiedAttributes)
-                )
-            } else {
-                MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/start for verification_required error")
-                return .unexpectedError
-            }
-        case .attributeValidationFailed:
+        case .invalidGrant where apiError.subError == .attributeValidationFailed:
             if let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
                 return .attributeValidationFailed(invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
@@ -183,34 +170,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
             return .unexpectedError
         }
 
         switch apiError.error {
-        case .invalidOOBValue,
-             .passwordTooWeak,
-             .passwordTooShort,
-             .passwordTooLong,
-             .passwordRecentlyUsed,
-             .passwordBanned:
-            return .invalidUserInput(apiError)
-        case .attributeValidationFailed:
-            if let continuationToken = apiError.continuationToken, let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
-                return .attributeValidationFailed(
-                    continuationToken: continuationToken,
-                    invalidAttributes: extractAttributeNames(from: invalidAttributes)
-                )
-            } else {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "Missing expected fields in signup/continue for attribute_validation_failed error"
-                )
-                return .unexpectedError
-            }
+        case .invalidGrant:
+            return handleInvalidGrantError(apiError, with: context)
         case .credentialRequired:
             if let continuationToken = apiError.continuationToken {
                 return .credentialRequired(continuationToken: continuationToken)
@@ -235,40 +202,41 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError
         case .unauthorizedClient,
-             .invalidGrant,
              .expiredToken,
-             .userAlreadyExists:
+             .userAlreadyExists,
+             .invalidRequest:
             return .error(apiError)
-        case .invalidRequest:
-            return handleInvalidRequestError(apiError)
         }
     }
 
-    private func handleInvalidRequestError(_ error: MSALNativeAuthSignUpContinueResponseError) -> MSALNativeAuthSignUpContinueValidatedResponse {
-        guard let errorCode = error.errorCodes?.first, let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) else {
-            return .error(error)
+    private func handleInvalidGrantError(
+        _ apiError: MSALNativeAuthSignUpContinueResponseError,
+        with context: MSIDRequestContext
+    ) -> MSALNativeAuthSignUpContinueValidatedResponse {
+        guard let subError = apiError.subError else {
+            return .error(apiError)
         }
-        switch knownErrorCode {
-        case .invalidOTP,
-            .incorrectOTP,
-            .OTPNoCacheEntryForUser:
-            return .invalidUserInput(
-                MSALNativeAuthSignUpContinueResponseError(
-                    error: .invalidOOBValue,
-                    errorDescription: error.errorDescription,
-                    errorCodes: error.errorCodes,
-                    errorURI: error.errorURI,
-                    innerErrors: error.innerErrors,
-                    continuationToken: error.continuationToken,
-                    requiredAttributes: error.requiredAttributes,
-                    unverifiedAttributes: error.unverifiedAttributes,
-                    invalidAttributes: error.invalidAttributes))
-        case .userNotFound,
-            .invalidCredentials,
-            .strongAuthRequired,
-            .userNotHaveAPassword,
-            .invalidRequestParameter:
-            return .error(error)
+
+        switch subError {
+        case .invalidOOBValue,
+             .passwordTooWeak,
+             .passwordTooShort,
+             .passwordTooLong,
+             .passwordInvalid,
+             .passwordRecentlyUsed,
+             .passwordBanned:
+            return .invalidUserInput(apiError)
+        case .attributeValidationFailed:
+            if let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
+                return .attributeValidationFailed(invalidAttributes: extractAttributeNames(from: invalidAttributes))
+            } else {
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "Missing expected fields in signup/continue for attribute_validation_failed error"
+                )
+                return .unexpectedError
+            }
         }
     }
 
