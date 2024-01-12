@@ -42,7 +42,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     ]
 
     override func setUpWithError() throws {
-        sut = .init(config: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorStub())
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock())
     }
 
     func test_makeMsidConfiguration() {
@@ -115,44 +115,5 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(accountResult.expiresOn, expiresOn)
         XCTAssertEqual(accountResult.scopes, scopes)
         XCTAssertNil(accountResult.account.accountClaims)
-    }
-}
-
-private class MSALNativeAuthCacheAccessorStub: MSALNativeAuthCacheInterface {
-    var tokenCache: MSIDDefaultTokenCacheAccessor
-    var accountMetadataCache: MSIDAccountMetadataCacheAccessor
-
-    required init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor) {
-        self.tokenCache = tokenCache
-        self.accountMetadataCache = accountMetadataCache
-    }
-
-    convenience init() {
-        let dataSource = MSIDKeychainTokenCache()
-        let tokenCache = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
-
-        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
-
-        self.init(tokenCache: tokenCache!, accountMetadataCache: accountMetadataCache!)
-    }
-
-    func getTokens(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
-        return MSALNativeAuthTokens(accessToken: nil,
-                                    refreshToken: nil,
-                                    rawIdToken: nil)
-    }
-
-    func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
-        return [MSALNativeAuthUserAccountResultStub.account]
-    }
-
-    func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
-        return MSIDTokenResult()
-    }
-
-    func removeTokens(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
-    }
-
-    func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
     }
 }
