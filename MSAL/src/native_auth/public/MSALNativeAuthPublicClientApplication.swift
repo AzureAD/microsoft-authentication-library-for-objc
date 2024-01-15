@@ -25,10 +25,10 @@
 import Foundation
 
 /**
-    Subclasses MSALPublicClientApplication to be used for Native Auth operations
+    Main interface to interact with the Native Auth methods
     
-    To create an instance of the MSALNativeAuthPublicClientApplication pass directly the clientId, tenantSubdomain, challengeTypes and redirectUri (if needed)
-    to init(clientId: tenantSubdomain: challengeTypes: redirectUri)
+    To create an instance of the MSALNativeAuthPublicClientApplication use the clientId, tenantSubdomain, challengeTypes and redirectUri (optional)
+    to the initialiser method.
  
     For example:
  

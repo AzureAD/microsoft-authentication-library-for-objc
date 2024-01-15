@@ -31,7 +31,7 @@ public class MSALNativeAuthRequiredAttribute: NSObject {
     public let name: String
     /// The type of the Required Attribute
     public let type: String
-    /// Specifies if the Attribute is required or not
+    /// Specifies if the attribute is required or not
     public let required: Bool
     /// Regex to specify the format of the Attribute
     public let regex: String?
