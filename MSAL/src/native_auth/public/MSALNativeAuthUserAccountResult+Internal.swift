@@ -28,7 +28,8 @@ extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(
         forceRefresh: Bool,
-        correlationId: UUID?
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 

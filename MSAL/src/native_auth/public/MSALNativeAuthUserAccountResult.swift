@@ -31,7 +31,7 @@ import Foundation
 
     let authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
-    let cacheAccessor: MSALNativeAuthCacheInterface
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     /// Get the ID token for the account.
     @objc public var idToken: String? {
@@ -87,7 +87,11 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
-            let controllerResponse = await getAccessTokenInternal(forceRefresh: forceRefresh, correlationId: correlationId)
+            let controllerResponse = await getAccessTokenInternal(
+                forceRefresh: forceRefresh,
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
+            )
             let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
