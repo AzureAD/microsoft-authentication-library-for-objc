@@ -95,8 +95,8 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         }
     }
     
-    func test_whenResetPasswordStartErrorResponseInvalidClient_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .invalidClient)
+    func test_whenResetPasswordStartErrorResponseUnauthorizedClient_itReturnsRelatedError() {
+        let error = createResetPasswordStartError(error: .unauthorizedClient)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -265,13 +265,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError)
     }
 
-    func test_whenResetPasswordContinueErrorResponseIs_invalidClient_itReturnsExpectedError() {
-        let result = buildContinueErrorResponse(expectedError: .invalidClient)
+    func test_whenResetPasswordContinueErrorResponseIs_unauthorizedClient_itReturnsExpectedError() {
+        let result = buildContinueErrorResponse(expectedError: .unauthorizedClient)
 
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .invalidClient = error.error {} else {
+        if case .unauthorizedClient = error.error {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
@@ -390,13 +390,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         }
     }
 
-    func test_whenResetPasswordSubmitErrorResponseIs_invalidClient_itReturnsExpectedError() {
-        let result = buildSubmitErrorResponse(expectedError: .invalidClient)
+    func test_whenResetPasswordSubmitErrorResponseIs_unauthorizedClient_itReturnsExpectedError() {
+        let result = buildSubmitErrorResponse(expectedError: .unauthorizedClient)
 
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .invalidClient = error.error {} else {
+        if case .unauthorizedClient = error.error {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }
@@ -500,13 +500,13 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         }
     }
 
-    func test_whenResetPasswordPollCompletionErrorResponseIsInvalidClient_itReturnsExpectedError() {
-        let result = buildPollCompletionErrorResponse(expectedError: .invalidClient)
+    func test_whenResetPasswordPollCompletionErrorResponseIsUnauthorizedClient_itReturnsExpectedError() {
+        let result = buildPollCompletionErrorResponse(expectedError: .unauthorizedClient)
 
         guard case .error(let error) = result else {
             return XCTFail("Unexpected response")
         }
-        if case .invalidClient = error.error {} else {
+        if case .unauthorizedClient = error.error {} else {
             XCTFail("Unexpected error: \(error.error)")
         }
     }

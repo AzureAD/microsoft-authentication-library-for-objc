@@ -74,11 +74,11 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
         XCTAssertNil(response?.codeLength)
     }
 
-    func test_resetPasswordChallenge_invalidClient() async throws {
+    func test_resetPasswordChallenge_unauthorizedClient() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .invalidClient,
-            expectedError: createError(.invalidClient)
+            expectedError: createError(.unauthorizedClient)
         )
     }
 
@@ -91,7 +91,6 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
     }
 
     func test_resetPasswordChallenge_invalidContinuationToken() async throws {
-        throw XCTSkip()
         
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,

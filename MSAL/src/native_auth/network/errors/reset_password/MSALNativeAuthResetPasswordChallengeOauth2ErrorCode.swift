@@ -26,7 +26,7 @@ import Foundation
 
 enum MSALNativeAuthResetPasswordChallengeOauth2ErrorCode: String, Decodable, CaseIterable {
     case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
+    case unauthorizedClient = "unauthorized_client"
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
 }

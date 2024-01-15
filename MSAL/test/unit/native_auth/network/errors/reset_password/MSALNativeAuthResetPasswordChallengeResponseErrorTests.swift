@@ -32,8 +32,8 @@ final class MSALNativeAuthResetPasswordChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to ResetPasswordStartError tests
 
-    func test_toResetPasswordStartPublicError_invalidClient() {
-        sut = MSALNativeAuthResetPasswordChallengeResponseError(error: .invalidClient, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
+    func test_toResetPasswordStartPublicError_unauthorizedClient() {
+        sut = MSALNativeAuthResetPasswordChallengeResponseError(error: .unauthorizedClient, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
         let error = sut.toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
@@ -62,8 +62,8 @@ final class MSALNativeAuthResetPasswordChallengeResponseErrorTests: XCTestCase {
 
     // MARK: - to ResendCodePublicError tests
 
-    func test_toResendCodePublicError_invalidClient() {
-        sut = MSALNativeAuthResetPasswordChallengeResponseError(error: .invalidClient, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
+    func test_toResendCodePublicError_unauthorizedClient() {
+        sut = MSALNativeAuthResetPasswordChallengeResponseError(error: .unauthorizedClient, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
         let error = sut.toResendCodePublicError()
         XCTAssertEqual(error.errorDescription, testDescription)
     }

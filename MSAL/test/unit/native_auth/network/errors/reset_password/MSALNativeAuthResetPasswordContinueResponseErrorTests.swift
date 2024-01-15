@@ -39,8 +39,8 @@ final class MSALNativeAuthResetPasswordContinueResponseErrorTests: XCTestCase {
         XCTAssertNotNil(error.errorDescription)
     }
     
-    func test_toResetPasswordStartPublicError_invalidClient() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .invalidClient, subError: nil, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
+    func test_toResetPasswordStartPublicError_unauthorizedClient() {
+        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .unauthorizedClient, subError: nil, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
         let error = sut.toVerifyCodePublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)

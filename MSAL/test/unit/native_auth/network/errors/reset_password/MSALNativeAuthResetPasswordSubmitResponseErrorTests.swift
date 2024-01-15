@@ -36,8 +36,8 @@ final class MSALNativeAuthResetPasswordSubmitResponseErrorTests: XCTestCase {
         testPasswordRequiredError(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
     }
 
-    func test_toPasswordRequiredPublicError_invalidClient() {
-        testPasswordRequiredError(code: .invalidClient, description: "General error", expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_unauthorizedClient() {
+        testPasswordRequiredError(code: .unauthorizedClient, description: "General error", expectedErrorType: .generalError)
     }
 
     func test_toPasswordRequiredPublicError_expiredToken() {

@@ -103,11 +103,11 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
         XCTAssertNil(response?.expiresIn)
     }
 
-    func test_resetPasswordPollCompletion_invalidClient() async throws {
+    func test_resetPasswordPollCompletion_unauthorizedClient() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .invalidClient,
-            expectedError: createResetPasswordPollCompletionError(error: .invalidClient)
+            expectedError: createResetPasswordPollCompletionError(error: .unauthorizedClient)
         )
     }
 
