@@ -22,33 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthCacheInterface {
-    init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor)
+protocol MSALNativeAuthCacheAccessorBuildable {
+    func makeCacheAccessor(
+        tokenCache: MSIDDefaultTokenCacheAccessor,
+        accountMetadataCache: MSIDAccountMetadataCacheAccessor
+    ) -> MSALNativeAuthCacheAccessor
+}
 
-    func getTokens(
-        account: MSALAccount,
-        configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws -> MSALNativeAuthTokens
-
-    func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount]
-
-    func validateAndSaveTokensAndAccount(
-        tokenResponse: MSIDTokenResponse,
-        configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws -> MSIDTokenResult?
-
-    func removeTokens(
-        accountIdentifier: MSIDAccountIdentifier,
-        authority: MSIDAuthority,
-        clientId: String,
-        context: MSIDRequestContext) throws
-
-    func clearCache(
-        accountIdentifier: MSIDAccountIdentifier,
-        authority: MSIDAuthority,
-        clientId: String,
-        context: MSIDRequestContext) throws
+final class MSALNativeAuthCacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable {
+    func makeCacheAccessor(
+        tokenCache: MSIDDefaultTokenCacheAccessor,
+        accountMetadataCache: MSIDAccountMetadataCacheAccessor
+    ) -> MSALNativeAuthCacheAccessor {
+        return MSALNativeAuthCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
+    }
 }

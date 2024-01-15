@@ -75,19 +75,19 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
     var resetPasswordController = MSALNativeAuthResetPasswordControllerMock()
     var credentialsController = MSALNativeAuthCredentialsControllerMock()
 
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+    func makeSignUpController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignUpControlling {
         return signUpController
     }
 
-    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
+    func makeSignInController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignInControlling {
         return signInController
     }
 
-    func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
+    func makeResetPasswordController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthResetPasswordControlling {
         return resetPasswordController
     }
 
-    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+    func makeCredentialsController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthCredentialsControlling {
         return credentialsController
     }
 }
@@ -109,19 +109,31 @@ class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuild
         self.credentialsController = credentialsController
     }
     
-    func makeSignUpController() -> MSAL.MSALNativeAuthSignUpControlling {
+    func makeSignUpController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignUpControlling {
         return signUpController
     }
     
-    func makeSignInController() -> MSAL.MSALNativeAuthSignInControlling {
+    func makeSignInController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignInControlling {
         return signInController
     }
     
-    func makeResetPasswordController() -> MSAL.MSALNativeAuthResetPasswordControlling {
+    func makeResetPasswordController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthResetPasswordControlling {
         return resetPasswordController
     }
     
-    func makeCredentialsController() -> MSAL.MSALNativeAuthCredentialsControlling {
+    func makeCredentialsController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthCredentialsControlling {
         return credentialsController
+    }
+}
+
+class MSALNativeAuthCacheAccessorFactoryMock: MSALNativeAuthCacheAccessorBuildable {
+    var tokenCache: MSIDDefaultTokenCacheAccessor?
+    var accountMetadataCache: MSIDAccountMetadataCacheAccessor?
+
+    func makeCacheAccessor(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor) -> MSAL.MSALNativeAuthCacheAccessor {
+        self.tokenCache = tokenCache
+        self.accountMetadataCache = accountMetadataCache
+
+        return MSALNativeAuthCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
     }
 }

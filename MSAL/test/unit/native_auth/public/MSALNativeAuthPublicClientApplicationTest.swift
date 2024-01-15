@@ -32,6 +32,7 @@ import XCTest
 final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
+    private let cacheAccessorFactoryMock = MSALNativeAuthCacheAccessorFactoryMock()
     private var sut: MSALNativeAuthPublicClientApplication!
     private var correlationId: UUID = UUID()
 
@@ -47,6 +48,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactoryMock,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )
@@ -65,6 +67,11 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testInit_whenPassingNilRedirectUri_itShouldNotThrowError() {
         XCTAssertNoThrow(try MSALNativeAuthPublicClientApplication(clientId: "genericClient", tenantSubdomain: "genericTenenat", challengeTypes: [.OOB]))
+    }
+
+    func testInit_nativeAuthCacheAccessor_itShouldUseConfigFromSuperclass() {
+        XCTAssertEqual(sut.tokenCache, cacheAccessorFactoryMock.tokenCache)
+        XCTAssertEqual(sut.accountMetadataCache, cacheAccessorFactoryMock.accountMetadataCache)
     }
 
     // MARK: - Delegates
@@ -603,6 +610,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )
@@ -704,6 +712,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )
@@ -795,6 +804,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )
@@ -884,6 +894,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )
@@ -984,6 +995,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
             internalChallengeTypes: []
         )

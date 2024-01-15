@@ -46,7 +46,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         super.init(clientId: config.clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration) {
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             config: config,
             requestProvider: MSALNativeAuthResetPasswordRequestProvider(
@@ -54,7 +54,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 telemetryProvider: MSALNativeAuthTelemetryProvider()
             ),
             responseValidator: MSALNativeAuthResetPasswordResponseValidator(),
-            signInController: MSALNativeAuthSignInController(config: config)
+            signInController: MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor)
         )
     }
 

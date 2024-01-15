@@ -50,13 +50,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration) {
-        let factory = MSALNativeAuthResultFactory(config: config)
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthTokenRequestProvider(
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
-            cacheAccessor: MSALNativeAuthCacheAccessor(),
+            cacheAccessor: cacheAccessor,
             factory: factory,
             responseValidator: MSALNativeAuthTokenResponseValidator(factory: factory,
                                                                     msidValidator: MSIDTokenResponseValidator())

@@ -40,7 +40,7 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(SignUpStartError(type: .invalidPassword)))
         }
 
-        let controller = controllerFactory.makeSignUpController()
+        let controller = controllerFactory.makeSignUpController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignUpStartRequestProviderParameters(
@@ -66,7 +66,7 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(SignInStartError(type: .invalidCredentials)))
         }
 
-        let controller = controllerFactory.makeSignInController()
+        let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
 
         let params = MSALNativeAuthSignInParameters(
             username: username,
@@ -85,7 +85,7 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(ResetPasswordStartError(type: .invalidUsername)))
         }
 
-        let controller = controllerFactory.makeResetPasswordController()
+        let controller = controllerFactory.makeResetPasswordController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return await controller.resetPassword(

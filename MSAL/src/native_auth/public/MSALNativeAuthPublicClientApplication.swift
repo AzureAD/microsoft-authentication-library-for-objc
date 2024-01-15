@@ -31,6 +31,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let inputValidator: MSALNativeAuthInputValidating
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
+    private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
+    lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
+        return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
+    }()
+
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
     ///   - config: Configuration for PublicClientApplication
@@ -54,6 +59,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         nativeConfiguration.sliceConfig = config.sliceConfig
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
         self.inputValidator = MSALNativeAuthInputValidator()
 
         try super.init(configuration: config)
@@ -82,6 +88,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
         self.inputValidator = MSALNativeAuthInputValidator()
 
         let configuration = MSALPublicClientApplicationConfig(
@@ -101,10 +108,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     init(
         controllerFactory: MSALNativeAuthControllerBuildable,
+        cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable,
         inputValidator: MSALNativeAuthInputValidating,
         internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     ) {
         self.controllerFactory = controllerFactory
+        self.cacheAccessorFactory = cacheAccessorFactory
         self.inputValidator = inputValidator
         self.internalChallengeTypes = internalChallengeTypes
 
@@ -226,7 +235,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
     /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
-        let controller = controllerFactory.makeCredentialsController()
+        let controller = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
