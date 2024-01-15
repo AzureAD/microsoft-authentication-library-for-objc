@@ -108,14 +108,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     init(
         controllerFactory: MSALNativeAuthControllerBuildable,
+        cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable,
         inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType],
-        cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     ) {
         self.controllerFactory = controllerFactory
+        self.cacheAccessorFactory = cacheAccessorFactory
         self.inputValidator = inputValidator
         self.internalChallengeTypes = internalChallengeTypes
-        self.cacheAccessorFactory = cacheAccessorFactory
 
         super.init()
     }

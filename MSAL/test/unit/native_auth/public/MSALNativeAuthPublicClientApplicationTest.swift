@@ -48,9 +48,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactoryMock,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [], 
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         authority = try! MSALCIAMAuthority(url: authorityURL!)
@@ -610,9 +610,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
@@ -712,9 +712,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
@@ -804,9 +804,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         // Correlation Id is validated internally against contextMock on both initiate and challenge in the
@@ -894,9 +894,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         // Correlation Id is validated internally against contextMock on both initiate and challenge in the
@@ -995,9 +995,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         sut = MSALNativeAuthPublicClientApplication(
             controllerFactory: controllerFactory,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
-            cacheAccessorFactory: cacheAccessorFactoryMock
+            internalChallengeTypes: []
         )
         
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
