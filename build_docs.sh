@@ -2,8 +2,8 @@
 # To build manually run "sudo sh build_docs.sh"
 gem install jazzy
 echo -e "Copying MSAL public files"
-mkdir -m 777 docs.temp
-mkdir -m 777 docs.temp/MSAL
+mkdir -m docs.temp
+mkdir -m docs.temp/MSAL
 cp `find MSAL/src/public` docs.temp/MSAL
 cp `find MSAL/src/native_auth/public` docs.temp/MSAL
 cp README.md docs.temp/
