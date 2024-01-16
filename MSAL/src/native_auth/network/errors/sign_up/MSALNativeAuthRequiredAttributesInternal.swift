@@ -28,9 +28,9 @@ class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
     let name: String
     let type: String
     let required: Bool
-    let options: MSALNativeAuthRequiredAttributesOptions?
+    let options: MSALNativeAuthRequiredAttributeOptions?
 
-    init(name: String, type: String, required: Bool, options: MSALNativeAuthRequiredAttributesOptions? = nil) {
+    init(name: String, type: String, required: Bool, options: MSALNativeAuthRequiredAttributeOptions? = nil) {
         self.name = name
         self.type = type
         self.required = required
