@@ -81,7 +81,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let error = createSignUpStartError(
             error: .invalidGrant,
             subError: .attributeValidationFailed,
-            invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "city")]
+            invalidAttributes: [MSALNativeAuthErrorBasicAttribute(name: "city")]
         )
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
@@ -132,7 +132,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidUsernameErrorDescription_it_returns_expectedError() {
-        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let attributes = [MSALNativeAuthErrorBasicAttribute(name: "attribute")]
         let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
 
         let apiError = createSignUpStartError(
@@ -155,7 +155,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
     
     func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidClientIdErrorDescription_it_returns_expectedError() {
-        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let attributes = [MSALNativeAuthErrorBasicAttribute(name: "attribute")]
         let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
         
         let apiError = createSignUpStartError(
@@ -178,7 +178,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStartErrorResponseIs_invalidRequestWithGenericErrorCode_it_returns_expectedError() {
-        let attributes = [MSALNativeAuthErrorBasicAttributes(name: "attribute")]
+        let attributes = [MSALNativeAuthErrorBasicAttribute(name: "attribute")]
         let errorCodes = [Int.max]
 
         let apiError = createSignUpStartError(
@@ -460,7 +460,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
-        let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: [MSALNativeAuthErrorBasicAttributes(name: "email")])
+        let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: [MSALNativeAuthErrorBasicAttribute(name: "email")])
 
         guard case .attributeValidationFailed(let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
@@ -602,8 +602,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         expectedError: MSALNativeAuthSignUpContinueOauth2ErrorCode,
         expectedSubError: MSALNativeAuthSubErrorCode? = nil,
         expectedContinuationToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
-        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
+        requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
         errorCodes: [Int]? = nil
     ) -> MSALNativeAuthSignUpContinueValidatedResponse {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .failure(
@@ -628,8 +628,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         continuationToken: String? = nil,
-        unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
-        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil
     ) -> MSALNativeAuthSignUpStartResponseError {
         .init(
             error: error,
@@ -668,9 +668,9 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         errorURI: String? = nil,
         innerErrors: [MSALNativeAuthInnerError]? = nil,
         continuationToken: String? = nil,
-        requiredAttributes: [MSALNativeAuthRequiredAttributesInternal]? = nil,
-        unverifiedAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil,
-        invalidAttributes: [MSALNativeAuthErrorBasicAttributes]? = nil
+        requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]? = nil,
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil
     ) -> MSALNativeAuthSignUpContinueResponseError {
         .init(
             error: error,

@@ -56,7 +56,7 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
 
 final class SignUpVerifyCodeDelegateDispatcher: DelegateDispatcher<SignUpVerifyCodeDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
@@ -111,7 +111,7 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
 
 final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpPasswordRequiredDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
@@ -136,7 +136,7 @@ final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpP
 
 final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignUpAttributesRequiredDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)

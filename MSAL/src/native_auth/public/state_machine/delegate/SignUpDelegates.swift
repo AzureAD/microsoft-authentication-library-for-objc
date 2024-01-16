@@ -63,7 +63,7 @@ public protocol SignUpVerifyCodeDelegate {
     /// - Parameters:
     ///   - attributes: List of required attributes.
     ///   - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
+    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
 
     /// Notifies the delegate that a password is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpVerifyCodeError(error:newState:)`` will be called.
@@ -114,7 +114,7 @@ public protocol SignUpPasswordRequiredDelegate {
     /// - Parameters:
     ///   - attributes: List of required attributes.
     ///   - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
+    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
 
     /// Notifies the delegate that the sign up operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpPasswordRequiredError(error:newState:)`` will be called.
@@ -134,7 +134,7 @@ public protocol SignUpAttributesRequiredDelegate {
     /// - Parameters:
     ///     - attributes:  List of required attributes.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
+    @MainActor @objc optional func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
 
     /// Notifies the delegate that invalid attributes were sent.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignUpAttributesRequiredError(error:)`` will be called.

@@ -24,23 +24,10 @@
 
 import Foundation
 
-/// Class that defines the structure of a Required Attribute
-@objc
-public class MSALNativeAuthRequiredAttributes: NSObject {
-    /// The name of the Required Attribute
-    public let name: String
-    /// The type of the Required Attribute
-    public let type: String
-    /// Specifies if the attribute is required or not
-    public let required: Bool
-    /// Regex to specify the format of the Attribute
-    public let regex: String?
+class MSALNativeAuthErrorBasicAttribute: NSObject, Decodable {
+    let name: String
 
-    init(name: String, type: String, required: Bool, regex: String? = nil) {
+    init(name: String) {
         self.name = name
-        self.type = type
-        self.required = required
-        self.regex = regex
-        super.init()
     }
 }
