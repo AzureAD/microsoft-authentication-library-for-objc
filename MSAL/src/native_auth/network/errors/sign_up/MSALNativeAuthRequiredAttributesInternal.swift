@@ -41,7 +41,7 @@ class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
         return "\(name)"
     }
 
-    func toRequiredAttributePublic() -> MSALNativeAuthRequiredAttributes {
+    func toRequiredAttributesPublic() -> MSALNativeAuthRequiredAttributes {
         MSALNativeAuthRequiredAttributes(name: name, type: type, required: required, regex: options?.regex)
     }
 }
