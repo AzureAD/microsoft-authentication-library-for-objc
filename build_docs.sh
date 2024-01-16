@@ -5,8 +5,8 @@
 # details see https://github.com/realm/jazzy?tab=readme-ov-file#mixed-objective-c--swift
 gem install jazzy
 echo -e "Copying MSAL public files"
-mkdir docs.temp
-mkdir docs.temp/MSAL
+mkdir -m 777 docs.temp
+mkdir -m 777 docs.temp/MSAL
 cp `find MSAL/src/public` docs.temp/MSAL
 cp `find MSAL/src/native_auth/public` docs.temp/MSAL
 cp README.md docs.temp/
