@@ -24,7 +24,7 @@
 
 import Foundation
 
-class MSALNativeAuthErrorBasicAttribute: NSObject, Decodable {
+class MSALNativeAuthErrorBasicAttributes: NSObject, Decodable {
     let name: String
 
     init(name: String) {

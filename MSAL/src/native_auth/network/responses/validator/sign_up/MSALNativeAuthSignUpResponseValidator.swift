@@ -249,7 +249,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         return knownErrorCode == .invalidRequestParameter && errorDescription.contains(knownErrorDescription)
     }
 
-    private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttribute]) -> [String] {
+    private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttributes]) -> [String] {
         return attributes.map { $0.name }
     }
 }

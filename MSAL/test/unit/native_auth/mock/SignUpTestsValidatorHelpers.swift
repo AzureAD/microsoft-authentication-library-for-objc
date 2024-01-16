@@ -214,7 +214,7 @@ class SignUpAttributesRequiredTestsValidatorHelper {
     private(set) var error: AttributesRequiredError?
     private(set) var newState: SignUpAttributesRequiredState?
     private(set) var signInAfterSignUpState: SignInAfterSignUpState?
-    private(set) var attributes: [MSALNativeAuthRequiredAttribute]?
+    private(set) var attributes: [MSALNativeAuthRequiredAttributes]?
     private(set) var invalidAttributes: [String]?
 
     init(expectation: XCTestExpectation? = nil) {

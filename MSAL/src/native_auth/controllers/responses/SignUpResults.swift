@@ -33,7 +33,7 @@ enum SignUpStartResult {
 enum SignUpVerifyCodeResult {
     case completed(SignInAfterSignUpState)
     case passwordRequired(SignUpPasswordRequiredState)
-    case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
+    case attributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
     case error(error: VerifyCodeError, newState: SignUpCodeRequiredState?)
 }
 
@@ -41,13 +41,13 @@ typealias SignUpResendCodeResult = CodeRequiredGenericResult<SignUpCodeRequiredS
 
 enum SignUpPasswordRequiredResult {
     case completed(SignInAfterSignUpState)
-    case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState)
+    case attributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState)
     case error(error: PasswordRequiredError, newState: SignUpPasswordRequiredState?)
 }
 
 enum SignUpAttributesRequiredResult {
     case completed(SignInAfterSignUpState)
-    case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute], state: SignUpAttributesRequiredState)
+    case attributesRequired(attributes: [MSALNativeAuthRequiredAttributes], state: SignUpAttributesRequiredState)
     case attributesInvalid(attributes: [String], newState: SignUpAttributesRequiredState)
     case error(error: AttributesRequiredError)
 }

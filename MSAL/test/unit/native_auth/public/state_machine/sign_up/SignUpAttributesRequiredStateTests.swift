@@ -97,7 +97,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
         let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
-        let expectedAttributes: [MSALNativeAuthRequiredAttribute] = [
+        let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
 
@@ -119,7 +119,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let exp = expectation(description: "sign-up states")
         let exp2 = expectation(description: "telemetry expectation")
         let expectedState = SignUpAttributesRequiredState(controller: MSALNativeAuthSignUpControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
-        let expectedAttributes: [MSALNativeAuthRequiredAttribute] = [
+        let expectedAttributes: [MSALNativeAuthRequiredAttributes] = [
             .init(name: "anAttribute", type: "aType", required: true)
         ]
 
