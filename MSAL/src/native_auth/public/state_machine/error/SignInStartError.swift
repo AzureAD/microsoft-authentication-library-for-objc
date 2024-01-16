@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Class that defines the structure and type of a SignInStart error
 @objcMembers
 public class SignInStartError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {

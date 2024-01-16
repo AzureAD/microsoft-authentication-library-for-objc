@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Base class for Native Auth states
 @objc
 public class MSALNativeAuthBaseState: NSObject {
     let continuationToken: String

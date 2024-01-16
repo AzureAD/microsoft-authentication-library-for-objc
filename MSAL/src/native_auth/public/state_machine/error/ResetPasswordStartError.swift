@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Class that defines the structure and type of a ResetPasswordStart error
 @objcMembers
 public class ResetPasswordStartError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {

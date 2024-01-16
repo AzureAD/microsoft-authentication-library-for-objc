@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a SignUpStart delegate
 @objc
 public protocol SignUpStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -48,6 +49,7 @@ public protocol SignUpStartDelegate {
     @MainActor @objc optional func onSignUpAttributesInvalid(attributeNames: [String])
 }
 
+/// Protocol that defines the methods of a SignUpVerifyCode delegate
 @objc
 public protocol SignUpVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -74,6 +76,7 @@ public protocol SignUpVerifyCodeDelegate {
     @MainActor @objc optional func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
+/// Protocol that defines the methods of a SignUpResendCode delegate
 @objc
 public protocol SignUpResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -97,6 +100,7 @@ public protocol SignUpResendCodeDelegate {
     )
 }
 
+/// Protocol that defines the methods of a SignUpPasswordRequired delegate
 @objc
 public protocol SignUpPasswordRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -118,6 +122,7 @@ public protocol SignUpPasswordRequiredDelegate {
     @MainActor @objc optional func onSignUpCompleted(newState: SignInAfterSignUpState)
 }
 
+/// Protocol that defines the methods of a SignUpAttributesRequired delegate
 @objc
 public protocol SignUpAttributesRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.

@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a Credentials delegate
 @objc
 public protocol CredentialsDelegate {
     /// Notifies the delegate that the operation resulted in an error.

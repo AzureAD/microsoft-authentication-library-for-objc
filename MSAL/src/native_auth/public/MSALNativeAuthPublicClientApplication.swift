@@ -24,6 +24,26 @@
 
 import Foundation
 
+/// Main interface to interact with the Native Auth methods
+///
+/// To create an instance of the MSALNativeAuthPublicClientApplication use the clientId, tenantSubdomain, challengeTypes and redirectUri (optional)
+/// to the initialiser method.
+///
+/// For example:
+ 
+/// <pre>
+///     do {
+///         nativeAuth = try MSALNativeAuthPublicClientApplication(
+///             clientId: "Enter_the_Application_Id_Here",
+///             tenantSubdomain: "Enter_the_Tenant_Subdomain_Here",
+///             challengeTypes: [.OOB]
+///        )
+///        print("Initialised Native Auth successfully.")
+///     } catch {
+///         print("Unable to initialize MSAL \(error)")
+///     }
+/// </pre>
+
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
