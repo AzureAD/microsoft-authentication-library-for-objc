@@ -1,5 +1,8 @@
 #!/bin/bash
 # To build manually run "sudo sh build_docs.sh"
+# As MSAL is a mixed Objective-C and Swift project we need to use SourceKitten to
+# first extract the doc comments from the source before building with Jazzy. For more
+# details see https://github.com/realm/jazzy?tab=readme-ov-file#mixed-objective-c--swift
 gem install jazzy
 echo -e "Copying MSAL public files"
 mkdir docs.temp
