@@ -112,7 +112,7 @@ class SignUpVerifyCodeDelegateSpy: SignUpVerifyCodeDelegate {
         expectation.fulfill()
     }
 
-    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) {
         onSignUpAttributesRequiredCalled = true
         attributesRequiredNewState = newState
 
@@ -186,7 +186,7 @@ class SignUpPasswordRequiredDelegateSpy: SignUpPasswordRequiredDelegate {
         expectation.fulfill()
     }
 
-    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttributes], newState: SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) {
         onSignUpAttributesRequiredCalled = true
         attributesRequiredState = newState
 
@@ -227,7 +227,7 @@ class SignUpAttributesRequiredDelegateSpy: SignUpAttributesRequiredDelegate {
         expectation.fulfill()
     }
     
-    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttributes], newState: MSAL.SignUpAttributesRequiredState) {
+    func onSignUpAttributesRequired(attributes: [MSAL.MSALNativeAuthRequiredAttribute], newState: MSAL.SignUpAttributesRequiredState) {
         onSignUpAttributesRequiredErrorCalled = true
         attributesRequiredState = newState
         expectation.fulfill()

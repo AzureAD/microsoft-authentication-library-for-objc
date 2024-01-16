@@ -24,18 +24,10 @@
 
 import Foundation
 
-@objc
-public class MSALNativeAuthRequiredAttributes: NSObject {
-    public let name: String
-    public let type: String
-    public let required: Bool
-    public let regex: String?
+class MSALNativeAuthErrorBasicAttribute: NSObject, Decodable {
+    let name: String
 
-    init(name: String, type: String, required: Bool, regex: String? = nil) {
+    init(name: String) {
         self.name = name
-        self.type = type
-        self.required = required
-        self.regex = regex
-        super.init()
     }
 }

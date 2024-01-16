@@ -191,7 +191,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 !requiredAttributes.isEmpty {
                 return .attributesRequired(
                     continuationToken: continuationToken,
-                    requiredAttributes: requiredAttributes.map { $0.toRequiredAttributesPublic() }
+                    requiredAttributes: requiredAttributes.map { $0.toRequiredAttributePublic() }
                 )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
@@ -249,7 +249,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         return knownErrorCode == .invalidRequestParameter && errorDescription.contains(knownErrorDescription)
     }
 
-    private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttributes]) -> [String] {
+    private func extractAttributeNames(from attributes: [MSALNativeAuthErrorBasicAttribute]) -> [String] {
         return attributes.map { $0.name }
     }
 }
