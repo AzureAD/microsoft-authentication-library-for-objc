@@ -27,13 +27,11 @@
 
 #import <Foundation/Foundation.h>
 
-/** 
-    The set of capabilities that an application wishes to support for Native Auth operations.
-
-    Valid options are:
-    * OOB: The application can support asking a user to supply a verification code that is sent by email.
-    * Password: The application can support asking a user to supply a password
-*/
+/// The set of capabilities that an application wishes to support for Native Auth operations.
+///
+/// Valid options are:
+/// * OOB: The application can support asking a user to supply a verification code that is sent by email.
+/// * Password: The application can support asking a user to supply a password
 
 typedef NS_OPTIONS(NSInteger, MSALNativeAuthChallengeTypes) {
     /// Specifies if the Challenge Type is OOB

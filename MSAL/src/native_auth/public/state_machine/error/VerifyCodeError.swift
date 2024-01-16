@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// Class that defines the structure and type of a VerifyCodeE error
+/// Class that defines the structure and type of a VerifyCode error
 @objcMembers
 public class VerifyCodeError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
