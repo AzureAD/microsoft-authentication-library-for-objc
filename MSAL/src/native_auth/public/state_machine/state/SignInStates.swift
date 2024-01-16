@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Base class for the SignIn state
 @objcMembers public class SignInBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthSignInControlling
     let inputValidator: MSALNativeAuthInputValidating

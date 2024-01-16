@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a SignInStart delegate
 @objc
 public protocol SignInStartDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -53,6 +54,7 @@ public protocol SignInStartDelegate {
     @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
+/// Protocol that defines the methods of a SignInPasswordRequired delegate
 @objc
 public protocol SignInPasswordRequiredDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -67,6 +69,7 @@ public protocol SignInPasswordRequiredDelegate {
     @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
+/// Protocol that defines the methods of a SignInResendCode delegate
 @objc
 public protocol SignInResendCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
@@ -88,6 +91,7 @@ public protocol SignInResendCodeDelegate {
                                                                   codeLength: Int)
 }
 
+/// Protocol that defines the methods of a SignInVerifyCode delegate
 @objc
 public protocol SignInVerifyCodeDelegate {
     /// Notifies the delegate that the operation resulted in an error.

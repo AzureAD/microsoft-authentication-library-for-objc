@@ -24,6 +24,7 @@
 
 import Foundation
 
+///  Class that defines the structure and type of a ResendCode error
 @objc
 public class ResendCodeError: MSALNativeAuthError {
     /// Describes why an error occurred and provides more information about the error.

@@ -24,6 +24,7 @@
 
 import Foundation
 
+/// Protocol that defines the methods of a SignInAfterSignUp delegate
 @objc
 public protocol SignInAfterSignUpDelegate {
     /// Notifies the delegate that the operation resulted in an error.
