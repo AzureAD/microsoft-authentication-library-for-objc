@@ -386,11 +386,6 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalBrokerNotAvailable                      = -42714,
     
     /**
-     JIT - Link - Timeout while waiting for server confirmation.
-    */
-    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42714,
-    
-    /**
      JIT - Link - Error while waiting for server confirmation
      */
     MSALInternalErrorJITLinkServerConfirmationError     =   -42715,
@@ -471,23 +466,37 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALErrorJITUnknownStatusWebCP                      = -42730,
 
     /**
-     JIT - Troubleshooting flow needed
-     */
-    MSALErrorJITTroubleshootingRequired                 = -42730,
-
-    /**
      JIT - Troubleshooting - Could not create web view controller
      */
     MSALErrorJITTroubleshootingCreateController         = -42731,
-
-    /**
-     JIT - Troubleshooting - Result unknown
-     */
-    MSALErrorJITTroubleshootingResultUnknown         = -42731,
     
     /**
      JIT - Troubleshooting - Acquire token error
      */
     MSALErrorJITTroubleshootingAcquireToken          = -42732,
     
+    /**
+     JIT - Link - Timeout while waiting for server confirmation.
+    */
+    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42733,
+    
+    /**
+     JIT - Troubleshooting flow needed
+     */
+    MSALErrorJITTroubleshootingRequired                 = -42734,
+    
+    /**
+     JIT - Troubleshooting - Result unknown
+     */
+    MSALErrorJITTroubleshootingResultUnknown         = -42735,
+    
+    /**
+     Device is not PSSO registered
+     */
+    MSALErrorDeviceNotPSSORegistered                    = -42736,
+    
+    /**
+     // In PSSO, KeyId stored in passkey provider storage does not match NGC key, needs to configure and retry
+     */
+    MSALErrorPSSOKeyIdMismatch                         = -42737,
 };

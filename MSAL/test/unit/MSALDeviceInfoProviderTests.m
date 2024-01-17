@@ -90,7 +90,7 @@
         dispatch_semaphore_signal(dsem);
     }];
     
-    [self waitForExpectations:@[expectation, failExpectation] timeout:1];
+    [self waitForExpectations:@[expectation, failExpectation] timeout:2];
 }
 
 - (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))

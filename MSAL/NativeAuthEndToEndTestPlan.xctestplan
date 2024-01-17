@@ -1,0 +1,77 @@
+{
+  "configurations" : [
+    {
+      "id" : "2A21CE4F-3AC3-481A-97AE-43C3291B8CD2",
+      "name" : "Test Tenant",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "clientId",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "existingPasswordUserEmail",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "existingUserPassword",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "authorityURL",
+            "value" : "<placeholder>"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "0A110D07-5D21-4B70-8C37-00FF79C890B1",
+      "name" : "Mock API",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "authorityURL",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "existingOTPUserEmail",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "existingPasswordUserEmail",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "existingUserPassword",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "clientId",
+            "value" : "<placeholder>"
+          },
+          {
+            "key" : "useMockAPI",
+            "value" : "true"
+          },
+          {
+            "key" : "mockAPIURL",
+            "value" : "<placeholder>"
+          }
+        ]
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:MSAL.xcodeproj",
+        "identifier" : "28D1D56B29BF62E900CE75F4",
+        "name" : "MSAL iOS Native Auth Integration Tests"
+      }
+    }
+  ],
+  "version" : 1
+}
