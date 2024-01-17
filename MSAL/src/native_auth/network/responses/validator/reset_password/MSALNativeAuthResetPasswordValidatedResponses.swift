@@ -31,7 +31,7 @@ enum MSALNativeAuthResetPasswordStartValidatedResponse {
 
 enum MSALNativeAuthResetPasswordStartValidatedErrorType: Error {
     case invalidRequest(message: String?)
-    case invalidClient(message: String?)
+    case unauthorizedClient(message: String?)
     case userNotFound(message: String?)
     case unsupportedChallengeType(message: String?)
     case userDoesNotHavePassword
@@ -42,7 +42,7 @@ enum MSALNativeAuthResetPasswordStartValidatedErrorType: Error {
             return .init(type: .userNotFound, message: message)
         case .unsupportedChallengeType(let message),
              .invalidRequest(let message),
-             .invalidClient(let message):
+             .unauthorizedClient(let message):
             return .init(type: .generalError, message: message)
         case .userDoesNotHavePassword:
             return .init(type: .userDoesNotHavePassword, message: MSALNativeAuthErrorMessage.userDoesNotHavePassword)

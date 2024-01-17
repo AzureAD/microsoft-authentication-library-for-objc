@@ -263,7 +263,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .slowDown(message: nil))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid server response"), validatorError: .invalidServerResponse)
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient(message: "Invalid Client ID"))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid Client ID"), validatorError: .unauthorizedClient(message: "Invalid Client ID"))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
@@ -469,7 +469,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     
     func test_whenSignInWithCodeStartAndInitiateReturnError_properErrorShouldBeReturned() async {
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired), validatorError: .redirect)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .invalidClient(message: nil))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unauthorizedClient(message: nil))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .unsupportedChallengeType(message: nil))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
@@ -502,7 +502,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidToken(message: nil))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidServerResponse)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .invalidClient(message: nil))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unauthorizedClient(message: nil))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unsupportedChallengeType(message: nil))
     }
@@ -632,7 +632,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInWithCodeSubmitPasswordTokenAPIReturnError_correctErrorShouldBeReturned() async {
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .generalError)
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .expiredToken(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidClient(message: nil))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .unauthorizedClient(message: nil))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidRequest(message: nil))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidServerResponse)
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .userNotFound(message: nil))
@@ -665,7 +665,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_signInWithCodeSubmitCodeReturnError_correctResultShouldReturned() {
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .generalError)
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .expiredToken(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidClient(message: nil))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unauthorizedClient(message: nil))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidRequest(message: nil))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidServerResponse)
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .userNotFound(message: nil))
@@ -826,7 +826,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Invalid Client ID"))
 
-        tokenResponseValidatorMock.tokenValidatedResponse = .error(.invalidClient(message: "Invalid Client ID"))
+        tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(message: "Invalid Client ID"))
 
         let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
         state.signIn(delegate: mockDelegate)

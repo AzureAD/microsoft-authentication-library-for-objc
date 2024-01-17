@@ -112,7 +112,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             return XCTFail("Unexpected response")
         }
         
-        if case .invalidClient(message: nil) = innerError {} else {
+        if case .unauthorizedClient(message: nil) = innerError {} else {
             XCTFail("Unexpected Error")
         }
     }
@@ -127,7 +127,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             return XCTFail("Unexpected response")
         }
         
-        if case .invalidClient(message: nil) = innerError {} else {
+        if case .unauthorizedClient(message: nil) = innerError {} else {
             XCTFail("Unexpected Error")
         }
     }

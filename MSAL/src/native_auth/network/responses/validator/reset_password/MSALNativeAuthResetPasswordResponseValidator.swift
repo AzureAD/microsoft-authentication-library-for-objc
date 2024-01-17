@@ -84,7 +84,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                 return .error(.invalidRequest(message: apiError.errorDescription))
             }
         case .unauthorizedClient:
-            return .error(.invalidClient(message: apiError.errorDescription))
+            return .error(.unauthorizedClient(message: apiError.errorDescription))
         case .userNotFound:
             return .error(.userNotFound(message: apiError.errorDescription))
         case .unsupportedChallengeType:

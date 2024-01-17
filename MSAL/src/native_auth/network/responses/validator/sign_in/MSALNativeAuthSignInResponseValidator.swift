@@ -133,7 +133,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             case .invalidRequest:
                 return .error(.invalidRequest(message: error.errorDescription))
             case .unauthorizedClient:
-                return .error(.invalidClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(message: error.errorDescription))
             case .invalidGrant:
                 return .error(.invalidToken(message: error.errorDescription))
             case .expiredToken:
@@ -150,7 +150,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             case .invalidRequest:
                 return .error(.invalidRequest(message: error.errorDescription))
             case .unauthorizedClient:
-                return .error(.invalidClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(message: error.errorDescription))
             case .unsupportedChallengeType:
                 return .error(.unsupportedChallengeType(message: error.errorDescription))
             case .userNotFound:

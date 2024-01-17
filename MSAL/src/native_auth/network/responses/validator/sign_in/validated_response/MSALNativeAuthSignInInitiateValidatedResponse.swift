@@ -31,7 +31,7 @@ enum MSALNativeAuthSignInInitiateValidatedResponse {
 
 enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     case redirect
-    case invalidClient(message: String?)
+    case unauthorizedClient(message: String?)
     case invalidRequest(message: String?)
     case invalidServerResponse
     case userNotFound(message: String?)
@@ -45,7 +45,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
             return .init(type: .userNotFound, message: message)
         case .invalidServerResponse:
             return .init(type: .generalError)
-        case .invalidClient(let message),
+        case .unauthorizedClient(let message),
              .unsupportedChallengeType(let message),
              .invalidRequest(let message):
             return .init(type: .generalError, message: message)
@@ -60,7 +60,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
             return .init(type: .userNotFound, message: message)
         case .invalidServerResponse:
             return .init(type: .generalError)
-        case .invalidClient(let message),
+        case .unauthorizedClient(let message),
              .unsupportedChallengeType(let message),
              .invalidRequest(let message):
             return .init(type: .generalError, message: message)

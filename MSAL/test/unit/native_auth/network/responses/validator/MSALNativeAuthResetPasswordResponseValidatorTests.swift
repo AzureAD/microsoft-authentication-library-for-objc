@@ -100,7 +100,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        if case .error(.invalidClient) = result {} else {
+        if case .error(.unauthorizedClient) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

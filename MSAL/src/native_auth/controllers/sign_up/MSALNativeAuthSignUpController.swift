@@ -201,7 +201,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                            context: context,
                            format: "InvalidUsername in signup/start request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
-        case .invalidClientId(let apiError):
+        case .unauthorizedClient(let apiError):
             let error = SignUpStartError(type: .generalError, message: apiError.errorDescription)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,

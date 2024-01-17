@@ -33,7 +33,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case generalError
     case expiredToken(message: String?)
     case expiredRefreshToken(message: String?)
-    case invalidClient(message: String?)
+    case unauthorizedClient(message: String?)
     case invalidRequest(message: String?)
     case invalidServerResponse
     case userNotFound(message: String?)
@@ -52,7 +52,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
              .slowDown(let message),
              .invalidRequest(let message),
              .invalidOOBCode(let message),
-             .invalidClient(let message),
+             .unauthorizedClient(let message),
              .unsupportedChallengeType(let message),
              .invalidScope(let message):
             return SignInStartError(type: .generalError, message: message)
@@ -78,7 +78,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
              .authorizationPending(let message),
              .slowDown(let message),
              .invalidRequest(let message),
-             .invalidClient(let message),
+             .unauthorizedClient(let message),
              .unsupportedChallengeType(let message),
              .invalidScope(let message):
             return RetrieveAccessTokenError(type: .generalError, message: message)
@@ -108,7 +108,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
              .authorizationPending(let message),
              .slowDown(let message),
              .invalidRequest(let message),
-             .invalidClient(let message),
+             .unauthorizedClient(let message),
              .unsupportedChallengeType(let message),
              .invalidScope(let message),
              .expiredRefreshToken(let message),

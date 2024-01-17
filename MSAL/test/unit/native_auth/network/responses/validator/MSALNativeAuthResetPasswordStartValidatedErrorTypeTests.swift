@@ -32,8 +32,8 @@ final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase 
 
     // MARK: - to ResetPasswordStartError tests
 
-    func test_toResetPasswordStartPublicError_invalidClient() {
-        let error = sut.invalidClient(message: testDescription).toResetPasswordStartPublicError()
+    func test_toResetPasswordStartPublicError_unauthorizedClient() {
+        let error = sut.unauthorizedClient(message: testDescription).toResetPasswordStartPublicError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }

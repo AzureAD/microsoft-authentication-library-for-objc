@@ -247,10 +247,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
     
-    func test_whenSignUpStartPassword_returns_invalidClientId_it_returnsGeneralError() async {
+    func test_whenSignUpStartPassword_returns_unauthorizedClient_it_returnsGeneralError() async {
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
-        let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
+        let unauthorizedClient : MSALNativeAuthSignUpStartValidatedResponse = .unauthorizedClient(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
                                                    subError: nil,
                                                    errorDescription: nil,
@@ -260,7 +260,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
-        validatorMock.mockValidateSignUpStartFunc(invalidClientId)
+        validatorMock.mockValidateSignUpStartFunc(unauthorizedClient)
         
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
@@ -635,10 +635,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
     
-    func test_whenSignUpStartCode_returns_invalidClientId_it_returnsGeneralError() async {
+    func test_whenSignUpStartCode_returns_unauthorizedClient_it_returnsGeneralError() async {
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
-        let invalidClientId : MSALNativeAuthSignUpStartValidatedResponse = .invalidClientId(
+        let unauthorizedClient : MSALNativeAuthSignUpStartValidatedResponse = .unauthorizedClient(
             MSALNativeAuthSignUpStartResponseError(error: .invalidRequest,
                                                    subError: nil,
                                                    errorDescription: nil,
@@ -648,7 +648,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
                                                    continuationToken: nil,
                                                    unverifiedAttributes: nil,
                                                    invalidAttributes: nil))
-        validatorMock.mockValidateSignUpStartFunc(invalidClientId)
+        validatorMock.mockValidateSignUpStartFunc(unauthorizedClient)
         
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)

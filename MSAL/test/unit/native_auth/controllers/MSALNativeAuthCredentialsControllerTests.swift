@@ -163,7 +163,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .slowDown(message: nil))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError), validatorError: .invalidRequest(message: nil))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse), validatorError: .invalidServerResponse)
-        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .invalidClient(message: "Invalid Client ID"))
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Invalid Client ID"), validatorError: .unauthorizedClient(message: "Invalid Client ID"))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .refreshTokenExpired), validatorError: .expiredRefreshToken(message: nil))

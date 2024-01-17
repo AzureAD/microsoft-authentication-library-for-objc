@@ -97,7 +97,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 return handleInvalidRequestErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
             case .invalidClient,
                 .unauthorizedClient:
-                return .error(.invalidClient(message: responseError.errorDescription))
+                return .error(.unauthorizedClient(message: responseError.errorDescription))
             case .invalidGrant:
                 if responseError.subError == .invalidOOBValue {
                     return .error(.invalidOOBCode(message: responseError.errorDescription))
