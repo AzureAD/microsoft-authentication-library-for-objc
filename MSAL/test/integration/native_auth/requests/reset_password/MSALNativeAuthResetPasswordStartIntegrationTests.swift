@@ -72,7 +72,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
     func test_resetPasswordStart_unauthorizedClient() async throws {
         try await perform_testFail(
             endpoint: .resetPasswordStart,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: createResetPasswordStartError(error: .unauthorizedClient)
         )
     }
