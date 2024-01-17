@@ -26,6 +26,8 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthCacheInterface {
+    init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor)
+
     func getTokens(
         account: MSALAccount,
         configuration: MSIDConfiguration,

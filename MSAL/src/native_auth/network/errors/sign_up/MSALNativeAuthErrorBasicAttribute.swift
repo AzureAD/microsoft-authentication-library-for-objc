@@ -24,24 +24,10 @@
 
 import Foundation
 
-class MSALNativeAuthRequiredAttributesInternal: NSObject, Decodable {
+class MSALNativeAuthErrorBasicAttribute: NSObject, Decodable {
     let name: String
-    let type: String
-    let required: Bool
-    let options: MSALNativeAuthRequiredAttributeOptions?
 
-    init(name: String, type: String, required: Bool, options: MSALNativeAuthRequiredAttributeOptions? = nil) {
+    init(name: String) {
         self.name = name
-        self.type = type
-        self.required = required
-        self.options = options
-    }
-
-    override var description: String {
-        return "\(name)"
-    }
-
-    func toRequiredAttributesPublic() -> MSALNativeAuthRequiredAttributes {
-        MSALNativeAuthRequiredAttributes(name: name, type: type, required: required, regex: options?.regex)
     }
 }

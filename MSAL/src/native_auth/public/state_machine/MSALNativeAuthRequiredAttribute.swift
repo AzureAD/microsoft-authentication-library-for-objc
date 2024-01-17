@@ -20,19 +20,27 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
 import Foundation
 
-/// Protocol that defines the methods of a SignInAfterSignUp delegate
+/// Class that defines the structure of a Required Attribute
 @objc
-public protocol SignInAfterSignUpDelegate {
-    /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onSignInAfterSignUpError(error: SignInAfterSignUpError)
+public class MSALNativeAuthRequiredAttribute: NSObject {
+    /// The name of the Required Attribute
+    public let name: String
+    /// The type of the Required Attribute
+    public let type: String
+    /// Specifies if the attribute is required or not
+    public let required: Bool
+    /// Regex to specify the format of the Attribute
+    public let regex: String?
 
-    /// Notifies the delegate that the sign in operation completed successfully.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInAfterSignUpError(error:)`` will be called.
-    /// - Parameter result: An object representing the signed in user account.
-    @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
+    init(name: String, type: String, required: Bool, regex: String? = nil) {
+        self.name = name
+        self.type = type
+        self.required = required
+        self.regex = regex
+        super.init()
+    }
 }
