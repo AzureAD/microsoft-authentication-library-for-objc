@@ -77,7 +77,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
-        if case .error(.invalidServerResponse) = result {} else {
+        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

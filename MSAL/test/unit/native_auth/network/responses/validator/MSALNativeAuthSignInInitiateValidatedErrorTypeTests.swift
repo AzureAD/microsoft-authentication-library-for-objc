@@ -52,9 +52,9 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     }
     
     func test_convertToSignInStartError_invalidServerResponse() {
-        let error = sut.invalidServerResponse.convertToSignInStartError()
+        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInStartError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.errorDescription, "Unexpected response body received")
     }
     
     func test_convertToSignInStartError_userNotFound() {
@@ -90,9 +90,9 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     }
     
     func test_convertToSignInPasswordStartError_invalidServerResponse() {
-        let error = sut.invalidServerResponse.convertToSignInPasswordStartError()
+        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInPasswordStartError()
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.generalError)
+        XCTAssertEqual(error.errorDescription, "Unexpected response body received")
     }
     
     func test_convertToSignInPasswordStartError_userNotFound() {

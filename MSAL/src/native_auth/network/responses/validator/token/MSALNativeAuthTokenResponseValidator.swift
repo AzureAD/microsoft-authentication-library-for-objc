@@ -64,8 +64,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "Token: Error type not expected, error: \(tokenResponseError)")
-                return .error(.invalidServerResponse)
+                    format: "Token: Error was not decoded properly, error: \(tokenResponseError)")
+                return .error(.unexpectedError(message: "Unexpected response body received"))
             }
             return handleFailedTokenResult(context, tokenResponseError)
         }
@@ -89,6 +89,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         return validAccount
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func handleFailedTokenResult(
         _ context: MSALNativeAuthRequestContext,
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
@@ -118,6 +119,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 return .error(.slowDown(message: responseError.errorDescription))
             case .userNotFound:
                 return .error(.userNotFound(message: responseError.errorDescription))
+            case .none:
+                return .error(.unexpectedError(message: responseError.errorDescription))
             }
         }
 

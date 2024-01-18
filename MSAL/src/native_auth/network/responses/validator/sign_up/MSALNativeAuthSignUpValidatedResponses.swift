@@ -30,7 +30,7 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     // TODO: Special errors handled separately. Remove after refactor validated error handling
     case invalidUsername(MSALNativeAuthSignUpStartResponseError)
     case unauthorizedClient(MSALNativeAuthSignUpStartResponseError)
-    case unexpectedError
+    case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
@@ -38,7 +38,7 @@ enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
     case passwordRequired(_ signUpChallengeToken: String)
     case redirect
     case error(MSALNativeAuthSignUpChallengeResponseError)
-    case unexpectedError
+    case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
@@ -49,5 +49,5 @@ enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
     case attributesRequired(continuationToken: String, requiredAttributes: [MSALNativeAuthRequiredAttribute])
     case attributeValidationFailed(invalidAttributes: [String])
     case error(MSALNativeAuthSignUpContinueResponseError)
-    case unexpectedError
+    case unexpectedError(message: String?)
 }
