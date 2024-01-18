@@ -31,7 +31,11 @@ final class CredentialsDelegateDispatcher: DelegateDispatcher<CredentialsDelegat
             telemetryUpdate?(.success(()))
             await onAccessTokenRetrieveCompleted(accessToken)
         } else {
-            let error = RetrieveAccessTokenError(type: .generalError, message: requiredErrorMessage(for: "onAccessTokenRetrieveCompleted"))
+            let error = RetrieveAccessTokenError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onAccessTokenRetrieveCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onAccessTokenRetrieveError(error: error)
         }

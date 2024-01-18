@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
@@ -35,9 +35,10 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
     let continuationToken: String?
     let unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttribute]?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
@@ -51,23 +52,34 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpStartResponseError {
 
-    func toSignUpStartPublicError() -> SignUpStartError {
+    func toSignUpStartPublicError(context: MSIDRequestContext) -> SignUpStartError {
         switch error {
         case .invalidGrant:
-            if let subError, subError.isAnyPasswordError {
-                return .init(type: .invalidPassword, message: errorDescription)
-            } else {
-                return .init(type: .generalError, message: errorDescription)
-            }
+            return .init(
+                type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         case .userAlreadyExists:
-            return .init(type: .userAlreadyExists, message: errorDescription)
+            return .init(
+                type: .userAlreadyExists,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         case .attributesRequired,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
              .invalidRequest,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 }

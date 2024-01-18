@@ -47,7 +47,7 @@ final class SignInResendCodeDelegateDispatcherTests: XCTestCase {
 
         let delegate = SignInResendCodeDelegateSpy(expectation: delegateExp, expectedSentTo: expectedSentTo, expectedChannelTargetType: expectedChannelTargetType, expectedCodeLength: expectedCodeLength)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -68,9 +68,9 @@ final class SignInResendCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignInResendCodeCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignInResendCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInResendCodeCodeRequired"))
+        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInResendCodeCodeRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResendCodeError else {
                 return XCTFail("wrong result")
             }

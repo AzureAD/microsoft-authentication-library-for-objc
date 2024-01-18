@@ -43,7 +43,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
-        let expectedError = PasswordRequiredError(type: .invalidPassword)
+        let expectedError = PasswordRequiredError(type: .invalidPassword, correlationId: .init())
         let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)

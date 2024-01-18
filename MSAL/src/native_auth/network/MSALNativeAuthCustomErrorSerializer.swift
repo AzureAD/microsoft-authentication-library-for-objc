@@ -26,9 +26,12 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error>: NSObject, MSIDResponseSerialization {
+// swiftlint:disable:next line_length
+final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativeAuthResponseHeadersSerializable>: NSObject, MSIDResponseSerialization {
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        let customError = try JSONDecoder().decode(T.self, from: data ?? Data())
+        var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
+        customError.headers = customError.serializeHeaders(from: httpResponse)
+
         // the successfuly constructed "customError" needs to be thrown, since the previous "try" command just validates the object (error) decoding
         throw customError
     }

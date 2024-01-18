@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponseError {
 
@@ -32,9 +32,10 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -45,25 +46,30 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
 
 extension MSALNativeAuthResetPasswordChallengeResponseError {
 
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+    func toResetPasswordStartPublicError(context: MSIDRequestContext) -> ResetPasswordStartError {
         switch error {
         case .invalidRequest,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 
-    func toResendCodePublicError() -> ResendCodeError {
+    func toResendCodePublicError(context: MSIDRequestContext) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(message: errorDescription)
+            return .init(message: errorDescription, correlationId: getHeaderCorrelationId() ?? context.correlationId(), errorCodes: errorCodes ?? [])
         }
     }
 }

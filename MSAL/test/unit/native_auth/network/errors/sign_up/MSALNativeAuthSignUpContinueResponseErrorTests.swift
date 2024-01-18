@@ -220,21 +220,21 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     
     private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toVerifyCodePublicError()
+        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toPasswordRequiredPublicError()
+        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?) {
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toAttributesRequiredPublicError()
+        let error = sut.toAttributesRequiredPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.errorDescription, description)
     }
 }

@@ -22,22 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInInitiateResponseError: MSALNativeAuthResponseError {
+protocol MSALNativeAuthResponseHeadersSerializable {
+    var headers: [String: String]? { get set }
 
-    let error: MSALNativeAuthSignInInitiateOauth2ErrorCode?
-    let errorDescription: String?
-    let errorCodes: [Int]?
-    let errorURI: String?
-    let innerErrors: [MSALNativeAuthInnerError]?
-    var headers: [String: String]?
+    func serializeHeaders(from httpResponse: HTTPURLResponse?) -> [String: String]?
+    func getHeaderCorrelationId() -> UUID?
+}
 
-    enum CodingKeys: String, CodingKey {
-        case error, headers
-        case errorDescription = "error_description"
-        case errorCodes = "error_codes"
-        case errorURI = "error_uri"
-        case innerErrors = "inner_errors"
+extension MSALNativeAuthResponseHeadersSerializable {
+
+    func serializeHeaders(from httpResponse: HTTPURLResponse?) -> [String: String]? {
+        guard let headers = httpResponse?.allHeaderFields else {
+            return nil
+        }
+
+        var mappedHeaders: [String: String] = [:]
+
+        headers.forEach {
+            guard let key = $0.key as? String, let value = $0.value as? String else {
+                return
+            }
+            mappedHeaders[key] = value
+        }
+
+        return mappedHeaders
+    }
+
+    func getHeaderCorrelationId() -> UUID? {
+        guard let correlationId = headers?[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] else {
+            return nil
+        }
+
+        return UUID(uuidString: correlationId)
     }
 }

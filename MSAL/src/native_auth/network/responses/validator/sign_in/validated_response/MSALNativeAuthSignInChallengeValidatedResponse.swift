@@ -22,37 +22,70 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 enum MSALNativeAuthSignInChallengeValidatedResponse {
-    case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
-    case passwordRequired(continuationToken: String)
+    case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int, correlationId: UUID?)
+    case passwordRequired(continuationToken: String, correlationId: UUID?)
     case error(MSALNativeAuthSignInChallengeValidatedErrorType)
 }
 
 enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case redirect
-    case expiredToken(message: String?)
-    case invalidToken(message: String?)
-    case unauthorizedClient(message: String?)
-    case invalidRequest(message: String?)
+    case expiredToken(MSALNativeAuthSignInChallengeResponseError)
+    case invalidToken(MSALNativeAuthSignInChallengeResponseError)
+    case unauthorizedClient(MSALNativeAuthSignInChallengeResponseError)
+    case invalidRequest(message: String?, correlationId: UUID?)
     case unexpectedError(message: String?)
-    case userNotFound(message: String?)
-    case unsupportedChallengeType(message: String?)
+    case userNotFound(MSALNativeAuthSignInChallengeResponseError)
+    case unsupportedChallengeType(MSALNativeAuthSignInChallengeResponseError)
 
-    func convertToSignInStartError() -> SignInStartError {
+    func convertToSignInStartError(context: MSIDRequestContext) -> SignInStartError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired)
-        case .expiredToken(let message),
-             .invalidToken(let message),
-             .invalidRequest(let message),
-             .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .unexpectedError(let message):
-            return .init(type: .generalError, message: message)
-        case .userNotFound(let message):
-            return .init(type: .userNotFound, message: message)
+            return .init(type: .browserRequired, correlationId: context.correlationId())
+        case .unexpectedError(let message):
+            return .init(type: .generalError, message: message, correlationId: context.correlationId())
+        case .invalidRequest(let message, let correlationId):
+            return .init(type: .generalError, message: message, correlationId: correlationId ?? context.correlationId())
+        case .expiredToken(let apiError),
+             .invalidToken(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .userNotFound(let apiError):
+            return .init(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        }
+    }
+
+    func convertToResendCodeError(context: MSIDRequestContext) -> ResendCodeError {
+        switch self {
+        case .redirect:
+            return .init(correlationId: context.correlationId())
+        case .invalidRequest(let message, let correlationId):
+            return .init(message: message, correlationId: correlationId ?? context.correlationId())
+        case .expiredToken(let apiError),
+             .invalidToken(let apiError),
+             .unauthorizedClient(let apiError),
+             .userNotFound(let apiError),
+             .unsupportedChallengeType(let apiError):
+            return .init(
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .unexpectedError(let message):
+            return .init(message: message, correlationId: context.correlationId())
         }
     }
 }

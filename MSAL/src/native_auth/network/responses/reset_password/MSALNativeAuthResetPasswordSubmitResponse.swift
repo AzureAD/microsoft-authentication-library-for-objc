@@ -24,9 +24,10 @@
 
 import Foundation
 
-struct MSALNativeAuthResetPasswordSubmitResponse: Decodable {
+struct MSALNativeAuthResetPasswordSubmitResponse: Decodable, MSALNativeAuthResponseHeadersSerializable {
 
     // MARK: - Variables
     let continuationToken: String
     let pollInterval: Int
+    var headers: [String: String]?
 }

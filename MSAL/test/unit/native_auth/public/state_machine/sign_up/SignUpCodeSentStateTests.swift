@@ -44,7 +44,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     // ResendCode
 
     func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
-        let expectedError = ResendCodeError(message: "test error")
+        let expectedError = ResendCodeError(message: "test error", correlationId: .init())
 
         let expectedResult: SignUpResendCodeResult = .error(error: expectedError, newState: nil)
         controller.resendCodeResult = .init(expectedResult)
@@ -110,7 +110,7 @@ final class SignUpCodeRequiredStateTests: XCTestCase {
     // SubmitCode
 
     func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
-        let expectedError = VerifyCodeError(type: .invalidCode)
+        let expectedError = VerifyCodeError(type: .invalidCode, correlationId: .init())
         let expectedState = SignUpCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpVerifyCodeResult = .error(

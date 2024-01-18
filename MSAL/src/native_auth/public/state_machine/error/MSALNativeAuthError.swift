@@ -29,10 +29,18 @@ import Foundation
 public class MSALNativeAuthError: NSObject, LocalizedError {
     /// Describes why an error occurred and provides more information about the error.
     public var errorDescription: String? { message }
+    
+    /// Correlation ID used for the request
+    public let correlationId: UUID
+
+    /// Error codes returned along with the error
+    public let errorCodes: [Int]
 
     private let message: String?
 
-    init(message: String? = nil) {
+    init(message: String? = nil, correlationId: UUID, errorCodes: [Int] = []) {
         self.message = message
+        self.correlationId = correlationId
+        self.errorCodes = errorCodes
     }
 }

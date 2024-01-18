@@ -24,10 +24,11 @@
 
 import Foundation
 
-struct MSALNativeAuthResetPasswordPollCompletionResponse: Decodable {
+struct MSALNativeAuthResetPasswordPollCompletionResponse: Decodable, MSALNativeAuthResponseHeadersSerializable {
 
     // MARK: - Variables
     let status: MSALNativeAuthResetPasswordPollCompletionStatus
     let continuationToken: String?
     let expiresIn: Int?
+    var headers: [String: String]?
 }

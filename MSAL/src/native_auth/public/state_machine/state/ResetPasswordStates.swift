@@ -54,6 +54,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
             let controllerResponse = await resendCodeInternal()
             let delegateDispatcher = ResetPasswordResendCodeDelegateDispatcher(
                 delegate: delegate,
+                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
@@ -80,6 +81,7 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
             let controllerResponse = await submitCodeInternal(code: code)
             let delegateDispatcher = ResetPasswordVerifyCodeDelegateDispatcher(
                 delegate: delegate,
+                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
@@ -102,7 +104,11 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
-            let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .completed(let newState):

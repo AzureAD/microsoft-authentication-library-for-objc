@@ -31,7 +31,7 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = SignInAfterSignUpError(message: requiredErrorMessage(for: "onSignInCompleted"))
+            let error = SignInAfterSignUpError(message: requiredErrorMessage(for: "onSignInCompleted"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignInAfterSignUpError(error: error)
         }

@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseError {
 
@@ -33,9 +33,10 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
@@ -47,19 +48,25 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
 
 extension MSALNativeAuthResetPasswordSubmitResponseError {
 
-    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
         switch error {
         case .invalidGrant:
-            if let subError, subError.isAnyPasswordError {
-                return .init(type: .invalidPassword, message: errorDescription)
-            } else {
-                return .init(type: .generalError, message: errorDescription)
-            }
+            return .init(
+                type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 }

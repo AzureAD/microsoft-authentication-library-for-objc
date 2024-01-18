@@ -22,60 +22,83 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+@_implementationOnly import MSAL_Private
+
 enum MSALNativeAuthResetPasswordStartValidatedResponse: Equatable {
-    case success(continuationToken: String)
-    case redirect
+    case success(continuationToken: String, correlationId: UUID?)
+    case redirect(correlationId: UUID?)
     case error(MSALNativeAuthResetPasswordStartValidatedErrorType)
     case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthResetPasswordStartValidatedErrorType: Equatable, Error {
-    case invalidRequest(message: String?)
-    case unauthorizedClient(message: String?)
-    case userNotFound(message: String?)
-    case unsupportedChallengeType(message: String?)
-    case userDoesNotHavePassword
+    case invalidRequest(MSALNativeAuthResetPasswordStartResponseError)
+    case unauthorizedClient(MSALNativeAuthResetPasswordStartResponseError)
+    case userNotFound(MSALNativeAuthResetPasswordStartResponseError)
+    case unsupportedChallengeType(MSALNativeAuthResetPasswordStartResponseError)
+    case userDoesNotHavePassword(MSALNativeAuthResetPasswordStartResponseError)
     case unexpectedError(message: String?)
 
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+    func toResetPasswordStartPublicError(context: MSIDRequestContext) -> ResetPasswordStartError {
         switch self {
-        case .userNotFound(let message):
-            return .init(type: .userNotFound, message: message)
-        case .unsupportedChallengeType(let message),
-             .invalidRequest(let message),
-             .unauthorizedClient(let message):
-            return .init(type: .generalError, message: message)
-        case .userDoesNotHavePassword:
-            return .init(type: .userDoesNotHavePassword, message: MSALNativeAuthErrorMessage.userDoesNotHavePassword)
+        case .userNotFound(let apiError):
+            return .init(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .unsupportedChallengeType(let apiError),
+             .invalidRequest(let apiError),
+             .unauthorizedClient(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .userDoesNotHavePassword(let apiError):
+            return .init(
+                type: .userDoesNotHavePassword,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         case .unexpectedError(message: let message):
-            return .init(type: .generalError, message: message)
+            return .init(type: .generalError, message: message, correlationId: context.correlationId())
         }
     }
 }
 
 enum MSALNativeAuthResetPasswordChallengeValidatedResponse: Equatable {
-    case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ resetPasswordChallengeToken: String)
+    case success(
+        _ sentTo: String,
+        _ channelTargetType: MSALNativeAuthChannelType,
+        _ codeLength: Int,
+        _ resetPasswordChallengeToken: String,
+        _ correlationId: UUID?
+    )
     case redirect
     case error(MSALNativeAuthResetPasswordChallengeResponseError)
     case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthResetPasswordContinueValidatedResponse: Equatable {
-    case success(continuationToken: String)
-    case invalidOOB
+    case success(continuationToken: String, correlationId: UUID?)
+    case invalidOOB(MSALNativeAuthResetPasswordContinueResponseError)
     case error(MSALNativeAuthResetPasswordContinueResponseError)
     case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthResetPasswordSubmitValidatedResponse: Equatable {
-    case success(continuationToken: String, pollInterval: Int)
+    case success(continuationToken: String, pollInterval: Int, correlationId: UUID?)
     case passwordError(error: MSALNativeAuthResetPasswordSubmitResponseError)
     case error(MSALNativeAuthResetPasswordSubmitResponseError)
     case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse: Equatable {
-    case success(status: MSALNativeAuthResetPasswordPollCompletionStatus, continuationToken: String?)
+    case success(status: MSALNativeAuthResetPasswordPollCompletionStatus, continuationToken: String?, correlationId: UUID?)
     case passwordError(error: MSALNativeAuthResetPasswordPollCompletionResponseError)
     case error(MSALNativeAuthResetPasswordPollCompletionResponseError)
     case unexpectedError(message: String?)

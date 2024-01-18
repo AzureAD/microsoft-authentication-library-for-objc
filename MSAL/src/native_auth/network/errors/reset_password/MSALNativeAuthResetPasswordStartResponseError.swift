@@ -32,9 +32,10 @@ struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseErro
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"

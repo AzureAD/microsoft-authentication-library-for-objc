@@ -52,7 +52,12 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func resendCode(delegate: SignUpResendCodeDelegate) {
         Task {
             let controllerResponse = await resendCodeInternal()
-            let delegateDispatcher = SignUpResendCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
+            let delegateDispatcher = SignUpResendCodeDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -75,7 +80,12 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate) {
         Task {
             let controllerResponse = await submitCodeInternal(code: code)
-            let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            
+            let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .completed(let state):
@@ -101,7 +111,12 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: SignUpPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
-            let delegateDispatcher = SignUpPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
+            let delegateDispatcher = SignUpPasswordRequiredDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .completed(let state):
@@ -127,8 +142,10 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ) {
         Task {
             let controllerResponse = await submitAttributesInternal(attributes: attributes)
+            
             let delegateDispatcher = SignUpAttributesRequiredDelegateDispatcher(
                 delegate: delegate,
+                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 

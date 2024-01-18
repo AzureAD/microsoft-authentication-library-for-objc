@@ -88,20 +88,20 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
     
     private func testSignUpChallengeErrorToSignUpStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let error = sut.toSignUpStartPublicError()
+        let error = sut.toSignUpStartPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpChallengeErrorToResendCodePublic(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?) {
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let error = sut.toResendCodePublicError()
+        let error = sut.toResendCodePublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpChallengeErrorToPasswordRequired(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let error = sut.toPasswordRequiredPublicError()
+        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }

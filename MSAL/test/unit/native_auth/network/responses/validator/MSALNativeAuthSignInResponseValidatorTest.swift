@@ -57,7 +57,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let continuationToken = "continuationToken"
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .passwordRequired(continuationToken: continuationToken) = result {} else {
+        if case .passwordRequired(continuationToken: continuationToken, _) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -79,7 +79,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let channelType = MSALNativeAuthInternalChannelType.email
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .codeRequired(continuationToken: continuationToken, sentTo: targetLabel, channelType: .email, codeLength: codeLength) = result {} else {
+        if case .codeRequired(continuationToken: continuationToken, sentTo: targetLabel, channelType: .email, codeLength: codeLength, correlationId: nil) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -128,7 +128,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let continuationToken = "continuationToken"
         let initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: continuationToken, challengeType: nil)
         let result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .success(continuationToken: continuationToken) = result {} else {
+        if case .success(continuationToken: continuationToken, correlationId: nil) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

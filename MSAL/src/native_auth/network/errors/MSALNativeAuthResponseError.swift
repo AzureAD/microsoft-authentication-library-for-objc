@@ -24,7 +24,7 @@
 
 import Foundation
 
-protocol MSALNativeAuthResponseError: Error, Decodable, Equatable {
+protocol MSALNativeAuthResponseError: Error, Decodable, Equatable, MSALNativeAuthResponseHeadersSerializable {
     associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
 
     var error: ErrorCode? { get }

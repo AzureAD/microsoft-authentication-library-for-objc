@@ -36,7 +36,11 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
             telemetryUpdate?(.success(()))
             await onSignUpCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCodeRequired"))
+            let error = SignUpStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCodeRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpStartError(error: error)
         }
@@ -47,7 +51,11 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
             telemetryUpdate?(.success(()))
             await onSignUpAttributesInvalid(attributeNames)
         } else {
-            let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
+            let error = SignUpStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesInvalid"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpStartError(error: error)
         }
@@ -61,7 +69,11 @@ final class SignUpVerifyCodeDelegateDispatcher: DelegateDispatcher<SignUpVerifyC
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
@@ -72,7 +84,11 @@ final class SignUpVerifyCodeDelegateDispatcher: DelegateDispatcher<SignUpVerifyC
             telemetryUpdate?(.success(()))
             await onSignUpPasswordRequired(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpPasswordRequired"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpPasswordRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
@@ -83,7 +99,11 @@ final class SignUpVerifyCodeDelegateDispatcher: DelegateDispatcher<SignUpVerifyC
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
@@ -102,7 +122,7 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
             telemetryUpdate?(.success(()))
             await onSignUpResendCodeCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"))
+            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpResendCodeError(error: error, newState: nil)
         }
@@ -116,7 +136,11 @@ final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpP
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
         }
@@ -127,7 +151,11 @@ final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpP
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
         }
@@ -141,7 +169,7 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
@@ -152,7 +180,7 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpAttributesInvalid(attributeNames, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesInvalid"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
@@ -163,7 +191,7 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpCompleted"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }

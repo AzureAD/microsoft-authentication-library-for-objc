@@ -82,8 +82,20 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     var expectedChallengeResponse: MSALNativeAuthSignInChallengeResponse?
     var expectedInitiateResponse: MSALNativeAuthSignInInitiateResponse?
     var expectedResponseError: Error?
-    var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound(message: nil))
-    var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken(message: nil))
+    var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound(.init(
+        error: .userNotFound,
+        errorDescription: nil,
+        errorCodes: nil,
+        errorURI: nil,
+        innerErrors: nil))
+    )
+    var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken(.init(
+        error: .expiredToken,
+        errorDescription: nil,
+        errorCodes: nil,
+        errorURI: nil,
+        innerErrors: nil)
+    ))
 
     
     func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {

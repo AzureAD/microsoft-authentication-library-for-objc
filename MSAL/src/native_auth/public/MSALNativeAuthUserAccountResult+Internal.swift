@@ -28,7 +28,7 @@ extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(
         forceRefresh: Bool,
-        correlationId: UUID?,
+        correlationId: UUID,
         cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
@@ -43,7 +43,7 @@ extension MSALNativeAuthUserAccountResult {
             }
         } else {
             MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
-            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound)))
+            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId)))
         }
     }
 }

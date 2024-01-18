@@ -54,9 +54,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleStartSuccess(_ response: MSALNativeAuthResetPasswordStartResponse,
                                     with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         if response.challengeType == .redirect {
-            return .redirect
+            return .redirect(correlationId: response.getHeaderCorrelationId())
         } else if let continuationToken = response.continuationToken {
-            return .success(continuationToken: continuationToken)
+            return .success(continuationToken: continuationToken, correlationId: response.getHeaderCorrelationId())
         } else {
             MSALLogger.log(level: .error,
                            context: context,
@@ -79,16 +79,16 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         switch apiError.error {
         case .invalidRequest:
             if apiError.errorCodes?.first == MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue {
-                return .error(.userDoesNotHavePassword)
+                return .error(.userDoesNotHavePassword(apiError))
             } else {
-                return .error(.invalidRequest(message: apiError.errorDescription))
+                return .error(.invalidRequest(apiError))
             }
         case .unauthorizedClient:
-            return .error(.unauthorizedClient(message: apiError.errorDescription))
+            return .error(.unauthorizedClient(apiError))
         case .userNotFound:
-            return .error(.userNotFound(message: apiError.errorDescription))
+            return .error(.userNotFound(apiError))
         case .unsupportedChallengeType:
-            return .error(.unsupportedChallengeType(message: apiError.errorDescription))
+            return .error(.unsupportedChallengeType(apiError))
         case .none:
             return .error(.unexpectedError(message: apiError.errorDescription))
         }
@@ -124,7 +124,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                     sentTo,
                     channelTargetType,
                     codeLength,
-                    continuationToken
+                    continuationToken,
+                    response.getHeaderCorrelationId()
                 )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields from backend")
@@ -165,7 +166,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleContinueSuccess(
         _ response: MSALNativeAuthResetPasswordContinueResponse
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
-        return .success(continuationToken: response.continuationToken)
+        return .success(continuationToken: response.continuationToken, correlationId: response.getHeaderCorrelationId())
     }
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
@@ -176,7 +177,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
         switch apiError.error {
         case .invalidGrant:
-            return apiError.subError == .invalidOOBValue ? .invalidOOB : .error(apiError)
+            return apiError.subError == .invalidOOBValue ? .invalidOOB(apiError) : .error(apiError)
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest:
@@ -208,7 +209,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         return .success(
             continuationToken: response.continuationToken,
-            pollInterval: response.pollInterval
+            pollInterval: response.pollInterval,
+            correlationId: response.getHeaderCorrelationId()
         )
     }
 
@@ -252,7 +254,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         _ response: MSALNativeAuthResetPasswordPollCompletionResponse
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         // Even if the `continuationToken` is nil, the ResetPassword flow is considered successfully completed
-        return .success(status: response.status, continuationToken: response.continuationToken)
+        return .success(status: response.status, continuationToken: response.continuationToken, correlationId: response.getHeaderCorrelationId())
     }
 
     private func handlePollCompletionError(

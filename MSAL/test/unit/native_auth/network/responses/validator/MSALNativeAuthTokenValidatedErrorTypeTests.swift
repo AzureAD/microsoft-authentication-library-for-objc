@@ -30,90 +30,143 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
     
     private typealias sut = MSALNativeAuthTokenValidatedErrorType
     private let testDescription = "testDescription"
-    
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private var apiErrorStub: MSALNativeAuthTokenResponseError {
+        .init(
+            error: .invalidRequest,
+            subError: .attributeValidationFailed,
+            errorDescription: testDescription,
+            errorCodes: testErrorCodes,
+            errorURI: nil,
+            innerErrors: nil, 
+            continuationToken: nil
+        )
+    }
+
     // MARK: - convertToSignInPasswordStartError tests
     
     func test_convertToSignInPasswordStartError_generalError() {
-        let error = sut.generalError.convertToSignInPasswordStartError()
+
+        let error = sut.generalError.convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_expiredToken() {
-        let error = sut.expiredToken(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.expiredToken(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_expiredRefreshToken() {
-        let error = sut.expiredRefreshToken(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.expiredRefreshToken(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_unauthorizedClient() {
-        let error = sut.unauthorizedClient(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.unauthorizedClient(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_invalidRequest() {
-        let error = sut.invalidRequest(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidRequest(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_invalidServerResponse() {
-        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInPasswordStartError()
+        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, "Unexpected response body received")
     }
     
     func test_convertToSignInPasswordStartError_userNotFound() {
-        let error = sut.userNotFound(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.userNotFound(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .userNotFound)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_invalidPassword() {
-        let error = sut.invalidPassword(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidPassword(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .invalidCredentials)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_invalidOOBCode() {
-        let error = sut.invalidOOBCode(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidOOBCode(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.unsupportedChallengeType(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_strongAuthRequired() {
-        let error = sut.strongAuthRequired(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.strongAuthRequired(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .browserRequired)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_invalidScope() {
-        let error = sut.invalidScope(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidScope(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_authorizationPending() {
-        let error = sut.authorizationPending(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.authorizationPending(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInPasswordStartError_slowDown() {
-        let error = sut.slowDown(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.slowDown(apiErrorStub).convertToSignInPasswordStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
 }

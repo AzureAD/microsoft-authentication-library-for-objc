@@ -84,7 +84,7 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
     
     private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
         sut = MSALNativeAuthSignUpStartResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toSignUpStartPublicError()
+        let error = sut.toSignUpStartPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }

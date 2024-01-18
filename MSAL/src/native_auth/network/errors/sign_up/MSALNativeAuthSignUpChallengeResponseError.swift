@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode?
@@ -30,9 +30,10 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
     let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
@@ -42,36 +43,46 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpChallengeResponseError {
 
-    func toSignUpStartPublicError() -> SignUpStartError {
+    func toSignUpStartPublicError(context: MSIDRequestContext) -> SignUpStartError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 
-    func toResendCodePublicError() -> ResendCodeError {
+    func toResendCodePublicError(context: MSIDRequestContext) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(message: errorDescription)
+            return .init(message: errorDescription, correlationId: getHeaderCorrelationId() ?? context.correlationId(), errorCodes: errorCodes ?? [])
         }
     }
 
-    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 }

@@ -163,4 +163,11 @@ class MSALNativeAuthBaseController {
             }
         }
     }
+
+    func updateContext(_ previousContext: MSIDRequestContext, with correlationId: UUID?) -> MSALNativeAuthRequestContext {
+        return MSALNativeAuthRequestContext(
+            correlationId: correlationId ?? previousContext.correlationId(),
+            telemetryRequestId: previousContext.telemetryRequestId()
+        )
+    }
 }

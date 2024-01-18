@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseError {
 
@@ -34,9 +34,10 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
     let continuationToken: String?
+    var headers: [String: String]?
 
     enum CodingKeys: String, CodingKey {
-        case error
+        case error, headers
         case subError = "suberror"
         case errorDescription = "error_description"
         case errorCodes = "error_codes"
@@ -49,17 +50,26 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
 
 extension MSALNativeAuthResetPasswordContinueResponseError {
 
-    func toVerifyCodePublicError() -> VerifyCodeError {
+    func toVerifyCodePublicError(context: MSIDRequestContext) -> VerifyCodeError {
         switch error {
         case .invalidGrant:
-            return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
-            : .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: subError == .invalidOOBValue ? .invalidCode : .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .verificationRequired,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: errorCodes ?? []
+            )
         }
     }
 }

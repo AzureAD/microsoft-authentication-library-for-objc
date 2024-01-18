@@ -30,12 +30,14 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     private var sut: MSALNativeAuthSignUpResponseValidator!
     private var context: MSIDRequestContext!
+    private var headersStub: [String: String]!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         sut = MSALNativeAuthSignUpResponseValidator()
         context = MSALNativeAuthRequestContextMock()
+        headersStub = [MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE: context.correlationId().uuidString]
     }
 
     // MARK: - Start Response
@@ -70,15 +72,16 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_succeedsWithContinuationToken_it_returns_success() {
-        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(.init(continuationToken: "continuation-token", challengeType: nil))
+        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(.init(continuationToken: "continuation-token", challengeType: nil, headers: headersStub))
 
         let result = sut.validate(response, with: context)
 
-        guard case let .success(continuationToken) = result else {
+        guard case let .success(continuationToken, correlationId) = result else {
             return XCTFail("Unexpected response")
         }
 
         XCTAssertEqual(continuationToken, "continuation-token")
+        XCTAssertEqual(correlationId, context.correlationId())
     }
 
     func test_whenSignUpStart_attributeValidationFailed_it_returns_attributeValidationFailed() {
@@ -91,10 +94,11 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
         let result = sut.validate(response, with: context)
 
-        guard case .attributeValidationFailed(let invalidAttributes) = result else {
+        guard case .attributeValidationFailed(let error, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
         }
 
+        XCTAssertEqual(error.getHeaderCorrelationId(), context.correlationId())
         XCTAssertEqual(invalidAttributes.first, "city")
     }
 
@@ -251,12 +255,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
             continuationToken: "token",
-            codeLength: 6)
+            codeLength: 6,
+            headers: headersStub)
         )
 
         let result = sut.validate(response, with: context)
 
-        guard case .codeRequired(let displayName, let displayType, let codeLength, let continuationToken) = result else {
+        guard case .codeRequired(let displayName, let displayType, let codeLength, let continuationToken, let correlationId) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -264,6 +269,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(displayType, .email)
         XCTAssertEqual(codeLength, 6)
         XCTAssertEqual(continuationToken, "token")
+        XCTAssertEqual(correlationId, context.correlationId())
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndPassword_it_returns_success() {
@@ -274,16 +280,18 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             challengeTargetLabel: "challenge-type-label",
             challengeChannel: .email,
             continuationToken: "token",
-            codeLength: nil)
+            codeLength: nil,
+            headers: headersStub)
         )
 
         let result = sut.validate(response, with: context)
 
-        guard case .passwordRequired(let continuationToken) = result else {
+        guard case .passwordRequired(let continuationToken, let correlationId) = result else {
             return XCTFail("Unexpected response")
         }
 
         XCTAssertEqual(continuationToken, "token")
+        XCTAssertEqual(correlationId, context.correlationId())
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsPassword_but_noToken_it_returns_unexpectedError() {
@@ -360,20 +368,20 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseContainsContinuationToken_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(continuationToken: "<continuationToken>", expiresIn: nil)
+            .init(continuationToken: "<continuationToken>", expiresIn: nil, headers: headersStub)
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .success("<continuationToken>"))
+        XCTAssertEqual(result, .success(continuationToken: "<continuationToken>", correlationId: context.correlationId()))
     }
 
     func test_whenSignUpStartSuccessResponseButDoesNotContainContinuationToken_it_returns_successWithNoContinuationToken() throws {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(continuationToken: nil, expiresIn: nil)
+            .init(continuationToken: nil, expiresIn: nil, headers: headersStub)
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .success(nil))
+        XCTAssertEqual(result, .success(continuationToken: nil, correlationId: context.correlationId()))
     }
 
     func test_whenSignUpContinueErrorResponseIsNotExpected_it_returns_unexpectedError() {
@@ -474,7 +482,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: [MSALNativeAuthErrorBasicAttribute(name: "email")])
 
-        guard case .attributeValidationFailed(let invalidAttributes) = result else {
+        guard case .attributeValidationFailed(_, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -507,7 +515,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_credentialRequired_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedContinuationToken: "continuation-token")
 
-        guard case .credentialRequired(let continuationToken) = result else {
+        guard case .credentialRequired(let continuationToken, let correlationId) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -522,7 +530,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "continuation-token", requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 
-        guard case .attributesRequired(let continuationToken, let requiredAttributes) = result else {
+        guard case .attributesRequired(let continuationToken, let requiredAttributes, _) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -652,7 +660,8 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             innerErrors: innerErrors,
             continuationToken: continuationToken,
             unverifiedAttributes: unverifiedAttributes,
-            invalidAttributes: invalidAttributes
+            invalidAttributes: invalidAttributes,
+            headers: headersStub
         )
     }
 

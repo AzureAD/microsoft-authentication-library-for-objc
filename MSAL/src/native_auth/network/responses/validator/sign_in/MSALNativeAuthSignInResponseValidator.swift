@@ -68,7 +68,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .error(.redirect)
             }
             if let continuationToken = initiateResponse.continuationToken {
-                return .success(continuationToken: continuationToken)
+                return .success(continuationToken: continuationToken, correlationId: initiateResponse.getHeaderCorrelationId())
             }
             MSALLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
             return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
@@ -111,7 +111,9 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 continuationToken: continuationToken,
                 sentTo: targetLabel,
                 channelType: channelType.toPublicChannelType(),
-                codeLength: codeLength)
+                codeLength: codeLength,
+                correlationId: response.getHeaderCorrelationId()
+            )
         case .password:
             guard let continuationToken = response.continuationToken else {
                 MSALLogger.log(
@@ -120,7 +122,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     format: "signin/challenge: Expected continuation token not nil with credential type password")
                 return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
-            return .passwordRequired(continuationToken: continuationToken)
+            return .passwordRequired(continuationToken: continuationToken, correlationId: response.getHeaderCorrelationId())
         case .redirect:
             return .error(.redirect)
         }
@@ -131,15 +133,15 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(message: error.errorDescription))
+                return .error(.invalidRequest(message: error.errorDescription, correlationId: error.getHeaderCorrelationId()))
             case .unauthorizedClient:
-                return .error(.unauthorizedClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(error))
             case .invalidGrant:
-                return .error(.invalidToken(message: error.errorDescription))
+                return .error(.invalidToken(error))
             case .expiredToken:
-                return .error(.expiredToken(message: error.errorDescription))
+                return .error(.expiredToken(error))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType(message: error.errorDescription))
+                return .error(.unsupportedChallengeType(error))
             case .none:
                 return .error(.unexpectedError(message: error.errorDescription))
             }
@@ -150,13 +152,13 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(message: error.errorDescription))
+                return .error(.invalidRequest(message: error.errorDescription, correlationId: error.getHeaderCorrelationId()))
             case .unauthorizedClient:
-                return .error(.unauthorizedClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(error))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType(message: error.errorDescription))
+                return .error(.unsupportedChallengeType(error))
             case .userNotFound:
-                return .error(.userNotFound(message: error.errorDescription))
+                return .error(.userNotFound(error))
             case .none:
                 return .error(.unexpectedError(message: error.errorDescription))
             }

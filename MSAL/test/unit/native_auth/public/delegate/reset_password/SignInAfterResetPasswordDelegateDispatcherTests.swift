@@ -30,6 +30,7 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: SignInAfterResetPasswordDelegateDispatcher!
+    private var correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -41,7 +42,7 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
         let delegate = SignInAfterResetPasswordDelegateSpy(expectation: delegateExp, expectedUserAccountResult: expectedResult)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -56,10 +57,10 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInAfterResetPasswordError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInAfterResetPasswordError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInAfterResetPasswordDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignInAfterResetPasswordError else {
                 return XCTFail("wrong result")
             }

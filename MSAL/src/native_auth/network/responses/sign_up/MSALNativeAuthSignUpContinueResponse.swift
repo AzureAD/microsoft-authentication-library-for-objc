@@ -24,7 +24,8 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpContinueResponse: Decodable {
+struct MSALNativeAuthSignUpContinueResponse: Decodable, MSALNativeAuthResponseHeadersSerializable {
     let continuationToken: String?
     let expiresIn: Int?
+    var headers: [String: String]?
 }

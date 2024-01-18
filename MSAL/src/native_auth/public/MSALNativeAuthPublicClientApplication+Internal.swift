@@ -30,14 +30,14 @@ extension MSALNativeAuthPublicClientApplication {
         username: String,
         password: String?,
         attributes: [String: Any]?,
-        correlationId: UUID?
+        correlationId: UUID
     ) async -> MSALNativeAuthSignUpControlling.SignUpStartControllerResponse {
         guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignUpStartError(type: .invalidUsername)))
+            return .init(.error(SignUpStartError(type: .invalidUsername, correlationId: correlationId)))
         }
 
         if let password = password, !inputValidator.isInputValid(password) {
-            return .init(.error(SignUpStartError(type: .invalidPassword)))
+            return .init(.error(SignUpStartError(type: .invalidPassword, correlationId: correlationId)))
         }
 
         let controller = controllerFactory.makeSignUpController(cacheAccessor: cacheAccessor)
@@ -56,14 +56,14 @@ extension MSALNativeAuthPublicClientApplication {
         username: String,
         password: String?,
         scopes: [String]?,
-        correlationId: UUID?
+        correlationId: UUID
     ) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         guard inputValidator.isInputValid(username) else {
-            return .init(.error(SignInStartError(type: .invalidUsername)))
+            return .init(.error(SignInStartError(type: .invalidUsername, correlationId: correlationId)))
         }
 
         if let password = password, !inputValidator.isInputValid(password) {
-            return .init(.error(SignInStartError(type: .invalidCredentials)))
+            return .init(.error(SignInStartError(type: .invalidCredentials, correlationId: correlationId)))
         }
 
         let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
@@ -79,10 +79,10 @@ extension MSALNativeAuthPublicClientApplication {
 
     func resetPasswordInternal(
         username: String,
-        correlationId: UUID?
+        correlationId: UUID
     ) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordStartControllerResponse {
         guard inputValidator.isInputValid(username) else {
-            return .init(.error(ResetPasswordStartError(type: .invalidUsername)))
+            return .init(.error(ResetPasswordStartError(type: .invalidUsername, correlationId: correlationId)))
         }
 
         let controller = controllerFactory.makeResetPasswordController(cacheAccessor: cacheAccessor)

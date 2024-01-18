@@ -24,12 +24,9 @@
 
 import Foundation
 
-struct MSALNativeAuthResendCodeRequestResponse: Decodable {
+struct MSALNativeAuthResendCodeRequestResponse: Decodable, MSALNativeAuthResponseHeadersSerializable {
 
     // MARK: - Variables
     let continuationToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case continuationToken
-    }
+    var headers: [String: String]?
 }

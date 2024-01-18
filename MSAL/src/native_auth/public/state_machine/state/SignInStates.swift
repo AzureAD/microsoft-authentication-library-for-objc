@@ -60,7 +60,11 @@ import Foundation
     public func resendCode(delegate: SignInResendCodeDelegate) {
         Task {
             let controllerResponse = await resendCodeInternal()
-            let delegateDispatcher = SignInResendCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            let delegateDispatcher = SignInResendCodeDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -83,7 +87,11 @@ import Foundation
     public func submitCode(code: String, delegate: SignInVerifyCodeDelegate) {
         Task {
             let controllerResponse = await submitCodeInternal(code: code)
-            let delegateDispatcher = SignInVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            let delegateDispatcher = SignInVerifyCodeDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .completed(let accountResult):
@@ -120,7 +128,11 @@ import Foundation
     public func submitPassword(password: String, delegate: SignInPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
-            let delegateDispatcher = SignInPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            let delegateDispatcher = SignInPasswordRequiredDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .completed(let accountResult):

@@ -23,8 +23,8 @@
 // THE SOFTWARE.
 
 enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
-    case success(continuationToken: String)
-    case attributeValidationFailed(invalidAttributes: [String])
+    case success(continuationToken: String, correlationId: UUID?)
+    case attributeValidationFailed(error: MSALNativeAuthSignUpStartResponseError, invalidAttributes: [String])
     case redirect
     case error(MSALNativeAuthSignUpStartResponseError)
     // TODO: Special errors handled separately. Remove after refactor validated error handling
@@ -34,20 +34,26 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
 }
 
 enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
-    case codeRequired(_ sentTo: String, _ channelType: MSALNativeAuthChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
-    case passwordRequired(_ signUpChallengeToken: String)
+    case codeRequired(
+        _ sentTo: String,
+        _ channelType: MSALNativeAuthChannelType,
+        _ codeLength: Int,
+        _ signUpChallengeToken: String,
+        _ correlationId: UUID?
+    )
+    case passwordRequired(_ signUpChallengeToken: String, correlationId: UUID?)
     case redirect
     case error(MSALNativeAuthSignUpChallengeResponseError)
     case unexpectedError(message: String?)
 }
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
-    case success(_ continuationToken: String?)
+    case success(continuationToken: String?, correlationId: UUID?)
     /// error that represents invalidOOB or invalidPassword, depending on which State the input comes from.
     case invalidUserInput(_ error: MSALNativeAuthSignUpContinueResponseError)
-    case credentialRequired(continuationToken: String)
-    case attributesRequired(continuationToken: String, requiredAttributes: [MSALNativeAuthRequiredAttribute])
-    case attributeValidationFailed(invalidAttributes: [String])
+    case credentialRequired(continuationToken: String, correlationId: UUID?)
+    case attributesRequired(continuationToken: String, requiredAttributes: [MSALNativeAuthRequiredAttribute], correlationId: UUID?)
+    case attributeValidationFailed(error: MSALNativeAuthSignUpContinueResponseError, invalidAttributes: [String])
     case error(MSALNativeAuthSignUpContinueResponseError)
     case unexpectedError(message: String?)
 }

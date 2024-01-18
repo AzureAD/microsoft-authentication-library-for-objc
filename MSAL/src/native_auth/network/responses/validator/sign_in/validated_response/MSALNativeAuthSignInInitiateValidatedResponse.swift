@@ -22,46 +22,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 enum MSALNativeAuthSignInInitiateValidatedResponse {
-    case success(continuationToken: String)
+    case success(continuationToken: String, correlationId: UUID?)
     case error(MSALNativeAuthSignInInitiateValidatedErrorType)
 }
 
 enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     case redirect
-    case unauthorizedClient(message: String?)
-    case invalidRequest(message: String?)
+    case unauthorizedClient(MSALNativeAuthSignInInitiateResponseError)
+    case invalidRequest(message: String?, correlationId: UUID?)
     case unexpectedError(message: String?)
-    case userNotFound(message: String?)
-    case unsupportedChallengeType(message: String?)
+    case userNotFound(MSALNativeAuthSignInInitiateResponseError)
+    case unsupportedChallengeType(MSALNativeAuthSignInInitiateResponseError)
 
-    func convertToSignInStartError() -> SignInStartError {
+    func convertToSignInStartError(context: MSIDRequestContext) -> SignInStartError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired)
-        case .userNotFound(let message):
-            return .init(type: .userNotFound, message: message)
-        case .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidRequest(let message),
-             .unexpectedError(message: let message):
-            return .init(type: .generalError, message: message)
-        }
-    }
-
-    func convertToSignInPasswordStartError() -> SignInStartError {
-        switch self {
-        case .redirect:
-            return .init(type: .browserRequired)
-        case .userNotFound(let message):
-            return .init(type: .userNotFound, message: message)
-        case .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidRequest(let message),
-             .unexpectedError(message: let message):
-            return .init(type: .generalError, message: message)
+            return .init(type: .browserRequired, correlationId: context.correlationId())
+        case .userNotFound(let apiError):
+            return .init(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .unexpectedError(let message):
+            return .init(type: .generalError, message: message, correlationId: context.correlationId())
+        case .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .invalidRequest(let message, let correlationId):
+            return .init(type: .generalError, message: message, correlationId: correlationId ?? context.correlationId())
         }
     }
 }

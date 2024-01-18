@@ -31,98 +31,167 @@ enum MSALNativeAuthTokenValidatedResponse {
 
 enum MSALNativeAuthTokenValidatedErrorType: Error {
     case generalError
-    case expiredToken(message: String?)
-    case expiredRefreshToken(message: String?)
-    case unauthorizedClient(message: String?)
-    case invalidRequest(message: String?)
+    case expiredToken(MSALNativeAuthTokenResponseError)
+    case expiredRefreshToken(MSALNativeAuthTokenResponseError)
+    case unauthorizedClient(MSALNativeAuthTokenResponseError)
+    case invalidRequest(MSALNativeAuthTokenResponseError)
     case unexpectedError(message: String?)
-    case userNotFound(message: String?)
-    case invalidPassword(message: String?)
-    case invalidOOBCode(message: String?)
-    case unsupportedChallengeType(message: String?)
-    case strongAuthRequired(message: String?)
-    case invalidScope(message: String?)
-    case authorizationPending(message: String?)
-    case slowDown(message: String?)
+    case userNotFound(MSALNativeAuthTokenResponseError)
+    case invalidPassword(MSALNativeAuthTokenResponseError)
+    case invalidOOBCode(MSALNativeAuthTokenResponseError)
+    case unsupportedChallengeType(MSALNativeAuthTokenResponseError)
+    case strongAuthRequired(MSALNativeAuthTokenResponseError)
+    case invalidScope(MSALNativeAuthTokenResponseError)
+    case authorizationPending(MSALNativeAuthTokenResponseError)
+    case slowDown(MSALNativeAuthTokenResponseError)
 
-    func convertToSignInPasswordStartError() -> SignInStartError {
+    // swiftlint:disable:next function_body_length
+    func convertToSignInPasswordStartError(context: MSIDRequestContext) -> SignInStartError {
         switch self {
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .invalidOOBCode(let message),
-             .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message):
-            return SignInStartError(type: .generalError, message: message)
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .invalidOOBCode(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .invalidRequest(let apiError):
+            return SignInStartError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         case .generalError:
-            return SignInStartError(type: .generalError)
-        case .userNotFound(let message):
-            return SignInStartError(type: .userNotFound, message: message)
-        case .invalidPassword(let message):
-            return SignInStartError(type: .invalidCredentials, message: message)
-        case .strongAuthRequired(let message):
-            return SignInStartError(type: .browserRequired, message: message)
-        case .expiredRefreshToken(let message):
+            return SignInStartError(type: .generalError, correlationId: context.correlationId())
+        case .unexpectedError(let message):
+            return SignInStartError(
+                type: .generalError,
+                message: message,
+                correlationId: context.correlationId()
+            )
+        case .userNotFound(let apiError):
+            return SignInStartError(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .invalidPassword(let apiError):
+            return SignInStartError(
+                type: .invalidCredentials,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .strongAuthRequired(let apiError):
+            return SignInStartError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .expiredRefreshToken(let apiError):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return SignInStartError(type: .generalError, message: message)
-        case .unexpectedError(message: let message):
-            return SignInStartError(type: .generalError, message: message)
+            return SignInStartError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         }
     }
 
-    func convertToRetrieveAccessTokenError() -> RetrieveAccessTokenError {
+    func convertToRetrieveAccessTokenError(context: MSIDRequestContext) -> RetrieveAccessTokenError {
         switch self {
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message):
-            return RetrieveAccessTokenError(type: .generalError, message: message)
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .invalidRequest(let apiError):
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         case .generalError:
-            return RetrieveAccessTokenError(type: .generalError)
-        case .expiredRefreshToken:
-            return RetrieveAccessTokenError(type: .refreshTokenExpired)
-        case .strongAuthRequired(let message):
-            return RetrieveAccessTokenError(type: .browserRequired, message: message)
-        case .userNotFound(let message),
-             .invalidPassword(let message),
-             .invalidOOBCode(let message):
+            return RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
+        case .unexpectedError(message: let message):
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: message,
+                correlationId: context.correlationId()
+            )
+        case .expiredRefreshToken(let apiError):
+            return RetrieveAccessTokenError(
+                type: .refreshTokenExpired,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .strongAuthRequired(let apiError):
+            return RetrieveAccessTokenError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .userNotFound(let apiError),
+             .invalidPassword(let apiError),
+             .invalidOOBCode(let apiError):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return RetrieveAccessTokenError(type: .generalError, message: message)
-        case .unexpectedError(message: let message):
-            return RetrieveAccessTokenError(type: .generalError, message: message)
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         }
     }
 
-    func convertToVerifyCodeError() -> VerifyCodeError {
+    func convertToVerifyCodeError(context: MSIDRequestContext) -> VerifyCodeError {
         switch self {
-        case .invalidOOBCode(let message):
-            return VerifyCodeError(type: .invalidCode, message: message)
-        case .strongAuthRequired(let message):
-            return VerifyCodeError(type: .browserRequired, message: message)
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message),
-             .expiredRefreshToken(let message),
-             .userNotFound(let message),
-             .invalidPassword(let message):
-            return VerifyCodeError(type: .generalError, message: message)
+        case .invalidOOBCode(let apiError):
+            return VerifyCodeError(
+                type: .invalidCode,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .strongAuthRequired(let apiError):
+            return VerifyCodeError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .expiredRefreshToken(let apiError),
+             .userNotFound(let apiError),
+             .invalidPassword(let apiError),
+             .invalidRequest(let apiError):
+            return VerifyCodeError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: apiError.getHeaderCorrelationId() ?? context.correlationId(),
+                errorCodes: apiError.errorCodes ?? []
+            )
         case .generalError:
-            return VerifyCodeError(type: .generalError)
-        case .unexpectedError(message: let message):
-            return VerifyCodeError(type: .generalError, message: message)
+            return VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+        case .unexpectedError(let message):
+            return VerifyCodeError(type: .generalError, message: message, correlationId: context.correlationId())
         }
     }
 
-    func convertToPasswordRequiredError() -> PasswordRequiredError {
-        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError())
+    func convertToPasswordRequiredError(context: MSIDRequestContext) -> PasswordRequiredError {
+        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError(context: context))
     }
 }

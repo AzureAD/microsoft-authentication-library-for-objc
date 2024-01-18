@@ -28,37 +28,65 @@ import XCTest
 final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase {
 
     private typealias sut = MSALNativeAuthResetPasswordStartValidatedErrorType
-    private let testDescription = "testDescription"
+    private var testDescription = "testDescription"
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private var apiErrorStub: MSALNativeAuthResetPasswordStartResponseError {
+        .init(
+            error: .unauthorizedClient,
+            errorDescription: testDescription,
+            errorCodes: testErrorCodes,
+            errorURI: nil,
+            innerErrors: nil,
+            target: nil
+        )
+    }
 
     // MARK: - to ResetPasswordStartError tests
 
     func test_toResetPasswordStartPublicError_unauthorizedClient() {
-        let error = sut.unauthorizedClient(message: testDescription).toResetPasswordStartPublicError()
+        let error = sut.unauthorizedClient(apiErrorStub).toResetPasswordStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
 
     func test_toResetPasswordStartPublicError_invalidRequest() {
-        let error = sut.invalidRequest(message: "General error").toResetPasswordStartPublicError()
+        let error = sut.invalidRequest(apiErrorStub).toResetPasswordStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_toResetPasswordStartPublicError_userDoesNotHavePassword() {
-        let error = sut.userDoesNotHavePassword.toResetPasswordStartPublicError()
+        testDescription = MSALNativeAuthErrorMessage.userDoesNotHavePassword
+        let error = sut.userDoesNotHavePassword(apiErrorStub).toResetPasswordStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .userDoesNotHavePassword)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.userDoesNotHavePassword)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
 
     func test_toResetPasswordStartPublicError_userNotFound() {
-        let error = sut.userNotFound(message: testDescription).toResetPasswordStartPublicError()
+        let error = sut.userNotFound(apiErrorStub).toResetPasswordStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .userNotFound)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
 
     func test_toResetPasswordStartPublicError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType(message: nil).toResetPasswordStartPublicError()
+        let error = sut.unsupportedChallengeType(apiErrorStub).toResetPasswordStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
 }

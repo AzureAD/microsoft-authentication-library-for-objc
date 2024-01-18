@@ -45,7 +45,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resetPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(.init(type: .generalError)))
+        return .init(.error(.init(type: .generalError, correlationId: .init())))
     }
 
     func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
@@ -55,7 +55,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resendCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(), newState: nil))
+        return .init(.error(error: .init(correlationId: .init()), newState: nil))
     }
 
     func submitCode(code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
@@ -65,7 +65,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         submitCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
     }
 
     func submitPassword(password: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
@@ -75,6 +75,6 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         submitPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
     }
 }
