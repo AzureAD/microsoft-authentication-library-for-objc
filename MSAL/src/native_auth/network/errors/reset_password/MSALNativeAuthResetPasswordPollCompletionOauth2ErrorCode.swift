@@ -27,7 +27,7 @@ import Foundation
 enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable, CaseIterable {
     case invalidGrant = "invalid_grant"
     case invalidRequest = "invalid_request"
-    case invalidClient = "invalid_client"
+    case unauthorizedClient = "unauthorized_client"
     case expiredToken = "expired_token"
     case userNotFound = "user_not_found"
 }

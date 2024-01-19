@@ -54,7 +54,7 @@ extension MSALNativeAuthResetPasswordContinueResponseError {
         case .invalidGrant:
             return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
                                                 : .init(type: .generalError, message: errorDescription)
-        case .invalidClient,
+        case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .verificationRequired:

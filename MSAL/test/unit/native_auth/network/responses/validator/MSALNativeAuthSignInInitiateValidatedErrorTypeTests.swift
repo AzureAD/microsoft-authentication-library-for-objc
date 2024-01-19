@@ -39,8 +39,8 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
     }
     
-    func test_convertToSignInStartError_invalidClient() {
-        let error = sut.invalidClient(message: testDescription).convertToSignInStartError()
+    func test_convertToSignInStartError_unauthorizedClient() {
+        let error = sut.unauthorizedClient(message: testDescription).convertToSignInStartError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }
@@ -77,8 +77,8 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
     }
     
-    func test_convertToSignInPasswordStartError_invalidClient() {
-        let error = sut.invalidClient(message: testDescription).convertToSignInPasswordStartError()
+    func test_convertToSignInPasswordStartError_unauthorizedClient() {
+        let error = sut.unauthorizedClient(message: testDescription).convertToSignInPasswordStartError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }

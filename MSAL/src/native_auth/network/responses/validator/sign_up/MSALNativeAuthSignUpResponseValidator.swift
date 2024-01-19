@@ -91,7 +91,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         case .invalidRequest where isSignUpStartInvalidRequestParameter(
             apiError,
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
-            return .invalidClientId(apiError)
+            return .unauthorizedClient(apiError)
         default:
             return .error(apiError)
         }

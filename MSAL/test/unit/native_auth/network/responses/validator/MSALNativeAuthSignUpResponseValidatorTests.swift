@@ -154,7 +154,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(error as MSALNativeAuthSignUpStartResponseError, apiError)
     }
     
-    func test_whenSignUpStartErrorResponseIs_invalidRequestWithInvalidClientIdErrorDescription_it_returns_expectedError() {
+    func test_whenSignUpStartErrorResponseIs_invalidRequestWithUnauthorizedClientErrorDescription_it_returns_expectedError() {
         let attributes = [MSALNativeAuthErrorBasicAttribute(name: "attribute")]
         let errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue, Int.max]
         
@@ -170,7 +170,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(apiError)
         
         let result = sut.validate(response, with: context)
-        guard case .invalidClientId(let error) = result else {
+        guard case .unauthorizedClient(let error) = result else {
             return XCTFail("Unexpected response")
         }
         

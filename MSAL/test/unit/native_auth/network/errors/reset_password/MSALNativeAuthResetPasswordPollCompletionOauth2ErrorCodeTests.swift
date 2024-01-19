@@ -41,8 +41,8 @@ final class MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests: XCTes
         XCTAssertEqual(sut.invalidRequest.rawValue, "invalid_request")
     }
     
-    func test_invalidClient() {
-        XCTAssertEqual(sut.invalidClient.rawValue, "invalid_client")
+    func test_unauthorizedClient() {
+        XCTAssertEqual(sut.unauthorizedClient.rawValue, "unauthorized_client")
     }
     
     func test_expiredToken() {

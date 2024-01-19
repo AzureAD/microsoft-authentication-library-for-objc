@@ -48,7 +48,7 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
     func toResetPasswordStartPublicError() -> ResetPasswordStartError {
         switch error {
         case .invalidRequest,
-             .invalidClient,
+             .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken:
             return .init(type: .generalError, message: errorDescription)
@@ -57,7 +57,7 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
 
     func toResendCodePublicError() -> ResendCodeError {
         switch error {
-        case .invalidClient,
+        case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest:

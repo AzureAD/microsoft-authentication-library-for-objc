@@ -83,8 +83,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             } else {
                 return .error(.invalidRequest(message: apiError.errorDescription))
             }
-        case .invalidClient:
-            return .error(.invalidClient(message: apiError.errorDescription))
+        case .unauthorizedClient:
+            return .error(.unauthorizedClient(message: apiError.errorDescription))
         case .userNotFound:
             return .error(.userNotFound(message: apiError.errorDescription))
         case .unsupportedChallengeType:
@@ -173,7 +173,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         switch apiError.error {
         case .invalidGrant:
             return apiError.subError == .invalidOOBValue ? .invalidOOB : .error(apiError)
-        case .invalidClient,
+        case .unauthorizedClient,
              .expiredToken,
              .invalidRequest:
             return .error(apiError)
@@ -220,7 +220,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                 return .error(apiError)
             }
         case .invalidRequest,
-             .invalidClient,
+             .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
         }
@@ -265,7 +265,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             }
         case .userNotFound,
              .invalidRequest,
-             .invalidClient,
+             .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
         }

@@ -80,7 +80,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         
         try await perform_testFail(
             endpoint: .signInChallenge,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: Error(error: .unauthorizedClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }

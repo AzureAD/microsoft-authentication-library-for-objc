@@ -51,8 +51,8 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
         XCTAssertEqual(error.errorDescription, testDescription)
     }
     
-    func test_convertToSignInPasswordStartError_invalidClient() {
-        let error = sut.invalidClient(message: testDescription).convertToSignInPasswordStartError()
+    func test_convertToSignInPasswordStartError_unauthorizedClient() {
+        let error = sut.unauthorizedClient(message: testDescription).convertToSignInPasswordStartError()
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }

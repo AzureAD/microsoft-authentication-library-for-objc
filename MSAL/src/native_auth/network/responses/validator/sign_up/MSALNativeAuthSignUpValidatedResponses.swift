@@ -29,7 +29,7 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     case error(MSALNativeAuthSignUpStartResponseError)
     // TODO: Special errors handled separately. Remove after refactor validated error handling
     case invalidUsername(MSALNativeAuthSignUpStartResponseError)
-    case invalidClientId(MSALNativeAuthSignUpStartResponseError)
+    case unauthorizedClient(MSALNativeAuthSignUpStartResponseError)
     case unexpectedError
 }
 

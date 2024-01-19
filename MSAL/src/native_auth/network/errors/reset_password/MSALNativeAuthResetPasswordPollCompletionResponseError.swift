@@ -55,7 +55,7 @@ extension MSALNativeAuthResetPasswordPollCompletionResponseError {
             } else {
                 return .init(type: .generalError, message: errorDescription)
             }
-        case .invalidClient,
+        case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .userNotFound:

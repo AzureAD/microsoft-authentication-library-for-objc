@@ -89,7 +89,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         
         try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: createError(.unauthorizedClient)
         )
     }
