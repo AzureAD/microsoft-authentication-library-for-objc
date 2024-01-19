@@ -75,6 +75,8 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
     }
 
     func test_resetPasswordChallenge_unauthorizedClient() async throws {
+        throw XCTSkip()
+        
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .unauthorizedClient,

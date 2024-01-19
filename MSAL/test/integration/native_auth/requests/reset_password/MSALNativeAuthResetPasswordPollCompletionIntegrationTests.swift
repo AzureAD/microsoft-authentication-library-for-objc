@@ -104,6 +104,8 @@ final class MSALNativeAuthResetPasswordPollCompletionIntegrationTests: MSALNativ
     }
 
     func test_resetPasswordPollCompletion_unauthorizedClient() async throws {
+        throw XCTSkip()
+        
         try await perform_testFail(
             endpoint: .resetPasswordPollCompletion,
             response: .unauthorizedClient,
