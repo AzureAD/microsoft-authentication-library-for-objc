@@ -65,7 +65,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                     level: .error,
                     context: context,
                     format: "Token: Error was not decoded properly, error: \(tokenResponseError)")
-                return .error(.unexpectedError(message: "Unexpected response body received"))
+                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
             }
             return handleFailedTokenResult(context, tokenResponseError)
         }

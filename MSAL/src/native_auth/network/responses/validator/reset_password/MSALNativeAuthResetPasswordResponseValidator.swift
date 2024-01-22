@@ -60,9 +60,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         } else {
             MSALLogger.log(level: .error,
                            context: context,
-                           format: "Reset Password Start returned success with unexpected response body")
+                           format: "resetpassword/start returned success with unexpected response body")
 
-            return .unexpectedError(message: "Unexpected response body received")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
     }
 
@@ -71,9 +71,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         guard let apiError = error as? MSALNativeAuthResetPasswordStartResponseError else {
             MSALLogger.log(level: .error,
                            context: context,
-                           format: "Reset Password Start: Error was not decoded properly, error: \(error)")
+                           format: "resetpassword/start: Error was not decoded properly, error: \(error)")
 
-            return .unexpectedError(message: "Unexpected response body received")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
 
         switch apiError.error {
@@ -128,7 +128,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                 )
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields from backend")
-                return .unexpectedError(message: "Unexpected response body received")
+                return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
             }
         case .password,
              .otp:
@@ -139,8 +139,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleChallengeError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordChallengeResponseError else {
-            MSALLogger.log(level: .info, context: context, format: "Reset Password Challenge: Error was not decoded properly, error: \(error)")
-            return .unexpectedError(message: "Unexpected response body received")
+            MSALLogger.log(level: .info, context: context, format: "resetpassword/challenge: Error was not decoded properly, error: \(error)")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
         if apiError.error == .none {
             return .unexpectedError(message: apiError.errorDescription)
@@ -170,8 +170,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordContinueResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "Reset Password Continue: Error was not decoded properly, error: \(error)")
-            return .unexpectedError(message: "Unexpected response body received")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/continue: Error was not decoded properly, error: \(error)")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
 
         switch apiError.error {
@@ -214,8 +214,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleSubmitError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordSubmitResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "Reset Password Submit: Error was not decoded properly, error: \(error)")
-            return .unexpectedError(message: "Unexpected response body received")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/submit: Error was not decoded properly, error: \(error)")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
 
         switch apiError.error {
@@ -260,8 +260,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         with context: MSIDRequestContext
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordPollCompletionResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "Reset Password Poll Completion: Error was not decoded properly, error: \(error)")
-            return .unexpectedError(message: "Unexpected response body received")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/poll_completion: Error was not decoded properly, error: \(error)")
+            return .unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody)
         }
 
         switch apiError.error {
