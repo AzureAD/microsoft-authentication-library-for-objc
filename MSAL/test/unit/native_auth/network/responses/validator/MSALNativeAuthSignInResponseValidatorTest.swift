@@ -116,7 +116,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTargetLabel: "some", challengeChannel: .email, codeLength: 2, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(message: "Unexpected challenge type")) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

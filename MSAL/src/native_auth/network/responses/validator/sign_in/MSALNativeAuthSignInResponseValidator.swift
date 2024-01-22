@@ -51,8 +51,8 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "signin/challenge: Error was not decoded properly, error: \(signInChallengeResponseError)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+                    format: "signin/challenge: Unable to decode error response: \(signInChallengeResponseError)")
+                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
             return handleFailedSignInChallengeResult(context, error: signInChallengeResponseError)
         }
@@ -71,14 +71,14 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .success(continuationToken: continuationToken)
             }
             MSALLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
-            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "signin/initiate: Error was not decoded properly, error: \(responseError)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+                    format: "signin/initiate: Unable to decode error response: \(responseError)")
+                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
             return handleFailedSignInInitiateResult(context, error: initiateResponseError)
         }
@@ -95,7 +95,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 level: .error,
                 context: context,
                 format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
-            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedChallengeType))
         case .oob:
             guard let continuationToken = response.continuationToken,
                     let targetLabel = response.challengeTargetLabel,
@@ -105,7 +105,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     level: .error,
                     context: context,
                     format: "signin/challenge: Invalid response with challenge type oob, response: \(response)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
             return .codeRequired(
                 continuationToken: continuationToken,
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     level: .error,
                     context: context,
                     format: "signin/challenge: Expected continuation token not nil with credential type password")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedErrorBody))
+                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
             return .passwordRequired(continuationToken: continuationToken)
         case .redirect:
