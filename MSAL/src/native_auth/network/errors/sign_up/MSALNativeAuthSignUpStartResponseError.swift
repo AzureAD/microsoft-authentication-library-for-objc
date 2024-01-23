@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthSignUpStartOauth2ErrorCode
+    let error: MSALNativeAuthSignUpStartOauth2ErrorCode?
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -65,7 +65,8 @@ extension MSALNativeAuthSignUpStartResponseError {
              .unauthorizedClient,
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
-             .invalidRequest:
+             .invalidRequest,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }

@@ -91,6 +91,7 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
     func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
         XCTAssertTrue(Thread.isMainThread)
         XCTAssertEqual(error.type, expectedError?.type)
+        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
         newPasswordRequiredState = newState
         expectation.fulfill()
     }

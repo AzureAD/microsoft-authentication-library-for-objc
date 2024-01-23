@@ -36,7 +36,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case invalidToken(message: String?)
     case unauthorizedClient(message: String?)
     case invalidRequest(message: String?)
-    case invalidServerResponse
+    case unexpectedError(message: String?)
     case userNotFound(message: String?)
     case unsupportedChallengeType(message: String?)
 
@@ -44,18 +44,15 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
         switch self {
         case .redirect:
             return .init(type: .browserRequired)
-        case .invalidServerResponse:
-            return .init(type: .generalError)
         case .expiredToken(let message),
              .invalidToken(let message),
-             .invalidRequest(let message):
-            return .init(type: .generalError, message: message)
-        case .unauthorizedClient(let message):
+             .invalidRequest(let message),
+             .unauthorizedClient(let message),
+             .unsupportedChallengeType(let message),
+             .unexpectedError(let message):
             return .init(type: .generalError, message: message)
         case .userNotFound(let message):
             return .init(type: .userNotFound, message: message)
-        case .unsupportedChallengeType(let message):
-            return .init(type: .generalError, message: message)
         }
     }
 }

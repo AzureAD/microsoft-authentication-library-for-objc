@@ -25,7 +25,7 @@
 import Foundation
 
 struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
-    let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode
+    let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -47,7 +47,8 @@ extension MSALNativeAuthSignUpChallengeResponseError {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
-             .invalidRequest:
+             .invalidRequest,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }
@@ -57,7 +58,8 @@ extension MSALNativeAuthSignUpChallengeResponseError {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
-             .invalidRequest:
+             .invalidRequest,
+             .none:
             return .init(message: errorDescription)
         }
     }
@@ -67,7 +69,8 @@ extension MSALNativeAuthSignUpChallengeResponseError {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
-             .invalidRequest:
+             .invalidRequest,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }

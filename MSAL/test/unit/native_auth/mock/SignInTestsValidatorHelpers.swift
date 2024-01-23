@@ -32,8 +32,7 @@ class SignInPasswordStartTestsValidatorHelper: SignInPasswordStartDelegateSpy {
             expectation.fulfill()
             return XCTFail("input should be .error")
         }
-
-        self.expectedError = error
+        
         Task { await self.onSignInStartError(error: error) }
     }
 
