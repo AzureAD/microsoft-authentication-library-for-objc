@@ -28,6 +28,7 @@ class DelegateDispatcher<T> {
     let delegate: T
     let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
 
+    
     init(delegate: T, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?) {
         self.delegate = delegate
         self.telemetryUpdate = telemetryUpdate
