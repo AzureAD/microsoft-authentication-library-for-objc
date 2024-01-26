@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode
+    let error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -50,7 +50,8 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
         case .invalidRequest,
              .unauthorizedClient,
              .unsupportedChallengeType,
-             .expiredToken:
+             .expiredToken,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }
@@ -60,7 +61,8 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
-             .invalidRequest:
+             .invalidRequest,
+             .none:
             return .init(message: errorDescription)
         }
     }

@@ -25,7 +25,7 @@
 import Foundation
 
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
-    let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
+    let error: MSALNativeAuthSignUpContinueOauth2ErrorCode?
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -63,7 +63,8 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .userAlreadyExists,
              .attributesRequired,
              .verificationRequired,
-             .credentialRequired:
+             .credentialRequired,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }
@@ -82,7 +83,8 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .userAlreadyExists,
              .attributesRequired,
              .verificationRequired,
-             .credentialRequired:
+             .credentialRequired,
+             .none:
             return .init(type: .generalError, message: errorDescription)
         }
     }

@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthTokenOauth2ErrorCode
+    let error: MSALNativeAuthTokenOauth2ErrorCode?
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?

@@ -35,7 +35,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case expiredRefreshToken(message: String?)
     case unauthorizedClient(message: String?)
     case invalidRequest(message: String?)
-    case invalidServerResponse
+    case unexpectedError(message: String?)
     case userNotFound(message: String?)
     case invalidPassword(message: String?)
     case invalidOOBCode(message: String?)
@@ -58,8 +58,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(type: .generalError, message: message)
         case .generalError:
             return SignInStartError(type: .generalError)
-        case .invalidServerResponse:
-            return SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
         case .userNotFound(let message):
             return SignInStartError(type: .userNotFound, message: message)
         case .invalidPassword(let message):
@@ -68,6 +66,8 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(type: .browserRequired, message: message)
         case .expiredRefreshToken(let message):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            return SignInStartError(type: .generalError, message: message)
+        case .unexpectedError(message: let message):
             return SignInStartError(type: .generalError, message: message)
         }
     }
@@ -84,8 +84,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(type: .generalError, message: message)
         case .generalError:
             return RetrieveAccessTokenError(type: .generalError)
-        case .invalidServerResponse:
-            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
         case .expiredRefreshToken:
             return RetrieveAccessTokenError(type: .refreshTokenExpired)
         case .strongAuthRequired(let message):
@@ -94,6 +92,8 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
              .invalidPassword(let message),
              .invalidOOBCode(let message):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            return RetrieveAccessTokenError(type: .generalError, message: message)
+        case .unexpectedError(message: let message):
             return RetrieveAccessTokenError(type: .generalError, message: message)
         }
     }
@@ -117,8 +117,8 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return VerifyCodeError(type: .generalError, message: message)
         case .generalError:
             return VerifyCodeError(type: .generalError)
-        case .invalidServerResponse:
-            return VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
+        case .unexpectedError(message: let message):
+            return VerifyCodeError(type: .generalError, message: message)
         }
     }
 

@@ -258,7 +258,50 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONMissing() throws {
+    func test_shouldDecodeErrorWithCorrectResponseSerializer_whenStatusCode400AndInvalidCode() throws {
+        let expectation = expectation(description: "Handle Error Retry Success")
+
+        let httpResponse = HTTPURLResponse(
+            url: HttpModuleMockConfigurator.baseUrl,
+            statusCode: 400,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        let httpRequest = MSALNativeAuthHTTPRequestMock.prepareMockRequest()
+
+        var dictionary = [String: Any]()
+        dictionary["error_code"] = "invalid code"
+        dictionary["error_description"] = "API Description"
+        dictionary["error_uri"] = HttpModuleMockConfigurator.baseUrl.absoluteString
+        dictionary["continuation_token"] = "abcdef"
+
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
+
+        let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignUpStartResponseError>()
+        errorHandler.handleError(
+            error,
+            httpResponse: httpResponse,
+            data: data,
+            httpRequest: httpRequest,
+            responseSerializer: MSIDHttpResponseSerializer(), // Some transient response serializer
+            externalSSOContext: nil,
+            context: context
+        ) { result, error in
+            guard let error = error as? MSALNativeAuthSignUpStartResponseError else {
+                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+                expectation.fulfill()
+                return
+            }
+            XCTAssertEqual(error.error, .none)
+            XCTAssertEqual(error.errorDescription, "API Description")
+            XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 1)
+    }
+
+    func test_shouldNotFailWithDecodeError_whenStatusCode400AndJSONMissing() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -282,18 +325,18 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            guard let error = error as? DecodingError else {
-                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+            guard let error = error as? MSALNativeAuthSignInInitiateResponseError else {
+                XCTFail("Error is expected to be returned, even with empty data")
                 expectation.fulfill()
                 return
             }
-            XCTAssertEqual(error.localizedDescription,"The data couldn’t be read because it is missing.")
+            XCTAssertEqual(error.error,.none)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_shouldFailWithDecodeError_whenStatusCode400AndJSONInvalid() throws {
+    func test_shouldNotFailWithDecodeError_whenStatusCode400AndJSONInvalid() throws {
         let expectation = expectation(description: "Handle Error Retry Success")
 
         let httpResponse = HTTPURLResponse(
@@ -318,12 +361,12 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
             externalSSOContext: nil,
             context: context
         ) { result, error in
-            guard let error = error as? DecodingError else {
-                XCTFail("Error type not expected, actual error type: \(type(of: error))")
+            guard let error = error as? MSALNativeAuthSignInInitiateResponseError else {
+                XCTFail("Error is expected to be returned, even with empty data")
                 expectation.fulfill()
                 return
             }
-            XCTAssertEqual(error.localizedDescription,"The data couldn’t be read because it is missing.")
+            XCTAssertEqual(error.error,.none)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
