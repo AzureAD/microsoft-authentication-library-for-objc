@@ -22,16 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
 
-@_implementationOnly import MSAL_Private
+import XCTest
+@testable import MSAL
 
-final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDResponseSerialization {
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
-        customError.correlationId = customError.retrieveCorrelationIdFromHeaders(from: httpResponse)
+final class MSALNativeAuthCustomErrorSerializerTests: XCTestCase {
 
-        // the successfuly constructed "customError" needs to be thrown, since the previous "try" command just validates the object (error) decoding
-        throw customError
+    func test_errorDeserializer_usesCorrelationIdFromHeaders() {
+        let headers = [
+            "client-request-id": "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0",
+            "header2": "value2"
+        ]
+        let responseString = """
+        {
+          "error": "invalid_grant",
+          "error_description": "New password is weak",
+          "suberror": "password_too_weak",
+          "correlation_id": "081f5395-539f-498d-8175-1d71e52601de"
+        }
+        """
+
+        let sut = MSALNativeAuthCustomErrorSerializer<MSALNativeAuthSignUpStartResponseError>()
+        
+        let httpResponse = HTTPURLResponse(url: URL(string: "https://contoso.com")!, statusCode: 400, httpVersion: nil, headerFields: headers)
+
+        do {
+            _ = try sut.responseObject(for: httpResponse, data: responseString.data(using: .utf8), context: nil)
+        } catch {
+            let result = (error as? MSALNativeAuthSignUpStartResponseError)?.correlationId
+            XCTAssertEqual(result?.uuidString, "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0")
+        }
     }
 }

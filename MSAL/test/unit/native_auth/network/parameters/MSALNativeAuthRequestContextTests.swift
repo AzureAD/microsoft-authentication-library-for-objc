@@ -22,16 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-@_implementationOnly import MSAL_Private
+final class MSALNativeAuthRequestContextTests: XCTestCase {
 
-final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDResponseSerialization {
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
-        customError.correlationId = customError.retrieveCorrelationIdFromHeaders(from: httpResponse)
+    func test_setServerCorrelationId() {
+        let requestCorrelationId = UUID()
+        let sut = MSALNativeAuthRequestContext(correlationId: requestCorrelationId)
 
-        // the successfuly constructed "customError" needs to be thrown, since the previous "try" command just validates the object (error) decoding
-        throw customError
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+
+        let serverCorrelationId = UUID()
+        sut.setServerCorrelationId(serverCorrelationId)
+        XCTAssertEqual(sut.correlationId(), serverCorrelationId)
     }
 }

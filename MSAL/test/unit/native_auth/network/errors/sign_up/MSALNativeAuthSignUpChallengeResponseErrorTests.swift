@@ -100,10 +100,12 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
     }
     
     private func testSignUpChallengeErrorToPasswordRequired(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
+        let correlationId = UUID()
         sut = MSALNativeAuthSignUpChallengeResponseError(error: code, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil)
-        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock())
+        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
+        XCTAssertEqual(error.correlationId, correlationId)
     }
     
 }

@@ -219,22 +219,28 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     // MARK: private methods
     
     private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
+        let correlationId = UUID()
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock())
+        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
         XCTAssertEqual(error.type, expectedErrorType)
+        XCTAssertEqual(error.correlationId, correlationId)
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
+        let correlationId = UUID()
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock())
+        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
         XCTAssertEqual(error.type, expectedErrorType)
+        XCTAssertEqual(error.correlationId, correlationId)
         XCTAssertEqual(error.errorDescription, description)
     }
     
     private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?) {
+        let correlationId = UUID()
         sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toAttributesRequiredPublicError(context: MSALNativeAuthRequestContextMock())
+        let error = sut.toAttributesRequiredPublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
         XCTAssertEqual(error.errorDescription, description)
+        XCTAssertEqual(error.correlationId, correlationId)
     }
 }

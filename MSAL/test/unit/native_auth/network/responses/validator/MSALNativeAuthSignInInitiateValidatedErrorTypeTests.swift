@@ -64,6 +64,7 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
 
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInStartError_invalidServerResponse() {
@@ -71,6 +72,7 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
 
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, "Unexpected response body received")
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInStartError_userNotFound() {
