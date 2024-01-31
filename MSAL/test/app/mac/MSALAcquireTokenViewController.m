@@ -39,6 +39,13 @@
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 
+@protocol ADBXPCServiceProtocol <NSObject>
+
+- (void)acquireTokenSilentlyFromBroker:(NSString *)passedInParam
+                       completionBlock:(void (^)(NSString *replyParam))blockName;
+
+@end
+
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
@@ -89,6 +96,8 @@ static NSString * const defaultScope = @"User.Read";
     [self populateUsers];
     self.selectedScopes = @[defaultScope];
     self.validateAuthoritySegment.selectedSegment = self.settings.validateAuthority ? 0 : 1;
+    
+    [self startSvcConnection];
 }
 
 - (void)populateProfiles
@@ -624,5 +633,22 @@ static NSString * const defaultScope = @"User.Read";
     }
     return webviewParameters;
 }
+
+- (void)startSvcConnection
+{
+    NSLog(@"Start service connection to broker");
+//    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithServiceName:@"com.microsoft.EntraIdentityBroker"];
+    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"UBF8T346G9.com.microsoft.entrabroker.EntraIdentityBrokerXPC2" options:NSXPCConnectionPrivileged];
+    [connection setRemoteObjectInterface:[NSXPCInterface interfaceWithProtocol:@protocol(ADBXPCServiceProtocol)]];
+    [connection resume];
+    id<ADBXPCServiceProtocol> service = [connection remoteObjectProxyWithErrorHandler:^(NSError * _Nonnull error) {
+        NSLog(@"Error received while connection to service: %@", error);
+    }];
+    
+    [service acquireTokenSilentlyFromBroker:@"test" completionBlock:^(NSString * _Nonnull replyParam) {
+        NSLog(@"Received broker error: %@", replyParam);
+    }];
+}
+
 
 @end
