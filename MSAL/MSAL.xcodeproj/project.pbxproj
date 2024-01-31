@@ -1782,7 +1782,7 @@
 		8D35C8F02A97BD2300BEC29A /* MSALNativeAuthRequiredAttributeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRequiredAttributeOptions.swift; sourceTree = "<group>"; };
 		8D61F9A02A66AC9D00468E18 /* MSALNativeAuthRequestableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRequestableTests.swift; sourceTree = "<group>"; };
 		8DDF473E2A98FE1C00126A47 /* MSALNativeAuthRequiredAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRequiredAttribute.swift; sourceTree = "<group>"; };
-		919BDFD32B633E8800DA8C53 /* MSAL (visionOS Framework).framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "MSAL (visionOS Framework).framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		919BDFD32B633E8800DA8C53 /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		919BDFDE2B633E8800DA8C53 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "/Users/mihai/Documents/code/broker_visionOS/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc/MSAL/Info.plist"; sourceTree = "<absolute>"; };
 		94E876B01E4556B400FB96ED /* MSAL.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAL.pch; sourceTree = "<group>"; };
 		94E876CA1E492D6000FB96ED /* MSALAuthority.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAuthority.h; sourceTree = "<group>"; };
@@ -3708,7 +3708,7 @@
 				04A6B59C2269286F0035C7C2 /* libMSAL (macOS Static Library).a */,
 				B295A16422D0348400FFB313 /* unit-test-host-mac.app */,
 				28D1D56C29BF62E900CE75F4 /* MSAL iOS Native Auth Integration Tests.xctest */,
-				919BDFD32B633E8800DA8C53 /* MSAL (visionOS Framework).framework */,
+				919BDFD32B633E8800DA8C53 /* MSAL.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5015,7 +5015,7 @@
 			);
 			name = "MSAL (visionOS Framework)";
 			productName = "MSAL (Framework)";
-			productReference = 919BDFD32B633E8800DA8C53 /* MSAL (visionOS Framework).framework */;
+			productReference = 919BDFD32B633E8800DA8C53 /* MSAL.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */ = {
@@ -7045,7 +7045,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1.24;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = MSAL;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -7079,7 +7079,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1.24;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = MSAL;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
