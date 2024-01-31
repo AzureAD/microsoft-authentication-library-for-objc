@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDResponseSerialization {
+final class MSALNativeAuthResponseSerializer<T: Decodable & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDResponseSerialization {
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         guard let data = data else {
@@ -34,6 +34,9 @@ final class MSALNativeAuthResponseSerializer<T: Decodable>: NSObject, MSIDRespon
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-        return try decoder.decode(T.self, from: data)
+        var response = try decoder.decode(T.self, from: data)
+        response.correlationId = response.retrieveCorrelationIdFromHeaders(from: httpResponse)
+
+        return response
     }
 }

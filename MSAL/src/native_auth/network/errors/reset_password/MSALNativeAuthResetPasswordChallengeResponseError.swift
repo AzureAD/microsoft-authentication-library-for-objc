@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponseError {
 
@@ -32,6 +32,7 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -40,30 +41,60 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case target
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthResetPasswordChallengeResponseError {
 
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+    func toResetPasswordStartPublicError(context: MSIDRequestContext) -> ResetPasswordStartError {
         switch error {
         case .invalidRequest,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 
-    func toResendCodePublicError() -> ResendCodeError {
+    func toResendCodePublicError(context: MSIDRequestContext) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
              .none:
-            return .init(message: errorDescription)
+            return .init(
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 }

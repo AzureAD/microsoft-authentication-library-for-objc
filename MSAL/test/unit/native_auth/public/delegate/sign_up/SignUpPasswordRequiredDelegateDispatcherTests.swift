@@ -42,7 +42,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpAttributesRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -66,9 +66,9 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpVerifyCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
                 return XCTFail("wrong result")
             }
@@ -98,7 +98,7 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpCompleted_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -116,9 +116,9 @@ final class SignUpPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCompleted_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
                 return XCTFail("wrong result")
             }

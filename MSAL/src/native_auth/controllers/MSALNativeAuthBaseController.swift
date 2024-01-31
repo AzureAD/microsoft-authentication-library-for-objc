@@ -149,12 +149,20 @@ class MSALNativeAuthBaseController {
         completion(response, error)
     }
 
-    func performRequest<T>(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<T, Error> {
+    func performRequest<T: MSALNativeAuthResponseCorrelatable>(
+        _ request: MSIDHttpRequest,
+        context: MSALNativeAuthRequestContext
+    ) async -> Result<T, Error> {
         return await withCheckedContinuation { continuation in
             request.send { result, error in
-                if let error = error {
+                if let error = error, let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
+                    context.setServerCorrelationId(errorWithCorrelationId.correlationId)
+                    continuation.resume(returning: .failure(error))
+                } else if let error = error {
+                    MSALLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
                     continuation.resume(returning: .failure(error))
                 } else if let response = result as? T {
+                    context.setServerCorrelationId(response.correlationId)
                     continuation.resume(returning: .success(response))
                 } else {
                     MSALLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")

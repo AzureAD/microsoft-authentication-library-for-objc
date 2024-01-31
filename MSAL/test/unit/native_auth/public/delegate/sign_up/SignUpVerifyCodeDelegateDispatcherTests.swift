@@ -42,7 +42,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpAttributesRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -66,9 +66,9 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpVerifyCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -98,7 +98,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpPasswordRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -116,9 +116,9 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpPasswordRequired"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpPasswordRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -143,7 +143,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpCompleted_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -161,9 +161,9 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCompleted_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
+        let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }

@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthTokenResponseValidating {
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse
@@ -51,7 +51,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     }
 
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration,
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse {
@@ -65,7 +65,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                     level: .error,
                     context: context,
                     format: "Token: Unable to decode error response: \(tokenResponseError)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return handleFailedTokenResult(context, tokenResponseError)
         }
@@ -91,47 +91,45 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
     // swiftlint:disable:next cyclomatic_complexity
     private func handleFailedTokenResult(
-        _ context: MSALNativeAuthRequestContext,
+        _ context: MSIDRequestContext,
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
             switch responseError.error {
             case .invalidRequest:
-                return handleInvalidRequestErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
+                return handleInvalidRequestErrorCodes(apiError: responseError, context: context)
             case .invalidClient,
                 .unauthorizedClient:
-                return .error(.unauthorizedClient(message: responseError.errorDescription))
+                return .error(.unauthorizedClient(responseError))
             case .invalidGrant:
                 if responseError.subError == .invalidOOBValue {
-                    return .error(.invalidOOBCode(message: responseError.errorDescription))
+                    return .error(.invalidOOBCode(responseError))
                 } else {
-                    return handleInvalidGrantErrorCodes(responseError.errorCodes, errorDescription: responseError.errorDescription, context: context)
+                    return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
             case .expiredToken:
-                return .error(.expiredToken(message: responseError.errorDescription))
+                return .error(.expiredToken(responseError))
             case .expiredRefreshToken:
-                return .error(.expiredRefreshToken(message: responseError.errorDescription))
+                return .error(.expiredRefreshToken(responseError))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType(message: responseError.errorDescription))
+                return .error(.unsupportedChallengeType(responseError))
             case .invalidScope:
-                return .error(.invalidScope(message: responseError.errorDescription))
+                return .error(.invalidScope(responseError))
             case .authorizationPending:
-                return .error(.authorizationPending(message: responseError.errorDescription))
+                return .error(.authorizationPending(responseError))
             case .slowDown:
-                return .error(.slowDown(message: responseError.errorDescription))
+                return .error(.slowDown(responseError))
             case .userNotFound:
-                return .error(.userNotFound(message: responseError.errorDescription))
+                return .error(.userNotFound(responseError))
             case .none:
-                return .error(.unexpectedError(message: responseError.errorDescription))
+                return .error(.unexpectedError(.init(errorDescription: responseError.errorDescription)))
             }
         }
 
     private func handleInvalidRequestErrorCodes(
-        _ errorCodes: [Int]?,
-        errorDescription: String?,
-        context: MSALNativeAuthRequestContext
+        apiError: MSALNativeAuthTokenResponseError,
+        context: MSIDRequestContext
     ) -> MSALNativeAuthTokenValidatedResponse {
         return handleInvalidResponseErrorCodes(
-            errorCodes,
-            errorDescription: errorDescription,
+            apiError,
             context: context,
             useInvalidRequestAsDefaultResult: true,
             errorCodesConverterFunction: convertInvalidRequestErrorCodeToErrorType
@@ -139,38 +137,31 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     }
 
     private func handleInvalidGrantErrorCodes(
-        _ errorCodes: [Int]?,
-        errorDescription: String?,
-        context: MSALNativeAuthRequestContext
+        apiError: MSALNativeAuthTokenResponseError,
+        context: MSIDRequestContext
     ) -> MSALNativeAuthTokenValidatedResponse {
-        return handleInvalidResponseErrorCodes(
-            errorCodes,
-            errorDescription: errorDescription,
-            context: context,
-            errorCodesConverterFunction: convertInvalidGrantErrorCodeToErrorType
-        )
+        return handleInvalidResponseErrorCodes(apiError, context: context, errorCodesConverterFunction: convertInvalidGrantErrorCodeToErrorType)
     }
 
     private func handleInvalidResponseErrorCodes(
-        _ errorCodes: [Int]?,
-        errorDescription: String?,
-        context: MSALNativeAuthRequestContext,
+        _ apiError: MSALNativeAuthTokenResponseError,
+        context: MSIDRequestContext,
         useInvalidRequestAsDefaultResult: Bool = false,
-        errorCodesConverterFunction: (MSALNativeAuthESTSApiErrorCodes, String?) -> MSALNativeAuthTokenValidatedErrorType
+        errorCodesConverterFunction: (MSALNativeAuthESTSApiErrorCodes, MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedErrorType
     ) -> MSALNativeAuthTokenValidatedResponse {
-        guard var errorCodes = errorCodes, !errorCodes.isEmpty else {
+        guard var errorCodes = apiError.errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
-            return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(message: errorDescription)) : .error(.generalError)
+            return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError)
         }
 
         let validatedResponse: MSALNativeAuthTokenValidatedResponse
         let firstErrorCode = errorCodes.removeFirst()
 
         if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
-            validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, errorDescription))
+            validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, apiError))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
-            validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(message: errorDescription)) : .error(.generalError)
+            validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError)
         }
 
         // Log the rest of error_codes
@@ -192,15 +183,15 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
     private func convertInvalidGrantErrorCodeToErrorType(
         _ errorCode: MSALNativeAuthESTSApiErrorCodes,
-        errorDescription: String?
+        _ apiError: MSALNativeAuthTokenResponseError
     ) -> MSALNativeAuthTokenValidatedErrorType {
         switch errorCode {
         case .userNotFound:
-            return .userNotFound(message: errorDescription)
+            return .userNotFound(apiError)
         case .invalidCredentials:
-            return .invalidPassword(message: errorDescription)
+            return .invalidPassword(apiError)
         case .strongAuthRequired:
-            return .strongAuthRequired(message: errorDescription)
+            return .strongAuthRequired(apiError)
         case .userNotHaveAPassword,
              .invalidRequestParameter:
             return .generalError
@@ -209,7 +200,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
     private func convertInvalidRequestErrorCodeToErrorType(
         _ errorCode: MSALNativeAuthESTSApiErrorCodes,
-        errorDescription: String?
+        _ apiError: MSALNativeAuthTokenResponseError
     ) -> MSALNativeAuthTokenValidatedErrorType {
         switch errorCode {
         case .userNotFound,
@@ -217,7 +208,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             .strongAuthRequired,
             .userNotHaveAPassword,
             .invalidRequestParameter:
-            return .invalidRequest(message: errorDescription)
+            return .invalidRequest(apiError)
         }
     }
 }

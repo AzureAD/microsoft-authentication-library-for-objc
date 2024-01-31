@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
@@ -35,6 +35,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
     let continuationToken: String?
     let unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttribute]?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -46,28 +47,67 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
         case continuationToken = "continuation_token"
         case unverifiedAttributes = "unverified_attributes"
         case invalidAttributes = "invalid_attributes"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthSignUpStartOauth2ErrorCode? = nil,
+        subError: MSALNativeAuthSubErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        continuationToken: String? = nil,
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.subError = subError
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.continuationToken = continuationToken
+        self.unverifiedAttributes = unverifiedAttributes
+        self.invalidAttributes = invalidAttributes
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthSignUpStartResponseError {
 
-    func toSignUpStartPublicError() -> SignUpStartError {
+    func toSignUpStartPublicError(context: MSIDRequestContext, message: String? = nil) -> SignUpStartError {
         switch error {
         case .invalidGrant:
-            if let subError, subError.isAnyPasswordError {
-                return .init(type: .invalidPassword, message: errorDescription)
-            } else {
-                return .init(type: .generalError, message: errorDescription)
-            }
+            return .init(
+                type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
+                message: message ?? errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         case .userAlreadyExists:
-            return .init(type: .userAlreadyExists, message: errorDescription)
+            return .init(
+                type: .userAlreadyExists,
+                message: message ?? errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         case .attributesRequired,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
              .invalidRequest,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: message ?? errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 }

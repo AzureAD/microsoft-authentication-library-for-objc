@@ -30,6 +30,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: CredentialsDelegateDispatcher!
+    private let correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -41,7 +42,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         let expectedToken = "token"
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedAccessToken: expectedToken)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -56,10 +57,10 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     }
 
     func test_dispatchAccessTokenRetrieveCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"))
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"), correlationId: correlationId)
         let delegate = CredentialsDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? RetrieveAccessTokenError else {
                 return XCTFail("wrong result")
             }

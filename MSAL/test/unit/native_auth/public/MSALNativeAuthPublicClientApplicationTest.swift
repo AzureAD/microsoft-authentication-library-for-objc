@@ -286,14 +286,14 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testSignInPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername))
+        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername, correlationId: correlationId))
         sut.signIn(username: "", password: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
     
     func testSignInPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials))
+        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials, correlationId: correlationId))
         sut.signIn(username: "correct", password: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
@@ -315,7 +315,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .completed(MSALNativeAuthUserAccountResultStub.result)
@@ -358,7 +358,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"), correlationId: correlationId)
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
@@ -381,7 +381,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testSignIn_delegate_whenInvalidUser_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername))
+        let delegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername, correlationId: correlationId))
         sut.signIn(username: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
@@ -413,7 +413,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
@@ -456,7 +456,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
@@ -558,8 +558,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
-        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
-        
+        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
+
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
         
         let expectedUsername = "username"
@@ -660,8 +660,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
-        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
-        
+        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
+
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
         
         let expectedUsername = "username"

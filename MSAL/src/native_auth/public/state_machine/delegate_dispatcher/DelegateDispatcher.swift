@@ -26,10 +26,12 @@ import Foundation
 
 class DelegateDispatcher<T> {
     let delegate: T
+    let correlationId: UUID
     let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
 
-    init(delegate: T, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?) {
+    init(delegate: T, correlationId: UUID, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?) {
         self.delegate = delegate
+        self.correlationId = correlationId
         self.telemetryUpdate = telemetryUpdate
     }
 

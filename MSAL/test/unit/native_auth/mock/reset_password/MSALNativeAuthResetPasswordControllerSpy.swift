@@ -45,36 +45,36 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resetPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(.init(type: .generalError)))
+        return .init(.error(.init(type: .generalError, correlationId: .init())))
     }
 
-    func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+    func resendCode(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordResendCodeControllerResponse {
         self.continuationToken = continuationToken
         self.username = username
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(), newState: nil))
+        return .init(.error(error: .init(correlationId: .init()), newState: nil))
     }
 
-    func submitCode(code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
+    func submitCode(code: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
         self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
     }
 
-    func submitPassword(password: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
+    func submitPassword(password: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
         self.continuationToken = continuationToken
         self.username = username
         self.context = context
         submitPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
     }
 }

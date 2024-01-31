@@ -87,12 +87,19 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
+            let correlationId = correlationId ?? .init()
+
             let controllerResponse = await getAccessTokenInternal(
                 forceRefresh: forceRefresh,
                 correlationId: correlationId,
                 cacheAccessor: cacheAccessor
             )
-            let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            
+            let delegateDispatcher = CredentialsDelegateDispatcher(
+                delegate: delegate,
+                correlationId: correlationId,
+                telemetryUpdate: controllerResponse.telemetryUpdate
+            )
 
             switch controllerResponse.result {
             case .success(let accessToken):

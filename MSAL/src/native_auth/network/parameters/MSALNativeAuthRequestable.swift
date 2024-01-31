@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthRequestable {
     var endpoint: MSALNativeAuthEndpoint { get }
-    var context: MSIDRequestContext { get }
+    var context: MSALNativeAuthRequestContext { get }
 
     func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String]

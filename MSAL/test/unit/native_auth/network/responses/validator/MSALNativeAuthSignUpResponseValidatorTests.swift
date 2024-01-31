@@ -55,7 +55,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpStartErrorResponseIsNotExpected_it_returns_unexpectedError() {
@@ -66,7 +66,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     func test_whenSignUpStart_succeedsWithContinuationToken_it_returns_success() {
@@ -91,7 +91,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
         let result = sut.validate(response, with: context)
 
-        guard case .attributeValidationFailed(let invalidAttributes) = result else {
+        guard case .attributeValidationFailed(let error, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -107,7 +107,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: nil))
+        XCTAssertEqual(result, .unexpectedError(.init()))
     }
 
     func test_whenSignUpStart_attributeValidationFailed_but_invalidAttributesIsNil_it_returns_attributeValidationFailed() {
@@ -119,7 +119,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: nil))
+        XCTAssertEqual(result, .unexpectedError(.init()))
     }
 
     func test_whenSignUpStartErrorResponseIsExpected_it_returns_error() {
@@ -225,7 +225,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsRedirect_it_returns_redirect() {
@@ -298,7 +298,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndOTP_it_returns_unexpectedError() {
@@ -313,7 +313,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpChallengeSuccessResponseOmitsSomeAttributes_it_returns_unexpectedError() {
@@ -328,7 +328,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpChallengeErrorResponseIsNotExpected_it_returns_unexpectedError() {
@@ -339,7 +339,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     func test_whenSignUpChallengeErrorResponseIsExpected_it_returns_error() {
@@ -364,7 +364,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .success("<continuationToken>"))
+        XCTAssertEqual(result, .success(continuationToken: "<continuationToken>"))
     }
 
     func test_whenSignUpStartSuccessResponseButDoesNotContainContinuationToken_it_returns_successWithNoContinuationToken() throws {
@@ -373,7 +373,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .success(nil))
+        XCTAssertEqual(result, .success(continuationToken: nil))
     }
 
     func test_whenSignUpContinueErrorResponseIsNotExpected_it_returns_unexpectedError() {
@@ -384,7 +384,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_invalidOOBValue_it_returns_expectedError() {
@@ -474,7 +474,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: [MSALNativeAuthErrorBasicAttribute(name: "email")])
 
-        guard case .attributeValidationFailed(let invalidAttributes) = result else {
+        guard case .attributeValidationFailed(_, let invalidAttributes) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -495,19 +495,19 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_but_invalidAttributesIsNil_it_returns_unexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: nil)
 
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributeValidationFailed_but_invalidAttributesIsEmpty_it_returns_unexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .attributeValidationFailed, invalidAttributes: [])
 
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_credentialRequired_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedContinuationToken: "continuation-token")
 
-        guard case .credentialRequired(let continuationToken) = result else {
+        guard case .credentialRequired(let continuationToken, _) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -516,13 +516,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpContinueErrorResponseIs_credentialRequired_but_continuationToken_isNil_it_returns_unexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .credentialRequired, expectedContinuationToken: nil)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "continuation-token", requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 
-        guard case .attributesRequired(let continuationToken, let requiredAttributes) = result else {
+        guard case .attributesRequired(let continuationToken, let requiredAttributes, _) = result else {
             return XCTFail("Unexpected response")
         }
 
@@ -535,24 +535,24 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_continuationToken_IsNil_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: nil, requiredAttributes: [.init(name: "email", type: "", required: true), .init(name: "city", type: "", required: false)])
 
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_requiredAttributesIsNil_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "continuation-token", requiredAttributes: nil)
 
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_attributesRequired_but_requiredAttributes_IsEmpty_it_returns_expectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired, expectedContinuationToken: "continuation-token", requiredAttributes: [])
 
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_verificationRequired_it_returns_unexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .attributesRequired)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenSignUpContinueErrorResponseIs_unauthorizedClient_it_returns_expectedError() {

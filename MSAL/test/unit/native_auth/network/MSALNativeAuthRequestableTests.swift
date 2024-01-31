@@ -31,11 +31,7 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
     var request: MSALNativeAuthResetPasswordStartRequestParameters! = nil
 
     override func setUpWithError() throws {
-        let context = MSALNativeAuthRequestContext(
-                correlationId: .init(
-                UUID(uuidString: DEFAULT_TEST_UID)!
-            )
-        )
+        let context = MSALNativeAuthRequestContext(correlationId: UUID(uuidString: DEFAULT_TEST_UID)!)
         
         request = MSALNativeAuthResetPasswordStartRequestParameters(context: context, username: DEFAULT_TEST_ID_TOKEN_USERNAME)
     }

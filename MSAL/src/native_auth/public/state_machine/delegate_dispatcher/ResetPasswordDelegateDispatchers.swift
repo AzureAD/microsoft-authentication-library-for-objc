@@ -36,7 +36,11 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
             telemetryUpdate?(.success(()))
             await onResetPasswordCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResetPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCodeRequired"))
+            let error = ResetPasswordStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onResetPasswordCodeRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordStartError(error: error)
         }
@@ -50,7 +54,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcher: DelegateDispatcher<ResetP
             telemetryUpdate?(.success(()))
             await onPasswordRequired(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onPasswordRequired"))
+            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onPasswordRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordVerifyCodeError(error: error, newState: nil)
         }
@@ -69,7 +73,7 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
             telemetryUpdate?(.success(()))
             await onResetPasswordResendCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: requiredErrorMessage(for: "onResetPasswordResendCodeRequired"))
+            let error = ResendCodeError(message: requiredErrorMessage(for: "onResetPasswordResendCodeRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         }
@@ -83,7 +87,11 @@ final class ResetPasswordRequiredDelegateDispatcher: DelegateDispatcher<ResetPas
             telemetryUpdate?(.success(()))
             await onResetPasswordCompleted(newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCompleted"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onResetPasswordCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordRequiredError(error: error, newState: nil)
         }

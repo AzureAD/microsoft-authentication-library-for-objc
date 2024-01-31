@@ -35,15 +35,15 @@ final class PasswordRequiredErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(type: .generalError, message: expectedMessage)
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
         let sut: [PasswordRequiredError] = [
-            .init(type: .browserRequired),
-            .init(type: .invalidPassword),
-            .init(type: .generalError)
+            .init(type: .browserRequired, correlationId: .init()),
+            .init(type: .invalidPassword, correlationId: .init()),
+            .init(type: .generalError, correlationId: .init())
         ]
 
         let expectedErrorDescriptions = [
@@ -60,13 +60,13 @@ final class PasswordRequiredErrorTests: XCTestCase {
     }
 
     func test_isBrowserRequired() {
-        sut = .init(type: .browserRequired)
+        sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isInvalidPassword)
     }
 
     func test_isInvalidPassword() {
-        sut = .init(type: .invalidPassword)
+        sut = .init(type: .invalidPassword, correlationId: .init())
         XCTAssertTrue(sut.isInvalidPassword)
         XCTAssertFalse(sut.isBrowserRequired)
     }

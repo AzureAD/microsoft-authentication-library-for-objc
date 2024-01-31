@@ -31,7 +31,7 @@ final class SignInAfterResetPasswordDelegateDispatcher: DelegateDispatcher<SignI
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = SignInAfterResetPasswordError(message: requiredErrorMessage(for: "onSignInCompleted"))
+            let error = SignInAfterResetPasswordError(message: requiredErrorMessage(for: "onSignInCompleted"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignInAfterResetPasswordError(error: error)
         }

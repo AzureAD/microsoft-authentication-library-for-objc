@@ -93,7 +93,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             context: context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
-            return .init(.failure(RetrieveAccessTokenError(type: .generalError)))
+            return .init(.failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())))
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
@@ -156,7 +156,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 config: config
             )
         case .error(let errorType):
-            let error = errorType.convertToRetrieveAccessTokenError()
+            let error = errorType.convertToRetrieveAccessTokenError(context: context)
             MSALLogger.log(
                 level: .error,
                 context: context,
@@ -183,7 +183,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 self?.stopTelemetryEvent(telemetryEvent, context: context, delegateDispatcherResult: result)
             })
         } catch {
-            let error = RetrieveAccessTokenError(type: .generalError)
+            let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(
                 level: .error,
                 context: context,

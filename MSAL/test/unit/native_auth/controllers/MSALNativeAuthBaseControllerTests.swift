@@ -266,3 +266,17 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
         }
     }
 }
+
+extension String: MSALNativeAuthResponseCorrelatable {
+    public var correlationId: UUID? {
+        get { nil }
+        set {}
+    }
+}
+
+extension Array<String>: MSALNativeAuthResponseCorrelatable {
+    public var correlationId: UUID? {
+        get { nil }
+        set {}
+    }
+}

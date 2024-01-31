@@ -81,7 +81,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
         includeChallengeType: Bool = true,
-        context: MSIDRequestContext) -> MSIDHttpRequest? {
+        context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
             do {
                 let params = MSALNativeAuthTokenRequestParameters(
                     context: context,
@@ -103,7 +103,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
     func createRefreshTokenRequest(
         scopes: [String],
         refreshToken: String?,
-        context: MSIDRequestContext) -> MSIDHttpRequest? {
+        context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
             guard let refreshToken = refreshToken else {
                 MSALLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request, refresh token is nil!")
                 return nil
@@ -128,7 +128,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
 
     func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration
     ) throws -> MSIDTokenResult {
         let displayableId = tokenResponse.idTokenObj?.username()
@@ -163,7 +163,7 @@ extension MSALNativeAuthTokenController {
 
     private func cacheTokenResponseRetrieveTokenResult(
         _ tokenResponse: MSIDTokenResponse,
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration
     ) -> MSIDTokenResult? {
         do {
@@ -183,7 +183,7 @@ extension MSALNativeAuthTokenController {
         return nil
     }
 
-    private func clearAccount(msidConfiguration: MSIDConfiguration, context: MSALNativeAuthRequestContext) throws {
+    private func clearAccount(msidConfiguration: MSIDConfiguration, context: MSIDRequestContext) throws {
         do {
             let accounts = try cacheAccessor.getAllAccounts(configuration: msidConfiguration)
             if let account = accounts.first {

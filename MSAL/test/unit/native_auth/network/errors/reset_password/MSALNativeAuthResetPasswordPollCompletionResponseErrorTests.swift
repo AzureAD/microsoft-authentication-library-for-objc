@@ -72,7 +72,7 @@ final class MSALNativeAuthResetPasswordPollCompletionResponseErrorTests: XCTestC
     
     private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
         sut = MSALNativeAuthResetPasswordPollCompletionResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
-        let error = sut.toPasswordRequiredPublicError()
+        let error = sut.toPasswordRequiredPublicError(context: MSALNativeAuthRequestContextMock())
         XCTAssertEqual(error.type, expectedErrorType)
         XCTAssertEqual(error.errorDescription, description)
     }

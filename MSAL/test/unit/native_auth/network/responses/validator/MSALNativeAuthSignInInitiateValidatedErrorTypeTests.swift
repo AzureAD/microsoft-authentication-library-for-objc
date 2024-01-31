@@ -30,81 +30,64 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     
     private typealias sut = MSALNativeAuthSignInInitiateValidatedErrorType
     private let testDescription = "testDescription"
-    
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private var apiErrorStub: MSALNativeAuthSignInInitiateResponseError {
+        .init(
+            error: .invalidRequest,
+            errorDescription: testDescription,
+            errorCodes: testErrorCodes
+        )
+    }
+
     // MARK: - convertToSignInStartError tests
     
     func test_convertToSignInStartError_redirect() {
-        let error = sut.redirect.convertToSignInStartError()
+        let error = sut.redirect.convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+        
         XCTAssertEqual(error.type, .browserRequired)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInStartError_unauthorizedClient() {
-        let error = sut.unauthorizedClient(message: testDescription).convertToSignInStartError()
+        let error = sut.unauthorizedClient(apiErrorStub).convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInStartError_invalidRequest() {
-        let error = sut.invalidRequest(message: testDescription).convertToSignInStartError()
+        let error = sut.invalidRequest(.init(errorDescription: testDescription)).convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
     }
     
     func test_convertToSignInStartError_invalidServerResponse() {
-        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInStartError()
+        let error = sut.unexpectedError(.init(errorDescription: "Unexpected response body received")).convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, "Unexpected response body received")
     }
     
     func test_convertToSignInStartError_userNotFound() {
-        let error = sut.userNotFound(message: testDescription).convertToSignInStartError()
+        let error = sut.userNotFound(apiErrorStub).convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .userNotFound)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     
     func test_convertToSignInStartError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType(message: testDescription).convertToSignInStartError()
+        let error = sut.unsupportedChallengeType(apiErrorStub).convertToSignInStartError(context: MSALNativeAuthRequestContextMock(correlationId: testCorrelationId))
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
     }
-    
-    // MARK: - convertToSignInPasswordStartError tests
-    
-    func test_convertToSignInPasswordStartError_redirect() {
-        let error = sut.redirect.convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .browserRequired)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
-    }
-    
-    func test_convertToSignInPasswordStartError_unauthorizedClient() {
-        let error = sut.unauthorizedClient(message: testDescription).convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, testDescription)
-    }
-    
-    func test_convertToSignInPasswordStartError_invalidRequest() {
-        let error = sut.invalidRequest(message: testDescription).convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, testDescription)
-    }
-    
-    func test_convertToSignInPasswordStartError_invalidServerResponse() {
-        let error = sut.unexpectedError(message: "Unexpected response body received").convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "Unexpected response body received")
-    }
-    
-    func test_convertToSignInPasswordStartError_userNotFound() {
-        let error = sut.userNotFound(message: testDescription).convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .userNotFound)
-        XCTAssertEqual(error.errorDescription, testDescription)
-    }
-    
-    func test_convertToSignInPasswordStartError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType(message: testDescription).convertToSignInPasswordStartError()
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, testDescription)
-    }
-    
 }

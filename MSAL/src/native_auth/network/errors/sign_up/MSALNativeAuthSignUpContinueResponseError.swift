@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode?
@@ -35,6 +35,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]?
     let unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]?
     let invalidAttributes: [MSALNativeAuthErrorBasicAttribute]?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -47,16 +48,48 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
         case requiredAttributes = "required_attributes"
         case unverifiedAttributes = "unverified_attributes"
         case invalidAttributes = "invalid_attributes"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthSignUpContinueOauth2ErrorCode? = nil,
+        subError: MSALNativeAuthSubErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        continuationToken: String? = nil,
+        requiredAttributes: [MSALNativeAuthRequiredAttributeInternal]? = nil,
+        unverifiedAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        invalidAttributes: [MSALNativeAuthErrorBasicAttribute]? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.subError = subError
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.continuationToken = continuationToken
+        self.requiredAttributes = requiredAttributes
+        self.unverifiedAttributes = unverifiedAttributes
+        self.invalidAttributes = invalidAttributes
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthSignUpContinueResponseError {
 
-    func toVerifyCodePublicError() -> VerifyCodeError {
+    func toVerifyCodePublicError(context: MSIDRequestContext) -> VerifyCodeError {
         switch error {
         case .invalidGrant:
-            return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
-                                                : .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: subError == .invalidOOBValue ? .invalidCode : .generalError,
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
@@ -65,18 +98,27 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .verificationRequired,
              .credentialRequired,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 
-    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
         switch error {
         case .invalidGrant:
-            if let subError, subError.isAnyPasswordError {
-                return .init(type: .invalidPassword, message: errorDescription)
-            } else {
-                return .init(type: .generalError, message: errorDescription)
-            }
+            return .init(
+                type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
+
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
@@ -85,11 +127,22 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .verificationRequired,
              .credentialRequired,
              .none:
-            return .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 
-    func toAttributesRequiredPublicError() -> AttributesRequiredError {
-        return AttributesRequiredError(message: errorDescription)
+    func toAttributesRequiredPublicError(context: MSIDRequestContext, message: String? = nil) -> AttributesRequiredError {
+        return AttributesRequiredError(
+            message: message ?? errorDescription,
+            correlationId: context.correlationId(),
+            errorCodes: errorCodes ?? [],
+            errorUri: errorURI
+        )
     }
 }

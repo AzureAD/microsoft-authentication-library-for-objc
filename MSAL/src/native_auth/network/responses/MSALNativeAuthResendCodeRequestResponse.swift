@@ -24,12 +24,9 @@
 
 import Foundation
 
-struct MSALNativeAuthResendCodeRequestResponse: Decodable {
+struct MSALNativeAuthResendCodeRequestResponse: Decodable, MSALNativeAuthResponseCorrelatable {
 
     // MARK: - Variables
     let continuationToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case continuationToken
-    }
+    var correlationId: UUID?
 }

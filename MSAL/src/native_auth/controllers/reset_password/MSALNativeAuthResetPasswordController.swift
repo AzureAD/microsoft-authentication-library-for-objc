@@ -66,7 +66,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         return await handleStartResponse(response, username: parameters.username, event: event, context: parameters.context)
     }
 
-    func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+    func resendCode(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
         let response = await performChallengeRequest(continuationToken: continuationToken, context: context)
         return await handleResendCodeChallengeResponse(response, username: username, event: event, context: context)
@@ -76,7 +76,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         code: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
 
@@ -95,7 +95,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         password: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmit, context: context)
 
@@ -125,7 +125,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             request = try requestProvider.start(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error creating resetpassword/start request: \(error)")
-            return .unexpectedError(message: nil)
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing resetpassword/start request")
@@ -137,7 +137,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     private func handleStartResponse(_ response: MSALNativeAuthResetPasswordStartValidatedResponse,
                                      username: String,
                                      event: MSIDTelemetryAPIEvent?,
-                                     context: MSIDRequestContext) async -> ResetPasswordStartControllerResponse {
+                                     context: MSALNativeAuthRequestContext) async -> ResetPasswordStartControllerResponse {
 
         MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request")
 
@@ -146,21 +146,31 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             let challengeResponse = await performChallengeRequest(continuationToken: continuationToken, context: context)
             return await handleChallengeResponse(challengeResponse, username: username, event: event, context: context)
         case .redirect:
-            let error = ResetPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.browserRequired)
+            let error = ResetPasswordStartError(
+                type: .browserRequired,
+                message: MSALNativeAuthErrorMessage.browserRequired,
+                correlationId: context.correlationId()
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Redirect error in resetpassword/start request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
-        case .error(let apiError):
-            let error = apiError.toResetPasswordStartPublicError()
+        case .error(let validatedError):
+            let error = validatedError.toResetPasswordStartPublicError(context: context)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in resetpassword/start request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
-        case .unexpectedError(let message):
-            let error = ResetPasswordStartError(type: .generalError, message: message)
+        case .unexpectedError(let apiError):
+            let error = ResetPasswordStartError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -173,7 +183,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
     private func performChallengeRequest(
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         let request: MSIDHttpRequest
 
@@ -181,7 +191,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             request = try requestProvider.challenge(token: continuationToken, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating Challenge Request: \(error)")
-            return .unexpectedError(message: nil)
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: context, format: "Performing resetpassword/challenge request")
@@ -214,21 +224,31 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResetPasswordStartPublicError()
+            let error = apiError.toResetPasswordStartPublicError(context: context)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in resetpassword/challenge request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
         case .redirect:
-            let error = ResetPasswordStartError(type: .browserRequired, message: MSALNativeAuthErrorMessage.browserRequired)
+            let error = ResetPasswordStartError(
+                type: .browserRequired,
+                message: MSALNativeAuthErrorMessage.browserRequired,
+                correlationId: context.correlationId()
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Redirect error in resetpassword/challenge request \(error.errorDescription ?? "No error description")")
             return .init(.error(error))
-        case .unexpectedError(let message):
-            let error = ResetPasswordStartError(type: .generalError, message: message)
+        case .unexpectedError(let apiError):
+            let error = ResetPasswordStartError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -260,21 +280,26 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResendCodePublicError()
+            let error = apiError.toResendCodePublicError(context: context)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in resetpassword/challenge request (resend code) \(error.errorDescription ?? "No error description")")
             return .init(.error(error: error, newState: nil))
         case .redirect:
-            let error = ResendCodeError()
+            let error = ResendCodeError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in resetpassword/challenge request (resend code) \(error.errorDescription ?? "No error description")")
             return .init(.error(error: error, newState: nil))
-        case .unexpectedError(let message):
-            let error = ResendCodeError(message: message)
+        case .unexpectedError(let apiError):
+            let error = ResendCodeError(
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -294,7 +319,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             request = try requestProvider.continue(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error creating Continue Request: \(error)")
-            return .unexpectedError(message: nil)
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing resetpassword/continue request")
@@ -324,14 +349,20 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toVerifyCodePublicError()
+            let error = apiError.toVerifyCodePublicError(context: context)
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in resetpassword/continue request \(error.errorDescription ?? "No error description")")
             return .init(.error(error: error, newState: nil))
-        case .unexpectedError(let message):
-            let error = VerifyCodeError(type: .generalError, message: message)
+        case .unexpectedError(let apiError):
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -339,8 +370,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                            format: "Error calling resetpassword/continue \(error.errorDescription ?? "No error description")")
 
             return .init(.error(error: error, newState: nil))
-        case .invalidOOB:
-            let error = VerifyCodeError(type: .invalidCode)
+        case .invalidOOB(let apiError):
+            let error = VerifyCodeError(
+                type: .invalidCode,
+                message: apiError.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -368,7 +405,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             request = try requestProvider.submit(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error creating Submit Request: \(error)")
-            return .unexpectedError(message: nil)
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing resetpassword/submit request")
@@ -382,7 +419,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         username: String,
         continuationToken: String,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/submit request")
 
@@ -397,7 +434,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 context: context
             )
         case .passwordError(let apiError):
-            let error = apiError.toPasswordRequiredPublicError()
+            let error = apiError.toPasswordRequiredPublicError(context: context)
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -411,7 +448,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
             return .init(.error(error: error, newState: newState))
         case .error(let apiError):
-            let error = apiError.toPasswordRequiredPublicError()
+            let error = apiError.toPasswordRequiredPublicError(context: context)
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -419,8 +456,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                            format: "Error calling resetpassword/submit \(error.errorDescription ?? "No error description")")
 
             return .init(.error(error: error, newState: nil))
-        case .unexpectedError(let message):
-            let error = PasswordRequiredError(type: .generalError, message: message)
+        case .unexpectedError(let apiError):
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -439,7 +482,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         pollInterval: Int,
         retriesRemaining: Int,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "Performing poll completion request")
 
@@ -463,7 +506,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
 
     private func performPollCompletionRequest(
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
@@ -475,7 +518,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             request = try requestProvider.pollCompletion(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error creating Poll Completion Request: \(error)")
-            return .unexpectedError(message: nil)
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing resetpassword/poll_completion request")
@@ -495,7 +538,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         retriesRemaining: Int,
         continuationToken: String,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/poll_completion")
 
@@ -524,14 +567,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
             case .failed:
-                let error = PasswordRequiredError(type: .generalError)
+                let error = PasswordRequiredError(type: .generalError, correlationId: context.correlationId())
                 self.stopTelemetryEvent(event, context: context, error: error)
                 MSALLogger.log(level: .error, context: context, format: "Password poll completion returned status 'failed'")
 
                 return .init(.error(error: error, newState: nil))
             }
         case .passwordError(let apiError):
-            let error = apiError.toPasswordRequiredPublicError()
+            let error = apiError.toPasswordRequiredPublicError(context: context)
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -545,7 +588,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
             return .init(.error(error: error, newState: newState))
         case .error(let apiError):
-            let error = apiError.toPasswordRequiredPublicError()
+            let error = apiError.toPasswordRequiredPublicError(context: context)
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -553,8 +596,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                            format: "Error calling resetpassword/poll_completion \(error.errorDescription ?? "No error description")")
 
             return .init(.error(error: error, newState: nil))
-        case .unexpectedError(let message):
-            let error = PasswordRequiredError(type: .generalError, message: message)
+        case .unexpectedError(let apiError):
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -572,10 +621,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         retriesRemaining: Int,
         username: String,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
         guard retriesRemaining > 0 else {
-            let error = PasswordRequiredError(type: .generalError)
+            let error = PasswordRequiredError(type: .generalError, correlationId: context.correlationId())
             self.stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error, context: context, format: "Password poll completion did not complete in time")
 

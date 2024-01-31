@@ -27,7 +27,7 @@
 struct MSALNativeAuthSignUpChallengeRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .signUpChallenge
     let continuationToken: String
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey

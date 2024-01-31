@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .token
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
     let username: String?
     let continuationToken: String?
     let grantType: MSALNativeAuthGrantType

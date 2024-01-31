@@ -42,7 +42,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
     func test_dispatchPasswordRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = ResetPasswordRequiredDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -66,9 +66,9 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
                 return XCTFail("wrong result")
             }

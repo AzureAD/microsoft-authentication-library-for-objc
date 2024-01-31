@@ -55,7 +55,7 @@ final class ResetPasswordRequiredStateTests: XCTestCase {
         controllerMock = MSALNativeAuthResetPasswordControllerMock()
         let sut = ResetPasswordRequiredState(controller: controllerMock, username: "username", continuationToken: "<token>", correlationId: correlationId)
 
-        let expectedError = PasswordRequiredError(type: .invalidPassword, message: nil)
+        let expectedError = PasswordRequiredError(type: .invalidPassword, message: nil, correlationId: .init())
         let expectedState = ResetPasswordRequiredState(controller: controllerMock, username: "username", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: MSALNativeAuthResetPasswordControlling.ResetPasswordSubmitPasswordControllerResponse = .init(.error(error: expectedError, newState: expectedState))
