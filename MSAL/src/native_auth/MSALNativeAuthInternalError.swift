@@ -31,7 +31,7 @@ enum MSALNativeAuthInternalError: Error, Equatable {
     case invalidAuthority
     case invalidUrl
     case missingResponseSerializer
-    case responseSerializationError
+    case responseSerializationError(headerCorrelationId: UUID?)
     case invalidResponse
     case invalidRequest
     case generalError

@@ -44,7 +44,7 @@ final class MSALNativeAuthResponseCorrelatableTests: XCTestCase {
 
         let httpResponse = HTTPURLResponse(url: URL(string: "http://contoso.com")!, statusCode: 200, httpVersion: nil, headerFields: originalHeaders)
 
-        let correlationIdString = sut.retrieveCorrelationIdFromHeaders(from: httpResponse)
+        let correlationIdString = ResponseCorrelatableClass.retrieveCorrelationIdFromHeaders(from: httpResponse)
 
         XCTAssertEqual(correlationIdString, UUID(uuidString: "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0"))
     }

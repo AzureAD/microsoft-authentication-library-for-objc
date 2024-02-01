@@ -28,15 +28,20 @@ final class MSALNativeAuthResponseSerializer<T: Decodable & MSALNativeAuthRespon
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         guard let data = data else {
-            throw MSALNativeAuthInternalError.responseSerializationError
+            MSALLogger.log(level: .error, context: context, format: "ResponseSerializer failed decoding. Empty Data")
+            throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
         }
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-        var response = try decoder.decode(T.self, from: data)
-        response.correlationId = response.retrieveCorrelationIdFromHeaders(from: httpResponse)
-
-        return response
+        do {
+            var response = try decoder.decode(T.self, from: data)
+            response.correlationId = T.retrieveCorrelationIdFromHeaders(from: httpResponse)
+            return response
+        } catch {
+            MSALLogger.log(level: .error, context: context, format: "ResponseSerializer failed decoding \(error)")
+            throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
+        }
     }
 }

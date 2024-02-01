@@ -265,6 +265,62 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
             XCTFail("Unexpected response")
         }
     }
+
+    // MARK: - Integration tests
+
+    func test_performRequest_500_error_updatesContextCorrelationId() async {
+        await performTestContext(statusCode: 500)
+    }
+
+    func test_performRequest_400_error_updatesContextCorrelationId() async {
+        await performTestContext(statusCode: 400)
+    }
+
+    private func performTestContext(statusCode: Int) async {
+        let localCorrelationId = UUID()
+
+        let headerCorrelationIdString = "82398bb3-0a88-475a-bfd6-c28d5eef42d4"
+        let headerCorrelationId = UUID(uuidString: headerCorrelationIdString)!
+
+        let context = MSALNativeAuthRequestContext(correlationId: localCorrelationId)
+
+        let baseUrl = URL(string: "https://www.contoso.com")!
+
+        let parameters = ["p1": "v1"]
+
+        let httpResponse = HTTPURLResponse(
+            url: baseUrl,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: [
+                "client-request-id": headerCorrelationIdString
+            ]
+        )
+
+        var urlRequest = URLRequest(url: baseUrl)
+        urlRequest.httpMethod = "POST"
+
+        let testUrlResponse = MSIDTestURLResponse.request(baseUrl, reponse: httpResponse)
+
+        testUrlResponse?.setUrlFormEncodedBody(parameters)
+        MSIDTestURLSession.add(testUrlResponse)
+
+        let request = MSIDHttpRequest()
+
+        request.errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignUpChallengeResponseError>()
+        request.urlRequest = urlRequest
+        request.parameters = parameters
+        request.retryCounter = 0
+
+        let result: Result<String, Error> = await sut.performRequest(request, context: context)
+
+        switch result {
+        case .failure:
+            XCTAssertEqual(context.correlationId(), headerCorrelationId)
+        case .success:
+            XCTFail("Unexpected response")
+        }
+    }
 }
 
 extension String: MSALNativeAuthResponseCorrelatable {

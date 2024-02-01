@@ -154,13 +154,18 @@ class MSALNativeAuthBaseController {
         context: MSALNativeAuthRequestContext
     ) async -> Result<T, Error> {
         return await withCheckedContinuation { continuation in
-            request.send { result, error in
+            request.send { [weak self] result, error in
                 if let error = error {
-                    if let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
+                    if let correlationId = self?.extractCorrelationIdFromUserInfo((error as NSError).userInfo) {
+                        context.setServerCorrelationId(UUID(uuidString: correlationId))
+                    } else if let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
                         context.setServerCorrelationId(errorWithCorrelationId.correlationId)
+                    } else if case MSALNativeAuthInternalError.responseSerializationError(let correlationId) = error {
+                        context.setServerCorrelationId(correlationId)
                     } else {
                         MSALLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
                     }
+
                     continuation.resume(returning: .failure(error))
                 } else if let response = result as? T {
                     context.setServerCorrelationId(response.correlationId)
@@ -171,5 +176,16 @@ class MSALNativeAuthBaseController {
                 }
             }
         }
+    }
+
+    private func extractCorrelationIdFromUserInfo(_ userInfo: [String: Any]) -> String? {
+        guard
+            let headers = userInfo[MSIDHTTPHeadersKey] as? [String: Any],
+            let correlationId = headers[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] as? String
+        else {
+            return nil
+        }
+
+        return correlationId
     }
 }
