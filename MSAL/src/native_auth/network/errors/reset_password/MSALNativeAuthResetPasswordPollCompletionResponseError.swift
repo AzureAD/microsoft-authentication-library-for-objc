@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthResponseError {
 
@@ -69,13 +69,13 @@ struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthRes
 
 extension MSALNativeAuthResetPasswordPollCompletionResponseError {
 
-    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(correlationId: UUID) -> PasswordRequiredError {
         switch error {
         case .invalidGrant:
             return .init(
                 type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
@@ -87,7 +87,7 @@ extension MSALNativeAuthResetPasswordPollCompletionResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )

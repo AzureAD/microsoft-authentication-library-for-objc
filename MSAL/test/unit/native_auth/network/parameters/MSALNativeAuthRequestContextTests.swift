@@ -37,4 +37,19 @@ final class MSALNativeAuthRequestContextTests: XCTestCase {
         sut.setServerCorrelationId(serverCorrelationId)
         XCTAssertEqual(sut.correlationId(), serverCorrelationId)
     }
+
+    func test_setServerCorrelationIdNil_worksAsExpected() {
+        let requestCorrelationId = UUID()
+        let sut = MSALNativeAuthRequestContext(correlationId: requestCorrelationId)
+
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+
+        let serverCorrelationId1 = UUID()
+        sut.setServerCorrelationId(serverCorrelationId1)
+        XCTAssertEqual(sut.correlationId(), serverCorrelationId1)
+
+        let serverCorrelationId2: UUID? = nil
+        sut.setServerCorrelationId(serverCorrelationId2)
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+    }
 }

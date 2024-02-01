@@ -93,7 +93,12 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
             return .unauthorizedClient(apiError)
         case .none:
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+            return .unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            ))
         default:
             return .error(apiError)
         }
@@ -214,7 +219,12 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .invalidRequest:
             return .error(apiError)
         case .none:
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+            return .unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            ))
         }
     }
 

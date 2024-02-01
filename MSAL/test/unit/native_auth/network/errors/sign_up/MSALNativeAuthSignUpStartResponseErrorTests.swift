@@ -29,65 +29,70 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
 
     private var sut: MSALNativeAuthSignUpStartResponseError!
     private let testDescription = "testDescription"
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private let testErrorUri = "test error uri"
 
     // MARK: - to toSignUpStartPublicError tests
 
     func test_toSignUpStartPublicError_invalidRequest() {
-        testSignUpStartErrorToSignUpStart(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidRequest, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_unauthorizedClient() {
-        testSignUpStartErrorToSignUpStart(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .unauthorizedClient, expectedErrorType: .generalError)
     }
 
     func test_toSignUpStartPublicError_unsupportedChallengeType() {
-        testSignUpStartErrorToSignUpStart(code: .unsupportedChallengeType, description: "General error", expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .unsupportedChallengeType, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_passwordTooWeak() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooWeak, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooShort() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooShort, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordTooLong() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordTooLong, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordRecentlyUsed() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordRecentlyUsed, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_passwordBanned() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .passwordBanned, expectedErrorType: .invalidPassword)
     }
     
     func test_toSignUpStartPublicError_userAlreadyExists() {
-        testSignUpStartErrorToSignUpStart(code: .userAlreadyExists, description: testDescription, expectedErrorType: .userAlreadyExists)
+        testSignUpStartErrorToSignUpStart(code: .userAlreadyExists, expectedErrorType: .userAlreadyExists)
     }
     
     func test_toSignUpStartPublicError_attributesRequired() {
-        testSignUpStartErrorToSignUpStart(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .attributesRequired, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_unsupportedAuthMethod() {
-        testSignUpStartErrorToSignUpStart(code: .unsupportedAuthMethod, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .unsupportedAuthMethod, expectedErrorType: .generalError)
     }
     
     func test_toSignUpStartPublicError_attributeValidationFailed() {
-        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .attributeValidationFailed, expectedErrorType: .generalError)
     }
 
     // MARK: private methods
     
-    private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: SignUpStartError.ErrorType) {
-        let correlationId = UUID()
-        sut = MSALNativeAuthSignUpStartResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toSignUpStartPublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+    private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: SignUpStartError.ErrorType) {
+        sut = MSALNativeAuthSignUpStartResponseError(error: code, subError: subError, errorDescription: testDescription, errorCodes: testErrorCodes, errorURI: testErrorUri, correlationId: testCorrelationId)
+        let error = sut.toSignUpStartPublicError(correlationId: testCorrelationId)
+        
         XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
-        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 }

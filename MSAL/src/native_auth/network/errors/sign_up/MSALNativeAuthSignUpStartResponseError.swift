@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
@@ -77,13 +77,13 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpStartResponseError {
 
-    func toSignUpStartPublicError(context: MSIDRequestContext, message: String? = nil) -> SignUpStartError {
+    func toSignUpStartPublicError(correlationId: UUID, message: String? = nil) -> SignUpStartError {
         switch error {
         case .invalidGrant:
             return .init(
                 type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
                 message: message ?? errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
@@ -91,7 +91,7 @@ extension MSALNativeAuthSignUpStartResponseError {
             return .init(
                 type: .userAlreadyExists,
                 message: message ?? errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
@@ -104,7 +104,7 @@ extension MSALNativeAuthSignUpStartResponseError {
             return .init(
                 type: .generalError,
                 message: message ?? errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )

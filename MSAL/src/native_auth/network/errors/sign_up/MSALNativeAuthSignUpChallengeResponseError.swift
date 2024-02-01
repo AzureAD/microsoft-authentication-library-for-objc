@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpChallengeOauth2ErrorCode?
@@ -60,7 +60,7 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpChallengeResponseError {
 
-    func toSignUpStartPublicError(context: MSIDRequestContext) -> SignUpStartError {
+    func toSignUpStartPublicError(correlationId: UUID) -> SignUpStartError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
@@ -70,14 +70,14 @@ extension MSALNativeAuthSignUpChallengeResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
         }
     }
 
-    func toResendCodePublicError(context: MSIDRequestContext) -> ResendCodeError {
+    func toResendCodePublicError(correlationId: UUID) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
@@ -86,14 +86,14 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .none:
             return .init(
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
         }
     }
 
-    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(correlationId: UUID) -> PasswordRequiredError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
@@ -103,7 +103,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )

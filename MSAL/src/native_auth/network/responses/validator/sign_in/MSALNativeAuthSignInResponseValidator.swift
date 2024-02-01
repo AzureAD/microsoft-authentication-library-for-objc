@@ -140,7 +140,12 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             case .unsupportedChallengeType:
                 return .error(.unsupportedChallengeType(error))
             case .none:
-                return .error(.unexpectedError(.init(errorDescription: error.errorDescription)))
+                return .error(.unexpectedError(.init(
+                    errorDescription: error.errorDescription,
+                    errorCodes: error.errorCodes,
+                    errorURI: error.errorURI,
+                    correlationId: error.correlationId
+                )))
             }
     }
 
@@ -155,7 +160,12 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             case .userNotFound:
                 return .error(.userNotFound(error))
             case .none:
-                return .error(.unexpectedError(.init(errorDescription: error.errorDescription)))
+                return .error(.unexpectedError(.init(
+                    errorDescription: error.errorDescription,
+                    errorCodes: error.errorCodes,
+                    errorURI: error.errorURI,
+                    correlationId: error.correlationId
+                )))
             }
     }
 }

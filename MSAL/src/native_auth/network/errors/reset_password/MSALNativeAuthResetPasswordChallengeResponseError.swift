@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponseError {
 
@@ -65,7 +65,7 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
 
 extension MSALNativeAuthResetPasswordChallengeResponseError {
 
-    func toResetPasswordStartPublicError(context: MSIDRequestContext) -> ResetPasswordStartError {
+    func toResetPasswordStartPublicError(correlationId: UUID) -> ResetPasswordStartError {
         switch error {
         case .invalidRequest,
              .unauthorizedClient,
@@ -75,14 +75,14 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
         }
     }
 
-    func toResendCodePublicError(context: MSIDRequestContext) -> ResendCodeError {
+    func toResendCodePublicError(correlationId: UUID) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
@@ -91,7 +91,7 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
              .none:
             return .init(
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )

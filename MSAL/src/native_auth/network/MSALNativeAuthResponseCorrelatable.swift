@@ -32,14 +32,10 @@ protocol MSALNativeAuthResponseCorrelatable {
 extension MSALNativeAuthResponseCorrelatable {
 
     func retrieveCorrelationIdFromHeaders(from httpResponse: HTTPURLResponse?) -> UUID? {
-        guard let headers = httpResponse?.allHeaderFields else {
+        guard let headers = httpResponse?.allHeaderFields, let correlationId = headers[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] as? String else {
             return nil
         }
 
-        if let correlationId = headers[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] as? String {
-            return UUID(uuidString: correlationId)
-        } else {
-            return nil
-        }
+        return UUID(uuidString: correlationId)
     }
 }

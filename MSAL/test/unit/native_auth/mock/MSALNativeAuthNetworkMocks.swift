@@ -136,7 +136,7 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
     var expectedConfiguration: MSIDConfiguration?
     var expectedTokenResponse: MSIDCIAMTokenResponse?
     var expectedResponseError: Error?
-    var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError)
+    var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError(.init()))
 
     func validate(context: MSIDRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
         checkConfAndContext(context, config: msidConfiguration)

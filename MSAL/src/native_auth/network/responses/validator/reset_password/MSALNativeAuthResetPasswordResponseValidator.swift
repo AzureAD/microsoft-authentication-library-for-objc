@@ -90,7 +90,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         case .unsupportedChallengeType:
             return .error(.unsupportedChallengeType(apiError))
         case .none:
-            return .error(.unexpectedError(.init(errorDescription: apiError.errorDescription)))
+            return .error(.unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            )))
         }
     }
 
@@ -185,7 +190,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
         case .none:
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+            return .unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            ))
         }
     }
 
@@ -227,7 +237,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .expiredToken:
             return .error(apiError)
         case .none:
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+            return .unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            ))
         }
     }
 
@@ -274,7 +289,12 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .expiredToken:
             return .error(apiError)
         case .none:
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+            return .unexpectedError(.init(
+                errorDescription: apiError.errorDescription,
+                errorCodes: apiError.errorCodes,
+                errorURI: apiError.errorURI,
+                correlationId: apiError.correlationId
+            ))
         }
     }
 }

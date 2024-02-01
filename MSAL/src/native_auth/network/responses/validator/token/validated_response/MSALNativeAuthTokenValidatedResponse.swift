@@ -30,7 +30,7 @@ enum MSALNativeAuthTokenValidatedResponse {
 }
 
 enum MSALNativeAuthTokenValidatedErrorType: Error {
-    case generalError
+    case generalError(MSALNativeAuthTokenResponseError?)
     case expiredToken(MSALNativeAuthTokenResponseError)
     case expiredRefreshToken(MSALNativeAuthTokenResponseError)
     case unauthorizedClient(MSALNativeAuthTokenResponseError)
@@ -46,7 +46,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case slowDown(MSALNativeAuthTokenResponseError)
 
     // swiftlint:disable:next function_body_length
-    func convertToSignInPasswordStartError(context: MSIDRequestContext) -> SignInStartError {
+    func convertToSignInPasswordStartError(correlationId: UUID) -> SignInStartError {
         switch self {
         case .expiredToken(let apiError),
              .authorizationPending(let apiError),
@@ -59,17 +59,16 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
-        case .generalError:
-            return SignInStartError(type: .generalError, correlationId: context.correlationId())
-        case .unexpectedError(let apiError):
+        case .unexpectedError(let apiError),
+             .generalError(let apiError):
             return SignInStartError(
                 type: .generalError,
                 message: apiError?.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
@@ -77,7 +76,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(
                 type: .userNotFound,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -85,7 +84,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(
                 type: .invalidCredentials,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -93,7 +92,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(
                 type: .browserRequired,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -102,14 +101,14 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return SignInStartError(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
         }
     }
 
-    func convertToRetrieveAccessTokenError(context: MSIDRequestContext) -> RetrieveAccessTokenError {
+    func convertToRetrieveAccessTokenError(correlationId: UUID) -> RetrieveAccessTokenError {
         switch self {
         case .expiredToken(let apiError),
              .authorizationPending(let apiError),
@@ -121,17 +120,17 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
         case .generalError:
-            return RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
+            return RetrieveAccessTokenError(type: .generalError, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError?.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
@@ -139,7 +138,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(
                 type: .refreshTokenExpired,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -147,7 +146,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(
                 type: .browserRequired,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -158,20 +157,20 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
         }
     }
 
-    func convertToVerifyCodeError(context: MSIDRequestContext) -> VerifyCodeError {
+    func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
         case .invalidOOBCode(let apiError):
             return VerifyCodeError(
                 type: .invalidCode,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -179,7 +178,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return VerifyCodeError(
                 type: .browserRequired,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -196,24 +195,24 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
             return VerifyCodeError(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
         case .generalError:
-            return VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            return VerifyCodeError(type: .generalError, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return VerifyCodeError(
                 type: .generalError,
                 message: apiError?.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
         }
     }
 
-    func convertToPasswordRequiredError(context: MSIDRequestContext) -> PasswordRequiredError {
-        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError(context: context))
+    func convertToPasswordRequiredError(correlationId: UUID) -> PasswordRequiredError {
+        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError(correlationId: correlationId))
     }
 }

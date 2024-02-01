@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     let error: MSALNativeAuthSignUpContinueOauth2ErrorCode?
@@ -80,13 +80,13 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
 
 extension MSALNativeAuthSignUpContinueResponseError {
 
-    func toVerifyCodePublicError(context: MSIDRequestContext) -> VerifyCodeError {
+    func toVerifyCodePublicError(correlationId: UUID) -> VerifyCodeError {
         switch error {
         case .invalidGrant:
             return .init(
                 type: subError == .invalidOOBValue ? .invalidCode : .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
@@ -101,20 +101,20 @@ extension MSALNativeAuthSignUpContinueResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
         }
     }
 
-    func toPasswordRequiredPublicError(context: MSIDRequestContext) -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(correlationId: UUID) -> PasswordRequiredError {
         switch error {
         case .invalidGrant:
             return .init(
                 type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
@@ -130,17 +130,17 @@ extension MSALNativeAuthSignUpContinueResponseError {
             return .init(
                 type: .generalError,
                 message: errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: errorCodes ?? [],
                 errorUri: errorURI
             )
         }
     }
 
-    func toAttributesRequiredPublicError(context: MSIDRequestContext, message: String? = nil) -> AttributesRequiredError {
+    func toAttributesRequiredPublicError(correlationId: UUID, message: String? = nil) -> AttributesRequiredError {
         return AttributesRequiredError(
             message: message ?? errorDescription,
-            correlationId: context.correlationId(),
+            correlationId: correlationId,
             errorCodes: errorCodes ?? [],
             errorUri: errorURI
         )

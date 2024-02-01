@@ -29,55 +29,86 @@ final class MSALNativeAuthResetPasswordContinueResponseErrorTests: XCTestCase {
 
     private var sut: MSALNativeAuthResetPasswordContinueResponseError!
     private let testDescription = "testDescription"
+    private let testErrorCodes = [1, 2, 3]
     private let correlationId = UUID()
+    private let testErrorUri = "test error uri"
+
+    private func createApiError(type: MSALNativeAuthResetPasswordContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil) -> MSALNativeAuthResetPasswordContinueResponseError {
+        .init(
+            error: type,
+            subError: subError,
+            errorDescription: testDescription,
+            errorCodes: testErrorCodes,
+            errorURI: testErrorUri,
+            correlationId: correlationId
+        )
+    }
 
     // MARK: - to toVerifyCodePublicError tests
     
     func test_toResetPasswordStartPublicError_invalidRequest() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .invalidRequest, subError: nil, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .invalidRequest)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+        XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_toResetPasswordStartPublicError_unauthorizedClient() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .unauthorizedClient, subError: nil, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .unauthorizedClient)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 
     func test_toResetPasswordStartPublicError_invalidGrant() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .invalidGrant, subError: nil, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .invalidGrant)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+        
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_toResetPasswordStartPublicError_expiredToken() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .expiredToken, subError: nil, errorDescription: testDescription, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .expiredToken)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 
     func test_toResetPasswordStartPublicError_unsupportedChallengeType() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .verificationRequired, subError: nil, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .verificationRequired)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+        
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertNotNil(error.errorDescription)
+        XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_toResetPasswordStartPublicError_invalidOOBValue() {
-        sut = MSALNativeAuthResetPasswordContinueResponseError(error: .invalidGrant, subError: .invalidOOBValue, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil, continuationToken: nil)
-        let error = sut.toVerifyCodePublicError(context: MSALNativeAuthRequestContextMock(correlationId: correlationId))
+        sut = createApiError(type: .invalidGrant, subError: .invalidOOBValue)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
         XCTAssertEqual(error.type, .invalidCode)
-        XCTAssertNotNil(error.errorDescription)
+        XCTAssertEqual(error.errorDescription, testDescription)
         XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 }

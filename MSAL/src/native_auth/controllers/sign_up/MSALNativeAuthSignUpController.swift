@@ -175,7 +175,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 format: "attribute_validation_failed received from signup/start request for attributes: \(invalidAttributes)"
             )
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = apiError.toSignUpStartPublicError(context: context, message: message)
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId(), message: message)
             return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
                 // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
@@ -189,7 +189,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error))
         case .error(let apiError),
              .unauthorizedClient(let apiError):
-            let error = apiError.toSignUpStartPublicError(context: context)
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -268,7 +268,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 }
             )
         case .error(let apiError):
-            let error = apiError.toSignUpStartPublicError(context: context)
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -328,7 +328,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResendCodePublicError(context: context)
+            let error = apiError.toResendCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -500,7 +500,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             })
         case .error(let apiError),
              .attributeValidationFailed(let apiError, _):
-            let error = apiError.toVerifyCodePublicError(context: context)
+            let error = apiError.toVerifyCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -537,7 +537,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .invalidUserInput(let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(
                 level: .error,
@@ -565,7 +565,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .error(let apiError),
              .attributeValidationFailed(let apiError, _),
              .credentialRequired(_, let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -602,7 +602,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .attributesRequired(let newContinuationToken, let attributes, let apiError):
-            let error = apiError.toAttributesRequiredPublicError(context: context)
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId())
             MSALLogger.log(level: .error,
                            context: context,
                            format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
@@ -621,7 +621,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALLogger.log(level: .error, context: context, format: message)
 
             let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
-            let error = apiError.toAttributesRequiredPublicError(context: context, message: message)
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId(), message: errorMessage)
             let state = SignUpAttributesRequiredState(
                 controller: self,
                 username: username,
@@ -635,7 +635,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         case .error(let apiError),
              .invalidUserInput(let apiError),
              .credentialRequired(_, let apiError):
-            let error = apiError.toAttributesRequiredPublicError(context: context)
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,

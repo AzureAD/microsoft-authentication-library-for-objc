@@ -273,7 +273,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError)
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError(signInTokenApiErrorStub))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInTokenApiErrorStub))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .authorizationPending(signInTokenApiErrorStub))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .slowDown(signInTokenApiErrorStub))
@@ -649,7 +649,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeSubmitPasswordTokenAPIReturnError_correctErrorShouldBeReturned() async {
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError)
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .unauthorizedClient(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(signInTokenApiErrorStub))
@@ -683,7 +683,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_signInWithCodeSubmitCodeReturnError_correctResultShouldReturned() {
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .generalError)
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .generalError(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .expiredToken(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unauthorizedClient(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidRequest(signInTokenApiErrorStub))

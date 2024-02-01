@@ -31,11 +31,14 @@ final class MSALNativeAuthResetPasswordStartValidatedErrorTypeTests: XCTestCase 
     private var testDescription = "testDescription"
     private let testErrorCodes = [1, 2, 3]
     private let testCorrelationId = UUID()
+    private let testErrorUri = "test error uri"
     private var apiErrorStub: MSALNativeAuthResetPasswordStartResponseError {
         .init(
             error: .unauthorizedClient,
             errorDescription: testDescription,
-            errorCodes: testErrorCodes
+            errorCodes: testErrorCodes,
+            errorURI: testErrorUri,
+            correlationId: testCorrelationId
         )
     }
 

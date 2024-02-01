@@ -156,7 +156,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 config: config
             )
         case .error(let errorType):
-            let error = errorType.convertToRetrieveAccessTokenError(context: context)
+            let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
             MSALLogger.log(
                 level: .error,
                 context: context,

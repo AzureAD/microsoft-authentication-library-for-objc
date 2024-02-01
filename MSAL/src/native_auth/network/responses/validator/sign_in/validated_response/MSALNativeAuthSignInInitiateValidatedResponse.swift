@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 enum MSALNativeAuthSignInInitiateValidatedResponse {
     case success(continuationToken: String)
@@ -37,15 +37,15 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     case userNotFound(MSALNativeAuthSignInInitiateResponseError)
     case unsupportedChallengeType(MSALNativeAuthSignInInitiateResponseError)
 
-    func convertToSignInStartError(context: MSIDRequestContext) -> SignInStartError {
+    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired, correlationId: context.correlationId())
+            return .init(type: .browserRequired, correlationId: correlationId)
         case .userNotFound(let apiError):
             return .init(
                 type: .userNotFound,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
@@ -53,7 +53,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
             return .init(
                 type: .generalError,
                 message: apiError?.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
@@ -63,7 +63,7 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
             return .init(
                 type: .generalError,
                 message: apiError.errorDescription,
-                correlationId: context.correlationId(),
+                correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )

@@ -64,7 +64,8 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
 
     func setServerCorrelationId(_ serverCorrelationId: UUID?) {
         guard let serverCorrelationId = serverCorrelationId else {
-            MSALLogger.log(level: .info, context: self, format: "correlationId not found in server response")
+            MSALLogger.log(level: .warning, context: self, format: "correlationId not found in server response")
+            _serverCorrelationId = serverCorrelationId
             return
         }
 
@@ -73,10 +74,10 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
         }
 
         let log = """
-                  Inconsistency between the correlationId sent by the SDK the one received in the response.
+                  Inconsistency between the correlationId sent by the SDK and the one received in the response.
                   Original correlationId: \(_correlationId). Server correlationId \(serverCorrelationId)
                   """
-        MSALLogger.log(level: .info, context: self, format: log)
+        MSALLogger.log(level: .warning, context: self, format: log)
 
         _serverCorrelationId = serverCorrelationId
     }

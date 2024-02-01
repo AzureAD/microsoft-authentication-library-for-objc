@@ -167,7 +167,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
-        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError)
+        await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError(apiErrorStub))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(apiErrorStub))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID), validatorError: .authorizationPending(apiErrorStub))
         await checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID), validatorError: .slowDown(apiErrorStub))

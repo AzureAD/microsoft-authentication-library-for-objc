@@ -120,7 +120,12 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             case .userNotFound:
                 return .error(.userNotFound(responseError))
             case .none:
-                return .error(.unexpectedError(.init(errorDescription: responseError.errorDescription)))
+                return .error(.unexpectedError(.init(
+                    errorDescription: responseError.errorDescription,
+                    errorCodes: responseError.errorCodes,
+                    errorURI: responseError.errorURI,
+                    correlationId: responseError.correlationId
+                )))
             }
         }
 
@@ -151,7 +156,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
     ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = apiError.errorCodes, !errorCodes.isEmpty else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
-            return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError)
+            return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError(apiError))
         }
 
         let validatedResponse: MSALNativeAuthTokenValidatedResponse
@@ -161,7 +166,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, apiError))
         } else {
             MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
-            validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError)
+            validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError(apiError))
         }
 
         // Log the rest of error_codes
@@ -194,7 +199,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .strongAuthRequired(apiError)
         case .userNotHaveAPassword,
              .invalidRequestParameter:
-            return .generalError
+            return .generalError(apiError)
         }
     }
 

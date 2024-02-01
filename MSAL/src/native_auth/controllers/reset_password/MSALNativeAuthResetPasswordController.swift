@@ -224,7 +224,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResetPasswordStartPublicError(context: context)
+            let error = apiError.toResetPasswordStartPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -280,7 +280,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResendCodePublicError(context: context)
+            let error = apiError.toResendCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -349,7 +349,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toVerifyCodePublicError(context: context)
+            let error = apiError.toVerifyCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -434,7 +434,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 context: context
             )
         case .passwordError(let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -448,7 +448,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
             return .init(.error(error: error, newState: newState))
         case .error(let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -574,7 +574,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 return .init(.error(error: error, newState: nil))
             }
         case .passwordError(let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
@@ -588,7 +588,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             )
             return .init(.error(error: error, newState: newState))
         case .error(let apiError):
-            let error = apiError.toPasswordRequiredPublicError(context: context)
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             self.stopTelemetryEvent(event, context: context, error: error)
 
             MSALLogger.log(level: .error,
