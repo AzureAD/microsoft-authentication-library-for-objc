@@ -43,11 +43,11 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnPasswordRequiredError() {
-        let expectedError = PasswordRequiredError(type: .invalidPassword, correlationId: .init())
+        let expectedError = PasswordRequiredError(type: .invalidPassword, correlationId: correlationId)
         let expectedState = SignUpPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignUpPasswordRequiredResult = .error(error: expectedError, newState: expectedState)
-        controller.submitPasswordResult = .init(expectedResult)
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let delegate = SignUpPasswordRequiredDelegateSpy(expectation: exp)
@@ -57,6 +57,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.error, expectedError)
         XCTAssertEqual(delegate.newPasswordRequiredState?.continuationToken, expectedState.continuationToken)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitCode_delegate_whenAttributesRequired_AndUserHasImplementedOptionalDelegate_shouldReturnAttributesRequired() {
@@ -66,7 +67,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         let exp2 = expectation(description: "exp telemetry is called")
 
         let expectedResult: SignUpPasswordRequiredResult = .attributesRequired(attributes: [], newState: expectedAttributesRequiredState)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -85,7 +86,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         let exp2 = expectation(description: "exp telemetry is called")
 
         let expectedResult: SignUpPasswordRequiredResult = .attributesRequired(attributes: [], newState: expectedAttributesRequiredState)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -96,6 +97,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitCode_delegate_whenSuccess_shouldReturnSignUpCompleted() {
@@ -105,7 +107,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         let exp2 = expectation(description: "telemetry expectation")
 
         let expectedResult: SignUpPasswordRequiredResult = .completed(expectedSignInAfterSignUpState)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -124,7 +126,7 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
         let exp2 = expectation(description: "telemetry expectation")
 
         let expectedResult: SignUpPasswordRequiredResult = .completed(expectedSignInAfterSignUpState)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -135,5 +137,6 @@ final class SignUpPasswordRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 }

@@ -42,7 +42,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
     func test_dispatchPasswordRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = ResetPasswordRequiredDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -56,7 +56,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
             correlationId: correlationId
         )
 
-        await sut.dispatchResetPasswordCompleted(newState: expectedState)
+        await sut.dispatchResetPasswordCompleted(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -68,7 +68,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
         let delegate = ResetPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCompleted"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
                 return XCTFail("wrong result")
             }
@@ -84,7 +84,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
             correlationId: correlationId
         )
 
-        await sut.dispatchResetPasswordCompleted(newState: expectedState)
+        await sut.dispatchResetPasswordCompleted(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -92,6 +92,7 @@ final class ResetPasswordRequiredDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: PasswordRequiredError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

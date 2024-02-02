@@ -53,11 +53,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         Task {
             let controllerResponse = await resendCodeInternal()
 
-            let delegateDispatcher = SignUpResendCodeDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignUpResendCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -65,7 +61,8 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .error(let error, let newState):
                 await delegate.onSignUpResendCodeError(error: error, newState: newState)
@@ -81,19 +78,19 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         Task {
             let controllerResponse = await submitCodeInternal(code: code)
             
-            let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .completed(let state):
-                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state, correlationId: controllerResponse.correlationId)
             case .passwordRequired(let state):
-                await delegateDispatcher.dispatchSignUpPasswordRequired(newState: state)
+                await delegateDispatcher.dispatchSignUpPasswordRequired(newState: state, correlationId: controllerResponse.correlationId)
             case .attributesRequired(let attributes, let state):
-                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesRequired(
+                    attributes: attributes,
+                    newState: state,
+                    correlationId: controllerResponse.correlationId
+                )
             case .error(let error, let state):
                 await delegate.onSignUpVerifyCodeError(error: error, newState: state)
             }
@@ -112,17 +109,17 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
 
-            let delegateDispatcher = SignUpPasswordRequiredDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignUpPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .completed(let state):
-                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state, correlationId: controllerResponse.correlationId)
             case .attributesRequired(let attributes, let state):
-                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesRequired(
+                    attributes: attributes,
+                    newState: state,
+                    correlationId: controllerResponse.correlationId
+                )
             case .error(let error, let state):
                 await delegate.onSignUpPasswordRequiredError(error: error, newState: state)
             }
@@ -145,19 +142,26 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
             
             let delegateDispatcher = SignUpAttributesRequiredDelegateDispatcher(
                 delegate: delegate,
-                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
             switch controllerResponse.result {
             case .completed(let state):
-                await delegateDispatcher.dispatchSignUpCompleted(newState: state)
+                await delegateDispatcher.dispatchSignUpCompleted(newState: state, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignUpAttributesRequiredError(error: error)
             case .attributesRequired(let attributes, let state):
-                await delegateDispatcher.dispatchSignUpAttributesRequired(attributes: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesRequired(
+                    attributes: attributes,
+                    newState: state,
+                    correlationId: controllerResponse.correlationId
+                )
             case .attributesInvalid(let attributes, let state):
-                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes, newState: state)
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(
+                    attributeNames: attributes,
+                    newState: state,
+                    correlationId: controllerResponse.correlationId
+                )
             }
         }
     }

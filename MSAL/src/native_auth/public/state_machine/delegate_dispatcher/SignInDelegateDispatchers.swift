@@ -30,7 +30,8 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         newState: SignInCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onSignInCodeRequired = delegate.onSignInCodeRequired {
             telemetryUpdate?(.success(()))
@@ -46,7 +47,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
-    func dispatchSignInPasswordRequired(newState: SignInPasswordRequiredState) async {
+    func dispatchSignInPasswordRequired(newState: SignInPasswordRequiredState, correlationId: UUID) async {
         if let onSignInPasswordRequired = delegate.onSignInPasswordRequired {
             telemetryUpdate?(.success(()))
             await onSignInPasswordRequired(newState)
@@ -61,7 +62,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
-    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
@@ -75,7 +76,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
 
 final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInPasswordRequiredDelegate> {
 
-    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
@@ -97,7 +98,8 @@ final class SignInResendCodeDelegateDispatcher: DelegateDispatcher<SignInResendC
         newState: SignInCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onSignInResendCodeCodeRequired = delegate.onSignInResendCodeCodeRequired {
             telemetryUpdate?(.success(()))
@@ -112,7 +114,7 @@ final class SignInResendCodeDelegateDispatcher: DelegateDispatcher<SignInResendC
 
 final class SignInVerifyCodeDelegateDispatcher: DelegateDispatcher<SignInVerifyCodeDelegate> {
 
-    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)

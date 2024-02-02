@@ -30,7 +30,7 @@ import Foundation
 /// to the initialiser method.
 ///
 /// For example:
- 
+
 /// <pre>
 ///     do {
 ///         nativeAuth = try MSALNativeAuthPublicClientApplication(
@@ -165,8 +165,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         Task {
-            let correlationId = correlationId ?? .init()
-
             let controllerResponse = await signUpInternal(
                 username: username,
                 password: password,
@@ -174,11 +172,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 correlationId: correlationId
             )
 
-            let delegateDispatcher = SignUpStartDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignUpStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -186,10 +180,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .attributesInvalid(let attributes):
-                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignUpStartError(error: error)
             }
@@ -211,8 +206,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignInStartDelegate
     ) {
         Task {
-            let correlationId = correlationId ?? .init()
-
             let controllerResponse = await signInInternal(
                 username: username,
                 password: password,
@@ -220,11 +213,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 correlationId: correlationId
             )
 
-            let delegateDispatcher = SignInStartDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignInStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -232,12 +221,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .passwordRequired(let newState):
-                await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState)
+                await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState, correlationId: controllerResponse.correlationId)
             case .completed(let result):
-                await delegateDispatcher.dispatchSignInCompleted(result: result)
+                await delegateDispatcher.dispatchSignInCompleted(result: result, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignInStartError(error: error)
             }
@@ -255,15 +245,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: ResetPasswordStartDelegate
     ) {
         Task {
-            let correlationId = correlationId ?? .init()
-
             let controllerResponse = await resetPasswordInternal(username: username, correlationId: correlationId)
 
-            let delegateDispatcher = ResetPasswordStartDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = ResetPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
@@ -271,7 +255,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .error(let error):
                 await delegate.onResetPasswordStartError(error: error)
@@ -283,7 +268,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
     /// - Returns: An object representing the account information if present in the local cache.
     public func getNativeAuthUserAccount(correlationId: UUID? = nil) -> MSALNativeAuthUserAccountResult? {
-        let correlationId = correlationId ?? .init()
         let controller = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 

@@ -35,13 +35,12 @@ import Foundation
             let controllerResponse = await signInInternal(scopes: scopes)
             let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
                 delegate: delegate,
-                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
             switch controllerResponse.result {
             case .success(let accountResult):
-                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .failure(let error):
                 let error = SignInAfterResetPasswordError(
                     message: error.errorDescription,

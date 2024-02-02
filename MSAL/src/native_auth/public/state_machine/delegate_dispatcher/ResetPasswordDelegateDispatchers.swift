@@ -30,7 +30,8 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onResetPasswordCodeRequired = delegate.onResetPasswordCodeRequired {
             telemetryUpdate?(.success(()))
@@ -49,7 +50,7 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
 
 final class ResetPasswordVerifyCodeDelegateDispatcher: DelegateDispatcher<ResetPasswordVerifyCodeDelegate> {
 
-    func dispatchPasswordRequired(newState: ResetPasswordRequiredState) async {
+    func dispatchPasswordRequired(newState: ResetPasswordRequiredState, correlationId: UUID) async {
         if let onPasswordRequired = delegate.onPasswordRequired {
             telemetryUpdate?(.success(()))
             await onPasswordRequired(newState)
@@ -67,7 +68,8 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onResetPasswordResendCodeRequired = delegate.onResetPasswordResendCodeRequired {
             telemetryUpdate?(.success(()))
@@ -82,7 +84,7 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
 
 final class ResetPasswordRequiredDelegateDispatcher: DelegateDispatcher<ResetPasswordRequiredDelegate> {
 
-    func dispatchResetPasswordCompleted(newState: SignInAfterResetPasswordState) async {
+    func dispatchResetPasswordCompleted(newState: SignInAfterResetPasswordState, correlationId: UUID) async {
         if let onResetPasswordCompleted = delegate.onResetPasswordCompleted {
             telemetryUpdate?(.success(()))
             await onResetPasswordCompleted(newState)

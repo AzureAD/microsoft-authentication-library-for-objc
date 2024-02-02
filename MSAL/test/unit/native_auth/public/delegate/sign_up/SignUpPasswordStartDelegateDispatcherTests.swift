@@ -42,7 +42,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpPasswordCodeRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -58,7 +58,8 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -73,7 +74,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
                 return XCTFail("wrong result")
             }
@@ -91,7 +92,8 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -100,13 +102,14 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpPasswordStartDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -115,7 +118,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
         let expectedAttributeNames = ["attribute1", "attribute2"]
 
-        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames)
+        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -126,7 +129,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         let delegate = SignUpPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
                 return XCTFail("wrong result")
             }
@@ -137,7 +140,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
 
         let expectedAttributeNames = ["attribute1", "attribute2"]
 
-        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames)
+        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -145,6 +148,7 @@ final class SignUpPasswordStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

@@ -33,15 +33,11 @@ import Foundation
     public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
         Task {
             let controllerResponse = await signInInternal(scopes: scopes)
-            let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .success(let accountResult):
-                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .failure(let error):
                 await delegate.onSignInAfterSignUpError(
                     error: SignInAfterSignUpError(message: error.errorDescription, correlationId: error.correlationId, errorCodes: error.errorCodes)

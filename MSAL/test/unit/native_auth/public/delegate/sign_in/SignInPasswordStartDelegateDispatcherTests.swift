@@ -42,7 +42,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignInCodeRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignInPasswordStartDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -58,7 +58,8 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -74,7 +75,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignInStartError else {
                 return XCTFail("wrong result")
             }
@@ -92,7 +93,8 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -101,6 +103,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
@@ -108,14 +111,14 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
         let delegate = SignInPasswordStartDelegateSpy(expectation: delegateExp, expectedUserAccountResult: expectedResult)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -127,7 +130,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignInStartError else {
                 return XCTFail("wrong result")
             }
@@ -138,7 +141,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
 
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
@@ -146,6 +149,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

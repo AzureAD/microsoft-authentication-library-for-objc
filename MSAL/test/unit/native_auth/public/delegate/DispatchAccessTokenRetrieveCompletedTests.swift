@@ -42,14 +42,14 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         let expectedToken = "token"
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedAccessToken: expectedToken)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: expectedToken)
+        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: expectedToken, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -60,7 +60,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"), correlationId: correlationId)
         let delegate = CredentialsDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? RetrieveAccessTokenError else {
                 return XCTFail("wrong result")
             }
@@ -69,7 +69,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token")
+        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token", correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
@@ -77,6 +77,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         func checkError(_ error: RetrieveAccessTokenError?) {
             XCTAssertEqual(error?.type, .generalError)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

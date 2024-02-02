@@ -42,14 +42,14 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
         let delegate = SignInAfterSignUpDelegateSpy(expectation: delegateExp, expectedUserAccountResult: expectedResult)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -60,7 +60,7 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
         let expectedError = SignInAfterSignUpError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInAfterSignUpDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignInAfterSignUpError else {
                 return XCTFail("wrong result")
             }
@@ -71,13 +71,14 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
 
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
 
         func checkError(_ error: SignInAfterSignUpError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

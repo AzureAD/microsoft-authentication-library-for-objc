@@ -44,11 +44,11 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     // ResendCode
 
     func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
-        let expectedError = ResendCodeError(message: "test error", correlationId: .init())
+        let expectedError = ResendCodeError(message: "test error", correlationId: correlationId)
         let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: ResetPasswordResendCodeResult = .error(error: expectedError, newState: expectedState)
-        controller.resendCodeResponse = .init(expectedResult)
+        controller.resendCodeResponse = .init(expectedResult, correlationId: correlationId)
 
         let exp = expectation(description: "reset password states")
         let delegate = ResetPasswordResendCodeDelegateSpy(expectation: exp)
@@ -57,6 +57,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
         XCTAssertEqual(delegate.newState, expectedState)
     }
 
@@ -71,7 +72,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controller.resendCodeResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controller.resendCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -97,7 +98,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controller.resendCodeResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controller.resendCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -107,16 +108,17 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordResendCodeRequired"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     // SubmitCode
 
     func test_submitCode_delegate_whenError_shouldReturnCorrectError() {
-        let expectedError = VerifyCodeError(type: .invalidCode, correlationId: .init())
+        let expectedError = VerifyCodeError(type: .invalidCode, correlationId: correlationId)
         let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .error(error: expectedError, newState: expectedState)
-        controller.submitCodeResponse = .init(expectedResult)
+        controller.submitCodeResponse = .init(expectedResult, correlationId: correlationId)
 
         let exp = expectation(description: "reset password states")
         let delegate = ResetPasswordVerifyCodeDelegateSpy(expectation: exp)
@@ -126,6 +128,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.error, expectedError)
         XCTAssertEqual(delegate.newCodeRequiredState, expectedState)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitCode_delegate_success_shouldReturnPasswordRequired() {
@@ -134,7 +137,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         let expectedState = ResetPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .passwordRequired(newState: expectedState)
-        controller.submitCodeResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -152,7 +155,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         let expectedState = ResetPasswordRequiredState(controller: controller, username: "", continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: ResetPasswordSubmitCodeResult = .passwordRequired(newState: expectedState)
-        controller.submitCodeResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -163,5 +166,6 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.error?.type, .generalError)
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onPasswordRequired"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 }

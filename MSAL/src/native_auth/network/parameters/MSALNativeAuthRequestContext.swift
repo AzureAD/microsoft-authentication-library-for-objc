@@ -30,8 +30,8 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
     private let _telemetryRequestId: String
     private var _serverCorrelationId: UUID? // TODO: Setting the server correlation id here is wrong. Needs refactoring.
 
-    init(correlationId: UUID = UUID(), telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()) {
-        _correlationId = correlationId
+    init(correlationId: UUID? = nil, telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()) {
+        _correlationId = correlationId ?? UUID()
         _telemetryRequestId = telemetryRequestId
     }
 

@@ -45,7 +45,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resetPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(.init(type: .generalError, correlationId: .init())))
+        return .init(.error(.init(type: .generalError, correlationId: .init())), correlationId: parameters.context.correlationId())
     }
 
     func resendCode(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordResendCodeControllerResponse {
@@ -55,7 +55,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resendCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(correlationId: .init()), newState: nil))
+        return .init(.error(error: .init(correlationId: .init()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitCode(code: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
@@ -65,7 +65,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         submitCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitPassword(password: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
@@ -75,6 +75,6 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         submitPasswordCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil), correlationId: context.correlationId())
     }
 }

@@ -32,7 +32,7 @@ final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativ
             var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
             customError.correlationId = T.retrieveCorrelationIdFromHeaders(from: httpResponse)
 
-            // the successfuly constructed "customError" needs to be thrown, 
+            // the successfuly constructed "customError" needs to be thrown,
             // since the previous "try" command just validates the object (error) decoding
             throw customError
         } catch is DecodingError {

@@ -48,7 +48,7 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
             error: expectedError,
             newState: expectedState
         )
-        controller.submitPasswordResult = .init(expectedResult)
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId)
 
         let exp = expectation(description: "sign-in states")
         let delegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: expectedError)
@@ -65,7 +65,7 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInPasswordRequiredResult = .completed(expectedAccountResult)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -81,7 +81,7 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInPasswordRequiredResult = .completed(expectedAccountResult)
-        controller.submitPasswordResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitPasswordResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -92,5 +92,6 @@ final class SignInPasswordRequiredStateTests: XCTestCase {
 
         XCTAssertNil(delegate.newPasswordRequiredState)
         XCTAssertEqual(delegate.delegateError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        XCTAssertEqual(delegate.delegateError?.correlationId, correlationId)
     }
 }

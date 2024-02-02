@@ -54,7 +54,6 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
             let controllerResponse = await resendCodeInternal()
             let delegateDispatcher = ResetPasswordResendCodeDelegateDispatcher(
                 delegate: delegate,
-                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
@@ -64,7 +63,8 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .error(let error, let newState):
                 await delegate.onResetPasswordResendCodeError(error: error, newState: newState)
@@ -81,13 +81,12 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
             let controllerResponse = await submitCodeInternal(code: code)
             let delegateDispatcher = ResetPasswordVerifyCodeDelegateDispatcher(
                 delegate: delegate,
-                correlationId: correlationId,
                 telemetryUpdate: controllerResponse.telemetryUpdate
             )
 
             switch controllerResponse.result {
             case .passwordRequired(let newState):
-                await delegateDispatcher.dispatchPasswordRequired(newState: newState)
+                await delegateDispatcher.dispatchPasswordRequired(newState: newState, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onResetPasswordVerifyCodeError(error: error, newState: newState)
             }
@@ -104,15 +103,11 @@ public class ResetPasswordBaseState: MSALNativeAuthBaseState {
     public func submitPassword(password: String, delegate: ResetPasswordRequiredDelegate) {
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
-            let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(
-                delegate: delegate,
-                correlationId: correlationId,
-                telemetryUpdate: controllerResponse.telemetryUpdate
-            )
+            let delegateDispatcher = ResetPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
             case .completed(let newState):
-                await delegateDispatcher.dispatchResetPasswordCompleted(newState: newState)
+                await delegateDispatcher.dispatchResetPasswordCompleted(newState: newState, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onResetPasswordRequiredError(error: error, newState: newState)
             }

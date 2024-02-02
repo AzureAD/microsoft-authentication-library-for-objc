@@ -42,7 +42,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
     func test_dispatchPasswordRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = ResetPasswordVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -51,7 +51,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchPasswordRequired(newState: expectedState)
+        await sut.dispatchPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -62,7 +62,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
         let delegate = ResetPasswordVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onPasswordRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -73,7 +73,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = ResetPasswordRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "username", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchPasswordRequired(newState: expectedState)
+        await sut.dispatchPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -81,6 +81,7 @@ final class ResetPasswordVerifyCodeDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: VerifyCodeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

@@ -46,7 +46,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = parameters.context
         signUpStartPasswordCalled = true
         expectation.fulfill()
-        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())))
+        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())), correlationId: parameters.context.correlationId())
     }
 
     func signUpStart(
@@ -55,7 +55,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = parameters.context
         signUpStartCalled = true
         expectation.fulfill()
-        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())))
+        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())), correlationId: parameters.context.correlationId())
     }
 
     func resendCode(
@@ -66,7 +66,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(correlationId: context.correlationId()), newState: nil))
+        return .init(.error(error: .init(correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitCode(
@@ -78,7 +78,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         submitCodeCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitPassword(
@@ -90,7 +90,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         submitPasswordCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitAttributes(
@@ -102,6 +102,6 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         submitAttributesCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(correlationId: context.correlationId())))
+        return .init(.error(error: .init(correlationId: context.correlationId())), correlationId: context.correlationId())
     }
 }

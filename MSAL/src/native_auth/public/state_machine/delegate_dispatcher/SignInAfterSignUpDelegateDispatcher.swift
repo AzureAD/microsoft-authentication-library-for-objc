@@ -26,7 +26,7 @@ import Foundation
 
 final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterSignUpDelegate> {
 
-    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult) async {
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)

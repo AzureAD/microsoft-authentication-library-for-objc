@@ -42,7 +42,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignUpAttributesRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -56,7 +56,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState)
+        await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -68,7 +68,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -84,7 +84,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignUpAttributesRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState)
+        await sut.dispatchSignUpAttributesRequired(attributes: expectedAttributes, newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -92,13 +92,14 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: VerifyCodeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
     func test_dispatchSignUpPasswordRequired_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -107,7 +108,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpPasswordRequired(newState: expectedState)
+        await sut.dispatchSignUpPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -118,7 +119,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpPasswordRequired"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -129,7 +130,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignUpPasswordRequiredState(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpPasswordRequired(newState: expectedState)
+        await sut.dispatchSignUpPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -137,13 +138,14 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: VerifyCodeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
     func test_dispatchSignUpCompleted_whenDelegateMethodsAreImplemented() async {
         let delegate = SignUpVerifyCodeDelegateSpy(expectation: delegateExp)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
             }
@@ -152,7 +154,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpCompleted(newState: expectedState)
+        await sut.dispatchSignUpCompleted(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -163,7 +165,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         let delegate = SignUpVerifyCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
         let expectedError = VerifyCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"), correlationId: correlationId)
 
-        sut = .init(delegate: delegate, correlationId: correlationId, telemetryUpdate: { result in
+        sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? VerifyCodeError else {
                 return XCTFail("wrong result")
             }
@@ -174,7 +176,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignInAfterSignUpState(controller: controllerFactoryMock.signInController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignUpCompleted(newState: expectedState)
+        await sut.dispatchSignUpCompleted(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -182,6 +184,7 @@ final class SignUpVerifyCodeDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: VerifyCodeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }
