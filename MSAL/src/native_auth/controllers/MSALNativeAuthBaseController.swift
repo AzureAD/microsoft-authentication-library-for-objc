@@ -156,13 +156,19 @@ class MSALNativeAuthBaseController {
         return await withCheckedContinuation { continuation in
             request.send { [weak self] result, error in
                 if let error = error {
+                    // 5xx errors contain the server's returned correlation-id in userInfo.
                     if let correlationId = self?.extractCorrelationIdFromUserInfo((error as NSError).userInfo) {
                         context.setServerCorrelationId(UUID(uuidString: correlationId))
+
+                    // 4xx errors are decoded producing an error that conforms to MSALNativeAuthResponseCorrelatable protocol.
                     } else if let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
                         context.setServerCorrelationId(errorWithCorrelationId.correlationId)
+
+                    // If a 4xx error fails to decode, this error is returned from the error deserializer.
                     } else if case MSALNativeAuthInternalError.responseSerializationError(let correlationId) = error {
                         context.setServerCorrelationId(correlationId)
                     } else {
+                        context.setServerCorrelationId(nil)
                         MSALLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
                     }
 
