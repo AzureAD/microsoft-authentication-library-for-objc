@@ -22,14 +22,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-protocol MSALNativeAuthResponseError: Error, Decodable, Equatable, MSALNativeAuthResponseCorrelatable {
-    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+final class MSALNativeAuthRequestContextTests: XCTestCase {
 
-    var error: ErrorCode? { get }
-    var errorDescription: String? { get }
-    var errorCodes: [Int]? { get }
-    var errorURI: String? { get }
-    var innerErrors: [MSALNativeAuthInnerError]? { get }
+    func test_setServerCorrelationId() {
+        let requestCorrelationId = UUID()
+        let sut = MSALNativeAuthRequestContext(correlationId: requestCorrelationId)
+
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+
+        let serverCorrelationId = UUID()
+        sut.setServerCorrelationId(serverCorrelationId)
+        XCTAssertEqual(sut.correlationId(), serverCorrelationId)
+    }
+
+    func test_setServerCorrelationIdNil_worksAsExpected() {
+        let requestCorrelationId = UUID()
+        let sut = MSALNativeAuthRequestContext(correlationId: requestCorrelationId)
+
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+
+        let serverCorrelationId1 = UUID()
+        sut.setServerCorrelationId(serverCorrelationId1)
+        XCTAssertEqual(sut.correlationId(), serverCorrelationId1)
+
+        let serverCorrelationId2: UUID? = nil
+        sut.setServerCorrelationId(serverCorrelationId2)
+        XCTAssertEqual(sut.correlationId(), requestCorrelationId)
+    }
 }

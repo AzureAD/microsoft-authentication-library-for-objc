@@ -33,11 +33,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
     let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
     var config: MSALNativeAuthConfiguration! = nil
     
-    let context = MSALNativeAuthRequestContext(
-        correlationId: .init(
-            UUID(uuidString: DEFAULT_TEST_UID)!
-        )
-    )
+    let context = MSALNativeAuthRequestContext(correlationId: UUID(uuidString: DEFAULT_TEST_UID)!)
 
     func test_signInInititate_getsConfiguredSuccessfully() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))

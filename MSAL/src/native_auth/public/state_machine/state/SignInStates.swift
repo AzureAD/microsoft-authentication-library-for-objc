@@ -68,7 +68,8 @@ import Foundation
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .error(let error, let newState):
                 await delegate.onSignInResendCodeError(error: error, newState: newState)
@@ -87,7 +88,7 @@ import Foundation
 
             switch controllerResponse.result {
             case .completed(let accountResult):
-                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onSignInVerifyCodeError(error: error, newState: newState)
             }
@@ -124,7 +125,7 @@ import Foundation
 
             switch controllerResponse.result {
             case .completed(let accountResult):
-                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
             }

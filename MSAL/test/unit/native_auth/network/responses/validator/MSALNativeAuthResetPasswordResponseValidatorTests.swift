@@ -84,7 +84,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .error(.unexpectedError(message: "API error message")))
+        XCTAssertEqual(result, .error(.unexpectedError(.init(errorDescription: "API error message"))))
     }
 
     func test_whenResetPasswordStartErrorResponseUserNotFound_itReturnsRelatedError() {
@@ -196,7 +196,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "Unexpected response body received"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
     func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeChannel_itReturnsUnexpectedError() {
@@ -210,7 +210,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: nil))
+        XCTAssertEqual(result, .unexpectedError(.init()))
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsNotExpected_itReturnsUnexpectedError() {
@@ -221,7 +221,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsExpected_itReturnsError() {
@@ -260,19 +260,23 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     func test_whenResetPasswordContinueErrorResponseIs_invalidOOBValue_itReturnsExpectedError() {
+        let apiError = MSALNativeAuthResetPasswordContinueResponseError(
+            error: .invalidGrant,
+            subError: .invalidOOBValue
+        )
         let result = buildContinueErrorResponse(expectedError: .invalidGrant, expectedSubError: .invalidOOBValue)
 
-        XCTAssertEqual(result, .invalidOOB)
+        XCTAssertEqual(result, .invalidOOB(apiError))
     }
 
     func test_whenResetPasswordContinueErrorResponseIs_verificationRequired_itReturnsUnexpectedError() {
         let result = buildContinueErrorResponse(expectedError: .verificationRequired)
 
-        XCTAssertEqual(result, .unexpectedError(message: nil))
+        XCTAssertEqual(result, .unexpectedError(nil))
     }
 
     func test_whenResetPasswordContinueErrorResponseIs_unauthorizedClient_itReturnsExpectedError() {
@@ -430,7 +434,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     // MARK: - Poll Completion Response
@@ -544,7 +548,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(message: "API error message"))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
     }
 
     // MARK: - Helper methods

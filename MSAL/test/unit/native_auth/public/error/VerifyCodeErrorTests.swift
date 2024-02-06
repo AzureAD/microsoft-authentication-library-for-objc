@@ -35,15 +35,15 @@ final class VerifyCodeErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(type: .generalError, message: expectedMessage)
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
         let sut: [VerifyCodeError] = [
-            .init(type: .browserRequired),
-            .init(type: .invalidCode),
-            .init(type: .generalError)
+            .init(type: .browserRequired, correlationId: .init()),
+            .init(type: .invalidCode, correlationId: .init()),
+            .init(type: .generalError, correlationId: .init())
         ]
 
         let expectedDescriptions = [
@@ -60,13 +60,13 @@ final class VerifyCodeErrorTests: XCTestCase {
     }
 
     func test_isBrowserRequired() {
-        sut = .init(type: .browserRequired)
+        sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isInvalidCode)
     }
 
     func test_isInvalidCode() {
-        sut = .init(type: .invalidCode)
+        sut = .init(type: .invalidCode, correlationId: .init())
         XCTAssertTrue(sut.isInvalidCode)
         XCTAssertFalse(sut.isBrowserRequired)
     }

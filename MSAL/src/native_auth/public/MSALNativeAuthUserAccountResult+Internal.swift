@@ -32,6 +32,7 @@ extension MSALNativeAuthUserAccountResult {
         cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        let correlationId = context.correlationId()
 
         if let accessToken = self.authTokens.accessToken {
             if forceRefresh || accessToken.isExpired() {
@@ -39,11 +40,11 @@ extension MSALNativeAuthUserAccountResult {
                 let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
                 return await credentialsController.refreshToken(context: context, authTokens: authTokens)
             } else {
-                return .init(.success(accessToken.accessToken))
+                return .init(.success(accessToken.accessToken), correlationId: correlationId)
             }
         } else {
             MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
-            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound)))
+            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId)), correlationId: correlationId)
         }
     }
 }

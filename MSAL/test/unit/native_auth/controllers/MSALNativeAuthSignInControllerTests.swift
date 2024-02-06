@@ -41,6 +41,24 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private let defaultScopes = "openid profile offline_access"
 
+    private var signInInitiateApiErrorStub: MSALNativeAuthSignInInitiateResponseError {
+        .init(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
+    }
+
+    private var signInChallengeApiErrorStub: MSALNativeAuthSignInChallengeResponseError {
+        .init(
+            error: .expiredToken,
+            errorDescription: nil,
+            errorCodes: nil,
+            errorURI: nil,
+            innerErrors: nil
+        )
+    }
+
+    private var signInTokenApiErrorStub: MSALNativeAuthTokenResponseError {
+        .init(error: .expiredToken, subError: nil, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
+    }
+
     override func setUpWithError() throws {
         signInRequestProviderMock = .init()
         tokenRequestProviderMock = .init()
@@ -81,7 +99,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.throwingInitError = ErrorMock.error
 
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
 
@@ -111,7 +129,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.password, scope: expectedScopes, password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
 
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: ["scope1", "scope2"]))
 
@@ -140,7 +158,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.password, scope: expectedScopes, password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
         tokenRequestProviderMock.throwingTokenError = ErrorMock.error
 
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: ["scope1", "openid", "profile"]))
 
@@ -207,7 +225,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.expectedUsername = expectedUsername
         tokenRequestProviderMock.expectedContext = expectedContext
 
-        let delegateError = SignInStartError(type: .generalError)
+        let delegateError = SignInStartError(type: .generalError, correlationId: defaultUUID)
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: delegateError)
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
         tokenResponseValidatorMock.expectedTokenResponse = tokenResponse
@@ -230,7 +248,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "SignInController")
 
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: continuationToken)
-        signInResponseValidatorMock.challengeValidatedResponse = .error(.invalidToken(message: nil))
+        signInResponseValidatorMock.challengeValidatedResponse = .error(.invalidToken(signInChallengeApiErrorStub))
 
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -241,7 +259,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.expectedUsername = expectedUsername
         tokenRequestProviderMock.expectedContext = expectedContext
 
-        let delegateError = SignInStartError(type: .generalError)
+        let delegateError = SignInStartError(type: .generalError, correlationId: defaultUUID)
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: delegateError)
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
         tokenResponseValidatorMock.expectedTokenResponse = tokenResponse
@@ -255,18 +273,18 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .generalError)
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .expiredToken(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .authorizationPending(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .slowDown(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid Client ID"), validatorError: .unauthorizedClient(message: "Invalid Client ID"))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received"), validatorError: .unexpectedError(message: "Unexpected response body received"))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unsupported challenge type"), validatorError: .unsupportedChallengeType(message: "Unsupported challenge type"))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid scope"), validatorError: .invalidScope(message: "Invalid scope"))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .invalidCredentials), validatorError: .invalidPassword(message: nil))
-        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message"), validatorError: .unexpectedError(message: "Error message"))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .authorizationPending(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .slowDown(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid Client ID", correlationId: defaultUUID), validatorError: .unauthorizedClient(createSignInTokenApiError(message: "Invalid Client ID")))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Unexpected response body received")))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unsupported challenge type", correlationId: defaultUUID), validatorError: .unsupportedChallengeType(createSignInTokenApiError(message: "Unsupported challenge type")))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Invalid scope", correlationId: defaultUUID), validatorError: .invalidScope(createSignInTokenApiError(message: "Invalid scope")))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .userNotFound, correlationId: defaultUUID), validatorError: .userNotFound(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .invalidCredentials, correlationId: defaultUUID), validatorError: .invalidPassword(signInTokenApiErrorStub))
+        await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Error message")))
     }
     
     func test_whenCredentialsAreRequired_browserRequiredErrorIsReturned() async {
@@ -289,9 +307,9 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let expectation = expectation(description: "SignInController")
 
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: .init(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA))
+        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: .init(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA, correlationId: defaultUUID))
 
-        tokenResponseValidatorMock.tokenValidatedResponse = .error(.strongAuthRequired(message: "MFA currently not supported. Use the browser instead"))
+        tokenResponseValidatorMock.tokenValidatedResponse = .error(.strongAuthRequired(.init(error: .unauthorizedClient, subError: nil, errorDescription: MSALNativeAuthErrorMessage.unsupportedMFA, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
 
@@ -361,7 +379,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         helper.expectedCodeLength = expectedCodeLength
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
-        result.telemetryUpdate?(.failure(.init(message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error", correlationId: defaultUUID)))
 
         helper.onSignInCodeRequired(result)
 
@@ -439,7 +457,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = nil
 
         let state = SignInCodeRequiredState(scopes: ["openid","profile","offline_access"], controller: sut, inputValidator: MSALNativeAuthInputValidator(), continuationToken: continuationToken, correlationId: defaultUUID)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)))
+        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError, correlationId: defaultUUID)))
 
         wait(for: [expectation], timeout: 1)
 
@@ -454,9 +472,9 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInRequestProviderMock.expectedUsername = expectedUsername
         signInRequestProviderMock.expectedContext = expectedContext
-        signInRequestProviderMock.throwingInitError = MSALNativeAuthError(message: nil)
+        signInRequestProviderMock.throwingInitError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
 
-        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
 
@@ -467,13 +485,13 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeStartAndInitiateReturnError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired), validatorError: .redirect)
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unauthorizedClient(message: nil))
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .unsupportedChallengeType(message: nil))
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received"), validatorError: .unexpectedError(message: "Unexpected response body received"))
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message"), validatorError: .unexpectedError(message: "Error message"))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired, correlationId: defaultUUID), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unauthorizedClient(signInInitiateApiErrorStub))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .userNotFound, correlationId: defaultUUID), validatorError: .userNotFound(signInInitiateApiErrorStub))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unsupportedChallengeType(signInInitiateApiErrorStub))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(createSignInInitiateApiError(correlationId: defaultUUID)))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Unexpected response body received")))
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Error message")))
     }
     
     func test_whenSignInWithCodeChallengeRequestCreationFail_errorShouldBeReturned() async {
@@ -483,10 +501,10 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil)
+        signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: "continuationToken")
-        
-        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError))
+
+        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
 
@@ -497,15 +515,15 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeChallengeReturnsError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .browserRequired), validatorError: .redirect)
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .expiredToken(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidToken(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError), validatorError: .invalidRequest(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unauthorizedClient(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received"), validatorError: .unexpectedError(message: "Unexpected response body received"))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .userNotFound), validatorError: .userNotFound(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: nil), validatorError: .unsupportedChallengeType(message: nil))
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message"), validatorError: .unexpectedError(message: "Error message"))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .browserRequired, correlationId: defaultUUID), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInChallengeApiErrorStub))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidToken(signInChallengeApiErrorStub))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(createSignInChallengeApiError(correlationId: defaultUUID)))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unauthorizedClient(signInChallengeApiErrorStub))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: "Unexpected response body received", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Unexpected response body received")))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .userNotFound, correlationId: defaultUUID), validatorError: .userNotFound(signInChallengeApiErrorStub))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unsupportedChallengeType(signInChallengeApiErrorStub))
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Error message")))
     }
     
     func test_whenSignInWithCodePasswordIsRequired_newStateIsPropagatedToUser() async {
@@ -547,7 +565,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let helper = SignInCodeStartWithPasswordRequiredTestsValidatorHelper(expectation: expectation)
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
-        result.telemetryUpdate?(.failure(.init(message: "error")))
+        result.telemetryUpdate?(.failure(.init(message: "error", correlationId: defaultUUID)))
 
         helper.onSignInPasswordRequired(result.result)
 
@@ -596,7 +614,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: expectedCredentialToken, grantType: MSALNativeAuthGrantType.password, scope: "", password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
 
-        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError))
+        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID))
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
         tokenResponseValidatorMock.expectedTokenResponse = tokenResponse
         cacheAccessorMock.expectedMSIDTokenResult = nil
@@ -616,10 +634,10 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil)
+        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInRequestProviderMock.expectedContext = expectedContext
         
-        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError))
+        let mockDelegate = SignInPasswordRequiredDelegateSpy(expectation: exp, expectedError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID))
 
         let state = SignInPasswordRequiredState(scopes: [], username: expectedUsername, controller: sut, continuationToken: expectedCredentialToken, correlationId: defaultUUID)
         state.submitPassword(password: expectedPassword, delegate: mockDelegate)
@@ -631,20 +649,20 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeSubmitPasswordTokenAPIReturnError_correctErrorShouldBeReturned() async {
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .generalError)
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .expiredToken(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .unauthorizedClient(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidRequest(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "Unexpected response body received"), validatorError: .unexpectedError(message: "Unexpected response body received"))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "User not found"), validatorError: .userNotFound(message: "User not found"))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidOOBCode(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .unsupportedChallengeType(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .browserRequired), validatorError: .strongAuthRequired(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .invalidScope(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .authorizationPending(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError), validatorError: .slowDown(message: nil))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .invalidPassword), validatorError: .invalidPassword(message: "Invalid password"))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "Error message"), validatorError: .unexpectedError(message: "Error message"))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .generalError(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .unauthorizedClient(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "Unexpected response body received", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Unexpected response body received")))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "User does not exist", correlationId: defaultUUID), validatorError: .userNotFound(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidOOBCode(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .unsupportedChallengeType(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .browserRequired, correlationId: defaultUUID), validatorError: .strongAuthRequired(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidScope(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .authorizationPending(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .slowDown(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .invalidPassword, correlationId: defaultUUID), validatorError: .invalidPassword(signInTokenApiErrorStub))
+        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "Error message", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Error message")))
     }
     
     func test_signInWithCodeSubmitCodeTokenRequestFailCreation_errorShouldBeReturned() {
@@ -654,10 +672,10 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "SignInController")
 
         signInRequestProviderMock.expectedContext = expectedContext
-        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil)
+        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
 
         let state = SignInCodeRequiredState(scopes: [], controller: sut, continuationToken: continuationToken, correlationId: defaultUUID)
-        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError)))
+        state.submitCode(code: "code", delegate: SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: VerifyCodeError(type: .generalError, correlationId: defaultUUID)))
 
         wait(for: [expectation], timeout: 1)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
@@ -665,19 +683,19 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_signInWithCodeSubmitCodeReturnError_correctResultShouldReturned() {
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .generalError)
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .expiredToken(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unauthorizedClient(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidRequest(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unexpectedError(message: "Unexpected response body received"))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .userNotFound(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .invalidCode, validatorError: .invalidOOBCode(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unsupportedChallengeType(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .browserRequired, validatorError: .strongAuthRequired(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidScope(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .authorizationPending(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .slowDown(message: nil))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidPassword(message: nil))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .generalError(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .expiredToken(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unauthorizedClient(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidRequest(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unexpectedError(.init(errorDescription: "Unexpected response body received")))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .userNotFound(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .invalidCode, validatorError: .invalidOOBCode(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unsupportedChallengeType(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .browserRequired, validatorError: .strongAuthRequired(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidScope(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .authorizationPending(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .slowDown(signInTokenApiErrorStub))
+        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidPassword(signInTokenApiErrorStub))
     }
         
     func test_signInWithCodeResendCode_shouldSendNewCode() async {
@@ -713,7 +731,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         
         let expectation = expectation(description: "SignInController")
 
-        signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil)
+        signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
 
         let helper = SignInResendCodeTestsValidatorHelper(expectation: expectation)
 
@@ -759,7 +777,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let helper = SignInResendCodeTestsValidatorHelper(expectation: expectation)
 
-        signInResponseValidatorMock.challengeValidatedResponse = .error(.userNotFound(message: nil))
+        signInResponseValidatorMock.challengeValidatedResponse = .error(.userNotFound(signInChallengeApiErrorStub))
 
         let result = await sut.resendCode(continuationToken: continuationToken, context: expectedContext, scopes: [])
 
@@ -804,10 +822,10 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let exp = expectation(description: "SignInController")
         
-        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil)
+        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInRequestProviderMock.expectedContext = expectedContext
         
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError())
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
         state.signIn(delegate: mockDelegate)
@@ -826,9 +844,9 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Invalid Client ID"))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
 
-        tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(message: "Invalid Client ID"))
+        tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(signInTokenApiErrorStub))
 
         let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
         state.signIn(delegate: mockDelegate)
@@ -841,7 +859,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInWithContinuationTokenHaveTokenNil_shouldReturnAnError() {
         let expectation = expectation(description: "SignInController")
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods"))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "username", continuationToken: nil, correlationId: defaultUUID)
         state.signIn(delegate: mockDelegate)
@@ -864,7 +882,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedCredentialToken, grantType: MSALNativeAuthGrantType.oobCode, scope: "", password: nil, oobCode: expectedOOBCode, includeChallengeType: true, refreshToken: nil)
-        let mockDelegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedError: VerifyCodeError(type: delegateError))
+        let mockDelegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedError: VerifyCodeError(type: delegateError, correlationId: defaultUUID))
         tokenResponseValidatorMock.tokenValidatedResponse = .error(validatorError)
         
         let state = SignInCodeRequiredState(scopes: [], controller: sut, continuationToken: expectedCredentialToken, correlationId: defaultUUID)
@@ -951,7 +969,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: continuationToken)
         signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(continuationToken: continuationToken)
-        
+
         signInRequestProviderMock.mockInitiateRequestFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
         signInRequestProviderMock.mockChallengeRequestFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
         signInRequestProviderMock.expectedUsername = expectedUsername
@@ -992,4 +1010,20 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertNotNil(telemetryEventDict["response_time"])
     }
 
+
+    private func createSignInTokenApiError(message: String) -> MSALNativeAuthTokenResponseError {
+        .init(error: .expiredToken, subError: nil, errorDescription: message, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
+    }
+
+    private func createSignInInitiateApiError(correlationId: UUID) -> MSALNativeAuthSignInInitiateResponseError {
+        var error = MSALNativeAuthSignInInitiateResponseError()
+        error.correlationId = correlationId
+        return error
+    }
+
+    private func createSignInChallengeApiError(correlationId: UUID) -> MSALNativeAuthSignInChallengeResponseError {
+        var error = MSALNativeAuthSignInChallengeResponseError()
+        error.correlationId = correlationId
+        return error
+    }
 }

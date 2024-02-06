@@ -29,51 +29,59 @@ final class MSALNativeAuthResetPasswordPollCompletionResponseErrorTests: XCTestC
 
     private var sut: MSALNativeAuthResetPasswordPollCompletionResponseError!
     private let testDescription = "testDescription"
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private let testErrorUri = "test error uri"
 
     // MARK: - toPasswordRequiredPublicError tests
     
     func test_toPasswordRequiredPublicError_invalidRequest() {
-        testPasswordRequiredError(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
+        testPasswordRequiredError(code: .invalidRequest, expectedErrorType: .generalError)
     }
 
     func test_toPasswordRequiredPublicError_unauthorizedClient() {
-        testPasswordRequiredError(code: .unauthorizedClient, description: "General error", expectedErrorType: .generalError)
+        testPasswordRequiredError(code: .unauthorizedClient, expectedErrorType: .generalError)
     }
 
     func test_toPasswordRequiredPublicError_expiredToken() {
-        testPasswordRequiredError(code: .expiredToken, description: testDescription, expectedErrorType: .generalError)
+        testPasswordRequiredError(code: .expiredToken, expectedErrorType: .generalError)
     }
 
     func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooWeak, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordTooShort() {
-        testPasswordRequiredError(code: .invalidGrant,subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant,subError: .passwordTooShort, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordTooLong() {
-        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooLong, description: "General error", expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordTooLong, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        testPasswordRequiredError(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordRecentlyUsed, expectedErrorType: .invalidPassword)
     }
 
     func test_toPasswordRequiredPublicError_passwordBanned() {
-        testPasswordRequiredError(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testPasswordRequiredError(code: .invalidGrant, subError: .passwordBanned, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_userNotFound() {
-        testPasswordRequiredError(code: .userNotFound, description: testDescription, expectedErrorType: .generalError)
+        testPasswordRequiredError(code: .userNotFound, expectedErrorType: .generalError)
     }
     
     // MARK: private methods
     
-    private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
-        sut = MSALNativeAuthResetPasswordPollCompletionResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, target: nil)
-        let error = sut.toPasswordRequiredPublicError()
+    private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: PasswordRequiredError.ErrorType) {
+
+        sut = MSALNativeAuthResetPasswordPollCompletionResponseError(error: code, subError: subError, errorDescription: testDescription, errorCodes: testErrorCodes, errorURI: testErrorUri, correlationId: testCorrelationId)
+        let error = sut.toPasswordRequiredPublicError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 }

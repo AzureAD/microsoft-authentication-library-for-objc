@@ -30,6 +30,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: CredentialsDelegateDispatcher!
+    private let correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -48,7 +49,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: expectedToken)
+        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: expectedToken, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -56,7 +57,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     }
 
     func test_dispatchAccessTokenRetrieveCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"))
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"), correlationId: correlationId)
         let delegate = CredentialsDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
@@ -68,7 +69,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token")
+        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token", correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
@@ -76,6 +77,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         func checkError(_ error: RetrieveAccessTokenError?) {
             XCTAssertEqual(error?.type, .generalError)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

@@ -77,7 +77,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
     func test_whenInvalidErrorTokenResponse_anErrorIsReturned() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(MSALNativeAuthInternalError.headerNotSerialized))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -112,7 +112,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             return XCTFail("Unexpected response")
         }
         
-        if case .unauthorizedClient(message: nil) = innerError {} else {
+        if case .unauthorizedClient(error) = innerError {} else {
             XCTFail("Unexpected Error")
         }
     }
@@ -127,31 +127,31 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             return XCTFail("Unexpected response")
         }
         
-        if case .unauthorizedClient(message: nil) = innerError {} else {
+        if case .unauthorizedClient(error) = innerError {} else {
             XCTFail("Unexpected Error")
         }
     }
     
 
     func test_invalidGrantTokenResponse_withKnownError_andSeveralUnknownErrorCodes_isProperlyHandled() {
-        let description = "description"
         let unknownErrorCode1 = Int.max
         let unknownErrorCode2 = unknownErrorCode1 - 1
 
         var errorCodes: [Int] = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .userNotFound(message: description) = checkErrorCodes() else {
+
+        guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .strongAuthRequired(message: description) = checkErrorCodes() else {
+        guard case .strongAuthRequired(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .strongAuthRequired(message: description) = checkErrorCodes() else {
+        guard case .strongAuthRequired(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .invalidPassword(message: description) = checkErrorCodes() else {
+        guard case .invalidPassword(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue, unknownErrorCode1, unknownErrorCode2]
@@ -159,14 +159,16 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             return XCTFail("Unexpected Error")
         }
         func checkErrorCodes() -> MSALNativeAuthTokenValidatedErrorType? {
-            let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: nil, errorDescription: description, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, continuationToken: nil)
-
+            let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: nil, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, continuationToken: nil)
             let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
             
             guard case .error(let innerError) = result else {
                 return nil
             }
             return innerError
+        }
+        func createError(_ errorCodes: [Int]) -> MSALNativeAuthTokenResponseError {
+            MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: nil, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, continuationToken: nil)
         }
     }
 
@@ -211,7 +213,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
                 return XCTFail("Unexpected response")
             }
             
-            guard case .invalidRequest(message: description) = innerError else {
+            guard case .invalidRequest(error) = innerError else {
                 return XCTFail("Unexpected Error")
             }
         }

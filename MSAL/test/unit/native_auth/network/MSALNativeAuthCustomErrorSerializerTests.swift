@@ -22,14 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
 
-protocol MSALNativeAuthResponseError: Error, Decodable, Equatable, MSALNativeAuthResponseCorrelatable {
-    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+import XCTest
+@testable import MSAL
 
-    var error: ErrorCode? { get }
-    var errorDescription: String? { get }
-    var errorCodes: [Int]? { get }
-    var errorURI: String? { get }
-    var innerErrors: [MSALNativeAuthInnerError]? { get }
+final class MSALNativeAuthCustomErrorSerializerTests: XCTestCase {
+
+    func test_errorDeserializer_usesCorrelationIdFromHeaders() {
+        let headers = [
+            "client-request-id": "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0",
+            "header2": "value2"
+        ]
+        let responseString = """
+        {
+          "error": "invalid_grant",
+          "error_description": "New password is weak",
+          "suberror": "password_too_weak",
+          "correlation_id": "081f5395-539f-498d-8175-1d71e52601de"
+        }
+        """
+
+        let sut = MSALNativeAuthCustomErrorSerializer<MSALNativeAuthSignUpStartResponseError>()
+        
+        let httpResponse = HTTPURLResponse(url: URL(string: "https://contoso.com")!, statusCode: 400, httpVersion: nil, headerFields: headers)
+
+        do {
+            _ = try sut.responseObject(for: httpResponse, data: responseString.data(using: .utf8), context: nil)
+        } catch {
+            let result = (error as? MSALNativeAuthSignUpStartResponseError)?.correlationId
+            XCTAssertEqual(result?.uuidString, "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0")
+        }
+    }
 }

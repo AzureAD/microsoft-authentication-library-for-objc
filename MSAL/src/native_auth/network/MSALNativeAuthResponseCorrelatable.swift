@@ -22,14 +22,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthResponseError: Error, Decodable, Equatable, MSALNativeAuthResponseCorrelatable {
-    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+protocol MSALNativeAuthResponseCorrelatable {
+    var correlationId: UUID? { get set }
+}
 
-    var error: ErrorCode? { get }
-    var errorDescription: String? { get }
-    var errorCodes: [Int]? { get }
-    var errorURI: String? { get }
-    var innerErrors: [MSALNativeAuthInnerError]? { get }
+extension MSALNativeAuthResponseCorrelatable {
+
+    static func retrieveCorrelationIdFromHeaders(from httpResponse: HTTPURLResponse?) -> UUID? {
+        guard let headers = httpResponse?.allHeaderFields, let correlationId = headers[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] as? String else {
+            return nil
+        }
+
+        return UUID(uuidString: correlationId)
+    }
 }
