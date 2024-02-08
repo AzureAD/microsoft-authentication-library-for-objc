@@ -82,6 +82,7 @@ extension MSALNativeAuthResetPasswordSubmitResponseError {
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

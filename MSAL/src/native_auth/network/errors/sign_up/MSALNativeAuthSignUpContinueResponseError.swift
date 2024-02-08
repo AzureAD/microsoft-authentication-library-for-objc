@@ -97,6 +97,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,
@@ -126,6 +127,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

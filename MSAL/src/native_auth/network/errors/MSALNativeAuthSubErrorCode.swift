@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable {
+enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable, MSALNativeAuthUnknownCaseProtocol {
     case passwordTooWeak = "password_too_weak"
     case passwordTooShort = "password_too_short"
     case passwordTooLong = "password_too_long"
@@ -33,6 +33,7 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable {
     case passwordBanned = "password_banned"
     case attributeValidationFailed = "attribute_validation_failed"
     case invalidOOBValue = "invalid_oob_value"
+    case unknownCase
 
     var isAnyPasswordError: Bool {
         switch self {
@@ -44,7 +45,8 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable {
              .passwordBanned:
             return true
         case .attributeValidationFailed,
-             .invalidOOBValue:
+             .invalidOOBValue,
+             .unknownCase:
             return false
         }
     }

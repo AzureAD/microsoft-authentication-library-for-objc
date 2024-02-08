@@ -138,4 +138,14 @@ final class MSALNativeAuthResetPasswordChallengeResponseErrorTests: XCTestCase {
         XCTAssertEqual(error.errorCodes, testErrorCodes)
         XCTAssertEqual(error.errorUri, testErrorUri)
     }
+
+    func test_toResendCodePublicError_errorUnknownCase() {
+        sut = createApiResendCodeError(type: .unknownCase)
+        let error = sut.toResendCodePublicError(correlationId: correlationId)
+
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
+    }
 }

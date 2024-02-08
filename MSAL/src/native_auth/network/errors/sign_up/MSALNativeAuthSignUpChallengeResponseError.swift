@@ -66,6 +66,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,
@@ -83,6 +84,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 message: errorDescription,
@@ -99,6 +101,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

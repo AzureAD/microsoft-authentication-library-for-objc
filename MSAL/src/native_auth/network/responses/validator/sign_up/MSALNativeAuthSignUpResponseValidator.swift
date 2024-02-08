@@ -92,7 +92,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             apiError,
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
             return .unauthorizedClient(apiError)
-        case .none:
+        case .none,
+             .unknownCase:
             return .unexpectedError(.init(
                 errorDescription: apiError.errorDescription,
                 errorCodes: apiError.errorCodes,
@@ -158,8 +159,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             MSALLogger.log(level: .error, context: context, format: "signup/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
-        if apiError.error == .none {
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+        if apiError.error == .unknownCase {
+            return .unexpectedError(apiError)
         }
 
         return .error(apiError)
@@ -218,13 +219,9 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .userAlreadyExists,
              .invalidRequest:
             return .error(apiError)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .none,
+             .unknownCase:
+            return .unexpectedError(apiError)
         }
     }
 
@@ -256,6 +253,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
+        case .unknownCase:
+            return .unexpectedError(apiError)
         }
     }
 

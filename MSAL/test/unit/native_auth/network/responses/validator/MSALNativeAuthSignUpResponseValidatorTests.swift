@@ -333,13 +333,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpChallengeErrorResponseIsNotExpected_it_returns_unexpectedError() {
         let error = createSignUpChallengeError(
-            error: nil,
+            error: .unknownCase,
             errorDescription: "API error message"
         )
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "API error message")))
+        XCTAssertEqual(result, .unexpectedError(.init(error: .unknownCase, errorDescription: "API error message")))
     }
 
     func test_whenSignUpChallengeErrorResponseIsExpected_it_returns_error() {

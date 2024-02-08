@@ -100,6 +100,7 @@ extension MSALNativeAuthSignUpStartResponseError {
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

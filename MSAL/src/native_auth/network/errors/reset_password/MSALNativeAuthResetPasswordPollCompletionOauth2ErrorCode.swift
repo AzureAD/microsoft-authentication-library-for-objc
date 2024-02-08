@@ -24,10 +24,11 @@
 
 import Foundation
 
-enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable, CaseIterable {
+enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable, CaseIterable, MSALNativeAuthUnknownCaseProtocol {
     case invalidGrant = "invalid_grant"
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
     case expiredToken = "expired_token"
     case userNotFound = "user_not_found"
+    case unknownCase
 }

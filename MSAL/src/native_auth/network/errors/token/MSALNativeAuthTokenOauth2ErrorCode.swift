@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable {
+enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
     case invalidClient = "invalid_client"
@@ -36,4 +36,5 @@ enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable {
     case authorizationPending = "authorization_pending"
     case slowDown = "slow_down"
     case userNotFound = "user_not_found"
+    case unknownCase
 }

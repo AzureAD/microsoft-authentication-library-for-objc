@@ -94,7 +94,15 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     func test_toVerifyCodePublicError_invalidOOBValue() {
         testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .invalidCode)
     }
-    
+
+    func test_toVerifyCodePublicError_errorUnknownCase() {
+        testSignUpContinueErrorToVerifyCode(code: .unknownCase, expectedErrorType: .generalError)
+    }
+
+    func test_toVerifyCodePublicError_suberrorUnknownCase() {
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    }
+
     // MARK: - toPasswordRequiredPublicError tests
     
     func test_toPasswordRequiredPublicError_invalidRequest() {
@@ -156,7 +164,15 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     func test_toPasswordRequiredPublicError_invalidOOBValue() {
         testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .generalError)
     }
-    
+
+    func test_toPasswordRequiredPublicError_errorUnknownCase() {
+        testSignUpContinueErrorToPasswordRequired(code: .unknownCase, subError: .invalidOOBValue, expectedErrorType: .generalError)
+    }
+
+    func test_toPasswordRequiredPublicError_suberrorUnknownCase() {
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    }
+
     // MARK: - toAttributesRequiredPublicError tests
     
     func test_toAttributesRequiredPublicError_invalidRequest() {
@@ -218,7 +234,15 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     func test_toAttributesRequiredPublicError_invalidOOBValue() {
         testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .invalidOOBValue)
     }
-    
+
+    func test_toAttributesRequiredPublicError_errorUnknownCase() {
+        testSignUpContinueErrorToAttributesRequired(code: .unknownCase, subError: .invalidOOBValue)
+    }
+
+    func test_toAttributesRequiredPublicError_suberrorUnknownCase() {
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .unknownCase)
+    }
+
     // MARK: private methods
     
     private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: VerifyCodeError.ErrorType) {

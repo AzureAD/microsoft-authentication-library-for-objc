@@ -70,7 +70,15 @@ final class MSALNativeAuthResetPasswordPollCompletionResponseErrorTests: XCTestC
     func test_toPasswordRequiredPublicError_userNotFound() {
         testPasswordRequiredError(code: .userNotFound, expectedErrorType: .generalError)
     }
-    
+
+    func test_toPasswordRequiredPublicError_errorUnknownCase() {
+        testPasswordRequiredError(code: .unknownCase, expectedErrorType: .generalError)
+    }
+
+    func test_toPasswordRequiredPublicError_suberrorUnknownCase() {
+        testPasswordRequiredError(code: .userNotFound, subError: .unknownCase, expectedErrorType: .generalError)
+    }
+
     // MARK: private methods
     
     private func testPasswordRequiredError(code: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: PasswordRequiredError.ErrorType) {

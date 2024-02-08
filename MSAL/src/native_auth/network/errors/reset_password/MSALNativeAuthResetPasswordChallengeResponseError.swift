@@ -71,6 +71,7 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
              .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,
@@ -88,6 +89,7 @@ extension MSALNativeAuthResetPasswordChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
+             .unknownCase,
              .none:
             return .init(
                 message: errorDescription,

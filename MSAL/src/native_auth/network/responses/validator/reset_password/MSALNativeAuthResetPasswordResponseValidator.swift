@@ -89,13 +89,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .error(.userNotFound(apiError))
         case .unsupportedChallengeType:
             return .error(.unsupportedChallengeType(apiError))
-        case .none:
-            return .error(.unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            )))
+        case .none,
+             .unknownCase:
+            return .error(.unexpectedError(apiError))
         }
     }
 
@@ -189,13 +185,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .none,
+             .unknownCase:
+            return .unexpectedError(apiError)
         }
     }
 
@@ -236,13 +228,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .none,
+             .unknownCase:
+            return .unexpectedError(apiError)
         }
     }
 
@@ -288,13 +276,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .none,
+             .unknownCase:
+            return .unexpectedError(apiError)
         }
     }
 }

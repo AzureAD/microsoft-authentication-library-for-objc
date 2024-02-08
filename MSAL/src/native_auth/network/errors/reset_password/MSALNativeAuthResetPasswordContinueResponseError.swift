@@ -87,6 +87,7 @@ extension MSALNativeAuthResetPasswordContinueResponseError {
              .expiredToken,
              .invalidRequest,
              .verificationRequired,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

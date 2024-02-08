@@ -83,6 +83,7 @@ extension MSALNativeAuthResetPasswordPollCompletionResponseError {
              .expiredToken,
              .invalidRequest,
              .userNotFound,
+             .unknownCase,
              .none:
             return .init(
                 type: .generalError,

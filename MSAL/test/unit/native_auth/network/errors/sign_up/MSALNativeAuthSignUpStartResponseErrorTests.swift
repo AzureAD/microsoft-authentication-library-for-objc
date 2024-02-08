@@ -83,6 +83,14 @@ final class MSALNativeAuthSignUpStartResponseErrorTests: XCTestCase {
         testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .attributeValidationFailed, expectedErrorType: .generalError)
     }
 
+    func test_toSignUpStartPublicError_errorUnknownCase() {
+        testSignUpStartErrorToSignUpStart(code: .unknownCase, subError: .attributeValidationFailed, expectedErrorType: .generalError)
+    }
+
+    func test_toSignUpStartPublicError_suberrorUnknownCase() {
+        testSignUpStartErrorToSignUpStart(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    }
+
     // MARK: private methods
     
     private func testSignUpStartErrorToSignUpStart(code: MSALNativeAuthSignUpStartOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: SignUpStartError.ErrorType) {
