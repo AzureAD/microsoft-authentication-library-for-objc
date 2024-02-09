@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthSubErrorCode: String, Decodable, CaseIterable, Equatable, MSALNativeAuthUnknownCaseProtocol {
+enum MSALNativeAuthSubErrorCode: String, Decodable, Equatable, MSALNativeAuthUnknownCaseProtocol {
     case passwordTooWeak = "password_too_weak"
     case passwordTooShort = "password_too_short"
     case passwordTooLong = "password_too_long"

@@ -30,50 +30,50 @@ final class MSALNativeAuthUnknownCaseProtocolTests: XCTestCase {
     func test_decodeKnownValue() throws {
         let json = """
         {
-            "main": "fish and chips",
-            "withCoffee": true,
-            "fruit": "apple"
+            "errorType": "invalid_grant",
+            "errorDescription": "This is an error description",
+            "errorCodes": [50076]
         }
         """
 
         let data = json.data(using: .utf8)!
 
-        let menu = try JSONDecoder().decode(ApiRestaurantMenu.self, from: data)
+        let apiError = try JSONDecoder().decode(ApiErrorResponse.self, from: data)
 
-        XCTAssertNotNil(menu)
-        XCTAssertEqual(menu.main, "fish and chips")
-        XCTAssertTrue(menu.withCoffee)
-        XCTAssertEqual(menu.fruit, .apple)
+        XCTAssertNotNil(apiError)
+        XCTAssertEqual(apiError.errorType, .invalidGrant)
+        XCTAssertEqual(apiError.errorDescription, "This is an error description")
+        XCTAssertEqual(apiError.errorCodes, [50076])
     }
 
     func test_decodingAnUnknownValue_produces_aNotNilApiModel() throws {
         let json = """
         {
-            "main": "fish and chips",
-            "withCoffee": true,
-            "fruit": "pomelo"
+            "errorType": "new_error_type_unknown_to_the_SDK",
+            "errorDescription": "This is an error description",
+            "errorCodes": [50076]
         }
         """
 
         let data = json.data(using: .utf8)!
 
-        let menu = try JSONDecoder().decode(ApiRestaurantMenu.self, from: data)
+        let apiError = try JSONDecoder().decode(ApiErrorResponse.self, from: data)
 
-        XCTAssertNotNil(menu)
-        XCTAssertEqual(menu.main, "fish and chips")
-        XCTAssertTrue(menu.withCoffee)
-        XCTAssertEqual(menu.fruit, .unknownCase)
+        XCTAssertNotNil(apiError)
+        XCTAssertEqual(apiError.errorType, .unknownCase)
+        XCTAssertEqual(apiError.errorDescription, "This is an error description")
+        XCTAssertEqual(apiError.errorCodes, [50076])
     }
 }
 
-struct ApiRestaurantMenu: Decodable {
-    let main: String
-    let withCoffee: Bool
-    let fruit: ApiFruitEnum
+private struct ApiErrorResponse: Decodable {
+    let errorType: ApiErrorTypeEnum
+    let errorDescription: String
+    let errorCodes: [Int]
 }
 
-enum ApiFruitEnum: String, Decodable, CaseIterable, Equatable, MSALNativeAuthUnknownCaseProtocol {
-    case apple = "apple"
-    case banana = "banana"
+private enum ApiErrorTypeEnum: String, Decodable, Equatable, MSALNativeAuthUnknownCaseProtocol {
+    case invalidGrant = "invalid_grant"
+    case unauthorizedClient = "unauthorized_client"
     case unknownCase
 }
