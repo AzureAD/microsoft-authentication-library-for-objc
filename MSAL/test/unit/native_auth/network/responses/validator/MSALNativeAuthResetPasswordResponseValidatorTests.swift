@@ -77,10 +77,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordStartErrorResponseIsNotExpected_itReturnsUnexpectedError() {
-        let error = createResetPasswordStartError(
-            error: nil,
-            errorDescription: "API error message"
-        )
+        let error = MSALNativeAuthResetPasswordStartResponseError(errorDescription: "API error message")
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -88,7 +85,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordStartErrorResponseUserNotFound_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .userNotFound)
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .userNotFound)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -98,7 +95,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
     
     func test_whenResetPasswordStartErrorResponseUnauthorizedClient_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .unauthorizedClient)
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .unauthorizedClient)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -108,7 +105,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
     
     func test_whenResetPasswordStartErrorResponseUnsupportedChallengeType_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .unsupportedChallengeType)
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .unsupportedChallengeType)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -118,7 +115,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
     
     func test_whenResetPasswordStartInvalidRequestUserDoesntHaveAPwd_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .invalidRequest, errorCodes: [500222])
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .invalidRequest, errorCodes: [500222])
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -128,7 +125,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
     
     func test_whenResetPasswordStartInvalidRequestGenericErrorCode_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .invalidRequest, errorCodes: [90023])
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .invalidRequest, errorCodes: [90023])
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -138,7 +135,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
     
     func test_whenResetPasswordStartInvalidRequestNoErrorCode_itReturnsRelatedError() {
-        let error = createResetPasswordStartError(error: .invalidRequest)
+        let error = MSALNativeAuthResetPasswordStartResponseError(error: .invalidRequest)
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -210,14 +207,11 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(.init()))
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsNotExpected_itReturnsUnexpectedError() {
-        let error = createResetPasswordChallengeError(
-            error: nil,
-            errorDescription: "API error message"
-        )
+        let error = MSALNativeAuthResetPasswordChallengeResponseError(errorDescription: "API error message")
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -225,7 +219,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsExpected_itReturnsError() {
-        let error = createResetPasswordChallengeError(error: .expiredToken)
+        let error = MSALNativeAuthResetPasswordChallengeResponseError(error: .expiredToken)
 
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .failure(error)
 
@@ -234,7 +228,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .expiredToken = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -253,10 +247,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
     }
 
     func test_whenResetPasswordContinueErrorResponseIsNotExpected_itReturnsUnexpectedError() {
-        let error = createResetPasswordContinueError(
-            error: nil,
-            errorDescription: "API error message"
-        )
+        let error = MSALNativeAuthResetPasswordContinueResponseError(errorDescription: "API error message")
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -286,7 +277,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .unauthorizedClient = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -297,7 +288,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .invalidGrant = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -308,7 +299,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .expiredToken = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -319,7 +310,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .invalidRequest = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -345,7 +336,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooWeak = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -356,7 +347,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooShort = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -367,7 +358,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooLong = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -378,7 +369,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordRecentlyUsed = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -389,7 +380,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordBanned = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -400,7 +391,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .invalidRequest = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -411,7 +402,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .unauthorizedClient = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -422,15 +413,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .expiredToken = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
     func test_whenResetPasswordSubmitErrorResponseIsNotExpected_itReturnsUnexpectedError() {
-        let error = createResetPasswordSubmitError(
-            error: nil,
-            errorDescription: "API error message"
-        )
+        let error = MSALNativeAuthResetPasswordSubmitResponseError(errorDescription: "API error message")
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -459,7 +447,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooWeak = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -470,7 +458,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooShort = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -481,7 +469,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordTooLong = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -492,7 +480,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordRecentlyUsed = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -503,7 +491,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .passwordBanned = error.subError {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -514,7 +502,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .invalidRequest = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -525,7 +513,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .unauthorizedClient = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
@@ -536,15 +524,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             return XCTFail("Unexpected response")
         }
         if case .expiredToken = error.error {} else {
-            XCTFail("Unexpected error: \(error.error?.rawValue ?? "Code not decoded")")
+            XCTFail("Unexpected error: \(error.error.rawValue)")
         }
     }
 
     func test_whenResetPasswordPollCompletionErrorResponseIsNotExpected_itReturnsUnexpectedError() {
-        let error = createResetPasswordPollCompletionError(
-            error: nil,
-            errorDescription: "API error message"
-        )
+        let error = MSALNativeAuthResetPasswordPollCompletionResponseError(errorDescription: "API error message")
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(error)
 
         let result = sut.validate(response, with: context)
@@ -559,7 +544,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedContinuationToken: String? = nil
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordContinueResponse, Error> = .failure(
-            createResetPasswordContinueError(
+            MSALNativeAuthResetPasswordContinueResponseError(
                 error: expectedError,
                 subError: expectedSubError,
                 continuationToken: expectedContinuationToken
@@ -574,7 +559,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedSubError: MSALNativeAuthSubErrorCode? = nil
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordSubmitResponse, Error> = .failure(
-            createResetPasswordSubmitError(
+            MSALNativeAuthResetPasswordSubmitResponseError(
                 error: expectedError,
                 subError: expectedSubError
             )
@@ -588,110 +573,12 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         expectedSubError: MSALNativeAuthSubErrorCode? = nil
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
         let response: Result<MSALNativeAuthResetPasswordPollCompletionResponse, Error> = .failure(
-            createResetPasswordPollCompletionError(
+            MSALNativeAuthResetPasswordPollCompletionResponseError(
                 error: expectedError,
                 subError: expectedSubError
             )
         )
 
         return sut.validate(response, with: context)
-    }
-
-    private func createResetPasswordStartError(
-        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode? = nil,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil
-    ) -> MSALNativeAuthResetPasswordStartResponseError {
-        .init(
-            error: error,
-            errorDescription: errorDescription,
-            errorCodes: errorCodes,
-            errorURI: errorURI,
-            innerErrors: innerErrors,
-            target: target
-        )
-    }
-
-    private func createResetPasswordChallengeError(
-        error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode? = nil,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil
-    ) -> MSALNativeAuthResetPasswordChallengeResponseError {
-        .init(
-            error: error,
-            errorDescription: errorDescription,
-            errorCodes: errorCodes,
-            errorURI: errorURI,
-            innerErrors: innerErrors,
-            target: target
-        )
-    }
-
-    private func createResetPasswordContinueError(
-        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode? = nil,
-        subError: MSALNativeAuthSubErrorCode? = nil,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil,
-        continuationToken: String? = nil
-    ) -> MSALNativeAuthResetPasswordContinueResponseError {
-        .init(
-            error: error,
-            subError: subError,
-            errorDescription: errorDescription,
-            errorCodes: errorCodes,
-            errorURI: errorURI,
-            innerErrors: innerErrors,
-            target: target,
-            continuationToken: continuationToken
-        )
-    }
-
-    private func createResetPasswordSubmitError(
-        error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode? = nil,
-        subError: MSALNativeAuthSubErrorCode? = nil,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil
-    ) -> MSALNativeAuthResetPasswordSubmitResponseError {
-        .init(
-            error: error,
-            subError: subError,
-            errorDescription: errorDescription,
-            errorCodes: errorCodes,
-            errorURI: errorURI,
-            innerErrors: innerErrors,
-            target: target
-        )
-    }
-
-    private func createResetPasswordPollCompletionError(
-        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode? = nil,
-        subError: MSALNativeAuthSubErrorCode? = nil,
-        errorDescription: String? = nil,
-        errorCodes: [Int]? = nil,
-        errorURI: String? = nil,
-        innerErrors: [MSALNativeAuthInnerError]? = nil,
-        target: String? = nil
-    ) -> MSALNativeAuthResetPasswordPollCompletionResponseError {
-        .init(
-            error: error,
-            subError: subError,
-            errorDescription: errorDescription,
-            errorCodes: errorCodes,
-            errorURI: errorURI,
-            innerErrors: innerErrors,
-            target: target
-        )
     }
 }

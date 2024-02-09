@@ -111,4 +111,26 @@ final class MSALNativeAuthResetPasswordContinueResponseErrorTests: XCTestCase {
         XCTAssertEqual(error.errorCodes, testErrorCodes)
         XCTAssertEqual(error.errorUri, testErrorUri)
     }
+
+    func test_toResetPasswordStartPublicError_errorUnknown() {
+        sut = createApiError(type: .unknown, subError: .invalidOOBValue)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
+    }
+
+    func test_toResetPasswordStartPublicError_suberrorUnknown() {
+        sut = createApiError(type: .invalidGrant, subError: .unknown)
+        let error = sut.toVerifyCodePublicError(correlationId: correlationId)
+
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
+    }
 }

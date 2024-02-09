@@ -25,9 +25,9 @@
 import Foundation
 
 protocol MSALNativeAuthResponseError: Error, Decodable, Equatable, MSALNativeAuthResponseCorrelatable {
-    associatedtype ErrorCode: RawRepresentable where ErrorCode.RawValue == String
+    associatedtype ErrorCode: RawRepresentable, MSALNativeAuthUnknownCaseProtocol where ErrorCode.RawValue == String
 
-    var error: ErrorCode? { get }
+    var error: ErrorCode { get }
     var errorDescription: String? { get }
     var errorCodes: [Int]? { get }
     var errorURI: String? { get }

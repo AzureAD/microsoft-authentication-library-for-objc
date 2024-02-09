@@ -30,7 +30,7 @@ final class MSALNativeAuthSignUpContinueOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpContinueOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 8)
+        XCTAssertEqual(sut.allCases.count, 9)
     }
 
     func test_invalidRequest() {

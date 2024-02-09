@@ -24,14 +24,23 @@
 
 import Foundation
 
-enum MSALNativeAuthSignUpContinueOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
-    case invalidRequest = "invalid_request"
-    case unauthorizedClient = "unauthorized_client"
-    case invalidGrant = "invalid_grant"
-    case expiredToken = "expired_token"
-    case userAlreadyExists = "user_already_exists"
-    case attributesRequired = "attributes_required"
-    case verificationRequired = "verification_required"
-    case credentialRequired = "credential_required"
-    case unknown
+/// Conform any decodable enum to this protocol to add an `unknown` case, that will be returned when the backend introduces
+/// a new case that is not registered in the SDK
+
+protocol MSALNativeAuthUnknownCaseProtocol: RawRepresentable, CaseIterable where RawValue: Decodable & Equatable {
+    static var unknown: Self { get }
+}
+
+extension MSALNativeAuthUnknownCaseProtocol {
+    init(rawValue: RawValue) {
+        let value = Self.allCases.first { $0.rawValue == rawValue }
+        self = value ?? Self.unknown
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(RawValue.self)
+        let value = Self(rawValue: rawValue)
+        self = value ?? Self.unknown
+    }
 }

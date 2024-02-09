@@ -99,7 +99,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.throwingInitError = ErrorMock.error
 
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
+        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, message: "SignIn Initiate: Cannot create Initiate request object", correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
 
@@ -474,7 +474,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.throwingInitError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
 
-        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, correlationId: defaultUUID))
+        let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedError: SignInStartError(type: .generalError, message: "SignIn Initiate: Cannot create Initiate request object", correlationId: defaultUUID))
 
         let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
 

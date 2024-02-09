@@ -82,7 +82,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                     context: context,
                     format: "Missing expected fields in signup/start for attribute_validation_failed error"
                 )
-                return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+                return .unexpectedError(apiError)
             }
         case .invalidRequest where isSignUpStartInvalidRequestParameter(
             apiError,
@@ -92,13 +92,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             apiError,
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
             return .unauthorizedClient(apiError)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .unknown:
+            return .unexpectedError(apiError)
         default:
             return .error(apiError)
         }
@@ -158,8 +153,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             MSALLogger.log(level: .error, context: context, format: "signup/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
-        if apiError.error == .none {
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+        if apiError.error == .unknown {
+            return .unexpectedError(apiError)
         }
 
         return .error(apiError)
@@ -218,13 +213,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .userAlreadyExists,
              .invalidRequest:
             return .error(apiError)
-        case .none:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .unknown:
+            return .unexpectedError(apiError)
         }
     }
 
@@ -256,6 +246,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
+        case .unknown:
+            return .unexpectedError(apiError)
         }
     }
 

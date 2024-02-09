@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -47,7 +47,7 @@ struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthRes
     }
 
     init(
-        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode? = nil,
+        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -83,7 +83,7 @@ extension MSALNativeAuthResetPasswordPollCompletionResponseError {
              .expiredToken,
              .invalidRequest,
              .userNotFound,
-             .none:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,
