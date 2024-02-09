@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -47,7 +47,7 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
     }
 
     init(
-        error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode? = nil,
+        error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode = .unknownCase,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -82,8 +82,7 @@ extension MSALNativeAuthResetPasswordSubmitResponseError {
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
-             .unknownCase,
-             .none:
+             .unknownCase:
             return .init(
                 type: .generalError,
                 message: errorDescription,

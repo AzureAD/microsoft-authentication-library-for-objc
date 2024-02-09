@@ -25,7 +25,7 @@
 import Foundation
 
 struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
-    let error: MSALNativeAuthSignUpContinueOauth2ErrorCode?
+    let error: MSALNativeAuthSignUpContinueOauth2ErrorCode
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -52,7 +52,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthSignUpContinueOauth2ErrorCode? = nil,
+        error: MSALNativeAuthSignUpContinueOauth2ErrorCode = .unknownCase,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -97,8 +97,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
-             .unknownCase,
-             .none:
+             .unknownCase:
             return .init(
                 type: .generalError,
                 message: errorDescription,
@@ -127,8 +126,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
-             .unknownCase,
-             .none:
+             .unknownCase:
             return .init(
                 type: .generalError,
                 message: errorDescription,

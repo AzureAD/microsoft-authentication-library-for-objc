@@ -82,7 +82,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                     context: context,
                     format: "Missing expected fields in signup/start for attribute_validation_failed error"
                 )
-                return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+                return .unexpectedError(apiError)
             }
         case .invalidRequest where isSignUpStartInvalidRequestParameter(
             apiError,
@@ -92,14 +92,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             apiError,
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
             return .unauthorizedClient(apiError)
-        case .none,
-             .unknownCase:
-            return .unexpectedError(.init(
-                errorDescription: apiError.errorDescription,
-                errorCodes: apiError.errorCodes,
-                errorURI: apiError.errorURI,
-                correlationId: apiError.correlationId
-            ))
+        case .unknownCase:
+            return .unexpectedError(apiError)
         default:
             return .error(apiError)
         }
@@ -219,8 +213,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .userAlreadyExists,
              .invalidRequest:
             return .error(apiError)
-        case .none,
-             .unknownCase:
+        case .unknownCase:
             return .unexpectedError(apiError)
         }
     }

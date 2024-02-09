@@ -119,8 +119,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 return .error(.slowDown(responseError))
             case .userNotFound:
                 return .error(.userNotFound(responseError))
-            case .none,
-                 .unknownCase:
+            case .unknownCase:
                 return .error(.unexpectedError(responseError))
             }
         }

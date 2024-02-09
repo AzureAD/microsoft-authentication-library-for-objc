@@ -89,8 +89,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .error(.userNotFound(apiError))
         case .unsupportedChallengeType:
             return .error(.unsupportedChallengeType(apiError))
-        case .none,
-             .unknownCase:
+        case .unknownCase:
             return .error(.unexpectedError(apiError))
         }
     }
@@ -133,8 +132,9 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             }
         case .password,
              .otp:
-            MSALLogger.log(level: .error, context: context, format: "ChallengeType not expected")
-            return .unexpectedError(.init())
+            let errorDescription = MSALNativeAuthErrorMessage.unexpectedChallengeType
+            MSALLogger.log(level: .error, context: context, format: errorDescription)
+            return .unexpectedError(.init(errorDescription: errorDescription))
         }
     }
 
@@ -143,8 +143,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             MSALLogger.log(level: .info, context: context, format: "resetpassword/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
-        if apiError.error == .none {
-            return .unexpectedError(.init(errorDescription: apiError.errorDescription))
+        if apiError.error == .unknownCase {
+            return .unexpectedError(apiError)
         }
         return .error(apiError)
     }
@@ -185,8 +185,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
-        case .none,
-             .unknownCase:
+        case .unknownCase:
             return .unexpectedError(apiError)
         }
     }
@@ -228,8 +227,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .none,
-             .unknownCase:
+        case .unknownCase:
             return .unexpectedError(apiError)
         }
     }
@@ -276,8 +274,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .none,
-             .unknownCase:
+        case .unknownCase:
             return .unexpectedError(apiError)
         }
     }

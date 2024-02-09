@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthSignInChallengeOauth2ErrorCode?
+    let error: MSALNativeAuthSignInChallengeOauth2ErrorCode
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -43,7 +43,7 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthSignInChallengeOauth2ErrorCode? = nil,
+        error: MSALNativeAuthSignInChallengeOauth2ErrorCode = .unknownCase,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,

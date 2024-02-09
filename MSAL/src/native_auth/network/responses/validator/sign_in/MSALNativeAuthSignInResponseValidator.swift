@@ -139,8 +139,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .error(.expiredToken(error))
             case .unsupportedChallengeType:
                 return .error(.unsupportedChallengeType(error))
-            case .none,
-                 .unknownCase:
+            case .unknownCase:
                 return .error(.unexpectedError(error))
             }
     }
@@ -155,8 +154,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .error(.unsupportedChallengeType(error))
             case .userNotFound:
                 return .error(.userNotFound(error))
-            case .none,
-                 .unknownCase:
+            case .unknownCase:
                 return .error(.unexpectedError(error))
             }
     }
