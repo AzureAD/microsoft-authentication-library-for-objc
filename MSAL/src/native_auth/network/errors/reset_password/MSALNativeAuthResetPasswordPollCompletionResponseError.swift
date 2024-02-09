@@ -47,7 +47,7 @@ struct MSALNativeAuthResetPasswordPollCompletionResponseError: MSALNativeAuthRes
     }
 
     init(
-        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -83,7 +83,7 @@ extension MSALNativeAuthResetPasswordPollCompletionResponseError {
              .expiredToken,
              .invalidRequest,
              .userNotFound,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,

@@ -49,7 +49,7 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
     }
 
     init(
-        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -87,7 +87,7 @@ extension MSALNativeAuthResetPasswordContinueResponseError {
              .expiredToken,
              .invalidRequest,
              .verificationRequired,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,

@@ -30,5 +30,5 @@ enum MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode: String, Decodable
     case unauthorizedClient = "unauthorized_client"
     case expiredToken = "expired_token"
     case userNotFound = "user_not_found"
-    case unknownCase
+    case unknown
 }

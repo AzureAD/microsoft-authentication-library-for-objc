@@ -30,5 +30,5 @@ enum MSALNativeAuthResetPasswordContinueOauth2ErrorCode: String, Decodable, MSAL
     case invalidGrant = "invalid_grant"
     case expiredToken = "expired_token"
     case verificationRequired = "verification_required"
-    case unknownCase
+    case unknown
 }

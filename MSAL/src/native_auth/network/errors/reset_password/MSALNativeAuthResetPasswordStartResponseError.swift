@@ -45,7 +45,7 @@ struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseErro
     }
 
     init(
-        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode = .unknown,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,

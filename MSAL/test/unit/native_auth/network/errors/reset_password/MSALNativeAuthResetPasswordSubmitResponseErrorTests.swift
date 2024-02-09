@@ -67,12 +67,12 @@ final class MSALNativeAuthResetPasswordSubmitResponseErrorTests: XCTestCase {
         testPasswordRequiredError(code: .invalidGrant, subError: .passwordBanned, expectedErrorType: .invalidPassword)
     }
 
-    func test_toPasswordRequiredPublicError_errorUnknownCase() {
-        testPasswordRequiredError(code: .unknownCase, subError: .passwordBanned, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_errorUnknown() {
+        testPasswordRequiredError(code: .unknown, subError: .passwordBanned, expectedErrorType: .generalError)
     }
 
-    func test_toPasswordRequiredPublicError_suberrorUnknownCase() {
-        testPasswordRequiredError(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_suberrorUnknown() {
+        testPasswordRequiredError(code: .invalidGrant, subError: .unknown, expectedErrorType: .generalError)
     }
 
     // MARK: private methods

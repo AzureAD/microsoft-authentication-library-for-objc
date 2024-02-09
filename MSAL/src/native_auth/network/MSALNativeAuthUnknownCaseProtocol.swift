@@ -24,23 +24,23 @@
 
 import Foundation
 
-/// Conform any decodable enum to this protocol to add an `unknownCase`, that will be returned when the backend introduces
+/// Conform any decodable enum to this protocol to add an `unknown` case, that will be returned when the backend introduces
 /// a new case that is not registered in the SDK
 
 protocol MSALNativeAuthUnknownCaseProtocol: RawRepresentable, CaseIterable where RawValue: Decodable & Equatable {
-    static var unknownCase: Self { get }
+    static var unknown: Self { get }
 }
 
 extension MSALNativeAuthUnknownCaseProtocol {
     init(rawValue: RawValue) {
         let value = Self.allCases.first { $0.rawValue == rawValue }
-        self = value ?? Self.unknownCase
+        self = value ?? Self.unknown
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(RawValue.self)
         let value = Self(rawValue: rawValue)
-        self = value ?? Self.unknownCase
+        self = value ?? Self.unknown
     }
 }

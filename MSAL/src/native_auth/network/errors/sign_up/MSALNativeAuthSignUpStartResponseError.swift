@@ -51,7 +51,7 @@ struct MSALNativeAuthSignUpStartResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthSignUpStartOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthSignUpStartOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -100,7 +100,7 @@ extension MSALNativeAuthSignUpStartResponseError {
              .unsupportedChallengeType,
              .unsupportedAuthMethod,
              .invalidRequest,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: message ?? errorDescription,

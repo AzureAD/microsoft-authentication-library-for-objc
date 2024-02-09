@@ -92,7 +92,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             apiError,
             knownErrorDescription: MSALNativeAuthESTSApiErrorDescriptions.clientIdParameterIsEmptyOrNotValid.rawValue):
             return .unauthorizedClient(apiError)
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         default:
             return .error(apiError)
@@ -153,7 +153,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             MSALLogger.log(level: .error, context: context, format: "signup/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
-        if apiError.error == .unknownCase {
+        if apiError.error == .unknown {
             return .unexpectedError(apiError)
         }
 
@@ -213,7 +213,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
              .userAlreadyExists,
              .invalidRequest:
             return .error(apiError)
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         }
     }
@@ -246,7 +246,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 )
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         }
     }

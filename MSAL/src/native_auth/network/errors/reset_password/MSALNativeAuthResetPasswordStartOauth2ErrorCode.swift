@@ -29,5 +29,5 @@ enum MSALNativeAuthResetPasswordStartOauth2ErrorCode: String, Decodable, MSALNat
     case unauthorizedClient = "unauthorized_client"
     case userNotFound = "user_not_found"
     case unsupportedChallengeType = "unsupported_challenge_type"
-    case unknownCase
+    case unknown
 }

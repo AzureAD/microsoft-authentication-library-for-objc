@@ -33,5 +33,5 @@ enum MSALNativeAuthSignUpContinueOauth2ErrorCode: String, Decodable, MSALNativeA
     case attributesRequired = "attributes_required"
     case verificationRequired = "verification_required"
     case credentialRequired = "credential_required"
-    case unknownCase
+    case unknown
 }

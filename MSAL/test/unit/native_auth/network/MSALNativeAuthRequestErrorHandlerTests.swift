@@ -294,8 +294,8 @@ class MSALNativeAuthResponseErrorHandlerTests: XCTestCase {
                 expectation.fulfill()
                 return
             }
-            XCTAssertEqual(error.error, .unknownCase)
-            XCTAssertEqual(error.subError, .unknownCase)
+            XCTAssertEqual(error.error, .unknown)
+            XCTAssertEqual(error.subError, .unknown)
             XCTAssertEqual(error.errorDescription, "API Description")
             XCTAssertEqual(error.errorURI, HttpModuleMockConfigurator.baseUrl.absoluteString)
             expectation.fulfill()

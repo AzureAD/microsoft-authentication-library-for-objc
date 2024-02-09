@@ -29,5 +29,5 @@ enum MSALNativeAuthSignInInitiateOauth2ErrorCode: String, Decodable, MSALNativeA
     case unauthorizedClient = "unauthorized_client"
     case userNotFound = "user_not_found"
     case unsupportedChallengeType = "unsupported_challenge_type"
-    case unknownCase
+    case unknown
 }

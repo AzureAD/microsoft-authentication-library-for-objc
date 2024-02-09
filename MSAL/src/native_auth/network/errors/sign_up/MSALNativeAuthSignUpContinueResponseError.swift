@@ -52,7 +52,7 @@ struct MSALNativeAuthSignUpContinueResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthSignUpContinueOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthSignUpContinueOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
@@ -97,7 +97,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,
@@ -126,7 +126,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
              .attributesRequired,
              .verificationRequired,
              .credentialRequired,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,

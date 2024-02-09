@@ -29,5 +29,5 @@ enum MSALNativeAuthSignUpChallengeOauth2ErrorCode: String, Decodable, MSALNative
     case unauthorizedClient = "unauthorized_client"
     case unsupportedChallengeType = "unsupported_challenge_type"
     case expiredToken = "expired_token"
-    case unknownCase
+    case unknown
 }

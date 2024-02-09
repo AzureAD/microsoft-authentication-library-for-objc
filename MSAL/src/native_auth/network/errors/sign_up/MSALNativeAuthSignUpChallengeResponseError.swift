@@ -42,7 +42,7 @@ struct MSALNativeAuthSignUpChallengeResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthSignUpChallengeOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthSignUpChallengeOauth2ErrorCode = .unknown,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,
@@ -66,7 +66,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,
@@ -83,7 +83,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
-             .unknownCase:
+             .unknown:
             return .init(
                 message: errorDescription,
                 correlationId: correlationId,
@@ -99,7 +99,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
-             .unknownCase:
+             .unknown:
             return .init(
                 type: .generalError,
                 message: errorDescription,

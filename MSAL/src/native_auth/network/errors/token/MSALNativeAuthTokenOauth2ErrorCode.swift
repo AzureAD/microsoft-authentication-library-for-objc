@@ -36,5 +36,5 @@ enum MSALNativeAuthTokenOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknow
     case authorizationPending = "authorization_pending"
     case slowDown = "slow_down"
     case userNotFound = "user_not_found"
-    case unknownCase
+    case unknown
 }

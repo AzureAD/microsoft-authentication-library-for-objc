@@ -89,7 +89,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .error(.userNotFound(apiError))
         case .unsupportedChallengeType:
             return .error(.unsupportedChallengeType(apiError))
-        case .unknownCase:
+        case .unknown:
             return .error(.unexpectedError(apiError))
         }
     }
@@ -143,7 +143,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             MSALLogger.log(level: .info, context: context, format: "resetpassword/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
-        if apiError.error == .unknownCase {
+        if apiError.error == .unknown {
             return .unexpectedError(apiError)
         }
         return .error(apiError)
@@ -185,7 +185,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         }
     }
@@ -227,7 +227,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         }
     }
@@ -274,7 +274,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
              .unauthorizedClient,
              .expiredToken:
             return .error(apiError)
-        case .unknownCase:
+        case .unknown:
             return .unexpectedError(apiError)
         }
     }

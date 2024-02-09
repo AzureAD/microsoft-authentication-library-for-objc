@@ -47,7 +47,7 @@ struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
     }
 
     init(
-        error: MSALNativeAuthTokenOauth2ErrorCode = .unknownCase,
+        error: MSALNativeAuthTokenOauth2ErrorCode = .unknown,
         subError: MSALNativeAuthSubErrorCode? = nil,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,

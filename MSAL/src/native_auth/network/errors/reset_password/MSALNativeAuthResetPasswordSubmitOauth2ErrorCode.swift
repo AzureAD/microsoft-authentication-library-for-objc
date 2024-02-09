@@ -29,5 +29,5 @@ enum MSALNativeAuthResetPasswordSubmitOauth2ErrorCode: String, Decodable, MSALNa
     case unauthorizedClient = "unauthorized_client"
     case expiredToken = "expired_token"
     case invalidGrant = "invalid_grant"
-    case unknownCase
+    case unknown
 }

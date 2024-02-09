@@ -60,7 +60,7 @@ final class MSALNativeAuthUnknownCaseProtocolTests: XCTestCase {
         let apiError = try JSONDecoder().decode(ApiErrorResponse.self, from: data)
 
         XCTAssertNotNil(apiError)
-        XCTAssertEqual(apiError.errorType, .unknownCase)
+        XCTAssertEqual(apiError.errorType, .unknown)
         XCTAssertEqual(apiError.errorDescription, "This is an error description")
         XCTAssertEqual(apiError.errorCodes, [50076])
     }
@@ -75,5 +75,5 @@ private struct ApiErrorResponse: Decodable {
 private enum ApiErrorTypeEnum: String, Decodable, Equatable, MSALNativeAuthUnknownCaseProtocol {
     case invalidGrant = "invalid_grant"
     case unauthorizedClient = "unauthorized_client"
-    case unknownCase
+    case unknown
 }

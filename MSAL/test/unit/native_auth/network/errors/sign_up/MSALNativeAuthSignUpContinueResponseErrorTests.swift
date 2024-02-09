@@ -95,12 +95,12 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .invalidCode)
     }
 
-    func test_toVerifyCodePublicError_errorUnknownCase() {
-        testSignUpContinueErrorToVerifyCode(code: .unknownCase, expectedErrorType: .generalError)
+    func test_toVerifyCodePublicError_errorUnknown() {
+        testSignUpContinueErrorToVerifyCode(code: .unknown, expectedErrorType: .generalError)
     }
 
-    func test_toVerifyCodePublicError_suberrorUnknownCase() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    func test_toVerifyCodePublicError_suberrorUnknown() {
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .unknown, expectedErrorType: .generalError)
     }
 
     // MARK: - toPasswordRequiredPublicError tests
@@ -165,12 +165,12 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .generalError)
     }
 
-    func test_toPasswordRequiredPublicError_errorUnknownCase() {
-        testSignUpContinueErrorToPasswordRequired(code: .unknownCase, subError: .invalidOOBValue, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_errorUnknown() {
+        testSignUpContinueErrorToPasswordRequired(code: .unknown, subError: .invalidOOBValue, expectedErrorType: .generalError)
     }
 
-    func test_toPasswordRequiredPublicError_suberrorUnknownCase() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .unknownCase, expectedErrorType: .generalError)
+    func test_toPasswordRequiredPublicError_suberrorUnknown() {
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .unknown, expectedErrorType: .generalError)
     }
 
     // MARK: - toAttributesRequiredPublicError tests
@@ -235,12 +235,12 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
         testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .invalidOOBValue)
     }
 
-    func test_toAttributesRequiredPublicError_errorUnknownCase() {
-        testSignUpContinueErrorToAttributesRequired(code: .unknownCase, subError: .invalidOOBValue)
+    func test_toAttributesRequiredPublicError_errorUnknown() {
+        testSignUpContinueErrorToAttributesRequired(code: .unknown, subError: .invalidOOBValue)
     }
 
-    func test_toAttributesRequiredPublicError_suberrorUnknownCase() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .unknownCase)
+    func test_toAttributesRequiredPublicError_suberrorUnknown() {
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .unknown)
     }
 
     // MARK: private methods
