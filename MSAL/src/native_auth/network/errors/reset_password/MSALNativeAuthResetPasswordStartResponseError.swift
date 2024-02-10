@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordStartOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordStartOauth2ErrorCode
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -45,7 +45,7 @@ struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseErro
     }
 
     init(
-        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode? = nil,
+        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode = .unknown,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,

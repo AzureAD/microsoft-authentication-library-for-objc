@@ -334,7 +334,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     sentTo: sentTo,
                     channelTargetType: channelType,
                     codeLength: codeLength
-                ), 
+                ),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
@@ -398,7 +398,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo
     ) async -> MSALNativeAuthSignInInitiateValidatedResponse {
         guard let request = createInitiateRequest(username: username, context: telemetryInfo.context) else {
-            let error = MSALNativeAuthSignInInitiateValidatedErrorType.invalidRequest(.init())
+            let errorDescription = "SignIn Initiate: Cannot create Initiate request object"
+            MSALLogger.log(level: .error, context: telemetryInfo.context, format: errorDescription)
+            let error = MSALNativeAuthSignInInitiateValidatedErrorType.invalidRequest(.init(errorDescription: errorDescription))
             stopTelemetryEvent(telemetryInfo, error: error)
             return .error(error)
         }
@@ -582,8 +584,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthSignInChallengeValidatedResponse {
         guard let challengeRequest = createChallengeRequest(continuationToken: continuationToken, context: context) else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: Cannot create Challenge request object")
-            return .error(.invalidRequest(.init()))
+            let errorDescription = "SignIn ResendCode: Cannot create Challenge request object"
+            MSALLogger.log(level: .error, context: context, format: errorDescription)
+            return .error(.invalidRequest(.init(errorDescription: errorDescription)))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
         return signInResponseValidator.validate(context: context, result: challengeResponse)

@@ -24,10 +24,11 @@
 
 import Foundation
 
-enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable {
+enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
     case invalidGrant = "invalid_grant"
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
+    case unknown
 }

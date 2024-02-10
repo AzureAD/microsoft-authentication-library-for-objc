@@ -86,7 +86,11 @@ final class MSALNativeAuthSignUpChallengeResponseErrorTests: XCTestCase {
     func test_toPasswordRequiredPublicError_invalidRequest() {
         testSignUpChallengeErrorToPasswordRequired(code: .invalidRequest, expectedErrorType: .generalError)
     }
-        
+
+    func test_toPasswordRequiredPublicError_errorUnknown() {
+        testSignUpChallengeErrorToPasswordRequired(code: .unknown, expectedErrorType: .generalError)
+    }
+
     // MARK: private methods
     
     private func testSignUpChallengeErrorToSignUpStart(code: MSALNativeAuthSignUpChallengeOauth2ErrorCode, expectedErrorType: SignUpStartError.ErrorType) {

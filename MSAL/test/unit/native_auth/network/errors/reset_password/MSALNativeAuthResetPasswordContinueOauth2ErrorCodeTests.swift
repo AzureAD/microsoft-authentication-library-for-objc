@@ -30,7 +30,7 @@ final class MSALNativeAuthResetPasswordContinueOauth2ErrorCodeTests: XCTestCase 
     private typealias sut = MSALNativeAuthResetPasswordContinueOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 5)
+        XCTAssertEqual(sut.allCases.count, 6)
     }
     
     func test_invalidRequest() {

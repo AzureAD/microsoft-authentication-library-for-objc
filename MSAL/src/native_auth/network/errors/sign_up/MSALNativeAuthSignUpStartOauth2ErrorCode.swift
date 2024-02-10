@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable, Equatable {
+enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, Equatable, MSALNativeAuthUnknownCaseProtocol {
     case invalidGrant = "invalid_grant"
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
@@ -32,4 +32,5 @@ enum MSALNativeAuthSignUpStartOauth2ErrorCode: String, Decodable, CaseIterable, 
     case userAlreadyExists = "user_already_exists"
     case attributesRequired = "attributes_required"
     case unsupportedAuthMethod = "unsupported_auth_method"
+    case unknown
 }
