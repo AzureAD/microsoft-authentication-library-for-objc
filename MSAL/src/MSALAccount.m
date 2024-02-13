@@ -98,6 +98,15 @@
     return msalAccount;
 }
 
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account
+                createTenantProfile:(BOOL) createTenantProfile
+                      accountClaims:(NSDictionary *) accountClaims
+{
+    MSALAccount *msalAccount = [self initWithMSIDAccount:account createTenantProfile:createTenantProfile];
+    msalAccount.accountClaims = account.isHomeTenantAccount ? accountClaims : nil;
+    return msalAccount;
+}
+
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {

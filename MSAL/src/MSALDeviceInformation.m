@@ -87,7 +87,6 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
 #if TARGET_OS_OSX
         _platformSSOStatus = [self msalPlatformSSOStatusFromMSIDPlatformSSOStatus:deviceInfo.platformSSOStatus];
 #endif
-
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
     }

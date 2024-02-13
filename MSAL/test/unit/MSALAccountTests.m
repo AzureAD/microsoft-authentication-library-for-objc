@@ -140,6 +140,74 @@
     XCTAssertNil(account.tenantProfiles);
 }
 
+- (void)testInitWithMSIDAccount_whenValidAccountAndValidClaims_shouldInitAndAddClaims
+{
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"localoid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.environment = authority.environment;
+    msidAccount.realm = authority.realm;
+    msidAccount.isSSOAccount = YES;
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+    };
+
+
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+
+    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
+                                         @"oid" : @"ff9feb5a"
+    };
+
+    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
+    XCTAssertNotNil(idTokenClaims);
+    msidAccount.idTokenClaims = idTokenClaims;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile: NO accountClaims:[idTokenClaims jsonDictionary]];
+
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.isSSOAccount);
+    XCTAssertEqualObjects(account.accountClaims, idTokenDictionary);
+}
+
+- (void)testInitWithMSIDAccount_whenValidAccountAndNil_shouldInitAndNotAddClaims
+{
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"localoid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.environment = authority.environment;
+    msidAccount.realm = authority.realm;
+    msidAccount.isSSOAccount = YES;
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+    };
+
+
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile: NO accountClaims:nil];
+
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.isSSOAccount);
+    XCTAssertNil(account.accountClaims);
+}
+
 - (void)testAddTenantProfiles_whenAddValidTenantProfiles_shouldAddIt
 {
     // Create MSAL account 1
