@@ -1,3 +1,6 @@
+## [1.2.22]
+* TBD
+
 ## [1.2.21]
 * Add additional error codes for PSSO KeyId mismatch (#1946)
 
