@@ -84,7 +84,7 @@ jobs:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.0-x86_64.xctestrun' \
+            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.4-x86_64.xctestrun' \
             -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
