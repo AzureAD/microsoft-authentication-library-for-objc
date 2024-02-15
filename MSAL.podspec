@@ -21,10 +21,8 @@ Pod::Spec.new do |s|
     :submodules => true
   }
 
-  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$(PODS_ROOT)/MSAL/app-lib"}
+  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
   s.default_subspecs ='app-lib'
-
-  s.xcconfig  = { 'HEADER_SEARCH_PATHS' => "$(PODS_ROOT)/MSAL/app-lib" }
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
