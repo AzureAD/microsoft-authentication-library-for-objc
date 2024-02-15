@@ -26,7 +26,6 @@ Pod::Spec.new do |s|
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
-  s.module_map = 'MSAL/module.modulemap'
 
   s.subspec 'app-lib' do |app|
     app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
