@@ -52,7 +52,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D626FF491FBA6DFC00EE4487"
-               BuildableName = "IdentityCoreTests.xctest"
+               BuildableName = ".xctest"
                BlueprintName = "IdentityCoreTests iOS"
                ReferencedContainer = "container:IdentityCore/IdentityCore/IdentityCore.xcodeproj">
             </BuildableReference>
