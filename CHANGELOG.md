@@ -1,3 +1,6 @@
+## [1.2.22]
+* Updated token request to include an additional parameter, indicating that the Broker should bypass the account mismatch validation check.
+
 ## [1.2.21]
 * Add additional error codes for PSSO KeyId mismatch (#1946)
 
