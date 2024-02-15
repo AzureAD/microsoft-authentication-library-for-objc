@@ -21,11 +21,13 @@ Pod::Spec.new do |s|
     :submodules => true
   }
 
-  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
+  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => '$(PODS_ROOT)/MSAL'}
   s.default_subspecs ='app-lib'
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
+  s.module_map = 'MSAL/module.modulemap'
+  s.preserve_path = 'MSAL/module.modulemap'
 
   s.subspec 'app-lib' do |app|
     app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
