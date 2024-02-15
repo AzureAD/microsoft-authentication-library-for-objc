@@ -21,14 +21,16 @@ Pod::Spec.new do |s|
     :submodules => true
   }
 
-  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => '$(PODS_ROOT)/MSAL}
+  s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$(PODS_ROOT)/MSAL"}
   s.default_subspecs ='app-lib'
+
+  core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(PODS_ROOT)/MSAL/app-lib/module' }
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
-  core.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(PODS_ROOT)/MSAL/app-lib/module' }
+
   s.subspec 'app-lib' do |app|
-  app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
+    app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
     app.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     app.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
     app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
