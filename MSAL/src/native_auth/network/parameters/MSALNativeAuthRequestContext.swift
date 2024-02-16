@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 class MSALNativeAuthRequestContext: MSIDRequestContext {
 
@@ -64,7 +69,7 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
 
     func setServerCorrelationId(_ serverCorrelationId: UUID?) {
         guard let serverCorrelationId = serverCorrelationId else {
-            MSALLogger.log(level: .warning, context: self, format: "correlationId not found in server response")
+            MSALNativeAuthLogger.log(level: .warning, context: self, format: "correlationId not found in server response")
             _serverCorrelationId = serverCorrelationId
             return
         }
@@ -77,7 +82,7 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
                   Inconsistency between the correlationId sent by the SDK and the one received in the response.
                   Original correlationId: \(_correlationId). Server correlationId \(serverCorrelationId)
                   """
-        MSALLogger.log(level: .warning, context: self, format: log)
+        MSALNativeAuthLogger.log(level: .warning, context: self, format: log)
 
         _serverCorrelationId = serverCorrelationId
     }

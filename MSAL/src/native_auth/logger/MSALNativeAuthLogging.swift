@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+//#if STATIC_LIBRARY
+import MSAL_Statics
+//#endif
+
+
 
 protocol MSALLogging {
     static func log(
@@ -59,7 +64,7 @@ protocol MSALLogging {
         _ args: CVarArg...)
 }
 
-extension MSALLogger: MSALLogging {
+class MSALNativeAuthLogger: MSALLogging {
     private static func logCommon(level: MSIDLogLevel,
                                   context: MSIDRequestContext? = nil,
                                   correlationId: UUID? = nil,

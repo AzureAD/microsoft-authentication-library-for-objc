@@ -23,7 +23,12 @@
 // THE SOFTWARE.
 
 import Foundation
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, MSALNativeAuthCredentialsControlling {
 
@@ -73,18 +78,18 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             guard let tokens = retrieveTokens(account: account,
                                               scopes: [],
                                               context: context) else {
-                MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
+                MSALNativeAuthLogger.log(level: .verbose, context: nil, format: "No tokens found")
                 return nil
             }
             return factory.makeUserAccountResult(account: account, authTokens: tokens)
         } else {
-            MSALLogger.log(level: .verbose, context: nil, format: "No account found")
+            MSALNativeAuthLogger.log(level: .verbose, context: nil, format: "No account found")
         }
         return nil
     }
 
     func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
+        MSALNativeAuthLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
         let scopes = authTokens.accessToken?.scopes.array as? [String] ?? []
         guard let request = createRefreshTokenRequest(
@@ -117,7 +122,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             let config = factory.makeMSIDConfiguration(scopes: [])
             return try cacheAccessor.getAllAccounts(configuration: config)
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: nil,
                 format: "Error retrieving accounts \(error)")
@@ -134,7 +139,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             let config = factory.makeMSIDConfiguration(scopes: scopes)
             return try cacheAccessor.getTokens(account: account, configuration: config, context: context)
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Error retrieving tokens: \(error)"
@@ -160,7 +165,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             )
         case .error(let errorType):
             let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
@@ -177,7 +182,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
     ) -> RefreshTokenCredentialControllerResponse {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .verbose,
                 context: context,
                 format: "Refresh Token completed successfully")
@@ -190,7 +195,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             })
         } catch {
             let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Token Result was not created properly error - \(error)")

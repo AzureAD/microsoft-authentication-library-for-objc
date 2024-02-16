@@ -37,7 +37,7 @@
  Initializes MSALCIAMAuthority with NSURL.
  @param     url                    Authority indicating a CIAM endpoint that MSAL can use to obtain tokens.
  @param     error               The error that occurred creating the authority object, if any, if you're not interested in the specific error pass in nil.
- //*/
+ */
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;

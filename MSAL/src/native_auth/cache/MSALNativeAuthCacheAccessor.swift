@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
     private let tokenCacheAccessor: MSIDDefaultTokenCacheAccessor

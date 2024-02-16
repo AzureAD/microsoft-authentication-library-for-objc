@@ -25,6 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+module MSAL_Statics {
+    umbrella header "src/public/MSAL.h"
+    header "src/public/MSALAccount.h"
+    header "src/public/MSALCIAMAuthority.h"
+    header "src/public/configuration/publicClientApplication/MSALSliceConfig.h"
+    header "src/native_auth/public/MSALNativeAuthChallengeTypes.h"
+    header "src/public/MSALDefinitions.h"
+    header "src/public/MSALHTTPMethod.h"
+    header "src/public/MSALPublicClientApplication.h"
+    header "src/public/configuration/MSALPublicClientApplicationConfig.h"
+}
+
 module MSAL_Private {
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"

@@ -21,10 +21,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
 import Foundation
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+
+
+
 
 enum MSALNativeAuthRequestConfiguratorType {
     enum SignUp {
@@ -259,7 +264,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             request.urlRequest = URLRequest(url: endpointUrl)
             request.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: parameters.context,
                 format: "Endpoint could not be created: \(error)"

@@ -23,6 +23,10 @@
 // THE SOFTWARE.
 
 import Foundation
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
 
 extension MSALNativeAuthUserAccountResult {
 
@@ -43,7 +47,7 @@ extension MSALNativeAuthUserAccountResult {
                 return .init(.success(accessToken.accessToken), correlationId: correlationId)
             }
         } else {
-            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
             return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId)), correlationId: correlationId)
         }
     }

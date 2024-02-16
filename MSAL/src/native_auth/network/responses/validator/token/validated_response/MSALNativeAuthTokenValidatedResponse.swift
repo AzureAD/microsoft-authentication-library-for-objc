@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 enum MSALNativeAuthTokenValidatedResponse {
     case success(MSIDTokenResponse)
@@ -97,7 +102,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorUri: apiError.errorURI
             )
         case .expiredRefreshToken(let apiError):
-            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            MSALNativeAuthLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
             return SignInStartError(
                 type: .generalError,
                 message: apiError.errorDescription,
@@ -153,7 +158,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .userNotFound(let apiError),
              .invalidPassword(let apiError),
              .invalidOOBCode(let apiError):
-            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            MSALNativeAuthLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError.errorDescription,

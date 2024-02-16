@@ -23,7 +23,11 @@
 // THE SOFTWARE.
 
 import Foundation
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
 
 class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling {
 
@@ -55,7 +59,7 @@ class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHan
         let lastRequestTelemetryString = lastRequestTelemetry.telemetryString()
 
         guard let mutableUrlRequest = (request.urlRequest as NSURLRequest).mutableCopy() as? NSMutableURLRequest else {
-            MSALLogger.log(level: .error,
+            MSALNativeAuthLogger.log(level: .error,
                            context: context,
                            format: "Mutable copy of request could not be made for telemetry")
             return

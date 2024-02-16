@@ -69,7 +69,7 @@
 #pragma mark - MSALExternalAccountProviding
 #pragma mark - Read
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<id<MSALAccountProtocol>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
     __block NSArray *results = nil;
@@ -87,7 +87,7 @@
     return results;
 }
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<id<MSALAccountProtocol>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
                                                             error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
@@ -180,7 +180,7 @@
 
 #pragma mark - Update
 
-- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
+- (BOOL)updateAccount:(id<MSALAccountProtocol>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
@@ -193,7 +193,7 @@
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(id<MSALAccount>)msalAccount
+                                                                     msalAccount:(id<MSALAccountProtocol>)msalAccount
                                                                    idTokenClaims:(NSDictionary *)idTokenClaims
                                                                          version:(MSALLegacySharedAccountVersion)version
                                                                            error:(NSError **)error
@@ -243,7 +243,7 @@
 
 #pragma mark - Removal
 
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(id<MSALAccountProtocol>)account
           wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
@@ -279,7 +279,7 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
-- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+- (BOOL)removeAccount:(nonnull id<MSALAccountProtocol>)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
@@ -292,7 +292,7 @@
 
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(id<MSALAccount>)account
+                                                                     msalAccount:(id<MSALAccountProtocol>)account
                                                                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                                                                            error:(NSError **)error
 {
@@ -342,7 +342,7 @@
 
 #pragma mark - Write
 
-- (void)updateAccountAsync:(id<MSALAccount>)account
+- (void)updateAccountAsync:(id<MSALAccountProtocol>)account
              idTokenClaims:(NSDictionary *)idTokenClaims
             tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                  operation:(MSALLegacySharedAccountWriteOperation)operation
@@ -365,7 +365,7 @@
     });
 }
 
-- (BOOL)updateAccountImpl:(id<MSALAccount>)account
+- (BOOL)updateAccountImpl:(id<MSALAccountProtocol>)account
             idTokenClaims:(NSDictionary *)idTokenClaims
            tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                 operation:(MSALLegacySharedAccountWriteOperation)operation
@@ -441,7 +441,7 @@
     return YES;
 }
 
-- (BOOL)saveUpdatedAccount:(id<MSALAccount>)account
+- (BOOL)saveUpdatedAccount:(id<MSALAccountProtocol>)account
                 jsonObject:(MSIDJsonObject *)jsonObject
                   accounts:(NSArray *)accounts
                  operation:(MSALLegacySharedAccountWriteOperation)operation

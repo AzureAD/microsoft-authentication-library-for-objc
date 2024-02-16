@@ -23,6 +23,10 @@
 // THE SOFTWARE.
 
 import Foundation
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
 
 extension ResetPasswordCodeRequiredState {
 
@@ -35,7 +39,7 @@ extension ResetPasswordCodeRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
-            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
             return .init(
                 .error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self), 
                 correlationId: correlationId
@@ -52,7 +56,7 @@ extension ResetPasswordRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {
-            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
             return .init(
                 .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self), 
                 correlationId: correlationId

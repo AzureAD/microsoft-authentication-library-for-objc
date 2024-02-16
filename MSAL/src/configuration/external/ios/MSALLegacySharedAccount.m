@@ -70,7 +70,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return self;
 }
 
-- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+- (instancetype)initWithMSALAccount:(id<MSALAccountProtocol>)account
                       accountClaims:(NSDictionary *)claims
                     applicationName:(NSString *)appName
                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -143,7 +143,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 #pragma mark - Update
 
-- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccountProtocol>)account
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -200,12 +200,12 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return YES;
 }
 
-- (NSDictionary *)claimsFromMSALAccount:(__unused id<MSALAccount>)account claims:(__unused NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(__unused id<MSALAccountProtocol>)account claims:(__unused NSDictionary *)claims
 {
     return nil;
 }
 
-- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccount>)account claims:(__unused NSDictionary *)claims
+- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccountProtocol>)account claims:(__unused NSDictionary *)claims
 {
     if (account.identifier)
     {

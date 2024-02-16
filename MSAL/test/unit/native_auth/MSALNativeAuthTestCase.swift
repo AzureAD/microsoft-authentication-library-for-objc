@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import XCTest
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 class MSALNativeAuthTestCase: XCTestCase {
     //Do not create more than one instance of this variable, inherit this class instead

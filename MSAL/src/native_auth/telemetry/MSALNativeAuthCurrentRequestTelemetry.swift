@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 final class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
     let apiId: MSALNativeAuthTelemetryApiId

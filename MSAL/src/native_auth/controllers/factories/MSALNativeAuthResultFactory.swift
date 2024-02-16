@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 protocol MSALNativeAuthResultBuildable {
 
@@ -51,13 +56,13 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             let claims = try MSIDIdTokenClaims.init(rawIdToken: tokenResult.rawIdToken)
             jsonDictionary = claims.jsonDictionary()
             if jsonDictionary == nil {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "Initialising account without claims")
             }
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Claims for account could not be created - \(error)" )
@@ -65,14 +70,14 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
         guard let account = MSALAccount.init(msidAccount: tokenResult.account,
                                              createTenantProfile: false,
                                              accountClaims: jsonDictionary) else {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Account could not be created")
             return nil
         }
         guard let refreshToken = tokenResult.refreshToken as? MSIDRefreshToken else {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Refresh token invalid, account result could not be created")

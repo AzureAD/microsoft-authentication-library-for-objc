@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 protocol MSALNativeAuthTokenResponseValidating {
     func validate(
@@ -61,7 +66,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         case .failure(let tokenResponseError):
             guard let tokenResponseError =
                     tokenResponseError as? MSALNativeAuthTokenResponseError else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "Token: Unable to decode error response: \(tokenResponseError)")
@@ -150,7 +155,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         errorCodesConverterFunction: (MSALNativeAuthESTSApiErrorCodes, MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedErrorType
     ) -> MSALNativeAuthTokenValidatedResponse {
         guard var errorCodes = apiError.errorCodes, !errorCodes.isEmpty else {
-            MSALLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "/token error - Empty error_codes received")
             return useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError(apiError))
         }
 
@@ -160,7 +165,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
             validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, apiError))
         } else {
-            MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
             validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError(apiError))
         }
 
@@ -175,7 +180,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 errorMessage = "/token error - Unknown ESTS received in error_codes with code: \(errorCode) (ignoring)"
             }
 
-            MSALLogger.log(level: .verbose, context: context, format: errorMessage)
+            MSALNativeAuthLogger.log(level: .verbose, context: context, format: errorMessage)
         }
 
         return validatedResponse

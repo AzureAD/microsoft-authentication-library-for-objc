@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedAccountsProvider (Internal)
 
-- (void)updateAccountAsync:(id<MSALAccount>)account
+- (void)updateAccountAsync:(id<MSALAccountProtocol>)account
              idTokenClaims:(nullable NSDictionary *)idTokenClaims
             tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                  operation:(MSALLegacySharedAccountWriteOperation)operation

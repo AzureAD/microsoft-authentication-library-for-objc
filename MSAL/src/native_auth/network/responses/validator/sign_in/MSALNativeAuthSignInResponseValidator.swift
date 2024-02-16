@@ -22,7 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import MSAL_Private
+#if STATIC_LIBRARY
+import MSAL_Statics
+#endif
+
+
 
 protocol MSALNativeAuthSignInResponseValidating {
     func validate(
@@ -48,7 +53,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         case .failure(let signInChallengeResponseError):
             guard let signInChallengeResponseError =
                     signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Unable to decode error response: \(signInChallengeResponseError)")
@@ -70,11 +75,11 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
-            MSALLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/initiate: Unable to decode error response: \(responseError)")
@@ -91,7 +96,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
         case .otp:
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
@@ -101,7 +106,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     let targetLabel = response.challengeTargetLabel,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Invalid response with challenge type oob, response: \(response)")
@@ -114,7 +119,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 codeLength: codeLength)
         case .password:
             guard let continuationToken = response.continuationToken else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Expected continuation token not nil with credential type password")

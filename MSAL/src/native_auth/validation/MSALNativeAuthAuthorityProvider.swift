@@ -21,8 +21,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import MSAL_Statics
+import MSAL_Private
+#if STATIC_LIBRARY
 
-@_implementationOnly import MSAL_Private
+#endif
 
 protocol MSALNativeAuthAuthorityProviding {
     func authority(rawTenant: String) throws -> MSALCIAMAuthority
