@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'native-auth' do |newapp|
-    newapp.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => '$SRCROOT/MSAL'}
+    newapp.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
     newapp.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
     newapp.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     newapp.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
