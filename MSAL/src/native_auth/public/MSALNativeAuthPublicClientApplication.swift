@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 #if STATIC_LIBRARY
-import MSAL_Statics
+//import MSAL_Statics
 #endif
 
 import Foundation

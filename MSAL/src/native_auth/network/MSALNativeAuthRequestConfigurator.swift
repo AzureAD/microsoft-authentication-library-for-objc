@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 #if STATIC_LIBRARY
-import MSAL_Statics
+//import MSAL_Statics
 #endif
 import Foundation
 
-import MSAL_Private
+@_implementationOnly import MSAL_Private
 
 
 

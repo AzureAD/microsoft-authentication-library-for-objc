@@ -26,9 +26,12 @@ Pod::Spec.new do |s|
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
+  s.xcconfig = { 'SWIFT_OBJC_BRIDGING_HEADER' => __dir__ + '/MSAL/MSAL-BridgingHeader.h' }
+  s.ios.preserve_paths = 'MSAL/MSAL-BridgingHeader.h'
+s.static_framework = false
 
   s.subspec 'app-lib' do |app|
-    app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
+    app.source_files = "MSAL/MSAL-BridgingHeader.h", "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
     app.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     app.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
     app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"

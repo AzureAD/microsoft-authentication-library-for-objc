@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
-import MSAL_Private
+@_implementationOnly import MSAL_Private
 
 typealias MSALNativeAuthOperationType = Int
 

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "04A6B57A226921890035C7C2"
-               BuildableName = "libMSAL (iOS Static Library).a"
+               BuildableName = "libMSAL.a"
                BlueprintName = "MSAL (iOS Static Library)"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
@@ -44,7 +44,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "04A6B57A226921890035C7C2"
-            BuildableName = "libMSAL (iOS Static Library).a"
+            BuildableName = "libMSAL.a"
             BlueprintName = "MSAL (iOS Static Library)"
             ReferencedContainer = "container:MSAL.xcodeproj">
          </BuildableReference>
@@ -60,7 +60,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "04A6B57A226921890035C7C2"
-            BuildableName = "libMSAL (iOS Static Library).a"
+            BuildableName = "libMSAL.a"
             BlueprintName = "MSAL (iOS Static Library)"
             ReferencedContainer = "container:MSAL.xcodeproj">
          </BuildableReference>

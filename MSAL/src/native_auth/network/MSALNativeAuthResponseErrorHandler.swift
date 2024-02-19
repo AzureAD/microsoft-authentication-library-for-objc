@@ -24,7 +24,7 @@
 
 import Foundation
 
-import MSAL_Private
+@_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthResponseErrorHandler<T: Decodable & Error & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDHttpRequestErrorHandling {
 

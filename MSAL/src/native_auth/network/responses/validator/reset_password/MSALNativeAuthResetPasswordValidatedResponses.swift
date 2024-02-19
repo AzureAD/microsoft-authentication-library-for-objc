@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MSAL_Private
+@_implementationOnly import MSAL_Private
 
 enum MSALNativeAuthResetPasswordStartValidatedResponse: Equatable {
     case success(continuationToken: String)

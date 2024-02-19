@@ -24,9 +24,9 @@
 
 import Foundation
 
-import MSAL_Private
+@_implementationOnly import MSAL_Private
 #if STATIC_LIBRARY
-import MSAL_Statics
+//import MSAL_Statics
 #endif
 
 

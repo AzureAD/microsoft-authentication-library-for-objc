@@ -24,7 +24,7 @@
 
 import Foundation
 #if STATIC_LIBRARY
-import MSAL_Statics
+//import MSAL_Statics
 #endif
 
 
