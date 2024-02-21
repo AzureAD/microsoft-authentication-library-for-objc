@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthTokens {
+@objc class MSALNativeAuthTokens: NSObject {
     let accessToken: MSIDAccessToken?
     let refreshToken: MSIDRefreshToken?
     let rawIdToken: String?

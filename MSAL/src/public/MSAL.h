@@ -91,3 +91,4 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALHttpMethod.h>
 #import <MSAL/MSALCIAMAuthority.h>
 #import <MSAL/MSALWipeCacheForAllAccountsConfig.h>
+#import <MSAL/MSALNativeAuthUserAccountResult.h>
