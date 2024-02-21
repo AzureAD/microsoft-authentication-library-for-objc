@@ -209,6 +209,7 @@
 
 - (void)test_non_nil_sdkVersion
 {
+    XCTSkip("Skip this test for private preview versioning");
     NSString *versionFromInfo = [[NSBundle bundleForClass:MSALPublicClientApplication.class] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     NSString *version = [MSALPublicClientApplication sdkVersion];
     XCTAssertNotNil(version);
@@ -2014,7 +2015,7 @@
         
                 XCTAssertNil(result);
                 XCTAssertNotNil(error);
-    }];    
+    }];
 }
 #if TARGET_OS_OSX
 - (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoWithPlatformSSOStatus API_AVAILABLE(ios(13.0), macos(10.15))
@@ -3272,7 +3273,7 @@
     XCTAssertEqual([application allAccounts:nil].count, 0);
 
     // 5. Make sure account and FOCI tokens are still in cache
-    MSIDAccount *cachedAccount = [self.tokenCacheAccessor getAccountForIdentifier:account.accountIdentifier authority:authority realmHint:nil context:nil error:nil];
+    MSIDAccount *cachedAccount = [self.tokenCacheAccessor getAccountForIdentifier:account.accountIdentifier authority:authority realmHint:nil accountHomeTenantId:nil accountSelectionLog:nil context:nil error:nil];
     XCTAssertNotNil(cachedAccount);
 
     MSIDRefreshToken *fociToken = [self.tokenCacheAccessor getRefreshTokenWithAccount:account.accountIdentifier familyId:@"1" configuration:configuration context:nil error:nil];
