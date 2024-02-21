@@ -24,10 +24,11 @@
 
 import Foundation
 
+
 /// Class that groups account and token information.
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
     /// The account object that holds account information.
-    @objc public let account: MSALAccount
+    public let account: MSALNativeAuthAccount
 
     let authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
@@ -49,7 +50,7 @@ import Foundation
     }
 
     init(
-        account: MSALAccount,
+        account: MSALNativeAuthAccount,
         authTokens: MSALNativeAuthTokens,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface
@@ -104,6 +105,28 @@ import Foundation
             case .failure(let error):
                 await delegate.onAccessTokenRetrieveError(error: error)
             }
+        }
+    }
+
+    func getAccessTokenInternal(
+        forceRefresh: Bool,
+        correlationId: UUID?,
+        cacheAccessor: MSALNativeAuthCacheInterface
+    ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        let correlationId = context.correlationId()
+
+        if let accessToken = self.authTokens.accessToken {
+            if forceRefresh || accessToken.isExpired() {
+                let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
+                let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
+                return await credentialsController.refreshToken(context: context, authTokens: authTokens)
+            } else {
+                return .init(.success(accessToken.accessToken), correlationId: correlationId)
+            }
+        } else {
+            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
+            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId)), correlationId: correlationId)
         }
     }
 }
