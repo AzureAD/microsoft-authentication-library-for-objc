@@ -1,6 +1,5 @@
 ## [1.3.0]
 
-
 ## [1.2.22]
 * Add privacy manifest (#1984)
 
