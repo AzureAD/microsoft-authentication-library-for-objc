@@ -3227,8 +3227,6 @@
 		D65A6F7E1E3FF3D900C69FBA /* public */ = {
 			isa = PBXGroup;
 			children = (
-				DE7A65672B8759C0004870EB /* MSALNativeAuthAccount.h */,
-				DE7A65682B8759C0004870EB /* MSALNativeAuthAccount.m */,
 				1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */,
 				1E72193724773D1B00AB9B67 /* MSALHttpMethod.h */,
 				9627C7B8225432690028A859 /* configuration */,
@@ -3607,6 +3605,14 @@
 			path = token;
 			sourceTree = "<group>";
 		};
+		DE7A657B2B8765BA004870EB /* account */ = {
+			isa = PBXGroup;
+			children = (
+				DE7A65682B8759C0004870EB /* MSALNativeAuthAccount.m */,
+			);
+			path = account;
+			sourceTree = "<group>";
+		};
 		DE8EC86B2A026BA0003FA561 /* sign_in */ = {
 			isa = PBXGroup;
 			children = (
@@ -3947,6 +3953,7 @@
 				9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */,
 				DE8BE7DB2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift */,
 				E2D3BC4E2A7BE1C4009C4D1F /* MSALNativeAuthUserAccountResult+Internal.swift */,
+				DE7A65672B8759C0004870EB /* MSALNativeAuthAccount.h */,
 			);
 			path = public;
 			sourceTree = "<group>";
@@ -4031,6 +4038,7 @@
 			isa = PBXGroup;
 			children = (
 				E206FC5E296D65DE00AF4400 /* MSALNativeAuthInternalError.swift */,
+				DE7A657B2B8765BA004870EB /* account */,
 				E26097942948FB660060DD7C /* cache */,
 				E205D62C29B783D6003887BC /* configuration */,
 				289747AE29799A6600838C80 /* input_validator */,

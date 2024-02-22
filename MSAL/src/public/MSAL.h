@@ -52,7 +52,6 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALSliceConfig.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALAccount.h>
-#import <MSAL/MSALNativeAuthAccount.h>
 #import <MSAL/MSALAccountId.h>
 #import <MSAL/MSALTelemetry.h>
 #import <MSAL/MSALAuthority.h>
@@ -81,6 +80,7 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALParameters.h>
 #import <MSAL/MSALPublicClientApplication+SingleAccount.h>
 #if TARGET_OS_IPHONE
+#import <MSAL/MSALNativeAuthAccount.h>
 #import <MSAL/MSALNativeAuthChallengeTypes.h>
 #import <MSAL/MSALLegacySharedAccountsProvider.h>
 #endif

@@ -40,8 +40,8 @@ struct MSALNativeAuthUserAccountResultStub {
         )
     }
 
-    static var account: MSALAccount {
-        MSALAccount(username: "username",
+    static var account: MSALNativeAuthAccount {
+        MSALNativeAuthAccount(username: "username",
                     homeAccountId: MSALAccountId(),
                     environment: "",
                     tenantProfiles: [])

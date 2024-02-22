@@ -45,7 +45,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
 
         sut = MSALNativeAuthUserAccountResult(
-            account: account!,
+            account: account as! MSALNativeAuthAccount,
             authTokens: MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: rawIdToken),
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: cacheAccessorMock
@@ -66,7 +66,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     func test_whenNoAccessToken_itReturnsCorrectError() {
         let expectation = expectation(description: "CredentialsController")
         sut = MSALNativeAuthUserAccountResult(
-            account: account!,
+            account: account as! MSALNativeAuthAccount,
             authTokens: MSALNativeAuthTokens(accessToken: nil, refreshToken: nil, rawIdToken: nil),
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
