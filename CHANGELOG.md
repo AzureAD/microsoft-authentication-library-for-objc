@@ -1,3 +1,9 @@
+## [1.3.0]
+
+
+## [1.2.22]
+* Add privacy manifest (#1984)
+
 ## [1.2.21]
 * Add additional error codes for PSSO KeyId mismatch (#1946)
 
