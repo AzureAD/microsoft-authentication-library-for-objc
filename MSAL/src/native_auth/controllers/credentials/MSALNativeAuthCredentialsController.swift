@@ -80,7 +80,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 let nativeAuthAccount = MSALNativeAuthAccount.init(username: username,
                                                                    homeAccountId: account.homeAccountId,
                                                                    environment: account.environment,
-                                                                      tenantProfiles: account.tenantProfiles ?? [])
+                                                                   tenantProfiles: account.tenantProfiles ?? [])
                 return factory.makeUserAccountResult(account: nativeAuthAccount, authTokens: tokens)
             } else {
                 MSALLogger.log(level: .verbose, context: nil, format: "No username found")
