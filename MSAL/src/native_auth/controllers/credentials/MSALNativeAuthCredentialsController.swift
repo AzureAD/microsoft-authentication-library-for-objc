@@ -67,7 +67,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
 
     func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult? {
         let accounts = self.allAccounts()
-        if let account = accounts.first {
+        if let account = accounts.first as? MSALNativeAuthAccount {
             // We pass an empty array of scopes because that will return all tokens for that account identifier
             // Because we expect to be only one access token per account at this point, it's ok for the array to be empty
             guard let tokens = retrieveTokens(account: account,
