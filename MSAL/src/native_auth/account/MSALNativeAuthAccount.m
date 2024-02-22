@@ -27,4 +27,19 @@
 
 @implementation MSALNativeAuthAccount
 
+- (instancetype)initWithUsername:(NSString *)username
+                   homeAccountId:(MSALAccountId *)homeAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    return [super initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
+}
+
+#pragma mark - NSCopying
+
+- (instancetype)copyWithZone:(NSZone *)zone
+{
+    return [super copyWithZone:zone];
+}
+
 @end

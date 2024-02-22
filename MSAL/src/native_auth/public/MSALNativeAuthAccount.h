@@ -30,6 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALNativeAuthAccount : MSALAccount
 
+- (instancetype)initWithUsername:(NSString *)username
+                   homeAccountId:(MSALAccountId *)homeAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+
 @end
 
 NS_ASSUME_NONNULL_END

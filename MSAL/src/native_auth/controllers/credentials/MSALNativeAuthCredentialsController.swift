@@ -67,7 +67,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
 
     func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult? {
         let accounts = self.allAccounts()
-        if let account = accounts.first as? MSALNativeAuthAccount {
+        if let account = accounts.first {
             // We pass an empty array of scopes because that will return all tokens for that account identifier
             // Because we expect to be only one access token per account at this point, it's ok for the array to be empty
             guard let tokens = retrieveTokens(account: account,
@@ -76,7 +76,15 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
                 return nil
             }
-            return factory.makeUserAccountResult(account: account, authTokens: tokens)
+            if let username = account.username {
+                let nativeAuthAccount = MSALNativeAuthAccount.init(username: username,
+                                                                   homeAccountId: account.homeAccountId,
+                                                                   environment: account.environment,
+                                                                      tenantProfiles: account.tenantProfiles ?? [])
+                return factory.makeUserAccountResult(account: nativeAuthAccount, authTokens: tokens)
+            } else {
+                MSALLogger.log(level: .verbose, context: nil, format: "No username found")
+            }
         } else {
             MSALLogger.log(level: .verbose, context: nil, format: "No account found")
         }
