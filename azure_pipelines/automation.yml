@@ -43,6 +43,12 @@ jobs:
     fetchDepth: 1
     persistCredentials: true
     path: s
+    
+  - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"'
   
   - task: Bash@3
     displayName: Go to project folder
