@@ -1,0 +1,101 @@
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+module MSAL_Private {
+    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
+    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"
+    header "IdentityCore/IdentityCore/src/oauth2/MSIDOauth2Factory.h"
+    header "IdentityCore/IdentityCore/src/oauth2/ciam/MSIDCIAMOauth2Factory.h"
+    header "IdentityCore/IdentityCore/src/oauth2/ciam/MSIDCIAMTokenResponse.h"
+    header "IdentityCore/IdentityCore/src/oauth2/token/MSIDAccessToken.h"
+    header "IdentityCore/IdentityCore/src/oauth2/token/MSIDRefreshToken.h"
+    header "IdentityCore/IdentityCore/src/oauth2/token/MSIDCredentialType.h"
+    header "IdentityCore/IdentityCore/src/oauth2/token/MSIDIdToken.h"
+    header "IdentityCore/IdentityCore/src/MSIDVersion.h"
+    header "IdentityCore/IdentityCore/src/cache/MSIDKeychainTokenCache.h"
+    header "IdentityCore/IdentityCore/src/cache/accessor/MSIDDefaultTokenCacheAccessor.h"
+    header "IdentityCore/IdentityCore/src/validation/MSIDCIAMAuthority.h"
+    header "IdentityCore/IdentityCore/src/auth_scheme/MSIDAuthenticationSchemePop.h"
+    header "IdentityCore/IdentityCore/src/auth_scheme/MSIDAuthenticationScheme.h"
+    header "IdentityCore/IdentityCore/src/network/MSIDHttpRequest.h"
+    header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDHttpRequestServerTelemetryHandling.h"
+    header "IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
+    header "IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
+    header "IdentityCore/IdentityCore/src/logger/MSIDLogger+Internal.h"
+    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
+    header "IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
+    header "IdentityCore/IdentityCore/src/MSIDBasicContext.h"
+    header "src/native_auth/logger/MSALLogMask.h"
+    header "IdentityCore/IdentityCore/src/cache/metadata/MSIDAccountMetadataCacheAccessor.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetry+Internal.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetryEventInterface.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetryAPIEvent.h"
+    header "IdentityCore/IdentityCore/src/telemetry/MSIDTelemetryEventStrings.h"
+    header "IdentityCore/IdentityCore/src/network/request_serializer/MSIDRequestSerialization.h"
+    header "IdentityCore/IdentityCore/src/network/request_configurator/MSIDHttpRequestConfiguratorProtocol.h"
+    header "IdentityCore/IdentityCore/src/network/request_configurator/MSIDAADRequestConfigurator.h"
+    header "IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDAADTokenRequestServerTelemetry.h"
+    header "IdentityCore/IdentityCore/src/oauth2/MSIDTokenResponse.h"
+    header "IdentityCore/IdentityCore/src/oauth2/MSIDExternalSSOContext.h"
+    header "IdentityCore/IdentityCore/src/requests/result/MSIDTokenResult.h"
+    header "IdentityCore/IdentityCore/src/configuration/MSIDConfiguration.h"
+    header "IdentityCore/IdentityCore/src/validation/MSIDAuthority.h"
+    header "IdentityCore/IdentityCore/src/validation/MSIDAuthority+Internal.h"
+    header "IdentityCore/IdentityCore/src/network/response_serializer/MSIDResponseSerialization.h"
+    header "IdentityCore/IdentityCore/src/network/response_serializer/MSIDAADTokenResponseSerializer.h"
+    header "IdentityCore/IdentityCore/src/requests/sdk/MSIDTokenResponseValidator.h"
+    header "IdentityCore/IdentityCore/src/MSIDError.h"
+    header "IdentityCore/IdentityCore/src/MSIDTelemetryStringSerializable.h"
+    header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDCurrentRequestTelemetry.h"
+    header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDRequestTelemetryConstants.h"
+    header "IdentityCore/IdentityCore/src/telemetry/request_telemetry/MSIDCurrentRequestTelemetrySerializedItem.h"
+    header "IdentityCore/IdentityCore/src/util/NSError+MSIDServerTelemetryError.h"
+    header "IdentityCore/IdentityCore/src/MSIDErrorConverter.h"
+    header "IdentityCore/IdentityCore/src/network/error_handler/MSIDHttpRequestErrorHandling.h"
+    header "IdentityCore/IdentityCore/src/util/NSString+MSIDExtensions.h"
+    header "IdentityCore/IdentityCore/src/workplacejoin/MSIDWorkPlaceJoinConstants.h"
+    header "IdentityCore/IdentityCore/src/webview/embeddedWebview/challangeHandlers/MSIDPKeyAuthHandler.h"
+    header "src/configuration/external/ios/MSALLegacySharedADALAccount.h"
+    header "src/MSALPublicClientApplication+Internal.h"
+    header "IdentityCore/IdentityCore/src/MSIDError.h"
+    header "src/MSALAccount+Internal.h"
+    header "src/configuration/external/MSALExternalAccountHandler.h"
+    header "src/instance/MSALAccountsProvider.h"
+    header "src/instance/oauth2/ciam/MSALCIAMOauth2Provider.h"
+    header "src/MSALAccountId+Internal.h"
+    header "IdentityCore/IdentityCore/src/requests/sdk/msal/MSIDDefaultTokenResponseValidator.h"
+    header "IdentityCore/IdentityCore/src/network/error_handler/MSIDAADRequestErrorHandler.h"
+    header "IdentityCore/IdentityCore/src/MSIDOAuth2Constants.h"
+    export *
+}
+
+module MSAL_Unit_Test_Private {
+    header "IdentityCore/IdentityCore/tests/util/MSIDTestIdentifiers.h"
+    header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLResponse.h"
+    header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLSession.h"
+}

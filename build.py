@@ -35,8 +35,9 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device = "iPhone 14"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=16.4'"
+ios_sim_device_type = "iPhone 14"
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(16.4\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=16.4'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
@@ -251,12 +252,25 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device)
+			return device_guids.get_ios(ios_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
 		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
+
+	def do_lint(self) :
+		if (self.linter != "swiftlint") :
+			sys.stdout.write("Unknown linter '" + self.linter + "'\n")
+			return
+
+		command = "swiftlint lint --strict " + self.directory
+
+		result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+
+		sys.stdout.write(result.stdout.decode(sys.stdout.encoding))
+
+		return result.returncode
 	
 	def do_codecov(self) :
 		"""
@@ -308,6 +322,8 @@ class BuildTarget:
 		try :
 			if (operation == "codecov") :
 				exit_code = self.do_codecov()
+			elif (operation == "lint") :
+				exit_code = self.do_lint()
 			else :
 				command = self.xcodebuild_command(operation, use_xcpretty)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
@@ -344,7 +360,7 @@ def requires_simulator(targets) :
 
 def launch_simulator() :
 	print("Booting simulator...")
-	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device)
+	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
 	print(command)
 	
 	# This spawns a new process without us having to wait for it
