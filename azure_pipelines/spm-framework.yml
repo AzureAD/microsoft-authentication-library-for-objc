@@ -206,21 +206,21 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
-  - task: GitHubRelease@1
-    displayName: Generate Common Core Github Release
-    inputs:
-      gitHubConnection: '$(GithubServiceConnection)'
-      repositoryName: 'AzureAD/microsoft-authentication-library-common-for-objc'
-      action: 'create'
-      target: 'main'
-      tagSource: 'userSpecifiedTag'
-      tag: '$(commonCoreReleaseVersion)'
-      title: '$(commonCoreReleaseVersion)'
-      releaseNotesFilePath: 'cc-release-notes.md'
-      changeLogCompareToRelease: 'lastFullRelease'
-      changeLogType: 'issueBased'
-      assets: |
-        *.abcd
+  # - task: GitHubRelease@1
+  #   displayName: Generate Common Core Github Release
+  #   inputs:
+  #     gitHubConnection: '$(GithubServiceConnection)'
+  #     repositoryName: 'AzureAD/microsoft-authentication-library-common-for-objc'
+  #     action: 'create'
+  #     target: 'main'
+  #     tagSource: 'userSpecifiedTag'
+  #     tag: '$(commonCoreReleaseVersion)'
+  #     title: '$(commonCoreReleaseVersion)'
+  #     releaseNotesFilePath: 'cc-release-notes.md'
+  #     changeLogCompareToRelease: 'lastFullRelease'
+  #     changeLogType: 'issueBased'
+  #     assets: |
+  #       *.abcd
   - task: InstallSSHKey@0
     displayName: Install SSH Key for MSAL Github Repo
     inputs:
