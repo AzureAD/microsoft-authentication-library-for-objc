@@ -74,7 +74,7 @@ jobs:
 
             author=$(git log -1 --pretty=format:'%an <%ae>')
             # Create a temp branch to cherry pick doc changes
-            git checkout -b 'update-docs-for-release-$(releaseVersion)'
+            git checkout -b 'update-docs-for-release-130'
             git add docs.temp/docs/*
             git commit -m 'adding docs for release' --author="${author}" --status
 
@@ -86,14 +86,14 @@ jobs:
             git clean -fd
 
             # Get previously commited changes for docs
-            git cherry-pick --strategy-option theirs "update-docs-for-release-$(releaseVersion)"
+            git cherry-pick --strategy-option theirs "update-docs-for-release-130"
 
             # Copy files in docs.temp folder to root
             \cp -r docs.temp/docs/* .
 
             # Push changes to docsRepositoryBranch branch
             git add -A
-            git commit -m 'Update docs for release $(releaseVersion)' --status  --author="${author}"
+            git commit -m 'Update docs for release 1.3.0' --status  --author="${author}"
             git push origin $(docsRepositoryBranch)
         fi
       workingDirectory: '$(Build.SourcesDirectory)'
