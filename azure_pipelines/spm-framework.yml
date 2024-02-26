@@ -80,6 +80,7 @@ jobs:
             git config --global user.name "${authorName}"
 
             author=$(git log -1 --pretty=format:'%an <%ae>')
+            ls
             # Create a temp branch to cherry pick doc changes
             git checkout -b 'update-docs-for-release-130'
             git add docs.temp/docs/*
