@@ -45,6 +45,12 @@ jobs:
     submodules: true
     fetchDepth: 1
     persistCredentials: false
+  - task: Bash@3
+    displayName: Install Sourcekitten
+    inputs:
+      targetType: 'inline'
+      script: |
+        brew install sourcekitten
   - task: InstallSSHKey@0
     displayName: Install SSH Key for MSAL Github Repo
     inputs:
