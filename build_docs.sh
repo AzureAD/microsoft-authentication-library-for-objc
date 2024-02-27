@@ -25,4 +25,4 @@ cd ..
 jazzy --module MSAL --sourcekitten-sourcefile docs.temp/swiftDoc.json,docs.temp/objcDoc.json --author Microsoft\ Corporation --author_url https://aka.ms/azuread --github_url https://github.com/AzureAD/microsoft-authentication-library-for-objc --theme fullwidth
 
 mkdir docs.temp/docs
-cp `find docs` docs.temp/docs
+cp -r -p docs docs.temp
