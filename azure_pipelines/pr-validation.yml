@@ -17,8 +17,6 @@ trigger:
 variables:
   - name: Codeql.Enabled
     value: true
-  - name: Codeql.Language
-    value: 'swift'
 
 # Define parallel jobs that run build script for specified targets
 jobs:
@@ -78,7 +76,7 @@ jobs:
       failOnStderr: true
 
   - task: CodeQL3000Finalize@0
-  
+
   - task: Bash@3
     condition: always()
     displayName: Cleanup
