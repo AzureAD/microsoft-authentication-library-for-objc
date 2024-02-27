@@ -13,6 +13,12 @@ cp README.md docs.temp/
 cd MSAL
 cd ..
 echo -e "Generating MSAL documentation"
+
+
+echo "------START----"
+cat /var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/xcodebuild-91A07D81-F596-450D-A23B-854BE25BF7E0.log
+echo "------END----"
+
 # Generate Swift SourceKitten output
 xcodebuild -list
 sourcekitten doc -- -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -configuration Debug RUN_CLANG_STATIC_ANALYZER=NO -sdk iphonesimulator CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -destination 'platform=iOS Simulator'
