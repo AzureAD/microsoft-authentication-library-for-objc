@@ -10,14 +10,6 @@ mkdir docs.temp/MSAL
 cp `find MSAL/src/public` docs.temp/MSAL
 cp `find MSAL/src/native_auth/public` docs.temp/MSAL
 cp README.md docs.temp/
-cd MSAL
-cd ..
-echo -e "Generating MSAL documentation"
-
-
-echo "------START----"
-cat /var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/xcodebuild-91A07D81-F596-450D-A23B-854BE25BF7E0.log
-echo "------END----"
 
 # Generate Swift SourceKitten output
 xcodebuild -list
