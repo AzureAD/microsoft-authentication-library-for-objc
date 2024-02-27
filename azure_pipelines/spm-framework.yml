@@ -40,7 +40,7 @@ jobs:
     timeOutInMinutes: 20
 
   steps:
-    - task: Bash@3
+  - task: Bash@3
     displayName: Select Xcode version
     inputs:
       targetType: 'inline'
