@@ -64,7 +64,7 @@ jobs:
     displayName: Build MSAL docs via Jazzy
     inputs:
       targetType: 'inline'
-      script: 'sudo sh build_docs.sh'
+      script: 'sh build_docs.sh'
   - task: Bash@3
     displayName: Push docs to github page for repository
     inputs:
