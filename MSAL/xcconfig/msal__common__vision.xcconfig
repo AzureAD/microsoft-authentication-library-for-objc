@@ -1,0 +1,2 @@
+#include "../IdentityCore/IdentityCore/xcconfig/identitycore__common__vision.xcconfig"
+ARCHS[sdk=xros*] = $(ARCHS_STANDARD)

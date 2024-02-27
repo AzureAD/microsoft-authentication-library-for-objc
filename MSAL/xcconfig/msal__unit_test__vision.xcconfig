@@ -1,0 +1,6 @@
+#include "msal__common__vision.xcconfig"
+
+INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-Vision-Unit-Tests;
+PRODUCT_NAME = "MSAL-Vision-UI-Tests";
+GCC_WARN_UNUSED_PARAMETER = NO
