@@ -15,7 +15,7 @@ cd ..
 echo -e "Generating MSAL documentation"
 # Generate Swift SourceKitten output
 xcodebuild -list
-sourcekitten doc -- -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -configuration Debug RUN_CLANG_STATIC_ANALYZER=NO -sdk iphonesimulator CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -destination 'platform=iOS Simulator' > docs.temp/swiftDoc.json
+sourcekitten doc -- -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -configuration Debug RUN_CLANG_STATIC_ANALYZER=NO -sdk iphonesimulator CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -destination 'platform=iOS Simulator'
 
 # Generate Objective-C SourceKitten output
 cd docs.temp
