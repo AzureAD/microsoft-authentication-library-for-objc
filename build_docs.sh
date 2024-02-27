@@ -7,6 +7,7 @@ gem install jazzy
 echo -e "Copying MSAL public files"
 mkdir docs.temp
 mkdir docs.temp/MSAL
+
 cp `find MSAL/src/public` docs.temp/MSAL
 cp `find MSAL/src/native_auth/public` docs.temp/MSAL
 cp README.md docs.temp/
@@ -22,3 +23,6 @@ cd ..
 
 # Feed both outputs to Jazzy as a comma-separated list
 jazzy --module MSAL --sourcekitten-sourcefile docs.temp/swiftDoc.json,docs.temp/objcDoc.json --author Microsoft\ Corporation --author_url https://aka.ms/azuread --github_url https://github.com/AzureAD/microsoft-authentication-library-for-objc --theme fullwidth
+
+mkdir docs.temp/docs
+cp `find docs` docs.temp/docs
