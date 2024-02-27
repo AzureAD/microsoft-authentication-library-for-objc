@@ -10,7 +10,8 @@ mkdir docs.temp/MSAL
 cp `find MSAL/src/public` docs.temp/MSAL
 cp `find MSAL/src/native_auth/public` docs.temp/MSAL
 cp README.md docs.temp/
-
+cd MSAL
+cd ..
 echo -e "Generating MSAL documentation"
 # Generate Swift SourceKitten output
 xcodebuild -list
