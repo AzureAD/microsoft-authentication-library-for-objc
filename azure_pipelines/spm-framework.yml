@@ -74,6 +74,8 @@ jobs:
         if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
+            ssh-keyscan github.com | tee -a ~/.ssh/known_hosts
+            git remote set-url origin git@github.com:$(repositoryName).git
             authorName=$(git log -1 --pretty=format:'%an')
             authorEmail=$(git log -1 --pretty=format:'%ae')
             git config --global user.email "${authorEmail}"
