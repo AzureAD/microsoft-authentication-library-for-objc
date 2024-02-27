@@ -81,12 +81,7 @@ jobs:
 
             author=$(git log -1 --pretty=format:'%an <%ae>')
             ls
-            cd docs.temp
-            ls
-            cd docs
-            ls
-            cd ..
-            cd ..
+            cp docs docs.temp
             
             # Create a temp branch to cherry pick doc changes
             git checkout -b 'update-docs-for-release-130'
