@@ -1,0 +1,6 @@
+#include "msal__common__vision.xcconfig"
+
+INFOPLIST_FILE = test/unit/resources/vision/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveVisionTests;
+PRODUCT_NAME = "InteractiveVisionTests";
+USER_HEADER_SEARCH_PATHS = $IDCORE_PATH/tests/automation/** $IDCORE_PATH/src/**;
