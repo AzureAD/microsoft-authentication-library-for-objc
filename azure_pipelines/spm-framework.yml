@@ -40,6 +40,9 @@ jobs:
     timeOutInMinutes: 20
 
   steps:
+    - script: |
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.0.app"
+    displayName: 'Switch to use Xcode 15.0'
   - checkout: msalRepository
     clean: true
     submodules: true
