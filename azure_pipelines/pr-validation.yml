@@ -14,6 +14,11 @@ trigger:
     - release/*
     exclude:
     - '*'
+variables:
+  - name: Codeql.Enabled
+    value: true
+  - name: Codeql.Language
+    value: 'swift'
 
 # Define parallel jobs that run build script for specified targets
 jobs:
@@ -54,6 +59,9 @@ jobs:
   - task: ComponentGovernanceComponentDetection@0
     inputs:
       alertWarningLevel: Low
+
+  - task: CodeQL3000Init@0
+
   - task: Bash@3
     displayName: Run Build script & check for Errors
     inputs:
@@ -68,6 +76,9 @@ jobs:
           echo "Build & Testing Failed! \n ${output}" >&2
         fi
       failOnStderr: true
+
+  - task: CodeQL3000Finalize@0
+  
   - task: Bash@3
     condition: always()
     displayName: Cleanup
