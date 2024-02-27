@@ -40,9 +40,11 @@ jobs:
     timeOutInMinutes: 20
 
   steps:
-    - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
-    displayName: 'Switch to use Xcode 14.3'
+    - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.0.app"'
   - checkout: msalRepository
     clean: true
     submodules: true
