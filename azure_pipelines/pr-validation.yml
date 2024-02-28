@@ -21,8 +21,8 @@ variables:
     value: true
   - name: Codeql.Language
     value: swift
-  - name: Codeql.AnalyzeInPipeline
-    value: true
+  #- name: Codeql.AnalyzeInPipeline
+  #  value: true
 
 # Define parallel jobs that run build script for specified targets
 jobs:
