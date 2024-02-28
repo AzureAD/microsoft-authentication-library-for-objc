@@ -16,7 +16,7 @@ trigger:
     - '*'
 variables:
   Codeql.Enabled: true
-  Codeql.Codeql.Language: swift
+  Codeql.Language: swift
 
 # Define parallel jobs that run build script for specified targets
 jobs:
