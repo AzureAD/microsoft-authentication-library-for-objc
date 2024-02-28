@@ -14,11 +14,15 @@ trigger:
     - release/*
     exclude:
     - '*'
+
+
 variables:
   - name: Codeql.Enabled
     value: true
   - name: Codeql.Language
     value: swift
+  - name: Codeql.AnalyzeInPipeline
+    value: true
 
 # Define parallel jobs that run build script for specified targets
 jobs:
@@ -61,6 +65,9 @@ jobs:
       alertWarningLevel: Low
 
   - task: CodeQL3000Init@0
+    condition: always()
+    inputs:
+      Enabled: true
 
   - task: Bash@3
     displayName: Run Build script & check for Errors
@@ -78,6 +85,7 @@ jobs:
       failOnStderr: true
 
   - task: CodeQL3000Finalize@0
+    condition: always()
 
   - task: Bash@3
     condition: always()
