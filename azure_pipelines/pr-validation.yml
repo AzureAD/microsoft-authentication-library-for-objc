@@ -20,7 +20,7 @@ variables:
   - name: Codeql.Enabled
     value: true
   - name: Codeql.Language
-    value: swift
+    value: 'swift'
   #- name: Codeql.AnalyzeInPipeline
   #  value: true
 
