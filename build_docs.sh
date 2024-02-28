@@ -21,4 +21,4 @@ sourcekitten doc --objc $(pwd)/MSAL/MSAL.h -- -x objective-c  -isysroot $(xcrun 
 cd ..
 
 # Feed both outputs to Jazzy as a comma-separated list
-jazzy --module MSAL --sourcekitten-sourcefile docs.temp/swiftDoc.json,docs.temp/objcDoc.json --author Microsoft\ Corporation --author_url https://aka.ms/azuread --github_url https://github.com/AzureAD/microsoft-authentication-library-for-objc --theme fullwidth
+jazzy --module MSAL --sourcekitten-sourcefile docs.temp/swiftDoc.json,docs.temp/objcDoc.json --author Microsoft\ Corporation --author_url https://aka.ms/azuread --github_url https://github.com/AzureAD/microsoft-authentication-library-for-objc --theme fullwidth --output docs.temp/docs

@@ -373,7 +373,7 @@ jobs:
       targetType: 'inline'
       script: |
         # NOTE : This should be the last step since it changes branch from main to $(docsRepositoryBranch)
-        if [ ! -d "docs" ]; then
+        if [ ! -d "docs.temp" ]; then
             echo "Docs were not generated in previous step!"
         else
             authorName=$(git log -1 --pretty=format:'%an')
@@ -384,12 +384,11 @@ jobs:
             author=$(git log -1 --pretty=format:'%an <%ae>')
             # Create a temp branch to cherry pick doc changes
             git checkout -b 'update-docs-for-release-$(releaseVersion)'
-            git add docs/*
+            git add docs.temp/docs/*
             git commit -m 'adding docs for release' --author="${author}" --status
 
             # Cleanup
             rm -rf docs.temp
-            rm -rf docs
             git fetch origin $(docsRepositoryBranch)
             git checkout FETCH_HEAD
             git checkout $(docsRepositoryBranch)
@@ -398,8 +397,8 @@ jobs:
             # Get previously commited changes for docs
             git cherry-pick --strategy-option theirs "update-docs-for-release-$(releaseVersion)"
 
-            # Copy files in docs folder to root
-            \cp -r docs/* .
+            # Copy files in docs.temp folder to root
+            \cp -r docs.temp/docs/* .
 
             # Push changes to docsRepositoryBranch branch
             git add -A
