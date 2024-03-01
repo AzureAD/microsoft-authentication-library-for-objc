@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
     :tag => s.version.to_s,
     :submodules => true
   }
-  
+  s.resource_bundles = {"MSAL" => ["MSAL/PrivacyInfo.xcprivacy"]}
   s.default_subspecs ='app-lib'
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
