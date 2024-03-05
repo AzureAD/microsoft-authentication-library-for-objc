@@ -36,7 +36,7 @@ jobs:
 - job: BuildXcFrameworks
   displayName: Build MSAL framework and release
   pool:
-    vmImage: 'macOS-11'
+    vmImage: 'macOS-13'
     timeOutInMinutes: 20
 
   steps:
@@ -357,6 +357,12 @@ jobs:
       workingDirectory: '$(Build.SourcesDirectory)'
     env:
       COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
+  - task: Bash@3
+    displayName: Install Sourcekitten
+    inputs:
+      targetType: 'inline'
+      script: |
+        brew install sourcekitten
   - task: Bash@3
     displayName: Build MSAL docs via Jazzy
     inputs:
