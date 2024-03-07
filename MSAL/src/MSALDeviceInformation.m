@@ -140,7 +140,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
 {
     switch (msidPreferredAuthConfig) {
         case MSIDPreferredAuthMethodQRPIN:
-            return MSALPreferredAuthMethodQRPIN;
+            return 1; // Private enum value for QR+PIN
             
         default:
             return MSALPreferredAuthMethodNone;

@@ -187,12 +187,7 @@ typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
     /*
         No preferred auth method passed with the request to the authetication server.
     */
-    MSALPreferredAuthMethodNone,
-    
-    /*
-        QR+PIN preferred as the auth method.
-    */
-    MSALPreferredAuthMethodQRPIN
+    MSALPreferredAuthMethodNone
 };
 
 /**
