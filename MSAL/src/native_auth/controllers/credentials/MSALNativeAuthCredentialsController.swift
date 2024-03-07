@@ -93,7 +93,10 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             context: context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
-            return .init(.failure(RetrieveAccessTokenError(type: .generalError)))
+            return .init(
+                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())), 
+                correlationId: context.correlationId()
+            )
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
@@ -156,13 +159,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 config: config
             )
         case .error(let errorType):
-            let error = errorType.convertToRetrieveAccessTokenError()
+            let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
             MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
             stopTelemetryEvent(telemetryEvent, context: context, error: error)
-            return .init(.failure(error))
+            return .init(.failure(error), correlationId: context.correlationId())
         }
     }
 
@@ -178,18 +181,21 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 level: .verbose,
                 context: context,
                 format: "Refresh Token completed successfully")
-            return .init(.success(tokenResult.accessToken.accessToken), telemetryUpdate: { [weak self] result in
+            return .init(
+                .success(tokenResult.accessToken.accessToken),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                 telemetryEvent?.setUserInformation(tokenResult.account)
                 self?.stopTelemetryEvent(telemetryEvent, context: context, delegateDispatcherResult: result)
             })
         } catch {
-            let error = RetrieveAccessTokenError(type: .generalError)
+            let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Token Result was not created properly error - \(error)")
             stopTelemetryEvent(telemetryEvent, context: context, error: error)
-            return .init(.failure(error))
+            return .init(.failure(error), correlationId: context.correlationId())
         }
     }
 }

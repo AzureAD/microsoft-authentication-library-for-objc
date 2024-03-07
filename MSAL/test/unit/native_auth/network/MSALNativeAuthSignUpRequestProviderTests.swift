@@ -31,11 +31,11 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
 
     private var sut: MSALNativeAuthSignUpRequestProvider!
     private var telemetryProvider: MSALNativeAuthTelemetryProvider!
-    private var context: MSIDRequestContext!
+    private var context: MSALNativeAuthRequestContextMock!
 
     override func setUpWithError() throws {
         telemetryProvider = MSALNativeAuthTelemetryProvider()
-        context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
+        context = MSALNativeAuthRequestContextMock(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
 
         sut = .init(requestConfigurator: MSALNativeAuthRequestConfigurator(config: MSALNativeAuthConfigStubs.configuration),
                     telemetryProvider: telemetryProvider)

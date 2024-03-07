@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct MSALNativeAuthResetPasswordChallengeResponse: Decodable {
+struct MSALNativeAuthResetPasswordChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
 
     // MARK: - Variables
     let challengeType: MSALNativeAuthInternalChallengeType
@@ -33,4 +33,5 @@ struct MSALNativeAuthResetPasswordChallengeResponse: Decodable {
     let challengeChannel: MSALNativeAuthInternalChannelType?
     let continuationToken: String?
     let codeLength: Int?
+    var correlationId: UUID?
 }

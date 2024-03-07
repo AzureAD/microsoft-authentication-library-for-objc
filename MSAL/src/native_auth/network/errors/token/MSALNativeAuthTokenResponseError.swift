@@ -33,6 +33,7 @@ struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let continuationToken: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -42,5 +43,26 @@ struct MSALNativeAuthTokenResponseError: MSALNativeAuthResponseError {
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case continuationToken = "continuation_token"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthTokenOauth2ErrorCode = .unknown,
+        subError: MSALNativeAuthSubErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        continuationToken: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.subError = subError
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.continuationToken = continuationToken
+        self.correlationId = correlationId
     }
 }

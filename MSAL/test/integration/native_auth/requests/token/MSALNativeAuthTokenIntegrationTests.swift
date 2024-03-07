@@ -170,7 +170,7 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
         let expectedError = createError(.slowDown)
 
-        XCTAssertEqual(result.error.rawValue, expectedError.error.rawValue)
+        XCTAssertEqual(result.error?.rawValue, expectedError.error?.rawValue)
     }
 
     private func createError(_ code: MSALNativeAuthTokenOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, errorCodes: [MSALNativeAuthESTSApiErrorCodes]? = nil) -> Error {

@@ -24,13 +24,13 @@
 
 enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     case success(continuationToken: String)
-    case attributeValidationFailed(invalidAttributes: [String])
+    case attributeValidationFailed(error: MSALNativeAuthSignUpStartResponseError, invalidAttributes: [String])
     case redirect
     case error(MSALNativeAuthSignUpStartResponseError)
     // TODO: Special errors handled separately. Remove after refactor validated error handling
     case invalidUsername(MSALNativeAuthSignUpStartResponseError)
-    case invalidClientId(MSALNativeAuthSignUpStartResponseError)
-    case unexpectedError
+    case unauthorizedClient(MSALNativeAuthSignUpStartResponseError)
+    case unexpectedError(MSALNativeAuthSignUpStartResponseError?)
 }
 
 enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
@@ -38,16 +38,20 @@ enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
     case passwordRequired(_ signUpChallengeToken: String)
     case redirect
     case error(MSALNativeAuthSignUpChallengeResponseError)
-    case unexpectedError
+    case unexpectedError(MSALNativeAuthSignUpChallengeResponseError?)
 }
 
 enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
-    case success(_ continuationToken: String?)
+    case success(continuationToken: String?)
     /// error that represents invalidOOB or invalidPassword, depending on which State the input comes from.
     case invalidUserInput(_ error: MSALNativeAuthSignUpContinueResponseError)
-    case credentialRequired(continuationToken: String)
-    case attributesRequired(continuationToken: String, requiredAttributes: [MSALNativeAuthRequiredAttribute])
-    case attributeValidationFailed(invalidAttributes: [String])
+    case credentialRequired(continuationToken: String, error: MSALNativeAuthSignUpContinueResponseError)
+    case attributesRequired(
+        continuationToken: String,
+        requiredAttributes: [MSALNativeAuthRequiredAttribute],
+        error: MSALNativeAuthSignUpContinueResponseError
+    )
+    case attributeValidationFailed(error: MSALNativeAuthSignUpContinueResponseError, invalidAttributes: [String])
     case error(MSALNativeAuthSignUpContinueResponseError)
-    case unexpectedError
+    case unexpectedError(MSALNativeAuthSignUpContinueResponseError?)
 }

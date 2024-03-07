@@ -77,7 +77,7 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
         
         try await perform_testFail(
             endpoint: .signUpChallenge,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: createError(.unauthorizedClient)
         )
     }

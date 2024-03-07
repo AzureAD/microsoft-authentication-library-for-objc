@@ -31,6 +31,7 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
     let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -38,5 +39,22 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthSignInChallengeOauth2ErrorCode = .unknown,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.correlationId = correlationId
     }
 }

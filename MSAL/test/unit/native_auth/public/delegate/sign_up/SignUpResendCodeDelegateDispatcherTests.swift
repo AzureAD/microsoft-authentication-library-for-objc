@@ -58,7 +58,8 @@ final class SignUpResendCodeDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -71,7 +72,7 @@ final class SignUpResendCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpResendCode_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpResendCodeDelegateMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpResendCodeCodeRequired"))
+        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpResendCodeCodeRequired"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResendCodeError else {
@@ -91,7 +92,8 @@ final class SignUpResendCodeDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -99,6 +101,7 @@ final class SignUpResendCodeDelegateDispatcherTests: XCTestCase {
 
         func checkError(_ error: ResendCodeError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

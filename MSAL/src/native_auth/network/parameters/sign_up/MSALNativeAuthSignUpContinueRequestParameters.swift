@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpContinueRequestParameters: MSALNativeAuthRequestable 
     let password: String?
     let oobCode: String?
     let attributes: String?
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey

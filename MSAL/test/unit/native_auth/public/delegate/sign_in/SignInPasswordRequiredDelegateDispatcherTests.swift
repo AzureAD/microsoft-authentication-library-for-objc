@@ -30,6 +30,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
     private var delegateExp: XCTestExpectation!
     private var sut: SignInPasswordRequiredDelegateDispatcher!
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
+    private let correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -48,7 +49,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -56,7 +57,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
 
 
@@ -71,7 +72,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.delegateError)
@@ -79,6 +80,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: PasswordRequiredError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

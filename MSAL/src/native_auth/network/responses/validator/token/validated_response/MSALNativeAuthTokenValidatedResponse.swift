@@ -30,99 +30,189 @@ enum MSALNativeAuthTokenValidatedResponse {
 }
 
 enum MSALNativeAuthTokenValidatedErrorType: Error {
-    case generalError
-    case expiredToken(message: String?)
-    case expiredRefreshToken(message: String?)
-    case invalidClient(message: String?)
-    case invalidRequest(message: String?)
-    case invalidServerResponse
-    case userNotFound(message: String?)
-    case invalidPassword(message: String?)
-    case invalidOOBCode(message: String?)
-    case unsupportedChallengeType(message: String?)
-    case strongAuthRequired(message: String?)
-    case invalidScope(message: String?)
-    case authorizationPending(message: String?)
-    case slowDown(message: String?)
+    case generalError(MSALNativeAuthTokenResponseError?)
+    case expiredToken(MSALNativeAuthTokenResponseError)
+    case expiredRefreshToken(MSALNativeAuthTokenResponseError)
+    case unauthorizedClient(MSALNativeAuthTokenResponseError)
+    case invalidRequest(MSALNativeAuthTokenResponseError)
+    case unexpectedError(MSALNativeAuthTokenResponseError?)
+    case userNotFound(MSALNativeAuthTokenResponseError)
+    case invalidPassword(MSALNativeAuthTokenResponseError)
+    case invalidOOBCode(MSALNativeAuthTokenResponseError)
+    case unsupportedChallengeType(MSALNativeAuthTokenResponseError)
+    case strongAuthRequired(MSALNativeAuthTokenResponseError)
+    case invalidScope(MSALNativeAuthTokenResponseError)
+    case authorizationPending(MSALNativeAuthTokenResponseError)
+    case slowDown(MSALNativeAuthTokenResponseError)
 
-    func convertToSignInPasswordStartError() -> SignInStartError {
+    // swiftlint:disable:next function_body_length
+    func convertToSignInPasswordStartError(correlationId: UUID) -> SignInStartError {
         switch self {
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .invalidOOBCode(let message),
-             .invalidClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message):
-            return SignInStartError(type: .generalError, message: message)
-        case .generalError:
-            return SignInStartError(type: .generalError)
-        case .invalidServerResponse:
-            return SignInStartError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
-        case .userNotFound(let message):
-            return SignInStartError(type: .userNotFound, message: message)
-        case .invalidPassword(let message):
-            return SignInStartError(type: .invalidCredentials, message: message)
-        case .strongAuthRequired(let message):
-            return SignInStartError(type: .browserRequired, message: message)
-        case .expiredRefreshToken(let message):
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .invalidOOBCode(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .invalidRequest(let apiError):
+            return SignInStartError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .unexpectedError(let apiError),
+             .generalError(let apiError):
+            return SignInStartError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        case .userNotFound(let apiError):
+            return SignInStartError(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .invalidPassword(let apiError):
+            return SignInStartError(
+                type: .invalidCredentials,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .strongAuthRequired(let apiError):
+            return SignInStartError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .expiredRefreshToken(let apiError):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return SignInStartError(type: .generalError, message: message)
+            return SignInStartError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
         }
     }
 
-    func convertToRetrieveAccessTokenError() -> RetrieveAccessTokenError {
+    func convertToRetrieveAccessTokenError(correlationId: UUID) -> RetrieveAccessTokenError {
         switch self {
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .invalidClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message):
-            return RetrieveAccessTokenError(type: .generalError, message: message)
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .invalidRequest(let apiError):
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
         case .generalError:
-            return RetrieveAccessTokenError(type: .generalError)
-        case .invalidServerResponse:
-            return RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
-        case .expiredRefreshToken:
-            return RetrieveAccessTokenError(type: .refreshTokenExpired)
-        case .strongAuthRequired(let message):
-            return RetrieveAccessTokenError(type: .browserRequired, message: message)
-        case .userNotFound(let message),
-             .invalidPassword(let message),
-             .invalidOOBCode(let message):
+            return RetrieveAccessTokenError(type: .generalError, correlationId: correlationId)
+        case .unexpectedError(let apiError):
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        case .expiredRefreshToken(let apiError):
+            return RetrieveAccessTokenError(
+                type: .refreshTokenExpired,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .strongAuthRequired(let apiError):
+            return RetrieveAccessTokenError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .userNotFound(let apiError),
+             .invalidPassword(let apiError),
+             .invalidOOBCode(let apiError):
             MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
-            return RetrieveAccessTokenError(type: .generalError, message: message)
+            return RetrieveAccessTokenError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
         }
     }
 
-    func convertToVerifyCodeError() -> VerifyCodeError {
+    func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
-        case .invalidOOBCode(let message):
-            return VerifyCodeError(type: .invalidCode, message: message)
-        case .strongAuthRequired(let message):
-            return VerifyCodeError(type: .browserRequired, message: message)
-        case .expiredToken(let message),
-             .authorizationPending(let message),
-             .slowDown(let message),
-             .invalidRequest(let message),
-             .invalidClient(let message),
-             .unsupportedChallengeType(let message),
-             .invalidScope(let message),
-             .expiredRefreshToken(let message),
-             .userNotFound(let message),
-             .invalidPassword(let message):
-            return VerifyCodeError(type: .generalError, message: message)
+        case .invalidOOBCode(let apiError):
+            return VerifyCodeError(
+                type: .invalidCode,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .strongAuthRequired(let apiError):
+            return VerifyCodeError(
+                type: .browserRequired,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .expiredToken(let apiError),
+             .authorizationPending(let apiError),
+             .slowDown(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidScope(let apiError),
+             .expiredRefreshToken(let apiError),
+             .userNotFound(let apiError),
+             .invalidPassword(let apiError),
+             .invalidRequest(let apiError):
+            return VerifyCodeError(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
         case .generalError:
-            return VerifyCodeError(type: .generalError)
-        case .invalidServerResponse:
-            return VerifyCodeError(type: .generalError, message: MSALNativeAuthErrorMessage.invalidServerResponse)
+            return VerifyCodeError(type: .generalError, correlationId: correlationId)
+        case .unexpectedError(let apiError):
+            return VerifyCodeError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
         }
     }
 
-    func convertToPasswordRequiredError() -> PasswordRequiredError {
-        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError())
+    func convertToPasswordRequiredError(correlationId: UUID) -> PasswordRequiredError {
+        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError(correlationId: correlationId))
     }
 }

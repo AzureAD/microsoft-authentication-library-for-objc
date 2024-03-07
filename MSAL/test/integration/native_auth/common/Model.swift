@@ -49,6 +49,7 @@ enum MockAPIResponse: String {
     case invalidRequest = "InvalidRequest"
     case invalidToken = "InvalidToken"
     case invalidClient = "InvalidClient"
+    case unauthorizedClient = "UnauthorizedClient"
     case invalidGrant = "InvalidGrant"
     case invalidScope = "InvalidScope"
     case expiredToken = "ExpiredToken"

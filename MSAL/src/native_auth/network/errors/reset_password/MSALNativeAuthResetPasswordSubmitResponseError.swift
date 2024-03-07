@@ -33,6 +33,7 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -42,23 +43,53 @@ struct MSALNativeAuthResetPasswordSubmitResponseError: MSALNativeAuthResponseErr
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case target
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthResetPasswordSubmitOauth2ErrorCode = .unknown,
+        subError: MSALNativeAuthSubErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.subError = subError
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthResetPasswordSubmitResponseError {
 
-    func toPasswordRequiredPublicError() -> PasswordRequiredError {
+    func toPasswordRequiredPublicError(correlationId: UUID) -> PasswordRequiredError {
         switch error {
         case .invalidGrant:
-            if let subError, subError.isAnyPasswordError {
-                return .init(type: .invalidPassword, message: errorDescription)
-            } else {
-                return .init(type: .generalError, message: errorDescription)
-            }
-        case .invalidClient,
+            return .init(
+                type: subError?.isAnyPasswordError == true ? .invalidPassword : .generalError,
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
+        case .unauthorizedClient,
              .expiredToken,
-             .invalidRequest:
-            return .init(type: .generalError, message: errorDescription)
+             .invalidRequest,
+             .unknown:
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 }

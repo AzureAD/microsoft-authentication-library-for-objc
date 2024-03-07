@@ -47,7 +47,7 @@ struct MSALNativeAuthNetworkStubs {
     }
 }
 
-class MSALNativeAuthRequestContextMock: MSIDRequestContext {
+class MSALNativeAuthRequestContextMock: MSALNativeAuthRequestContext {
 
     let mockCorrelationId: UUID
     var mockTelemetryRequestId = ""
@@ -58,19 +58,19 @@ class MSALNativeAuthRequestContextMock: MSIDRequestContext {
         self.mockCorrelationId = correlationId
     }
 
-    func correlationId() -> UUID {
+    override func correlationId() -> UUID {
         return mockCorrelationId
     }
 
-    func logComponent() -> String {
+    override func logComponent() -> String {
         return mockLogComponent
     }
 
-    func telemetryRequestId() -> String {
+    override func telemetryRequestId() -> String {
         return mockTelemetryRequestId
     }
 
-    func appRequestMetadata() -> [AnyHashable: Any] {
+    override func appRequestMetadata() -> [AnyHashable: Any] {
         return mockAppRequestMetadata
     }
 }
@@ -82,11 +82,15 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     var expectedChallengeResponse: MSALNativeAuthSignInChallengeResponse?
     var expectedInitiateResponse: MSALNativeAuthSignInInitiateResponse?
     var expectedResponseError: Error?
-    var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound(message: nil))
-    var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken(message: nil))
+    var initiateValidatedResponse: MSALNativeAuthSignInInitiateValidatedResponse = .error(.userNotFound(.init(
+        error: .userNotFound))
+    )
+    var challengeValidatedResponse: MSALNativeAuthSignInChallengeValidatedResponse = .error(.expiredToken(.init(
+        error: .expiredToken)
+    ))
 
     
-    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
+    func validate(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successChallengeResponse) = result, let expectedChallengeResponse = expectedChallengeResponse {
             XCTAssertEqual(successChallengeResponse.challengeType, expectedChallengeResponse.challengeType)
@@ -102,7 +106,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         return challengeValidatedResponse
     }
     
-    func validate(context: MSAL.MSALNativeAuthRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
+    func validate(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successInitiateResponse) = result, let expectedInitiateResponse = expectedInitiateResponse {
             XCTAssertEqual(successInitiateResponse.challengeType, expectedInitiateResponse.challengeType)
@@ -115,7 +119,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         return initiateValidatedResponse
     }
     
-    private func checkConfAndContext(_ context: MSAL.MSALNativeAuthRequestContext, config: MSIDConfiguration? = nil) {
+    private func checkConfAndContext(_ context: MSIDRequestContext, config: MSIDConfiguration? = nil) {
         if let expectedRequestContext = expectedRequestContext {
             XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
             XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
@@ -132,9 +136,9 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
     var expectedConfiguration: MSIDConfiguration?
     var expectedTokenResponse: MSIDCIAMTokenResponse?
     var expectedResponseError: Error?
-    var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError)
+    var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError(.init()))
 
-    func validate(context: MSAL.MSALNativeAuthRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
+    func validate(context: MSIDRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
         checkConfAndContext(context, config: msidConfiguration)
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
             XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)
@@ -153,7 +157,7 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
         true
     }
 
-    private func checkConfAndContext(_ context: MSAL.MSALNativeAuthRequestContext, config: MSIDConfiguration? = nil) {
+    private func checkConfAndContext(_ context: MSIDRequestContext, config: MSIDConfiguration? = nil) {
         if let expectedRequestContext = expectedRequestContext {
             XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
             XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())

@@ -29,7 +29,7 @@ import XCTest
 final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrationBaseTests {
 
     private var provider: MSALNativeAuthSignUpRequestProvider!
-    private var context: MSIDRequestContext!
+    private var context: MSALNativeAuthRequestContext!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -89,7 +89,7 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
         
         try await perform_testFail(
             endpoint: .signUpContinue,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: createError(.unauthorizedClient)
         )
     }

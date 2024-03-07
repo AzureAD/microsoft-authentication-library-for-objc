@@ -58,7 +58,8 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -71,7 +72,7 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchResetPasswordCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResetPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCodeRequired"))
+        let expectedError = ResetPasswordStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordCodeRequired"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResetPasswordStartError else {
@@ -91,7 +92,8 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -100,6 +102,7 @@ final class ResetPasswordStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: ResetPasswordStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

@@ -5,7 +5,8 @@
 # @AzureAD/AppleIdentityTeam and @AzureAD/MSAL-ObjC-CIAM will be the co-owners of the MSAL.project file
 /MSAL/MSAL.xcodeproj/project.pbxproj @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 # @AzureAD/MSAL-ObjC-CIAM owns any files in the */native_auth
-# directories and any of its subdirectories.
+# directories, subdirectories and the module.modulemap file.
+/MSAL/module.modulemap @AzureAD/MSAL-ObjC-CIAM
 /MSAL/src/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/unit/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/integration/native_auth/ @AzureAD/MSAL-ObjC-CIAM

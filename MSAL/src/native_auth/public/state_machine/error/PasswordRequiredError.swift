@@ -35,21 +35,31 @@ public class PasswordRequiredError: MSALNativeAuthError {
 
     let type: ErrorType
 
-    init(type: ErrorType, message: String? = nil) {
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
     }
 
     init(signInStartError: SignInStartError) {
+        let errorDescription: String?
+
         switch signInStartError.type {
         case .browserRequired:
             self.type = .browserRequired
+            errorDescription = MSALNativeAuthErrorMessage.browserRequired
         case .invalidCredentials:
             self.type = .invalidPassword
+            errorDescription = MSALNativeAuthErrorMessage.invalidPassword
         default:
             self.type = .generalError
+            errorDescription = signInStartError.errorDescription
         }
-        super.init(message: signInStartError.errorDescription)
+        super.init(
+            message: errorDescription,
+            correlationId: signInStartError.correlationId,
+            errorCodes: signInStartError.errorCodes,
+            errorUri: signInStartError.errorUri
+        )
     }
 
     /// Describes why an error occurred and provides more information about the error.

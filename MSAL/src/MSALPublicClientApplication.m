@@ -1214,6 +1214,15 @@
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
     
+#if TARGET_OS_OSX
+    msidParams.clientSku = MSID_CLIENT_SKU_MSAL_OSX;
+                        
+#else
+    msidParams.clientSku = MSID_CLIENT_SKU_MSAL_IOS;
+#endif
+    
+    msidParams.skipValidateResultAccount = NO;
+    
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
     if (signInState == MSIDAccountMetadataStateSignedOut && msidParams.promptType != MSIDPromptTypeConsent)

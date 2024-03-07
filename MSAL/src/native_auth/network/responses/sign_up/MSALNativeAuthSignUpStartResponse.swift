@@ -24,7 +24,8 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpStartResponse: Decodable {
+struct MSALNativeAuthSignUpStartResponse: Decodable, MSALNativeAuthResponseCorrelatable {
     let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
+    var correlationId: UUID?
 }

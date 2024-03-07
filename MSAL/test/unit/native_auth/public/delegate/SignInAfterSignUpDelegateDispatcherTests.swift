@@ -30,6 +30,7 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: SignInAfterSignUpDelegateDispatcher!
+    private let correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -48,7 +49,7 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -56,7 +57,7 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInAfterSignUpError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInAfterSignUpError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInAfterSignUpDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
@@ -70,13 +71,14 @@ final class SignInAfterSignUpDelegateDispatcherTests: XCTestCase {
 
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
 
         func checkError(_ error: SignInAfterSignUpError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

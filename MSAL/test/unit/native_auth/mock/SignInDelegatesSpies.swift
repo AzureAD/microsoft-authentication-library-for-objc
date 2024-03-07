@@ -43,8 +43,7 @@ open class SignInPasswordStartDelegateSpy: SignInStartDelegate {
     public func onSignInStartError(error: MSAL.SignInStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(error.type, expectedError.type)
-            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            checkErrors(error: error, expectedError: expectedError)
             expectation.fulfill()
             return
         }
@@ -90,7 +89,7 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
 
     func onSignInPasswordRequiredError(error: MSAL.PasswordRequiredError, newState: MSAL.SignInPasswordRequiredState?) {
         XCTAssertTrue(Thread.isMainThread)
-        XCTAssertEqual(error.type, expectedError?.type)
+        checkErrors(error: error, expectedError: expectedError)
         newPasswordRequiredState = newState
         expectation.fulfill()
     }
@@ -317,7 +316,7 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     }
 
     public func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
-        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        checkErrors(error: error, expectedError: expectedError)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -349,7 +348,7 @@ class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
     }
 
     func onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError) {
-        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        checkErrors(error: error, expectedError: expectedError)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -379,7 +378,7 @@ final class SignInAfterSignUpDelegateOptionalMethodsNotImplemented: SignInAfterS
     }
 
     public func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {
-        XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+        checkErrors(error: error, expectedError: expectedError)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -399,8 +398,7 @@ final class SignInPasswordStartDelegateOptionalMethodNotImplemented: SignInStart
     func onSignInStartError(error: MSAL.SignInStartError) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(error.type, expectedError.type)
-            XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            checkErrors(error: error, expectedError: expectedError)
             expectation.fulfill()
             return
         }
@@ -420,9 +418,38 @@ final class SignInCodeStartDelegateOptionalMethodNotImplemented: SignInStartDele
     }
 
     public func onSignInStartError(error: SignInStartError) {
-        XCTAssertEqual(error.type, expectedError?.type)
-        XCTAssertEqual(error.localizedDescription, expectedError?.localizedDescription)
+        checkErrors(error: error, expectedError: expectedError)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
+}
+
+fileprivate func checkErrors(error: SignInStartError, expectedError: SignInStartError?) {
+    XCTAssertEqual(error.type, expectedError?.type)
+    XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+    XCTAssertEqual(error.errorCodes, expectedError?.errorCodes)
+    XCTAssertEqual(error.errorUri, expectedError?.errorUri)
+    XCTAssertEqual(error.correlationId, expectedError?.correlationId)
+}
+
+fileprivate func checkErrors(error: PasswordRequiredError, expectedError: PasswordRequiredError?) {
+    XCTAssertEqual(error.type, expectedError?.type)
+    XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+    XCTAssertEqual(error.errorCodes, expectedError?.errorCodes)
+    XCTAssertEqual(error.errorUri, expectedError?.errorUri)
+    XCTAssertEqual(error.correlationId, expectedError?.correlationId)
+}
+
+fileprivate func checkErrors(error: SignInAfterSignUpError, expectedError: SignInAfterSignUpError?) {
+    XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+    XCTAssertEqual(error.errorCodes, expectedError?.errorCodes)
+    XCTAssertEqual(error.errorUri, expectedError?.errorUri)
+    XCTAssertEqual(error.correlationId, expectedError?.correlationId)
+}
+
+fileprivate func checkErrors(error: SignInAfterResetPasswordError, expectedError: SignInAfterResetPasswordError?) {
+    XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
+    XCTAssertEqual(error.errorCodes, expectedError?.errorCodes)
+    XCTAssertEqual(error.errorUri, expectedError?.errorUri)
+    XCTAssertEqual(error.correlationId, expectedError?.correlationId)
 }

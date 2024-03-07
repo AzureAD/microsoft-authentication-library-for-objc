@@ -30,90 +30,160 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
     
     private typealias sut = MSALNativeAuthTokenValidatedErrorType
     private let testDescription = "testDescription"
-    
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private let testErrorUri = "test error uri"
+    private var apiErrorStub: MSALNativeAuthTokenResponseError {
+        .init(
+            error: .invalidRequest,
+            subError: .attributeValidationFailed,
+            errorDescription: testDescription,
+            errorCodes: testErrorCodes,
+            errorURI: testErrorUri,
+            correlationId: testCorrelationId
+        )
+    }
+
     // MARK: - convertToSignInPasswordStartError tests
     
     func test_convertToSignInPasswordStartError_generalError() {
-        let error = sut.generalError.convertToSignInPasswordStartError()
+
+        let error = sut.generalError(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, "General error")
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_expiredToken() {
-        let error = sut.expiredToken(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.expiredToken(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_expiredRefreshToken() {
-        let error = sut.expiredRefreshToken(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.expiredRefreshToken(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
-    func test_convertToSignInPasswordStartError_invalidClient() {
-        let error = sut.invalidClient(message: testDescription).convertToSignInPasswordStartError()
+    func test_convertToSignInPasswordStartError_unauthorizedClient() {
+        let error = sut.unauthorizedClient(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_invalidRequest() {
-        let error = sut.invalidRequest(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidRequest(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_invalidServerResponse() {
-        let error = sut.invalidServerResponse.convertToSignInPasswordStartError()
+        let error = sut.unexpectedError(.init(apiErrorStub)).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidServerResponse)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_userNotFound() {
-        let error = sut.userNotFound(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.userNotFound(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .userNotFound)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_invalidPassword() {
-        let error = sut.invalidPassword(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidPassword(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .invalidCredentials)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_invalidOOBCode() {
-        let error = sut.invalidOOBCode(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidOOBCode(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_unsupportedChallengeType() {
-        let error = sut.unsupportedChallengeType(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.unsupportedChallengeType(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_strongAuthRequired() {
-        let error = sut.strongAuthRequired(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.strongAuthRequired(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .browserRequired)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_invalidScope() {
-        let error = sut.invalidScope(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.invalidScope(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_authorizationPending() {
-        let error = sut.authorizationPending(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.authorizationPending(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
     func test_convertToSignInPasswordStartError_slowDown() {
-        let error = sut.slowDown(message: testDescription).convertToSignInPasswordStartError()
+        let error = sut.slowDown(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
+
         XCTAssertEqual(error.type, .generalError)
         XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 }

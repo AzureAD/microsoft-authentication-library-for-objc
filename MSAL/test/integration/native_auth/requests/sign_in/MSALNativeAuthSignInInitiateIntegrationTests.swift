@@ -69,7 +69,7 @@ class MSALNativeAuthSignInInitiateIntegrationTests: MSALNativeAuthIntegrationBas
         
         try await perform_testFail(
             endpoint: .signInInitiate,
-            response: .invalidClient,
+            response: .unauthorizedClient,
             expectedError: Error(error: .unauthorizedClient, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
         )
     }

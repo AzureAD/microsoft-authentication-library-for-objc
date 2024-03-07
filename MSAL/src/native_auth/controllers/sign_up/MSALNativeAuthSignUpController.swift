@@ -70,7 +70,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return await handleSignUpStartResult(result, username: parameters.username, event: event, context: parameters.context)
     }
 
-    func resendCode(username: String, context: MSIDRequestContext, continuationToken: String) async -> SignUpResendCodeControllerResponse {
+    func resendCode(username: String, context: MSALNativeAuthRequestContext, continuationToken: String) async -> SignUpResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpResendCode, context: context)
         let challengeResult = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
         return handleResendCodeResult(challengeResult, username: username, event: event, continuationToken: continuationToken, context: context)
@@ -80,7 +80,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ code: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpSubmitCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitCode, context: context)
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
@@ -98,7 +98,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ password: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpSubmitPasswordControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitPassword, context: context)
 
@@ -122,7 +122,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ attributes: [String: Any],
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpSubmitAttributesControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitAttributes, context: context)
         let params = MSALNativeAuthSignUpContinueRequestProviderParams(
@@ -147,7 +147,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             request = try requestProvider.start(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error while creating Start Request: \(error)")
-            return .unexpectedError
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing signup/start request")
@@ -161,60 +161,66 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         _ result: MSALNativeAuthSignUpStartValidatedResponse,
         username: String,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpStartControllerResponse {
         switch result {
         case .success(let continuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/start request")
             let challengeResult = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
             return handleSignUpChallengeResult(challengeResult, username: username, event: event, context: context)
-        case .attributeValidationFailed(let invalidAttributes):
+        case .attributeValidationFailed(let apiError, let invalidAttributes):
             MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "attribute_validation_failed received from signup/start request for attributes: \(invalidAttributes)"
             )
             let message = String(format: MSALNativeAuthErrorMessage.attributeValidationFailedSignUpStart, invalidAttributes.description)
-            let error = SignUpStartError(type: .generalError, message: message)
-            return .init(.attributesInvalid(invalidAttributes), telemetryUpdate: { [weak self] result in
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId(), message: message)
+            return .init(.attributesInvalid(invalidAttributes), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
-            let error = SignUpStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Redirect error in signup/start request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .error(let apiError):
-            let error = apiError.toSignUpStartPublicError()
+            return .init(.error(error), correlationId: context.correlationId())
+        case .error(let apiError),
+             .unauthorizedClient(let apiError):
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/start request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            return .init(.error(error), correlationId: context.correlationId())
         case .invalidUsername(let apiError):
-            let error = SignUpStartError(type: .invalidUsername, message: apiError.errorDescription)
+            let error = SignUpStartError(
+                type: .invalidUsername,
+                message: apiError.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "InvalidUsername in signup/start request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .invalidClientId(let apiError):
-            let error = SignUpStartError(type: .generalError, message: apiError.errorDescription)
-            stopTelemetryEvent(event, context: context, error: error)
-            MSALLogger.log(level: .error,
-                           context: context,
-                           format: "Invalid Client Id in signup/start request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .unexpectedError:
-            let error = SignUpStartError(type: .generalError)
+            return .init(.error(error), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = SignUpStartError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/start request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            return .init(.error(error), correlationId: context.correlationId())
         }
     }
 
@@ -222,7 +228,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
     private func performAndValidateChallengeRequest(
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthSignUpChallengeValidatedResponse {
         let request: MSIDHttpRequest
 
@@ -230,7 +236,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             request = try requestProvider.challenge(token: continuationToken, context: context)
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error while creating Challenge Request: \(error)")
-            return .unexpectedError
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: context, format: "Performing signup/challenge request")
@@ -248,41 +254,55 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let continuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge request")
-            return SignUpStartControllerResponse(
-                .codeRequired(
-                    newState: SignUpCodeRequiredState(controller: self,
-                                                      username: username,
-                                                      continuationToken: continuationToken,
-                                                      correlationId: context.correlationId()),
-                    sentTo: sentTo,
-                    channelTargetType: challengeType,
-                    codeLength: codeLength
-                ), telemetryUpdate: { [weak self] result in
+            let result: SignUpStartResult = .codeRequired(
+                newState: SignUpCodeRequiredState(
+                    controller: self,
+                    username: username,
+                    continuationToken: continuationToken,
+                    correlationId: context.correlationId()
+                ),
+                sentTo: sentTo,
+                channelTargetType: challengeType,
+                codeLength: codeLength
+            )
+            return SignUpStartControllerResponse(result, correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 }
             )
         case .error(let apiError):
-            let error = apiError.toSignUpStartPublicError()
+            let error = apiError.toSignUpStartPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/challenge request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            return .init(.error(error), correlationId: context.correlationId())
         case .redirect:
-            let error = SignUpStartError(type: .browserRequired)
+            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Redirect error in signup/challenge request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
-        case .unexpectedError,
-             .passwordRequired:
-            let error = SignUpStartError(type: .generalError)
+            return .init(.error(error), correlationId: context.correlationId())
+        case .passwordRequired:
+            let error = SignUpStartError(type: .generalError, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/challenge request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error))
+            return .init(.error(error), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = SignUpStartError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Unexpected error in signup/challenge request \(error.errorDescription ?? "No error description")")
+            return .init(.error(error), correlationId: context.correlationId())
         }
     }
 
@@ -296,21 +316,23 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .codeRequired(let sentTo, let challengeType, let codeLength, let newContinuationToken):
             MSALLogger.log(level: .info, context: context, format: "Successful signup/challenge resendCode request")
-            return .init(.codeRequired(
-                newState: SignUpCodeRequiredState(
-                    controller: self,
-                    username: username,
-                    continuationToken: newContinuationToken,
-                    correlationId: context.correlationId()
-                ),
+            let newState = SignUpCodeRequiredState(
+                controller: self,
+                username: username,
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            let result: SignUpResendCodeResult = .codeRequired(
+                newState: newState,
                 sentTo: sentTo,
                 channelTargetType: challengeType,
                 codeLength: codeLength
-            ), telemetryUpdate: { [weak self] result in
+            )
+            return .init(result, correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .error(let apiError):
-            let error = apiError.toResendCodePublicError()
+            let error = apiError.toResendCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
@@ -321,16 +343,33 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 continuationToken: continuationToken,
                 correlationId: context.correlationId()
             )
-            return .init(.error(error: error, newState: newState))
-        case .redirect,
-             .unexpectedError,
-             .passwordRequired:
-            let error = ResendCodeError()
+            return .init(.error(error: error, newState: newState), correlationId: context.correlationId())
+        case .redirect:
+            let error = ResendCodeError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/challenge resendCode request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .passwordRequired:
+            let error = ResendCodeError(correlationId: context.correlationId())
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Unexpected error in signup/challenge resendCode request \(error.errorDescription ?? "No error description")")
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = ResendCodeError(
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Unexpected error in signup/challenge resendCode request \(error.errorDescription ?? "No error description")")
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -350,25 +389,48 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                     continuationToken: continuationToken,
                                                     correlationId: context.correlationId())
 
-            return .init(.passwordRequired(state), telemetryUpdate: { [weak self] result in
+            return .init(.passwordRequired(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
         case .redirect:
-            let error = VerifyCodeError(type: .browserRequired)
+            let error = VerifyCodeError(type: .browserRequired, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Redirect error in signup/challenge request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
-        case .error,
-             .codeRequired,
-             .unexpectedError:
-            let error = VerifyCodeError(type: .generalError)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .error(let apiError):
+            let error = VerifyCodeError(
+                type: .generalError,
+                correlationId: context.correlationId(),
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/challenge request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .codeRequired:
+            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Unexpected error in signup/challenge request \(error.errorDescription ?? "No error description")")
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            MSALLogger.log(level: .error,
+                           context: context,
+                           format: "Unexpected error in signup/challenge request \(error.errorDescription ?? "No error description")")
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -383,7 +445,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             request = try requestProvider.continue(parameters: parameters)
         } catch {
             MSALLogger.log(level: .error, context: parameters.context, format: "Error while creating Continue Request: \(error)")
-            return .unexpectedError
+            return .unexpectedError(nil)
         }
 
         MSALLogger.log(level: .info, context: parameters.context, format: "Performing signup/continue request")
@@ -392,23 +454,30 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         return responseValidator.validate(result, with: parameters.context)
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitCodeResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
         username: String,
         continuationToken: String,
         event: MSIDTelemetryAPIEvent?,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpSubmitCodeControllerResponse {
         switch result {
         case .success(let newContinuationToken):
             let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
-            return .init(.completed(state), telemetryUpdate: { [weak self] result in
+            return .init(.completed(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .invalidUserInput:
+        case .invalidUserInput(let apiError):
             MSALLogger.log(level: .error, context: context, format: "invalid_user_input error in signup/continue request")
 
-            let error = VerifyCodeError(type: .invalidCode)
+            let error = VerifyCodeError(
+                type: .invalidCode,
+                message: apiError.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             let state = SignUpCodeRequiredState(
                 controller: self,
@@ -416,13 +485,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 continuationToken: continuationToken,
                 correlationId: context.correlationId()
             )
-            return .init(.error(error: error, newState: state))
-        case .credentialRequired(let newContinuationToken):
+            return .init(.error(error: error, newState: state), correlationId: context.correlationId())
+        case .credentialRequired(let newContinuationToken, _):
             MSALLogger.log(level: .verbose, context: context, format: "credential_required received in signup/continue request")
 
             let result = await performAndValidateChallengeRequest(continuationToken: newContinuationToken, context: context)
             return handlePerformChallengeAfterContinueRequest(result, username: username, event: event, context: context)
-        case .attributesRequired(let newContinuationToken, let attributes):
+        case .attributesRequired(let newContinuationToken, let attributes, _):
             MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
@@ -430,27 +499,37 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                       continuationToken: newContinuationToken,
                                                       correlationId: context.correlationId())
 
-            return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
+            return .init(
+                .attributesRequired(attributes: attributes, newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .error(let apiError):
-            let error = apiError.toVerifyCodePublicError()
+        case .error(let apiError),
+             .attributeValidationFailed(let apiError, _):
+            let error = apiError.toVerifyCodePublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/continue request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
-        case .attributeValidationFailed,
-             .unexpectedError:
-            let error = VerifyCodeError(type: .generalError)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/continue request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitPasswordResult(
         _ result: MSALNativeAuthSignUpContinueValidatedResponse,
         username: String,
@@ -461,11 +540,11 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .success(let newContinuationToken):
             let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
-            return .init(.completed(state), telemetryUpdate: { [weak self] result in
+            return .init(.completed(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .invalidUserInput(let error):
-            let error = error.toPasswordRequiredPublicError()
+        case .invalidUserInput(let apiError):
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(
                 level: .error,
@@ -478,8 +557,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                     continuationToken: continuationToken,
                                                     correlationId: context.correlationId())
 
-            return .init(.error(error: error, newState: state))
-        case .attributesRequired(let newContinuationToken, let attributes):
+            return .init(.error(error: error, newState: state), correlationId: context.correlationId())
+        case .attributesRequired(let newContinuationToken, let attributes, _):
             MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
@@ -487,25 +566,34 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                                                       continuationToken: newContinuationToken,
                                                       correlationId: context.correlationId())
 
-            return .init(.attributesRequired(attributes: attributes, newState: state), telemetryUpdate: { [weak self] result in
+            return .init(
+                .attributesRequired(attributes: attributes, newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .error(let apiError):
-            let error = apiError.toPasswordRequiredPublicError()
+        case .error(let apiError),
+             .attributeValidationFailed(let apiError, _),
+             .credentialRequired(_, let apiError):
+            let error = apiError.toPasswordRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/continue submitPassword request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
-        case .attributeValidationFailed,
-             .credentialRequired,
-             .unexpectedError:
-            let error = PasswordRequiredError(type: .generalError)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/continue submitPassword request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error, newState: nil))
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -520,11 +608,11 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         switch result {
         case .success(let newContinuationToken):
             let state = createSignInAfterSignUpStateUsingContinuationToken(newContinuationToken, username: username, event: event, context: context)
-            return .init(.completed(state), telemetryUpdate: { [weak self] result in
+            return .init(.completed(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .attributesRequired(let newContinuationToken, let attributes):
-            let error = AttributesRequiredError()
+        case .attributesRequired(let newContinuationToken, let attributes, let apiError):
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId())
             MSALLogger.log(level: .error,
                            context: context,
                            format: "attributes_required received in signup/continue submitAttributes request: \(attributes)")
@@ -534,43 +622,53 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
-            return .init(.attributesRequired(attributes: attributes, state: state), telemetryUpdate: { [weak self] result in
+            return .init(
+                .attributesRequired(attributes: attributes, state: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                 // The telemetry event always fails because more attributes are required (we consider this an error after having sent attributes)
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .attributeValidationFailed(let invalidAttributes):
+        case .attributeValidationFailed(let apiError, let invalidAttributes):
             let message = "attribute_validation_failed from signup/continue submitAttributes request. Make sure these attributes are correct: \(invalidAttributes)" // swiftlint:disable:this line_length
             MSALLogger.log(level: .error, context: context, format: message)
 
             let errorMessage = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, invalidAttributes.description)
-            let error = AttributesRequiredError(message: errorMessage)
-
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId(), message: errorMessage)
             let state = SignUpAttributesRequiredState(
                 controller: self,
                 username: username,
                 continuationToken: continuationToken,
                 correlationId: context.correlationId()
             )
-            return .init(.attributesInvalid(attributes: invalidAttributes, newState: state), telemetryUpdate: { [weak self] result in
+            return .init(
+                .attributesInvalid(attributes: invalidAttributes, newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                 // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .error(let apiError):
-            let error = apiError.toAttributesRequiredPublicError()
+        case .error(let apiError),
+             .invalidUserInput(let apiError),
+             .credentialRequired(_, let apiError):
+            let error = apiError.toAttributesRequiredPublicError(correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Error in signup/continue submitAttributes request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error))
-        case .credentialRequired,
-             .unexpectedError,
-             .invalidUserInput:
-            let error = AttributesRequiredError()
+            return .init(.error(error: error), correlationId: context.correlationId())
+        case .unexpectedError(let apiError):
+            let error = AttributesRequiredError(
+                message: apiError?.errorDescription,
+                correlationId: context.correlationId(),
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,
                            context: context,
                            format: "Unexpected error in signup/continue submitAttributes request \(error.errorDescription ?? "No error description")")
-            return .init(.error(error: error))
+            return .init(.error(error: error), correlationId: context.correlationId())
         }
     }
 

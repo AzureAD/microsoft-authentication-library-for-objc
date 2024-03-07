@@ -52,6 +52,8 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)
             XCTAssertEqual(error.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error.correlationId, expectedError.correlationId)
+            XCTAssertEqual(error.errorCodes, expectedError.errorCodes)
             expectation.fulfill()
             return
         }

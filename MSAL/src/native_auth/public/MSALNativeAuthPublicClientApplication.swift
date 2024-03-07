@@ -30,7 +30,7 @@ import Foundation
 /// to the initialiser method.
 ///
 /// For example:
- 
+
 /// <pre>
 ///     do {
 ///         nativeAuth = try MSALNativeAuthPublicClientApplication(
@@ -171,6 +171,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 attributes: attributes,
                 correlationId: correlationId
             )
+
             let delegateDispatcher = SignUpStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
@@ -179,10 +180,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .attributesInvalid(let attributes):
-                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes)
+                await delegateDispatcher.dispatchSignUpAttributesInvalid(attributeNames: attributes, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignUpStartError(error: error)
             }
@@ -219,12 +221,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .passwordRequired(let newState):
-                await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState)
+                await delegateDispatcher.dispatchSignInPasswordRequired(newState: newState, correlationId: controllerResponse.correlationId)
             case .completed(let result):
-                await delegateDispatcher.dispatchSignInCompleted(result: result)
+                await delegateDispatcher.dispatchSignInCompleted(result: result, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignInStartError(error: error)
             }
@@ -243,6 +246,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ) {
         Task {
             let controllerResponse = await resetPasswordInternal(username: username, correlationId: correlationId)
+
             let delegateDispatcher = ResetPasswordStartDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
@@ -251,7 +255,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                     newState: newState,
                     sentTo: sentTo,
                     channelTargetType: channelTargetType,
-                    codeLength: codeLength
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
                 )
             case .error(let error):
                 await delegate.onResetPasswordStartError(error: error)

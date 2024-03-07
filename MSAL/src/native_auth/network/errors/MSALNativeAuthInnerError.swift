@@ -25,7 +25,7 @@
 import Foundation
 
 struct MSALNativeAuthInnerError: Decodable, Equatable {
-    let error: String
+    let error: String?
     let errorDescription: String?
     enum CodingKeys: String, CodingKey {
         case error

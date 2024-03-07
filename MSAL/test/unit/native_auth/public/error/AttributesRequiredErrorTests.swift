@@ -24,6 +24,7 @@
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Unit_Test_Private
 
 final class AttributesRequiredErrorTests: XCTestCase {
 
@@ -31,12 +32,20 @@ final class AttributesRequiredErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(message: expectedMessage)
+        let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
+
+        sut = .init(message: expectedMessage, correlationId: uuid)
+        
         XCTAssertEqual(sut.errorDescription, expectedMessage)
+        XCTAssertEqual(sut.correlationId, uuid)
     }
 
     func test_defaultErrorDescription() {
-        sut = .init()
+        let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
+
+        sut = .init(correlationId: uuid)
+
         XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
+        XCTAssertEqual(sut.correlationId, uuid)
     }
 }
