@@ -32,7 +32,7 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
     var expectedResult: MSALNativeAuthTokenResult?
     var expectedAccessToken: String?
     var expectedScopes: [String]?
-    var expecteExpiresOn: Date?
+    var expectedExpiresOn: Date?
 
     init(expectation: XCTestExpectation, expectedError: RetrieveAccessTokenError? = nil, expectedResult: MSALNativeAuthTokenResult? = nil) {
         self.expectation = expectation
@@ -46,7 +46,7 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
             XCTAssertEqual(expectedResult, expectedResult)
             XCTAssertEqual(expectedResult.accessToken, expectedAccessToken)
             XCTAssertEqual(expectedResult.scopes, expectedScopes)
-            XCTAssertEqual(expectedResult.expiresOn, expecteExpiresOn)
+            XCTAssertEqual(expectedResult.expiresOn, expectedExpiresOn)
         } else {
             XCTFail("This method should not be called")
         }

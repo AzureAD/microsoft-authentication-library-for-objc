@@ -150,7 +150,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let expectedAccessToken = "accessToken"
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
         helper.expectedAccessToken = authTokens.accessToken.accessToken
-        helper.expecteExpiresOn = authTokens.accessToken.expiresOn
+        helper.expectedExpiresOn = authTokens.accessToken.expiresOn
         helper.expectedScopes = authTokens.accessToken.scopes.array as? [String] ?? []
 
         factory.mockMakeUserAccountResult(userAccountResult)
