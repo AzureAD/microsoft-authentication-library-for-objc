@@ -30,7 +30,7 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     private var sut: RetrieveAccessTokenError!
 
     func test_totalCases() {
-        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 4)
+        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 3)
     }
 
     func test_customErrorDescription() {
@@ -49,7 +49,6 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
         let expectedIdentifiers = [
             MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.refreshTokenExpired,
-            MSALNativeAuthErrorMessage.tokenNotFound,
             MSALNativeAuthErrorMessage.generalError
         ]
 
