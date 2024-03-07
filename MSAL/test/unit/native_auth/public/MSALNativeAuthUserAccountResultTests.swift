@@ -57,17 +57,33 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     func test_whenAccountAndTokenExist_itReturnsCorrectData() {
         let expectation = expectation(description: "CredentialsController")
-
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedAccessToken: "accessToken")
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "accessToken"
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = "refreshToken"
+        let rawIdToken = "rawIdToken"
+        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
+                                              refreshToken: refreshToken,
+                                              rawIdToken: rawIdToken)
+        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
         sut.getAccessToken(delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
 
     func test_whenNoAccessToken_itReturnsCorrectError() {
         let expectation = expectation(description: "CredentialsController")
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = nil
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = nil
+        let rawIdToken = ""
+        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
+                                              refreshToken: refreshToken,
+                                              rawIdToken: rawIdToken)
+
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
-            authTokens: MSALNativeAuthTokens(accessToken: nil, refreshToken: nil, rawIdToken: nil),
+            authTokens: authTokens,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )

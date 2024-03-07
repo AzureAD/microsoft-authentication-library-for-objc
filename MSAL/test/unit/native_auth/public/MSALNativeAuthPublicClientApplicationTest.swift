@@ -585,9 +585,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -687,9 +685,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -784,9 +780,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -874,9 +868,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -974,9 +966,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)

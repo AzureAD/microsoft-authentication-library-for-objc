@@ -94,7 +94,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
             return .init(
-                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())), 
+                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())),
                 correlationId: context.correlationId()
             )
         }

@@ -88,7 +88,7 @@ import Foundation
             switch controllerResponse.result {
             case .success(let accessToken):
                 await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
-                    accessToken: accessToken,
+                    result: accessToken,
                     correlationId: controllerResponse.correlationId
                 )
             case .failure(let error):
