@@ -66,28 +66,6 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
 
-    func test_whenNoAccessToken_itReturnsCorrectError() throws {
-        //The MSALNativeAuthTokens accessToken is never nil anymore so we this can't happen anymore
-        try XCTSkipIf(true)
-        let expectation = expectation(description: "CredentialsController")
-        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-        authTokens.accessToken.expiresOn = Date(timeIntervalSinceNow: 3600)
-        authTokens.accessToken.accessToken = nil
-        sut = MSALNativeAuthUserAccountResult(
-            account: account!,
-            authTokens: authTokens,
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
-        )
-        let correlationId = UUID()
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId, errorCodes: []))
-        mockDelegate.expectedAccessToken = authTokens.accessToken.accessToken
-        mockDelegate.expectedExpiresOn = authTokens.accessToken.expiresOn
-        mockDelegate.expectedScopes = authTokens.accessToken.scopes.array as? [String]
-        sut.getAccessToken(correlationId: correlationId, delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
-    }
-
     // MARK: - sign-out tests
 
     func test_signOut_successfullyCallsCacheAccessor() {

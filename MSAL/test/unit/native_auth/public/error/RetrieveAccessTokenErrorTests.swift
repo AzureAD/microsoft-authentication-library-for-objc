@@ -43,7 +43,6 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
         let sut: [RetrieveAccessTokenError] = [
             .init(type: .browserRequired, correlationId: .init()),
             .init(type: .refreshTokenExpired, correlationId: .init()),
-            .init(type: .tokenNotFound, correlationId: .init()),
             .init(type: .generalError, correlationId: .init())
         ]
 
@@ -65,20 +64,11 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
         sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isRefreshTokenExpired)
-        XCTAssertFalse(sut.isTokenNotFound)
     }
 
     func test_isRefreshTokenExpired() {
         sut = .init(type: .refreshTokenExpired, correlationId: .init())
         XCTAssertTrue(sut.isRefreshTokenExpired)
         XCTAssertFalse(sut.isBrowserRequired)
-        XCTAssertFalse(sut.isTokenNotFound)
-    }
-
-    func test_isTokenNotFound() {
-        sut = .init(type: .tokenNotFound, correlationId: .init())
-        XCTAssertTrue(sut.isTokenNotFound)
-        XCTAssertFalse(sut.isBrowserRequired)
-        XCTAssertFalse(sut.isRefreshTokenExpired)
     }
 }
