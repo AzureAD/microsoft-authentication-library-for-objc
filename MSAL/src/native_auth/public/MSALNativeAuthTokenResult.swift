@@ -40,12 +40,13 @@ public class MSALNativeAuthTokenResult: NSObject {
         authTokens.accessToken.accessToken
     }
 
-    /// Get the list of permissions for the access token for the account if present.
+    /// Get the list of permissions for the access token for the account.
     @objc public var scopes: [String] {
         authTokens.accessToken.scopes.array as? [String] ?? []
     }
 
-    /// Get the expiration date for the access token for the account if present.
+    /// Get the expiration date for the access token for the account.
+    /// This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
     @objc public var expiresOn: Date? {
         authTokens.accessToken.expiresOn
     }
