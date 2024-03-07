@@ -22,32 +22,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-
 import Foundation
 
-public class MSALNativeAuthAccessTokenResult: NSObject {
-    
+public class MSALNativeAuthTokenResult: NSObject {
+
     let authTokens: MSALNativeAuthTokens
-    
+
     init(authTokens: MSALNativeAuthTokens) {
         self.authTokens = authTokens
     }
-    
+
     /**
      The Access Token requested.
      Note that if access token is not returned in token response, this property will be returned as an empty string.
      */
-    @objc public var accessToken: String? {
-        authTokens.accessToken?.accessToken
+    @objc public var accessToken: String {
+        authTokens.accessToken.accessToken
     }
-    
+
     /// Get the list of permissions for the access token for the account if present.
     @objc public var scopes: [String] {
-        authTokens.accessToken?.scopes.array as? [String] ?? []
+        authTokens.accessToken.scopes.array as? [String] ?? []
     }
 
     /// Get the expiration date for the access token for the account if present.
     @objc public var expiresOn: Date? {
-        authTokens.accessToken?.expiresOn
+        authTokens.accessToken.expiresOn
     }
 }

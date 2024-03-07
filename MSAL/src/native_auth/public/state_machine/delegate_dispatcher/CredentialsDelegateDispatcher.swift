@@ -26,7 +26,7 @@ import Foundation
 
 final class CredentialsDelegateDispatcher: DelegateDispatcher<CredentialsDelegate> {
 
-    func dispatchAccessTokenRetrieveCompleted(accessToken: MSALNativeAuthAccessTokenResult, correlationId: UUID) async {
+    func dispatchAccessTokenRetrieveCompleted(accessToken: MSALNativeAuthTokenResult, correlationId: UUID) async {
         if let onAccessTokenRetrieveCompleted = delegate.onAccessTokenRetrieveCompleted {
             telemetryUpdate?(.success(()))
             await onAccessTokenRetrieveCompleted(accessToken)

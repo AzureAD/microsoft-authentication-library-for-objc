@@ -34,17 +34,12 @@ extension MSALNativeAuthUserAccountResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let correlationId = context.correlationId()
 
-        if let accessToken = self.authTokens.accessToken {
-            if forceRefresh || accessToken.isExpired() {
-                let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-                let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
-                return await credentialsController.refreshToken(context: context, authTokens: authTokens)
-            } else {
-                return .init(.success(MSALNativeAuthAccessTokenResult(authTokens: authTokens)), correlationId: correlationId)
-            }
+        if forceRefresh || self.authTokens.accessToken.isExpired() {
+            let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
+            let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
+            return await credentialsController.refreshToken(context: context, authTokens: authTokens)
         } else {
-            MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")
-            return .init(.failure(RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId)), correlationId: correlationId)
+            return .init(.success(MSALNativeAuthTokenResult(authTokens: authTokens)), correlationId: correlationId)
         }
     }
 }
