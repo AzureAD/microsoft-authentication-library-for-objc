@@ -40,7 +40,7 @@ extension MSALNativeAuthUserAccountResult {
                 let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
                 return await credentialsController.refreshToken(context: context, authTokens: authTokens)
             } else {
-                return .init(.success(accessToken.accessToken), correlationId: correlationId)
+                return .init(.success(MSALNativeAuthAccessTokenResult(authTokens: authTokens)), correlationId: correlationId)
             }
         } else {
             MSALLogger.log(level: .error, context: context, format: "Retrieve Access Token: Existing token not found")

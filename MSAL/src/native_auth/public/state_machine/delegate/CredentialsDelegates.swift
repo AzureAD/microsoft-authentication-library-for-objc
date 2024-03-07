@@ -34,5 +34,5 @@ public protocol CredentialsDelegate {
     /// Notifies the delegate that the operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onAccessTokenRetrieveError(error:)`` will be called.
     /// - Parameter accessToken: The access token string.
-    @MainActor @objc optional func onAccessTokenRetrieveCompleted(accessToken: String)
+    @MainActor @objc optional func onAccessTokenRetrieveCompleted(accessToken: MSALNativeAuthAccessTokenResult)
 }
