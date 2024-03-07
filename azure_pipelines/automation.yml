@@ -43,6 +43,12 @@ jobs:
     fetchDepth: 1
     persistCredentials: true
     path: s
+    
+  - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -66,7 +72,7 @@ jobs:
           -workspace MSAL.xcworkspace \
           -scheme "MSAL Test Automation (iOS)" \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.2' \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
@@ -78,8 +84,8 @@ jobs:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.0-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.2' \
+            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.4-x86_64.xctestrun' \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
