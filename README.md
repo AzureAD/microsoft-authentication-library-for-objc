@@ -94,7 +94,7 @@ The master branch has been copied over to main branch. The master branch will co
 
 ### Using CocoaPods
 
-**For browser-delegated authentication using MSAL iOS and macOS**
+**For browser-delegated authentication:**
 
 You can use [CocoaPods](http://cocoapods.org/) to install `MSAL` by adding it to your `Podfile` under target:
 
@@ -106,9 +106,9 @@ target 'your-target-here' do
 end
 ```
 
-**For native-authentication using MSAL iOS**
+**For native-authentication:**
 
-To use the native authentication capabilities provided by MSAL in your iOS application, you need to specify the `MSAL/native-auth` dependency as follows:
+To use the native authentication capabilities provided by MSAL in your iOS application, you need to specify `native-auth` as subspec for the `MSAL` dependency as follows:
 
 ```
 use_frameworks!
