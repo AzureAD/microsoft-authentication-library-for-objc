@@ -24,7 +24,7 @@
 
 import XCTest
 @testable import MSAL
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 class MSALNativeAuthTestLogger : NSObject {
     static var instanceCreated = false
@@ -83,7 +83,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithContext_noMaskNonNil() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
+        MSALNativeAuthLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -101,7 +101,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithContext_andMasked() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -118,7 +118,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithContext_maskedAndNull() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -139,7 +139,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -159,7 +159,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -178,7 +178,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     func testLogPIIWithContext_nilString() throws {
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -198,7 +198,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.logPII(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -218,7 +218,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithCorrelationId_noMaskNonNil() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
+        MSALNativeAuthLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -234,7 +234,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithCorrelationId_andMasked() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -250,7 +250,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithCorrelationId_maskedAndNull() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.log(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -270,7 +270,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskAllPII
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -289,7 +289,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
+        MSALNativeAuthLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII("String"))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -306,7 +306,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogPIIWithCorrelationId_nilString() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));
@@ -325,7 +325,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
         MSALGlobalConfig.loggerConfig.logMaskingLevel = .settingsMaskEUIIOnly
         
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
-        MSALLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
+        MSALNativeAuthLogger.logPII(level: .error, correlationId: correlationId, filename: #file, lineNumber: #line, function: #function, format: "Test %@", MSALLogMask.maskPII(nil))
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         
         XCTAssertNotNil(Self.logger.messages.object(at: 0));

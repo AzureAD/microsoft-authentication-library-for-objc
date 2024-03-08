@@ -34,13 +34,13 @@
 + (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary
                                                           error:(NSError * _Nullable * _Nullable)error;
 
-+ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccount>)account
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccountProtocol>)account
                                                       claims:(nonnull NSDictionary *)claims
                                              applicationName:(nonnull NSString *)applicationName
                                               accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                                                        error:(NSError * _Nullable * _Nullable )error;
 
-+ (nullable MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
++ (nullable MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccountProtocol>)account
                                             tenantProfileIdentifier:(nullable NSString *)tenantProfileIdentifier;
 
 @end

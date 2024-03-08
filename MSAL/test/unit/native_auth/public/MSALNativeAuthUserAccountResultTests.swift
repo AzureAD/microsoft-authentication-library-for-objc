@@ -26,7 +26,7 @@ import Foundation
 
 import XCTest
 @testable import MSAL
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 class MSALNativeAuthUserAccountResultTests: XCTestCase {
     var sut: MSALNativeAuthUserAccountResult!

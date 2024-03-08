@@ -24,7 +24,7 @@
 
 import XCTest
 @testable import MSAL
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordControlling {
     private let expectation: XCTestExpectation

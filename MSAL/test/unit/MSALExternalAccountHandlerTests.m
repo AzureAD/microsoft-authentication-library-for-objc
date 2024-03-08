@@ -48,7 +48,7 @@
 
 @implementation MSALTestExternalAccountsProvider
 
-- (BOOL)updateAccount:(id<MSALAccount>)account
+- (BOOL)updateAccount:(id<MSALAccountProtocol>)account
         idTokenClaims:(NSDictionary *)idTokenClaims
                 error:(NSError * _Nullable * _Nullable)error
 {
@@ -62,7 +62,7 @@
     return self.accountOperationResult;
 }
 
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(id<MSALAccountProtocol>)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
@@ -72,7 +72,7 @@
                          error:error];
 }
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<id<MSALAccountProtocol>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
     self.readAccountsInvokedCount++;
@@ -86,7 +86,7 @@
     return self.resultAccounts;
 }
 
-- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+- (BOOL)removeAccount:(nonnull id<MSALAccountProtocol>)account
           wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error

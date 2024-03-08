@@ -23,11 +23,11 @@
 // THE SOFTWARE.
 
 import Foundation
-
+import MSAL_Private
 /// Class that groups account and token information.
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
     /// The account object that holds account information.
-    @objc public let account: MSALAccount
+    @objc public let account: MSALAccountProtocol
 
     let authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
@@ -49,7 +49,7 @@ import Foundation
     }
 
     init(
-        account: MSALAccount,
+        account: MSALAccountProtocol,
         authTokens: MSALNativeAuthTokens,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface
@@ -64,19 +64,23 @@ import Foundation
     @objc public func signOut() {
         let context = MSALNativeAuthRequestContext()
 
+        guard let someAccount = account as? MSALAccount else {
+            return
+        }
         do {
             try cacheAccessor.clearCache(
-                accountIdentifier: account.lookupAccountIdentifier,
+                accountIdentifier: someAccount.lookupAccountIdentifier,
                 authority: configuration.authority,
                 clientId: configuration.clientId,
                 context: context
             )
         } catch {
-            MSALLogger.log(
+            /*
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Clearing MSAL token cache for the current account failed with error %@: \(error)"
-            )
+            )*/
         }
     }
 

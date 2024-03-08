@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -19,16 +20,11 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-#import <Foundation/Foundation.h>
-#import "MSALLegacySharedAccount.h"
-#import "MSALAccount.h"
 
-NS_ASSUME_NONNULL_BEGIN
+#ifndef MSAL_BridgingHeader_h
+#define MSAL_BridgingHeader_h
+#import <MSAL/MSAL.h>
 
-@interface MSALLegacySharedMSAAccount : MSALLegacySharedAccount <MSALAccountProtocol>
-
-@end
-
-NS_ASSUME_NONNULL_END
+#endif /* MSAL_BridgingHeader_h */

@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 @testable import MSAL
-@_implementationOnly import MSAL_Private
+import MSAL_Private
 
 class MSALNativeAuthSignUpResponseValidatorMock: MSALNativeAuthSignUpResponseValidating {
 

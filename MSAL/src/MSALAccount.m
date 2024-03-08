@@ -107,7 +107,7 @@
     return msalAccount;
 }
 
-- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccountProtocol>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:externalAccount.identifier];

@@ -141,7 +141,7 @@
     XCTAssertNil(error);
     XCTAssertNotNil(results);
     XCTAssertEqual([results count], 1);
-    id<MSALAccount> account = results[0];
+    id<MSALAccountProtocol> account = results[0];
     XCTAssertTrue([account.identifier hasPrefix:@"oid1"]);
     XCTAssertEqualObjects(account.username, @"user@CONTOSO.com");
     XCTAssertEqualObjects(account.environment, @"login.windows.net");
