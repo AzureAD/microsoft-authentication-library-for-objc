@@ -89,7 +89,8 @@ MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParame
 }];
 ```
 
-## Master branch deprercation
+## Master branch deprecation
+
 The master branch has been copied over to main branch. The master branch will contain updates only until version 1.2.14, for further releases please refer to 'main' branch instead of 'master'.
 
 ## Installation
