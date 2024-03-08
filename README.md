@@ -11,6 +11,8 @@ The Microsoft Authentication Library (MSAL) for iOS and macOS is an auth SDK tha
 
 Using MSAL for iOS and macOS, you can acquire security tokens from the Microsoft identity platform to authenticate users and access secure web APIs for their applications. The library supports multiple authentication scenarios, such as single sign-on (SSO), Conditional Access, and brokered authentication. 
 
+## Native authentication support in MSAL
+
 MSAL iOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their mobile applications. With native authentication, users are guided through a rich, native, mobile-first sign-up and sign-in journey without leaving the app. The native authentication feature is only available for mobile apps on [External ID for customers](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication). macOS is not supported.
 
 ## Get started
@@ -117,7 +119,9 @@ target 'your-target-here' do
 	pod 'MSAL/native-auth'
 end
 ```
+
 Note: If you're using the `native-auth` subspec, you must include the `use_frameworks!` setting in your `Podfile`.
+
 ### Using Carthage
 
 You can use [Carthage](https://github.com/Carthage/Carthage) to install `MSAL` by adding it to your `Cartfile`: 
@@ -145,13 +149,7 @@ Workarounds for some bugs we encountered :
 
 ### Manually
 
-1. Clone the repository using the following command.
-```
-git clone https://github.com/AzureAD/microsoft-authentication-library-for-objc.git --recursive
-```
-2. In your project, drag and add `microsoft-authentication-library-for-objc/MSAL/MSAL.xcodeproj`
-3. In your project settings, for the target application, select `Build Phases` and add MSAL in `Target Dependencies`.
-
+If you choose to integrate MSAL for iOS and macOS manually into your Xcode project, follow the instructions outlined in the official documentation on how to [add package dependencies to your application](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app#Add-a-package-dependency).
 
 ## Using Git Submodule
 
