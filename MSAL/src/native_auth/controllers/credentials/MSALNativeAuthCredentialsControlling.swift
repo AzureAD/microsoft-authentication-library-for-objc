@@ -25,7 +25,8 @@
 import Foundation
 
 protocol MSALNativeAuthCredentialsControlling {
-    typealias RefreshTokenCredentialControllerResponse = MSALNativeAuthControllerTelemetryWrapper<Result<String, RetrieveAccessTokenError>>
+    typealias RefreshTokenCredentialControllerResponse =
+    MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthTokenResult, RetrieveAccessTokenError>>
 
     func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult?
     func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse

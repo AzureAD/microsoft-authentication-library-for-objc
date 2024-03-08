@@ -56,16 +56,19 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
 
     func test_whenValidTokenResponse_validationIsSuccessful() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = nil
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = nil
+        let rawIdToken = "rawIdToken"
+        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
+                                              refreshToken: refreshToken,
+                                              rawIdToken: rawIdToken)
         let userAccountResult = MSALNativeAuthUserAccountResult(account:
                                                                     MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens:authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
-        let refreshToken = MSIDRefreshToken()
-        refreshToken.familyId = "familyId"
-        refreshToken.refreshToken = "refreshToken"
         let tokenResponse = MSIDCIAMTokenResponse()
         factory.mockMakeUserAccountResult(userAccountResult)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))
