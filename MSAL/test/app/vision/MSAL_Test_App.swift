@@ -47,7 +47,10 @@ struct MSAL_Test_App: App {
                             }
                         }
                     }
-                    
+                }
+            
+                .onOpenURL { (url) in
+                    MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: nil)
                 }
         }
     }

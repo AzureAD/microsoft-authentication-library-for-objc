@@ -495,8 +495,7 @@
 		919BDFCB2B633E8800DA8C53 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
 		919BDFCC2B633E8800DA8C53 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
 		919BDFCD2B633E8800DA8C53 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
-		919BDFDF2B633F0B00DA8C53 /* libIdentityCore visionOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */; };
-		91D745DA2B69D5470070CC18 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 91D745D92B69D5470070CC18 /* RealityKitContent */; };
+		919BDFDF2B633F0B00DA8C53 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */; };
 		91D745DC2B69D5470070CC18 /* MSAL_Test_App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D745DB2B69D5470070CC18 /* MSAL_Test_App.swift */; };
 		91D745DE2B69D5470070CC18 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D745DD2B69D5470070CC18 /* ContentView.swift */; };
 		91D745E02B69D54B0070CC18 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 91D745DF2B69D54B0070CC18 /* Assets.xcassets */; };
@@ -2423,7 +2422,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				919BDFC82B633E8800DA8C53 /* AuthenticationServices.framework in Frameworks */,
-				919BDFDF2B633F0B00DA8C53 /* libIdentityCore visionOS.a in Frameworks */,
+				919BDFDF2B633F0B00DA8C53 /* libIdentityCore.a in Frameworks */,
 				919BDFC92B633E8800DA8C53 /* WebKit.framework in Frameworks */,
 				919BDFCB2B633E8800DA8C53 /* SafariServices.framework in Frameworks */,
 				919BDFCC2B633E8800DA8C53 /* UIKit.framework in Frameworks */,
@@ -2435,7 +2434,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				91D745DA2B69D5470070CC18 /* RealityKitContent in Frameworks */,
 				91D745EC2B69D9300070CC18 /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3735,7 +3733,7 @@
 				B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */,
 				B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */,
 				E7A6569624FEE45300931BAE /* libIdentityCoreSwift.a */,
-				919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */,
+				919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5125,7 +5123,6 @@
 			);
 			name = "MSAL Test App (visonOS)";
 			packageProductDependencies = (
-				91D745D92B69D5470070CC18 /* RealityKitContent */,
 			);
 			productName = "MSAL Test App";
 			productReference = 91D745D52B69D5470070CC18 /* MSAL Test App.app */;
@@ -5485,10 +5482,10 @@
 			remoteRef = 231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */ = {
+		919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libIdentityCore visionOS.a";
+			path = libIdentityCore.a;
 			remoteRef = 919BDFDC2B633E8800DA8C53 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -8305,13 +8302,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		91D745D92B69D5470070CC18 /* RealityKitContent */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = RealityKitContent;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D6DFF39A1E2579360012891A /* Project object */;
 }

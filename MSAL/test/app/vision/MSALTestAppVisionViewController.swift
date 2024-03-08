@@ -193,7 +193,7 @@ extension MSALTestAppVisionViewController {
         guard let webViewParameters = self.webViewParamaters else { return }
         webViewParameters.webviewType = self.getWebviewType();
 
-        var parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
+        let parameters = MSALInteractiveTokenParameters(scopes: kScopes, webviewParameters: webViewParameters)
         parameters.promptType = .selectAccount
         
         if let claimRequest = self.getClaimsRequest()
