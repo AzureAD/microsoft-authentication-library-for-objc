@@ -149,7 +149,7 @@ Workarounds for some bugs we encountered :
 
 ### Manually
 
-If you choose to integrate MSAL for iOS and macOS manually into your Xcode project, follow the instructions outlined in the official documentation on how to [add package dependencies to your application](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app#Add-a-package-dependency).
+If you choose to manually integrate MSAL for iOS and macOS into your Xcode project, follow the guidance in the official documentation on how to [add package dependencies to your application](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app#Add-a-package-dependency).
 
 ## Using Git Submodule
 
