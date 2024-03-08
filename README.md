@@ -117,7 +117,7 @@ target 'your-target-here' do
 	pod 'MSAL/native-auth'
 end
 ```
-
+Note: If you're using the `native-auth` subspec, you must include the `use_frameworks!` setting in your `Podfile`.
 ### Using Carthage
 
 You can use [Carthage](https://github.com/Carthage/Carthage) to install `MSAL` by adding it to your `Cartfile`: 
