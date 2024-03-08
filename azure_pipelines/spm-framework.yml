@@ -352,7 +352,8 @@ jobs:
       targetType: 'inline'
       script: |
         # Release to CocoaPods
-        pod trunk push --use-libraries --allow-warnings MSAL.podspec
+        # Do not use "--use-libraries" option because native auth code doesn't support static library yet
+        pod trunk push --allow-warnings MSAL.podspec
         #pod trunk me
       workingDirectory: '$(Build.SourcesDirectory)'
     env:
