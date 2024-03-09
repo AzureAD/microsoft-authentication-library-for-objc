@@ -1,5 +1,5 @@
 ## [1.3.1]
-* Add support for QR+PIN (#1929)
+* Preferred auth method added to device information, returned from broker
 
 ## [1.3.0]
 

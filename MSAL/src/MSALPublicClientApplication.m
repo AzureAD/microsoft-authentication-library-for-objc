@@ -1186,7 +1186,7 @@
     // Private enum value for QR+PIN
     if (parameters.preferredAuthMethod == 1)
     {
-        NSMutableDictionary *extraAuthorizeURLQueryParameters = [msidParams.extraAuthorizeURLQueryParameters mutableCopy];;
+        NSMutableDictionary *extraAuthorizeURLQueryParameters = [msidParams.extraAuthorizeURLQueryParameters mutableCopy];
         [extraAuthorizeURLQueryParameters setObject:MSID_PREFERRED_AUTH_METHOD_QR_PIN forKey:MSID_PREFERRED_AUTH_METHOD_KEY];
         msidParams.extraAuthorizeURLQueryParameters = extraAuthorizeURLQueryParameters;
     }
