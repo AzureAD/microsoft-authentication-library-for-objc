@@ -51,11 +51,6 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.browserRequired
         case .refreshTokenExpired:
             return MSALNativeAuthErrorMessage.refreshTokenExpired
-<<<<<<< HEAD
-=======
-        case .tokenNotFound:
-            return MSALNativeAuthErrorMessage.tokenNotFound
->>>>>>> main
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
         }
@@ -70,12 +65,4 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     public var isRefreshTokenExpired: Bool {
         return type == .refreshTokenExpired
     }
-<<<<<<< HEAD
-=======
-
-    /// Returns `true` if the existing token cannot be found.
-    public var isTokenNotFound: Bool {
-        return type == .tokenNotFound
-    }
->>>>>>> main
 }

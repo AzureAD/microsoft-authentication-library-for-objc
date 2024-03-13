@@ -86,15 +86,9 @@ import Foundation
             let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
-<<<<<<< HEAD
             case .success(let accessTokenResult):
                 await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
                     result: accessTokenResult,
-=======
-            case .success(let accessToken):
-                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
-                    accessToken: accessToken,
->>>>>>> main
                     correlationId: controllerResponse.correlationId
                 )
             case .failure(let error):
