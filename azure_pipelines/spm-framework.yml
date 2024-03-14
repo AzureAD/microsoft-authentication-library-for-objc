@@ -102,6 +102,11 @@ jobs:
         # Zipping xcframework. -y : including symlinks (Need to preserve symlinks in xcframework so that codesign validation doesn't fail) -v : verbose logging
         zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
       failOnStderr: true
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'runtime'
+      version: '6.0.0'
+      installationPath: '/Users/runner/.dotnet'
   - task: EsrpCodeSigning@2
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
