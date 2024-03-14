@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SignUpPasswordRequiredState Class Reference</title>
+    <title>MSALPreferredAuthMethod Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Class/SignUpPasswordRequiredState" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Enum/MSALPreferredAuthMethod" class="dashAnchor"></a>
 
-    <a title="SignUpPasswordRequiredState Class Reference"></a>
+    <a title="MSALPreferredAuthMethod Enumeration Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">MSAL Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      SignUpPasswordRequiredState Class Reference
+      MSALPreferredAuthMethod Enumeration Reference
     </p>
 
     <div class="content-wrapper">
@@ -515,16 +515,16 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>SignUpPasswordRequiredState</h1>
+            <h1>MSALPreferredAuthMethod</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="kt">SignUpPasswordRequiredState</span> <span class="p">:</span> <span class="kt"><a href="../Classes.html#/c:@M@MSAL@objc(cs)SignUpBaseState">SignUpBaseState</a></span></code></pre>
+                  <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MSALPreferredAuthMethod</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
 
                 </div>
               </div>
-            <p>An object of this type is created when a user is required to supply a password to continue a sign up flow.</p>
+            <p>Preferred auth method for MSAL requests. Can be configured by admin as part of MSALDeviceInformation and
+passed in the interactive params to the server.</p>
 
           </div>
         </section>
@@ -536,9 +536,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@MSAL@objc(cs)SignUpPasswordRequiredState(im)submitPasswordWithPassword:delegate:"></a>
-                    <a name="//apple_ref/swift/Method/submitPassword(password:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)SignUpPasswordRequiredState(im)submitPasswordWithPassword:delegate:">submitPassword(password:<wbr>delegate:<wbr>)</a>
+                    <a name="/c:@E@MSALPreferredAuthMethod@MSALPreferredAuthMethodNone"></a>
+                    <a name="//apple_ref/swift/Case/MSALPreferredAuthMethodNone" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALPreferredAuthMethod@MSALPreferredAuthMethodNone">MSALPreferredAuthMethodNone</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -546,47 +546,16 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Submits the password to the server for verification.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">submitPassword</span><span class="p">(</span><span class="nv">password</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SignUpPasswordRequiredDelegate.html">SignUpPasswordRequiredDelegate</a></span><span class="p">)</span></code></pre>
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALPreferredAuthMethodNone</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>password</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Password that the user supplied.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>delegate</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Delegate that receives callbacks for the operation.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                       </div>
                     </section>
                   </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>SignUpPasswordRequiredState Class Reference</title>
+    <title>MSALNativeAuthTokenResult Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Class/SignUpPasswordRequiredState" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Class/MSALNativeAuthTokenResult" class="dashAnchor"></a>
 
-    <a title="SignUpPasswordRequiredState Class Reference"></a>
+    <a title="MSALNativeAuthTokenResult Class Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">MSAL Reference</a>
       <img class="carat" src="../img/carat.png" alt=""/>
-      SignUpPasswordRequiredState Class Reference
+      MSALNativeAuthTokenResult Class Reference
     </p>
 
     <div class="content-wrapper">
@@ -515,16 +515,15 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>SignUpPasswordRequiredState</h1>
+            <h1>MSALNativeAuthTokenResult</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="kt">SignUpPasswordRequiredState</span> <span class="p">:</span> <span class="kt"><a href="../Classes.html#/c:@M@MSAL@objc(cs)SignUpBaseState">SignUpBaseState</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthTokenResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
-            <p>An object of this type is created when a user is required to supply a password to continue a sign up flow.</p>
+            <p>Undocumented</p>
 
           </div>
         </section>
@@ -536,9 +535,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@MSAL@objc(cs)SignUpPasswordRequiredState(im)submitPasswordWithPassword:delegate:"></a>
-                    <a name="//apple_ref/swift/Method/submitPassword(password:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)SignUpPasswordRequiredState(im)submitPasswordWithPassword:delegate:">submitPassword(password:<wbr>delegate:<wbr>)</a>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)accessToken"></a>
+                    <a name="//apple_ref/swift/Property/accessToken" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)accessToken">accessToken</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -546,47 +545,75 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Submits the password to the server for verification.</p>
+                        <p>The Access Token requested.
+Note that if access token is not returned in token response, this property will be returned as an empty string.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">submitPassword</span><span class="p">(</span><span class="nv">password</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SignUpPasswordRequiredDelegate.html">SignUpPasswordRequiredDelegate</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">accessToken</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>password</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Password that the user supplied.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>delegate</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Delegate that receives callbacks for the operation.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)scopes"></a>
+                    <a name="//apple_ref/swift/Property/scopes" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)scopes">scopes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the list of permissions for the access token for the account.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)expiresOn"></a>
+                    <a name="//apple_ref/swift/Property/expiresOn" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult(py)expiresOn">expiresOn</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Get the expiration date for the access token for the account.
+This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">expiresOn</span><span class="p">:</span> <span class="kt">Date</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
