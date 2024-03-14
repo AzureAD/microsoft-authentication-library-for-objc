@@ -76,10 +76,11 @@
 
     [self shibDismissRememberPassword];
     
-    [self acceptSpeedBump];
     
-    [self acceptMSSTSConsentIfNecessary:@"Accept"
+    [self acceptMSSTSConsentIfNecessary:@"Continue"
                         embeddedWebView:request.usesEmbeddedWebView];
+    
+    [self acceptSpeedBump];
     
     if (!request.usesEmbeddedWebView)
     {
