@@ -106,6 +106,7 @@ jobs:
     inputs:
       packageType: 'runtime'
       version: '6.0.0'
+      installationPath: '/Users/runner/.dotnet'
   - task: EsrpCodeSigning@2
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
