@@ -60,6 +60,23 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
             return MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: idToken.rawIdToken)
         }
 
+    func getAccessToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDAccessToken? {
+        let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
+        return try tokenCacheAccessor.getAccessToken(
+            forAccount: account.lookupAccountIdentifier,
+            configuration: accountConfiguration,
+            context: context)
+    }
+
+    func getRefreshToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDRefreshToken? {
+        let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
+        return try tokenCacheAccessor.getRefreshToken(
+            withAccount: account.lookupAccountIdentifier,
+            familyId: nil,
+            configuration: accountConfiguration,
+            context: context)
+    }
+
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {
         let request = MSALAccountsProvider(tokenCache: tokenCacheAccessor,
                                            accountMetadataCache: accountMetadataCache,

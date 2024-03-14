@@ -166,12 +166,12 @@ extension MSALNativeAuthTokenController {
         context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration
     ) -> MSIDTokenResult? {
-        do {
-            // If there is an account existing already in the cache, we remove it
-            try clearAccount(msidConfiguration: msidConfiguration, context: context)
-        } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error clearing account \(error) (ignoring)")
-        }
+//        do {
+//            // If there is an account existing already in the cache, we remove it
+//            try clearAccount(msidConfiguration: msidConfiguration, context: context)
+//        } catch {
+//            MSALLogger.log(level: .error, context: context, format: "Error clearing account \(error) (ignoring)")
+//        }
         do {
             let result = try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse,
                                                                            configuration: msidConfiguration,

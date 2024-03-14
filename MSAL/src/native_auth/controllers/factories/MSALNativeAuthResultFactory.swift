@@ -30,9 +30,9 @@ protocol MSALNativeAuthResultBuildable {
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult?
 
-    func makeUserAccountResult(account: MSALAccount, authTokens: MSALNativeAuthTokens) -> MSALNativeAuthUserAccountResult?
+    func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSALNativeAuthUserAccountResult?
 
-    func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration
+    func makeMSIDConfiguration(scopes: [String]?) -> MSIDConfiguration
 }
 
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
@@ -71,29 +71,19 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 format: "Account could not be created")
             return nil
         }
-        guard let refreshToken = tokenResult.refreshToken as? MSIDRefreshToken else {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Refresh token invalid, account result could not be created")
-            return nil
-        }
-        let authTokens = MSALNativeAuthTokens(accessToken: tokenResult.accessToken,
-                                              refreshToken: refreshToken,
-                                              rawIdToken: tokenResult.rawIdToken)
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
+        return .init(account: account, rawIdToken: tokenResult.rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 
-    func makeUserAccountResult(account: MSALAccount, authTokens: MSALNativeAuthTokens) -> MSALNativeAuthUserAccountResult? {
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
+    func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSALNativeAuthUserAccountResult? {
+        return .init(account: account, rawIdToken: rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 
-    func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {
+    func makeMSIDConfiguration(scopes: [String]?) -> MSIDConfiguration {
         return .init(
             authority: config.authority,
             redirectUri: nil,
             clientId: config.clientId,
-            target: scopes.joinScopes()
+            target: scopes?.joinScopes()
         )
     }
 }

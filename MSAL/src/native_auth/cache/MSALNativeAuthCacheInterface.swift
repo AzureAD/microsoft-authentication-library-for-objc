@@ -28,10 +28,18 @@ import Foundation
 protocol MSALNativeAuthCacheInterface {
     init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor)
 
+    // TODO: do we need a more granular method, like getRefreshToken, getAccessToken, getIdToken
     func getTokens(
         account: MSALAccount,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSALNativeAuthTokens
+    
+    func getAccessToken(
+        account: MSALAccount,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext) throws -> MSIDAccessToken?
+    
+    func getRefreshToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDRefreshToken?
 
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount]
 

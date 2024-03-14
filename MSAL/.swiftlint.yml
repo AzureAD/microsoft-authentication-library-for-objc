@@ -13,3 +13,4 @@ function_parameter_count:
 
 disabled_rules:
   - todo
+  - force_cast

@@ -29,23 +29,23 @@ import Foundation
     /// The account object that holds account information.
     @objc public let account: MSALAccount
 
-    let authTokens: MSALNativeAuthTokens
+    let rawIdToken: String?
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
 
     /// Get the ID token for the account.
     @objc public var idToken: String? {
-        authTokens.rawIdToken
+        rawIdToken
     }
 
     init(
         account: MSALAccount,
-        authTokens: MSALNativeAuthTokens,
+        rawIdToken: String?,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface
     ) {
         self.account = account
-        self.authTokens = authTokens
+        self.rawIdToken = rawIdToken
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
     }
@@ -73,12 +73,14 @@ import Foundation
     /// Retrieves an access token for the account.
     /// - Parameters:
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
+    @objc public func getAccessToken(forceRefresh: Bool = false, scopes: [String]? = nil, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(
                 forceRefresh: forceRefresh,
+                scopes: scopes,
                 correlationId: correlationId,
                 cacheAccessor: cacheAccessor
             )
