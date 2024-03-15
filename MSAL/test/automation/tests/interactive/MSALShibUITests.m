@@ -79,7 +79,7 @@
     
     [self acceptMSSTSConsentIfNecessary:@"Continue"
                         embeddedWebView:request.usesEmbeddedWebView];
-        
+
     if (!request.usesEmbeddedWebView)
     {
         [self acceptSpeedBump];
