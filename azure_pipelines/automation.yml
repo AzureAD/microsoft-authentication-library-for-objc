@@ -71,9 +71,7 @@ jobs:
     displayName: Build for testing
     inputs:
       targetType: 'inline'
-      script: |        
-        # echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
-        # base64 --decode -i MSAL/test/automation/conf_encoded.json -o MSAL/test/automation/conf.json
+      script: |
         mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
