@@ -11,7 +11,7 @@ The Microsoft Authentication Library (MSAL) for iOS and macOS is an auth SDK tha
 
 Using MSAL for iOS and macOS, you can acquire security tokens from the Microsoft identity platform to authenticate users and access secure web APIs for their applications. The library supports multiple authentication scenarios, such as single sign-on (SSO), Conditional Access, and brokered authentication. 
 
-## Native authentication support in MSAL
+#### Native authentication support in MSAL
 
 MSAL iOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their mobile applications. With native authentication, users are guided through a rich, native, mobile-first sign-up and sign-in journey without leaving the app. The native authentication feature is only available for mobile apps on [External ID for customers](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication). macOS is not supported.
 
