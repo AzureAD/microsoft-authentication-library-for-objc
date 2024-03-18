@@ -59,14 +59,23 @@ jobs:
   
   - script: 'gem install xcpretty'
     displayName: 'Install xcpretty'
+
+
+  - task: DownloadSecureFile@1
+    name: configuration
+    displayName: 'Get Automation conf.json'
+    inputs:
+      secureFile: 'broker-automation-conf.json'
   
   - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
       script: |        
-        echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
-        base64 --decode -i MSAL/test/automation/conf_encoded.json -o MSAL/test/automation/conf.json
+        # echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
+        # base64 --decode -i MSAL/test/automation/conf_encoded.json -o MSAL/test/automation/conf.json
+        cd MSAL/test
+        mv $(configuration.secureFilePath) automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
