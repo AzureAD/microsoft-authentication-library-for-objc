@@ -75,6 +75,7 @@ jobs:
         # echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
         # base64 --decode -i MSAL/test/automation/conf_encoded.json -o MSAL/test/automation/conf.json
         mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
+        ls MSAL/test/automation/
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
