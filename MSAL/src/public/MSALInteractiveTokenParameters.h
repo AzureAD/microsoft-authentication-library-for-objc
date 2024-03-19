@@ -95,6 +95,12 @@ Modal presentation style for displaying authentication web content.
  */
 @property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+/**
+ The pre-defined preferred auth method for the interactive request.
+ By default, it will be set to MSALPreferredAuthMethod.MSALPreferredAuthMethodNone.
+ */
+@property (nonatomic) MSALPreferredAuthMethod preferredAuthMethod;
+
 #pragma mark - Constructing MSALInteractiveTokenParameters
 
 #if TARGET_OS_IPHONE
