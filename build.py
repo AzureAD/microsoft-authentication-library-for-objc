@@ -35,7 +35,7 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device_type = "iPhone 14"
+ios_sim_device_type = "iPhone 15"
 ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(17.2\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=17.2'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
