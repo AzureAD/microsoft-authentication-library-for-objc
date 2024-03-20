@@ -251,7 +251,7 @@ application.acquireToken(with: interactiveParameters, completionBlock: { (result
 	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
 	let accountIdentifier = authResult.account.identifier
 })
-``
+```
 
 #### Objective-C
 ```obj-c
