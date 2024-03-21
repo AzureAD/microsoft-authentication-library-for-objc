@@ -66,6 +66,12 @@ jobs:
       destinationTypeOption: 'devices'
       args: 'SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath $(Build.binariesDirectory)/iOS'
       exportPath: $(Build.binariesDirectory)/iOS
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: 'Component Governance Component Detection'
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'Low'
   - task: Xcode@5
     displayName: Build archive for macOS
     inputs:
