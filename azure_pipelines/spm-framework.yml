@@ -93,6 +93,18 @@ jobs:
         -framework $(Build.binariesDirectory)/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -output $(Build.ArtifactStagingDirectory)/MSAL.xcframework
       failOnStderr: true
+      
+  - task: Bash@3
+    displayName: Copy dSym
+    inputs:
+      workingDirectory: $(Build.binariesDirectory)
+      targetType: 'inline'
+      script: |
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL-iOS.framework.dSYM.zip $(Build.binariesDirectory)/iOS.xcarchive/dSYMs/MSAL.framework.dSYM
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL-iOS-Sim.framework.dSYM.zip $(Build.binariesDirectory)/iOS-Sim.xcarchive/dSYMs/MSAL.framework.dSYM
+        zip -r $(Build.ArtifactStagingDirectory)/MSAL-macOS.framework.dSYM.zip $(Build.binariesDirectory)/macOS.xcarchive/dSYMs/MSAL.framework.dSYM
+      failOnStderr: false
+      
   - task: Bash@3
     displayName: Zip xcframework for codesigning
     inputs:

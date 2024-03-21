@@ -1,3 +1,6 @@
+TBD:
+* Add dSym files to release page (#2103)
+
 ## [1.3.1]
 * Preferred auth method added to device information, returned from broker
 
