@@ -168,14 +168,20 @@ typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
     MSALPlatformSSONotEnabled,
     
     /*
-     Administrator has configured Platform SSO in sso config. But device has not been registred with AAD via platform SSO
+     Administrator has configured Platform SSO in sso config. But device has not been registered with AAD via platform SSO
      */
     MSALPlatformSSOEnabledNotRegistered,
     
     /*
-     Administrator has configured Platform SSO in sso config and the device is registred with AAD via platform SSO
+     Administrator has configured Platform SSO in sso config and the device is registered with AAD via platform SSO
      */
-    MSALPlatformSSOEnabledAndRegistered
+    MSALPlatformSSOEnabledAndRegistered,
+    
+    /*
+     Administrator has configured Platform SSO in sso config and the device is registered via platform SSO, but needs repair
+     */
+    
+    MSALPlatformSSORegistrationNeedsRepair
 };
 
 /**
