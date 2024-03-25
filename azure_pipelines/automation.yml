@@ -31,7 +31,7 @@ resources:
     name: OneBranch.Pipelines/GovernedTemplates
     ref: refs/heads/main
 extends:
-  template: v2/OneBranch.Official.CrossPlat.yml@onebranchTemplates
+  template: v2/OneBranch.NonOfficial.CrossPlat.yml@onebranchTemplates
   parameters:
     customTags: 'ES365AIMigrationTooling-BulkMigrated'
     stages:
