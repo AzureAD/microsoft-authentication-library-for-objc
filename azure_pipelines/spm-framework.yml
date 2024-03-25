@@ -32,6 +32,9 @@ resources:
     name: $(repositoryName)
     ref: $(repositoryBranch)
 
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+
 jobs:
 - job: BuildXcFrameworks
   displayName: Build MSAL framework and release
