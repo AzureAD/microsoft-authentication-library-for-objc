@@ -76,15 +76,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
                 return nil
             }
-            if let username = account.username {
-                let nativeAuthAccount = MSALNativeAuthAccount.init(username: username,
-                                                                   homeAccountId: account.homeAccountId,
-                                                                   environment: account.environment,
-                                                                   tenantProfiles: account.tenantProfiles ?? [])
-                return factory.makeUserAccountResult(account: nativeAuthAccount, authTokens: tokens)
-            } else {
-                MSALLogger.log(level: .verbose, context: nil, format: "No username found")
-            }
+            let nativeAuthAccount = MSALNativeAuthAccount.copy(from: account)
+            return factory.makeUserAccountResult(account: nativeAuthAccount, authTokens: tokens)
         } else {
             MSALLogger.log(level: .verbose, context: nil, format: "No account found")
         }
@@ -102,7 +95,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
             return .init(
-                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())), 
+                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())),
                 correlationId: context.correlationId()
             )
         }

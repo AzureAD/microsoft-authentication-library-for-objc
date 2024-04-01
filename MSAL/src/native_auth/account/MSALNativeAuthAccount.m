@@ -24,16 +24,14 @@
 
 
 #import "MSALNativeAuthAccount.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @implementation MSALNativeAuthAccount
 
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
-{
-    return [super initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
++ (instancetype) copyFromAccount: (MSALAccount*) account {
+    return [[MSALNativeAuthAccount alloc] initWithUsername:account.username homeAccountId:account.homeAccountId environment:account.environment tenantProfiles:account.tenantProfiles];
 }
+
 
 #pragma mark - NSCopying
 

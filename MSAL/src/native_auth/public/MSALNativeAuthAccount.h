@@ -24,16 +24,12 @@
 
 
 #import <Foundation/Foundation.h>
-#import "MSALAccount.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALNativeAuthAccount : MSALAccount
 
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
++ (instancetype) copyFromAccount: (MSALAccount*) account;
 
 @end
 
