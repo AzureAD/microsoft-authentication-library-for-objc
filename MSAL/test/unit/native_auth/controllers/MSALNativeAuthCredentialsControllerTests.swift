@@ -113,8 +113,6 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let accountResult = sut.retrieveUserAccountResult(context: expectedContext)
         XCTAssertEqual(accountResult?.account.username, account.username)
         XCTAssertEqual(accountResult?.idToken, authTokens.rawIdToken)
-        XCTAssertEqual(accountResult?.scopes, authTokens.accessToken?.scopes.array as? [String])
-        XCTAssertEqual(accountResult?.expiresOn, authTokens.accessToken?.expiresOn)
         XCTAssertTrue(NSDictionary(dictionary: accountResult?.account.accountClaims ?? [:]).isEqual(to: account.accountClaims ?? [:]))
     }
 
@@ -150,7 +148,10 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let expectedAccessToken = "accessToken"
-        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedAccessToken: expectedAccessToken)
+        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
+        helper.expectedAccessToken = authTokens.accessToken.accessToken
+        helper.expectedExpiresOn = authTokens.accessToken.expiresOn
+        helper.expectedScopes = authTokens.accessToken.scopes.array as? [String] ?? []
 
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()
@@ -163,7 +164,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         helper.onAccessTokenRetrieveCompleted(result)
 
         await fulfillment(of: [expectation], timeout: 1)
-        XCTAssertEqual(expectedAccessToken, authTokens.accessToken?.accessToken)
+        XCTAssertEqual(expectedAccessToken, authTokens.accessToken.accessToken)
     }
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {

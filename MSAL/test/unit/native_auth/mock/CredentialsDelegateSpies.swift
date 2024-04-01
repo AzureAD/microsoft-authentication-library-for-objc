@@ -29,18 +29,24 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
 
     private let expectation: XCTestExpectation
     var expectedError: RetrieveAccessTokenError?
+    var expectedResult: MSALNativeAuthTokenResult?
     var expectedAccessToken: String?
-    
-    init(expectation: XCTestExpectation, expectedError: RetrieveAccessTokenError? = nil, expectedAccessToken: String? = nil) {
+    var expectedScopes: [String]?
+    var expectedExpiresOn: Date?
+
+    init(expectation: XCTestExpectation, expectedError: RetrieveAccessTokenError? = nil, expectedResult: MSALNativeAuthTokenResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
-        self.expectedAccessToken = expectedAccessToken
+        self.expectedResult = expectedResult
     }
 
-    public func onAccessTokenRetrieveCompleted(accessToken: String) {
-        if let expectedAccessToken = expectedAccessToken {
+    public func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
+        if let expectedResult = expectedResult {
             XCTAssertTrue(Thread.isMainThread)
-            XCTAssertEqual(expectedAccessToken, accessToken)
+            XCTAssertEqual(expectedResult, expectedResult)
+            XCTAssertEqual(expectedResult.accessToken, expectedAccessToken)
+            XCTAssertEqual(expectedResult.scopes, expectedScopes)
+            XCTAssertEqual(expectedResult.expiresOn, expectedExpiresOn)
         } else {
             XCTFail("This method should not be called")
         }
@@ -84,11 +90,11 @@ final class CredentialsDelegateOptionalMethodsNotImplemented: CredentialsDelegat
 class CredentialsTestValidatorHelper: CredentialsDelegateSpy {
 
     func onAccessTokenRetrieveCompleted(_ response: MSALNativeAuthCredentialsController.RefreshTokenCredentialControllerResponse) {
-        guard case let .success(token) = response.result else {
+        guard case let .success(result) = response.result else {
             return XCTFail("wrong result")
         }
 
-        Task { await self.onAccessTokenRetrieveCompleted(accessToken: token) }
+        Task { await self.onAccessTokenRetrieveCompleted(result: result) }
     }
 
     func onAccessTokenRetrieveError(_ response: MSALNativeAuthCredentialsController.RefreshTokenCredentialControllerResponse) {

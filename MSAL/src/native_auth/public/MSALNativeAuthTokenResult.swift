@@ -16,30 +16,38 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-extension MSALNativeAuthUserAccountResult {
+public class MSALNativeAuthTokenResult: NSObject {
 
-    func getAccessTokenInternal(
-        forceRefresh: Bool,
-        correlationId: UUID?,
-        cacheAccessor: MSALNativeAuthCacheInterface
-    ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let correlationId = context.correlationId()
+    let authTokens: MSALNativeAuthTokens
 
-        if forceRefresh || self.authTokens.accessToken.isExpired() {
-            let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-            let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
-            return await credentialsController.refreshToken(context: context, authTokens: authTokens)
-        } else {
-            return .init(.success(MSALNativeAuthTokenResult(authTokens: authTokens)), correlationId: correlationId)
-        }
+    init(authTokens: MSALNativeAuthTokens) {
+        self.authTokens = authTokens
+    }
+
+    /**
+     The Access Token requested.
+     Note that if access token is not returned in token response, this property will be returned as an empty string.
+     */
+    @objc public var accessToken: String {
+        authTokens.accessToken.accessToken
+    }
+
+    /// Get the list of permissions for the access token for the account.
+    @objc public var scopes: [String] {
+        authTokens.accessToken.scopes.array as? [String] ?? []
+    }
+
+    /// Get the expiration date for the access token for the account.
+    /// This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
+    @objc public var expiresOn: Date? {
+        authTokens.accessToken.expiresOn
     }
 }
