@@ -1,3 +1,6 @@
+## [1.3.1]
+* Preferred auth method added to device information, returned from broker
+
 ## [1.3.0]
 
 ## [1.2.22]

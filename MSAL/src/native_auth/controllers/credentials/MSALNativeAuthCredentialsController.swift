@@ -87,7 +87,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
     func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
-        let scopes = authTokens.accessToken?.scopes.array as? [String] ?? []
+        let scopes = authTokens.accessToken.scopes.array as? [String] ?? []
         guard let request = createRefreshTokenRequest(
             scopes: scopes,
             refreshToken: authTokens.refreshToken?.refreshToken,
@@ -182,8 +182,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 level: .verbose,
                 context: context,
                 format: "Refresh Token completed successfully")
+            // TODO: Handle tokenResult.refreshToken as? MSIDRefreshToken in a safer way
             return .init(
-                .success(tokenResult.accessToken.accessToken),
+                .success(MSALNativeAuthTokenResult(authTokens: MSALNativeAuthTokens(
+                    accessToken: tokenResult.accessToken,
+                    refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
+                    rawIdToken: tokenResult.rawIdToken
+                ))),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                 telemetryEvent?.setUserInformation(tokenResult.account)

@@ -167,7 +167,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     int i = 0;
     
     while (i < 20) {
-        
+        sleep(1);
         // If consent button found, tap it and return
         if (elementToCheck.exists)
         {

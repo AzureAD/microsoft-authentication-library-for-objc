@@ -80,8 +80,6 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         }
         XCTAssertEqual(accountResult.account.username, username)
         XCTAssertEqual(accountResult.idToken, idToken)
-        XCTAssertEqual(accountResult.expiresOn, expiresOn)
-        XCTAssertEqual(accountResult.scopes, scopes)
         XCTAssertNotNil(accountResult.account.accountClaims)
         XCTAssertEqual(accountResult.account.accountClaims?.count, 21)
     }
@@ -112,8 +110,6 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         }
         XCTAssertEqual(accountResult.account.username, username)
         XCTAssertEqual(accountResult.idToken, idToken)
-        XCTAssertEqual(accountResult.expiresOn, expiresOn)
-        XCTAssertEqual(accountResult.scopes, scopes)
         XCTAssertNil(accountResult.account.accountClaims)
     }
 }

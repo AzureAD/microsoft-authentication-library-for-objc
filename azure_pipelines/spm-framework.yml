@@ -36,7 +36,7 @@ jobs:
 - job: BuildXcFrameworks
   displayName: Build MSAL framework and release
   pool:
-    vmImage: 'macOS-11'
+    vmImage: 'macOS-13'
     timeOutInMinutes: 20
 
   steps:
@@ -102,6 +102,11 @@ jobs:
         # Zipping xcframework. -y : including symlinks (Need to preserve symlinks in xcframework so that codesign validation doesn't fail) -v : verbose logging
         zip -r $(Build.ArtifactStagingDirectory)/MSAL.zip MSAL.xcframework -y -v
       failOnStderr: true
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'runtime'
+      version: '6.0.0'
+      installationPath: '/Users/runner/.dotnet'
   - task: EsrpCodeSigning@2
     inputs:
       ConnectedServiceName: 'MSAL ESRP CodeSign Service Connection'
@@ -352,11 +357,18 @@ jobs:
       targetType: 'inline'
       script: |
         # Release to CocoaPods
-        pod trunk push --use-libraries --allow-warnings MSAL.podspec
+        # Do not use "--use-libraries" option because native auth code doesn't support static library yet
+        pod trunk push --allow-warnings MSAL.podspec
         #pod trunk me
       workingDirectory: '$(Build.SourcesDirectory)'
     env:
       COCOAPODS_TRUNK_TOKEN: $(COCOAPODS_TRUNK_TOKEN)
+  - task: Bash@3
+    displayName: Install Sourcekitten
+    inputs:
+      targetType: 'inline'
+      script: |
+        brew install sourcekitten
   - task: Bash@3
     displayName: Build MSAL docs via Jazzy
     inputs:

@@ -57,26 +57,15 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     func test_whenAccountAndTokenExist_itReturnsCorrectData() {
         let expectation = expectation(description: "CredentialsController")
-
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedAccessToken: "accessToken")
+        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
+        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
+        mockDelegate.expectedAccessToken = authTokens.accessToken.accessToken
+        mockDelegate.expectedExpiresOn = authTokens.accessToken.expiresOn
+        mockDelegate.expectedScopes = authTokens.accessToken.scopes.array as? [String] ?? []
         sut.getAccessToken(delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
-
-    func test_whenNoAccessToken_itReturnsCorrectError() {
-        let expectation = expectation(description: "CredentialsController")
-        sut = MSALNativeAuthUserAccountResult(
-            account: account as! MSALNativeAuthAccount,
-            authTokens: MSALNativeAuthTokens(accessToken: nil, refreshToken: nil, rawIdToken: nil),
-            configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
-        )
-        let correlationId = UUID()
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .tokenNotFound, correlationId: correlationId, errorCodes: []))
-        sut.getAccessToken(correlationId: correlationId, delegate: mockDelegate)
-        wait(for: [expectation], timeout: 1)
-    }
-
+    
     // MARK: - sign-out tests
 
     func test_signOut_successfullyCallsCacheAccessor() {
