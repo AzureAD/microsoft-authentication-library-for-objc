@@ -1,0 +1,14 @@
+{
+    "codebaseName": "MSAL Objective C SDK",
+    "notificationAliases": [
+        "identity-apple-eng@microsoft.com"
+    ],
+    "codebaseAdmins": [
+        "identity-apple-eng@microsoft.com"
+    ],
+    "instanceUrl": "https://identitydivision.visualstudio.com",
+    "projectName": "Engineering",
+    "areaPath": "Engineering\\Auth Client\\Libraries\\Client-SDKs\\MSAL\\Apple",
+    "iterationPath": "Engineering\\Unscheduled",
+    "allTools": true
+}
