@@ -29,7 +29,9 @@
 @implementation MSALNativeAuthAccount
 
 + (instancetype) copyFromAccount: (MSALAccount*) account {
-    return [[MSALNativeAuthAccount alloc] initWithUsername:account.username homeAccountId:account.homeAccountId environment:account.environment tenantProfiles:account.tenantProfiles];
+    MSALNativeAuthAccount* nativeAuthAccount = [[MSALNativeAuthAccount alloc] initWithUsername:account.username homeAccountId:account.homeAccountId environment:account.environment tenantProfiles:account.tenantProfiles];
+    nativeAuthAccount.accountClaims = account.accountClaims;
+    return nativeAuthAccount ;
 }
 
 
