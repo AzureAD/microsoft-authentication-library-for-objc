@@ -27,7 +27,7 @@ import Foundation
 /// Class that groups account and token information.
 @objc public class MSALNativeAuthUserAccountResult: NSObject {
     /// The account object that holds account information.
-    @objc public let account: MSALNativeAuthAccount
+    @objc public let account: MSALAccount
 
     let authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
@@ -39,7 +39,7 @@ import Foundation
     }
 
     init(
-        account: MSALNativeAuthAccount,
+        account: MSALAccount,
         authTokens: MSALNativeAuthTokens,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface

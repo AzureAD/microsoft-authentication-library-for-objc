@@ -45,7 +45,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
 
         sut = MSALNativeAuthUserAccountResult(
-            account: account as! MSALNativeAuthAccount,
+            account: account˘,
             authTokens: MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: rawIdToken),
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: cacheAccessorMock

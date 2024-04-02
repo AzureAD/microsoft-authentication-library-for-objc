@@ -27,7 +27,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALNativeAuthAccount : MSALAccount
+@interface MSALAccount (CopyAccount)
 
 + (instancetype) copyFromAccount: (MSALAccount*) account;
 

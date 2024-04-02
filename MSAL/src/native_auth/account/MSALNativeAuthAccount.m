@@ -23,23 +23,15 @@
 // THE SOFTWARE.  
 
 
-#import "MSALNativeAuthAccount.h"
+#import "MSALAccount+Copy.h"
 #import "MSALAccount+MultiTenantAccount.h"
 
-@implementation MSALNativeAuthAccount
+@implementation MSALAccount (CopyAccount)
 
 + (instancetype) copyFromAccount: (MSALAccount*) account {
-    MSALNativeAuthAccount* nativeAuthAccount = [[MSALNativeAuthAccount alloc] initWithUsername:account.username homeAccountId:account.homeAccountId environment:account.environment tenantProfiles:account.tenantProfiles];
-    nativeAuthAccount.accountClaims = account.accountClaims;
-    return nativeAuthAccount ;
-}
-
-
-#pragma mark - NSCopying
-
-- (instancetype)copyWithZone:(NSZone *)zone
-{
-    return [super copyWithZone:zone];
+    MSALAccount* newAccount = [[MSALAccount alloc] initWithUsername:account.username homeAccountId:account.homeAccountId environment:account.environment tenantProfiles:account.tenantProfiles];
+    newAccount.accountClaims = account.accountClaims;
+    return newAccount;
 }
 
 @end

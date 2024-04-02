@@ -76,7 +76,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
                 return nil
             }
-            let nativeAuthAccount = MSALNativeAuthAccount.copy(from: account)
+            let nativeAuthAccount = MSALAccount.copy(from: account)
             return factory.makeUserAccountResult(account: nativeAuthAccount, authTokens: tokens)
         } else {
             MSALLogger.log(level: .verbose, context: nil, format: "No account found")
