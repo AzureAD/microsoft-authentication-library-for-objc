@@ -1,4 +1,4 @@
-## [1.2.22.1]
+## [1.2.23]
 * Fix pkey auth after server side removal of registration
 
 ## [1.2.22]
