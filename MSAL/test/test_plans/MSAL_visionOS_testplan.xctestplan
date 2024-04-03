@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "642F780B-7368-48D8-9238-4DD1ABADE045",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:MSAL.xcodeproj",
+        "identifier" : "91832C1E2BBCABB400B6F998",
+        "name" : "MSAL visionOS Unit Tests"
+      }
+    }
+  ],
+  "version" : 1
+}

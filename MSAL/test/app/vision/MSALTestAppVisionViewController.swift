@@ -32,7 +32,7 @@ class MSALTestAppVisionViewController: UIViewController
     let kClientID = "66855f8a-60cd-445e-a9bb-8cd8eadbd3fa"
     let kGraphEndpoint = "https://graph.microsoft.com/"
     let kAuthority = "https://login.microsoftonline.com/common"
-    let kRedirectUri = "msauth.com.microsoft.identitysample.MSALiOS://auth"
+    let kRedirectUri = "msauth.com.microsoft.MSALTestApp://auth"
     
     let kScopes: [String] = ["user.read"]
     

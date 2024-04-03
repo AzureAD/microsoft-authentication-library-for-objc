@@ -1,0 +1,6 @@
+#include "msal__common__vision.xcconfig"
+
+INFOPLIST_FILE = test/unit/resources/vision/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-Vision-Unit-Tests;
+PRODUCT_NAME = "MSAL-visionOS-Unit-Tests";
+GCC_WARN_UNUSED_PARAMETER = NO

@@ -28,9 +28,9 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
-            MSALTestAppView()
+            Text("Hello, world!")
         }
-        
+        .padding()
     }
 }
 

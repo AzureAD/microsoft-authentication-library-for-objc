@@ -25,15 +25,11 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            MSALTestAppView()
+@main
+struct unit_test_host_visionApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
         }
-        
     }
-}
-
-#Preview(windowStyle: .automatic) {
-    ContentView()
 }
