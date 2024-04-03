@@ -1,0 +1,15 @@
+included:
+  - src/native_auth
+
+
+line_length:
+  warning: 150
+    
+type_name:
+  max_length: 60
+
+function_parameter_count:
+  warning: 7
+
+disabled_rules:
+  - todo
