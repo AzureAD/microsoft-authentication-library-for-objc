@@ -76,6 +76,19 @@ import Foundation
             }
         }
     }
+    
+    public func resendCode() async -> MSALNativeAuthSignInResendCodeResult {
+        let controllerResponse = await resendCodeInternal()
+
+        switch controllerResponse.result {
+        case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+            controllerResponse.telemetryUpdate?(.success(()))
+        case .error(let error, let newState):
+            controllerResponse.telemetryUpdate?(.failure(error))
+        }
+        
+        return controllerResponse.result.output()
+    }
 
     /// Submits the code to the server for verification.
     /// - Parameters:
@@ -93,6 +106,19 @@ import Foundation
                 await delegate.onSignInVerifyCodeError(error: error, newState: newState)
             }
         }
+    }
+    
+    public func submitCode(code: String) async -> MSALNativeAuthSignInVerifyCodeResult {
+        let controllerResponse = await submitCodeInternal(code: code)
+
+        switch controllerResponse.result {
+        case .completed(let accountResult):
+            controllerResponse.telemetryUpdate?(.success(()))
+        case .error(let error, let newState):
+            controllerResponse.telemetryUpdate?(.failure(error))
+        }
+        
+        return controllerResponse.result.output()
     }
 }
 

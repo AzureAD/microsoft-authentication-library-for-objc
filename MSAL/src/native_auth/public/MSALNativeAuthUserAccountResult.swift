@@ -96,4 +96,21 @@ import Foundation
             }
         }
     }
+    
+    public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil) async -> Result<MSALNativeAuthTokenResult, RetrieveAccessTokenError> {
+        let controllerResponse = await getAccessTokenInternal(
+            forceRefresh: forceRefresh,
+            correlationId: correlationId,
+            cacheAccessor: cacheAccessor
+        )
+        
+        switch controllerResponse.result {
+        case .success(let result):
+            controllerResponse.telemetryUpdate?(.success(()))
+            return .success(result)
+        case .failure(let error):
+            controllerResponse.telemetryUpdate?(.failure(error))
+            return .failure(error)
+        }
+    }
 }

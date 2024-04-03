@@ -29,9 +29,42 @@ enum SignInStartResult {
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(newState: SignInPasswordRequiredState)
     case error(SignInStartError)
+
+    func output() -> MSALNativeAuthSignInStartResult {
+        switch self {
+        case .completed(let result):
+            return MSALNativeAuthSignInStartCompleted(completed: result)
+        case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+            let result = MSALNativeAuthCodeRequiredResult(newState: newState,
+                                                          sentTo: sentTo,
+                                                          channelTargetType: channelTargetType,
+                                                          codeLength: codeLength)
+            return MSALNativeAuthSignInStartCodeRequired(codeRequired: result)
+        case .passwordRequired(let newState):
+            return MSALNativeAuthSignInStartPasswordRequired(passwordRequired: newState)
+        case .error(let error):
+            return MSALNativeAuthSignInStartError(error: error)
+        }
+    }
 }
 
-typealias SignInResendCodeResult = CodeRequiredGenericResult<SignInCodeRequiredState, ResendCodeError>
+enum SignInResendCodeResult {
+    case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
+    case error(error: ResendCodeError, newState: SignInCodeRequiredState?)
+
+    func output() -> MSALNativeAuthSignInResendCodeResult {
+        switch self {
+        case .codeRequired(let newState, let sentTo, let channelTargetType, let codeLength):
+            return MSALNativeAuthSignInResendCodeRequired(resendCodeRequired: MSALNativeAuthCodeRequiredResult(newState: newState,
+                                                                                                               sentTo: sentTo,
+                                                                                                               channelTargetType: channelTargetType,
+                                                                                                               codeLength: codeLength))
+        case .error(let error, let newState):
+            return MSALNativeAuthSignInResendCodeRequiredError(resendCodeRequiredError: MSALNativeAuthSignInResendCodeErrorResult(error: error,
+                                                                                                                                  newState: newState))
+        }
+    }
+}
 
 enum SignInPasswordRequiredResult {
     case completed(MSALNativeAuthUserAccountResult)
@@ -41,4 +74,14 @@ enum SignInPasswordRequiredResult {
 enum SignInVerifyCodeResult {
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: VerifyCodeError, newState: SignInCodeRequiredState?)
+
+    func output() -> MSALNativeAuthSignInVerifyCodeResult {
+        switch self {
+        case .completed(let result):
+            return MSALNativeAuthSignInVerifyCodeCompleted(completed: result)
+        case .error(let error, let newState):
+            return MSALNativeAuthSignInVerifyCodeError(verifyCodeError: MSALNativeAuthSignInVerifyCodeErrorResult(error: error,
+                                                                                                                  newState: newState))
+        }
+    }
 }

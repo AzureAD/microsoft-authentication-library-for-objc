@@ -190,6 +190,30 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             }
         }
     }
+    
+    public func signIn(
+        username: String,
+        password: String? = nil,
+        scopes: [String]? = nil,
+        correlationId: UUID? = nil
+    ) async -> MSALNativeAuthSignInStartResult {
+        
+        let controllerResponse = await signInInternal(
+            username: username,
+            password: password,
+            scopes: scopes,
+            correlationId: correlationId
+        )
+        
+        switch controllerResponse.result {
+        case .completed, .codeRequired, .passwordRequired:
+            controllerResponse.telemetryUpdate?(.success(()))
+        case .error(let error):
+            controllerResponse.telemetryUpdate?(.failure(error))
+        }
+        
+        return controllerResponse.result.output()
+    }
 
     /// Sign in a user with a given username and password.
     /// - Parameters:
