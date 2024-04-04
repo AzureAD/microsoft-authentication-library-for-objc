@@ -7,3 +7,19 @@ trigger:
     - CHANGELOG.md
 
 pr: none
+
+jobs:
+- job: TriggerRunJob
+  displayName: Echo message
+  pool:
+    vmImage: 'macOS-13'
+    timeOutInMinutes: 20
+
+  steps:
+  - task: Bash@3
+    displayName: Echo Message
+    inputs:
+      workingDirectory: $(Build.binariesDirectory)
+      targetType: 'inline'
+      script: |
+        echo "Ran trigger"
