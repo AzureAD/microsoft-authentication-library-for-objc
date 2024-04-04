@@ -13,7 +13,7 @@ jobs:
   displayName: "Trigger MSAL Release - OneBranch Pipeline"
   steps:
   - bash: |
-      az pipelines run --project 'IDDP' --id 2424 --branch 'main' --organization $(ADOORGANIZATION)
+      az pipelines run --project $(ADOPROJECT) --id $(MSAL_RELEASE_ONEBRANCH_PIPELINEID) --branch 'main' --organization $(ADOORGANIZATION)
     displayName: 'Trigger MSAL Release - OneBranch Pipeline'
     env:
       AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
