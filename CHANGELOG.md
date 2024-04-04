@@ -1,3 +1,6 @@
+## [1.2.24]
+* Fix pkey auth after server side removal of registration to use isDeviceRegistered flag from ssoContext.
+
 ## [1.2.23]
 * Fix pkey auth after server side removal of registration
 
