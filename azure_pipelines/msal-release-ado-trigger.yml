@@ -9,17 +9,11 @@ trigger:
 pr: none
 
 jobs:
-- job: TriggerRunJob
-  displayName: Echo message
-  pool:
-    vmImage: 'macOS-13'
-    timeOutInMinutes: 20
-
+- job:
+  displayName: "Trigger MSAL Release - OneBranch Pipeline"
   steps:
-  - task: Bash@3
-    displayName: Echo Message
-    inputs:
-      workingDirectory: $(Build.binariesDirectory)
-      targetType: 'inline'
-      script: |
-        echo "Ran trigger"
+  - bash: |
+      az pipelines run --project 'IDDP' --id 2424 --branch 'main' 
+    displayName: 'Trigger MSAL Release - OneBranch Pipeline'
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
