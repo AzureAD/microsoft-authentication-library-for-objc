@@ -25,6 +25,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		289E15662948EB5A006104D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B57B226921890035C7C2;
+			remoteInfo = "MSAL (iOS Static Library)";
+		};
+		289E15682948EB5A006104D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B59C2269286F0035C7C2;
+			remoteInfo = "MSAL (Mac Static Library)";
+		};
+		289E156A2948EB5A006104D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B295A16422D0348400FFB313;
+			remoteInfo = "unit-test-host-mac";
+		};
 		961E5C301ECA7864001DBA9A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
@@ -186,15 +207,18 @@
 			isa = PBXGroup;
 			children = (
 				96672DB71EC7913D00878AC5 /* MSAL.framework */,
-				96672DB91EC7913D00878AC5 /* "MSAL-iOS-Unit-Tests".xctest */,
+				96672DB91EC7913D00878AC5 /* "MSAL-iOS-UI-Tests".xctest */,
 				96672DBB1EC7913D00878AC5 /* MSAL.framework */,
 				96672DBD1EC7913D00878AC5 /* "MSAL-Mac-Unit-Tests".xctest */,
 				96672DBF1EC7913D00878AC5 /* MSAL Test App.app */,
-				96672DC11EC7913D00878AC5 /* MSAL Test App.app */,
 				96672DC31EC7913D00878AC5 /* MSAL Test Automation (iOS).app */,
 				96672DC51EC7913D00878AC5 /* unit-test-host.app */,
 				96595137215180A8009F86DF /* InteractiveiOSTests.xctest */,
 				96595139215180A8009F86DF /* MultiAppiOSTests.xctest */,
+				96672DC11EC7913D00878AC5 /* MSAL Test App (Mac).app */,
+				289E15672948EB5A006104D9 /* libMSAL (iOS Static Library).a */,
+				289E15692948EB5A006104D9 /* libMSAL (macOS Static Library).a */,
+				289E156B2948EB5A006104D9 /* unit-test-host-mac.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -296,6 +320,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -316,6 +341,27 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		289E15672948EB5A006104D9 /* libMSAL (iOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (iOS Static Library).a";
+			remoteRef = 289E15662948EB5A006104D9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		289E15692948EB5A006104D9 /* libMSAL (macOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (macOS Static Library).a";
+			remoteRef = 289E15682948EB5A006104D9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		289E156B2948EB5A006104D9 /* unit-test-host-mac.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host-mac.app";
+			remoteRef = 289E156A2948EB5A006104D9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		96595137215180A8009F86DF /* InteractiveiOSTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -365,10 +411,10 @@
 			remoteRef = 96672DBE1EC7913D00878AC5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		96672DC11EC7913D00878AC5 /* MSAL Test App.app */ = {
+		96672DC11EC7913D00878AC5 /* MSAL Test App (Mac).app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = "MSAL Test App.app";
+			path = "MSAL Test App (Mac).app";
 			remoteRef = 96672DC01EC7913D00878AC5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -551,6 +597,7 @@
 				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -566,6 +613,7 @@
 				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";

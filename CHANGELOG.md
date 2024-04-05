@@ -1,3 +1,8 @@
+## [1.3.1]
+* Preferred auth method added to device information, returned from broker
+
+## [1.3.0]
+
 ## [1.2.24]
 * Fix pkey auth after server side removal of registration to use isDeviceRegistered flag from ssoContext.
 
