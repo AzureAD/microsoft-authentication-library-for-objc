@@ -27,7 +27,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALLegacySharedADALAccount : MSALLegacySharedAccount <MSALAccount>
+@interface MSALLegacySharedADALAccount : MSALLegacySharedAccount <MSALAccountProtocel>
 
 @end
 

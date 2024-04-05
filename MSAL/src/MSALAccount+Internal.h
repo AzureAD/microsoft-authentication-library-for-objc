@@ -33,7 +33,7 @@
 @class MSIDAccount;
 @class MSALAccountId;
 @class MSIDIdTokenClaims;
-@protocol MSALAccount;
+@protocol MSALAccountProtocel;
 @class MSALOauth2Provider;
 
 @interface MSALAccount ()
@@ -61,7 +61,7 @@
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account
                 createTenantProfile:(BOOL) createTenantProfile
                       accountClaims:(NSDictionary *) accountClaims;
-- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccountProtocel>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;

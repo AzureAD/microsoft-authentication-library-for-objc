@@ -164,7 +164,7 @@ static NSString *kADALAccountType = @"ADAL";
 
 #pragma mark - Updates
 
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccountProtocel>)account claims:(NSDictionary *)claims
 {
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
     jsonDictionary[@"displayName"] = claims[@"name"];

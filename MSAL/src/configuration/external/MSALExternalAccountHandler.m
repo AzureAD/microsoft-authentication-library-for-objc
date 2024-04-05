@@ -151,7 +151,7 @@
             return nil;
         }
         
-        for (id<MSALAccount> externalAccount in externalAccounts)
+        for (id<MSALAccountProtocel> externalAccount in externalAccounts)
         {
             MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount oauth2Provider:self.oauth2Provider];
             

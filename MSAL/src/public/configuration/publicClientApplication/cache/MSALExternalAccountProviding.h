@@ -28,7 +28,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol MSALAccount;
+@protocol MSALAccountProtocel;
 @class MSALTenantProfile;
 @class MSALAccountEnumerationParameters;
 
@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  This is called when new and/or updated account is available.
  */
-- (BOOL)updateAccount:(id<MSALAccount>)account
+- (BOOL)updateAccount:(id<MSALAccountProtocel>)account
         idTokenClaims:(NSDictionary *)idTokenClaims
                 error:(NSError * _Nullable * _Nullable)error;
 
@@ -54,7 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
  It normally happens when the app calls removeAccount API in MSAL.
  But it can also happen in other circumstances when MSAL needs to cleanup account.
  */
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(id<MSALAccountProtocel>)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -removeAccount:wipeAccount:tenantProfiles:error: instead");
 
@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
  But it can also happen in other circumstances when MSAL needs to cleanup account.
  If wipeAccount == YES, it means application requested full removal of the account and all related artifacts. 
  */
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(id<MSALAccountProtocel>)account
           wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error;
@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
  Return your accounts that match parameters.
  MSAL will merge external accounts with its own internal storage and return a combined list of accounts that mathes specified parameters.
  */
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<id<MSALAccountProtocel>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error;
 
 @end

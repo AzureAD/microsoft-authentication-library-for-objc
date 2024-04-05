@@ -41,3 +41,4 @@
 #import "MSIDRequestContext.h"
 #import "MSALDefinitions.h"
 #import "MSALError.h"
+#import "MSALAccount+Internal.h"

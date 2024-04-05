@@ -36,7 +36,7 @@
         
     @note For a list of standard id_token claims in the Microsoft Identity platform, see https://docs.microsoft.com/en-us/azure/active-directory/develop/id-tokens
 */
-@protocol MSALAccount <NSObject>
+@protocol MSALAccountProtocel <NSObject>
 
 /**
     Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string including special characters such as @, /, or whitespace.
@@ -87,7 +87,7 @@
     @note MSALAccount should be never created directly by an application.
     Instead, it is returned by MSAL as a result of getting a token interactively or silently (see `MSALResult`), or looked up by MSAL from cache (e.g. see `-[MSALPublicClientApplication allAccounts:]`)
   */
-@interface MSALAccount : NSObject <MSALAccount, NSCopying>
+@interface MSALAccount : NSObject <MSALAccountProtocel, NSCopying>
 
 /**
     `-[MSALAccount new]` is unavailable.
@@ -103,3 +103,4 @@
 
 @end
 
+ 

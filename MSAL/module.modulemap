@@ -25,6 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+module MSAL_Static {
+    header "src/public/MSALAccount.h"
+    header "src/public/configuration/publicClientApplication/cache/MSALExternalAccountProviding.h"
+    //header "src/public/"
+}
+
 module MSAL_Private {
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"
@@ -84,10 +90,12 @@ module MSAL_Private {
     header "src/MSALPublicClientApplication+Internal.h"
     header "IdentityCore/IdentityCore/src/MSIDError.h"
     header "src/MSALAccount+Internal.h"
+    header "src/MSALAccount+Internal.h"
     header "src/configuration/external/MSALExternalAccountHandler.h"
     header "src/instance/MSALAccountsProvider.h"
     header "src/instance/oauth2/ciam/MSALCIAMOauth2Provider.h"
     header "src/MSALAccountId+Internal.h"
+    header "src/configuration/external/ios/MSALLegacySharedAccount.h"
     header "IdentityCore/IdentityCore/src/requests/sdk/msal/MSIDDefaultTokenResponseValidator.h"
     header "IdentityCore/IdentityCore/src/network/error_handler/MSIDAADRequestErrorHandler.h"
     header "IdentityCore/IdentityCore/src/MSIDOAuth2Constants.h"
