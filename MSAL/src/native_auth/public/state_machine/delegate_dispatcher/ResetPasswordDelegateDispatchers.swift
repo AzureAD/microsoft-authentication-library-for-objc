@@ -30,13 +30,18 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onResetPasswordCodeRequired = delegate.onResetPasswordCodeRequired {
             telemetryUpdate?(.success(()))
             await onResetPasswordCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResetPasswordStartError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCodeRequired"))
+            let error = ResetPasswordStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onResetPasswordCodeRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordStartError(error: error)
         }
@@ -45,12 +50,12 @@ final class ResetPasswordStartDelegateDispatcher: DelegateDispatcher<ResetPasswo
 
 final class ResetPasswordVerifyCodeDelegateDispatcher: DelegateDispatcher<ResetPasswordVerifyCodeDelegate> {
 
-    func dispatchPasswordRequired(newState: ResetPasswordRequiredState) async {
+    func dispatchPasswordRequired(newState: ResetPasswordRequiredState, correlationId: UUID) async {
         if let onPasswordRequired = delegate.onPasswordRequired {
             telemetryUpdate?(.success(()))
             await onPasswordRequired(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onPasswordRequired"))
+            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onPasswordRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordVerifyCodeError(error: error, newState: nil)
         }
@@ -63,13 +68,14 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
         newState: ResetPasswordCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onResetPasswordResendCodeRequired = delegate.onResetPasswordResendCodeRequired {
             telemetryUpdate?(.success(()))
             await onResetPasswordResendCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: requiredErrorMessage(for: "onResetPasswordResendCodeRequired"))
+            let error = ResendCodeError(message: requiredErrorMessage(for: "onResetPasswordResendCodeRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordResendCodeError(error: error, newState: nil)
         }
@@ -78,12 +84,16 @@ final class ResetPasswordResendCodeDelegateDispatcher: DelegateDispatcher<ResetP
 
 final class ResetPasswordRequiredDelegateDispatcher: DelegateDispatcher<ResetPasswordRequiredDelegate> {
 
-    func dispatchResetPasswordCompleted(newState: SignInAfterResetPasswordState) async {
+    func dispatchResetPasswordCompleted(newState: SignInAfterResetPasswordState, correlationId: UUID) async {
         if let onResetPasswordCompleted = delegate.onResetPasswordCompleted {
             telemetryUpdate?(.success(()))
             await onResetPasswordCompleted(newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onResetPasswordCompleted"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onResetPasswordCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onResetPasswordRequiredError(error: error, newState: nil)
         }

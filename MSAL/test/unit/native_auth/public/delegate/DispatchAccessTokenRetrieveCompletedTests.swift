@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+@_implementationOnly import MSAL_Private
 @testable import MSAL
 import XCTest
 
@@ -30,6 +31,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: CredentialsDelegateDispatcher!
+    private let correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -38,9 +40,19 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
     }
 
     func test_dispatchAccessTokenRetrieveCompleted_whenDelegateMethodsAreImplemented() async {
-        let expectedToken = "token"
-        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedAccessToken: expectedToken)
-
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "accessToken"
+        accessToken.scopes = ["scope1", "scope2"]
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = "refreshToken"
+        let rawIdToken = "rawIdToken"
+        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
+                                              refreshToken: refreshToken,
+                                              rawIdToken: rawIdToken)
+        let expectedResult = MSALNativeAuthTokenResult(authTokens: authTokens)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
+        delegate.expectedAccessToken = accessToken.accessToken
+        delegate.expectedScopes = accessToken.scopes.array as? [String] ?? []
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
@@ -48,15 +60,15 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: expectedToken)
+        await sut.dispatchAccessTokenRetrieveCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
-        XCTAssertEqual(delegate.expectedAccessToken, expectedToken)
+        XCTAssertEqual(delegate.expectedResult, expectedResult)
     }
 
     func test_dispatchAccessTokenRetrieveCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"))
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onAccessTokenRetrieveCompleted"), correlationId: correlationId)
         let delegate = CredentialsDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
@@ -68,7 +80,16 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchAccessTokenRetrieveCompleted(accessToken: "token")
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "accessToken"
+        let refreshToken = MSIDRefreshToken()
+        refreshToken.refreshToken = "refreshToken"
+        let rawIdToken = "rawIdToken"
+        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
+                                              refreshToken: refreshToken,
+                                              rawIdToken: rawIdToken)
+
+        await sut.dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult(authTokens: authTokens), correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
@@ -76,6 +97,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         func checkError(_ error: RetrieveAccessTokenError?) {
             XCTAssertEqual(error?.type, .generalError)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

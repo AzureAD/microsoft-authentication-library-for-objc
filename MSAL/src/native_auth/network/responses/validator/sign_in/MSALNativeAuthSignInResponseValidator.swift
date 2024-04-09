@@ -26,12 +26,12 @@
 
 protocol MSALNativeAuthSignInResponseValidating {
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
 
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse
 }
@@ -39,7 +39,7 @@ protocol MSALNativeAuthSignInResponseValidating {
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch result {
@@ -52,14 +52,14 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     level: .error,
                     context: context,
                     format: "signin/challenge: Unable to decode error response: \(signInChallengeResponseError)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
-            return handleFailedSignInChallengeResult(context, error: signInChallengeResponseError)
+            return handleFailedSignInChallengeResult(error: signInChallengeResponseError)
         }
     }
 
     func validate(
-        context: MSALNativeAuthRequestContext,
+        context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse {
         switch result {
@@ -71,23 +71,23 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 return .success(continuationToken: continuationToken)
             }
             MSALLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
-            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
                 MSALLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/initiate: Unable to decode error response: \(responseError)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
-            return handleFailedSignInInitiateResult(context, error: initiateResponseError)
+            return handleFailedSignInInitiateResult(error: initiateResponseError)
         }
     }
 
     // MARK: private methods
 
     private func handleSuccessfulSignInChallengeResult(
-        _ context: MSALNativeAuthRequestContext,
+        _ context: MSIDRequestContext,
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
         case .otp:
@@ -95,7 +95,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 level: .error,
                 context: context,
                 format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
-            return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedChallengeType))
+            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         case .oob:
             guard let continuationToken = response.continuationToken,
                     let targetLabel = response.challengeTargetLabel,
@@ -105,7 +105,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     level: .error,
                     context: context,
                     format: "signin/challenge: Invalid response with challenge type oob, response: \(response)")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .codeRequired(
                 continuationToken: continuationToken,
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     level: .error,
                     context: context,
                     format: "signin/challenge: Expected continuation token not nil with credential type password")
-                return .error(.unexpectedError(message: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .passwordRequired(continuationToken: continuationToken)
         case .redirect:
@@ -127,38 +127,35 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
     }
 
     private func handleFailedSignInChallengeResult(
-        _ context: MSALNativeAuthRequestContext,
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(message: error.errorDescription))
+                return .error(.invalidRequest(error))
             case .unauthorizedClient:
-                return .error(.unauthorizedClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(error))
             case .invalidGrant:
-                return .error(.invalidToken(message: error.errorDescription))
+                return .error(.invalidToken(error))
             case .expiredToken:
-                return .error(.expiredToken(message: error.errorDescription))
+                return .error(.expiredToken(error))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType(message: error.errorDescription))
-            case .none:
-                return .error(.unexpectedError(message: error.errorDescription))
+                return .error(.unsupportedChallengeType(error))
+            case .unknown:
+                return .error(.unexpectedError(error))
             }
     }
 
-    private func handleFailedSignInInitiateResult(
-        _ context: MSALNativeAuthRequestContext,
-        error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {
+    private func handleFailedSignInInitiateResult(error: MSALNativeAuthSignInInitiateResponseError) -> MSALNativeAuthSignInInitiateValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(message: error.errorDescription))
+                return .error(.invalidRequest(error))
             case .unauthorizedClient:
-                return .error(.unauthorizedClient(message: error.errorDescription))
+                return .error(.unauthorizedClient(error))
             case .unsupportedChallengeType:
-                return .error(.unsupportedChallengeType(message: error.errorDescription))
+                return .error(.unsupportedChallengeType(error))
             case .userNotFound:
-                return .error(.userNotFound(message: error.errorDescription))
-            case .none:
-                return .error(.unexpectedError(message: error.errorDescription))
+                return .error(.userNotFound(error))
+            case .unknown:
+                return .error(.unexpectedError(error))
             }
     }
 }

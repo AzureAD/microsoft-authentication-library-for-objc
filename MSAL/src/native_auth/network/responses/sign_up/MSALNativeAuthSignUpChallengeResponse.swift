@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpChallengeResponse: Decodable {
+struct MSALNativeAuthSignUpChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
     let challengeType: MSALNativeAuthInternalChallengeType?
     let bindingMethod: String?
     let interval: Int?
@@ -32,4 +32,5 @@ struct MSALNativeAuthSignUpChallengeResponse: Decodable {
     let challengeChannel: MSALNativeAuthInternalChannelType?
     let continuationToken: String?
     let codeLength: Int?
+    var correlationId: UUID?
 }

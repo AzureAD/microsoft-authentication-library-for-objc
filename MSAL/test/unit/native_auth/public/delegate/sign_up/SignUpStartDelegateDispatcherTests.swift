@@ -58,7 +58,8 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -71,7 +72,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
@@ -91,7 +92,8 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -100,6 +102,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
@@ -115,7 +118,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
         let expectedAttributeNames = ["attribute1", "attribute2"]
 
-        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames)
+        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -124,7 +127,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchSignUpAttributesInvalid_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = SignUpStartDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
+        let expectedError = SignUpStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? SignUpStartError else {
@@ -137,7 +140,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
 
         let expectedAttributeNames = ["attribute1", "attribute2"]
 
-        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames)
+        await sut.dispatchSignUpAttributesInvalid(attributeNames: expectedAttributeNames, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.error)
@@ -145,6 +148,7 @@ final class SignUpStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignUpStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

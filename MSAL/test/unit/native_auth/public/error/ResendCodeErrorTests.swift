@@ -31,12 +31,12 @@ final class ResendCodeErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(message: expectedMessage)
+        sut = .init(message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
-        sut = .init()
+        sut = .init(correlationId: .init())
         XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
     }
 }

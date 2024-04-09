@@ -30,6 +30,7 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
     private var sut: SignInAfterResetPasswordDelegateDispatcher!
+    private var correlationId = UUID()
 
     override func setUp() {
         super.setUp()
@@ -48,7 +49,7 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -56,7 +57,7 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInAfterResetPasswordError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInAfterResetPasswordError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInAfterResetPasswordDelegateOptionalMethodsNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
@@ -70,12 +71,13 @@ final class SignInAfterResetPasswordDelegateDispatcherTests: XCTestCase {
 
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
 
-        await sut.dispatchSignInCompleted(result: expectedResult)
+        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
         func checkError(_ error: SignInAfterResetPasswordError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

@@ -26,10 +26,18 @@ import Foundation
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error>: NSObject, MSIDResponseSerialization {
+final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDResponseSerialization {
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        let customError = try JSONDecoder().decode(T.self, from: data ?? Data())
-        // the successfuly constructed "customError" needs to be thrown, since the previous "try" command just validates the object (error) decoding
-        throw customError
+        do {
+            var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
+            customError.correlationId = T.retrieveCorrelationIdFromHeaders(from: httpResponse)
+
+            // the successfuly constructed "customError" needs to be thrown,
+            // since the previous "try" command just validates the object (error) decoding
+            throw customError
+        } catch is DecodingError {
+            MSALLogger.log(level: .error, context: context, format: "CustomErrorSerializer failed decoding")
+            throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
+        }
     }
 }

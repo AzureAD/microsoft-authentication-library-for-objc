@@ -26,7 +26,7 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode
     let subError: MSALNativeAuthSubErrorCode?
     let errorDescription: String?
     let errorCodes: [Int]?
@@ -34,6 +34,7 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
     let continuationToken: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -44,22 +45,56 @@ struct MSALNativeAuthResetPasswordContinueResponseError: MSALNativeAuthResponseE
         case innerErrors = "inner_errors"
         case target
         case continuationToken = "continuation_token"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthResetPasswordContinueOauth2ErrorCode = .unknown,
+        subError: MSALNativeAuthSubErrorCode? = nil,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        continuationToken: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.subError = subError
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
+        self.continuationToken = continuationToken
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthResetPasswordContinueResponseError {
 
-    func toVerifyCodePublicError() -> VerifyCodeError {
+    func toVerifyCodePublicError(correlationId: UUID) -> VerifyCodeError {
         switch error {
         case .invalidGrant:
-            return subError == .invalidOOBValue ? .init(type: .invalidCode, message: errorDescription)
-            : .init(type: .generalError, message: errorDescription)
+            return .init(
+                type: subError == .invalidOOBValue ? .invalidCode : .generalError,
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         case .unauthorizedClient,
              .expiredToken,
              .invalidRequest,
              .verificationRequired,
-             .none:
-            return .init(type: .generalError, message: errorDescription)
+             .unknown:
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 }

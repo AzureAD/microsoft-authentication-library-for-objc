@@ -69,7 +69,7 @@ class MSALNativeAuthResetPasswordRequestProviderMock: MSALNativeAuthResetPasswor
         throwErrorChallenge = throwError
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(token: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
         checkParameters(token: token, context: context)
 

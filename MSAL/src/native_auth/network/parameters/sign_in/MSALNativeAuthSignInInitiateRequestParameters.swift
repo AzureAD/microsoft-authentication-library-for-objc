@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthSignInInitiateRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .signInInitiate
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
     let username: String
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {

@@ -31,7 +31,7 @@ protocol MSALNativeAuthResetPasswordRequestProviding {
 
     func challenge(
         token: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
     func `continue`(
@@ -83,7 +83,7 @@ final class MSALNativeAuthResetPasswordRequestProvider: MSALNativeAuthResetPassw
 
     // MARK: - Reset Password Challenge
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(token: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let requestParams = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: context,
             continuationToken: token

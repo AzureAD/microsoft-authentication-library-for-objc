@@ -35,17 +35,17 @@ final class ResetPasswordStartErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(type: .generalError, message: expectedMessage)
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
         let sut: [ResetPasswordStartError] = [
-            .init(type: .browserRequired),
-            .init(type: .userDoesNotHavePassword),
-            .init(type: .userNotFound),
-            .init(type: .invalidUsername),
-            .init(type: .generalError)
+            .init(type: .browserRequired, correlationId: .init()),
+            .init(type: .userDoesNotHavePassword, correlationId: .init()),
+            .init(type: .userNotFound, correlationId: .init()),
+            .init(type: .invalidUsername, correlationId: .init()),
+            .init(type: .generalError, correlationId: .init())
         ]
 
         let expectedIdentifiers = [
@@ -64,7 +64,7 @@ final class ResetPasswordStartErrorTests: XCTestCase {
     }
 
     func test_isBrowserRequired() {
-        sut = .init(type: .browserRequired)
+        sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserDoesNotHavePassword)
         XCTAssertFalse(sut.isUserNotFound)
@@ -72,7 +72,7 @@ final class ResetPasswordStartErrorTests: XCTestCase {
     }
 
     func test_isUserDoesNotHaveAPassword() {
-        sut = .init(type: .userDoesNotHavePassword)
+        sut = .init(type: .userDoesNotHavePassword, correlationId: .init())
         XCTAssertTrue(sut.isUserDoesNotHavePassword)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserNotFound)
@@ -80,7 +80,7 @@ final class ResetPasswordStartErrorTests: XCTestCase {
     }
 
     func test_isUserNotFound() {
-        sut = .init(type: .userNotFound)
+        sut = .init(type: .userNotFound, correlationId: .init())
         XCTAssertTrue(sut.isUserNotFound)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserDoesNotHavePassword)
@@ -88,7 +88,7 @@ final class ResetPasswordStartErrorTests: XCTestCase {
     }
 
     func test_isInvalidUsername() {
-        sut = .init(type: .invalidUsername)
+        sut = .init(type: .invalidUsername, correlationId: .init())
         XCTAssertTrue(sut.isInvalidUsername)
         XCTAssertFalse(sut.isBrowserRequired)
         XCTAssertFalse(sut.isUserDoesNotHavePassword)

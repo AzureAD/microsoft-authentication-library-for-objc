@@ -71,7 +71,7 @@ class MSALNativeAuthSignUpRequestProviderMock: MSALNativeAuthSignUpRequestProvid
         self.throwErrorChallenge = throwError
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(token: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         challengeCalled = true
         checkChallengeParameters(token: token, context: context)
 

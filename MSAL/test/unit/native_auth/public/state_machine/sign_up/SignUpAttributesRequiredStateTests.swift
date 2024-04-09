@@ -43,10 +43,10 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnAttributesRequiredError() {
-        let expectedError = AttributesRequiredError()
+        let expectedError = AttributesRequiredError(correlationId: correlationId)
 
         let expectedResult: SignUpAttributesRequiredResult = .error(error: expectedError)
-        controller.submitAttributesResult = .init(expectedResult)
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId)
 
         let exp = expectation(description: "sign-up states")
         let delegate = SignUpAttributesRequiredDelegateSpy(expectation: exp)
@@ -55,6 +55,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         wait(for: [exp])
 
         XCTAssertEqual(delegate.error, expectedError)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitPassword_delegate_whenSuccess_shouldReturnCompleted() {
@@ -63,7 +64,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -81,7 +82,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let expectedState = SignInAfterSignUpState(controller: MSALNativeAuthSignInControllerMock(), username: "", continuationToken: "continuationToken", correlationId: UUID())
 
         let expectedResult: SignUpAttributesRequiredResult = .completed(expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -91,6 +92,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCompleted"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitPassword_delegate_whenAttributesRequired_shouldReturnAttributesRequired() {
@@ -102,7 +104,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         ]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesRequired(attributes: expectedAttributes, state: expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -124,7 +126,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         ]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesRequired(attributes: expectedAttributes, state: expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -134,6 +136,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesRequired"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func test_submitPassword_delegate_whenAttributesAreInvalid_shouldReturnAttributesInvalid() {
@@ -143,7 +146,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -163,7 +166,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         let expectedAttributes = ["anAttribute"]
 
         let expectedResult: SignUpAttributesRequiredResult = .attributesInvalid(attributes: expectedAttributes, newState: expectedState)
-        controller.submitAttributesResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -173,5 +176,6 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
 
         XCTAssertEqual(delegate.error?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid"))
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 }
