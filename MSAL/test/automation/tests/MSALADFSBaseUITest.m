@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSALADFSBaseUITest.h"
+#import "XCUIElement+CrossPlat.h"
 
 @implementation MSALADFSBaseUITest
 
@@ -46,7 +47,8 @@
     
     sleep(1);
     [self aadEnterPassword:self.testApp];
-    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
+    [self dismissRememberPassword];
+    [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:request.usesEmbeddedWebView];
     
     if (!request.usesEmbeddedWebView)
     {
@@ -70,6 +72,15 @@
     [self waitForElement:passwordTextField];
     [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
+}
+
+- (void)dismissRememberPassword
+{
+    if ([self.testApp.scrollViews.otherElements.buttons[@"Not Now"] waitForExistenceWithTimeout:2.0])
+    {
+        XCUIElement *notNow = self.testApp.scrollViews.otherElements.buttons[@"Not Now"];
+        [notNow msidTap];
+    }
 }
 
 @end
