@@ -65,7 +65,6 @@ open class SignInPasswordStartDelegateSpy: SignInStartDelegate {
         if let expectedUserAccountResult = expectedUserAccountResult {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         } else {
             XCTFail("This method should not be called")
         }
@@ -106,7 +105,6 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
         XCTAssertTrue(Thread.isMainThread)
         if let expectedUserAccountResult = expectedUserAccountResult {
             XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-            XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         } else {
             XCTFail("This method should not be called")
         }
@@ -278,7 +276,6 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
             return
         }
         XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -329,7 +326,6 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
             return
         }
         XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
@@ -361,7 +357,6 @@ class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
             return
         }
         XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
-        XCTAssertEqual(expectedUserAccountResult.scopes, result.scopes)
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }

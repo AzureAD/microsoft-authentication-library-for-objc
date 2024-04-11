@@ -77,7 +77,6 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     public func submitCode(code: String, delegate: SignUpVerifyCodeDelegate) {
         Task {
             let controllerResponse = await submitCodeInternal(code: code)
-            
             let delegateDispatcher = SignUpVerifyCodeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
