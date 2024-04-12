@@ -420,7 +420,7 @@
                                 representing the TenantID property of the directory)
  @param  claimsRequest          The claims parameter that needs to be sent to token endpoint. When claims
                                 is passed, access token will be skipped and refresh token will be tried.
- @param  forceRefresh           Ignore any existing access token in the cache and force MSAL to
+ @param  forceRefresh           Ignore any existing access token in the cache and force MSAL/Broker to
                                 get a new access token from the service.
  @param  correlationId          UUID to correlate this request with the server
  @param  completionBlock        The completion block that will be called when the authentication
