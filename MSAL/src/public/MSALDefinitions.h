@@ -179,6 +179,18 @@ typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
 };
 
 /**
+ Preferred auth method for MSAL requests. Can be configured by admin as part of MSALDeviceInformation and
+ passed in the interactive params to the server.
+ */
+typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
+{
+    /*
+        No preferred auth method passed with the request to the authetication server.
+    */
+    MSALPreferredAuthMethodNone
+};
+
+/**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.

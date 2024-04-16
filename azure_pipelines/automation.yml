@@ -43,6 +43,12 @@ jobs:
     fetchDepth: 1
     persistCredentials: true
     path: s
+    
+  - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -53,14 +59,20 @@ jobs:
   
   - script: 'gem install xcpretty'
     displayName: 'Install xcpretty'
+
+
+  - task: DownloadSecureFile@1
+    name: configuration
+    displayName: 'Get Automation conf.json'
+    inputs:
+      secureFile: 'broker-automation-conf.json'
   
   - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
-      script: |        
-        echo $(AppleAutomationBase64) > "MSAL/test/automation/conf_encoded.json"
-        base64 --decode -i MSAL/test/automation/conf_encoded.json -o MSAL/test/automation/conf.json
+      script: |
+        mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
@@ -70,7 +82,7 @@ jobs:
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
-  
+
   - task: Bash@3
     displayName: Run automations
     inputs:

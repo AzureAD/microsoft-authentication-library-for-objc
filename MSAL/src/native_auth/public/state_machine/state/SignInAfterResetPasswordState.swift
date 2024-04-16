@@ -40,9 +40,14 @@ import Foundation
 
             switch controllerResponse.result {
             case .success(let accountResult):
-                await delegateDispatcher.dispatchSignInCompleted(result: accountResult)
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .failure(let error):
-                await delegate.onSignInAfterResetPasswordError(error: SignInAfterResetPasswordError(message: error.errorDescription))
+                let error = SignInAfterResetPasswordError(
+                    message: error.errorDescription,
+                    correlationId: error.correlationId,
+                    errorCodes: error.errorCodes
+                )
+                await delegate.onSignInAfterResetPasswordError(error: error)
             }
         }
     }

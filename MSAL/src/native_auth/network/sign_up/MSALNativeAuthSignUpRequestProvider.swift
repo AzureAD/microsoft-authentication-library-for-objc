@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthSignUpRequestProviding {
     func start(parameters: MSALNativeAuthSignUpStartRequestProviderParameters) throws -> MSIDHttpRequest
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest
+    func challenge(token: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
     func `continue`(parameters: MSALNativeAuthSignUpContinueRequestProviderParams) throws -> MSIDHttpRequest
 }
 
@@ -57,7 +57,7 @@ final class MSALNativeAuthSignUpRequestProvider: MSALNativeAuthSignUpRequestProv
         return request
     }
 
-    func challenge(token: String, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+    func challenge(token: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let params = MSALNativeAuthSignUpChallengeRequestParameters(
             continuationToken: token,
             context: context

@@ -30,27 +30,25 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     private var sut: RetrieveAccessTokenError!
 
     func test_totalCases() {
-        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 4)
+        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 3)
     }
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(type: .generalError, message: expectedMessage)
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
         let sut: [RetrieveAccessTokenError] = [
-            .init(type: .browserRequired),
-            .init(type: .refreshTokenExpired),
-            .init(type: .tokenNotFound),
-            .init(type: .generalError)
+            .init(type: .browserRequired, correlationId: .init()),
+            .init(type: .refreshTokenExpired, correlationId: .init()),
+            .init(type: .generalError, correlationId: .init())
         ]
 
         let expectedIdentifiers = [
             MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.refreshTokenExpired,
-            MSALNativeAuthErrorMessage.tokenNotFound,
             MSALNativeAuthErrorMessage.generalError
         ]
 
@@ -62,23 +60,14 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     }
 
     func test_isBrowserRequired() {
-        sut = .init(type: .browserRequired)
+        sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
         XCTAssertFalse(sut.isRefreshTokenExpired)
-        XCTAssertFalse(sut.isTokenNotFound)
     }
 
     func test_isRefreshTokenExpired() {
-        sut = .init(type: .refreshTokenExpired)
+        sut = .init(type: .refreshTokenExpired, correlationId: .init())
         XCTAssertTrue(sut.isRefreshTokenExpired)
         XCTAssertFalse(sut.isBrowserRequired)
-        XCTAssertFalse(sut.isTokenNotFound)
-    }
-
-    func test_isTokenNotFound() {
-        sut = .init(type: .tokenNotFound)
-        XCTAssertTrue(sut.isTokenNotFound)
-        XCTAssertFalse(sut.isBrowserRequired)
-        XCTAssertFalse(sut.isRefreshTokenExpired)
     }
 }

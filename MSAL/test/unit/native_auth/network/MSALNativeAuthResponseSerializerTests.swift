@@ -67,9 +67,37 @@ final class MSALNativeAuthResponseSerializerTests: XCTestCase {
         """
         XCTAssertThrowsError(try serializer.responseObject(for: nil, data: wrongResponseString.data(using: .utf8) , context: nil))
     }
+
+    func testSerialize_headersCorrelationId() throws {
+        let originalHeaders = [
+            "client-request-id": "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0",
+            "header2": "value2"
+        ]
+        let responseString = """
+        {
+          "token_type": "Bearer",
+          "scope": "scope",
+          "expires_in": 4141,
+          "extended_expires_in": 4141,
+          "access_token": "access",
+          "refresh_token": "refresh",
+          "id_token": "id"
+        }
+        """
+
+        let httpResponse = HTTPURLResponse(url: URL(string: "https://contoso.com")!, statusCode: 200, httpVersion: nil, headerFields: originalHeaders)
+
+        let serializer = MSALNativeAuthResponseSerializer<ResponseStub>()
+
+        let result = try serializer.responseObject(for: httpResponse, data: responseString.data(using: .utf8), context: nil)
+
+        let resultCorrelationId = (result as? MSALNativeAuthResponseCorrelatable)?.correlationId
+
+        XCTAssertEqual(resultCorrelationId?.uuidString, "9958D9BC-D9D1-43E4-B5CA-5A7B0C3F28B0")
+    }
 }
 
-private struct ResponseStub: Decodable {
+private struct ResponseStub: Decodable, MSALNativeAuthResponseCorrelatable {
     let tokenType: String
     let scope: String
     let expiresIn: Int
@@ -77,4 +105,5 @@ private struct ResponseStub: Decodable {
     let accessToken: String
     let refreshToken: String
     let idToken: String
+    var correlationId: UUID?
 }

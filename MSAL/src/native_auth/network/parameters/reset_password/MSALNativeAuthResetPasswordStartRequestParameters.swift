@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthResetPasswordStartRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .resetPasswordStart
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
     let username: String
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {

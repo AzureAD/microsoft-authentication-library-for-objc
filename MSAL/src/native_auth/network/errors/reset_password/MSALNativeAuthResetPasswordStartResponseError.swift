@@ -26,12 +26,13 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordStartOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordStartOauth2ErrorCode
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -40,5 +41,24 @@ struct MSALNativeAuthResetPasswordStartResponseError: MSALNativeAuthResponseErro
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case target
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthResetPasswordStartOauth2ErrorCode = .unknown,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
+        self.correlationId = correlationId
     }
 }

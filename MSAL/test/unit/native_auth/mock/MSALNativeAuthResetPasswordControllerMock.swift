@@ -37,15 +37,15 @@ class MSALNativeAuthResetPasswordControllerMock: MSALNativeAuthResetPasswordCont
         return resetPasswordResponse
     }
 
-    func resendCode(username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+    func resendCode(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordResendCodeControllerResponse {
         return resendCodeResponse
     }
 
-    func submitCode(code: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
+    func submitCode(code: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {
         return submitCodeResponse
     }
 
-    func submitPassword(password: String, username: String, continuationToken: String, context: MSIDRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
+    func submitPassword(password: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitPasswordControllerResponse {
         return submitPasswordResponse
     }
 }

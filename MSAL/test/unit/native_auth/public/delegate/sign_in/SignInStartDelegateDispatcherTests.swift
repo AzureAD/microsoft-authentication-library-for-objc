@@ -57,7 +57,8 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -69,7 +70,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
@@ -91,7 +92,8 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -100,6 +102,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 
@@ -115,7 +118,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignInPasswordRequired(newState: expectedState)
+        await sut.dispatchSignInPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
 
@@ -123,7 +126,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInPasswordRequired_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: delegateExp, expectedError: expectedError)
 
 
@@ -138,7 +141,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
 
-        await sut.dispatchSignInPasswordRequired(newState: expectedState)
+        await sut.dispatchSignInPasswordRequired(newState: expectedState, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)
@@ -146,6 +149,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
         func checkError(_ error: SignInStartError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

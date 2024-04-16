@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthResetPasswordPollCompletionRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .resetpasswordPollCompletion
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
     let continuationToken: String
 
     func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {

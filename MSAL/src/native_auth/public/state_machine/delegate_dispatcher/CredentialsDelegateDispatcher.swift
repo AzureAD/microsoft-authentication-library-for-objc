@@ -26,12 +26,16 @@ import Foundation
 
 final class CredentialsDelegateDispatcher: DelegateDispatcher<CredentialsDelegate> {
 
-    func dispatchAccessTokenRetrieveCompleted(accessToken: String) async {
+    func dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult, correlationId: UUID) async {
         if let onAccessTokenRetrieveCompleted = delegate.onAccessTokenRetrieveCompleted {
             telemetryUpdate?(.success(()))
-            await onAccessTokenRetrieveCompleted(accessToken)
+            await onAccessTokenRetrieveCompleted(result)
         } else {
-            let error = RetrieveAccessTokenError(type: .generalError, message: requiredErrorMessage(for: "onAccessTokenRetrieveCompleted"))
+            let error = RetrieveAccessTokenError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onAccessTokenRetrieveCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onAccessTokenRetrieveError(error: error)
         }

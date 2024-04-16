@@ -29,212 +29,252 @@ final class MSALNativeAuthSignUpContinueResponseErrorTests: XCTestCase {
     
     private var sut: MSALNativeAuthSignUpContinueResponseError!
     private let testDescription = "testDescription"
-    
+    private let testErrorCodes = [1, 2, 3]
+    private let testCorrelationId = UUID()
+    private let testErrorUri = "test error uri"
+
     // MARK: - to toVerifyCodePublicError tests
     
     func test_toVerifyCodePublicError_invalidRequest() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidRequest, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_unauthorizedClient() {
-        testSignUpContinueErrorToVerifyCode(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .unauthorizedClient, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_invalidGrant() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_expiredToken() {
-        testSignUpContinueErrorToVerifyCode(code: .expiredToken, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .expiredToken, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordTooWeak() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooWeak, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordTooShort() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooShort, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordTooLong() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordTooLong, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordRecentlyUsed, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_passwordBanned() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .passwordBanned, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_userAlreadyExists() {
-        testSignUpContinueErrorToVerifyCode(code: .userAlreadyExists, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .userAlreadyExists, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_attributesRequired() {
-        testSignUpContinueErrorToVerifyCode(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .attributesRequired, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_verificationRequired() {
-        testSignUpContinueErrorToVerifyCode(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .verificationRequired, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .attributeValidationFailed, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_credentialRequired() {
-        testSignUpContinueErrorToVerifyCode(code: .credentialRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToVerifyCode(code: .credentialRequired, expectedErrorType: .generalError)
     }
     
     func test_toVerifyCodePublicError_invalidOOBValue() {
-        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription, expectedErrorType: .invalidCode)
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .invalidCode)
     }
-    
+
+    func test_toVerifyCodePublicError_errorUnknown() {
+        testSignUpContinueErrorToVerifyCode(code: .unknown, expectedErrorType: .generalError)
+    }
+
+    func test_toVerifyCodePublicError_suberrorUnknown() {
+        testSignUpContinueErrorToVerifyCode(code: .invalidGrant, subError: .unknown, expectedErrorType: .generalError)
+    }
+
     // MARK: - toPasswordRequiredPublicError tests
     
     func test_toPasswordRequiredPublicError_invalidRequest() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidRequest, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidRequest, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_unauthorizedClient() {
-        testSignUpContinueErrorToPasswordRequired(code: .unauthorizedClient, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .unauthorizedClient, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_invalidGrant() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_expiredToken() {
-        testSignUpContinueErrorToPasswordRequired(code: .expiredToken, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .expiredToken, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_passwordTooWeak() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooWeak, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordTooShort() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooShort, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooShort, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordTooLong() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooLong, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordTooLong, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordRecentlyUsed, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_passwordBanned() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordBanned, description: testDescription, expectedErrorType: .invalidPassword)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .passwordBanned, expectedErrorType: .invalidPassword)
     }
     
     func test_toPasswordRequiredPublicError_userAlreadyExists() {
-        testSignUpContinueErrorToPasswordRequired(code: .userAlreadyExists, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .userAlreadyExists, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_attributesRequired() {
-        testSignUpContinueErrorToPasswordRequired(code: .attributesRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .attributesRequired, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_verificationRequired() {
-        testSignUpContinueErrorToPasswordRequired(code: .verificationRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .verificationRequired, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .attributeValidationFailed, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_credentialRequired() {
-        testSignUpContinueErrorToPasswordRequired(code: .credentialRequired, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .credentialRequired, expectedErrorType: .generalError)
     }
     
     func test_toPasswordRequiredPublicError_invalidOOBValue() {
-        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription, expectedErrorType: .generalError)
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .invalidOOBValue, expectedErrorType: .generalError)
     }
-    
+
+    func test_toPasswordRequiredPublicError_errorUnknown() {
+        testSignUpContinueErrorToPasswordRequired(code: .unknown, subError: .invalidOOBValue, expectedErrorType: .generalError)
+    }
+
+    func test_toPasswordRequiredPublicError_suberrorUnknown() {
+        testSignUpContinueErrorToPasswordRequired(code: .invalidGrant, subError: .unknown, expectedErrorType: .generalError)
+    }
+
     // MARK: - toAttributesRequiredPublicError tests
     
     func test_toAttributesRequiredPublicError_invalidRequest() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidRequest, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidRequest)
     }
     
     func test_toAttributesRequiredPublicError_unauthorizedClien() {
-        testSignUpContinueErrorToAttributesRequired(code: .unauthorizedClient, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .unauthorizedClient)
     }
     
     func test_toAttributesRequiredPublicError_invalidGrant() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant)
     }
     
     func test_toAttributesRequiredPublicError_expiredToken() {
-        testSignUpContinueErrorToAttributesRequired(code: .expiredToken, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .expiredToken)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooWeak() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooWeak, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooWeak)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooShort() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooShort, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooShort)
     }
     
     func test_toAttributesRequiredPublicError_passwordTooLong() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooLong, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordTooLong)
     }
     
     func test_toAttributesRequiredPublicError_passwordRecentlyUsed() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordRecentlyUsed, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordRecentlyUsed)
     }
     
     func test_toAttributesRequiredPublicError_passwordBanned() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordBanned, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .passwordBanned)
     }
     
     func test_toAttributesRequiredPublicError_userAlreadyExists() {
-        testSignUpContinueErrorToAttributesRequired(code: .userAlreadyExists, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .userAlreadyExists)
     }
     
     func test_toAttributesRequiredPublicError_attributesRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .attributesRequired, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .attributesRequired)
     }
     
     func test_toAttributesRequiredPublicError_verificationRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .verificationRequired, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .verificationRequired)
     }
     
     func test_toAttributesRequiredPublicError_attributeValidationFailed() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .attributeValidationFailed, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .attributeValidationFailed)
     }
     
     func test_toAttributesRequiredPublicError_credentialRequired() {
-        testSignUpContinueErrorToAttributesRequired(code: .credentialRequired, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .credentialRequired)
     }
     
     func test_toAttributesRequiredPublicError_invalidOOBValue() {
-        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .invalidOOBValue, description: testDescription)
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .invalidOOBValue)
     }
-    
+
+    func test_toAttributesRequiredPublicError_errorUnknown() {
+        testSignUpContinueErrorToAttributesRequired(code: .unknown, subError: .invalidOOBValue)
+    }
+
+    func test_toAttributesRequiredPublicError_suberrorUnknown() {
+        testSignUpContinueErrorToAttributesRequired(code: .invalidGrant, subError: .unknown)
+    }
+
     // MARK: private methods
     
-    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: VerifyCodeError.ErrorType) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toVerifyCodePublicError()
+    private func testSignUpContinueErrorToVerifyCode(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: VerifyCodeError.ErrorType) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: testDescription, errorCodes: testErrorCodes, errorURI: testErrorUri, correlationId: testCorrelationId)
+        
+        let error = sut.toVerifyCodePublicError(correlationId: testCorrelationId)
         XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
-    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?, expectedErrorType: PasswordRequiredError.ErrorType) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toPasswordRequiredPublicError()
+    private func testSignUpContinueErrorToPasswordRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, expectedErrorType: PasswordRequiredError.ErrorType) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: testDescription, errorCodes: testErrorCodes, errorURI: testErrorUri, correlationId: testCorrelationId)
+
+        let error = sut.toPasswordRequiredPublicError(correlationId: testCorrelationId)
         XCTAssertEqual(error.type, expectedErrorType)
-        XCTAssertEqual(error.errorDescription, description)
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
+
     }
     
-    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil, description: String?) {
-        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: description, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil, requiredAttributes: nil, unverifiedAttributes: nil, invalidAttributes: nil)
-        let error = sut.toAttributesRequiredPublicError()
-        XCTAssertEqual(error.errorDescription, description)
+    private func testSignUpContinueErrorToAttributesRequired(code: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil) {
+        sut = MSALNativeAuthSignUpContinueResponseError(error: code, subError: subError, errorDescription: testDescription, errorCodes: testErrorCodes, errorURI: testErrorUri, correlationId: testCorrelationId)
+        let error = sut.toAttributesRequiredPublicError(correlationId: testCorrelationId)
+
+        XCTAssertEqual(error.errorDescription, testDescription)
+        XCTAssertEqual(error.correlationId, testCorrelationId)
+        XCTAssertEqual(error.errorCodes, testErrorCodes)
+        XCTAssertEqual(error.errorUri, testErrorUri)
     }
 }

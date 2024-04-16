@@ -66,7 +66,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .password, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -92,22 +92,22 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let channelType = MSALNativeAuthInternalChannelType.email
         let missingCredentialToken = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         var result = sut.validate(context: context, result: .success(missingCredentialToken))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
         let missingTargetLabel = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         result = sut.validate(context: context, result: .success(missingTargetLabel))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
         let missingChannelType = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: nil, codeLength: codeLength, interval: nil)
         result = sut.validate(context: context, result: .success(missingChannelType))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
         let missingCodeLength = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
         result = sut.validate(context: context, result: .success(missingCodeLength))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -116,7 +116,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTargetLabel: "some", challengeChannel: .email, codeLength: 2, interval: nil)
         let result = sut.validate(context: context, result: .success(challengeResponse))
-        if case .error(.unexpectedError(message: "Unexpected challenge type")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected challenge type"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -137,7 +137,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: nil)
         let result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -155,17 +155,17 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         var initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: .oob)
         var result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
         initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: .otp)
         result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
         initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: .password)
         result = sut.validate(context: context, result: .success(initiateResponse))
-        if case .error(.unexpectedError(message: "Unexpected response body received")) = result {} else {
+        if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

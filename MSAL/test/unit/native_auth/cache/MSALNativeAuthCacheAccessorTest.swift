@@ -56,7 +56,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         var tokens: MSALNativeAuthTokens? = nil
         
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
     }
@@ -67,7 +67,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         var tokens: MSALNativeAuthTokens? = nil
         
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
         
@@ -80,7 +80,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertNoThrow(try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
 
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, newAccessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, newAccessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, newRefreshToken)
         XCTAssertEqual(tokens?.rawIdToken, newIdToken)
     }
@@ -97,7 +97,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertEqual(account?.environment, "contoso.com")
         XCTAssertNil(account?.accountClaims)
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: account!, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
     }
@@ -115,7 +115,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertNil(account?.accountClaims)
         parameters.msidConfiguration = getMSIDConfiguration(host: "https://contoso.com/tfp/tenantName")
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: account!, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, tokenResponse.accessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, tokenResponse.accessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, tokenResponse.refreshToken)
         XCTAssertEqual(tokens?.rawIdToken, tokenResponse.idToken)
     }
@@ -140,7 +140,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         XCTAssertEqual(account?.environment, "contoso.com")
         XCTAssertNil(account?.accountClaims)
         XCTAssertNoThrow(tokens = try cacheAccessor.getTokens(account: account!, configuration: parameters.msidConfiguration, context: contextStub))
-        XCTAssertEqual(tokens?.accessToken?.accessToken, newAccessToken)
+        XCTAssertEqual(tokens?.accessToken.accessToken, newAccessToken)
         XCTAssertEqual(tokens?.refreshToken?.refreshToken, newRefreshToken)
         XCTAssertEqual(tokens?.rawIdToken, newIdToken)
     }

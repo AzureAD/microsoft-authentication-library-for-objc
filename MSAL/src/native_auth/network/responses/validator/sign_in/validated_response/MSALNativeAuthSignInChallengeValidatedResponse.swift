@@ -32,27 +32,72 @@ enum MSALNativeAuthSignInChallengeValidatedResponse {
 
 enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case redirect
-    case expiredToken(message: String?)
-    case invalidToken(message: String?)
-    case unauthorizedClient(message: String?)
-    case invalidRequest(message: String?)
-    case unexpectedError(message: String?)
-    case userNotFound(message: String?)
-    case unsupportedChallengeType(message: String?)
+    case expiredToken(MSALNativeAuthSignInChallengeResponseError)
+    case invalidToken(MSALNativeAuthSignInChallengeResponseError)
+    case unauthorizedClient(MSALNativeAuthSignInChallengeResponseError)
+    case invalidRequest(MSALNativeAuthSignInChallengeResponseError)
+    case unexpectedError(MSALNativeAuthSignInChallengeResponseError?)
+    case userNotFound(MSALNativeAuthSignInChallengeResponseError)
+    case unsupportedChallengeType(MSALNativeAuthSignInChallengeResponseError)
 
-    func convertToSignInStartError() -> SignInStartError {
+    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired)
-        case .expiredToken(let message),
-             .invalidToken(let message),
-             .invalidRequest(let message),
-             .unauthorizedClient(let message),
-             .unsupportedChallengeType(let message),
-             .unexpectedError(let message):
-            return .init(type: .generalError, message: message)
-        case .userNotFound(let message):
-            return .init(type: .userNotFound, message: message)
+            return .init(type: .browserRequired, correlationId: correlationId)
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        case .expiredToken(let apiError),
+             .invalidToken(let apiError),
+             .unauthorizedClient(let apiError),
+             .unsupportedChallengeType(let apiError),
+             .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .userNotFound(let apiError):
+            return .init(
+                type: .userNotFound,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        }
+    }
+
+    func convertToResendCodeError(correlationId: UUID) -> ResendCodeError {
+        switch self {
+        case .redirect:
+            return .init(correlationId: correlationId)
+        case .invalidRequest(let apiError),
+             .expiredToken(let apiError),
+             .invalidToken(let apiError),
+             .unauthorizedClient(let apiError),
+             .userNotFound(let apiError),
+             .unsupportedChallengeType(let apiError):
+            return .init(
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
         }
     }
 }
