@@ -319,7 +319,6 @@
 		8D61F9A12A66AC9D00468E18 /* MSALNativeAuthRequestableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D61F9A02A66AC9D00468E18 /* MSALNativeAuthRequestableTests.swift */; };
 		8DDF473F2A98FE1C00126A47 /* MSALNativeAuthRequiredAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDF473E2A98FE1C00126A47 /* MSALNativeAuthRequiredAttribute.swift */; };
 		9112E2272BBDF484001A9074 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
-		9156D3212BC0B2AD00818E1A /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		9156D3222BC0B2B500818E1A /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 919BDFD32B633E8800DA8C53 /* MSAL.framework */; };
 		91832BFF2BBCAA8700B6F998 /* unit_test_host_visionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91832BFE2BBCAA8700B6F998 /* unit_test_host_visionApp.swift */; };
 		91832C012BBCAA8700B6F998 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91832C002BBCAA8700B6F998 /* ContentView.swift */; };
@@ -368,6 +367,7 @@
 		91832CC82BBCABB400B6F998 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
 		91832CCB2BBCABB400B6F998 /* OpenIdConfigurationMissingFields.json in Resources */ = {isa = PBXBuildFile; fileRef = 962859471E734EF5008F1AE1 /* OpenIdConfigurationMissingFields.json */; };
 		91832CCC2BBCABB400B6F998 /* OpenIdConfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 962859441E734ECA008F1AE1 /* OpenIdConfiguration.json */; };
+		919A9DCF2BD0943700831BF1 /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		919BDE7C2B633E8800DA8C53 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		919BDE7D2B633E8800DA8C53 /* MSALPublicClientStatusNotifications.h in Headers */ = {isa = PBXBuildFile; fileRef = B28BBD312211DC7D00F51723 /* MSALPublicClientStatusNotifications.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		919BDE7E2B633E8800DA8C53 /* MSALRedirectUri.h in Headers */ = {isa = PBXBuildFile; fileRef = B203459221AF77FB00B221AA /* MSALRedirectUri.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -2557,8 +2557,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				919A9DCF2BD0943700831BF1 /* libIdentityTest.a in Frameworks */,
 				9156D3222BC0B2B500818E1A /* MSAL.framework in Frameworks */,
-				9156D3212BC0B2AD00818E1A /* libIdentityTest.a in Frameworks */,
 				91832CC32BBCABB400B6F998 /* AuthenticationServices.framework in Frameworks */,
 				91832CC42BBCABB400B6F998 /* WebKit.framework in Frameworks */,
 				91832CC52BBCABB400B6F998 /* Security.framework in Frameworks */,
@@ -7709,6 +7709,8 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
+				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = $SRCROOT;
 				INFOPLIST_FILE = test/unit/resources/vision/Info.plist;
@@ -7718,6 +7720,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				PRODUCT_NAME = "\"MSAL-visionOS-Unit-Tests\"";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -7747,6 +7750,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				HEADER_SEARCH_PATHS = $SRCROOT;
 				INFOPLIST_FILE = test/unit/resources/vision/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -7755,6 +7759,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				PRODUCT_NAME = "\"MSAL-visionOS-Unit-Tests\"";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
