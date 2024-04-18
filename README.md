@@ -176,6 +176,11 @@ After installation, please follow the official [MSAL iOS and macOS documentation
 
 For more information on common usage patterns, error handling and debugging, logging, telemetry, and other library functionalities, please refere to the official [MSAL iOS and macOS documentation](https://learn.microsoft.com/en-us/entra/msal/objc/).
 
+## Supported Versions
+
+**iOS** - MSAL supports iOS 14 and above.
+
+**macOS** - MSAL supports macOS (OSX) 10.13 and above.
 
 ## Community help and support
 
