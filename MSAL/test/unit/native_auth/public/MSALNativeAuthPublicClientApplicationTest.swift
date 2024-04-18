@@ -105,7 +105,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -128,7 +128,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
         
@@ -141,6 +141,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             delegate.error?.errorDescription,
             String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired")
         )
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func testSignUpPassword_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
@@ -150,7 +151,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -168,7 +169,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -181,6 +182,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             delegate.error?.errorDescription, 
             String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid")
         )
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     // Sign Up with code
@@ -204,7 +206,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -227,7 +229,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -240,6 +242,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             delegate.error?.errorDescription,
             String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpCodeRequired")
         )
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     func testSignUp_delegate_whenSendAttributes_shouldReturnAttributesInvalid() {
@@ -249,7 +252,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -267,7 +270,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedInvalidAttributes = ["attribute"]
 
         let expectedResult: SignUpStartResult = .attributesInvalid(expectedInvalidAttributes)
-        controllerFactoryMock.signUpController.startResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -280,21 +283,22 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             delegate.error?.errorDescription,
             String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignUpAttributesInvalid")
         )
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
     }
 
     // Sign in with password
 
     func testSignInPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername))
-        sut.signIn(username: "", password: "", delegate: delegate)
+        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername, correlationId: correlationId))
+        sut.signIn(username: "", password: "", correlationId: correlationId, delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
     
     func testSignInPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials))
-        sut.signIn(username: "correct", password: "", delegate: delegate)
+        let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials, correlationId: correlationId))
+        sut.signIn(username: "correct", password: "", correlationId: correlationId, delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
 
@@ -303,7 +307,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp2 = expectation(description: "expectation Telemetry")
         let delegate = SignInPasswordStartDelegateSpy(expectation: exp1, expectedUserAccountResult: MSALNativeAuthUserAccountResultStub.result)
 
-        controllerFactoryMock.signInController.signInStartResult = .init(.init(.completed(MSALNativeAuthUserAccountResultStub.result), telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(.init(.completed(MSALNativeAuthUserAccountResultStub.result), correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         }))
         sut.signIn(username: "correct", password: "correct", delegate: delegate)
@@ -315,12 +319,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .completed(MSALNativeAuthUserAccountResultStub.result)
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -345,7 +349,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
         
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -358,7 +362,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"), correlationId: correlationId)
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
@@ -368,7 +372,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -381,7 +385,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     func testSignIn_delegate_whenInvalidUser_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
-        let delegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername))
+        let delegate = SignInCodeStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername, correlationId: correlationId))
         sut.signIn(username: "", delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
@@ -401,7 +405,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
         sut.signIn(username: "correct", delegate: delegate)
@@ -413,7 +417,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCodeRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
@@ -423,7 +427,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -441,7 +445,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedResult: SignInStartResult = .passwordRequired(newState: expectedState)
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -456,14 +460,14 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in public interface")
         let exp2 = expectation(description: "expectation Telemetry")
 
-        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"))
+        let expectedError = SignInStartError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInPasswordRequired"), correlationId: correlationId)
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
             newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId)
         )
 
-        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -494,7 +498,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             codeLength: 1
         )
 
-        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
         sut.resetPassword(username: "correct", delegate: delegate)
@@ -519,7 +523,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, telemetryUpdate: { _ in
+        controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -558,8 +562,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
-        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
-        
+        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
+
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
         
         let expectedUsername = "username"
@@ -581,9 +585,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -660,8 +662,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
-        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success("continuationToken"))
-        
+        signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
+
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
         
         let expectedUsername = "username"
@@ -683,9 +685,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -780,9 +780,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -870,9 +868,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
@@ -970,9 +966,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let authResultFactoryMock = MSALNativeAuthResultFactoryMock()
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
-                                                                authTokens: MSALNativeAuthTokens(accessToken: nil,
-                                                                                                 refreshToken: nil,
-                                                                                                 rawIdToken: nil),
+                                                                authTokens: MSALNativeAuthUserAccountResultStub.authTokens,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)

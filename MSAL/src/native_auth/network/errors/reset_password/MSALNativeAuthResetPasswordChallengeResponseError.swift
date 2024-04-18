@@ -26,12 +26,13 @@ import Foundation
 
 struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode?
+    let error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
     let innerErrors: [MSALNativeAuthInnerError]?
     let target: String?
+    var correlationId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case error
@@ -40,30 +41,60 @@ struct MSALNativeAuthResetPasswordChallengeResponseError: MSALNativeAuthResponse
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
         case target
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthResetPasswordChallengeOauth2ErrorCode = .unknown,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        target: String? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.target = target
+        self.correlationId = correlationId
     }
 }
 
 extension MSALNativeAuthResetPasswordChallengeResponseError {
 
-    func toResetPasswordStartPublicError() -> ResetPasswordStartError {
+    func toResetPasswordStartPublicError(correlationId: UUID) -> ResetPasswordStartError {
         switch error {
         case .invalidRequest,
              .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
-             .none:
-            return .init(type: .generalError, message: errorDescription)
+             .unknown:
+            return .init(
+                type: .generalError,
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 
-    func toResendCodePublicError() -> ResendCodeError {
+    func toResendCodePublicError(correlationId: UUID) -> ResendCodeError {
         switch error {
         case .unauthorizedClient,
              .unsupportedChallengeType,
              .expiredToken,
              .invalidRequest,
-             .none:
-            return .init(message: errorDescription)
+             .unknown:
+            return .init(
+                message: errorDescription,
+                correlationId: correlationId,
+                errorCodes: errorCodes ?? [],
+                errorUri: errorURI
+            )
         }
     }
 }

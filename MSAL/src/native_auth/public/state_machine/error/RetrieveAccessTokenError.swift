@@ -30,15 +30,14 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case refreshTokenExpired
-        case tokenNotFound
         case generalError
     }
 
     let type: ErrorType
 
-    init(type: ErrorType, message: String? = nil) {
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message)
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -52,8 +51,6 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.browserRequired
         case .refreshTokenExpired:
             return MSALNativeAuthErrorMessage.refreshTokenExpired
-        case .tokenNotFound:
-            return MSALNativeAuthErrorMessage.tokenNotFound
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
         }
@@ -67,10 +64,5 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     /// Returns `true` if the refresh token has expired.
     public var isRefreshTokenExpired: Bool {
         return type == .refreshTokenExpired
-    }
-
-    /// Returns `true` if the existing token cannot be found.
-    public var isTokenNotFound: Bool {
-        return type == .tokenNotFound
     }
 }

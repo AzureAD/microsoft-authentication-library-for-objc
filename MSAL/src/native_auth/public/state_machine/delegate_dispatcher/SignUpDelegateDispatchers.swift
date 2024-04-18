@@ -30,24 +30,33 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
         newState: SignUpCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onSignUpCodeRequired = delegate.onSignUpCodeRequired {
             telemetryUpdate?(.success(()))
             await onSignUpCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCodeRequired"))
+            let error = SignUpStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCodeRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpStartError(error: error)
         }
     }
 
-    func dispatchSignUpAttributesInvalid(attributeNames: [String]) async {
+    func dispatchSignUpAttributesInvalid(attributeNames: [String], correlationId: UUID) async {
         if let onSignUpAttributesInvalid = delegate.onSignUpAttributesInvalid {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesInvalid(attributeNames)
         } else {
-            let error = SignUpStartError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
+            let error = SignUpStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesInvalid"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpStartError(error: error)
         }
@@ -56,34 +65,50 @@ final class SignUpStartDelegateDispatcher: DelegateDispatcher<SignUpStartDelegat
 
 final class SignUpVerifyCodeDelegateDispatcher: DelegateDispatcher<SignUpVerifyCodeDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(
+        attributes: [MSALNativeAuthRequiredAttribute],
+        newState: SignUpAttributesRequiredState,
+        correlationId: UUID
+    ) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
     }
 
-    func dispatchSignUpPasswordRequired(newState: SignUpPasswordRequiredState) async {
+    func dispatchSignUpPasswordRequired(newState: SignUpPasswordRequiredState, correlationId: UUID) async {
         if let onSignUpPasswordRequired = delegate.onSignUpPasswordRequired {
             telemetryUpdate?(.success(()))
             await onSignUpPasswordRequired(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpPasswordRequired"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpPasswordRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
     }
 
-    func dispatchSignUpCompleted(newState: SignInAfterSignUpState) async {
+    func dispatchSignUpCompleted(newState: SignInAfterSignUpState, correlationId: UUID) async {
         if let onSignUpCompleted = delegate.onSignUpCompleted {
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = VerifyCodeError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = VerifyCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpVerifyCodeError(error: error, newState: nil)
         }
@@ -96,13 +121,14 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
         newState: SignUpCodeRequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
-        codeLength: Int
+        codeLength: Int,
+        correlationId: UUID
     ) async {
         if let onSignUpResendCodeCodeRequired = delegate.onSignUpResendCodeCodeRequired {
             telemetryUpdate?(.success(()))
             await onSignUpResendCodeCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"))
+            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpResendCodeError(error: error, newState: nil)
         }
@@ -111,23 +137,35 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
 
 final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpPasswordRequiredDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(
+        attributes: [MSALNativeAuthRequiredAttribute],
+        newState: SignUpAttributesRequiredState,
+        correlationId: UUID
+    ) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
         }
     }
 
-    func dispatchSignUpCompleted(newState: SignInAfterSignUpState) async {
+    func dispatchSignUpCompleted(newState: SignInAfterSignUpState, correlationId: UUID) async {
         if let onSignUpCompleted = delegate.onSignUpCompleted {
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = PasswordRequiredError(type: .generalError, message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpPasswordRequiredError(error: error, newState: nil)
         }
@@ -136,34 +174,38 @@ final class SignUpPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignUpP
 
 final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignUpAttributesRequiredDelegate> {
 
-    func dispatchSignUpAttributesRequired(attributes: [MSALNativeAuthRequiredAttribute], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesRequired(
+        attributes: [MSALNativeAuthRequiredAttribute],
+        newState: SignUpAttributesRequiredState,
+        correlationId: UUID
+    ) async {
         if let onSignUpAttributesRequired = delegate.onSignUpAttributesRequired {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesRequired"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesRequired"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
     }
 
-    func dispatchSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState) async {
+    func dispatchSignUpAttributesInvalid(attributeNames: [String], newState: SignUpAttributesRequiredState, correlationId: UUID) async {
         if let onSignUpAttributesInvalid = delegate.onSignUpAttributesInvalid {
             telemetryUpdate?(.success(()))
             await onSignUpAttributesInvalid(attributeNames, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesInvalid"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesInvalid"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
     }
 
-    func dispatchSignUpCompleted(newState: SignInAfterSignUpState) async {
+    func dispatchSignUpCompleted(newState: SignInAfterSignUpState, correlationId: UUID) async {
         if let onSignUpCompleted = delegate.onSignUpCompleted {
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpCompleted"))
+            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpCompleted"), correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }

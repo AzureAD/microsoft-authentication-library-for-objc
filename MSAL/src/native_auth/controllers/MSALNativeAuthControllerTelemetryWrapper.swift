@@ -29,10 +29,12 @@ import Foundation
 /// (ex: an optional delegate method not implemented by the external developer).
 struct MSALNativeAuthControllerTelemetryWrapper<R> {
     let result: R
+    let correlationId: UUID
     let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
 
-    init(_ result: R, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)? = nil) {
+    init(_ result: R, correlationId: UUID, telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)? = nil) {
         self.result = result
+        self.correlationId = correlationId
         self.telemetryUpdate = telemetryUpdate
     }
 }

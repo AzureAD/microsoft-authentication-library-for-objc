@@ -58,7 +58,8 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -71,7 +72,7 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchResetPasswordResendCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordResendCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordResendCodeRequired"))
+        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordResendCodeRequired"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResendCodeError else {
@@ -91,7 +92,8 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
             newState: expectedState,
             sentTo: expectedSentTo,
             channelTargetType: expectedChannelTargetType,
-            codeLength: expectedCodeLength
+            codeLength: expectedCodeLength,
+            correlationId: correlationId
         )
 
         await fulfillment(of: [telemetryExp, delegateExp])
@@ -99,6 +101,7 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
 
         func checkError(_ error: ResendCodeError?) {
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
+            XCTAssertEqual(error?.correlationId, expectedError.correlationId)
         }
     }
 }

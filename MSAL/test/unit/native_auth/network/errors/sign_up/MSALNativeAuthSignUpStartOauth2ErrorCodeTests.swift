@@ -30,7 +30,7 @@ final class MSALNativeAuthSignUpStartOauth2ErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSignUpStartOauth2ErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 7)
+        XCTAssertEqual(sut.allCases.count, 8)
     }
 
     func test_invalidGrant() {

@@ -46,7 +46,7 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = parameters.context
         signUpStartPasswordCalled = true
         expectation.fulfill()
-        return .init(.error(.init(type: .generalError)))
+        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())), correlationId: parameters.context.correlationId())
     }
 
     func signUpStart(
@@ -55,53 +55,53 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = parameters.context
         signUpStartCalled = true
         expectation.fulfill()
-        return .init(.error(.init(type: .generalError)))
+        return .init(.error(.init(type: .generalError, correlationId: parameters.context.correlationId())), correlationId: parameters.context.correlationId())
     }
 
     func resendCode(
         username: String,
-        context: MSIDRequestContext,
+        context: MSALNativeAuthRequestContext,
         continuationToken: String
     ) async -> SignUpResendCodeControllerResponse {
         self.context = context
         resendCodeCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(), newState: nil))
+        return .init(.error(error: .init(correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitCode(
         _ code: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitCodeControllerResponse {
         self.context = context
         submitCodeCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitPassword(
         _ password: String,
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthSignUpControlling.SignUpSubmitPasswordControllerResponse {
         self.context = context
         submitPasswordCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(type: .generalError), newState: nil))
+        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitAttributes(
         _ attributes: [String: Any],
         username: String,
         continuationToken: String,
-        context: MSIDRequestContext
+        context: MSALNativeAuthRequestContext
     ) async -> SignUpSubmitAttributesControllerResponse {
         self.context = context
         submitAttributesCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init()))
+        return .init(.error(error: .init(correlationId: context.correlationId())), correlationId: context.correlationId())
     }
 }

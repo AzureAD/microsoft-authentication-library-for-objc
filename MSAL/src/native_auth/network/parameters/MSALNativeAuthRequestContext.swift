@@ -24,17 +24,19 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthRequestContext: MSIDRequestContext {
+class MSALNativeAuthRequestContext: MSIDRequestContext {
 
     private let _correlationId: UUID
-    private let _telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()
+    private let _telemetryRequestId: String
+    private var _serverCorrelationId: UUID? // TODO: Setting the server correlation id here is wrong. Needs refactoring.
 
-    init(correlationId: UUID? = nil) {
+    init(correlationId: UUID? = nil, telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()) {
         _correlationId = correlationId ?? UUID()
+        _telemetryRequestId = telemetryRequestId
     }
 
     func correlationId() -> UUID {
-        _correlationId
+        _serverCorrelationId ?? _correlationId
     }
 
     func logComponent() -> String {
@@ -58,5 +60,25 @@ final class MSALNativeAuthRequestContext: MSIDRequestContext {
             MSID_APP_NAME_KEY: appName,
             MSID_APP_VER_KEY: appVersion
         ]
+    }
+
+    func setServerCorrelationId(_ serverCorrelationId: UUID?) {
+        guard let serverCorrelationId = serverCorrelationId else {
+            MSALLogger.log(level: .warning, context: self, format: "correlationId not found in server response")
+            _serverCorrelationId = serverCorrelationId
+            return
+        }
+
+        guard _correlationId != serverCorrelationId else {
+            return
+        }
+
+        let log = """
+                  Inconsistency between the correlationId sent by the SDK and the one received in the response.
+                  Original correlationId: \(_correlationId). Server correlationId \(serverCorrelationId)
+                  """
+        MSALLogger.log(level: .warning, context: self, format: log)
+
+        _serverCorrelationId = serverCorrelationId
     }
 }

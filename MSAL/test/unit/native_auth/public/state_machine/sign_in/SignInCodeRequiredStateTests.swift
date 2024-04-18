@@ -45,14 +45,14 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_withError_shouldReturnSignInResendCodeError() {
         let exp = expectation(description: "sign-in states")
 
-        let expectedError = ResendCodeError(message: "test error")
+        let expectedError = ResendCodeError(message: "test error", correlationId: correlationId)
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInResendCodeResult = .error(
             error: expectedError,
             newState: expectedState
         )
-        controller.resendCodeResult = .init(expectedResult)
+        controller.resendCodeResult = .init(expectedResult, correlationId: correlationId)
 
         let delegate = SignInResendCodeDelegateSpy(expectation: exp)
 
@@ -61,6 +61,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.newSignInResendCodeError, expectedError)
         XCTAssertEqual(delegate.newSignInCodeRequiredState?.continuationToken, expectedState.continuationToken)
+        XCTAssertEqual(delegate.newSignInResendCodeError?.correlationId, correlationId)
     }
 
     func test_resendCode_delegate_success_shouldReturnSignInResendCodeCodeRequired() {
@@ -74,7 +75,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controller.resendCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.resendCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -96,7 +97,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
             channelTargetType: .email,
             codeLength: 1
         )
-        controller.resendCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.resendCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -105,20 +106,21 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
         XCTAssertEqual(delegate.newSignInResendCodeError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInResendCodeCodeRequired"))
+        XCTAssertEqual(delegate.newSignInResendCodeError?.correlationId, correlationId)
     }
 
     // SubmitCode
 
     func test_submitCode_delegate_withError_shouldReturnSignInVerifyCodeError() {
         let exp = expectation(description: "sign-in states")
-        let expectedError = VerifyCodeError(type: .invalidCode)
+        let expectedError = VerifyCodeError(type: .invalidCode, correlationId: .init())
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInVerifyCodeResult = .error(
             error: expectedError,
             newState: expectedState
         )
-        controller.submitCodeResult = .init(expectedResult)
+        controller.submitCodeResult = .init(expectedResult, correlationId: correlationId)
 
         let delegate = SignInVerifyCodeDelegateSpy(expectation: exp, expectedError: expectedError)
         delegate.expectedNewState = expectedState
@@ -133,7 +135,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInVerifyCodeResult = .completed(expectedAccountResult)
-        controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -149,7 +151,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         let expectedAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectedResult: SignInVerifyCodeResult = .completed(expectedAccountResult)
-        controller.submitCodeResult = .init(expectedResult, telemetryUpdate: { _ in
+        controller.submitCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
@@ -159,5 +161,6 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         wait(for: [exp, exp2])
         XCTAssertEqual(delegate.expectedError?.type, .generalError)
         XCTAssertEqual(delegate.expectedError?.errorDescription, String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"))
+        XCTAssertEqual(delegate.expectedError?.correlationId, correlationId)
     }
 }

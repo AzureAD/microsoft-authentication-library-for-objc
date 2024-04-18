@@ -38,16 +38,6 @@ import Foundation
         authTokens.rawIdToken
     }
 
-    /// Get the list of permissions for the access token for the account if present.
-    @objc public var scopes: [String] {
-        authTokens.accessToken?.scopes.array as? [String] ?? []
-    }
-
-    /// Get the expiration date for the access token for the account if present.
-    @objc public var expiresOn: Date? {
-        authTokens.accessToken?.expiresOn
-    }
-
     init(
         account: MSALAccount,
         authTokens: MSALNativeAuthTokens,
@@ -92,11 +82,15 @@ import Foundation
                 correlationId: correlationId,
                 cacheAccessor: cacheAccessor
             )
+
             let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
-            case .success(let accessToken):
-                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(accessToken: accessToken)
+            case .success(let accessTokenResult):
+                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
+                    result: accessTokenResult,
+                    correlationId: controllerResponse.correlationId
+                )
             case .failure(let error):
                 await delegate.onAccessTokenRetrieveError(error: error)
             }

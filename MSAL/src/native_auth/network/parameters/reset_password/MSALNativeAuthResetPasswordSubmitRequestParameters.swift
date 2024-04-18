@@ -26,7 +26,7 @@
 
 struct MSALNativeAuthResetPasswordSubmitRequestParameters: MSALNativeAuthRequestable {
     let endpoint: MSALNativeAuthEndpoint = .resetPasswordSubmit
-    let context: MSIDRequestContext
+    let context: MSALNativeAuthRequestContext
     let continuationToken: String
     let newPassword: String
 

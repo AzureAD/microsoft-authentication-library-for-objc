@@ -31,7 +31,7 @@ extension SignInCodeRequiredState {
         MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
-            return .init(.error(error: VerifyCodeError(type: .invalidCode), newState: self))
+            return .init(.error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self), correlationId: context.correlationId())
         }
 
         return await controller.submitCode(code, continuationToken: continuationToken, context: context, scopes: scopes)
@@ -53,7 +53,10 @@ extension SignInPasswordRequiredState {
 
         guard inputValidator.isInputValid(password) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
-            return .init(.error(error: PasswordRequiredError(type: .invalidPassword), newState: self))
+            return .init(
+                .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self),
+                correlationId: context.correlationId()
+            )
         }
 
         return await controller.submitPassword(password, username: username, continuationToken: continuationToken, context: context, scopes: scopes)
