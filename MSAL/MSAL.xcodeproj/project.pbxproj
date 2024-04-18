@@ -496,7 +496,7 @@
 		919BDFCB2B633E8800DA8C53 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
 		919BDFCC2B633E8800DA8C53 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
 		919BDFCD2B633E8800DA8C53 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
-		919BDFDF2B633F0B00DA8C53 /* libIdentityCore visionOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */; };
+		919BDFDF2B633F0B00DA8C53 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */; };
 		94E876CE1E492D6000FB96ED /* MSALAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 94E876CB1E492D6000FB96ED /* MSALAuthority.m */; };
 		960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
 		960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
@@ -1390,6 +1390,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
 			remoteInfo = "MSAL (iOS Framework)";
+		};
+		919A9E7B2BD1C41800831BF1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 91F955082BB4991200999532;
+			remoteInfo = MSIDTestHostAppVisionOS;
+		};
+		919A9E7D2BD1C41800831BF1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 91F956322BB4998500999532;
+			remoteInfo = "IdentityTest visionOS";
+		};
+		919A9E7F2BD1C41800831BF1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 91F955F82BB4994B00999532;
+			remoteInfo = "IdentityCoreTests visionOS";
 		};
 		919BDFDC2B633E8800DA8C53 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -2399,7 +2420,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				919BDFC82B633E8800DA8C53 /* AuthenticationServices.framework in Frameworks */,
-				919BDFDF2B633F0B00DA8C53 /* libIdentityCore visionOS.a in Frameworks */,
+				919BDFDF2B633F0B00DA8C53 /* libIdentityCore.a in Frameworks */,
 				919BDFC92B633E8800DA8C53 /* WebKit.framework in Frameworks */,
 				919BDFCB2B633E8800DA8C53 /* SafariServices.framework in Frameworks */,
 				919BDFCC2B633E8800DA8C53 /* UIKit.framework in Frameworks */,
@@ -3665,7 +3686,10 @@
 				B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */,
 				B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */,
 				E7A6569624FEE45300931BAE /* libIdentityCoreSwift.a */,
-				919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */,
+				919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */,
+				919A9E7C2BD1C41800831BF1 /* MSIDTestsHostApp.app */,
+				919A9E7E2BD1C41800831BF1 /* libIdentityTest.a */,
+				919A9E802BD1C41800831BF1 /* IdentityCoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -5391,10 +5415,31 @@
 			remoteRef = 231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		919BDFDD2B633E8800DA8C53 /* libIdentityCore visionOS.a */ = {
+		919A9E7C2BD1C41800831BF1 /* MSIDTestsHostApp.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = MSIDTestsHostApp.app;
+			remoteRef = 919A9E7B2BD1C41800831BF1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		919A9E7E2BD1C41800831BF1 /* libIdentityTest.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libIdentityCore visionOS.a";
+			path = libIdentityTest.a;
+			remoteRef = 919A9E7D2BD1C41800831BF1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		919A9E802BD1C41800831BF1 /* IdentityCoreTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = IdentityCoreTests.xctest;
+			remoteRef = 919A9E7F2BD1C41800831BF1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		919BDFDD2B633E8800DA8C53 /* libIdentityCore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityCore.a;
 			remoteRef = 919BDFDC2B633E8800DA8C53 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -7067,7 +7112,7 @@
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = $SRCROOT;
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = resources/vision/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -7101,7 +7146,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = $SRCROOT;
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = resources/vision/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
