@@ -84,7 +84,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(
             account: account,
-            authTokens: authTokens,
+            idToken: authTokens.rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
@@ -101,7 +101,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let userAccountResult = MSALNativeAuthUserAccountResult(
             account: account,
-            authTokens: authTokens,
+            idToken: authTokens.rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
@@ -127,7 +127,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID))
 
-        let result = await sut.refreshToken(context: expectedContext, scopes: nil, refreshToken: authTokens.refreshToken?.refreshToken)
+        let result = await sut.refreshToken(context: expectedContext, scopes: [], refreshToken: authTokens.refreshToken?.refreshToken)
         helper.onAccessTokenRetrieveError(result)
 
         await fulfillment(of: [expectation], timeout: 1)
@@ -140,7 +140,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let account = MSALNativeAuthUserAccountResultStub.account
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(account: account,
-                                                                authTokens: authTokens,
+                                                                idToken: authTokens.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock())
 
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -151,11 +151,11 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let accessToken = authTokens.accessToken
         let helper = CredentialsTestValidatorHelper(expectation: expectation,
                                                     expectedResult: MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
-                                                                                              scopes: accessToken.scopes.array as? [String] ?? [],
+                                                                                              scopes: accessToken.scopes?.array as? [String] ?? [],
                                                                                               expiresOn: accessToken.expiresOn))
         helper.expectedAccessToken = accessToken.accessToken
         helper.expectedExpiresOn = accessToken.expiresOn
-        helper.expectedScopes = accessToken.scopes.array as? [String] ?? []
+        helper.expectedScopes = accessToken.scopes?.array as? [String] ?? []
 
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()

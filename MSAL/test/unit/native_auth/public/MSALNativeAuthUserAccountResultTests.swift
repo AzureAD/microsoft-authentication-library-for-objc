@@ -43,10 +43,11 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let rawIdToken = "rawIdToken"
 
         cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
+        cacheAccessorMock.mockAuthTokens = MSALNativeAuthUserAccountResultStub.authTokens
 
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
-            authTokens: MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: rawIdToken),
+            idToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: cacheAccessorMock
         )
@@ -57,12 +58,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     func test_whenAccountAndTokenExist_itReturnsCorrectData() {
         let expectation = expectation(description: "CredentialsController")
-        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
-        mockDelegate.expectedAccessToken = authTokens.accessToken.accessToken
-        mockDelegate.expectedExpiresOn = authTokens.accessToken.expiresOn
-        mockDelegate.expectedScopes = authTokens.accessToken.scopes.array as? [String] ?? []
-        sut.getAccessToken(delegate: mockDelegate)
+        let date = Date()
+        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(accessToken: "accessToken", scopes: [], expiresOn: date))
+        mockDelegate.expectedAccessToken = "accessToken"
+        mockDelegate.expectedExpiresOn = date
+        mockDelegate.expectedScopes = []
+        sut.getAccessToken(scopes: nil, delegate: mockDelegate)
         wait(for: [expectation], timeout: 1)
     }
 

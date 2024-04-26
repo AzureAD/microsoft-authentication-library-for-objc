@@ -49,10 +49,10 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
                                               refreshToken: refreshToken,
                                               rawIdToken: rawIdToken)
-        let expectedResult = MSALNativeAuthTokenResult(authTokens: authTokens)
+        let expectedResult = MSALNativeAuthTokenResult(accessToken: "accessToken", scopes: [], expiresOn: Date())
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
         delegate.expectedAccessToken = accessToken.accessToken
-        delegate.expectedScopes = accessToken.scopes.array as? [String] ?? []
+        delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
@@ -89,7 +89,7 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
                                               refreshToken: refreshToken,
                                               rawIdToken: rawIdToken)
 
-        await sut.dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult(authTokens: authTokens), correlationId: correlationId)
+        await sut.dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult(accessToken: "accessToken", scopes: [], expiresOn: Date()), correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)

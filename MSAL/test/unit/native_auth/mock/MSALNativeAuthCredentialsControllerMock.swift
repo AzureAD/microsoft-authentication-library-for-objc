@@ -26,8 +26,8 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthCredentialsControllerMock: MSALNativeAuthCredentialsControlling {
-
+class MSALNativeAuthCredentialsControllerMock: MSAL.MSALNativeAuthCredentialsControlling {
+    var accessTokenResult: RefreshTokenCredentialControllerResponse!
     var refreshTokenResult: RefreshTokenCredentialControllerResponse!
     var accountResult: MSALNativeAuthUserAccountResult?
 
@@ -37,5 +37,13 @@ class MSALNativeAuthCredentialsControllerMock: MSALNativeAuthCredentialsControll
 
     func retrieveUserAccountResult(context: MSAL.MSALNativeAuthRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
         return accountResult
+    }
+    
+    func refreshToken(context: MSAL.MSALNativeAuthRequestContext, scopes: [String]?, refreshToken: String?) async -> RefreshTokenCredentialControllerResponse {
+        refreshTokenResult
+    }
+    
+    func retrieveAccessToken(context: MSAL.MSALNativeAuthRequestContext, account: MSALAccount, scopes: [String]?, forceRefresh: Bool) async -> RefreshTokenCredentialControllerResponse {
+        accessTokenResult
     }
 }

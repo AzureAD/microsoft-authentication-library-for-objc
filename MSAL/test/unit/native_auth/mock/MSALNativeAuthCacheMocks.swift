@@ -27,6 +27,18 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
+    func getAccessToken(account: MSALAccount, configuration: MSIDConfiguration, context: any MSIDRequestContext) throws -> MSIDAccessToken? {
+        mockAuthTokens?.accessToken
+    }
+    
+    func getRefreshToken(account: MSALAccount, configuration: MSIDConfiguration, context: any MSIDRequestContext) throws -> MSIDRefreshToken? {
+        mockAuthTokens?.refreshToken
+    }
+    
+    func getIDToken(account: MSALAccount, configuration: MSIDConfiguration, context: any MSIDRequestContext) throws -> String? {
+        mockAuthTokens?.rawIdToken
+    }
+    
     var tokenCache: MSIDDefaultTokenCacheAccessor
     var accountMetadataCache: MSIDAccountMetadataCacheAccessor
 
