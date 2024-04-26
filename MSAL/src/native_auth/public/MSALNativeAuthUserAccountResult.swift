@@ -75,10 +75,40 @@ import Foundation
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "Use 'getAccessToken' method that can receive an optional list of API scopes")
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(
                 forceRefresh: forceRefresh,
+                correlationId: correlationId,
+                cacheAccessor: cacheAccessor
+            )
+
+            let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
+            switch controllerResponse.result {
+            case .success(let accessTokenResult):
+                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
+                    result: accessTokenResult,
+                    correlationId: controllerResponse.correlationId
+                )
+            case .failure(let error):
+                await delegate.onAccessTokenRetrieveError(error: error)
+            }
+        }
+    }
+    
+    /// Retrieves an access token for the account.
+    /// - Parameters:
+    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
+    ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @objc public func getAccessToken(forceRefresh: Bool = false, scopes: [String]? = nil, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
+        Task {
+            let controllerResponse = await getAccessTokenInternal(
+                forceRefresh: forceRefresh,
+                scopes: scopes,
                 correlationId: correlationId,
                 cacheAccessor: cacheAccessor
             )

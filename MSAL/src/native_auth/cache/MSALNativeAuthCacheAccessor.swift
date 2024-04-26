@@ -82,6 +82,23 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                                                                                           context: context),
                                                   saveSSOStateOnly: false)
         }
+    
+    func getAccessToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDAccessToken? {
+        let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
+        return try tokenCacheAccessor.getAccessToken(
+            forAccount: account.lookupAccountIdentifier,
+            configuration: accountConfiguration,
+            context: context)
+    }
+
+    func getRefreshToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDRefreshToken? {
+        let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
+        return try tokenCacheAccessor.getRefreshToken(
+            withAccount: account.lookupAccountIdentifier,
+            familyId: nil,
+            configuration: accountConfiguration,
+            context: context)
+    }
 
     // Here we create the MSIDRequestParameters required by the validateAndSave method
     private func getRequestParameters(

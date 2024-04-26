@@ -28,18 +28,13 @@ extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(
         forceRefresh: Bool,
+        scopes: [String]? = nil,
         correlationId: UUID?,
         cacheAccessor: MSALNativeAuthCacheInterface
     ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let correlationId = context.correlationId()
-
-        if forceRefresh || self.authTokens.accessToken.isExpired() {
-            let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-            let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
-            return await credentialsController.refreshToken(context: context, authTokens: authTokens)
-        } else {
-            return .init(.success(MSALNativeAuthTokenResult(authTokens: authTokens)), correlationId: correlationId)
-        }
+        let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
+        let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
+        return await credentialsController.retrieveAccessToken(context: context, account: account, scopes: scopes, forceRefresh: forceRefresh)
     }
 }

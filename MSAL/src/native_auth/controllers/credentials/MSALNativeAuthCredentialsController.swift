@@ -70,6 +70,12 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         if let account = accounts.first {
             // We pass an empty array of scopes because that will return all tokens for that account identifier
             // Because we expect to be only one access token per account at this point, it's ok for the array to be empty
+            
+            // we should only retrieve the ID token at this point. Configuration.target can be nil (we don't need scopes)
+            // AT needs to be retrieved on getAccessToken function. We need scope here
+            // RT needs to be retrieved if AT is not found, expired or force refresh is true (only when needed). Configuration.target can be nil (we don't need scopes)
+            // TODO: modify here
+
             guard let tokens = retrieveTokens(account: account,
                                               scopes: [],
                                               context: context) else {
@@ -82,14 +88,21 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         }
         return nil
     }
-
-    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
+    
+    //--------------------------------------------------------------------------------------------------
+//    func refreshToken(context: MSALNativeAuthRequestContext, scopes: [String]?, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
+    func refreshToken(context: MSALNativeAuthRequestContext, scopes: [String]?, refreshToken: String?) async -> RefreshTokenCredentialControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
-        let scopes = authTokens.accessToken.scopes.array as? [String] ?? []
+
+        let scopes = scopes ?? ["offline_access", "openid", "profile"]
+        // To-do: check for empty array?
+//        var scopes = scopes ?? ["offline_access", "openid", "profile"]
+//        scopes = scopes.isEmpty ? ["offline_access", "openid", "profile"] : scopes
+        
         guard let request = createRefreshTokenRequest(
             scopes: scopes,
-            refreshToken: authTokens.refreshToken?.refreshToken,
+            refreshToken: refreshToken,
             context: context
         ) else {
             stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
@@ -107,6 +120,52 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             telemetryEvent: telemetryEvent
         )
     }
+
+    func retrieveAccessToken(context: MSALNativeAuthRequestContext, account: MSALAccount, scopes: [String]?, forceRefresh: Bool) async -> RefreshTokenCredentialControllerResponse {
+        guard let refreshToken = retrieveRefreshToken(account: account, context: context) else {
+            return .init(.failure(
+                RetrieveAccessTokenError(
+                    type: .generalError,
+                    message: "error retrieving refresh token from cache",
+                    correlationId: context.correlationId(),
+                    errorCodes: [],
+                    errorUri: nil)
+            ), correlationId: context.correlationId())
+        }
+
+        let config = factory.makeMSIDConfiguration(scopes: scopes ?? [])
+        let accessToken = try? cacheAccessor.getAccessToken(account: account, configuration: config, context: context)
+
+        guard let accessToken = accessToken, !forceRefresh, !accessToken.isExpired() else {
+            return await self.refreshToken(context: context, scopes: scopes, refreshToken: refreshToken.refreshToken)
+        }
+
+        return .init(.success(MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                        scopes: accessToken.scopes.array as? [String] ?? [],
+                                                        expiresOn: accessToken.expiresOn)),
+                     correlationId: context.correlationId())
+    }
+
+    private func retrieveRefreshToken(
+        account: MSALAccount,
+        context: MSALNativeAuthRequestContext
+    ) -> MSIDRefreshToken? {
+        do {
+            let config = factory.makeMSIDConfiguration(scopes: [])
+            return try cacheAccessor.getRefreshToken(account: account, configuration: config, context: context)
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "Error retrieving refresh tokens: \(error)"
+            )
+        }
+        return nil
+    }
+
+    
+    //--------------------------------------------------------------------------------------------------
+
 
     // MARK: - Private
 
@@ -181,13 +240,10 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 level: .verbose,
                 context: context,
                 format: "Refresh Token completed successfully")
-            // TODO: Handle tokenResult.refreshToken as? MSIDRefreshToken in a safer way
             return .init(
-                .success(MSALNativeAuthTokenResult(authTokens: MSALNativeAuthTokens(
-                    accessToken: tokenResult.accessToken,
-                    refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
-                    rawIdToken: tokenResult.rawIdToken
-                ))),
+                .success(MSALNativeAuthTokenResult(accessToken: tokenResult.accessToken.accessToken,
+                                                   scopes: tokenResult.accessToken.scopes.array as? [String] ?? [],
+                                                   expiresOn: tokenResult.accessToken.expiresOn)),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                 telemetryEvent?.setUserInformation(tokenResult.account)

@@ -29,5 +29,6 @@ protocol MSALNativeAuthCredentialsControlling {
     MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthTokenResult, RetrieveAccessTokenError>>
 
     func retrieveUserAccountResult(context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult?
-    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse
+    func refreshToken(context: MSALNativeAuthRequestContext, scopes: [String]?, refreshToken: String?) async -> RefreshTokenCredentialControllerResponse
+    func retrieveAccessToken(context: MSALNativeAuthRequestContext, account: MSALAccount, scopes: [String]?, forceRefresh: Bool) async -> RefreshTokenCredentialControllerResponse
 }

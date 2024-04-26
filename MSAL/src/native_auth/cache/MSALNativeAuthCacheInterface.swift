@@ -39,6 +39,14 @@ protocol MSALNativeAuthCacheInterface {
         tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSIDTokenResult?
+    
+    func getAccessToken(account: MSALAccount,
+                        configuration: MSIDConfiguration,
+                        context: MSIDRequestContext) throws -> MSIDAccessToken?
+    
+    func getRefreshToken(account: MSALAccount,
+                         configuration: MSIDConfiguration,
+                         context: MSIDRequestContext) throws -> MSIDRefreshToken?
 
     func removeTokens(
         accountIdentifier: MSIDAccountIdentifier,
