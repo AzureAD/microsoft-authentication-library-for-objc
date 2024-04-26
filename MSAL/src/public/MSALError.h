@@ -177,6 +177,11 @@ typedef NS_ENUM(NSInteger, MSALError)
     The server error happens when server returns server_error
      */
     MSALErrorServerError                         = -50006,
+
+    /**
+     Workplacejoin migrate device registration is required to proceed.
+     */
+    MSALErrorWorkplaceJoinMigrateDevice          = -50007,
 };
 
 /**
