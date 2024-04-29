@@ -1310,13 +1310,6 @@
 			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
 			remoteInfo = "MSAL (Mac Framework)";
 		};
-		D67227941EBD108C00F3422A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D61A64321E5A29580086D120;
-			remoteInfo = "MSAL Test App (iOS)";
-		};
 		D67227981EBD10B500F3422A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -1372,13 +1365,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = D626FF681FBA6EDF00EE4487;
 			remoteInfo = "IdentityCoreTests Mac";
-		};
-		D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 962E37A61E720C5D00DE71FE;
-			remoteInfo = "MSAL Test Automation (iOS)";
 		};
 		E7A6569524FEE45300931BAE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -4851,8 +4837,6 @@
 			dependencies = (
 				231CE9D91FEC677D00E95D3E /* PBXTargetDependency */,
 				D61F5BC71E59333000912CB8 /* PBXTargetDependency */,
-				D6BFE3DB1EB42D3200F2B7E8 /* PBXTargetDependency */,
-				D67227951EBD108C00F3422A /* PBXTargetDependency */,
 				D67227B71EBD112800F3422A /* PBXTargetDependency */,
 			);
 			name = "MSAL iOS Unit Tests";
@@ -6192,11 +6176,6 @@
 			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
 			targetProxy = D65A6FD61E3FF49C00C69FBA /* PBXContainerItemProxy */;
 		};
-		D67227951EBD108C00F3422A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D61A64321E5A29580086D120 /* MSAL Test App (iOS) */;
-			targetProxy = D67227941EBD108C00F3422A /* PBXContainerItemProxy */;
-		};
 		D67227991EBD10B500F3422A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */;
@@ -6206,11 +6185,6 @@
 			isa = PBXTargetDependency;
 			target = D672279E1EBD111900F3422A /* unit-test-host */;
 			targetProxy = D67227B61EBD112800F3422A /* PBXContainerItemProxy */;
-		};
-		D6BFE3DB1EB42D3200F2B7E8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
-			targetProxy = D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -7236,8 +7210,11 @@
 					"@loader_path/Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -7267,7 +7244,10 @@
 					"@loader_path/Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -7325,6 +7305,9 @@
 				ENABLE_BITCODE = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Debug;
 		};
@@ -7338,6 +7321,9 @@
 				ENABLE_BITCODE = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Release;
 		};
