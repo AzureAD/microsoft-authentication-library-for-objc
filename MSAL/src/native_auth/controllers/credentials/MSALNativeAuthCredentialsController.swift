@@ -83,7 +83,9 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return nil
     }
 
-    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens, userAccountResult: MSALNativeAuthUserAccountResult) async -> RefreshTokenCredentialControllerResponse {
+    func refreshToken(context: MSALNativeAuthRequestContext,
+                      authTokens: MSALNativeAuthTokens,
+                      userAccountResult: MSALNativeAuthUserAccountResult) async -> RefreshTokenCredentialControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
         let scopes = authTokens.accessToken.scopes.array as? [String] ?? []

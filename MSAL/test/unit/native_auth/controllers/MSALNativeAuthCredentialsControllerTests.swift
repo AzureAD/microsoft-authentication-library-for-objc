@@ -121,13 +121,14 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
+        let userAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         requestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: nil, grantType: MSALNativeAuthGrantType.refreshToken, scope: "" , password: nil, oobCode: nil, includeChallengeType: true, refreshToken: "refreshToken")
         requestProviderMock.throwingRefreshTokenError = ErrorMock.error
 
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: RetrieveAccessTokenError(type: .generalError, correlationId: defaultUUID))
 
-        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens, userAccountResult: userAccountResult)
         helper.onAccessTokenRetrieveError(result)
 
         await fulfillment(of: [expectation], timeout: 1)
@@ -138,6 +139,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "CredentialsController")
 
         let account = MSALNativeAuthUserAccountResultStub.account
+        let newAccount = MSALAccount(msidAccount: MSIDAccount(), createTenantProfile: false, accountClaims: ["claim1": "true"])
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(account: account,
                                                                 authTokens: authTokens,
@@ -148,6 +150,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let expectedAccessToken = "accessToken"
+        let expectedIdToken = "newIdToken"
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
         helper.expectedAccessToken = authTokens.accessToken.accessToken
         helper.expectedExpiresOn = authTokens.accessToken.expiresOn
@@ -156,15 +159,18 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()
         tokenResult.accessToken.accessToken = expectedAccessToken
+        tokenResult.rawIdToken = expectedIdToken
         responseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
-        cacheAccessorMock.mockUserAccounts = [account]
+        cacheAccessorMock.mockUserAccounts = [newAccount!]
         cacheAccessorMock.mockAuthTokens = authTokens
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
-        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens, userAccountResult: userAccountResult)
         helper.onAccessTokenRetrieveCompleted(result)
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertEqual(expectedAccessToken, authTokens.accessToken.accessToken)
+        XCTAssertEqual(userAccountResult.idToken, expectedIdToken)
+        XCTAssertEqual(userAccountResult.account, newAccount)
     }
 
     func test_whenErrorIsReturnedFromValidator_itIsCorrectlyTranslatedToDelegateError() async  {
@@ -183,6 +189,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     private func checkPublicErrorWithValidatorError(publicError: RetrieveAccessTokenError, validatorError: MSALNativeAuthTokenValidatedErrorType) async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
+        let userAccountResult = MSALNativeAuthUserAccountResultStub.result
 
         let expectation = expectation(description: "CredentialsController")
 
@@ -191,7 +198,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedError: publicError)
         responseValidatorMock.tokenValidatedResponse = .error(validatorError)
 
-        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens)
+        let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens, userAccountResult: userAccountResult)
         helper.onAccessTokenRetrieveError(result)
 
         checkTelemetryEventResult(id: .telemetryApiIdRefreshToken, isSuccessful: false)
