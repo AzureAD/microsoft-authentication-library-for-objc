@@ -307,41 +307,5 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 }
             }
         }
-
-//        Task {
-//            
-//            let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
-//            params.forceRefresh = forceRefresh
-//            
-//            do {
-//                let response = try await withCheckedThrowingContinuation({ [weak self] (continuation: CheckedContinuation<MSALResult, Error>) in
-//                    guard let self = self else { return }
-//                    
-//                    self.acquireTokenSilent(with: params) { result, error in
-//                        
-//                        guard let result = result else {
-//                            continuation.resume(throwing: error!)
-//                            return
-//                        }
-//                        
-//                        continuation.resume(returning: result)
-//                    }
-//                })
-//                
-//                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil) // controllerResponse.telemetryUpdate)
-//                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: response.accessToken,
-//                                                            scopes: response.scopes,
-//                                                            expiresOn: response.expiresOn)
-//                
-//                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
-//                    result: accessTokenResult,
-//                    correlationId: response.correlationId
-//                )
-//                
-//            } catch {
-//                let e = RetrieveAccessTokenError(type: .generalError, correlationId: correlationId ?? UUID())
-//                await delegate.onAccessTokenRetrieveError(error: e)
-//            }
-//        }
     }
 }
