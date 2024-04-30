@@ -82,6 +82,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterSignUpDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+        checkAccessTokenDelegate(credentialsDelegate)
     }
 
     // Hero Scenario 2.1.2. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
@@ -132,6 +141,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterSignUpDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+        checkAccessTokenDelegate(credentialsDelegate)
     }
 
     // Hero Scenario 2.1.3. Sign up - with Email verification as FIRST step (Email & Password)
@@ -199,6 +217,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterSignUpDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+        checkAccessTokenDelegate(credentialsDelegate)
     }
 
     // Hero Scenario 2.1.4. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
@@ -283,6 +310,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterSignUpDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+        checkAccessTokenDelegate(credentialsDelegate)
     }
 
     // Hero Scenario 2.1.5. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
@@ -384,6 +420,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterSignUpDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+        checkAccessTokenDelegate(credentialsDelegate)
     }
 
     // Hero Scenario 2.1.6. Sign up – without automatic sign in (Email & Password)
@@ -433,6 +478,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertEqual(delegate.result?.account.username, usernamePassword)
         XCTAssertNotNil(delegate.result?.idToken)
         XCTAssertNil(delegate.result?.account.accountClaims)
+    }
+
+    private func checkAccessTokenDelegate(_ delegate: CredentialsDelegateSpy) {
         XCTAssertEqual(delegate.result?.scopes[0], "openid")
         XCTAssertEqual(delegate.result?.scopes[1], "offline_access")
     }

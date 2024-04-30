@@ -141,7 +141,16 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
         XCTAssertNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
-        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[0], "openid")
-        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[1], "offline_access")
+
+        // Now retrieve access token...
+        let accessTokenExp = expectation(description: "get access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: accessTokenExp)
+
+        signInAfterResetPasswordDelegate.result?.getAccessToken(delegate: credentialsDelegate)
+
+        await fulfillment(of: [accessTokenExp], timeout: defaultTimeout)
+
+        XCTAssertEqual(credentialsDelegate.result?.scopes[0], "openid")
+        XCTAssertEqual(credentialsDelegate.result?.scopes[1], "offline_access")
     }
 }

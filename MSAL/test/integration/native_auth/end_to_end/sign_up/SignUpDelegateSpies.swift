@@ -265,3 +265,29 @@ class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
         expectation.fulfill()
     }
 }
+
+class CredentialsDelegateSpy: CredentialsDelegate {
+    private let expectation: XCTestExpectation
+    private(set) var onCredentialsDelegateErrorCalled = false
+    private(set) var error: RetrieveAccessTokenError?
+    private(set) var onAccessTokenRetrieveCompletedCalled = false
+    private(set) var result: MSALNativeAuthTokenResult?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onAccessTokenRetrieveError(error: RetrieveAccessTokenError) {
+        onCredentialsDelegateErrorCalled = true
+        self.error = error
+
+        expectation.fulfill()
+    }
+
+    func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult) {
+        onAccessTokenRetrieveCompletedCalled = true
+        self.result = result
+
+        expectation.fulfill()
+    }
+}
