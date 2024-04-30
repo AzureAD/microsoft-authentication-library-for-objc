@@ -148,10 +148,12 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequestRefreshTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
         let expectedAccessToken = "accessToken"
-        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(authTokens: authTokens))
+        let helper = CredentialsTestValidatorHelper(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
+                                                                                                                        scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
+                                                                                                                        expiresOn: authTokens.accessToken.expiresOn))
         helper.expectedAccessToken = authTokens.accessToken.accessToken
         helper.expectedExpiresOn = authTokens.accessToken.expiresOn
-        helper.expectedScopes = authTokens.accessToken.scopes.array as? [String] ?? []
+        helper.expectedScopes = authTokens.accessToken.scopes?.array as? [String] ?? []
 
         factory.mockMakeUserAccountResult(userAccountResult)
         tokenResult.accessToken = MSIDAccessToken()

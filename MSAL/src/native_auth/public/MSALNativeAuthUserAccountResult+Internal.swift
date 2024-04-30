@@ -39,7 +39,9 @@ extension MSALNativeAuthUserAccountResult {
             let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
             return await credentialsController.refreshToken(context: context, authTokens: authTokens)
         } else {
-            return .init(.success(MSALNativeAuthTokenResult(authTokens: authTokens)), correlationId: correlationId)
+            return .init(.success(MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
+                                                            scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
+                                                            expiresOn: authTokens.accessToken.expiresOn)), correlationId: correlationId)
         }
     }
 }

@@ -75,6 +75,7 @@ import Foundation
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "Use 'getAccessToken' method from 'MSALNativeAuthPublicClientApplication' instance")
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(
