@@ -174,6 +174,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleMSIDTokenResponse(
         tokenResponse: MSIDTokenResponse,
         telemetryEvent: MSIDTelemetryAPIEvent?,
