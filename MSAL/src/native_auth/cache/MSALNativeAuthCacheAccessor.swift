@@ -82,7 +82,7 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                                                                                           context: context),
                                                   saveSSOStateOnly: false)
         }
-    
+
     func getAccessToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDAccessToken? {
         let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
         return try tokenCacheAccessor.getAccessToken(
@@ -99,12 +99,12 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
             configuration: accountConfiguration,
             context: context)
     }
-    
+
     func getIDToken(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> String? {
         let accountConfiguration = try getAccountConfiguration(configuration: configuration, account: account)
         return try tokenCacheAccessor.getIDToken(
             forAccount: account.lookupAccountIdentifier,
-            configuration: configuration,
+            configuration: accountConfiguration,
             idTokenType: MSIDCredentialType.MSIDIDTokenType,
             context: context).rawIdToken
     }
