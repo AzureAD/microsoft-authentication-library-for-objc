@@ -97,4 +97,39 @@ import Foundation
             }
         }
     }
+    
+    /// Retrieves an access token for the account.
+    /// - Parameters:
+    ///   - client: The instance of Native Auth public client application.
+    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
+    ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
+    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
+    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    public func getAccessToken(client: MSALNativeAuthPublicClientApplication,
+                               forceRefresh: Bool = false,
+                               scopes: [String]? = nil,
+                               correlationId: UUID? = nil,
+                               delegate: CredentialsDelegate) {
+
+        let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
+        params.forceRefresh = forceRefresh
+
+        client.acquireTokenSilent(with: params) { result, error in
+
+            if let error = error as? NSError {
+                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
+                                                                correlationId: correlationId ?? result?.correlationId ?? UUID(),
+                                                                errorCodes: [error.code])
+                Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
+            }
+
+            if let result = result {
+                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
+                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
+                                                                  scopes: result.scopes,
+                                                                  expiresOn: result.expiresOn)
+                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
+            }
+        }
+    }
 }

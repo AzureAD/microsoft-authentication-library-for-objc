@@ -292,19 +292,19 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         acquireTokenSilent(with: params) { result, error in
 
-            if let _ = error {
-                let accessTokenError = RetrieveAccessTokenError(type: .generalError, correlationId: correlationId ?? UUID())
+            if let error = error as? NSError {
+                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
+                                                                correlationId: correlationId ?? result?.correlationId ?? UUID(),
+                                                                errorCodes: [error.code])
                 Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
             }
 
             if let result = result {
                 let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                // controllerResponse.telemetryUpdate)
                 let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                            scopes: result.scopes,
-                                                            expiresOn: result.expiresOn)
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId)
-                }
+                                                                  scopes: result.scopes,
+                                                                  expiresOn: result.expiresOn)
+                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
             }
         }
     }
