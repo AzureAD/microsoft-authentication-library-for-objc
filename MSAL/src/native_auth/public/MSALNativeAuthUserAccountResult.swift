@@ -33,7 +33,7 @@ import Foundation
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
 
-    /// Get the ID token for the account.
+    /// Get the latest ID token for the account.
     @objc public var idToken: String? {
         authTokens.rawIdToken
     }
