@@ -73,13 +73,13 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
     // MARK: get native user account tests
 
-    func test_whenNoAccountPresent_shouldReturnNoAccounts() {
+    func test_whenNoAccountPresent_shouldReturnNoUserAccountResult() {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let accountResult = sut.retrieveUserAccountResult(context: expectedContext)
         XCTAssertNil(accountResult)
     }
 
-    func test_whenNoTokenPresent_shouldReturnNoAccounts() {
+    func test_whenNoTokenPresent_shouldReturnNoUserAccountResult() {
         let account = MSALNativeAuthUserAccountResultStub.account
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(
@@ -95,7 +95,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(accountResult)
     }
 
-    func test_whenAccountSet_shouldReturnAccount() async {
+    func test_whenAccountSet_shouldReturnUserAccountResult() async {
         let account = MSALNativeAuthUserAccountResultStub.account
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
 

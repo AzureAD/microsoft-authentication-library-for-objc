@@ -174,7 +174,6 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         }
     }
 
-    // swiftlint:disable:next function_body_length
     private func handleMSIDTokenResponse(
         tokenResponse: MSIDTokenResponse,
         telemetryEvent: MSIDTelemetryAPIEvent?,
@@ -184,40 +183,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
     ) -> RefreshTokenCredentialControllerResponse {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            MSALLogger.log(
-                level: .verbose,
-                context: context,
-                format: "Refresh Token completed successfully")
-            // TODO: Handle tokenResult.refreshToken as? MSIDRefreshToken in a safer way
-            let authTokens = MSALNativeAuthTokens(
-                accessToken: tokenResult.accessToken,
-                refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
-                rawIdToken: tokenResult.rawIdToken
-            )
-            var jsonDictionary: [AnyHashable: Any]?
-            do {
-                let claims = try MSIDIdTokenClaims.init(rawIdToken: tokenResult.rawIdToken)
-                jsonDictionary = claims.jsonDictionary()
-                if jsonDictionary == nil {
-                    MSALLogger.log(
-                        level: .error,
-                        context: context,
-                        format: "Initialising account without claims")
-                }
-            } catch {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "Claims for account could not be created - \(error)" )
-            }
-            guard let account = MSALAccount.init(msidAccount: tokenResult.account,
-                                                 createTenantProfile: false,
-                                                 accountClaims: jsonDictionary) else {
+            let account =  factory.makeAccount(tokenResult: tokenResult, context: context)
+            guard let authTokens = factory.makeAuthTokens(tokenResult: tokenResult, context: context) else {
                 let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
                 MSALLogger.log(
                     level: .error,
                     context: context,
-                    format: "Account could not be created")
+                    format: "Auth Tokens could not be created")
                 stopTelemetryEvent(telemetryEvent, context: context, error: error)
                 return .init(.failure(error), correlationId: context.correlationId())
             }
