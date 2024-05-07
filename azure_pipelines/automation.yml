@@ -65,7 +65,7 @@ jobs:
     name: configuration
     displayName: 'Get Automation conf.json'
     inputs:
-      secureFile: 'broker-automation-conf-test.json'
+      secureFile: 'broker-automation-conf.json'
   
   - task: Bash@3
     displayName: Build for testing
