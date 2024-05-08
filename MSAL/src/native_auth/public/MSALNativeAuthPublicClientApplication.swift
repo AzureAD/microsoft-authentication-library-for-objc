@@ -47,11 +47,12 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplication {
 
-    let controllerFactory: MSALNativeAuthControllerBuildable
+    var controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
-    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
+
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
         return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
     }()
@@ -68,8 +69,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             throw MSALNativeAuthInternalError.invalidAuthority
         }
 
-        self.internalChallengeTypes =
-            MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+        internalChallengeTypes = MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
 
         var nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
@@ -87,6 +87,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
 
         try super.init(configuration: config)
+        self.controllerFactory.application = self
     }
 
     /// Initialize a MSALNativePublicClientApplication.
@@ -104,7 +105,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let ciamAuthority = try MSALNativeAuthAuthorityProvider()
                 .authority(rawTenant: tenantSubdomain)
 
-        self.internalChallengeTypes = MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+        internalChallengeTypes = MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
+
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
@@ -132,6 +134,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
 
         try super.init(configuration: configuration)
+        self.controllerFactory.application = self
     }
 
     init(
@@ -146,6 +149,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
+        self.controllerFactory.application = self
     }
 
     // MARK: delegate methods
@@ -272,40 +276,5 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
-    }
-
-    /// Retrieves an access token for the account.
-    /// - Parameters:
-    ///   - account: The account object that holds account information.
-    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
-    ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    public func getAccessToken(account: MSALAccount,
-                               forceRefresh: Bool = false,
-                               scopes: [String]? = nil,
-                               correlationId: UUID? = nil,
-                               delegate: CredentialsDelegate) {
-
-        let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
-        params.forceRefresh = forceRefresh
-
-        acquireTokenSilent(with: params) { result, error in
-
-            if let error = error as? NSError {
-                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                correlationId: correlationId ?? result?.correlationId ?? UUID(),
-                                                                errorCodes: [error.code])
-                Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
-            }
-
-            if let result = result {
-                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                                  scopes: result.scopes,
-                                                                  expiresOn: result.expiresOn)
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
-            }
-        }
     }
 }

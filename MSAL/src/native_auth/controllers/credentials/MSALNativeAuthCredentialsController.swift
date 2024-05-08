@@ -38,7 +38,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         requestProvider: MSALNativeAuthTokenRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
-        responseValidator: MSALNativeAuthTokenResponseValidating
+        responseValidator: MSALNativeAuthTokenResponseValidating,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.cacheAccessor = cacheAccessor
         super.init(
@@ -46,12 +47,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             requestProvider: requestProvider,
             cacheAccessor: cacheAccessor,
             factory: factory,
-            responseValidator: responseValidator
+            responseValidator: responseValidator,
+            application: application
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
-        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface, application: MSALNativeAuthPublicClientApplication?) {
+        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor, application: application)
         self.init(
             clientId: config.clientId,
             requestProvider: MSALNativeAuthTokenRequestProvider(
@@ -59,7 +61,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             cacheAccessor: cacheAccessor,
             factory: factory,
             responseValidator: MSALNativeAuthTokenResponseValidator(factory: factory,
-                                                                    msidValidator: MSIDTokenResponseValidator())
+                                                                    msidValidator: MSIDTokenResponseValidator()),
+            application: application
         )
     }
 

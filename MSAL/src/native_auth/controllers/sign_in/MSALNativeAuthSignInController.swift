@@ -42,7 +42,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
-        tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
@@ -51,12 +52,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             requestProvider: tokenRequestProvider,
             cacheAccessor: cacheAccessor,
             factory: factory,
-            responseValidator: tokenResponseValidator
+            responseValidator: tokenResponseValidator,
+            application: application
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
-        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface, application: MSALNativeAuthPublicClientApplication?) {
+        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor, application: application)
         self.init(
             clientId: config.clientId,
             signInRequestProvider: MSALNativeAuthSignInRequestProvider(
@@ -68,7 +70,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 factory: factory,
-                msidValidator: MSIDTokenResponseValidator())
+                msidValidator: MSIDTokenResponseValidator()), 
+                application: application
         )
     }
 

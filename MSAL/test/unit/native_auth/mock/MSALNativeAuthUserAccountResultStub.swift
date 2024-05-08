@@ -36,7 +36,8 @@ struct MSALNativeAuthUserAccountResultStub {
             account: account,
             authTokens: authTokens,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            application: nil
         )
     }
 

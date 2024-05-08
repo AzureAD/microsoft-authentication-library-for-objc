@@ -48,7 +48,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             account: account!,
             authTokens: MSALNativeAuthTokens(accessToken: accessToken, refreshToken: refreshToken, rawIdToken: rawIdToken),
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: cacheAccessorMock
+            cacheAccessor: cacheAccessorMock,
+            application: nil
         )
         try super.setUpWithError()
     }

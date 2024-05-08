@@ -28,11 +28,14 @@ class MSALNativeAuthBaseController {
 
     typealias TelemetryInfo = (event: MSIDTelemetryAPIEvent?, context: MSALNativeAuthRequestContext)
     let clientId: String
+    weak var application: MSALNativeAuthPublicClientApplication?
 
     init(
-        clientId: String
+        clientId: String,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.clientId = clientId
+        self.application = application
     }
 
     func makeAndStartTelemetryEvent(

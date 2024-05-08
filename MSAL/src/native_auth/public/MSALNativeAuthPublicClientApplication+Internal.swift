@@ -88,7 +88,7 @@ extension MSALNativeAuthPublicClientApplication {
     ) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordStartControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let correlationId = context.correlationId()
-        
+
         guard inputValidator.isInputValid(username) else {
             return .init(.error(ResetPasswordStartError(type: .invalidUsername, correlationId: correlationId)), correlationId: correlationId)
         }
@@ -118,5 +118,20 @@ extension MSALNativeAuthPublicClientApplication {
 
         internalChallengeTypes.append(.redirect)
         return internalChallengeTypes
+    }
+
+    func copy(with zone: NSZone? = nil) -> Any? {
+        var challenges: MSALNativeAuthChallengeTypes = []
+        for challenge in internalChallengeTypes {
+            switch challenge {
+            case .oob:
+                challenges.insert(.OOB)
+            case .password:
+                challenges.insert(.password)
+            default:
+                break
+            }
+        }
+        return try? MSALNativeAuthPublicClientApplication(configuration: configuration, challengeTypes: challenges)
     }
 }

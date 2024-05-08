@@ -52,7 +52,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
             requestProvider: requestProviderMock,
             cacheAccessor: cacheAccessorMock,
             factory: factory,
-            responseValidator: responseValidatorMock
+            responseValidator: responseValidatorMock,
+            application: nil
         )
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
@@ -86,7 +87,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
             account: account,
             authTokens: authTokens,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            application: nil
         )
         factory.mockMakeUserAccountResult(userAccountResult)
         cacheAccessorMock.mockUserAccounts = [account]
@@ -103,7 +105,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
             account: account,
             authTokens: authTokens,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            application: nil
         )
 
         factory.mockMakeUserAccountResult(userAccountResult)
@@ -141,7 +144,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(account: account,
                                                                 authTokens: authTokens,
-                                                                configuration: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                configuration: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+                                                                application: nil)
 
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 

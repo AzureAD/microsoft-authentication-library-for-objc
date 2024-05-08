@@ -53,7 +53,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         sut = .init(config: MSALNativeAuthConfigStubs.configuration,
                     requestProvider: requestProviderMock,
                     responseValidator: validatorMock, 
-                    signInController: MSALNativeAuthControllerFactoryMock().signInController
+                    signInController: MSALNativeAuthControllerFactoryMock().signInController, 
+                    application: nil
         )
     }
 
@@ -857,7 +858,8 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
             config: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
             responseValidator: validatorMock,
-            signInController: signInControllerMock
+            signInController: signInControllerMock,
+            application: nil
         )
 
         requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())

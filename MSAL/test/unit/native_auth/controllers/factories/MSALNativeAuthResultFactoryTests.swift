@@ -42,7 +42,7 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
     ]
 
     override func setUpWithError() throws {
-        sut = .init(config: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock())
+        sut = .init(config: MSALNativeAuthConfigStubs.configuration, cacheAccessor: MSALNativeAuthCacheAccessorMock(), application: nil)
     }
 
     func test_makeMsidConfiguration() {

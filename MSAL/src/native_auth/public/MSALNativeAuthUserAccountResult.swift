@@ -32,6 +32,7 @@ import Foundation
     let authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
+    private let application: MSALNativeAuthPublicClientApplication?
 
     /// Get the ID token for the account.
     @objc public var idToken: String? {
@@ -42,12 +43,14 @@ import Foundation
         account: MSALAccount,
         authTokens: MSALNativeAuthTokens,
         configuration: MSALNativeAuthConfiguration,
-        cacheAccessor: MSALNativeAuthCacheInterface
+        cacheAccessor: MSALNativeAuthCacheInterface,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.account = account
         self.authTokens = authTokens
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
+        self.application = application?.copy() as? MSALNativeAuthPublicClientApplication
     }
 
     /// Removes all the data from the cache.
@@ -97,7 +100,7 @@ import Foundation
             }
         }
     }
-    
+
     /// Retrieves an access token for the account.
     /// - Parameters:
     ///   - client: The instance of Native Auth public client application.
@@ -105,8 +108,7 @@ import Foundation
     ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    public func getAccessToken(client: MSALNativeAuthPublicClientApplication,
-                               forceRefresh: Bool = false,
+    public func getAccessToken(forceRefresh: Bool = false,
                                scopes: [String]? = nil,
                                correlationId: UUID? = nil,
                                delegate: CredentialsDelegate) {
@@ -114,7 +116,7 @@ import Foundation
         let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
         params.forceRefresh = forceRefresh
 
-        client.acquireTokenSilent(with: params) { result, error in
+        application?.acquireTokenSilent(with: params) { result, error in
 
             if let error = error as? NSError {
                 let accessTokenError = RetrieveAccessTokenError(type: .generalError,

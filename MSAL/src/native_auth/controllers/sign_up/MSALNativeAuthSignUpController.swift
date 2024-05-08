@@ -40,15 +40,16 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         config: MSALNativeAuthConfiguration,
         requestProvider: MSALNativeAuthSignUpRequestProviding,
         responseValidator: MSALNativeAuthSignUpResponseValidating,
-        signInController: MSALNativeAuthSignInControlling
+        signInController: MSALNativeAuthSignInControlling,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
         self.signInController = signInController
-        super.init(clientId: config.clientId)
+        super.init(clientId: config.clientId, application: application)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface, application: MSALNativeAuthPublicClientApplication?) {
         self.init(
             config: config,
             requestProvider: MSALNativeAuthSignUpRequestProvider(
@@ -56,7 +57,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 telemetryProvider: MSALNativeAuthTelemetryProvider()
             ),
             responseValidator: MSALNativeAuthSignUpResponseValidator(),
-            signInController: MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor)
+            signInController: MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor, application: application),
+            application: application
         )
     }
 

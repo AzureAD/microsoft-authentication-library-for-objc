@@ -46,7 +46,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
                 rawIdToken: tokenResult.rawIdToken
             ),
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(), application: nil
         )
     }
 
@@ -55,7 +55,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
             account: account,
             authTokens: authTokens,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(), application: nil
         )
     }
 
@@ -69,7 +69,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
 }
 
 class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
-
+    var application: MSAL.MSALNativeAuthPublicClientApplication?
     var signUpController = MSALNativeAuthSignUpControllerMock()
     var signInController = MSALNativeAuthSignInControllerMock()
     var resetPasswordController = MSALNativeAuthResetPasswordControllerMock()
@@ -93,7 +93,7 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
 }
 
 class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuildable {
-    
+    var application: MSAL.MSALNativeAuthPublicClientApplication?
     var signUpController: MSALNativeAuthSignUpControlling!
     var signInController: MSALNativeAuthSignInControlling!
     var resetPasswordController: MSALNativeAuthResetPasswordControlling!

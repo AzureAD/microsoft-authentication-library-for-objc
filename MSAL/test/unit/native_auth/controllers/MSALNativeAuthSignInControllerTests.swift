@@ -75,7 +75,8 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             cacheAccessor: cacheAccessorMock,
             factory: MSALNativeAuthResultFactoryMock(),
             signInResponseValidator: signInResponseValidatorMock,
-            tokenResponseValidator: tokenResponseValidatorMock
+            tokenResponseValidator: tokenResponseValidatorMock,
+            application: nil
         )
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"

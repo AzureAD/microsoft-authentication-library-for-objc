@@ -42,7 +42,7 @@ final class MSALNativeAuthBaseControllerTests: MSALNativeAuthTestCase {
         dispatcher = MSALNativeAuthTelemetryTestDispatcher()
 
         sut = MSALNativeAuthBaseController(
-            clientId: clientId
+            clientId: clientId, application: nil
         )
     }
 

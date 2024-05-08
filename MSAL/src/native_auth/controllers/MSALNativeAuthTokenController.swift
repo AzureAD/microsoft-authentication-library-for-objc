@@ -40,14 +40,16 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         requestProvider: MSALNativeAuthTokenRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
-        responseValidator: MSALNativeAuthTokenResponseValidating
+        responseValidator: MSALNativeAuthTokenResponseValidating,
+        application: MSALNativeAuthPublicClientApplication?
     ) {
         self.requestProvider = requestProvider
         self.factory = factory
         self.responseValidator = responseValidator
         self.cacheAccessor = cacheAccessor
         super.init(
-            clientId: clientId
+            clientId: clientId,
+            application: application
         )
     }
 

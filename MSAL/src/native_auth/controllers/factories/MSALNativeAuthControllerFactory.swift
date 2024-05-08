@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 protocol MSALNativeAuthControllerBuildable {
+    var application: MSALNativeAuthPublicClientApplication? { get set }
     func makeSignUpController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignUpControlling
     func makeSignInController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignInControlling
     func makeResetPasswordController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthResetPasswordControlling
@@ -31,24 +32,25 @@ protocol MSALNativeAuthControllerBuildable {
 
 final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
     private let config: MSALNativeAuthConfiguration
+    weak var application: MSALNativeAuthPublicClientApplication?
 
     init(config: MSALNativeAuthConfiguration) {
         self.config = config
     }
 
     func makeSignUpController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignUpControlling {
-        return MSALNativeAuthSignUpController(config: config, cacheAccessor: cacheAccessor)
+        return MSALNativeAuthSignUpController(config: config, cacheAccessor: cacheAccessor, application: application)
     }
 
     func makeSignInController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignInControlling {
-        return MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor)
+        return MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor, application: application)
     }
 
     func makeResetPasswordController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthResetPasswordControlling {
-        return MSALNativeAuthResetPasswordController(config: config, cacheAccessor: cacheAccessor)
+        return MSALNativeAuthResetPasswordController(config: config, cacheAccessor: cacheAccessor, application: application)
     }
 
     func makeCredentialsController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthCredentialsControlling {
-        return MSALNativeAuthCredentialsController(config: config, cacheAccessor: cacheAccessor)
+        return MSALNativeAuthCredentialsController(config: config, cacheAccessor: cacheAccessor, application: application)
     }
 }
