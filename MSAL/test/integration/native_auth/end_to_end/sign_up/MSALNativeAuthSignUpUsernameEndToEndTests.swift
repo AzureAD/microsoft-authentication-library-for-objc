@@ -32,7 +32,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
+        //try XCTSkipIf(!usingMockAPI)
     }
 
     // Hero Scenario 1.1.1. Sign up – with Email Verification (Email & Email OTP)
@@ -264,6 +264,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
+        let codeRetriever = MSALNativeAuthEmailOTPCodeRetriever()
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -271,8 +272,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
             try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
         }
-
-        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
+        let username = "daniloraspa@1secmail.com"
+        sut.signUp(username: username, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
         checkSignUpStartDelegate(signUpStartDelegate)
@@ -286,7 +287,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        let code = await codeRetriever.retrieveEmailOTPCode(email: username, usingMockAPI: usingMockAPI)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
