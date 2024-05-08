@@ -76,7 +76,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         try await mockResponse(response, endpoint: endpoint)
         let response: Error = try await perform_uncheckedTestFail()
 
-        XCTAssertEqual(response.error?.rawValue, expectedError.error?.rawValue)
+        XCTAssertEqual(response.error.rawValue, expectedError.error.rawValue)
 
         // TODO: Fix these checks
         if expectedError.errorDescription != nil {
