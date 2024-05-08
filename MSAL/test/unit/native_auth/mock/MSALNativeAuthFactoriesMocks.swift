@@ -31,7 +31,29 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
+    private(set) var makeAccount: MSALAccount?
+    private(set) var makeNativeAuthTokens: MSALNativeAuthTokens?
     private(set) var makeNativeAuthUserAccountResult: MSALNativeAuthUserAccountResult?
+
+    func mockMakeAccount(_ account: MSALAccount) {
+        self.makeAccount = account
+    }
+
+    func makeAccount(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALAccount {
+        return makeAccount ?? MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false)
+    }
+
+    func mockMakeNativeAuthTokens(_ authTokens: MSALNativeAuthTokens) {
+        self.makeNativeAuthTokens = authTokens
+    }
+
+    func makeAuthTokens(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSAL.MSALNativeAuthTokens? {
+        return makeNativeAuthTokens ?? MSALNativeAuthTokens(
+            accessToken: tokenResult.accessToken,
+            refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
+            rawIdToken: tokenResult.rawIdToken
+        )
+    }
 
     func mockMakeUserAccountResult(_ result: MSALNativeAuthUserAccountResult) {
         self.makeNativeAuthUserAccountResult = result

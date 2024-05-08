@@ -37,11 +37,16 @@ extension MSALNativeAuthUserAccountResult {
         if forceRefresh || self.authTokens.accessToken.isExpired() {
             let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
             let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
-            return await credentialsController.refreshToken(context: context, authTokens: authTokens)
+            return await credentialsController.refreshToken(context: context, authTokens: authTokens, userAccountResult: self)
         } else {
             return .init(.success(MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
                                                             scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
                                                             expiresOn: authTokens.accessToken.expiresOn)), correlationId: correlationId)
         }
+    }
+
+    func refreshData(authTokens: MSALNativeAuthTokens, account: MSALAccount) {
+        self.authTokens = authTokens
+        self.account = account
     }
 }
