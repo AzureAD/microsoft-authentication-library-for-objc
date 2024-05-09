@@ -41,7 +41,10 @@ class MSALNativeAuthEmailOTPCodeRetriever: XCTestCase {
             XCTFail("invalid email address")
             return ""
         }
-        // add here a sleep
+        // sleep for 4.0 seconds
+        let seconds = 4.0
+        try? await Task.sleep(nanoseconds: UInt64(seconds * Double(NSEC_PER_SEC)))
+        
         guard let lastMessageId = await retrieveLastMessage(local: local) else {
             XCTFail("Something went wrong retrieving the messages for the email specified")
             return ""
