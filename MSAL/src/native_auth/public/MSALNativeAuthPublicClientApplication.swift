@@ -49,8 +49,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
-    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
+    private(set) static var sharedConfiguration: MSALPublicClientApplicationConfig?
+    private(set) static var sharedChallengeTypes: MSALNativeAuthChallengeTypes?
+
+    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
         return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
@@ -68,6 +71,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             throw MSALNativeAuthInternalError.invalidAuthority
         }
 
+        MSALNativeAuthPublicClientApplication.sharedConfiguration = config
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
         self.internalChallengeTypes =
             MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
 
@@ -120,6 +125,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
+        MSALNativeAuthPublicClientApplication.sharedConfiguration = configuration
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
 
         if redirectUri == nil {
             MSALLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
@@ -272,40 +279,5 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
-    }
-
-    /// Retrieves an access token for the account.
-    /// - Parameters:
-    ///   - account: The account object that holds account information.
-    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
-    ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    public func getAccessToken(account: MSALAccount,
-                               forceRefresh: Bool = false,
-                               scopes: [String]? = nil,
-                               correlationId: UUID? = nil,
-                               delegate: CredentialsDelegate) {
-
-        let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
-        params.forceRefresh = forceRefresh
-
-        acquireTokenSilent(with: params) { result, error in
-
-            if let error = error as? NSError {
-                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                correlationId: correlationId ?? result?.correlationId ?? UUID(),
-                                                                errorCodes: [error.code])
-                Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
-            }
-
-            if let result = result {
-                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                                  scopes: result.scopes,
-                                                                  expiresOn: result.expiresOn)
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
-            }
-        }
     }
 }

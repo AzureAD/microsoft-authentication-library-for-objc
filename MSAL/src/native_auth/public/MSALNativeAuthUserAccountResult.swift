@@ -75,7 +75,7 @@ import Foundation
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    @available(*, deprecated, message: "Use 'getAccessToken' method from 'MSALNativeAuthPublicClientApplication' instance")
+    @available(*, deprecated, message: "Use the 'getAccessToken' method that also receives a list of scopes to be included in the token")
     @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
         Task {
             let controllerResponse = await getAccessTokenInternal(
@@ -97,7 +97,7 @@ import Foundation
             }
         }
     }
-    
+
     /// Retrieves an access token for the account.
     /// - Parameters:
     ///   - client: The instance of Native Auth public client application.
@@ -105,8 +105,7 @@ import Foundation
     ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    public func getAccessToken(client: MSALNativeAuthPublicClientApplication,
-                               forceRefresh: Bool = false,
+    public func getAccessToken(forceRefresh: Bool = false,
                                scopes: [String]? = nil,
                                correlationId: UUID? = nil,
                                delegate: CredentialsDelegate) {
@@ -114,13 +113,19 @@ import Foundation
         let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
         params.forceRefresh = forceRefresh
 
+        guard let config = MSALNativeAuthPublicClientApplication.sharedConfiguration,
+              let challengeTypes = MSALNativeAuthPublicClientApplication.sharedChallengeTypes,
+              let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
+        else { return }
+
         client.acquireTokenSilent(with: params) { result, error in
 
             if let error = error as? NSError {
                 let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                correlationId: correlationId ?? result?.correlationId ?? UUID(),
+                                                                correlationId: result?.correlationId ?? UUID(),
                                                                 errorCodes: [error.code])
                 Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
+                return
             }
 
             if let result = result {
@@ -129,7 +134,10 @@ import Foundation
                                                                   scopes: result.scopes,
                                                                   expiresOn: result.expiresOn)
                 Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
+                return
             }
+            
+            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError, correlationId: correlationId ?? UUID())) }
         }
     }
 }

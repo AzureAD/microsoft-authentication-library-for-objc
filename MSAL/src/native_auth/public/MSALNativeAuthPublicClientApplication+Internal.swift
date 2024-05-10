@@ -88,7 +88,7 @@ extension MSALNativeAuthPublicClientApplication {
     ) async -> MSALNativeAuthResetPasswordControlling.ResetPasswordStartControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let correlationId = context.correlationId()
-        
+
         guard inputValidator.isInputValid(username) else {
             return .init(.error(ResetPasswordStartError(type: .invalidUsername, correlationId: correlationId)), correlationId: correlationId)
         }

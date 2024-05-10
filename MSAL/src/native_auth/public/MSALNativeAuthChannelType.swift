@@ -27,10 +27,10 @@ import Foundation
 /// The possible Channel Types via which a code was sent
 @objc
 public enum MSALNativeAuthChannelType: Int {
-    
+
     /// Specifies if the channel type is Email
     case email
-    
+
     /// Specifies if the channel type is Phone
     case phone
 }
