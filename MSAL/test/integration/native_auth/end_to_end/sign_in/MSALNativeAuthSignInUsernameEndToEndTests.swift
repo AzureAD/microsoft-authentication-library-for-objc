@@ -103,7 +103,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
-        XCTAssertTrue(signInVerifyCodeDelegateSpy.error!.isInvalidCode)
+        XCTAssertTrue(signInVerifyCodeDelegateSpy.error?.isInvalidCode ?? false)
     }
 
     // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
@@ -204,7 +204,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.error!.isInvalidPassword)
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword ?? false)
     }
 
     // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
