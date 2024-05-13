@@ -761,7 +761,6 @@
 		B2C17B0A1FC8DB2E0070A514 /* MSIDVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */; };
 		B2C17B0B1FC8DB2E0070A514 /* MSIDVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */; };
 		B2D0A38321C708CF0071E0DA /* MSALADFSv4FederatedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DE72120E85100B1B40C /* MSALADFSv4FederatedTests.m */; };
-		B2D0A38821C709C30071E0DA /* MSALShibUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEE2120F0E800B1B40C /* MSALShibUITests.m */; };
 		B2D0A38A21C70AF50071E0DA /* MSALPingUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */; };
 		B2D0A38E21C71B8C0071E0DA /* MSALGuestUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */; };
 		B2D0A38F21C71D900071E0DA /* MSALCacheRemovalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */; };
@@ -5555,7 +5554,6 @@
 				B2A1C33F21C7038D00DDAE8E /* MSALADFSv3FederatedTests.m in Sources */,
 				B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */,
 				B282255C23EF811F0007DFE4 /* MSALB2CInteractiveTests.m in Sources */,
-				B2D0A38821C709C30071E0DA /* MSALShibUITests.m in Sources */,
 				B2BB73732112C32C000EA4C5 /* MSALAADBasicInteractiveTests.m in Sources */,
 				B2D0A38E21C71B8C0071E0DA /* MSALGuestUserTests.m in Sources */,
 				B2D0A39221C72C740071E0DA /* MSALMSABasicInteractiveTests.m in Sources */,
