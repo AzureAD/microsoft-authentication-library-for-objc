@@ -163,7 +163,12 @@ jobs:
   
   steps:
 
-  - checkout: none
+  - checkout: self
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
 
   - task: Bash@3
     displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec 
