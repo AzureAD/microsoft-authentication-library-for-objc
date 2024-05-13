@@ -191,5 +191,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        git checkout -- MSAL.podspec
+        git checkout -f -- MSAL.podspec
       workingDirectory: '$(Build.SourcesDirectory)'
