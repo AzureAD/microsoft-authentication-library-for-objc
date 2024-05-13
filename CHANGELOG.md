@@ -1,5 +1,6 @@
 ## [1.3.3]
 * Update common core submodule.
+* Automation improvements.
 
 ## [1.3.2]
 * Add forceRefresh param to ignore AT in cache and request a new AT.
