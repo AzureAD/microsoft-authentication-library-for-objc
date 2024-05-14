@@ -31,6 +31,7 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
         case browserRequired
         case refreshTokenExpired
         case generalError
+        case invalidScope
     }
 
     let type: ErrorType
@@ -53,6 +54,8 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.refreshTokenExpired
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
+        case .invalidScope:
+            return MSALNativeAuthErrorMessage.invalidScope
         }
     }
 

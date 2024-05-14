@@ -75,69 +75,41 @@ import Foundation
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    @available(*, deprecated, message: "Use the 'getAccessToken' method that also receives a list of scopes to be included in the token")
-    @objc public func getAccessToken(forceRefresh: Bool = false, correlationId: UUID? = nil, delegate: CredentialsDelegate) {
-        Task {
-            let controllerResponse = await getAccessTokenInternal(
-                forceRefresh: forceRefresh,
-                correlationId: correlationId,
-                cacheAccessor: cacheAccessor
-            )
-
-            let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
-
-            switch controllerResponse.result {
-            case .success(let accessTokenResult):
-                await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(
-                    result: accessTokenResult,
-                    correlationId: controllerResponse.correlationId
-                )
-            case .failure(let error):
-                await delegate.onAccessTokenRetrieveError(error: error)
-            }
-        }
+    @objc public func getAccessToken(forceRefresh: Bool = false,
+                                     correlationId: UUID? = nil,
+                                     delegate: CredentialsDelegate) {
+        getAccessTokenInternal(forceRefresh: forceRefresh,
+                               scopes: [],
+                               correlationId: correlationId,
+                               delegate: delegate)
     }
 
     /// Retrieves an access token for the account.
     /// - Parameters:
-    ///   - client: The instance of Native Auth public client application.
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     public func getAccessToken(forceRefresh: Bool = false,
-                               scopes: [String]? = nil,
+                               scopes: [String],
                                correlationId: UUID? = nil,
                                delegate: CredentialsDelegate) {
 
-        let params = MSALSilentTokenParameters(scopes: scopes ?? [], account: account)
-        params.forceRefresh = forceRefresh
-
-        guard let config = MSALNativeAuthPublicClientApplication.sharedConfiguration,
-              let challengeTypes = MSALNativeAuthPublicClientApplication.sharedChallengeTypes,
-              let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
-        else { return }
-
-        client.acquireTokenSilent(with: params) { result, error in
-
-            if let error = error as? NSError {
-                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                correlationId: result?.correlationId ?? UUID(),
-                                                                errorCodes: [error.code])
-                Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
-                return
-            }
-
-            if let result = result {
-                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                                  scopes: result.scopes,
-                                                                  expiresOn: result.expiresOn)
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
-                return
-            }
-            
-            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError, correlationId: correlationId ?? UUID())) }
+        guard !scopes.isEmpty else {
+            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .invalidScope,
+                                                                                             correlationId: correlationId ?? UUID())) }
+            return
         }
+
+        MSALLogger.log(
+            level: .info,
+            context: nil,
+            format: "Retrieving access token with scopes started."
+        )
+
+        getAccessTokenInternal(forceRefresh: forceRefresh,
+                               scopes: scopes,
+                               correlationId: correlationId,
+                               delegate: delegate)
     }
 }

@@ -26,9 +26,9 @@ import Foundation
 
 public class MSALNativeAuthTokenResult: NSObject {
 
-    let internalAccessToken: String
-    let internalScopes: [String]
-    let internalExpiresOn: Date?
+    private let internalAccessToken: String
+    private let internalScopes: [String]
+    private let internalExpiresOn: Date?
 
     init(accessToken: String, scopes: [String], expiresOn: Date?) {
         internalAccessToken = accessToken

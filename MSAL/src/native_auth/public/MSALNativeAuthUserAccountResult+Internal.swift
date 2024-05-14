@@ -26,22 +26,45 @@ import Foundation
 
 extension MSALNativeAuthUserAccountResult {
 
-    func getAccessTokenInternal(
-        forceRefresh: Bool,
-        correlationId: UUID?,
-        cacheAccessor: MSALNativeAuthCacheInterface
-    ) async -> MSALNativeAuthCredentialsControlling.RefreshTokenCredentialControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let correlationId = context.correlationId()
+    func getAccessTokenInternal(forceRefresh: Bool = false,
+                                scopes: [String],
+                                correlationId: UUID? = nil,
+                                delegate: CredentialsDelegate) {
 
-        if forceRefresh || self.authTokens.accessToken.isExpired() {
-            let controllerFactory = MSALNativeAuthControllerFactory(config: configuration)
-            let credentialsController = controllerFactory.makeCredentialsController(cacheAccessor: cacheAccessor)
-            return await credentialsController.refreshToken(context: context, authTokens: authTokens)
-        } else {
-            return .init(.success(MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
-                                                            scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
-                                                            expiresOn: authTokens.accessToken.expiresOn)), correlationId: correlationId)
+        let params = MSALSilentTokenParameters(scopes: scopes, account: account)
+        params.forceRefresh = forceRefresh
+        params.correlationId = correlationId
+
+        guard let config = MSALNativeAuthPublicClientApplication.sharedConfiguration,
+              let challengeTypes = MSALNativeAuthPublicClientApplication.sharedChallengeTypes,
+              let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
+        else {
+            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
+                                                                                             correlationId: correlationId ?? UUID())) }
+            return
+        }
+
+        client.acquireTokenSilent(with: params) { result, error in
+
+            if let error = error as? NSError {
+                let accessTokenError = RetrieveAccessTokenError(type: .generalError,
+                                                                correlationId: result?.correlationId ?? UUID(),
+                                                                errorCodes: [error.code])
+                Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
+                return
+            }
+
+            if let result = result {
+                let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
+                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
+                                                                  scopes: result.scopes,
+                                                                  expiresOn: result.expiresOn)
+                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
+                return
+            }
+
+            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError, 
+                                                                                             correlationId: correlationId ?? UUID())) }
         }
     }
 }

@@ -71,8 +71,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             throw MSALNativeAuthInternalError.invalidAuthority
         }
 
-        MSALNativeAuthPublicClientApplication.sharedConfiguration = config
-        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
         self.internalChallengeTypes =
             MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
 
@@ -92,6 +90,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
 
         try super.init(configuration: config)
+        MSALNativeAuthPublicClientApplication.sharedConfiguration = config
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
     }
 
     /// Initialize a MSALNativePublicClientApplication.
@@ -125,8 +125,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: redirectUri,
             authority: ciamAuthority
         )
-        MSALNativeAuthPublicClientApplication.sharedConfiguration = configuration
-        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
 
         if redirectUri == nil {
             MSALLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
@@ -139,13 +137,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
 
         try super.init(configuration: configuration)
+        MSALNativeAuthPublicClientApplication.sharedConfiguration = configuration
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = challengeTypes
     }
 
     init(
         controllerFactory: MSALNativeAuthControllerBuildable,
         cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable,
         inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType],
+        configuration: MSALPublicClientApplicationConfig
     ) {
         self.controllerFactory = controllerFactory
         self.cacheAccessorFactory = cacheAccessorFactory
@@ -153,6 +154,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
+
+        MSALNativeAuthPublicClientApplication.sharedConfiguration = configuration
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = getChallengeTypesFromInternalChallengeTypes(internalChallengeTypes)
     }
 
     // MARK: delegate methods
