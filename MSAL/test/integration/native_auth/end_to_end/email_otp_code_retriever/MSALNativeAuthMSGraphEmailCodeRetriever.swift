@@ -47,7 +47,7 @@ class MSALNativeAuthMSGraphEmailCodeRetriever: XCTestCase, MSALNativeAuthEmailOT
             XCTFail("invalid URL")
             return ""
         }
-        let seconds = 18.0
+        let seconds = 20.0
         try? await Task.sleep(nanoseconds: UInt64(seconds * Double(NSEC_PER_SEC)))
         
         var request = URLRequest(url: url)
