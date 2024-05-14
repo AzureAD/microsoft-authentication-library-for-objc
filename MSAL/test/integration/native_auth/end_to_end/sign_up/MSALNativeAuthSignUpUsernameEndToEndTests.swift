@@ -263,14 +263,24 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 //    }
 
     // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
-    func test_signUpWithoutAutomaticSignIn() async throws {
+    func test_signUpWithoutAutomaticSignIn_1secmail() async throws {
         for i in 31...40 {
-            try await internalSignUpNoSignIn(username: "daniloraspa\(i)@1secmail.com")
+            // I didn't use a shared code retriever because I didn't test it how concurrency would work (out of scope)
+            let codeRetriever = MSALNativeAuth1SecmailCodeRetriever()
+            try await internalSignUpNoSignIn(username: "daniloraspa\(i)@1secmail.com", codeRetriever: codeRetriever)
         }
     }
     
-    private func internalSignUpNoSignIn(username: String) async throws {
-        let codeRetriever = MSALNativeAuthEmailOTPCodeRetriever()
+    func test_signUpWithoutAutomaticSignIn_msgraph() async throws {
+        let accessTokenRetriever = MSALNativeAuthGraphAccessTokenRetriever()
+        for i in 52...61 {
+            let codeRetriever = MSALNativeAuthMSGraphEmailCodeRetriever()
+        codeRetriever.accessTokenRetriever = accessTokenRetriever
+            try await internalSignUpNoSignIn(username: "daniloe2e+pwd\(i)@5khwpc.onmicrosoft.com", codeRetriever: codeRetriever)
+        }
+    }
+    
+    private func internalSignUpNoSignIn(username: String, codeRetriever: MSALNativeAuthEmailOTPCodeRetriever) async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -282,7 +292,11 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
         checkSignUpStartDelegate(signUpStartDelegate)
-
+        
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            print("❌❌❌ \(username) NOT created!")
+            return
+        }
         // Now submit the code...
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
@@ -297,6 +311,11 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+        if (signUpVerifyCodeDelegate.onSignUpCompletedCalled) {
+            print("✅✅✅ \(username) created!")
+        } else {
+            print("❌❌❌ \(username) NOT created!")
+        }
     }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {

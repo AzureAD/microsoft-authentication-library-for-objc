@@ -264,6 +264,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
+    public func privatePreviewFunction() {
+        #warning("\"privatePreviewFunction\" is in private preview and it's not stable")
+        MSALLogger.log(level: .warning, context: nil, format: "This feature is in private preview and it's not stable")
+    }
+
     /// Retrieve the current signed in account from the cache.
     /// - Parameter correlationId: Optional. UUID to correlate this request with the server for debugging.
     /// - Returns: An object representing the account information if present in the local cache.

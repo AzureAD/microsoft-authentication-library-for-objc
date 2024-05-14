@@ -24,13 +24,13 @@
 
 import XCTest
 
-class MSALNativeAuthEmailOTPCodeRetriever: XCTestCase {
+protocol MSALNativeAuthEmailOTPCodeRetriever {
+    func retrieveEmailOTPCode(email: String, usingMockAPI: Bool) async -> String
+}
+
+class MSALNativeAuth1SecmailCodeRetriever: XCTestCase, MSALNativeAuthEmailOTPCodeRetriever {
     
     private let baseURLString = "https://www.1secmail.com/api/v1/?action="
-    
-    // GET check mailbox https://www.1secmail.com/api/v1/?action=getMessages&login=daniloraspa&domain=1secmail.com
-    
-    // GET fetch single message https://www.1secmail.com/api/v1/?action=readMessage&login=daniloraspa&domain=1secmail.com&id=1515413811
     
     // we suppose the domain is 1secmail.com
     func retrieveEmailOTPCode(email: String, usingMockAPI: Bool) async -> String {
@@ -41,7 +41,6 @@ class MSALNativeAuthEmailOTPCodeRetriever: XCTestCase {
             XCTFail("invalid email address")
             return ""
         }
-        // sleep for 4.0 seconds
         let seconds = 4.0
         try? await Task.sleep(nanoseconds: UInt64(seconds * Double(NSEC_PER_SEC)))
         
