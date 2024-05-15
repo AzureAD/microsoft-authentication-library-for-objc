@@ -39,6 +39,11 @@ extension MSALNativeAuthUserAccountResult {
               let challengeTypes = MSALNativeAuthPublicClientApplication.sharedChallengeTypes,
               let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
         else {
+            MSALLogger.log(
+                            level: .error,
+                            context: nil,
+                            format: "Config or challenge types unexpectedly found nil."
+                        )
             Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
                                                                                              correlationId: correlationId ?? UUID())) }
             return
