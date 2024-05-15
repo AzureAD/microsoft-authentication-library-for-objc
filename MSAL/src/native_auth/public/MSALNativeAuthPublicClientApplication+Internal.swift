@@ -119,8 +119,10 @@ extension MSALNativeAuthPublicClientApplication {
         internalChallengeTypes.append(.redirect)
         return internalChallengeTypes
     }
-    
-    func getChallengeTypesFromInternalChallengeTypes(_ internalChallengeTypes: [MSALNativeAuthInternalChallengeType]) -> MSALNativeAuthChallengeTypes {
+
+    static func getChallengeTypesFromInternalChallengeTypes(
+        _ internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    ) -> MSALNativeAuthChallengeTypes {
         var challenges: MSALNativeAuthChallengeTypes = []
         for challenge in internalChallengeTypes {
             switch challenge {

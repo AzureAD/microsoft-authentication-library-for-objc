@@ -156,7 +156,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         super.init()
 
         MSALNativeAuthPublicClientApplication.sharedConfiguration = configuration
-        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = getChallengeTypesFromInternalChallengeTypes(internalChallengeTypes)
+        MSALNativeAuthPublicClientApplication.sharedChallengeTypes = MSALNativeAuthPublicClientApplication
+            .getChallengeTypesFromInternalChallengeTypes(internalChallengeTypes)
     }
 
     // MARK: delegate methods

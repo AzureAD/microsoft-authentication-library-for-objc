@@ -63,7 +63,7 @@ extension MSALNativeAuthUserAccountResult {
                 return
             }
 
-            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError, 
+            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
                                                                                              correlationId: correlationId ?? UUID())) }
         }
     }

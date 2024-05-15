@@ -72,4 +72,10 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
         XCTAssertTrue(sut.isRefreshTokenExpired)
         XCTAssertFalse(sut.isBrowserRequired)
     }
+    
+    func test_isScopeInvalid() {
+        sut = .init(type: .invalidScope, correlationId: .init())
+        XCTAssertTrue(sut.isInvalidScope)
+        XCTAssertFalse(sut.isBrowserRequired)
+    }
 }
