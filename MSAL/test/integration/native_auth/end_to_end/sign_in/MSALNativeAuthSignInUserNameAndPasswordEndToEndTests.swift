@@ -94,4 +94,13 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
+    
+    func test_readConfJson() {
+        guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
+            XCTFail()
+            return
+        }
+        let confDictionary = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
+        XCTAssertNotNil(confDictionary?["certificate_data"])
+    }
 }
