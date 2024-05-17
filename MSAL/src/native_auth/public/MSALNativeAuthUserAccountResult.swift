@@ -32,6 +32,7 @@ import Foundation
     var authTokens: MSALNativeAuthTokens
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
+    private let inputValidator: MSALNativeAuthInputValidating
 
     /// Get the latest ID token for the account.
     @objc public var idToken: String? {
@@ -48,6 +49,7 @@ import Foundation
         self.authTokens = authTokens
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
+        inputValidator = MSALNativeAuthInputValidator()
     }
 
     /// Removes all the data from the cache.
@@ -95,7 +97,7 @@ import Foundation
                                correlationId: UUID? = nil,
                                delegate: CredentialsDelegate) {
 
-        guard !scopes.isEmpty else {
+        guard inputValidator.isInputValid(scopes) else {
             Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .invalidScope,
                                                                                              correlationId: correlationId ?? UUID())) }
             return
