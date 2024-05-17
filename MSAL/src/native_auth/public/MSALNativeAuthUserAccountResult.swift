@@ -80,6 +80,11 @@ import Foundation
     @objc public func getAccessToken(forceRefresh: Bool = false,
                                      correlationId: UUID? = nil,
                                      delegate: CredentialsDelegate) {
+        MSALLogger.log(
+            level: .info,
+            context: nil,
+            format: "Retrieving access token without scopes.")
+
         getAccessTokenInternal(forceRefresh: forceRefresh,
                                scopes: [],
                                correlationId: correlationId,
