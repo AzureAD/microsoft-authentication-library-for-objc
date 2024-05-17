@@ -50,9 +50,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
 
-    fileprivate(set) static var sharedConfiguration: [String: MSALPublicClientApplicationConfig] = [:]
-    fileprivate(set) static var sharedChallengeTypes: [String: MSALNativeAuthChallengeTypes] = [:]
-
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
@@ -77,7 +74,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         var nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes
+            challengeTypes: internalChallengeTypes,
+            redirectUri: config.redirectUri
         )
         nativeConfiguration.sliceConfig = config.sliceConfig
 
@@ -90,10 +88,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
 
         try super.init(configuration: config)
-        MSALNativeAuthPublicClientApplication.saveClientConfigurationAndChallengeTypes(configuration: configuration,
-                                                                                       clientId: configuration.clientId,
-                                                                                       authorityUrl: ciamAuthority.url.absoluteString,
-                                                                                       challengeTypes: challengeTypes)
     }
 
     /// Initialize a MSALNativePublicClientApplication.
@@ -115,7 +109,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes
+            challengeTypes: internalChallengeTypes,
+            redirectUri: redirectUri
         )
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
@@ -139,10 +134,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         configuration.redirectUri = redirectUri ?? defaultRedirectUri
 
         try super.init(configuration: configuration)
-        MSALNativeAuthPublicClientApplication.saveClientConfigurationAndChallengeTypes(configuration: configuration,
-                                                                                       clientId: configuration.clientId,
-                                                                                       authorityUrl: ciamAuthority.url.absoluteString,
-                                                                                       challengeTypes: challengeTypes)
     }
 
     init(
@@ -158,11 +149,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
-        // This initialiser is only used for unit testing, and the configuration is here (empty) as a reminder that it can eventually impact on future tests
-        MSALNativeAuthPublicClientApplication.saveClientConfigurationAndChallengeTypes(configuration: MSALPublicClientApplicationConfig(clientId: ""),
-                                                                                       clientId: "",
-                                                                                       authorityUrl: "",
-                                                                                       challengeTypes: [])
     }
 
     // MARK: delegate methods
@@ -289,37 +275,5 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         return controller.retrieveUserAccountResult(context: context)
-    }
-}
-
-extension MSALNativeAuthPublicClientApplication {
-
-    static func saveClientConfigurationAndChallengeTypes(configuration: MSALPublicClientApplicationConfig,
-                                                         clientId: String,
-                                                         authorityUrl: String,
-                                                         challengeTypes: MSALNativeAuthChallengeTypes) {
-        let index = indexForClient(clientId: clientId, authorityUrl: authorityUrl, challengeTypes: challengeTypes)
-        sharedConfiguration[index] = configuration
-        sharedChallengeTypes[index] = challengeTypes
-    }
-
-    static func getClientConfiguration(clientId: String,
-                                       authorityUrl: String,
-                                       challengeTypes: MSALNativeAuthChallengeTypes) -> MSALPublicClientApplicationConfig? {
-        let index = indexForClient(clientId: clientId, authorityUrl: authorityUrl, challengeTypes: challengeTypes)
-        return sharedConfiguration[index]
-    }
-
-    static func getClientChallengeTypes(clientId: String,
-                                        authorityUrl: String,
-                                        challengeTypes: MSALNativeAuthChallengeTypes) -> MSALNativeAuthChallengeTypes? {
-        let index = indexForClient(clientId: clientId, authorityUrl: authorityUrl, challengeTypes: challengeTypes)
-        return sharedChallengeTypes[index]
-    }
-
-    private static func indexForClient(clientId: String,
-                                       authorityUrl: String,
-                                       challengeTypes: MSALNativeAuthChallengeTypes) -> String {
-        clientId + authorityUrl + String(describing: challengeTypes)
     }
 }

@@ -37,17 +37,12 @@ extension MSALNativeAuthUserAccountResult {
         params.correlationId = correlationId
 
         let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
-        let config = MSALNativeAuthPublicClientApplication.getClientConfiguration(clientId: configuration.clientId,
-                                                                                  authorityUrl: configuration.authority.url.absoluteString,
-                                                                                  challengeTypes: challengeTypes)
+        let authority = try? MSALCIAMAuthority(url: configuration.authority.url)
+        let config = MSALPublicClientApplicationConfig(clientId: configuration.clientId,
+                                                       redirectUri: configuration.redirectUri,
+                                                       authority: authority)
 
-        let challenges = MSALNativeAuthPublicClientApplication.getClientChallengeTypes(clientId: configuration.clientId,
-                                                                                           authorityUrl: configuration.authority.url.absoluteString,
-                                                                                           challengeTypes: challengeTypes)
-
-        guard let config = config,
-              let challenges = challenges,
-              let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challenges)
+        guard let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
         else {
             MSALLogger.log(
                             level: .error,
