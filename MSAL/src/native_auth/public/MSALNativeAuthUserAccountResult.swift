@@ -87,7 +87,7 @@ import Foundation
     /// Retrieves an access token for the account.
     /// - Parameters:
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
-    ///   - scopes: Optional. Permissions that should be included in the access token received after sign in flow has completed
+    ///   - scopes: Permissions you want included in the access token received in the result. Not all scopes are guaranteed to be included in the access token returned.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     public func getAccessToken(forceRefresh: Bool = false,
