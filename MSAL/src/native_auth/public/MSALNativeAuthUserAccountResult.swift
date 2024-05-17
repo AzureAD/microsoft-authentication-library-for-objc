@@ -72,7 +72,7 @@ import Foundation
         }
     }
 
-    /// Retrieves an access token for the account.
+    /// Retrieves the access token for the default OIDC(openid, offline_access, profile) scopes from the cache.
     /// - Parameters:
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
@@ -91,7 +91,10 @@ import Foundation
                                delegate: delegate)
     }
 
-    /// Retrieves an access token for the account.
+    /// Retrieves the access token for the currently signed in account from the cache such that
+    /// the scope of retrieved access token is a superset of requested scopes. If the access token
+    /// has expired, it will be refreshed using the refresh token that's stored in the cache. If no
+    /// access token matching the requested scopes is found in cache then a new access token is fetched.
     /// - Parameters:
     ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - scopes: Permissions you want included in the access token received in the result. Not all scopes are guaranteed to be included in the access token returned.
