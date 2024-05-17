@@ -36,7 +36,7 @@ extension MSALNativeAuthUserAccountResult {
         params.forceRefresh = forceRefresh
         params.correlationId = correlationId
 
-        let challengeTypes = MSALNativeAuthPublicClientApplication.getChallengeTypesFromInternalChallengeTypes(configuration.challengeTypes)
+        let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
         let config = MSALNativeAuthPublicClientApplication.getClientConfiguration(clientId: configuration.clientId,
                                                                                   authorityUrl: configuration.authority.url.absoluteString,
                                                                                   challengeTypes: challengeTypes)
