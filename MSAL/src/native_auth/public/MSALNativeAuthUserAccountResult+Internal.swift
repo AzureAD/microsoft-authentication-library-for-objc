@@ -32,6 +32,7 @@ extension MSALNativeAuthUserAccountResult {
                                 delegate: CredentialsDelegate) {
 
         let params = MSALSilentTokenParameters(scopes: scopes, account: account)
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         params.forceRefresh = forceRefresh
         params.correlationId = correlationId
 
@@ -41,11 +42,12 @@ extension MSALNativeAuthUserAccountResult {
         else {
             MSALLogger.log(
                             level: .error,
-                            context: nil,
+                            context: context,
                             format: "Config or challenge types unexpectedly found nil."
                         )
-            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
-                                                                                             correlationId: correlationId ?? UUID())) }
+            Task { await delegate.onAccessTokenRetrieveError(
+                error: RetrieveAccessTokenError(type: .generalError,
+                                                correlationId: correlationId ?? context.correlationId())) }
             return
         }
 
