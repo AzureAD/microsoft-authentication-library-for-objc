@@ -83,34 +83,6 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return nil
     }
 
-    func refreshToken(context: MSALNativeAuthRequestContext,
-                      authTokens: MSALNativeAuthTokens,
-                      userAccountResult: MSALNativeAuthUserAccountResult) async -> RefreshTokenCredentialControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
-        let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
-        let scopes = authTokens.accessToken.scopes?.array as? [String] ?? []
-        guard let request = createRefreshTokenRequest(
-            scopes: scopes,
-            refreshToken: authTokens.refreshToken?.refreshToken,
-            context: context
-        ) else {
-            stopTelemetryEvent(telemetryEvent, context: context, error: MSALNativeAuthInternalError.invalidRequest)
-            return .init(
-                .failure(RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())),
-                correlationId: context.correlationId()
-            )
-        }
-        let config = factory.makeMSIDConfiguration(scopes: scopes)
-        let response = await performAndValidateTokenRequest(request, config: config, context: context)
-        return handleTokenResponse(
-            response,
-            scopes: scopes,
-            context: context,
-            telemetryEvent: telemetryEvent,
-            userAccountResult: userAccountResult
-        )
-    }
-
     // MARK: - Private
 
     private func allAccounts() -> [MSALAccount] {
