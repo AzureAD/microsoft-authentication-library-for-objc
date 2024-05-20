@@ -83,7 +83,9 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return nil
     }
 
-    func refreshToken(context: MSALNativeAuthRequestContext, authTokens: MSALNativeAuthTokens) async -> RefreshTokenCredentialControllerResponse {
+    func refreshToken(context: MSALNativeAuthRequestContext,
+                      authTokens: MSALNativeAuthTokens,
+                      userAccountResult: MSALNativeAuthUserAccountResult) async -> RefreshTokenCredentialControllerResponse {
         MSALLogger.log(level: .verbose, context: context, format: "Refresh started")
         let telemetryEvent = makeAndStartTelemetryEvent(id: .telemetryApiIdRefreshToken, context: context)
         let scopes = authTokens.accessToken.scopes.array as? [String] ?? []
@@ -104,7 +106,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             response,
             scopes: scopes,
             context: context,
-            telemetryEvent: telemetryEvent
+            telemetryEvent: telemetryEvent,
+            userAccountResult: userAccountResult
         )
     }
 
@@ -147,7 +150,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String],
         context: MSALNativeAuthRequestContext,
-        telemetryEvent: MSIDTelemetryAPIEvent?
+        telemetryEvent: MSIDTelemetryAPIEvent?,
+        userAccountResult: MSALNativeAuthUserAccountResult
     ) -> RefreshTokenCredentialControllerResponse {
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         switch response {
@@ -156,7 +160,8 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
                 tokenResponse: tokenResponse,
                 telemetryEvent: telemetryEvent,
                 context: context,
-                config: config
+                config: config,
+                userAccountResult: userAccountResult
             )
         case .error(let errorType):
             let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
@@ -173,21 +178,23 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         tokenResponse: MSIDTokenResponse,
         telemetryEvent: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration
+        config: MSIDConfiguration,
+        userAccountResult: MSALNativeAuthUserAccountResult
     ) -> RefreshTokenCredentialControllerResponse {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            MSALLogger.log(
-                level: .verbose,
-                context: context,
-                format: "Refresh Token completed successfully")
-            // TODO: Handle tokenResult.refreshToken as? MSIDRefreshToken in a safer way
-            return .init(
-                .success(MSALNativeAuthTokenResult(authTokens: MSALNativeAuthTokens(
-                    accessToken: tokenResult.accessToken,
-                    refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
-                    rawIdToken: tokenResult.rawIdToken
-                ))),
+            let account =  factory.makeAccount(tokenResult: tokenResult, context: context)
+            guard let authTokens = factory.makeAuthTokens(tokenResult: tokenResult, context: context) else {
+                let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
+                MSALLogger.log(
+                    level: .error,
+                    context: context,
+                    format: "Auth Tokens could not be created")
+                stopTelemetryEvent(telemetryEvent, context: context, error: error)
+                return .init(.failure(error), correlationId: context.correlationId())
+            }
+            userAccountResult.refreshData(authTokens: authTokens, account: account)
+            return .init(.success(MSALNativeAuthTokenResult(authTokens: authTokens)),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                 telemetryEvent?.setUserInformation(tokenResult.account)
