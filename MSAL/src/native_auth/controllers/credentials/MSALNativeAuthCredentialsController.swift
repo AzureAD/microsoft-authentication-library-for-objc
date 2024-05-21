@@ -69,7 +69,6 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         let accounts = self.allAccounts()
         if let account = accounts.first {
             // We pass an empty array of scopes because that will return all tokens for that account identifier
-            // Because we expect to be only one access token per account at this point, it's ok for the array to be empty
             guard let tokens = retrieveTokens(account: account,
                                               scopes: [],
                                               context: context) else {
@@ -118,70 +117,70 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return nil
     }
 
-    private func handleTokenResponse(
-        _ response: MSALNativeAuthTokenValidatedResponse,
-        scopes: [String],
-        context: MSALNativeAuthRequestContext,
-        telemetryEvent: MSIDTelemetryAPIEvent?,
-        userAccountResult: MSALNativeAuthUserAccountResult
-    ) -> RefreshTokenCredentialControllerResponse {
-        let config = factory.makeMSIDConfiguration(scopes: scopes)
-        switch response {
-        case .success(let tokenResponse):
-            return handleMSIDTokenResponse(
-                tokenResponse: tokenResponse,
-                telemetryEvent: telemetryEvent,
-                context: context,
-                config: config,
-                userAccountResult: userAccountResult
-            )
-        case .error(let errorType):
-            let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
-            stopTelemetryEvent(telemetryEvent, context: context, error: error)
-            return .init(.failure(error), correlationId: context.correlationId())
-        }
-    }
+//    private func handleTokenResponse(
+//        _ response: MSALNativeAuthTokenValidatedResponse,
+//        scopes: [String],
+//        context: MSALNativeAuthRequestContext,
+//        telemetryEvent: MSIDTelemetryAPIEvent?,
+//        userAccountResult: MSALNativeAuthUserAccountResult
+//    ) -> RefreshTokenCredentialControllerResponse {
+//        let config = factory.makeMSIDConfiguration(scopes: scopes)
+//        switch response {
+//        case .success(let tokenResponse):
+//            return handleMSIDTokenResponse(
+//                tokenResponse: tokenResponse,
+//                telemetryEvent: telemetryEvent,
+//                context: context,
+//                config: config,
+//                userAccountResult: userAccountResult
+//            )
+//        case .error(let errorType):
+//            let error = errorType.convertToRetrieveAccessTokenError(correlationId: context.correlationId())
+//            MSALLogger.log(
+//                level: .error,
+//                context: context,
+//                format: "Refresh Token completed with error: \(error.errorDescription ?? "No error description")")
+//            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+//            return .init(.failure(error), correlationId: context.correlationId())
+//        }
+//    }
 
-    private func handleMSIDTokenResponse(
-        tokenResponse: MSIDTokenResponse,
-        telemetryEvent: MSIDTelemetryAPIEvent?,
-        context: MSALNativeAuthRequestContext,
-        config: MSIDConfiguration,
-        userAccountResult: MSALNativeAuthUserAccountResult
-    ) -> RefreshTokenCredentialControllerResponse {
-        do {
-            let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            let account =  factory.makeAccount(tokenResult: tokenResult, context: context)
-            guard let authTokens = factory.makeAuthTokens(tokenResult: tokenResult, context: context) else {
-                let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "Auth Tokens could not be created")
-                stopTelemetryEvent(telemetryEvent, context: context, error: error)
-                return .init(.failure(error), correlationId: context.correlationId())
-            }
-            userAccountResult.refreshData(authTokens: authTokens, account: account)
-            return .init(.success(MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
-                                                            scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
-                                                            expiresOn: authTokens.accessToken.expiresOn)),
-                correlationId: context.correlationId(),
-                telemetryUpdate: { [weak self] result in
-                telemetryEvent?.setUserInformation(tokenResult.account)
-                self?.stopTelemetryEvent(telemetryEvent, context: context, delegateDispatcherResult: result)
-            })
-        } catch {
-            let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Token Result was not created properly error - \(error)")
-            stopTelemetryEvent(telemetryEvent, context: context, error: error)
-            return .init(.failure(error), correlationId: context.correlationId())
-        }
-    }
+//    private func handleMSIDTokenResponse(
+//        tokenResponse: MSIDTokenResponse,
+//        telemetryEvent: MSIDTelemetryAPIEvent?,
+//        context: MSALNativeAuthRequestContext,
+//        config: MSIDConfiguration,
+//        userAccountResult: MSALNativeAuthUserAccountResult
+//    ) -> RefreshTokenCredentialControllerResponse {
+//        do {
+//            let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+//            let account =  factory.makeAccount(tokenResult: tokenResult, context: context)
+//            guard let authTokens = factory.makeAuthTokens(tokenResult: tokenResult, context: context) else {
+//                let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
+//                MSALLogger.log(
+//                    level: .error,
+//                    context: context,
+//                    format: "Auth Tokens could not be created")
+//                stopTelemetryEvent(telemetryEvent, context: context, error: error)
+//                return .init(.failure(error), correlationId: context.correlationId())
+//            }
+//            userAccountResult.refreshData(authTokens: authTokens, account: account)
+//            return .init(.success(MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
+//                                                            scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
+//                                                            expiresOn: authTokens.accessToken.expiresOn)),
+//                correlationId: context.correlationId(),
+//                telemetryUpdate: { [weak self] result in
+//                telemetryEvent?.setUserInformation(tokenResult.account)
+//                self?.stopTelemetryEvent(telemetryEvent, context: context, delegateDispatcherResult: result)
+//            })
+//        } catch {
+//            let error = RetrieveAccessTokenError(type: .generalError, correlationId: context.correlationId())
+//            MSALLogger.log(
+//                level: .error,
+//                context: context,
+//                format: "Token Result was not created properly error - \(error)")
+//            stopTelemetryEvent(telemetryEvent, context: context, error: error)
+//            return .init(.failure(error), correlationId: context.correlationId())
+//        }
+//    }
 }

@@ -34,7 +34,7 @@ struct MSALNativeAuthUserAccountResultStub {
     static var result : MSALNativeAuthUserAccountResult {
         return MSALNativeAuthUserAccountResult(
             account: account,
-            authTokens: authTokens,
+            rawIdToken: authTokens.rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )

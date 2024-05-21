@@ -93,11 +93,11 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 format: "Auth Tokens could not be created")
             return nil
         }
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
+        return .init(account: account, rawIdToken: authTokens.rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 
     func makeUserAccountResult(account: MSALAccount, authTokens: MSALNativeAuthTokens) -> MSALNativeAuthUserAccountResult? {
-        return .init(account: account, authTokens: authTokens, configuration: config, cacheAccessor: cacheAccessor)
+        return .init(account: account, rawIdToken: authTokens.rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {

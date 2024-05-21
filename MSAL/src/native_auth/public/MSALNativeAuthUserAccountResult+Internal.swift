@@ -80,7 +80,7 @@ extension MSALNativeAuthUserAccountResult {
     }
 
     func refreshData(authTokens: MSALNativeAuthTokens, account: MSALAccount) {
-        self.authTokens = authTokens
+        self.rawIdToken = authTokens.rawIdToken
         self.account = account
     }
 }

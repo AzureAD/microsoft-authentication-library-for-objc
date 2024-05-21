@@ -29,24 +29,25 @@ import Foundation
     /// The account object that holds account information.
     @objc public var account: MSALAccount
 
-    var authTokens: MSALNativeAuthTokens
+//    var authTokens: MSALNativeAuthTokens
+    var rawIdToken: String?
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
 
     /// Get the latest ID token for the account.
     @objc public var idToken: String? {
-        authTokens.rawIdToken
+        rawIdToken
     }
 
     init(
         account: MSALAccount,
-        authTokens: MSALNativeAuthTokens,
+        rawIdToken: String?,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface
     ) {
         self.account = account
-        self.authTokens = authTokens
+        self.rawIdToken = rawIdToken
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
         inputValidator = MSALNativeAuthInputValidator()
