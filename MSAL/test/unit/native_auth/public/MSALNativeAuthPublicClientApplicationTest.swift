@@ -59,7 +59,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         )
         
         authority = try! MSALCIAMAuthority(url: authorityURL!)
-        configuration = try! MSALNativeAuthConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.oob, .password])
+        configuration = try! MSALNativeAuthConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.oob, .password], redirectUri: nil)
         contextMock = .init(correlationId: .init(uuidString: correlationId.uuidString)!)
     }
 
