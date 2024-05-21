@@ -78,9 +78,4 @@ extension MSALNativeAuthUserAccountResult {
                                                                                              correlationId: correlationId ?? UUID())) }
         }
     }
-
-    func refreshData(authTokens: MSALNativeAuthTokens, account: MSALAccount) {
-        self.rawIdToken = authTokens.rawIdToken
-        self.account = account
-    }
 }
