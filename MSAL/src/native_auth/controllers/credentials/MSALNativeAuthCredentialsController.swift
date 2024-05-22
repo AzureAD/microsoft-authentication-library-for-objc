@@ -69,13 +69,13 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         let accounts = self.allAccounts()
         if let account = accounts.first {
             // We pass an empty array of scopes because that will return all tokens for that account identifier
-            guard let tokens = retrieveTokens(account: account,
-                                              scopes: [],
-                                              context: context) else {
+            guard let rawIdToken = retrieveIdToken(account: account,
+                                                   scopes: [],
+                                                   context: context) else {
                 MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
                 return nil
             }
-            return factory.makeUserAccountResult(account: account, rawIdToken: tokens.rawIdToken)
+            return factory.makeUserAccountResult(account: account, rawIdToken: rawIdToken)
         } else {
             MSALLogger.log(level: .verbose, context: nil, format: "No account found")
         }
@@ -99,14 +99,14 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
         return []
     }
 
-    private func retrieveTokens(
+    private func retrieveIdToken(
         account: MSALAccount,
         scopes: [String],
         context: MSALNativeAuthRequestContext
-    ) -> MSALNativeAuthTokens? {
+    ) -> String? {
         do {
             let config = factory.makeMSIDConfiguration(scopes: scopes)
-            return try cacheAccessor.getTokens(account: account, configuration: config, context: context)
+            return try cacheAccessor.getIdToken(account: account, configuration: config, context: context)
         } catch {
             MSALLogger.log(
                 level: .error,

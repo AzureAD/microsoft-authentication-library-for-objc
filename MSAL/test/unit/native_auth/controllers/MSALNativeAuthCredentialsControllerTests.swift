@@ -81,10 +81,10 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
     func test_whenNoTokenPresent_shouldReturnNoUserAccountResult() {
         let account = MSALNativeAuthUserAccountResultStub.account
-        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
+        let rawIdToken = MSALNativeAuthUserAccountResultStub.rawIdToken
         let userAccountResult = MSALNativeAuthUserAccountResult(
             account: account,
-            rawIdToken: authTokens.rawIdToken,
+            rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
@@ -97,22 +97,22 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
 
     func test_whenAccountSet_shouldReturnUserAccountResult() async {
         let account = MSALNativeAuthUserAccountResultStub.account
-        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
+        let rawIdToken = MSALNativeAuthUserAccountResultStub.rawIdToken
 
         let userAccountResult = MSALNativeAuthUserAccountResult(
             account: account,
-            rawIdToken: authTokens.rawIdToken,
+            rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
 
         factory.mockMakeUserAccountResult(userAccountResult)
         cacheAccessorMock.mockUserAccounts = [account]
-        cacheAccessorMock.mockAuthTokens = authTokens
+        cacheAccessorMock.mockIdToken = rawIdToken
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let accountResult = sut.retrieveUserAccountResult(context: expectedContext)
         XCTAssertEqual(accountResult?.account.username, account.username)
-        XCTAssertEqual(accountResult?.idToken, authTokens.rawIdToken)
+        XCTAssertEqual(accountResult?.idToken, rawIdToken)
         XCTAssertTrue(NSDictionary(dictionary: accountResult?.account.accountClaims ?? [:]).isEqual(to: account.accountClaims ?? [:]))
     }
 

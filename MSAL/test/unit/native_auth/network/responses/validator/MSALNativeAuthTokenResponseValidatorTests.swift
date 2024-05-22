@@ -61,12 +61,9 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         let refreshToken = MSIDRefreshToken()
         refreshToken.refreshToken = nil
         let rawIdToken = "rawIdToken"
-        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
-                                              refreshToken: refreshToken,
-                                              rawIdToken: rawIdToken)
         let userAccountResult = MSALNativeAuthUserAccountResult(account:
                                                                     MSALNativeAuthUserAccountResultStub.account,
-                                                                rawIdToken:authTokens.rawIdToken,
+                                                                rawIdToken:rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
                                                                 cacheAccessor: MSALNativeAuthCacheAccessorMock())
         let tokenResponse = MSIDCIAMTokenResponse()

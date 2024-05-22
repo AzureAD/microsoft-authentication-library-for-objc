@@ -27,12 +27,12 @@ import XCTest
 @_implementationOnly import MSAL_Private
 
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
-
+    
     var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
     private(set) var makeAccount: MSALAccount?
-    private(set) var makeNativeAuthTokens: MSALNativeAuthTokens?
+    private(set) var makeNativeRawIdToken: String?
     private(set) var makeNativeAuthUserAccountResult: MSALNativeAuthUserAccountResult?
 
     func mockMakeAccount(_ account: MSALAccount) {
@@ -43,16 +43,12 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
         return makeAccount ?? MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false)
     }
 
-    func mockMakeNativeAuthTokens(_ authTokens: MSALNativeAuthTokens) {
-        self.makeNativeAuthTokens = authTokens
+    func mockMakeNativeAuthRawIdToken(_ rawIdToken: String) {
+        self.makeNativeRawIdToken = rawIdToken
     }
 
-    func makeAuthTokens(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSAL.MSALNativeAuthTokens? {
-        return makeNativeAuthTokens ?? MSALNativeAuthTokens(
-            accessToken: tokenResult.accessToken,
-            refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,
-            rawIdToken: tokenResult.rawIdToken
-        )
+    func makeRawIdToken(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> String? {
+        return makeNativeRawIdToken ?? tokenResult.rawIdToken
     }
 
     func mockMakeUserAccountResult(_ result: MSALNativeAuthUserAccountResult) {
@@ -68,10 +64,10 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
         )
     }
 
-    func makeUserAccountResult(account: MSALAccount, authTokens: MSAL.MSALNativeAuthTokens) -> MSAL.MSALNativeAuthUserAccountResult? {
+    func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSAL.MSALNativeAuthUserAccountResult? {
         return makeNativeAuthUserAccountResult ?? .init(
             account: account,
-            rawIdToken: authTokens.rawIdToken,
+            rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
