@@ -75,26 +75,6 @@ final class MSALNativeAuthResultFactoryTests: XCTestCase {
         XCTAssertEqual(account.accountClaims?.count, 21)
     }
 
-    func test_makeAuthTokens_withNilRefreshToken_shouldNotCreateAuthTokens() {
-        let idToken = "correctIdToken"
-        let username = "username"
-        let tokenResult = getMSIDTokenResultFromData(idToken: idToken, username: username)
-        tokenResult?.refreshToken = nil
-        let context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
-        let rawIdToken = sut.makeRawIdToken(tokenResult: tokenResult!, context: context)
-        XCTAssertNil(rawIdToken)
-    }
-
-    func test_makeAuthTokens_withNonNilRefreshToken_shouldCreateAuthTokens() {
-        let idToken = "correctIdToken"
-        let username = "username"
-        let tokenResult = getMSIDTokenResultFromData(idToken: idToken, username: username)
-        let context = MSALNativeAuthRequestContext(correlationId: .init(uuidString: DEFAULT_TEST_UID)!)
-        let rawIdToken = sut.makeRawIdToken(tokenResult: tokenResult!, context: context)
-        XCTAssertNotNil(idToken)
-        XCTAssertEqual(rawIdToken, idToken)
-    }
-
     func test_makeUserAccount_withIncorrectIdToken_accountClaimsNotPresent() {
         let idToken = "invalidIdToken"
         let username = "username"

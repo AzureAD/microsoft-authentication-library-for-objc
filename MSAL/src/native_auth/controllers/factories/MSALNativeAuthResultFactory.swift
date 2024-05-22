@@ -30,8 +30,6 @@ protocol MSALNativeAuthResultBuildable {
 
     func makeAccount(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALAccount
 
-    func makeRawIdToken(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> String?
-
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult?
 
     func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSALNativeAuthUserAccountResult?
@@ -71,26 +69,9 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                                 accountClaims: jsonDictionary)
     }
 
-    func makeRawIdToken(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> String? {
-        guard let refreshToken = tokenResult.refreshToken as? MSIDRefreshToken else {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Refresh token invalid, account result could not be created")
-            return nil
-        }
-        return tokenResult.rawIdToken
-    }
-
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult? {
         let account =  makeAccount(tokenResult: tokenResult, context: context)
-        guard let rawIdToken = makeRawIdToken(tokenResult: tokenResult, context: context) else {
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "Auth Tokens could not be created")
-            return nil
-        }
+        let rawIdToken = tokenResult.rawIdToken
         return .init(account: account, rawIdToken: rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 

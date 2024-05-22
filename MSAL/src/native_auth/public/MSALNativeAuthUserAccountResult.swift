@@ -29,7 +29,6 @@ import Foundation
     /// The account object that holds account information.
     @objc public var account: MSALAccount
 
-//    var authTokens: MSALNativeAuthTokens
     var rawIdToken: String?
     let configuration: MSALNativeAuthConfiguration
     private let cacheAccessor: MSALNativeAuthCacheInterface
@@ -75,7 +74,7 @@ import Foundation
 
     /// Retrieves the access token for the default OIDC(openid, offline_access, profile) scopes from the cache.
     /// - Parameters:
-    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
+    ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     @objc public func getAccessToken(forceRefresh: Bool = false,
@@ -97,12 +96,12 @@ import Foundation
     /// has expired, it will be refreshed using the refresh token that's stored in the cache. If no
     /// access token matching the requested scopes is found in cache then a new access token is fetched.
     /// - Parameters:
-    ///   - forceRefresh: Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - scopes: Permissions you want included in the access token received in the result. Not all scopes are guaranteed to be included in the access token returned.
+    ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
-    public func getAccessToken(forceRefresh: Bool = false,
-                               scopes: [String],
+    public func getAccessToken(scopes: [String],
+                               forceRefresh: Bool = false,
                                correlationId: UUID? = nil,
                                delegate: CredentialsDelegate) {
 

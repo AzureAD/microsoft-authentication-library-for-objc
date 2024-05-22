@@ -72,7 +72,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             guard let rawIdToken = retrieveIdToken(account: account,
                                                    scopes: [],
                                                    context: context) else {
-                MSALLogger.log(level: .verbose, context: nil, format: "No tokens found")
+                MSALLogger.log(level: .verbose, context: nil, format: "No Id token found")
                 return nil
             }
             return factory.makeUserAccountResult(account: account, rawIdToken: rawIdToken)
@@ -111,7 +111,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             MSALLogger.log(
                 level: .error,
                 context: context,
-                format: "Error retrieving tokens: \(error)"
+                format: "Error retrieving IdToken"
             )
         }
         return nil
