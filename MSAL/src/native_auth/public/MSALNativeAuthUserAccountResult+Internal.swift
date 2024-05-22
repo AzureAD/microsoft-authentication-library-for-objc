@@ -59,7 +59,7 @@ extension MSALNativeAuthUserAccountResult {
 
             if let error = error as? NSError {
                 let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                correlationId: result?.correlationId ?? UUID(),
+                                                                correlationId: result?.correlationId ?? context.correlationId(),
                                                                 errorCodes: [error.code])
                 Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
                 return
@@ -75,7 +75,7 @@ extension MSALNativeAuthUserAccountResult {
             }
 
             Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
-                                                                                             correlationId: correlationId ?? UUID())) }
+                                                                                             correlationId: correlationId ?? context.correlationId())) }
         }
     }
 }
