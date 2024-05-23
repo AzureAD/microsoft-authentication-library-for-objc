@@ -879,7 +879,7 @@
     // Nested auth protocol
     msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
     msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
-    msidParams.skipSendRedirectUri = parameters.skipSendRedirectUri;
+    msidParams.skipSendRedirectUri = [NSStringFromClass([self class]) isEqualToString:@"MSAL.MSALNativeAuthPublicClientApplication"];
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
