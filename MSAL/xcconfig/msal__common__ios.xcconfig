@@ -1,2 +1,3 @@
 #include "../IdentityCore/IdentityCore/xcconfig/identitycore__common__ios.xcconfig"
 ARCHS[sdk=iphoneos*] = $(ARCHS_STANDARD)
+ARCHS[sdk=xros*] = $(ARCHS_STANDARD)
