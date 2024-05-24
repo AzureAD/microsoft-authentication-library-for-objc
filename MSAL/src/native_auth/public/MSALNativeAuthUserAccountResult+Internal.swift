@@ -41,10 +41,7 @@ extension MSALNativeAuthUserAccountResult {
         let config = MSALPublicClientApplicationConfig(clientId: configuration.clientId,
                                                        redirectUri: configuration.redirectUri,
                                                        authority: authority)
-
-        config.bypassRedirectURIValidation = true
-        let defaultRedirectUri = String(format: "msauth.%@://auth", Bundle.main.bundleIdentifier ?? "<bundle_id>")
-        config.redirectUri = defaultRedirectUri
+        config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
         guard let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
         else {
