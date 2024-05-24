@@ -29,8 +29,8 @@ import Foundation
     /// The account object that holds account information.
     @objc public var account: MSALAccount
 
-    var rawIdToken: String?
     let configuration: MSALNativeAuthConfiguration
+    private var rawIdToken: String?
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
 
@@ -43,13 +43,14 @@ import Foundation
         account: MSALAccount,
         rawIdToken: String?,
         configuration: MSALNativeAuthConfiguration,
-        cacheAccessor: MSALNativeAuthCacheInterface
+        cacheAccessor: MSALNativeAuthCacheInterface,
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
     ) {
         self.account = account
         self.rawIdToken = rawIdToken
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
-        inputValidator = MSALNativeAuthInputValidator()
+        self.inputValidator = inputValidator
     }
 
     /// Removes all the data from the cache.

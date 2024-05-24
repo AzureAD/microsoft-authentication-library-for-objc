@@ -53,22 +53,6 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         try super.setUpWithError()
     }
 
-    // MARK: Call delegate properly tests
-    // To-do: change this test by moching MSAL cache accessor
-    
-//    func test_whenAccountAndTokenExist_itReturnsCorrectData() {
-//        let expectation = expectation(description: "CredentialsController")
-//        let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
-//        let mockDelegate = CredentialsDelegateSpy(expectation: expectation, expectedResult: MSALNativeAuthTokenResult(accessToken: authTokens.accessToken.accessToken,
-//                                                                                                                      scopes: authTokens.accessToken.scopes?.array as? [String] ?? [],
-//                                                                                                                      expiresOn: authTokens.accessToken.expiresOn))
-//        mockDelegate.expectedAccessToken = authTokens.accessToken.accessToken
-//        mockDelegate.expectedExpiresOn = authTokens.accessToken.expiresOn
-//        mockDelegate.expectedScopes = authTokens.accessToken.scopes?.array as? [String] ?? []
-//        sut.getAccessToken(delegate: mockDelegate)
-//        wait(for: [expectation], timeout: 1)
-//    }
-
     // MARK: - sign-out tests
 
     func test_signOut_successfullyCallsCacheAccessor() {
