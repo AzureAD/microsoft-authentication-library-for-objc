@@ -26,9 +26,9 @@ import Foundation
 
 extension MSALNativeAuthUserAccountResult {
 
-    func getAccessTokenInternal(forceRefresh: Bool = false,
+    func getAccessTokenInternal(forceRefresh: Bool,
                                 scopes: [String],
-                                correlationId: UUID? = nil,
+                                correlationId: UUID?,
                                 delegate: CredentialsDelegate) {
 
         let params = MSALSilentTokenParameters(scopes: scopes, account: account)
