@@ -49,7 +49,7 @@
 #import "MSIDTestConfiguration.h"
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDTestIdentifiers.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDClientInfo.h"
 #import "MSIDTestIdTokenUtil.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"

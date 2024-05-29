@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
 #import "MSALAccountId.h"
@@ -29,7 +30,6 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALPublicClientApplication.h"
-#import "MSALAccount.h"
 
 #if __has_include("MSALAdditionalTestAppSettings.h")
 #include "MSALAdditionalTestAppSettings.h"

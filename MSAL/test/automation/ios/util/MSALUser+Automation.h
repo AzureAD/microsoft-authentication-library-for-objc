@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <MSAL/MSAL.h>
+#import "MSAL/MSAL-Swift.h"
 
 @interface MSALAccount (Automation)
 

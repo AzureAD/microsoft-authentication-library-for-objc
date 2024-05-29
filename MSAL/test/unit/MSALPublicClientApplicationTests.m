@@ -36,7 +36,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAccount.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDAADOauth2Factory.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSIDAccountIdentifier.h"
@@ -67,9 +67,8 @@
 #import "MSALB2CAuthority.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALCacheConfig.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDTestCacheDataSource.h"

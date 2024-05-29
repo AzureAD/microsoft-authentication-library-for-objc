@@ -22,12 +22,11 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MSALAccount.h"
 #import "MSALLegacySharedAccount.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALLegacySharedADALAccount : MSALLegacySharedAccount <MSALAccount>
+@interface MSALLegacySharedADALAccount : MSALLegacySharedAccount
 
 @end
 

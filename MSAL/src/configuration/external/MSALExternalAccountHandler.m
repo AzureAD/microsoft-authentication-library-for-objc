@@ -24,12 +24,10 @@
 #import "MSALExternalAccountHandler.h"
 #import "MSALExternalAccountProviding.h"
 #import "MSALTenantProfile.h"
-#import "MSALAccount.h"
 #import "MSALAADAuthority.h"
 #import "MSALResult.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALOauth2Provider.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALErrorConverter.h"
 #import "MSALResult.h"
 #import "MSALTenantProfile.h"
@@ -151,7 +149,7 @@
             return nil;
         }
         
-        for (id<MSALAccount> externalAccount in externalAccounts)
+        for (MSALAccount * externalAccount in externalAccounts)
         {
             MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount oauth2Provider:self.oauth2Provider];
             

@@ -23,11 +23,10 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALLegacySharedAccount.h"
-#import "MSALAccount.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALLegacySharedMSAAccount : MSALLegacySharedAccount <MSALAccount>
+@interface MSALLegacySharedMSAAccount : MSALLegacySharedAccount
 
 @end
 

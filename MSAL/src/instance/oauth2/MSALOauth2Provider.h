@@ -32,7 +32,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSIDOauth2Factory;
 @class MSIDTokenResult;
 @class MSIDDefaultTokenCacheAccessor;
-@class MSALAccount;
 @class MSIDAuthority;
 @class MSALTenantProfile;
 @class MSALAccountId;

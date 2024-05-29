@@ -30,8 +30,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSALAccount.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDAccountIdentifier.h"
 #import "MSALTenantProfile.h"
 #import "MSALAuthority.h"
@@ -44,7 +43,6 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDConstants.h"
 #import "MSIDTestCacheUtil.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALMockExternalAccountHandler.h"
 #import "MSALAADOauth2Provider.h"

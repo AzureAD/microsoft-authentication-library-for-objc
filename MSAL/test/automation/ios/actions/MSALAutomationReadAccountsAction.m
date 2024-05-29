@@ -33,7 +33,7 @@
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationAccountsResult.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALTenantProfile.h"
 
 @implementation MSALAutomationReadAccountsAction

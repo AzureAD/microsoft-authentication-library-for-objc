@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALLegacySharedADALAccount.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDJsonObject.h"
@@ -164,7 +165,7 @@ static NSString *kADALAccountType = @"ADAL";
 
 #pragma mark - Updates
 
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(MSALAccount *)account claims:(NSDictionary *)claims
 {
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
     jsonDictionary[@"displayName"] = claims[@"name"];

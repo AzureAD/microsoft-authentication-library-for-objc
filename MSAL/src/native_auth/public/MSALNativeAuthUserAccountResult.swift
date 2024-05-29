@@ -56,7 +56,7 @@ import Foundation
 
         do {
             try cacheAccessor.clearCache(
-                accountIdentifier: account.lookupAccountIdentifier,
+                accountIdentifier: account.lookupAccountIdentifier!,
                 authority: configuration.authority,
                 clientId: configuration.clientId,
                 context: context

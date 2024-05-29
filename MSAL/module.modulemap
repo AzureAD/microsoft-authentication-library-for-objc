@@ -83,7 +83,6 @@ module MSAL_Private {
     header "src/configuration/external/ios/MSALLegacySharedADALAccount.h"
     header "src/MSALPublicClientApplication+Internal.h"
     header "IdentityCore/IdentityCore/src/MSIDError.h"
-    header "src/MSALAccount+Internal.h"
     header "src/configuration/external/MSALExternalAccountHandler.h"
     header "src/instance/MSALAccountsProvider.h"
     header "src/instance/oauth2/ciam/MSALCIAMOauth2Provider.h"
@@ -91,6 +90,7 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/requests/sdk/msal/MSIDDefaultTokenResponseValidator.h"
     header "IdentityCore/IdentityCore/src/network/error_handler/MSIDAADRequestErrorHandler.h"
     header "IdentityCore/IdentityCore/src/MSIDOAuth2Constants.h"
+    header "src/MSALTenantProfile+Internal.h"
     export *
 }
 

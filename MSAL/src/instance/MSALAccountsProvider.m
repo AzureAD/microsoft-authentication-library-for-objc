@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAuthority.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDAccount.h"
 #import "MSIDAccountIdentifier.h"
@@ -41,17 +42,16 @@
 #import "MSIDB2CAuthority.h"
 #import "MSIDADFSAuthority.h"
 #import "MSIDIdTokenClaims.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDIdToken.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSIDRequestParameters+Broker.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALAccountId+Internal.h"
 #import "MSIDAccountMetadataCacheItem.h"
 
@@ -285,7 +285,7 @@
         
         if ([externalAccount.mTenantProfiles count])
         {
-            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.tenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
+            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [[externalAccount tenantProfiles] filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
             if ([homeTenantProfileArray count] == 1) accountClaims = homeTenantProfileArray[0].claims;
         }
     

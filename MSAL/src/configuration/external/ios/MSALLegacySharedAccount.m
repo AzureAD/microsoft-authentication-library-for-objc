@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALLegacySharedAccount.h"
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSALAccountEnumerationParameters+Private.h"
-#import "MSALAccount+Internal.h"
 
 @interface MSALLegacySharedAccount()
 
@@ -70,7 +70,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return self;
 }
 
-- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+- (instancetype)initWithMSALAccount:(MSALAccount *)account
                       accountClaims:(NSDictionary *)claims
                     applicationName:(NSString *)appName
                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -143,7 +143,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 #pragma mark - Update
 
-- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+- (BOOL)updateAccountWithMSALAccount:(MSALAccount *)account
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -200,12 +200,12 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return YES;
 }
 
-- (NSDictionary *)claimsFromMSALAccount:(__unused id<MSALAccount>)account claims:(__unused NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(__unused MSALAccount*)account claims:(__unused NSDictionary *)claims
 {
     return nil;
 }
 
-- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccount>)account claims:(__unused NSDictionary *)claims
+- (NSDictionary *)additionalPropertiesFromMSALAccount:(MSALAccount *)account claims:(__unused NSDictionary *)claims
 {
     if (account.identifier)
     {

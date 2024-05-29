@@ -29,7 +29,7 @@
 #import "MSALExternalAccountHandler.h"
 #import "MSALOauth2Provider.h"
 #import "MSALTestConstants.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALAccountId+Internal.h"
 #import <MSAL/MSAL.h>
 
@@ -48,7 +48,7 @@
 
 @implementation MSALTestExternalAccountsProvider
 
-- (BOOL)updateAccount:(id<MSALAccount>)account
+- (BOOL)updateAccount:(MSALAccount *)account
         idTokenClaims:(NSDictionary *)idTokenClaims
                 error:(NSError * _Nullable * _Nullable)error
 {
@@ -62,7 +62,7 @@
     return self.accountOperationResult;
 }
 
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(MSALAccount *)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
@@ -72,7 +72,7 @@
                          error:error];
 }
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<MSALAccount *> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
     self.readAccountsInvokedCount++;
@@ -86,7 +86,7 @@
     return self.resultAccounts;
 }
 
-- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+- (BOOL)removeAccount:(nonnull MSALAccount *)account
           wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error

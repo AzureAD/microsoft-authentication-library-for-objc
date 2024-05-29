@@ -29,7 +29,6 @@
 #import "MSIDAccountMetadata.h"
 #import "MSALSSOExtensionRequestHandler.h"
 
-@class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
 @class MSALAuthority;
 @class MSIDAccount;

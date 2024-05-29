@@ -48,7 +48,6 @@
 #import "MSIDWebAADAuthCodeResponse.h"
 
 #import "MSALResult.h"
-#import "MSALAccount.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
 #import "XCTestCase+HelperMethods.h"

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALAutomationBaseAction.h"
 #import <MSAL/MSAL.h>
 #import "MSIDAutomationTestRequest.h"
@@ -36,8 +37,7 @@
 #import "MSALResult+Automation.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSIDAutomationSuccessResult.h"
-#import "MSALAccount.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALTenantProfile.h"
 #import "MSALSliceConfig.h"
 

@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALLegacySharedAccountsProvider.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCacheKey.h"
@@ -31,7 +32,6 @@
 #import "MSALAccountEnumerationParameters+Private.h"
 #import "MSIDConstants.h"
 #import "MSALErrorConverter.h"
-#import "MSALAccount.h"
 #import "MSALTenantProfile.h"
 
 @interface MSALLegacySharedAccountsProvider()
@@ -69,7 +69,7 @@
 #pragma mark - MSALExternalAccountProviding
 #pragma mark - Read
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<MSALAccount *> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
     __block NSArray *results = nil;
@@ -87,7 +87,7 @@
     return results;
 }
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<MSALAccount *> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
                                                             error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
@@ -180,7 +180,7 @@
 
 #pragma mark - Update
 
-- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
+- (BOOL)updateAccount:(MSALAccount *)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
@@ -193,7 +193,7 @@
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(id<MSALAccount>)msalAccount
+                                                                     msalAccount:(MSALAccount *)msalAccount
                                                                    idTokenClaims:(NSDictionary *)idTokenClaims
                                                                          version:(MSALLegacySharedAccountVersion)version
                                                                            error:(NSError **)error
@@ -243,7 +243,7 @@
 
 #pragma mark - Removal
 
-- (BOOL)removeAccount:(id<MSALAccount>)account
+- (BOOL)removeAccount:(MSALAccount *)account
           wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
@@ -279,7 +279,7 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
-- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+- (BOOL)removeAccount:(nonnull MSALAccount *)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
@@ -292,7 +292,7 @@
 
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(id<MSALAccount>)account
+                                                                     msalAccount:(MSALAccount *)account
                                                                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                                                                            error:(NSError **)error
 {
@@ -342,7 +342,7 @@
 
 #pragma mark - Write
 
-- (void)updateAccountAsync:(id<MSALAccount>)account
+- (void)updateAccountAsync:(MSALAccount *)account
              idTokenClaims:(NSDictionary *)idTokenClaims
             tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                  operation:(MSALLegacySharedAccountWriteOperation)operation
@@ -365,7 +365,7 @@
     });
 }
 
-- (BOOL)updateAccountImpl:(id<MSALAccount>)account
+- (BOOL)updateAccountImpl:(MSALAccount *)account
             idTokenClaims:(NSDictionary *)idTokenClaims
            tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                 operation:(MSALLegacySharedAccountWriteOperation)operation
@@ -441,7 +441,7 @@
     return YES;
 }
 
-- (BOOL)saveUpdatedAccount:(id<MSALAccount>)account
+- (BOOL)saveUpdatedAccount:(MSALAccount *)account
                 jsonObject:(MSIDJsonObject *)jsonObject
                   accounts:(NSArray *)accounts
                  operation:(MSALLegacySharedAccountWriteOperation)operation

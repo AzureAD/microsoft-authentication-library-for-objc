@@ -27,9 +27,9 @@
 
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
 #import "MSALWebviewParameters.h"
-#import "MSALAccount+Internal.h"
 #import "MSALGlobalConfig.h"
 #import "MSALWebviewType_Internal.h"
+#import "MSAL/MSAL-Swift.h"
 
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 

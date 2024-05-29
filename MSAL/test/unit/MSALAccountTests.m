@@ -28,18 +28,16 @@
 #import "MSALTestCase.h"
 #import "MSIDClientInfo.h"
 #import "MSIDAADV2IdTokenClaims.h"
-#import "MSALAccount+Internal.h"
-#import "MSIDAccount.h"
+
 #import "MSALAccountId.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAuthority+Internal.h"
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALAuthority.h"
 #import "MSALAccountId+Internal.h"
-#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALUserTests : MSALTestCase
 

@@ -22,10 +22,10 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
+#import "MSAL.h"
 
 @class MSIDJsonObject;
 @class MSALAccountEnumerationParameters;
-@protocol MSALAccount;
 
 // Every time there's a new field added, version update is required
 // Versions are identified numerically (V1, V2, V3)
@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
  Updates existing account with MSAL account fields.
  Not thread safe.
  */
-- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+- (BOOL)updateAccountWithMSALAccount:(MSALAccount *)account
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  Creates new account based on MSAL account.
  */
-- (nullable instancetype)initWithMSALAccount:(id<MSALAccount>)account
+- (nullable instancetype)initWithMSALAccount:(MSALAccount *)account
                                accountClaims:(NSDictionary *)claims
                              applicationName:(NSString *)appName
                               accountVersion:(MSALLegacySharedAccountVersion)accountVersion

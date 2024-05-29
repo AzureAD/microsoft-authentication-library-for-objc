@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+
+#import "MSAL/MSAL-Swift.h"
 #import "MSALResult.h"
 #import "MSIDAccessToken.h"
 #import "NSString+MSIDExtensions.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDAADV2IdTokenClaims.h"
-#import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
 #import "MSALAuthority.h"
 #import "MSIDAuthority.h"
@@ -131,9 +132,8 @@
                                                                          environment:tokenResult.account.environment
                                                                  isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
                                                                               claims:claims.jsonDictionary];
-    
     MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:tokenResult.account createTenantProfile:NO];
-    
+
     if (tokenResult.account.isHomeTenantAccount)
     {
         account.accountClaims = claims.jsonDictionary;

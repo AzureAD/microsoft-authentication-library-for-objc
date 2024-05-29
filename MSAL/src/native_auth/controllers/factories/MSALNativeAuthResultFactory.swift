@@ -66,7 +66,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                 context: context,
                 format: "Claims for account could not be created - \(error)" )
         }
-        return MSALAccount.init(msidAccount: tokenResult.account,
+        return MSALAccount.init(MSIDAccount: tokenResult.account,
                                 createTenantProfile: false,
                                 accountClaims: jsonDictionary)
     }

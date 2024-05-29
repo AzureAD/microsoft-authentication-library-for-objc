@@ -40,7 +40,7 @@
 #import "MSIDSilentController.h"
 #import "MSIDTestIdTokenUtil.h"
 #import "MSALAccountId+Internal.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDTestBundle.h"
 #import "MSALOauth2Provider.h"

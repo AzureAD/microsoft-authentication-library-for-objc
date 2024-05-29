@@ -27,7 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAccount;
 @class MSALAuthority;
 @class MSALTenantProfile;
 

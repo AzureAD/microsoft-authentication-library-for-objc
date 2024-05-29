@@ -56,7 +56,7 @@
     return nil;
 }
 
-+ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccount>)account
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull MSALAccount *)account
                                                       claims:(nonnull NSDictionary *)claims
                                              applicationName:(nonnull NSString *)applicationName
                                               accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -84,7 +84,7 @@
     return nil;
 }
 
-+ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
++ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull MSALAccount *)account
                                    tenantProfileIdentifier:(nullable NSString *)tenantProfileIdentifier
 {
     if ([self isMSAAccount:account])
@@ -103,7 +103,7 @@
     return nil;
 }
 
-+ (BOOL)isMSAAccount:(id<MSALAccount>)account
++ (BOOL)isMSAAccount:(MSALAccount *)account
 {
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
     

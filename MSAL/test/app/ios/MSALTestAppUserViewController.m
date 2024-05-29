@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALTestAppUserViewController.h"
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
-#import "MSALAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
 

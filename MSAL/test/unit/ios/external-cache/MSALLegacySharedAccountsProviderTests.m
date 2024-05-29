@@ -31,7 +31,7 @@
 #import "MSIDJsonObject.h"
 #import "MSIDCacheItemJsonSerializer.h"
 #import "MSIDCacheKey.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALAccountId+Internal.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDConstants.h"
@@ -141,7 +141,7 @@
     XCTAssertNil(error);
     XCTAssertNotNil(results);
     XCTAssertEqual([results count], 1);
-    id<MSALAccount> account = results[0];
+    MSALAccount * account = results[0];
     XCTAssertTrue([account.identifier hasPrefix:@"oid1"]);
     XCTAssertEqualObjects(account.username, @"user@CONTOSO.com");
     XCTAssertEqualObjects(account.environment, @"login.windows.net");

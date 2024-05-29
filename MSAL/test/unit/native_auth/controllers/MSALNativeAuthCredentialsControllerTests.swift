@@ -139,7 +139,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         let expectation = expectation(description: "CredentialsController")
 
         let account = MSALNativeAuthUserAccountResultStub.account
-        let newAccount = MSALAccount(msidAccount: MSIDAccount(), createTenantProfile: false, accountClaims: ["claim1": "true"])
+        let newAccount = MSALAccount(MSIDAccount: MSIDAccount(), createTenantProfile: false, accountClaims: ["claim1": "true"])
         let authTokens = MSALNativeAuthUserAccountResultStub.authTokens
         let userAccountResult = MSALNativeAuthUserAccountResult(account: account,
                                                                 authTokens: authTokens,
@@ -161,7 +161,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
         tokenResult.accessToken.accessToken = expectedAccessToken
         tokenResult.rawIdToken = expectedIdToken
         responseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
-        cacheAccessorMock.mockUserAccounts = [newAccount!]
+        cacheAccessorMock.mockUserAccounts = [newAccount]
         cacheAccessorMock.mockAuthTokens = authTokens
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
         let result = await sut.refreshToken(context: expectedContext, authTokens: authTokens, userAccountResult: userAccountResult)

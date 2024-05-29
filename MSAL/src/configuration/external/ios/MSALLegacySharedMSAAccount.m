@@ -93,7 +93,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     return self;
 }
 
-- (instancetype)initWithMSALAccount:(__unused id<MSALAccount>)account
+- (instancetype)initWithMSALAccount:(__unused MSALAccount *)account
                       accountClaims:(__unused NSDictionary *)claims
                     applicationName:(__unused NSString *)appName
                      accountVersion:(__unused MSALLegacySharedAccountVersion)accountVersion
@@ -128,7 +128,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
 
 #pragma mark - Updates
 
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(MSALAccount *)account claims:(NSDictionary *)claims
 {
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
     jsonDictionary[@"displayName"] = claims[@"name"] ? claims[@"name"] : account.username;

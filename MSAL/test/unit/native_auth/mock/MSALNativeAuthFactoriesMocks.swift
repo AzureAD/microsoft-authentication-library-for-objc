@@ -40,7 +40,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     }
 
     func makeAccount(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALAccount {
-        return makeAccount ?? MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false)
+        return makeAccount ?? MSALAccount.init(MSIDAccount: tokenResult.account, createTenantProfile: false)
     }
 
     func mockMakeNativeAuthTokens(_ authTokens: MSALNativeAuthTokens) {
@@ -61,7 +61,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
         return makeNativeAuthUserAccountResult ?? .init(
-            account: MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false),
+            account: MSALAccount.init(MSIDAccount: tokenResult.account, createTenantProfile: false),
             authTokens: MSALNativeAuthTokens(
                 accessToken: tokenResult.accessToken,
                 refreshToken: tokenResult.refreshToken as? MSIDRefreshToken,

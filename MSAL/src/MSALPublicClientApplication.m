@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALPromptType_Internal.h"
 #import "MSALError.h"
@@ -35,7 +36,6 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccount.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSALAccount+Internal.h"
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"

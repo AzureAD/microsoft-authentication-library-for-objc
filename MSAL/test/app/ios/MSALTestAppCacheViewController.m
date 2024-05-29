@@ -30,7 +30,7 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
 #import "MSIDAccessToken.h"

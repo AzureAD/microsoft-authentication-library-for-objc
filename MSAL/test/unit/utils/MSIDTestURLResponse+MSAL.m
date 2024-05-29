@@ -34,7 +34,6 @@
 #import "MSIDConstants.h"
 #import "MSIDVersion.h"
 #import "NSOrderedSet+MSIDExtensions.h"
-#import "MSALAccount.h"
 #import "MSIDWorkPlaceJoinConstants.h"
 
 @implementation MSIDTestURLResponse (MSAL)

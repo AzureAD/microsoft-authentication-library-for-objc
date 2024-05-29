@@ -30,10 +30,9 @@
 #import "MSALCIAMAuthority.h"
 #import "MSIDCIAMAuthority.h"
 #import "MSIDTokenResult.h"
-#import "MSALAccount.h"
 #import "MSALAccountId.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALTenantProfile+Internal.h"

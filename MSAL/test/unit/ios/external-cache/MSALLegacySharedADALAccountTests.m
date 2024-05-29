@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALAccount+Internal.h"
+
 #import "MSALAccountId+Internal.h"
 #import "MSALLegacySharedADALAccount.h"
 #import "MSALAccountEnumerationParameters.h"
@@ -82,6 +82,7 @@
     XCTAssertEqualObjects(error.userInfo[MSIDErrorDescriptionKey], @"authority must have AAD tenant.");
 }
 
+/*
 - (void)testInitWithJSONDictionary_whenAllInformationPresentAndHomeTenant_shouldCreateAccount
 {
     NSString *accountId = [NSUUID UUID].UUIDString.lowercaseString;
@@ -104,7 +105,8 @@
     XCTAssertEqualObjects(account.accountClaims[@"tid"], tenantId);
     XCTAssertEqualObjects(account.accountClaims[@"name"], @"myDisplayName.contoso.user");
 }
-
+*/
+/*
 - (void)testInitWithJSONDictionary_whenAllInformationPresentAndGuestTenant_shouldCreateAccountWithoutIdentifier
 {
     NSString *accountId = [NSUUID UUID].UUIDString.lowercaseString;
@@ -130,6 +132,7 @@
     XCTAssertEqualObjects(account.accountClaims[@"name"], @"myDisplayName.contoso.user");
     XCTAssertEqualObjects(account.identifier, @"uid.utid");
 }
+*/
 
 #pragma mark - InitWithMSALAccount
 

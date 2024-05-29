@@ -220,8 +220,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     private func getAccount() -> MSALAccount {
         let homeAccountId = MSALAccountId(accountIdentifier: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff", objectId: "", tenantId: "https://contoso.com/tfp/tenantName")
         let account = MSALAccount(username: "1234567890", homeAccountId: homeAccountId, environment: "contoso.com", tenantProfiles: [])
-        account?.lookupAccountIdentifier = getAccountIdentifier()
-        return account!
+        account.lookupAccountIdentifier = getAccountIdentifier()
+        return account
     }
     
     private func getTokenResponse() -> MSIDCIAMTokenResponse {
@@ -246,7 +246,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         var accounts: [MSALAccount]!
         XCTAssertNoThrow(accounts = try cacheAccessor.getAllAccounts(configuration: parameters.msidConfiguration))
         for account in accounts {
-            let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.homeAccountId.identifier)!
+            let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.homeAccountId?.identifier)!
             XCTAssertNoThrow(try cacheAccessor.clearCache(accountIdentifier: identifier,
                                                           authority: parameters.msidConfiguration.authority,
                                                           clientId: parameters.msidConfiguration.clientId,

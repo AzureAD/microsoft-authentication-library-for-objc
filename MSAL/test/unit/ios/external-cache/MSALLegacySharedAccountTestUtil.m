@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALLegacySharedAccountTestUtil.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSALAccountId+Internal.h"
 #import "MSIDConstants.h"
 

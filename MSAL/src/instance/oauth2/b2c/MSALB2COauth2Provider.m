@@ -33,10 +33,9 @@
 #import "MSALB2CAuthority_Internal.h"
 #import "MSIDTokenResult.h"
 #import "MSIDB2CAuthority.h"
-#import "MSALAccount.h"
 #import "MSALAccountId.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-#import "MSALAccount+Internal.h"
+
 #import "MSIDAccountIdentifier.h"
 #import "MSIDB2CIdTokenClaims.h"
 #import "MSALTenantProfile+Internal.h"

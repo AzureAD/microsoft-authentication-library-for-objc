@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALStressTestHelper.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppSettings.h"
@@ -38,7 +39,6 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALResult.h"
 #import "MSALSilentTokenParameters.h"
-#import "MSALAccount.h"
 
 @implementation MSALStressTestHelper
 
