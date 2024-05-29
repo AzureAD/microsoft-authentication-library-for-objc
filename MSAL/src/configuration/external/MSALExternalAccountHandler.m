@@ -83,7 +83,7 @@
     for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
         NSError *removalError = nil;
-        BOOL result = [provider removeAccount:account wipeAccount:wipeAccount tenantProfiles:account.tenantProfiles error:&removalError];
+        BOOL result = [provider removeAccount:account wipeAccount:wipeAccount tenantProfiles:[account tenantProfiles] error:&removalError];
         
         if (!result)
         {
