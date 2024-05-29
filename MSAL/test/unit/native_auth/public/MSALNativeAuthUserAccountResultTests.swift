@@ -32,6 +32,47 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     var sut: MSALNativeAuthUserAccountResult!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var account: MSALAccount!
+    private let innerCorrelationId = UUID().uuidString
+    private let withInnerCorrelationId = UUID().uuidString
+    private let withoutInnerCorrelationId = UUID().uuidString
+    
+    private var innerErrorMock: NSError {
+        let innerUserInfo: [String : Any] = [
+            MSALInternalErrorCodeKey : -42002,
+            MSALErrorDescriptionKey: "inner_user_info_error_description",
+            MSALOAuthErrorKey: "inner_invalid_request",
+            MSALCorrelationIDKey: innerCorrelationId
+        ]
+        return NSError(domain: "HttpResponseErrorDomain", code: 401, userInfo: innerUserInfo)
+    }
+    
+    private var errorWithInnerErrorMock: NSError {
+        let userInfo: [String : Any] = [
+            NSUnderlyingErrorKey : innerErrorMock ,
+            MSALErrorDescriptionKey: "user_info_error_description",
+            MSALOAuthErrorKey: "invalid_request",
+            MSALCorrelationIDKey: withInnerCorrelationId
+        ]
+        return NSError(domain: "HttpResponseErrorDomain", code: 501, userInfo: userInfo)
+    }
+    
+    private var errorWithoutInnerErrorMock: NSError {
+        let userInfo: [String : Any] = [
+            MSALInternalErrorCodeKey : -3003,
+            MSALErrorDescriptionKey: "user_info_error_description",
+            MSALOAuthErrorKey: "invalid_request",
+            MSALCorrelationIDKey: withoutInnerCorrelationId
+        ]
+        return NSError(domain: "HttpResponseErrorDomain", code: 601, userInfo: userInfo)
+    }
+    
+    private var errorWithoutInnerErrorWithoutDescriptionMock: NSError {
+        let userInfo: [String : Any] = [
+            MSALOAuthErrorKey: "invalid_request",
+            MSALCorrelationIDKey: withoutInnerCorrelationId
+        ]
+        return NSError(domain: "HttpResponseErrorDomain", code: 701, userInfo: userInfo)
+    }
 
     override func setUpWithError() throws {
 
@@ -58,5 +99,43 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     func test_signOut_successfullyCallsCacheAccessor() {
         sut.signOut()
         XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+    }
+    
+    // MARK: - error tests
+    
+    func test_errorWithInnerError() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        
+        let result = sut.createRetrieveAccessTokenError(error: errorWithInnerErrorMock,
+                                                        context: context)
+        
+        XCTAssertEqual(result.errorDescription, "inner_user_info_error_description")
+        XCTAssertEqual(result.errorCodes, [-42002])
+        XCTAssertEqual(result.correlationId.uuidString, innerCorrelationId)
+    }
+    
+    func test_errorWithoutInnerError() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        
+        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorMock,
+                                                        context: context)
+        
+        XCTAssertEqual(result.errorDescription, "user_info_error_description")
+        XCTAssertEqual(result.errorCodes, [-3003])
+        XCTAssertEqual(result.correlationId.uuidString, withoutInnerCorrelationId)
+    }
+    
+    func test_errorWithoutInnerErrorWithoutDescription() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        
+        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorWithoutDescriptionMock,
+                                                        context: context)
+        
+        XCTAssertEqual(result.errorDescription, errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription)
+        XCTAssertEqual(result.errorCodes, [701])
+        XCTAssertEqual(result.correlationId, contextCorrelationId)
     }
 }
