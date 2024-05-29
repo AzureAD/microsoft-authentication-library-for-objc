@@ -59,14 +59,16 @@ extension MSALNativeAuthUserAccountResult {
         client.acquireTokenSilent(with: params) { result, error in
 
             if let error = error as? NSError {
-                var errorMessage: String?
-                if let message = error.userInfo[MSALErrorDescriptionKey] as? String {
-                    errorMessage = message
-                }
+                let (message, code, correlationId) = error.messageCodeAndCorrelationIdFromMSALError()
+
+                let errorMessage = message ?? error.localizedDescription
+                let errorCode = code ?? error.code
+                let errorCorrelationId = correlationId ?? result?.correlationId ?? context.correlationId()
+
                 let accessTokenError = RetrieveAccessTokenError(type: .generalError,
-                                                                message: errorMessage ?? error.localizedDescription,
-                                                                correlationId: result?.correlationId ?? context.correlationId(),
-                                                                errorCodes: [error.code])
+                                                                message: errorMessage,
+                                                                correlationId: errorCorrelationId,
+                                                                errorCodes: [errorCode])
                 Task { await delegate.onAccessTokenRetrieveError(error: accessTokenError) }
                 return
             }
