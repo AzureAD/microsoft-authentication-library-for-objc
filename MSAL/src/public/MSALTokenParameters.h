@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALParameters.h"
 
-@class MSALAccount;
+
 @class MSALAuthority;
 @class MSALClaimsRequest;
 @protocol MSALAuthenticationSchemeProtocol;

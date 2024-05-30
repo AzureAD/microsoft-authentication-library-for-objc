@@ -30,7 +30,7 @@
 #import "MSALGlobalConfig.h"
 
 @class MSALResult;
-@class MSALAccount;
+
 @class MSALTokenRequest;
 @class MSALAuthority;
 @class MSALSilentTokenParameters;

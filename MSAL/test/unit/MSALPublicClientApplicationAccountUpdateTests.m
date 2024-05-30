@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import <XCTest/XCTest.h>
 #import "NSString+MSALTestUtil.h"
 #import "MSALTestConstants.h"

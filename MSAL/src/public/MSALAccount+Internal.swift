@@ -26,9 +26,9 @@
 import Foundation
 import MSAL_Private
 
-@objc extension MSALAccount {
+@objc public extension MSALAccount {
 
-    @objc public convenience init(
+    @objc convenience init(
         username: String?,
         homeAccountId: MSALAccountId?,
         environment: String?,
@@ -44,7 +44,7 @@ import MSAL_Private
         addTenantProfiles(tenantProfiles)
     }
 
-    @objc public convenience init(
+    @objc convenience init(
         MSIDAccount account: MSIDAccount?,
         createTenantProfile: Bool
     ) {
@@ -76,7 +76,7 @@ import MSAL_Private
         }
     }
 
-    @objc public convenience init(
+    @objc convenience init(
         MSIDAccount account: MSIDAccount?,
         createTenantProfile: Bool,
         accountClaims: [AnyHashable : Any]?
@@ -96,7 +96,7 @@ import MSAL_Private
         }
     }
 
-    @objc public convenience init(
+    @objc convenience init(
         MSALExternalAccount externalAccount: MSALAccount?,
         oauth2Provider oauthProvider: MSALOauth2Provider?
     ) {
@@ -152,48 +152,3 @@ import MSAL_Private
 
 }
 
-extension MSALAccount {
-    // MARK: - NSObject
-
-    public override func isEqual(_ object: (Any)?) -> Bool {
-        guard let other = object as? MSALAccount else {
-            return false
-        }
-        return isEqualTo(user: other)
-    }
-
-    public override var hash : Int {
-        let hash = 0
-        // Equality of MSALAccount is depending on equality of homeAccountId or username
-        // So we are not able to calculate a precise hash
-        return hash
-    }
-
-    func isEqualTo(user: MSALAccount?) -> Bool {
-        guard let user else {
-            return false
-        }
-
-        return self.username == user.username && self.homeAccountId == user.homeAccountId
-    }
-
-    public func tenantProfiles() -> [MSALTenantProfile]? {
-        return mTenantProfiles?.values as? [MSALTenantProfile]
-    }
-
-    public func addTenantProfiles(_ tenantProfiles: [MSALTenantProfile]?) {
-        if (tenantProfiles?.count ?? 0) <= 0 {
-            return
-        }
-
-        if mTenantProfiles == nil {
-            mTenantProfiles = [String : MSALTenantProfile]()
-        }
-
-        for profile in tenantProfiles ?? [] {
-            if let tenantId = profile.tenantId, mTenantProfiles?[tenantId] == nil {
-                mTenantProfiles?[tenantId] = profile
-            }
-        }
-    }
-}

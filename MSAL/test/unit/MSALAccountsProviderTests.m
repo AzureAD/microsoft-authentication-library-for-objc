@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
+#import "MSAL/MSAL-Swift.h"
 #import <XCTest/XCTest.h>
 #import "MSALAccountsProvider.h"
 #import "MSIDDefaultTokenCacheAccessor.h"

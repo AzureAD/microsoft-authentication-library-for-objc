@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import <XCTest/XCTest.h>
 #import "MSALExternalAccountHandler.h"
 #import "MSALOauth2Provider.h"

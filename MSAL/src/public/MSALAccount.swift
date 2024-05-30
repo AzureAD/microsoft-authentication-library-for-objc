@@ -23,7 +23,7 @@
 // THE SOFTWARE.  
 
 
-import MSAL_Private
+//import MSAL
 import Foundation
 
 /**
@@ -33,6 +33,7 @@ import Foundation
 
     @note For a list of standard id_token claims in the Microsoft Identity platform, see https://docs.microsoft.com/en-us/azure/active-directory/develop/id-tokens
 */
+
 
 @objc internal protocol MSALAccountProtocol : NSObjectProtocol {
 

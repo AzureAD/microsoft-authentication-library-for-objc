@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALExternalAccountProviding.h"
 #import "MSALTenantProfile.h"

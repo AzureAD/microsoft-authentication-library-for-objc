@@ -25,7 +25,7 @@
 #import "MSALLegacySharedAccount.h"
 
 @class MSIDJsonObject;
-@class MSALAccount;
+
 @class MSALAccountEnumerationParameters;
 @class MSALTenantProfile;
 

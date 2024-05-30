@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
+#import "MSAL/MSAL-Swift.h"
 #import "MSALB2COauth2Provider.h"
 #import "MSALOauth2Provider+Internal.h"
 #import "MSIDB2COauth2Factory.h"

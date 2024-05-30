@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALLegacySharedMSAAccount.h"
 #import "MSIDJsonObject.h"
 #import "MSIDAADAuthority.h"

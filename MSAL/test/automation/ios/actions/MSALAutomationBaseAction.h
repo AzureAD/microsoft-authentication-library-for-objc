@@ -30,7 +30,7 @@
 
 @class MSALPublicClientApplication;
 @class MSIDAutomationTestResult;
-@class MSALAccount;
+
 @class MSALResult;
 @class MSIDAutomationTestRequest;
 @class MSIDLegacyTokenCacheAccessor;

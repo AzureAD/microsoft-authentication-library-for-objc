@@ -27,7 +27,7 @@
 
 #import "MSIDTestURLResponse.h"
 
-@class MSALAccount;
+
 
 @interface MSIDTestURLResponse (MSAL)
 

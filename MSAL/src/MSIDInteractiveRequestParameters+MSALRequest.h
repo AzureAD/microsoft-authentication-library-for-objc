@@ -29,7 +29,7 @@
 
 @class MSALWebviewParameters;
 @class WKWebView;
-@class MSALAccount;
+
 
 NS_ASSUME_NONNULL_BEGIN
 

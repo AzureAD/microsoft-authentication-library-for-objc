@@ -83,6 +83,7 @@ final class MSALNativeLoggingTests: MSALNativeAuthTestCase {
     
     func testLogWithContext_noMaskNonNil() throws {
         Self.logger.expectation = XCTestExpectation(description: "Callback Invoked")
+        
         MSALLogger.log(level: .error, context: context, filename: #file, lineNumber: #line, function: #function, format: "Test %@", "String")
         XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1)
         

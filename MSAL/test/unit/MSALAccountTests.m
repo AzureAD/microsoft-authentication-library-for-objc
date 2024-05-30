@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
+#import "MSAL/MSAL-Swift.h"
 #import "MSALTestCase.h"
 #import "MSIDClientInfo.h"
 #import "MSIDAADV2IdTokenClaims.h"

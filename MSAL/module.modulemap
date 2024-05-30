@@ -25,6 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+module MSAL {
+    header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
+    header "src/public/MSALAccountId.h"
+    header "src/public/MSALTenantProfile.h"
+    header "src/public/MSALPublicClientApplication.h"
+    header "src/native_auth/public/MSALNativeAuthChallengeTypes.h"
+    header "src/public/MSALCIAMAuthority.h"
+    header "src/public/MSALLogger.h"
+    header "src/public/configuration/publicClientApplication/MSALSliceConfig.h"
+    export *
+}
+
 module MSAL_Private {
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccountIdentifier.h"
     header "IdentityCore/IdentityCore/src/oauth2/account/MSIDAccount.h"

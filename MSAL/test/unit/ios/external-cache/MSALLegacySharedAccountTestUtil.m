@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALLegacySharedAccountTestUtil.h"
 
 #import "MSALAccountId+Internal.h"

@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSAL/MSAL-Swift.h"
 #import "MSALCIAMOauth2Provider.h"
 #import "MSALOauth2Provider+Internal.h"
 #import "MSIDCIAMOauth2Factory.h"

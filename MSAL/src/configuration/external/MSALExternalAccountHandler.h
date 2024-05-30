@@ -25,7 +25,7 @@
 
 @protocol MSALExternalAccountProviding;
 @class MSALResult;
-@class MSALAccount;
+
 @protocol MSALExternalAccount;
 @class MSALAccountEnumerationParameters;
 @class MSALOauth2Provider;
