@@ -111,7 +111,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                         context: context)
         
         XCTAssertEqual(result.errorDescription, "inner_user_info_error_description")
-        XCTAssertEqual(result.errorCodes, [-42002])
+        XCTAssertEqual(result.errorCodes, [])
         XCTAssertEqual(result.correlationId.uuidString, innerCorrelationId)
     }
     

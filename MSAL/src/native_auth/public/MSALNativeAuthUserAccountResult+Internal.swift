@@ -82,9 +82,8 @@ extension MSALNativeAuthUserAccountResult {
     func createRetrieveAccessTokenError(error: NSError, context: MSALNativeAuthRequestContext) -> RetrieveAccessTokenError {
         if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError,
            let message = innerError.userInfo[MSALErrorDescriptionKey] as? String,
-           let code = codeFromMSALError(error: innerError),
            let correlationId = correlationIdFromMSALError(error: innerError) {
-            return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [code])
+            return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [])
         }
 
         if let message = error.userInfo[MSALErrorDescriptionKey] as? String,
@@ -102,7 +101,7 @@ extension MSALNativeAuthUserAccountResult {
     private func codeFromMSALError(error: NSError) -> Int? {
         return error.userInfo[MSALInternalErrorCodeKey] as? Int
     }
-    
+
     private func correlationIdFromMSALError(error: NSError) -> UUID? {
         return UUID(uuidString: error.userInfo[MSALCorrelationIDKey] as? String ?? "")
     }
