@@ -78,8 +78,8 @@ cd ../..
 rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
 
 git checkout -- .
-git fetch
-git switch dev
+git fetch --quiet
+git switch "$1"
 
 git branch -D "$BRANCH_NAME"
 git push origin --delete "$BRANCH_NAME"
