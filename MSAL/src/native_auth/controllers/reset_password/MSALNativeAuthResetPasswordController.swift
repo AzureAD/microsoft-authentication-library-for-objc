@@ -143,7 +143,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                                      event: MSIDTelemetryAPIEvent?,
                                      context: MSALNativeAuthRequestContext) async -> ResetPasswordStartControllerResponse {
 
-        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request")
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/start request")
 
         switch response {
         case .success(let continuationToken):
@@ -489,14 +489,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "Performing poll completion request")
+        MSALLogger.log(level: .info, context: context, format: "Performing poll completion request")
 
         let pollCompletionResponse = await performPollCompletionRequest(
             continuationToken: continuationToken,
             context: context
         )
 
-        MSALLogger.log(level: .verbose, context: context, format: "Handling poll completion response")
+        MSALLogger.log(level: .info, context: context, format: "Handling poll completion response")
 
         return await handlePollCompletionResponse(
             pollCompletionResponse,
