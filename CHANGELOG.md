@@ -1,6 +1,10 @@
+
+TBD:
+* Update Native Auth logging levels for improved clarity and consistency. #2184
+
 ## [1.4.0]:
 * Add platform sequence param. #2192
-* Native auth can now store multiple access tokens related to different resources.
+* Native auth can now store multiple access tokens related to different resources. #2159
 
 ## [1.3.3]
 * Update common core submodule.
