@@ -1,6 +1,10 @@
 ## [1.4.0]
 * Native auth can now store multiple access tokens related to different resources.
 
+## [1.3.3]
+* Update common core submodule.
+* Automation improvements.
+
 ## [1.3.2]
 * Add forceRefresh param to ignore AT in cache and request a new AT.
 
