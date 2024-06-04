@@ -91,6 +91,7 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/requests/sdk/msal/MSIDDefaultTokenResponseValidator.h"
     header "IdentityCore/IdentityCore/src/network/error_handler/MSIDAADRequestErrorHandler.h"
     header "IdentityCore/IdentityCore/src/MSIDOAuth2Constants.h"
+    header "IdentityCore/IdentityCore/tests/util/MSIDTestCacheDataSource.h"
     export *
 }
 
