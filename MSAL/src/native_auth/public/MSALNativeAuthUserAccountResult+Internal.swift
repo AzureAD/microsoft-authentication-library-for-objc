@@ -74,32 +74,22 @@ extension MSALNativeAuthUserAccountResult {
                 return
             }
 
-            Task { await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(type: .generalError,
-                                                                                             correlationId: correlationId ?? context.correlationId())) }
+            Task {
+                await delegate.onAccessTokenRetrieveError(error: RetrieveAccessTokenError(
+                    type: .generalError,
+                    correlationId: correlationId ?? context.correlationId())
+                )
+            }
         }
     }
 
     func createRetrieveAccessTokenError(error: NSError, context: MSALNativeAuthRequestContext) -> RetrieveAccessTokenError {
-        if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError,
-           let message = innerError.userInfo[MSALErrorDescriptionKey] as? String,
-           let correlationId = correlationIdFromMSALError(error: innerError) {
-            return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [])
+        if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError {
+           return createRetrieveAccessTokenError(error: innerError, context: context)
         }
-
-        if let message = error.userInfo[MSALErrorDescriptionKey] as? String,
-            let code = codeFromMSALError(error: error),
-            let correlationId = correlationIdFromMSALError(error: error) {
-            return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [code])
-        }
-
-        return RetrieveAccessTokenError(type: .generalError,
-                                        message: error.localizedDescription,
-                                        correlationId: context.correlationId(),
-                                        errorCodes: [error.code])
-    }
-
-    private func codeFromMSALError(error: NSError) -> Int? {
-        return error.userInfo[MSALInternalErrorCodeKey] as? Int
+        let message = error.userInfo[MSALErrorDescriptionKey] as? String ?? error.localizedDescription
+        let correlationId = correlationIdFromMSALError(error: error) ?? context.correlationId()
+        return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [])
     }
 
     private func correlationIdFromMSALError(error: NSError) -> UUID? {

@@ -73,6 +73,14 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 701, userInfo: userInfo)
     }
+    
+    private var errorWithoutInnerErrorWithoutCorrelationIdMock: NSError {
+        let userInfo: [String : Any] = [
+            MSALOAuthErrorKey: "invalid_request",
+            MSALErrorDescriptionKey: "user_info_error_description"
+        ]
+        return NSError(domain: "HttpResponseErrorDomain", code: 701, userInfo: userInfo)
+    }
 
     override func setUpWithError() throws {
 
@@ -123,7 +131,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                         context: context)
         
         XCTAssertEqual(result.errorDescription, "user_info_error_description")
-        XCTAssertEqual(result.errorCodes, [-3003])
+        XCTAssertEqual(result.errorCodes, [])
         XCTAssertEqual(result.correlationId.uuidString, withoutInnerCorrelationId)
     }
     
@@ -135,7 +143,19 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                         context: context)
         
         XCTAssertEqual(result.errorDescription, errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription)
-        XCTAssertEqual(result.errorCodes, [701])
+        XCTAssertEqual(result.errorCodes, [])
+        XCTAssertEqual(result.correlationId.uuidString, withoutInnerCorrelationId)
+    }
+    
+    func test_errorWithoutInnerErrorWithoutCorrelationId() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        
+        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorWithoutCorrelationIdMock,
+                                                        context: context)
+        
+        XCTAssertEqual(result.errorDescription, "user_info_error_description")
+        XCTAssertEqual(result.errorCodes, [])
         XCTAssertEqual(result.correlationId, contextCorrelationId)
     }
 }

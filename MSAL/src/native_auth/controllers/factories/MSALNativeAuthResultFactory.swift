@@ -71,8 +71,7 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult? {
         let account =  makeAccount(tokenResult: tokenResult, context: context)
-        let rawIdToken = tokenResult.rawIdToken
-        return .init(account: account, rawIdToken: rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
+        return .init(account: account, rawIdToken: tokenResult.rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
     }
 
     func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSALNativeAuthUserAccountResult? {

@@ -68,7 +68,7 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
     public var isRefreshTokenExpired: Bool {
         return type == .refreshTokenExpired
     }
-    
+
     /// Returns `true` if the scope list is empty.
     public var isInvalidScope: Bool {
         return type == .invalidScope
