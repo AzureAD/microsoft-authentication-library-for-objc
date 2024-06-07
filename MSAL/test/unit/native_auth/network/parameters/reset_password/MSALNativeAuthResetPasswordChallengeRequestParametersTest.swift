@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect], redirectUri: nil))
         let parameters = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
             continuationToken: "<continuation-token>"
@@ -49,7 +49,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect], redirectUri: nil))
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
             continuationToken: "<continuation-token>"
@@ -67,7 +67,7 @@ final class MSALNativeAuthResetPasswordChallengeRequestParametersTest: XCTestCas
     }
 
     func test_allOptionalNil_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect], redirectUri: nil))
         let params = MSALNativeAuthResetPasswordChallengeRequestParameters(
             context: MSALNativeAuthRequestContextMock(),
             continuationToken: "<continuation-token>"

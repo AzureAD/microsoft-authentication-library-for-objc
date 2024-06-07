@@ -54,13 +54,15 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     private(set) var clearCacheWasCalled = false
     var expectedMSIDTokenResult: MSIDTokenResult?
     var mockUserAccounts: [MSALAccount]?
-    var mockAuthTokens: MSALNativeAuthTokens?
+    var mockIdToken: String?
 
-    func getTokens(account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSAL.MSALNativeAuthTokens {
-        guard let mockAuthTokens = mockAuthTokens else {
+    
+    func getIdToken(
+        account: MSALAccount, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> String? {
+        guard let mockIdToken = mockIdToken else {
             throw E.noTokens
         }
-        return mockAuthTokens
+        return mockIdToken
     }
 
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount] {

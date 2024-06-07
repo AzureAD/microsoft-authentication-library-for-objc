@@ -28,10 +28,10 @@ import Foundation
 protocol MSALNativeAuthCacheInterface {
     init(tokenCache: MSIDDefaultTokenCacheAccessor, accountMetadataCache: MSIDAccountMetadataCacheAccessor)
 
-    func getTokens(
+    func getIdToken(
         account: MSALAccount,
         configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws -> MSALNativeAuthTokens
+        context: MSIDRequestContext) throws -> String?
 
     func getAllAccounts(configuration: MSIDConfiguration) throws -> [MSALAccount]
 
