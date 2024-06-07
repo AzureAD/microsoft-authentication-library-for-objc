@@ -43,16 +43,13 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "accessToken"
         accessToken.scopes = ["scope1", "scope2"]
-        let refreshToken = MSIDRefreshToken()
-        refreshToken.refreshToken = "refreshToken"
-        let rawIdToken = "rawIdToken"
-        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
-                                              refreshToken: refreshToken,
-                                              rawIdToken: rawIdToken)
-        let expectedResult = MSALNativeAuthTokenResult(authTokens: authTokens)
+
+        let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                       scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                       expiresOn: accessToken.expiresOn)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
         delegate.expectedAccessToken = accessToken.accessToken
-        delegate.expectedScopes = accessToken.scopes.array as? [String] ?? []
+        delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
                 return XCTFail("wrong result")
@@ -82,14 +79,10 @@ final class DispatchAccessTokenRetrieveCompletedTests: XCTestCase {
 
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "accessToken"
-        let refreshToken = MSIDRefreshToken()
-        refreshToken.refreshToken = "refreshToken"
-        let rawIdToken = "rawIdToken"
-        let authTokens = MSALNativeAuthTokens(accessToken: accessToken,
-                                              refreshToken: refreshToken,
-                                              rawIdToken: rawIdToken)
 
-        await sut.dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult(authTokens: authTokens), correlationId: correlationId)
+        await sut.dispatchAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                                                         scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                                                         expiresOn: accessToken.expiresOn), correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp])
         checkError(delegate.expectedError)

@@ -36,7 +36,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], redirectUri: nil))
         let parameters = MSALNativeAuthTokenRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                     username: "username",
                                                                     continuationToken: "Test Credential Token",
@@ -52,7 +52,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
     }
 
     func test_passwordParameters_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], redirectUri: nil))
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
@@ -83,7 +83,7 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
     }
 
     func test_nilParameters_shouldCreateCorrectParameters() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect]))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect], redirectUri: nil))
         let params = MSALNativeAuthTokenRequestParameters(
             context: context,
             username: nil,
