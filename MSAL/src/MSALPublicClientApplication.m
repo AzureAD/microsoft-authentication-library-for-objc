@@ -212,7 +212,7 @@
                                                                     bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
-    if (!msalRedirectUri)
+    if (!msalRedirectUri && !config.bypassRedirectURIValidation)
     {
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
@@ -884,6 +884,7 @@
     // Nested auth protocol
     msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
     msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"

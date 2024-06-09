@@ -108,6 +108,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func convertToRetrieveAccessTokenError(correlationId: UUID) -> RetrieveAccessTokenError {
         switch self {
         case .expiredToken(let apiError),

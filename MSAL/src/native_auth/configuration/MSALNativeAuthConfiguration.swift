@@ -32,12 +32,14 @@ struct MSALNativeAuthConfiguration {
     let clientId: String
     let authority: MSIDCIAMAuthority
     let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    let redirectUri: String?
     var sliceConfig: MSALSliceConfig?
 
     init(
         clientId: String,
         authority: MSALCIAMAuthority,
-        challengeTypes: [MSALNativeAuthInternalChallengeType]) throws {
+        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        redirectUri: String?) throws {
         self.clientId = clientId
         self.authority = try MSIDCIAMAuthority(
             url: authority.url,
@@ -45,5 +47,6 @@ struct MSALNativeAuthConfiguration {
             context: MSALNativeAuthRequestContext()
         )
         self.challengeTypes = challengeTypes
+        self.redirectUri = redirectUri
     }
 }

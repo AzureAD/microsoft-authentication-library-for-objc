@@ -238,6 +238,21 @@
 #endif
 }
 
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenNilRedirectUriAndByPassValidation_shouldReturnApplicationAndNilError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id" redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    config.bypassRedirectURIValidation = true;
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+}
+
 #if TARGET_OS_IPHONE
 
 - (void)testInitWithClientId_whenSchemeNotRegistered_shouldReturnNilApplicationAndFillError
