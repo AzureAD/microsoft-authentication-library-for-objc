@@ -489,12 +489,12 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             )
             return .init(.error(error: error, newState: state), correlationId: context.correlationId())
         case .credentialRequired(let newContinuationToken, _):
-            MSALLogger.log(level: .verbose, context: context, format: "credential_required received in signup/continue request")
+            MSALLogger.log(level: .info, context: context, format: "credential_required received in signup/continue request")
 
             let result = await performAndValidateChallengeRequest(continuationToken: newContinuationToken, context: context)
             return handlePerformChallengeAfterContinueRequest(result, username: username, event: event, context: context)
         case .attributesRequired(let newContinuationToken, let attributes, _):
-            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
+            MSALLogger.log(level: .info, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
                                                       username: username,
@@ -561,7 +561,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
 
             return .init(.error(error: error, newState: state), correlationId: context.correlationId())
         case .attributesRequired(let newContinuationToken, let attributes, _):
-            MSALLogger.log(level: .verbose, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
+            MSALLogger.log(level: .info, context: context, format: "attributes_required received in signup/continue request: \(attributes)")
 
             let state = SignUpAttributesRequiredState(controller: self,
                                                       username: username,
