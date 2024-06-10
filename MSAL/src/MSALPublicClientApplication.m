@@ -865,9 +865,9 @@
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
     
-    msidParams.platformSequence = [NSString msidAddPlatformSequenceParamWithName:[MSIDVersion platformName]
-                                                                         version:[MSIDVersion sdkVersion]
-                                                                      toSequence:nil];
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithName:[MSIDVersion platformName]
+                                                                            version:[MSIDVersion sdkVersion]
+                                                                         toSequence:nil];
 
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
@@ -1206,9 +1206,9 @@
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
     
-    msidParams.platformSequence = [NSString msidAddPlatformSequenceParamWithName:[MSIDVersion platformName]
-                                                                         version:[MSIDVersion sdkVersion]
-                                                                      toSequence:nil];
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithName:[MSIDVersion platformName]
+                                                                            version:[MSIDVersion sdkVersion]
+                                                                         toSequence:nil];
     
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
@@ -1463,9 +1463,9 @@
     msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
-    msidParams.platformSequence = [NSString msidAddPlatformSequenceParamWithName:[MSIDVersion platformName]
-                                                                         version:[MSIDVersion sdkVersion]
-                                                                      toSequence:nil];
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithName:[MSIDVersion platformName]
+                                                                            version:[MSIDVersion sdkVersion]
+                                                                         toSequence:nil];
     NSError *localError;
     BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
     
