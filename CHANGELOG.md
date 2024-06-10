@@ -1,3 +1,6 @@
+TBD:
+* Add platform sequence param. #2192
+
 ## [1.3.3]
 * Update common core submodule.
 * Automation improvements.
