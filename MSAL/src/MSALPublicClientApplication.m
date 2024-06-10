@@ -114,6 +114,8 @@
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
 
+#import "TelemetryKitObjc.h"
+
 @interface MSALPublicClientApplication()
 {
     WKWebView *_customWebview;
@@ -184,6 +186,11 @@
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
+}
+
+- (void) performTelemetry {
+    TelemetryKitObjc *telemetryKitObj = [[TelemetryKitObjc alloc] init];
+    [telemetryKitObj doTelemetryObjc];
 }
 
 - (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config

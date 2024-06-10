@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 @_implementationOnly import MSAL_Private
+import TelemetryKit
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length

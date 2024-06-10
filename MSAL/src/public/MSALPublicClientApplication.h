@@ -75,6 +75,8 @@
  */
 @property (atomic, readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
 
+- (void) performTelemetry;
+
 /**
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
     templates representing well-formed authorities. It is useful when the authority is obtained at

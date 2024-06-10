@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+import TelemetryKit
 
 /// Main interface to interact with the Native Auth methods
 ///
@@ -145,6 +146,16 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
+    }
+
+    public override func performTelemetry() {
+        let telemetryKitSwift = TelemetryKit(sdk: .openTelemetry)
+
+        telemetryKitSwift.doTelemetry()
+        telemetryKitSwift.doTelemetryFromObjc()
+
+//        let telemetryKitObj = TelemetryKitObjc()
+//        telemetryKitObj.doTelemetryObjc()
     }
 
     // MARK: delegate methods
