@@ -2,7 +2,8 @@ BRANCH_NAME="$1"
 SAMPLE_APP_TEMP_DIR="NativeAuthSampleAppTemp"
 current_date=$(date +"%Y-%m-%d %H:%M:%S")
 
-echo "S1 is $($1) / $1 / ${BRANCH_NAME}" # djb:remove
+echo "djb: Branch name passed as argument: $1" # djb: remove
+echo "djb: Branch name variable: ${BRANCH_NAME}" # djb: remove
 
 set -e
 
