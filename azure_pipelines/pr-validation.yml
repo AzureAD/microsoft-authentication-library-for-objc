@@ -83,4 +83,62 @@ jobs:
       testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
-  
+
+- job: 'Validate_SPM_Integration'
+  displayName: Validate SPM Integration
+  pool:
+    vmImage: 'macOS-13'
+    timeOutInMinutes: 15
+  workspace:
+    clean: all
+
+  steps:
+
+  - checkout: self
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
+
+  - script: |
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
+    displayName: 'Switch to use Xcode 14.3'
+
+  - task: Bash@3
+    displayName: Set variable BRANCH_NAME to a temporary branch
+    inputs:
+      targetType: 'inline'
+      script: |
+        UUID_LOCAL=$(uuidgen)
+        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp-${UUID_LOCAL}"
+        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
+      
+  - task: Bash@3
+    displayName: Checkout to temporary branch
+    inputs:
+      targetType: 'inline'
+      script: |
+        git checkout -b "${BRANCH_NAME}"
+
+  - task: Bash@3
+    displayName: Run SPM integration test script
+    inputs:
+      targetType: 'inline'
+      script: |
+        sh spm-integration-test.sh "${BRANCH_NAME}"
+    continueOnError: true
+
+  - task: Bash@3
+    displayName: Cleanup
+    inputs:
+      targetType: 'inline'
+      script: 
+        cd ../..
+        rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
+        git checkout -- .
+        git fetch --quiet
+        git switch "$(Build.SourceBranchName)"
+        git branch -D "$BRANCH_NAME"
+        git push origin --delete "$BRANCH_NAME"
+
