@@ -2,9 +2,6 @@ BRANCH_NAME="$1"
 SAMPLE_APP_TEMP_DIR="NativeAuthSampleAppTemp"
 current_date=$(date +"%Y-%m-%d %H:%M:%S")
 
-echo "djb: Branch name passed as argument: $1" # djb: remove
-echo "djb: Branch name variable: ${BRANCH_NAME}" # djb: remove
-
 set -e
 
 # Build framework
@@ -29,7 +26,7 @@ fi
 
 echo "Updating Package.swift"
 
-NEW_URL="https://github.com/AzureAD/microsoft-authentication-library-for-objc/raw/$BRANCH_NAME/MSAL.zip/"
+NEW_URL="https://github.com/AzureAD/microsoft-authentication-library-for-objc/raw/$BRANCH_NAME/MSAL.zip"
 
 sed -i '' "s#url: \"[^\"]*\"#url: \"$NEW_URL\"#" Package.swift
 sed -i '' "s#checksum: \"[^\"]*\"#checksum: \"$CHECKSUM\"#" Package.swift
@@ -59,4 +56,4 @@ rm -f NativeAuthSampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Pac
 echo "Running the Sample App with the temporary Swift Package"
 
 xcodebuild -resolvePackageDependencies
-xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' clean build
+xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.0' clean build
