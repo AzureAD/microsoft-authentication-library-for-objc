@@ -112,6 +112,7 @@
 #import "MSIDRequestTelemetryConstants.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
 #import "NSString+MSIDTelemetryExtensions.h"
+#import "MSIDVersion.h"
 
 @interface MSALPublicClientApplication()
 {
