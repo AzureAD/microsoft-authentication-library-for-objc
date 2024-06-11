@@ -110,10 +110,10 @@ jobs:
     inputs:
       targetType: 'inline'
       script: 
-        UUID_LOCAL: "$(uuidgen)"
-        echo "uuid: ${UUID_LOCAL}"
-        BRANCH_NAME_LOCAL: "$(Build.SourceBranchName)-temp-${UUID_LOCAL}}"
-        echo "Branch name local: ${BRANCH_NAME_LOCAL}"
+        UUID_LOCAL = "$(uuidgen)"
+        echo "uuid = ${UUID_LOCAL}"
+        BRANCH_NAME_LOCAL = "$(Build.SourceBranchName)-temp-${UUID_LOCAL}}"
+        echo "Branch name local = ${BRANCH_NAME_LOCAL}"
         echo "##vso[task.setvariable variable=BRANCH_NAME]$BRANCH_NAME_LOCAL"
         echo "Branch name: ${BRANCH_NAME}"
         git checkout -b "$BRANCH_NAME"
