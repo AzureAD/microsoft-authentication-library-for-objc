@@ -115,14 +115,14 @@ jobs:
         BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp-${UUID_LOCAL}"
         echo "Branch name local = ${BRANCH_NAME_LOCAL}"
         echo "##vso[task.setvariable variable=BRANCH_NAME;]$BRANCH_NAME_LOCAL"
-        git checkout -b "$BRANCH_NAME_LOCAL"
+        git checkout -b $BRANCH_NAME
 
   - task: Bash@3
     displayName: Run SPM integration test script
     inputs:
       targetType: 'inline'
       script: 
-        sh spm-integration-test.sh "$(BRANCH_NAME)"
+        sh spm-integration-test.sh $(BRANCH_NAME)
     continueOnError: true
 
   - task: Bash@3
