@@ -117,12 +117,12 @@ jobs:
       echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
       
 
-- task: Bash@3
+  - task: Bash@3
   displayName: Debug Print BRANCH_NAME
   inputs:
     targetType: 'inline'
     script: |
-    git checkout -b "${BRANCH_NAME}"
+      git checkout -b "${BRANCH_NAME}"
       echo "BRANCH_NAME is set to: ${BRANCH_NAME}"
 
 - task: Bash@3
