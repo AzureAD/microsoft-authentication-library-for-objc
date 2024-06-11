@@ -126,11 +126,9 @@ jobs:
       script: 
         cd ../..
         rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
-
         git checkout -- .
-        git fetch --quiet # djb: remove?
+        git fetch --quiet
         git switch "$(Build.SourceBranchName)"
-
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
 
