@@ -1,4 +1,4 @@
-TBD:
+## [1.3.4]:
 * Add platform sequence param. #2192
 
 ## [1.3.3]
