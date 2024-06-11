@@ -106,22 +106,20 @@ jobs:
     displayName: 'Switch to use Xcode 14.3'
 
   - task: Bash@3
-    displayName: Set BRANCH_NAME variable
+    displayName: Set variable BRANCH_NAME to a temporary branch
     inputs:
       targetType: 'inline'
       script: |
         UUID_LOCAL=$(uuidgen)
         BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp-${UUID_LOCAL}"
-        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}";
-        git checkout -b "${BRANCH_NAME}"
+        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
       
   - task: Bash@3
-    displayName: Debug Print BRANCH_NAME
+    displayName: Checkout to temporary branch
     inputs:
       targetType: 'inline'
       script: |
-        
-        echo "BRANCH_NAME is set to: ${BRANCH_NAME}"
+        git checkout -b "${BRANCH_NAME}"
 
   - task: Bash@3
     displayName: Run SPM integration test script
