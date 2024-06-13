@@ -33,7 +33,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     let correlationId = UUID()
     let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
                                                                                authority: MSALCIAMAuthority(url: URL(string: (ProcessInfo.processInfo.environment["authorityURL"] ?? "<mock api url not set>") + "/test")!),
-                                                                               challengeTypes: [.password, .oob, .redirect])
+                                                                               challengeTypes: [.password, .oob, .redirect], redirectUri: nil)
     var sut: MSIDHttpRequest!
     
     override func tearDown() {
@@ -76,7 +76,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         try await mockResponse(response, endpoint: endpoint)
         let response: Error = try await perform_uncheckedTestFail()
 
-        XCTAssertEqual(response.error?.rawValue, expectedError.error?.rawValue)
+        XCTAssertEqual(response.error.rawValue, expectedError.error.rawValue)
 
         // TODO: Fix these checks
         if expectedError.errorDescription != nil {
