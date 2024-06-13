@@ -103,7 +103,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
-        XCTAssertTrue(signInVerifyCodeDelegateSpy.error?.isInvalidCode ?? false)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.error?.isInvalidCode, true)
     }
 
     // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
