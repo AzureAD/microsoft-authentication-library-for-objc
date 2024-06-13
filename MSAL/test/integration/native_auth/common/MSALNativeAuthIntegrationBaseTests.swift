@@ -31,9 +31,14 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     var defaultTimeout: TimeInterval = 5
     let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
-    let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(clientId: UUID().uuidString,
-                                                                               authority: MSALCIAMAuthority(url: URL(string: (ProcessInfo.processInfo.environment["authorityURL"] ?? "<mock api url not set>") + "/test")!),
-                                                                               challengeTypes: [.password, .oob, .redirect], redirectUri: nil)
+    let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(
+        clientId: UUID().uuidString,
+        authority: MSALCIAMAuthority(url:
+                                        URL(string: (ProcessInfo.processInfo.environment["authorityURL"] ?? "<mock api url not set>") + "/testTenant")!),
+                                                                               
+        challengeTypes: [.password, .oob, .redirect],
+        redirectUri: nil
+    )
     var sut: MSIDHttpRequest!
     
     override func tearDown() {
