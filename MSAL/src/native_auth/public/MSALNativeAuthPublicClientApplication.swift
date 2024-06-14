@@ -153,20 +153,24 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let telemetry: TelemetryKit
 
         do {
-            telemetry = try TelemetryKit(sdk: .oneDs)
+            telemetry = try TelemetryKit(
+                sdk: .openTelemetry,
+                tenantToken: "f6467ed73bdd47528a3b6d78f93b1eea-de7b8fbe-17ba-4b62-8d93-ff348afa2162-7691"
+            )
         } catch {
             print(error)
             fatalError()
         }
 
         let eventProperties = TKEventProperties(
-            name: "DJB-Sample-Event",
+            name: "DJB-Sample-Event-1",
             properties: [
-                "sample-djb": "This is a test",
-                "test": "this is another test"
+                "key_boolean": true,
+                "key_number": 1234,
+                "key_string": "Hello"
             ]
         )
-        telemetry.logSampleEvent(eventProperties)
+        telemetry.logEvent(eventProperties)
 
 //        telemetryKitSwift.doTelemetry()
 //        telemetryKitSwift.doTelemetryFromObjc()
