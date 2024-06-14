@@ -62,8 +62,6 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
     }
 
     func test_resetPasswordContinue_unauthorizedClient() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .resetPasswordContinue,
             response: .unauthorizedClient,
@@ -76,16 +74,6 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
             endpoint: .resetPasswordContinue,
             response: .expiredToken,
             expectedError: createResetPasswordContinueError(error: .expiredToken)
-        )
-    }
-
-    func test_resetPasswordContinue_invalidContinuationToken() async throws {
-        throw XCTSkip()
-        
-        try await perform_testFail(
-            endpoint: .resetPasswordContinue,
-            response: .invalidContinuationToken,
-            expectedError: createResetPasswordContinueError(error: .invalidRequest)
         )
     }
 
@@ -102,16 +90,6 @@ final class MSALNativeAuthResetPasswordContinueIntegrationTests: MSALNativeAuthI
             endpoint: .resetPasswordContinue,
             response: .invalidOOBValue,
             expectedError: createResetPasswordContinueError(error: .invalidGrant, subError: .invalidOOBValue)
-        )
-    }
-
-    func test_resetPasswordContinue_verificationRequired() async throws {
-        throw XCTSkip()
-        
-        try await perform_testFail(
-            endpoint: .resetPasswordContinue,
-            response: .verificationRequired,
-            expectedError: createResetPasswordContinueError(error: .verificationRequired)
         )
     }
 
