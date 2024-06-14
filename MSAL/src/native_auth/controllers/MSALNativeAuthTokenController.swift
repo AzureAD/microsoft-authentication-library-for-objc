@@ -34,6 +34,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
     private let requestProvider: MSALNativeAuthTokenRequestProviding
     private let responseValidator: MSALNativeAuthTokenResponseValidating
     private let cacheAccessor: MSALNativeAuthCacheInterface
+    // let telemetry: Telemetry - should be added at this level
 
     init(
         clientId: String,

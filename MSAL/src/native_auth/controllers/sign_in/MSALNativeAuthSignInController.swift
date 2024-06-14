@@ -32,6 +32,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
+    private let telemetry: Telemetry
 
     // MARK: - Init
 
@@ -42,10 +43,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
-        tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
+        telemetry: Telemetry
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
+        self.telemetry = telemetry
         super.init(
             clientId: clientId,
             requestProvider: tokenRequestProvider,
@@ -68,7 +71,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 factory: factory,
-                msidValidator: MSIDTokenResponseValidator())
+                msidValidator: MSIDTokenResponseValidator()
+            ),
+            telemetry: MSALNativeAuthTelemetry.shared
         )
     }
 
@@ -88,10 +93,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
         switch result {
         case .success(let challengeValidatedResponse):
+            telemetry.logEvent(TelemetryEvent.initiate.build(.ok))
             return await handleChallengeResponse(challengeValidatedResponse, params: params, telemetryInfo: telemetryInfo)
         case .failure(let error):
+            let error = error.convertToSignInStartError(correlationId: params.context.correlationId())
+            telemetry.logEvent(TelemetryEvent.initiate.build(.error(description: error.errorDescription)))
             return .init(
-                .error(error.convertToSignInStartError(correlationId: params.context.correlationId())),
+                .error(error),
                 correlationId: params.context.correlationId()
             )
         }
@@ -305,12 +313,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let result = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
         switch result {
         case .passwordRequired:
+            telemetry.logEvent(TelemetryEvent.challenge.build(.ok, properties: ["isPasswordRequired": true, "isResend": true]))
             let error = ResendCodeError(correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .error(let challengeError):
             let error = challengeError.convertToResendCodeError(correlationId: context.correlationId())
+            telemetry.logEvent(TelemetryEvent.challenge.build(.error(description: error.errorDescription), properties: ["isResend": true]))
             MSALLogger.log(level: .error, context: context, format: "SignIn ResendCode: received challenge error response: \(challengeError)")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
@@ -322,6 +332,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     correlationId: context.correlationId())
             ), correlationId: context.correlationId())
         case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
+            telemetry.logEvent(TelemetryEvent.challenge.build(.ok, properties: ["isCodeRequired": true, "isResend": true]))
             let state = SignInCodeRequiredState(
                 scopes: scopes,
                 controller: self,
@@ -439,6 +450,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         switch response {
         case .success(let tokenResponse):
+            telemetry.logEvent(TelemetryEvent.token.build(.ok))
             return handleMSIDTokenResponse(
                 tokenResponse: tokenResponse,
                 context: telemetryInfo.context,
@@ -449,6 +461,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
         case .error(let errorType):
             let error = errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId())
+            telemetry.logEvent(TelemetryEvent.token.build(.error(description: error.errorDescription)))
             MSALLogger.log(level: .error,
                            context: telemetryInfo.context,
                            format: "SignIn completed with errorType: \(error.errorDescription ?? "No error description")")
@@ -615,6 +628,28 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Challenge Request: \(error)")
             return nil
+        }
+    }
+}
+
+extension MSALNativeAuthSignInController {
+
+    enum TelemetryEvent {
+        case initiate, challenge, token
+
+        var name: String {
+            switch self {
+            case .initiate:
+                return "signinstart"
+            case .challenge:
+                return "signinchallenge"
+            case .token:
+                return "signintoken"
+            }
+        }
+
+        func build(_ status: MSALNativeAuthTelemetryEvent.Status, properties: [String: Any] = [:]) -> MSALNativeAuthTelemetryEvent {
+            return MSALNativeAuthTelemetryEvent(name: name, status: status, properties: properties)
         }
     }
 }
