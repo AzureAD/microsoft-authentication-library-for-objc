@@ -149,10 +149,27 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     }
 
     public override func performTelemetry() {
-        let telemetryKitSwift = TelemetryKit(sdk: .openTelemetry)
 
-        telemetryKitSwift.doTelemetry()
-        telemetryKitSwift.doTelemetryFromObjc()
+        let telemetry: TelemetryKit
+
+        do {
+            telemetry = try TelemetryKit(sdk: .oneDs)
+        } catch {
+            print(error)
+            fatalError()
+        }
+
+        let eventProperties = TKEventProperties(
+            name: "DJB-Sample-Event",
+            properties: [
+                "sample-djb": "This is a test",
+                "test": "this is another test"
+            ]
+        )
+        telemetry.logSampleEvent(eventProperties)
+
+//        telemetryKitSwift.doTelemetry()
+//        telemetryKitSwift.doTelemetryFromObjc()
 
 //        let telemetryKitObj = TelemetryKitObjc()
 //        telemetryKitObj.doTelemetryObjc()
