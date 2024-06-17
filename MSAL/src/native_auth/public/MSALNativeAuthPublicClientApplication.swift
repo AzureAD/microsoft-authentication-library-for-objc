@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
-import TelemetryKit
+//import TelemetryKit
 
 /// Main interface to interact with the Native Auth methods
 ///
@@ -150,33 +150,27 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     public override func performTelemetry() {
 
-        let telemetry: TelemetryKit
-
-        do {
-            telemetry = try TelemetryKit(
-                sdk: .openTelemetry,
-                tenantToken: "f6467ed73bdd47528a3b6d78f93b1eea-de7b8fbe-17ba-4b62-8d93-ff348afa2162-7691"
-            )
-        } catch {
-            print(error)
-            fatalError()
-        }
-
-        let eventProperties = TKEventProperties(
-            name: "DJB-Sample-Event-1",
-            properties: [
-                "key_boolean": true,
-                "key_number": 1234,
-                "key_string": "Hello"
-            ]
-        )
-        telemetry.logEvent(eventProperties)
-
-//        telemetryKitSwift.doTelemetry()
-//        telemetryKitSwift.doTelemetryFromObjc()
-
-//        let telemetryKitObj = TelemetryKitObjc()
-//        telemetryKitObj.doTelemetryObjc()
+//        let telemetry: TelemetryKit
+//
+//        do {
+//            telemetry = try TelemetryKit(
+//                sdk: .openTelemetry,
+//                tenantToken: "f6467ed73bdd47528a3b6d78f93b1eea-de7b8fbe-17ba-4b62-8d93-ff348afa2162-7691"
+//            )
+//        } catch {
+//            print(error)
+//            fatalError()
+//        }
+//
+//        let eventProperties = TKEventProperties(
+//            name: "DJB-Sample-Event-1",
+//            properties: [
+//                "key_boolean": true,
+//                "key_number": 1234,
+//                "key_string": "Hello"
+//            ]
+//        )
+//        telemetry.logEvent(eventProperties)
     }
 
     // MARK: delegate methods

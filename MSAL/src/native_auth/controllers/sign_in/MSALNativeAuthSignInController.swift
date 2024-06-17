@@ -649,7 +649,7 @@ extension MSALNativeAuthSignInController {
         }
 
         func build(_ status: MSALNativeAuthTelemetryEvent.Status, properties: [String: Any] = [:]) -> MSALNativeAuthTelemetryEvent {
-            return MSALNativeAuthTelemetryEvent(name: name, status: status, properties: properties)
+            return .init(name: name, status: status, properties: properties)
         }
     }
 }

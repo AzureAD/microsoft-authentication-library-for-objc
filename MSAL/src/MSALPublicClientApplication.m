@@ -114,7 +114,10 @@
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
 
-#import "TelemetryKitObjc.h"
+@import TelemetryKit;
+
+//#import "TelemetryKitObjc.h"
+
 
 @interface MSALPublicClientApplication()
 {
@@ -189,8 +192,13 @@
 }
 
 - (void) performTelemetry {
-    TelemetryKitObjc *telemetryKitObj = [[TelemetryKitObjc alloc] init];
-    [telemetryKitObj doTelemetryObjc];
+    //TelemetryKitObjc *telemetryKitObj = [[TelemetryKitObjc alloc] init];
+    //[telemetryKitObj doTelemetryObjc];
+    NSLog(@"Calling TelemetryKit from Objc");
+    TelemetryKit *telemetry = [[TelemetryKit alloc] initWithOpenTelemetryTenantToken:@"f6467ed73bdd47528a3b6d78f93b1eea-de7b8fbe-17ba-4b62-8d93-ff348afa2162-7691"
+                                                                               error:nil];
+    [telemetry logSampleEvent];
+
 }
 
 - (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config
