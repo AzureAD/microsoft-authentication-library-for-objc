@@ -1,5 +1,6 @@
-TBD:
+## [1.4.0]:
 * Add platform sequence param. #2192
+* Native auth can now store multiple access tokens related to different resources.
 
 ## [1.3.3]
 * Update common core submodule.
