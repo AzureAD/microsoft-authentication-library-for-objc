@@ -34,12 +34,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let unknownUsername = UUID().uuidString
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.userNotFound, endpoint: .signInToken)
-        }
-
         sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -55,12 +49,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.invalidPassword, endpoint: .signInToken)
-        }
 
         sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
@@ -79,12 +67,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 

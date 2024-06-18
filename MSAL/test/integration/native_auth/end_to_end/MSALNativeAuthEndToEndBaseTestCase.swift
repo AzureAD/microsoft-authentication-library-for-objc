@@ -26,7 +26,6 @@ import XCTest
 import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
-    let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
     var defaultTimeout: TimeInterval = 5
 
@@ -38,22 +37,14 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let authorityURLString = ProcessInfo.processInfo.environment["authorityURL"] ?? "<authorityURL not set>"
     }
 
-    func mockResponse(_ response: MockAPIResponse, endpoint: MockAPIEndpoint) async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: endpoint,
-            correlationId: correlationId,
-            responses: [response]
-        )
-    }
-
     override func tearDown() {
-        try? mockAPIHandler.clearQueues(correlationId: correlationId)
+        
     }
 
     override func setUpWithError() throws {
         try super.setUpWithError()
         let useMockAPIBooleanString = ProcessInfo.processInfo.environment["useMockAPI"] ?? "false"
-        usingMockAPI = Bool(useMockAPIBooleanString) ?? false
+        usingMockAPI = false
         
         // mock API URL needs to contains a tenant
         guard let authorityURL = URL(string: Configuration.authorityURLString + (usingMockAPI ? "/testTenant" : "")), let authority = try? MSALCIAMAuthority(url: authorityURL) else {

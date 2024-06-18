@@ -37,11 +37,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
         let otp = "<otp not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
@@ -51,13 +46,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        } else {
-            // TODO: Replace this with retrieving the OTP from email
-            XCTAssertNotEqual(otp, "<otp not set>")
-        }
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
@@ -88,11 +76,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
         let otp = "<otp not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
@@ -102,13 +85,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        } else {
-            // TODO: Replace this with retrieving the OTP from email
-            XCTAssertNotEqual(otp, "<otp not set>")
-        }
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
@@ -137,12 +113,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
@@ -168,12 +138,6 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 

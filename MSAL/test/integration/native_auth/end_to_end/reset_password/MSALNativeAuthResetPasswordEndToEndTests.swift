@@ -39,10 +39,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprStartSuccess, endpoint: .resetPasswordStart)
-        }
-
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
@@ -56,10 +52,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprContinueSuccess, endpoint: .resetPasswordContinue)
-        }
-
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
         await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
@@ -68,10 +60,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
-
-        if usingMockAPI {
-            try await mockResponse(.ssprSubmitSuccess, endpoint: .resetPasswordSubmit)
-        }
 
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
@@ -84,10 +72,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprStartSuccess, endpoint: .resetPasswordStart)
-        }
-
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
@@ -101,10 +85,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprContinueSuccess, endpoint: .resetPasswordContinue)
-        }
-
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
         await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
@@ -113,10 +93,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
-
-        if usingMockAPI {
-            try await mockResponse(.ssprSubmitSuccess, endpoint: .resetPasswordSubmit)
-        }
 
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
@@ -127,10 +103,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         let signInAfterResetPasswordExp = expectation(description: "sign in after reset password")
         let signInAfterResetPasswordDelegate = SignInAfterResetPasswordDelegateSpy(expectation: signInAfterResetPasswordExp)
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(delegate: signInAfterResetPasswordDelegate)
 

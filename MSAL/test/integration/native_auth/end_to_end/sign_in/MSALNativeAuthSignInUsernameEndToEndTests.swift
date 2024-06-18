@@ -34,10 +34,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let unknownUsername = UUID().uuidString
 
-        if usingMockAPI {
-            try await mockResponse(.userNotFound, endpoint: .signInInitiate)
-        }
-
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -53,11 +49,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
@@ -78,11 +69,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -92,10 +78,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        if usingMockAPI {
-            try await mockResponse(.invalidOOBValue, endpoint: .signInToken)
-        }
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy)
 
@@ -118,11 +100,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
         let otp = "<otp not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -132,13 +109,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        } else {
-            // TODO: Replace this with retrieving the OTP from email
-            XCTAssertNotEqual(otp, "<otp not set>")
-        }
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
@@ -158,11 +128,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -181,11 +146,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -194,10 +154,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
 
         // Now submit the password..
-
-        if usingMockAPI {
-            try await mockResponse(.invalidPassword, endpoint: .signInToken)
-        }
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
 
@@ -219,11 +175,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation], timeout: 2)
@@ -232,10 +183,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
 
         // Now submit the password..
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
 

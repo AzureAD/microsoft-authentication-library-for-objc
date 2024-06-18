@@ -40,11 +40,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
-
         sut.signUp(
             username: usernamePassword,
             password: password,
@@ -60,10 +55,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
@@ -73,10 +64,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
@@ -88,11 +75,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
 
         sut.signUp(
             username: usernamePassword,
@@ -110,10 +92,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
@@ -123,10 +101,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
@@ -138,11 +112,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     func test_signUpWithPassword_withEmailVerificationAsFirstStep_succeeds() async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
 
         sut.signUp(
             username: usernamePassword,
@@ -159,11 +128,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let credentialRequiredExp = expectation(description: "credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: credentialRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.credentialRequired, endpoint: .signUpContinue)
-            try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [credentialRequiredExp], timeout: defaultTimeout)
@@ -173,10 +137,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let attributesRequiredExp = expectation(description: "attributes required")
         let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: attributesRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
@@ -191,10 +151,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpPasswordDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
@@ -205,11 +161,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
 
         sut.signUp(
             username: usernamePassword,
@@ -226,11 +177,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let submitCodeExp = expectation(description: "submit code, credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        if usingMockAPI {
-            try await mockResponse(.credentialRequired, endpoint: .signUpContinue)
-            try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
@@ -240,10 +186,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let passwordRequiredExp = expectation(description: "password required")
         let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
@@ -258,10 +200,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let attributesRequiredExp = expectation(description: "attributes required, sign-up complete")
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpPasswordDelegate.attributesRequiredState?.submitAttributes(
             attributes: attributes,
             delegate: signUpAttributesRequiredDelegate
@@ -275,10 +213,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
@@ -289,11 +223,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
 
         sut.signUp(
             username: usernamePassword,
@@ -310,11 +239,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let submitCodeExp = expectation(description: "submit code, credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        if usingMockAPI {
-            try await mockResponse(.credentialRequired, endpoint: .signUpContinue)
-            try await mockResponse(.challengeTypePassword, endpoint: .signUpChallenge)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
@@ -324,10 +248,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let attributesRequiredExp1 = expectation(description: "attributes required 1")
         let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: attributesRequiredExp1)
-
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
             password: "1234",
@@ -342,10 +262,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let attributesRequiredExp2 = expectation(description: "attributes required 2, sign-up complete")
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesRequiredExp2)
 
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
-
         signUpPasswordDelegate.attributesRequiredState?.submitAttributes(
             attributes: attributes,
             delegate: signUpAttributesRequiredDelegate
@@ -358,10 +274,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         signUpAttributesRequiredDelegate.expectation = signUpCompleteExp
-
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
 
         signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
             attributes: attributes,
@@ -376,10 +288,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
@@ -390,11 +298,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
 
         sut.signUp(
             username: usernamePassword,
@@ -410,10 +313,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
