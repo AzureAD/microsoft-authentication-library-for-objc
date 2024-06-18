@@ -28,10 +28,14 @@ import XCTest
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
     private let usernameOTP = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
+    
+    func test_readConfJson() {
+        guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
+            XCTFail()
+            return
+        }
+        let confDictionary = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
+        XCTAssertNotNil(confDictionary?["certificate_data"])
     }
     
     // Hero Scenario 2.3.1. SSPR – without automatic sign in
