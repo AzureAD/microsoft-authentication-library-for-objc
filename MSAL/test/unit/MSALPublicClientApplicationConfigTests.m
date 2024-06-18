@@ -78,6 +78,7 @@
     XCTAssertNil(config.sliceConfig.slice);
     XCTAssertNil(config.sliceConfig);
     XCTAssertNotNil(config.cacheConfig);
+    XCTAssertEqual(config.bypassRedirectURIValidation, NO);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(config.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
@@ -104,6 +105,7 @@
     XCTAssertNil(copiedConfig.sliceConfig.slice);
     XCTAssertNil(copiedConfig.sliceConfig);
     XCTAssertNotNil(copiedConfig.cacheConfig);
+    XCTAssertEqual(copiedConfig.bypassRedirectURIValidation, NO);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(copiedConfig.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
@@ -124,6 +126,7 @@
     config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:@"myslice" dc:@"mydc"];
     config.cacheConfig.keychainSharingGroup = @"my.test.group";
     config.extendedLifetimeEnabled = YES;
+    config.bypassRedirectURIValidation = YES;
     
     MSALPublicClientApplicationConfig *copiedConfig = [config copy];
     XCTAssertNotNil(copiedConfig);
@@ -140,6 +143,7 @@
     XCTAssertEqualObjects(copiedConfig.sliceConfig.slice, @"myslice");
     XCTAssertNotNil(copiedConfig.sliceConfig);
     XCTAssertNotNil(copiedConfig.cacheConfig);
+    XCTAssertEqual(copiedConfig.bypassRedirectURIValidation, YES);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(copiedConfig.cacheConfig.keychainSharingGroup, @"my.test.group");
 #endif

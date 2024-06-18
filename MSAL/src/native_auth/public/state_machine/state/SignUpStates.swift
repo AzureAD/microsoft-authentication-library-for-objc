@@ -138,7 +138,7 @@ public class SignUpBaseState: MSALNativeAuthBaseState {
     ) {
         Task {
             let controllerResponse = await submitAttributesInternal(attributes: attributes)
-            
+
             let delegateDispatcher = SignUpAttributesRequiredDelegateDispatcher(
                 delegate: delegate,
                 telemetryUpdate: controllerResponse.telemetryUpdate

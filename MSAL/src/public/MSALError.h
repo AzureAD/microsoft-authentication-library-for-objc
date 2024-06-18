@@ -478,7 +478,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      JIT - Troubleshooting - Acquire token error
      */
-    MSALErrorJITTroubleshootingAcquireToken          = -42732,
+    MSALErrorJITTroubleshootingAcquireToken             = -42732,
     
     /**
      JIT - Link - Timeout while waiting for server confirmation.
@@ -493,7 +493,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      JIT - Troubleshooting - Result unknown
      */
-    MSALErrorJITTroubleshootingResultUnknown         = -42735,
+    MSALErrorJITTroubleshootingResultUnknown            = -42735,
     
     /**
      Device is not PSSO registered
@@ -504,4 +504,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      // In PSSO, KeyId stored in passkey provider storage does not match NGC key, needs to configure and retry
      */
     MSALErrorPSSOKeyIdMismatch                         = -42737,
+    
+    /**
+     JIT - Error Handling config invalid or not found
+     */
+    MSALErrorJITErrorHandlingConfigNotFound             = -42738,
 };

@@ -37,7 +37,7 @@ extension ResetPasswordCodeRequiredState {
         guard inputValidator.isInputValid(code) else {
             MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
             return .init(
-                .error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self), 
+                .error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self),
                 correlationId: correlationId
             )
         }
@@ -54,7 +54,7 @@ extension ResetPasswordRequiredState {
         guard inputValidator.isInputValid(password) else {
             MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
             return .init(
-                .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self), 
+                .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self),
                 correlationId: correlationId
             )
         }
