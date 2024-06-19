@@ -63,4 +63,9 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
         return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
     }
+    
+    func generateRandomEmail() -> String {
+        let randomId = UUID().uuidString.prefix(8)
+        return "native-auth-signup-\(randomId)@1secmail.org "
+    }
 }
