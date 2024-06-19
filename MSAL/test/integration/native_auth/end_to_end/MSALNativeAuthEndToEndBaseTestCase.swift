@@ -36,9 +36,6 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     class Configuration: NSObject {
         static let clientId = ProcessInfo.processInfo.environment["clientId"] ?? "<clientId not set>"
         static let authorityURLString = ProcessInfo.processInfo.environment["authorityURL"] ?? "<authorityURL not set>"
-        static let authorityURL = URL(string: authorityURLString) ?? URL(string: "https://microsoft.com")
-
-        static let authority = try? MSALCIAMAuthority(url: authorityURL!)
     }
 
     func mockResponse(_ response: MockAPIResponse, endpoint: MockAPIEndpoint) async throws {
@@ -55,18 +52,23 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
 
     override func setUpWithError() throws {
         try super.setUpWithError()
+        let useMockAPIBooleanString = ProcessInfo.processInfo.environment["useMockAPI"] ?? "false"
+        usingMockAPI = Bool(useMockAPIBooleanString) ?? false
+        
+        // mock API URL needs to contains a tenant
+        guard let authorityURL = URL(string: Configuration.authorityURLString + (usingMockAPI ? "/testTenant" : "")), let authority = try? MSALCIAMAuthority(url: authorityURL) else {
+            XCTFail("AuthorityURL not set or invalid")
+            return
+        }
 
         sut = try MSALNativeAuthPublicClientApplication(
             configuration: MSALPublicClientApplicationConfig(
                 clientId: Configuration.clientId,
                 redirectUri: nil,
-                authority: Configuration.authority
+                authority: authority
             ),
             challengeTypes: [.OOB, .password]
         )
-
-        let useMockAPIBooleanString = ProcessInfo.processInfo.environment["useMockAPI"] ?? "false"
-        usingMockAPI = Bool(useMockAPIBooleanString) ?? false
 
         if usingMockAPI {
             print("🤖🤖🤖 Using mock API: \(Configuration.authorityURLString)")
