@@ -26,45 +26,41 @@ import XCTest
 import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
+    class Constants {
+        static let nativeAuthKey = "native_auth"
+        static let clientIdEmailPasswordKey = "email_password_client_id"
+        static let clientIdEmailCodeKey = "email_code_client_id"
+        static let tenantSubdomainKey = "tenant_subdomain"
+        static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
+        static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        static let resetPasswordUsernameKey = "reset_password_username"
+    }
+    
     let correlationId = UUID()
-    var defaultTimeout: TimeInterval = 5
+    let defaultTimeout: TimeInterval = 20
 
-    var sut: MSALNativeAuthPublicClientApplication!
-    var usingMockAPI = false
-
-    class Configuration: NSObject {
-        static let clientId = ProcessInfo.processInfo.environment["clientId"] ?? "<clientId not set>"
-        static let authorityURLString = ProcessInfo.processInfo.environment["authorityURL"] ?? "<authorityURL not set>"
-    }
-
-    override func tearDown() {
-        
-    }
+    private var confFileContent: [String: String]? = nil
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let useMockAPIBooleanString = ProcessInfo.processInfo.environment["useMockAPI"] ?? "false"
-        usingMockAPI = false
         
-        // mock API URL needs to contains a tenant
-        guard let authorityURL = URL(string: Configuration.authorityURLString + (usingMockAPI ? "/testTenant" : "")), let authority = try? MSALCIAMAuthority(url: authorityURL) else {
-            XCTFail("AuthorityURL not set or invalid")
+        guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
+            XCTFail("conf.json file not found")
             return
         }
-
-        sut = try MSALNativeAuthPublicClientApplication(
-            configuration: MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: authority
-            ),
-            challengeTypes: [.OOB, .password]
-        )
-
-        if usingMockAPI {
-            print("🤖🤖🤖 Using mock API: \(Configuration.authorityURLString)")
-        } else {
-            print("👩‍💻👩‍💻👩‍💻 Using test tenant: \(Configuration.authorityURLString)")
+        let confFile = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
+        confFileContent = confFile?[Constants.nativeAuthKey] as? [String: String]
+    }
+    
+    func initialisePublicClientApplication(
+        useEmailPasswordClientId: Bool = true,
+        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
+    ) -> MSALNativeAuthPublicClientApplication? {
+        let clientIdKey = useEmailPasswordClientId ? Constants.clientIdEmailPasswordKey : Constants.clientIdEmailCodeKey
+        guard let clientId = confFileContent?[clientIdKey] as? String, let tenantSubdomain = confFileContent?[Constants.tenantSubdomainKey] as? String else {
+            XCTFail("ClientId or tenantSubdomain not found in conf.json")
+            return nil
         }
+        return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
     }
 }

@@ -29,14 +29,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     private let usernamePassword = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
     private let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
     private let attributes = ["age": 40]
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
-    }
     
     // Hero Scenario 2.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -73,6 +71,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.2. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -110,6 +111,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.3. Sign up - with Email verification as FIRST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsFirstStep_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -159,6 +163,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.4. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -221,6 +228,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.5. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -296,6 +306,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.6. Sign up – without automatic sign in (Email & Password)
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 

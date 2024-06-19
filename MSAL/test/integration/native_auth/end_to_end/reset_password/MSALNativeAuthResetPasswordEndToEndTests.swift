@@ -29,17 +29,11 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     private let usernameOTP = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
     
-    func test_readConfJson() {
-        guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
-            XCTFail()
-            return
-        }
-        let confDictionary = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
-        XCTAssertNotNil(confDictionary?["certificate_data"])
-    }
-    
     // Hero Scenario 2.3.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -73,6 +67,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 

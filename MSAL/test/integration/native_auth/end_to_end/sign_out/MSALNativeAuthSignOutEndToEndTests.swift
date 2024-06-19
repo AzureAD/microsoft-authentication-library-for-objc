@@ -27,7 +27,9 @@ import XCTest
 
 final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     func test_noSignOutAfterSignInOTPAccountStillPresent() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
@@ -66,7 +68,9 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     // Hero Scenario 1.3.1. Sign out – Local sign out from app on device (no SSO)
     
     func test_signOutAfterSignInOTPSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let verifyCodeExpectation = expectation(description: "verifying code")
@@ -105,7 +109,9 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     }
 
     func test_noSignOutAfterSignInPasswordAccountStillPresent() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
@@ -131,7 +137,9 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
 
     func test_signOutAfterSignInPasswordSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication() else {
+            return
+        }
         
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
