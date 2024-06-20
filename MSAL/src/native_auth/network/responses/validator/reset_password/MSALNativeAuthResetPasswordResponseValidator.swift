@@ -140,7 +140,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
 
     private func handleChallengeError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         guard let apiError = error as? MSALNativeAuthResetPasswordChallengeResponseError else {
-            MSALLogger.log(level: .info, context: context, format: "resetpassword/challenge: Unable to decode error response: \(error)")
+            MSALLogger.log(level: .error, context: context, format: "resetpassword/challenge: Unable to decode error response: \(error)")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
         if apiError.error == .unknown {

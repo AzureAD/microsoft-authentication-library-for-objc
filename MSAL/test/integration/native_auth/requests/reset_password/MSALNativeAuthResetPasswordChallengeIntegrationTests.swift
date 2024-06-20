@@ -75,8 +75,6 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
     }
 
     func test_resetPasswordChallenge_unauthorizedClient() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .resetPasswordChallenge,
             response: .unauthorizedClient,
@@ -89,16 +87,6 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
             endpoint: .resetPasswordChallenge,
             response: .expiredToken,
             expectedError: createError(.expiredToken)
-        )
-    }
-
-    func test_resetPasswordChallenge_invalidContinuationToken() async throws {
-        throw XCTSkip()
-        
-        try await perform_testFail(
-            endpoint: .resetPasswordChallenge,
-            response: .invalidContinuationToken,
-            expectedError: createError(.invalidRequest)
         )
     }
 

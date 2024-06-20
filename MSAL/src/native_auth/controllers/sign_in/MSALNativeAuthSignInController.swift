@@ -77,7 +77,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     func signIn(params: MSALNativeAuthSignInParameters) async -> SignInControllerResponse {
         let eventId: MSALNativeAuthTelemetryApiId =
         params.password == nil ? .telemetryApiIdSignInWithCodeStart : .telemetryApiIdSignInWithPasswordStart
-        MSALLogger.log(level: .verbose, context: params.context, format: "SignIn started")
+        MSALLogger.log(level: .info, context: params.context, format: "SignIn started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: eventId, context: params.context),
             context: params.context
@@ -103,7 +103,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String]?,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn after previous flow started")
+        MSALLogger.log(level: .info, context: context, format: "SignIn after previous flow started")
         let telemetryInfo = TelemetryInfo(
             event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
             context: context
@@ -469,7 +469,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
 
             if let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) {
-                MSALLogger.log(level: .verbose, context: context, format: "SignIn completed successfully")
+                MSALLogger.log(level: .info, context: context, format: "SignIn completed successfully")
                 telemetryInfo.event?.setUserInformation(tokenResult.account)
                 stopTelemetryEvent(telemetryInfo)
                 onSuccess(userAccountResult)

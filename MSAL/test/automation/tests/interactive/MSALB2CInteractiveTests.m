@@ -121,7 +121,7 @@
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.requestIDP = @"Microsoft";
+    request.requestIDP = @"MSA";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
@@ -155,7 +155,7 @@
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.requestIDP = @"Microsoft";
+    request.requestIDP = @"MSA";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
@@ -186,7 +186,7 @@
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
-    request.requestIDP = @"Microsoft";
+    request.requestIDP = @"MSA";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
@@ -220,7 +220,7 @@
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.usePassedWebView = YES;
-    request.requestIDP = @"Microsoft";
+    request.requestIDP = @"MSA";
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;

@@ -63,9 +63,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
         XCTAssertEqual(response?.challengeType, .redirect)
     }
 
-    func test_signUpStart_unauthorizedClient() async throws {
-        throw XCTSkip()
-        
+    func test_signUpStart_unauthorizedClient() async throws {        
         try await perform_testFail(
             endpoint: .signUpStart,
             response: .unauthorizedClient,
