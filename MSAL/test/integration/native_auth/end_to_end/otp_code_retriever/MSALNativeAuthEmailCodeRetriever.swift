@@ -27,7 +27,7 @@ import XCTest
 class MSALNativeAuthEmailCodeRetriever: XCTestCase {
 
     private let baseURLString = "https://www.1secmail.com/api/v1/?action="
-    private let secondsToWait = 2.5
+    private let secondsToWait = 4.0
     private let numberOfRetry = 3
 
     func retrieveEmailOTPCode(email: String) async -> String? {

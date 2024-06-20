@@ -40,6 +40,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     let defaultTimeout: TimeInterval = 20
 
     private var confFileContent: [String: String]? = nil
+    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -66,6 +67,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     func generateRandomEmail() -> String {
         let randomId = UUID().uuidString.prefix(8)
-        return "native-auth-signup-\(randomId)@1secmail.org "
+        return "native-auth-signup-\(randomId)@1secmail.org"
+    }
+    
+    func retrieveCodeFor(email: String) async -> String? {
+        return await codeRetriever.retrieveEmailOTPCode(email: email)
     }
 }
