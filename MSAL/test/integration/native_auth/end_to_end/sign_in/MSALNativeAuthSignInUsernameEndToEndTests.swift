@@ -27,44 +27,26 @@ import XCTest
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     func test_signInWithUnknownUsernameResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
             return
         }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        let unknownUsername = UUID().uuidString
+        let unknownUsername = UUID().uuidString + "@contoso.com"
 
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
-    func test_signInWithKnownUsernameResultsInOTPSent() async throws {
-        guard let sut = initialisePublicClientApplication() else {
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
-        XCTAssertNotNil(signInDelegateSpy.sentTo)
-    }
-
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        throw XCTSkip("Skipping this test because email+code signIn username is missing")
+        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
             return
         }
 
@@ -73,21 +55,24 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
 
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
+        let username = "missing email+code signIn username"
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
+        guard signInDelegateSpy.onSignInCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "00000000", delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
@@ -96,7 +81,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        throw XCTSkip("Skipping this test because email+code signIn username is missing")
+        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
             return
         }
 
@@ -110,7 +96,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -120,90 +106,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
         XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
-    }
-
-    func test_signInWithKnownPasswordUsernameResultsInPasswordSent() async throws {
-        guard let sut = initialisePublicClientApplication() else {
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-    }
-
-    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication() else {
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
-    }
-
-    // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
-    func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
-        guard let sut = initialisePublicClientApplication() else {
-            return
-        }
-        
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.account.username, username)
     }
 }

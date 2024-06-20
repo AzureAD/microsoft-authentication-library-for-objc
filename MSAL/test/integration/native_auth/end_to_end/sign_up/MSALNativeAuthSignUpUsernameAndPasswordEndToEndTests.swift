@@ -225,6 +225,38 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [signInExp], timeout: defaultTimeout)
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
+    
+    // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
+    func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            return
+        }
+        
+        let signInExpectation = expectation(description: "signing in")
+        let passwordRequiredExpectation = expectation(description: "verifying password")
+        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
+        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
+
+        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
+        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
+
+        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
+        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
+
+        // Now submit the password..
+
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
+
+        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.account.username, username)
+    }
 
     // Hero Scenario 2.1.5. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
@@ -331,6 +363,35 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+    }
+    
+    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
+        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            return
+        }
+
+        let signInExpectation = expectation(description: "signing in")
+        let passwordRequiredExpectation = expectation(description: "verifying password")
+        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
+        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
+
+        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
+
+        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
+        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
+
+        // Now submit the password..
+
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
+
+        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
+        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
     }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
