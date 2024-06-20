@@ -304,7 +304,5 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertEqual(delegate.result?.account.username, usernameOTP)
         XCTAssertNotNil(delegate.result?.idToken)
         XCTAssertNil(delegate.result?.account.accountClaims)
-        XCTAssertEqual(delegate.result?.scopes[0], "openid")
-        XCTAssertEqual(delegate.result?.scopes[1], "offline_access")
     }
 }

@@ -73,8 +73,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
     }
 
     func test_signUpChallenge_unauthorizedClient() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .signUpChallenge,
             response: .unauthorizedClient,
@@ -95,16 +93,6 @@ final class MSALNativeAuthSignUpChallengeIntegrationTests: MSALNativeAuthIntegra
             endpoint: .signUpChallenge,
             response: .unsupportedChallengeType,
             expectedError: createError(.unsupportedChallengeType)
-        )
-    }
-
-    func test_signUpChallenge_invalidContinuationToken() async throws {
-        throw XCTSkip()
-        
-        try await perform_testFail(
-            endpoint: .signUpChallenge,
-            response: .invalidContinuationToken,
-            expectedError: createError(.invalidRequest)
         )
     }
 

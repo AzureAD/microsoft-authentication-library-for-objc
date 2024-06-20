@@ -34,7 +34,7 @@ struct MSALNativeAuthUserAccountResultStub {
     static var result : MSALNativeAuthUserAccountResult {
         return MSALNativeAuthUserAccountResult(
             account: account,
-            authTokens: authTokens,
+            rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: MSALNativeAuthCacheAccessorMock()
         )
@@ -47,16 +47,7 @@ struct MSALNativeAuthUserAccountResultStub {
                     tenantProfiles: [])
     }
 
-    static var authTokens: MSALNativeAuthTokens {
-        let accessToken = MSIDAccessToken()
-        accessToken.accessToken = "accessToken"
-        accessToken.expiresOn = Date()
-        accessToken.scopes = []
-        let refreshToken = MSIDRefreshToken()
-        refreshToken.refreshToken = "refreshToken"
-        return MSALNativeAuthTokens(accessToken: accessToken,
-                             refreshToken: refreshToken,
-                             rawIdToken: "idToken")
+    static var rawIdToken: String? {
+        "idToken"
     }
-
 }

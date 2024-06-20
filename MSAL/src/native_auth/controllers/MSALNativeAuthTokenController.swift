@@ -170,7 +170,7 @@ extension MSALNativeAuthTokenController {
             // If there is an account existing already in the cache, we remove it
             try clearAccount(msidConfiguration: msidConfiguration, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error clearing account \(error) (ignoring)")
+            MSALLogger.log(level: .warning, context: context, format: "Error clearing account \(error) (ignoring)")
         }
         do {
             let result = try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse,
@@ -178,7 +178,7 @@ extension MSALNativeAuthTokenController {
                                                                            context: context)
             return result
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error caching response: \(error) (ignoring)")
+            MSALLogger.log(level: .warning, context: context, format: "Error caching response: \(error) (ignoring)")
         }
         return nil
     }
@@ -194,12 +194,12 @@ extension MSALNativeAuthTokenController {
                                                   context: context)
                 }
             } else {
-                MSALLogger.log(level: .error,
+                MSALLogger.log(level: .warning,
                                context: context,
                                format: "Error creating MSIDAccountIdentifier out of MSALAccount (ignoring)")
             }
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error clearing previous account (ignoring)")
+            MSALLogger.log(level: .warning, context: context, format: "Error clearing previous account (ignoring)")
         }
     }
 

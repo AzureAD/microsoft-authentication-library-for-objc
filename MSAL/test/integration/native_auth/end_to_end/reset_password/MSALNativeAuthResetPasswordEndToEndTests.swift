@@ -81,8 +81,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
-        try XCTSkipIf(true) // TODO: Remove once we update to continuation_token
-
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
@@ -141,7 +139,5 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
         XCTAssertNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
-        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[0], "openid")
-        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.scopes[1], "offline_access")
     }
 }
