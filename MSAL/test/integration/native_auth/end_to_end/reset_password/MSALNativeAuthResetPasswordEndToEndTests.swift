@@ -31,7 +31,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     
     // Hero Scenario 2.3.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -67,7 +69,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")

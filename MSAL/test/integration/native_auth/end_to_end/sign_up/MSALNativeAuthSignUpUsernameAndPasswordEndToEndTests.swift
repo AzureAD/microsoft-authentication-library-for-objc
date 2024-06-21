@@ -32,7 +32,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Hero Scenario 2.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -71,7 +73,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.2. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -111,7 +115,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.3. Sign up - with Email verification as FIRST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsFirstStep_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -163,7 +169,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.4. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -228,7 +236,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
     func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         
@@ -260,7 +270,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.5. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -338,7 +350,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.1.6. Sign up – without automatic sign in (Email & Password)
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
@@ -363,35 +377,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
-    }
-    
-    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
     }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {

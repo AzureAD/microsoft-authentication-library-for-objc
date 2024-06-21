@@ -32,11 +32,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     // Hero Scenario 1.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateRandomEmail()
+        let usernameOTP = generateSignUpRandomEmail()
 
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
@@ -76,11 +77,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
         throw XCTSkip("Skipping this test because application with custom attributes is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateRandomEmail()
+        let usernameOTP = generateSignUpRandomEmail()
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
@@ -112,11 +114,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
         throw XCTSkip("Skipping this test because application with custom attributes is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateRandomEmail()
+        let usernameOTP = generateSignUpRandomEmail()
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
@@ -161,11 +164,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
         throw XCTSkip("Skipping this test because application with custom attributes is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateRandomEmail()
+        let usernameOTP = generateSignUpRandomEmail()
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
@@ -226,11 +230,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateRandomEmail()
+        let usernameOTP = generateSignUpRandomEmail()
         
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 

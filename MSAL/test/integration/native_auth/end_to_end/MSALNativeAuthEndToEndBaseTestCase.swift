@@ -57,9 +57,17 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     func initialisePublicClientApplication(
         useEmailPasswordClientId: Bool = true,
+        attributeRequiredClientId: Bool = false,
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
     ) -> MSALNativeAuthPublicClientApplication? {
-        let clientIdKey = useEmailPasswordClientId ? Constants.clientIdEmailPasswordKey : Constants.clientIdEmailCodeKey
+        var clientIdKey = Constants.clientIdEmailPasswordKey
+        if useEmailPasswordClientId && attributeRequiredClientId {
+            clientIdKey = Constants.clientIdEmailPasswordAttributesKey
+        } else if !useEmailPasswordClientId && attributeRequiredClientId {
+            clientIdKey = Constants.clientIdEmailCodeAttributesKey
+        } else if !useEmailPasswordClientId && !attributeRequiredClientId {
+            clientIdKey = Constants.clientIdEmailCodeKey
+        }
         guard let clientId = confFileContent?[clientIdKey] as? String, let tenantSubdomain = confFileContent?[Constants.tenantSubdomainKey] as? String else {
             XCTFail("ClientId or tenantSubdomain not found in conf.json")
             return nil
@@ -67,12 +75,16 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
     }
     
-    func generateRandomEmail() -> String {
+    func generateSignUpRandomEmail() -> String {
         let randomId = UUID().uuidString.prefix(8)
         return "native-auth-signup-\(randomId)@1secmail.org"
     }
     
     func retrieveCodeFor(email: String) async -> String? {
         return await codeRetriever.retrieveEmailOTPCode(email: email)
+    }
+    
+    func getSignInUsernamePassword() -> String? {
+        return confFileContent?[Constants.signInEmailPasswordUsernameKey]
     }
 }

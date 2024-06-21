@@ -28,6 +28,7 @@ import XCTest
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     func test_signInWithUnknownUsernameResultsInError() async throws {
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
 
@@ -47,6 +48,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
         throw XCTSkip("Skipping this test because email+code signIn username is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
 
@@ -83,6 +85,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
         throw XCTSkip("Skipping this test because email+code signIn username is missing")
         guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+            XCTFail("Missing information")
             return
         }
 

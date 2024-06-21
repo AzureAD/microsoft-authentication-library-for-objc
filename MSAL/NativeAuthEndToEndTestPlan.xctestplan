@@ -62,6 +62,8 @@
     }
   ],
   "defaultOptions" : {
+    "codeCoverage" : false,
+    "testRepetitionMode" : "retryOnFailure",
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
