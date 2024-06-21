@@ -181,7 +181,7 @@ typedef NS_ENUM(NSInteger, MSALError)
     /**
      Workplacejoin migrate device registration is required to proceed.
      */
-    MSALErrorWorkplaceJoinMigrateDevice          = -50007,
+    MSALErrorInsufficientDeviceStrength          = -50007,
 };
 
 /**

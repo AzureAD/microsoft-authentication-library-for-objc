@@ -73,7 +73,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorNoMainViewController) : @(MSALInternalErrorNoViewController),
                                    @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALInternalErrorAttemptToOpenURLFromExtension),
                                    @(MSIDErrorUINotSupportedInExtension): @(MSALInternalErrorUINotSupportedInExtension),
-
+                                   @(MSIDErrorInsufficientDeviceStrength): @(MSALErrorInsufficientDeviceStrength),
                                    // Broker errors
                                    @(MSIDErrorBrokerResponseNotReceived): @(MSALInternalErrorBrokerResponseNotReceived),
                                    @(MSIDErrorBrokerNoResumeStateFound): @(MSALInternalErrorBrokerNoResumeStateFound),
@@ -112,7 +112,6 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITTroubleshootingAcquireToken) : @(MSALErrorJITTroubleshootingAcquireToken),
                                    @(MSIDErrorDeviceNotPSSORegistered) : @(MSALErrorDeviceNotPSSORegistered),
                                    @(MSIDErrorPSSOKeyIdMismatch) : @(MSALErrorPSSOKeyIdMismatch),
-                                   @(MSIDErrorWorkplaceJoinMigrateDevice) : @(MSALErrorWorkplaceJoinMigrateDevice),
                                    @(MSIDErrorJITErrorHandlingConfigNotFound) : @(MSALErrorJITErrorHandlingConfigNotFound),
                                    
                                    // Oauth2 errors
