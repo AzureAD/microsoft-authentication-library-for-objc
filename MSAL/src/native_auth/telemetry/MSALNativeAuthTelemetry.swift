@@ -31,6 +31,7 @@ protocol Telemetry {
 
 struct MSALNativeAuthTelemetryEvent {
     enum Status {
+        // swiftlint:disable:next identifier_name
         case ok
         case unset
         case error(description: String?)
