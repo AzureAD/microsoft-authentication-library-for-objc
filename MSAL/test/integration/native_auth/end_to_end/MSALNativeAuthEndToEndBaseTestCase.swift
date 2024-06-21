@@ -30,6 +30,8 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let nativeAuthKey = "native_auth"
         static let clientIdEmailPasswordKey = "email_password_client_id"
         static let clientIdEmailCodeKey = "email_code_client_id"
+        static let clientIdEmailPasswordAttributesKey = "email_password_attributes_client_id"
+        static let clientIdEmailCodeAttributesKey = "email_code_attributes_client_id"
         static let tenantSubdomainKey = "tenant_subdomain"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"

@@ -5306,15 +5306,17 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"~/aadtests/conf.json",
 			);
 			name = "Copy conf.json file";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/scriptOutput.data",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/unit-test-host.app/PlugIns/${TARGET_NAME}.xctest\necho \"BUILD_APP_DIR: $BUILD_APP_DIR\"\necho \"PRODUCT_NAME: $PRODUCT_NAME\"\necho \"TARGET_NAME: $TARGET_NAME\"\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH \"$BUILD_APP_DIR/$FILENAME\"\nfi\n";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/unit-test-host.app/PlugIns/${TARGET_NAME}.xctest\necho \"BUILD_APP_DIR: $BUILD_APP_DIR\"\necho \"PRODUCT_NAME: $PRODUCT_NAME\"\necho \"TARGET_NAME: $TARGET_NAME\"\nif [ -e $RESOURCE_PATH ]\nthen cp -f $RESOURCE_PATH \"$BUILD_APP_DIR/$FILENAME\"\nfi\n";
 		};
 		9BFFD3092968A0A0009866FC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
