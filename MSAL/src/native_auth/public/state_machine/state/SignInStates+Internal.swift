@@ -28,7 +28,7 @@ extension SignInCodeRequiredState {
 
     func submitCodeInternal(code: String) async -> MSALNativeAuthSignInControlling.SignInSubmitCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, code submitted")
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
             MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
             return .init(.error(error: VerifyCodeError(
@@ -42,7 +42,7 @@ extension SignInCodeRequiredState {
 
     func resendCodeInternal() async -> MSALNativeAuthSignInControlling.SignInResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .verbose, context: context, format: "SignIn flow, resend code requested")
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, resend code requested")
 
         return await controller.resendCode(continuationToken: continuationToken, context: context, scopes: scopes)
     }
