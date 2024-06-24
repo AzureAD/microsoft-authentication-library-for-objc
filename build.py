@@ -64,12 +64,18 @@ target_specifiers = [
         "target" : "iosFramework"
 	},
 	{
+		"name" : "MSAL iOS Native Auth E2E Tests",
+		"scheme" : "unit-test-host",
+		"operations" : [ "build", "test" ],
+		"platform" : "iOS",
+        "target" : "MSAL\ iOS\ Native\ Auth\ E2E\ Tests"
+	},
+	{
 		"name" : "iOS Test App",
 		"scheme" : "MSAL Test App (iOS)",
 		"operations" : [ "build" ],
 		"platform" : "iOS",
         "target" : "iosTestApp"
-
 	},
 	{
 		"name" : "Sample iOS App",
