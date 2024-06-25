@@ -193,7 +193,7 @@ jobs:
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
-          -scheme "MSAL iOS Native Auth E2E Tests" \
+          -scheme "unit-test-host" \
           -sdk iphonesimulator \
           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
           -derivedDataPath 'build' \
