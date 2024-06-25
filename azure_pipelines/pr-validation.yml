@@ -110,8 +110,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        UUID_LOCAL=$(uuidgen)
-        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp-${UUID_LOCAL}"
+        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
         echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
       
   - task: Bash@3
