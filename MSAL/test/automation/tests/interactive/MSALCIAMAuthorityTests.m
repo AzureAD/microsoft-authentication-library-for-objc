@@ -63,7 +63,6 @@
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
-    NSLog(@"%@", self.primaryAccount);
     request.configurationAuthority = @"https://msidlabciam6.ciamlogin.com";
     request.expectedResultAuthority = @"https://msidlabciam6.ciamlogin.com/fe362aec-5d43-45d1-b730-9755e60dc3b9";
     request.cacheAuthority = @"https://msidlabciam6.ciamlogin.com/fe362aec-5d43-45d1-b730-9755e60dc3b9";
