@@ -44,8 +44,8 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
-    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAM;
-    accountConfigurationRequest.additionalQueryParameters = @{@"signInAudience": @"azureadmyorg",@"PublicClient": @"No"};
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAMCUD;
+    accountConfigurationRequest.additionalQueryParameters = @{@"signInAudience": @"azureadmyorg"};
     
     [self loadTestAccount:accountConfigurationRequest];
     
@@ -63,15 +63,16 @@
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
-    request.configurationAuthority = @"https://msidlabciam2.ciamlogin.com";
-    request.expectedResultAuthority = @"https://msidlabciam2.ciamlogin.com/f7416cc8-8ea1-4e5c-b230-0c978f81dfc6";
-    request.cacheAuthority = @"https://msidlabciam2.ciamlogin.com/f7416cc8-8ea1-4e5c-b230-0c978f81dfc6";
+    NSLog(@"%@", self.primaryAccount);
+    request.configurationAuthority = @"https://msidlabciam6.ciamlogin.com";
+    request.expectedResultAuthority = @"https://msidlabciam6.ciamlogin.com/fe362aec-5d43-45d1-b730-9755e60dc3b9";
+    request.cacheAuthority = @"https://msidlabciam6.ciamlogin.com/fe362aec-5d43-45d1-b730-9755e60dc3b9";
     request.acquireTokenAuthority = request.cacheAuthority;
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.promptBehavior = @"force";
     request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
    
-    // 1. Do intevractive login
+    // 1. Do interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
     
