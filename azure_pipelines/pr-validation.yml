@@ -127,9 +127,10 @@ jobs:
       targetType: 'inline'
       script: |
         sh spm-integration-test.sh "${BRANCH_NAME}"
-    continueOnError: true
+    continueOnError: false
 
   - task: Bash@3
+    condition: always()
     displayName: Cleanup
     inputs:
       targetType: 'inline'
