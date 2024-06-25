@@ -49,8 +49,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
-    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
 
+    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
         return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
@@ -74,7 +74,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         var nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: config.clientId,
             authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes
+            challengeTypes: internalChallengeTypes,
+            redirectUri: config.redirectUri
         )
         nativeConfiguration.sliceConfig = config.sliceConfig
 
@@ -108,7 +109,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         let nativeConfiguration = try MSALNativeAuthConfiguration(
             clientId: clientId,
             authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes
+            challengeTypes: internalChallengeTypes,
+            redirectUri: redirectUri
         )
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
@@ -127,10 +129,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
         // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios
         configuration.bypassRedirectURIValidation = redirectUri == nil
-        let defaultRedirectUri = String(format: "msauth.%@://auth", Bundle.main.bundleIdentifier ?? "<bundle_id>")
-        // we need to set a default redirect URI value to ensure IdentityCore checks the bypassRedirectURIValidation flag
-        configuration.redirectUri = redirectUri ?? defaultRedirectUri
-
         try super.init(configuration: configuration)
     }
 
@@ -138,7 +136,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         controllerFactory: MSALNativeAuthControllerBuildable,
         cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable,
         inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+        internalChallengeTypes: [MSALNativeAuthInternalChallengeType],
+        configuration: MSALPublicClientApplicationConfig
     ) {
         self.controllerFactory = controllerFactory
         self.cacheAccessorFactory = cacheAccessorFactory

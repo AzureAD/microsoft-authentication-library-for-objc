@@ -111,6 +111,8 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDRequestTelemetryConstants.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
+#import "NSString+MSIDTelemetryExtensions.h"
+#import "MSIDVersion.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -211,7 +213,7 @@
                                                                     bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
-    if (!msalRedirectUri)
+    if (!msalRedirectUri && !config.bypassRedirectURIValidation)
     {
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
@@ -863,6 +865,10 @@
     NSMutableDictionary *extraURLQueryParameters = [self.internalConfig.extraQueryParameters.extraURLQueryParameters mutableCopy];
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
+    
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
 
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
@@ -879,6 +885,7 @@
     // Nested auth protocol
     msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
     msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1200,6 +1207,10 @@
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
     
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
+    
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
@@ -1453,7 +1464,9 @@
     msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
-    
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
     NSError *localError;
     BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
     
