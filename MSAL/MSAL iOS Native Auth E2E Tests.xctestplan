@@ -13,7 +13,6 @@
   },
   "testTargets" : [
     {
-      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:MSAL.xcodeproj",
         "identifier" : "28CED2E72C21E0F9004320D1",
