@@ -54,4 +54,8 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdSignUpSubmitPassword = 75013
     case telemetryApiIdSignUpSubmitAttributes = 75014
 
+
+    case signInStart = 8500
+    case signInChallenge = 8501
+    case signInToken = 8502
 }

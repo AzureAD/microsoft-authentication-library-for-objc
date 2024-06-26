@@ -30,6 +30,7 @@ class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHan
     let currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry
     let context: MSIDRequestContext
     private let lastRequestTelemetry: MSIDLastRequestTelemetry
+    
     init(currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry,
          context: MSIDRequestContext) {
         self.currentRequestTelemetry = currentRequestTelemetry

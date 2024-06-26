@@ -71,13 +71,17 @@ extension MSALNativeAuthPublicClientApplication {
             return .init(.error(SignInStartError(type: .invalidCredentials, correlationId: correlationId)), correlationId: correlationId)
         }
 
+        let latencyTracker = MSALNativeAuthLatencyTracker.shared
+        latencyTracker.start(id: .signInStart)
+
         let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
 
         let params = MSALNativeAuthSignInParameters(
             username: username,
             password: password,
             context: context,
-            scopes: scopes
+            scopes: scopes,
+            latencyTracker: latencyTracker
         )
         return await controller.signIn(params: params)
     }

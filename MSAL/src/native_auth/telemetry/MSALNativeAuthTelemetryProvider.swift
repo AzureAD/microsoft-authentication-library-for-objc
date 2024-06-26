@@ -43,11 +43,15 @@ protocol MSALNativeAuthTelemetryProviding {
 }
 
 class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
+
+    let latencyTracker = MSALNativeAuthLatencyTracker.shared // TODO: use Dependency Injection
+
     func telemetryForSignUp(
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdSignUpCodeStart,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -56,6 +60,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdSignInWithCodeStart,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -64,6 +69,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdToken,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -71,6 +77,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdResetPassword,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -79,6 +86,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdResetPasswordStart,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -87,6 +95,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdResendCode,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -95,6 +104,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdVerifyCode,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 
@@ -103,6 +113,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdSignOut,
             operationType: type.rawValue,
+            latencyMs: latencyTracker.dispatchNext()?.latency,
             platformFields: nil)
     }
 }
