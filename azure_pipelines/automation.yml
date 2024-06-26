@@ -68,13 +68,13 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: 'python get_automation_conf_file.py'
-      workingDirectory: $(Agent.BuildDirectory)/s/microsoft-authentication-library-for-objc/azure_pipelines/scripts/
+      workingDirectory: azure_pipelines/scripts/
   - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
       script: |
-        mv $(Agent.BuildDirectory)/s/microsoft-authentication-library-for-objc/azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
+        mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
