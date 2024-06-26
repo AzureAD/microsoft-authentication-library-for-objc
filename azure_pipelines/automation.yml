@@ -193,7 +193,7 @@ jobs:
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
-          -scheme "unit-test-host" \
+          -scheme "MSAL iOS Native Auth E2E Tests" \
           -sdk iphonesimulator \
           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
           -derivedDataPath 'build' \
@@ -207,7 +207,7 @@ jobs:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/unit-test-host_iphonesimulator17.0-x86_64.xctestrun' \
+            -xctestrun 'build/Build/Products/MSAL iOS Native Auth E2E Tests_iphonesimulator17.0-x86_64.xctestrun' \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
