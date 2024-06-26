@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "1186CC98-3243-4507-A72B-4E3670FF0E7A",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testRepetitionMode" : "retryOnFailure"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:MSAL.xcodeproj",
+        "identifier" : "28CED2E72C21E0F9004320D1",
+        "name" : "MSAL iOS Native Auth E2E Tests"
+      }
+    }
+  ],
+  "version" : 1
+}
