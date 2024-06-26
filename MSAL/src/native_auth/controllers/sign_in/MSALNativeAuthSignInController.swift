@@ -88,7 +88,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
         switch result {
         case .success(let challengeValidatedResponse):
-            params.latencyTracker.start(id: .signInChallenge)
             return await handleChallengeResponse(challengeValidatedResponse, params: params, telemetryInfo: telemetryInfo)
         case .failure(let error):
             return .init(
@@ -416,9 +415,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         _ validatedResponse: MSALNativeAuthSignInInitiateValidatedResponse,
         telemetryInfo: TelemetryInfo
     ) async -> Result<MSALNativeAuthSignInChallengeValidatedResponse, MSALNativeAuthSignInInitiateValidatedErrorType> {
-
-        MSALNativeAuthLatencyTracker.shared.stop(id: .signInStart)
-
         switch validatedResponse {
         case .success(let continuationToken):
             let challengeValidatedResponse = await performAndValidateChallengeRequest(
@@ -440,8 +436,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
-        MSALNativeAuthLatencyTracker.shared.stop(id: .signInToken)
-
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         switch response {
         case .success(let tokenResponse):
@@ -499,16 +493,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         params: MSALNativeAuthSignInParameters,
         telemetryInfo: TelemetryInfo
     ) async -> SignInControllerResponse {
-
-        MSALNativeAuthLatencyTracker.shared.stop(id: .signInChallenge)
-
         let scopes = joinScopes(params.scopes)
         let isSignInUsingPassword = params.password != nil
         switch validatedResponse {
         case .passwordRequired(let continuationToken):
             if isSignInUsingPassword {
-                MSALNativeAuthLatencyTracker.shared.start(id: .signInToken)
-
                 guard let request = createTokenRequest(
                     username: params.username,
                     password: params.password,

@@ -28,18 +28,15 @@ import Foundation
 final class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryStringSerializable {
     let apiId: MSALNativeAuthTelemetryApiId
     let operationType: MSALNativeAuthOperationType // DJB: Remove
-    let latencyMs: Int?
     private let schemaVersion: Int
     private let platformFields: [String]?
 
     init(apiId: MSALNativeAuthTelemetryApiId,
          operationType: MSALNativeAuthOperationType,
-         latencyMs: Int?,
          platformFields: [String]?) {
         self.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION
         self.apiId = apiId
         self.operationType = operationType // DJB: remove
-        self.latencyMs = latencyMs
         self.platformFields = platformFields
     }
 
@@ -53,8 +50,19 @@ final class MSALNativeAuthCurrentRequestTelemetry: NSObject, MSIDTelemetryString
     }
 
     private func createSerializedItem() -> MSIDCurrentRequestTelemetrySerializedItem {
-        let defaultFields: [NSNumber] = [.init(value: apiId.rawValue),
-                                         .init(value: latencyMs ?? 0)] // DJB: find a better way other than sending a 0
+        let tracker = MSALNativeAuthLatencyTracker.shared // TODO: Inject the latencyEvent
+
+        var defaultFields: [NSNumber] {
+            guard let latencyEvent = tracker.dispatchNext() else {
+                return []
+            }
+
+            return [
+                .init(value: latencyEvent.id.rawValue),
+                .init(integerLiteral: Int(latencyEvent.latency) ?? -100)
+            ]
+        }
+
         return .init(schemaVersion: .init(value: schemaVersion),
                      defaultFields: defaultFields,
                      platformFields: platformFields)

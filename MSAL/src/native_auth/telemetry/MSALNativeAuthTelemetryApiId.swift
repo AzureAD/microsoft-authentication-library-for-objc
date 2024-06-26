@@ -54,8 +54,29 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdSignUpSubmitPassword = 75013
     case telemetryApiIdSignUpSubmitAttributes = 75014
 
+    case signUpStart = -1
+    case signUpChallenge = -2
+    case signUpContinue = -3
+}
 
-    case signInStart = 8500
-    case signInChallenge = 8501
-    case signInToken = 8502
+// TODO: Implement something like this instead of using TelemetryApiId for everything
+enum Tracker {
+    enum Api {
+        enum SignUp: Int {
+            case start
+            case challenge
+            case `continue`
+        }
+
+        enum SignIn: Int {
+            case initiate
+            case challenge
+            case token
+        }
+    }
+
+    enum Cache {
+        case store
+        case retrieve
+    }
 }

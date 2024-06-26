@@ -29,19 +29,16 @@ class MSALNativeAuthSignInParameters {
     let password: String?
     let context: MSALNativeAuthRequestContext
     let scopes: [String]?
-    let latencyTracker: MSALNativeAuthLatencyTracking
 
     init(
         username: String,
         password: String?,
         context: MSALNativeAuthRequestContext,
-        scopes: [String]?,
-        latencyTracker: MSALNativeAuthLatencyTracking
+        scopes: [String]?
     ) {
         self.username = username
         self.password = password
         self.context = context
         self.scopes = scopes
-        self.latencyTracker = latencyTracker
     }
 }

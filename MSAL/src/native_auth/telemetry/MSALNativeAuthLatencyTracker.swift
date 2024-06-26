@@ -30,47 +30,56 @@ protocol MSALNativeAuthLatencyTracking {
 
     func start(id: MSALNativeAuthTelemetryApiId)
     func stop(id: MSALNativeAuthTelemetryApiId)
-    func dispatchNext() -> LatencyFlow?
+    func dispatchNext() -> LatencyEvent?
+}
+
+struct LatencyEvent: Hashable {
+    let id: MSALNativeAuthTelemetryApiId // create separate classes for Api, Cache, etc.
+    let startDate: Date
+    var endDate: Date?
+
+    // TODO: Test thoroughly
+    var latency: String {
+        guard let endDate else { return "" }
+        let difference = endDate.timeIntervalSince(startDate) * 1000
+        return String(format: "%.0f", difference)
+    }
 }
 
 final class MSALNativeAuthLatencyTracker: MSALNativeAuthLatencyTracking {
 
     static var shared = MSALNativeAuthLatencyTracker()
 
-    // [id: startTime]
-    private var runningTrackers: [MSALNativeAuthTelemetryApiId: Date] = [:]
+    private var unfinishedEvents: Set<LatencyEvent> = []
+    private var queue: [LatencyEvent] = []
 
-    // [(id, latencyMs)]
-    private var latenciesQueue: [LatencyFlow] = []
-
-    private init() {}
+    private init() {
+    }
 
     func start(id: MSALNativeAuthTelemetryApiId) {
-        runningTrackers[id] = .init()
+        let event = LatencyEvent(id: id, startDate: .init())
+        unfinishedEvents.insert(event)
     }
 
     func stop(id: MSALNativeAuthTelemetryApiId) {
-        guard let startTime = runningTrackers[id] else {
-            MSALLogger.log(level: .error, context: MSIDBasicContext(), format: "LatencyTracker for \(id) has not been started!")
+        guard var event = unfinishedEvents.first(where: { $0.id == id }) else {
             return
         }
 
-        let difference = calculateDiff(endTime: Date(), startTime: startTime)
-        latenciesQueue.enqueue((id, difference))
+        unfinishedEvents.remove(event)
+        event.endDate = .init()
+
+        queue.enqueue(event)
     }
 
-    func dispatchNext() -> LatencyFlow? {
-        latenciesQueue.dequeue()
-    }
-
-    private func calculateDiff(endTime: Date, startTime: Date) -> Int {
-        let differenceMs = endTime.timeIntervalSince(startTime) * 1000
-        return Int(differenceMs)
+    // TODO: Create a function that dequeues the first 8-10 finished events?
+    func dispatchNext() -> LatencyEvent? {
+        queue.dequeue()
     }
 }
 
 // TODO: Create a proper Queue class
-private extension Array where Element == MSALNativeAuthLatencyTracking.LatencyFlow {
+private extension Array where Element == LatencyEvent {
 
     mutating func enqueue(_ element: Element) {
         append(element)
