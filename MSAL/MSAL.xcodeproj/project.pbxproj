@@ -1068,7 +1068,6 @@
 		E243F6AA29D42FE900DAC60F /* MSALNativeAuthSignUpContinueRequestProviderParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243F6A929D42FE900DAC60F /* MSALNativeAuthSignUpContinueRequestProviderParams.swift */; };
 		E243F6AF29D446FC00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243F6AD29D4427E00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift */; };
 		E248917A2A1CFA6B001ECBE2 /* MSALNativeAuthConfigStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F5BE9429894FCA00C67EC7 /* MSALNativeAuthConfigStubs.swift */; };
-		E25222072C0F6AA60081C943 /* TelemetryKit in Frameworks */ = {isa = PBXBuildFile; productRef = E25222062C0F6AA60081C943 /* TelemetryKit */; };
 		E25BC07A2995423100588549 /* MSALNativeAuthNetworkMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0792995423100588549 /* MSALNativeAuthNetworkMocks.swift */; };
 		E25BC0832995429D00588549 /* MSALNativeAuthCacheMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0822995429D00588549 /* MSALNativeAuthCacheMocks.swift */; };
 		E25BC0852995430B00588549 /* MSALNativeAuthFactoriesMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0842995430B00588549 /* MSALNativeAuthFactoriesMocks.swift */; };
@@ -1085,6 +1084,8 @@
 		E284F5E429F2F28A00DBED7D /* MSALNativeAuthSignUpControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = E284F5E329F2F28A00DBED7D /* MSALNativeAuthSignUpControlling.swift */; };
 		E286E2DD2A1BAEA800666DD0 /* MSALNativeAuthSignUpControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E286E2DC2A1BAEA800666DD0 /* MSALNativeAuthSignUpControllerTests.swift */; };
 		E2960A112A1F4D2F000F441B /* MSALNativeAuthSignUpChallengeResponseErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2960A102A1F4D2F000F441B /* MSALNativeAuthSignUpChallengeResponseErrorTests.swift */; };
+		E2A98CE42C297993002F7E66 /* TelemetryKit in Frameworks */ = {isa = PBXBuildFile; productRef = E2A98CE32C297993002F7E66 /* TelemetryKit */; };
+		E2A98CED2C297999002F7E66 /* TelemetryKit in Frameworks */ = {isa = PBXBuildFile; productRef = E2A98CEC2C297999002F7E66 /* TelemetryKit */; };
 		E2ACA47B29520C2200E98964 /* MSALNativeAuthEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2ACA47A29520C2200E98964 /* MSALNativeAuthEndpoint.swift */; };
 		E2ACA48B2952302B00E98964 /* MSALNativeAuthRequestContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2ACA48A2952302B00E98964 /* MSALNativeAuthRequestContext.swift */; };
 		E2ACA4952953415E00E98964 /* MSALNativeAuthGrantType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2ACA4942953415E00E98964 /* MSALNativeAuthGrantType.swift */; };
@@ -2265,7 +2266,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E25222072C0F6AA60081C943 /* TelemetryKit in Frameworks */,
+				E2A98CE42C297993002F7E66 /* TelemetryKit in Frameworks */,
 				963C89AB214BA1760051AFEE /* AuthenticationServices.framework in Frameworks */,
 				96902DF320E1577500200E6F /* WebKit.framework in Frameworks */,
 				B2C17B071FC8DAC50070A514 /* libIdentityCore.a in Frameworks */,
@@ -2282,6 +2283,7 @@
 				B227557C23752545000B7EF3 /* AuthenticationServices.framework in Frameworks */,
 				D6A206381FC510B500755A51 /* Security.framework in Frameworks */,
 				96902DFD20E1590200200E6F /* SecurityInterface.framework in Frameworks */,
+				E2A98CED2C297999002F7E66 /* TelemetryKit in Frameworks */,
 				96902DFB20E158E700200E6F /* GSS.framework in Frameworks */,
 				96902DF620E1579000200E6F /* WebKit.framework in Frameworks */,
 				B2C17B081FC8DACC0070A514 /* libIdentityCore.a in Frameworks */,
@@ -4818,7 +4820,7 @@
 			);
 			name = "MSAL (iOS Framework)";
 			packageProductDependencies = (
-				E25222062C0F6AA60081C943 /* TelemetryKit */,
+				E2A98CE32C297993002F7E66 /* TelemetryKit */,
 			);
 			productName = "MSAL (Framework)";
 			productReference = D65A6F431E3FD30A00C69FBA /* MSAL.framework */;
@@ -4839,6 +4841,9 @@
 				B2C17B061FC8D9600070A514 /* PBXTargetDependency */,
 			);
 			name = "MSAL (Mac Framework)";
+			packageProductDependencies = (
+				E2A98CEC2C297999002F7E66 /* TelemetryKit */,
+			);
 			productName = "MSAL (Mac Framework)";
 			productReference = D65A6F501E3FD32D00C69FBA /* MSAL.framework */;
 			productType = "com.apple.product-type.framework";
@@ -5017,7 +5022,7 @@
 			);
 			mainGroup = D6DFF3991E2579360012891A;
 			packageReferences = (
-				E25221FE2C0F6A000081C943 /* XCLocalSwiftPackageReference "../../TelemetryKit" */,
+				E2A98CE02C2978A2002F7E66 /* XCLocalSwiftPackageReference "../../TelemetryKit" */,
 			);
 			productRefGroup = D6DFF3A31E2579360012891A /* Products */;
 			projectDirPath = "";
@@ -7512,16 +7517,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E25221FE2C0F6A000081C943 /* XCLocalSwiftPackageReference "../../TelemetryKit" */ = {
+		E2A98CE02C2978A2002F7E66 /* XCLocalSwiftPackageReference "../../TelemetryKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../TelemetryKit;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E25222062C0F6AA60081C943 /* TelemetryKit */ = {
+		E2A98CE32C297993002F7E66 /* TelemetryKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E25221FE2C0F6A000081C943 /* XCLocalSwiftPackageReference "../../TelemetryKit" */;
+			package = E2A98CE02C2978A2002F7E66 /* XCLocalSwiftPackageReference "../../TelemetryKit" */;
+			productName = TelemetryKit;
+		};
+		E2A98CEC2C297999002F7E66 /* TelemetryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E2A98CE02C2978A2002F7E66 /* XCLocalSwiftPackageReference "../../TelemetryKit" */;
 			productName = TelemetryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
