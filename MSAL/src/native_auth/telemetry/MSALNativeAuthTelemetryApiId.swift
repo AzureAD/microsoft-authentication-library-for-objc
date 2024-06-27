@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MSALNativeAuthTelemetryApiId: Int {
+enum MSALNativeAuthTelemetryApiId: Int, CaseIterable, Codable {
     // TODO: Resolve the below comment about the correct definitions of these constants:
     // Until we know exactly how to define them,
     // to prevent any clashes with existing id's

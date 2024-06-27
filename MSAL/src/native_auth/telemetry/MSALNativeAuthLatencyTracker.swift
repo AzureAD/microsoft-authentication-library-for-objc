@@ -26,14 +26,14 @@ import Foundation
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthLatencyTracking {
-    typealias LatencyFlow = (id: MSALNativeAuthTelemetryApiId, latency: Int)
-
     func start(id: MSALNativeAuthTelemetryApiId)
     func stop(id: MSALNativeAuthTelemetryApiId)
     func dispatchNext() -> LatencyEvent?
 }
 
-struct LatencyEvent: Hashable {
+struct LatencyEvent: Hashable, Codable {
+    static let EventKey = "nativeauth_latency_key_"
+
     let id: MSALNativeAuthTelemetryApiId // create separate classes for Api, Cache, etc.
     let startDate: Date
     var endDate: Date?
@@ -44,16 +44,23 @@ struct LatencyEvent: Hashable {
         let difference = endDate.timeIntervalSince(startDate) * 1000
         return String(format: "%.0f", difference)
     }
+
+    var userDefaultsKey: String {
+        "\(Self.EventKey)\(id)"
+    }
 }
 
 final class MSALNativeAuthLatencyTracker: MSALNativeAuthLatencyTracking {
 
     static var shared = MSALNativeAuthLatencyTracker()
 
+    private let userDefaults: UserDefaults
     private var unfinishedEvents: Set<LatencyEvent> = []
     private var queue: [LatencyEvent] = []
 
-    private init() {
+    private init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+        lookupStoredEvents()
     }
 
     func start(id: MSALNativeAuthTelemetryApiId) {
@@ -69,12 +76,66 @@ final class MSALNativeAuthLatencyTracker: MSALNativeAuthLatencyTracking {
         unfinishedEvents.remove(event)
         event.endDate = .init()
 
+        persistEvent(event)
         queue.enqueue(event)
     }
 
-    // TODO: Create a function that dequeues the first 8-10 finished events?
+    // TODO: Create a function that dequeues the first 8-10 finished events in batch?
     func dispatchNext() -> LatencyEvent? {
-        queue.dequeue()
+        guard let event = queue.dequeue() else {
+            return nil
+        }
+
+        userDefaults.removeObject(forKey: event.userDefaultsKey)
+        return event
+    }
+
+    private func lookupStoredEvents() {
+        let events = MSALNativeAuthTelemetryApiId.allCases.compactMap {
+            let key = "\(LatencyEvent.EventKey)\($0)"
+            return retrieveEvent(key)
+        }
+
+        for event in events {
+            if !queue.contains(where: {$0.id == event.id}) {
+                queue.enqueue(event)
+            }
+        }
+    }
+
+    private func persistEvent(_ event: LatencyEvent) {
+        let encoder = JSONEncoder()
+
+        do {
+            let data = try encoder.encode(event)
+            userDefaults.set(data, forKey: event.userDefaultsKey)
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: MSALNativeAuthRequestContext(),
+                format: "Error encoding cached event"
+            )
+        }
+    }
+
+    private func retrieveEvent(_ key: String) -> LatencyEvent? {
+        let decoder = JSONDecoder()
+
+        guard let data = userDefaults.data(forKey: key) else {
+            return nil
+        }
+
+        do {
+            return try decoder.decode(LatencyEvent.self, from: data)
+        } catch {
+            MSALLogger.log(
+                level: .error,
+                context: MSALNativeAuthRequestContext(),
+                format: "Error decoding cached event"
+            )
+
+            return nil
+        }
     }
 }
 
