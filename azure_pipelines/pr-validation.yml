@@ -15,6 +15,10 @@ trigger:
     exclude:
     - '*'
 
+pool:
+  vmImage: 'macOS-13'
+  timeOutInMinutes: 30
+
 # Define parallel jobs that run build script for specified targets
 jobs:
 - job: 'Validate_Pull_Request'
@@ -26,9 +30,6 @@ jobs:
       MAC_FRAMEWORK: 
         target: "macFramework"
   displayName: Validate Pull Request
-  pool:
-    vmImage: 'macOS-13'
-    timeOutInMinutes: 30
 
   steps:
   - script: |
