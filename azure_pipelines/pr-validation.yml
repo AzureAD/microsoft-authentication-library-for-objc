@@ -84,7 +84,7 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
-  - job: e2e_test_native_auth
+- job: e2e_test_native_auth
   displayName: Run MSAL E2E tests for native auth
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
