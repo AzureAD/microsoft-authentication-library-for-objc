@@ -44,13 +44,9 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
-<<<<<<< HEAD
     accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAMCUD;
     accountConfigurationRequest.additionalQueryParameters = @{@"signInAudience": @"azureadmyorg"};
-=======
-    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeCIAM;
->>>>>>> 68b97f350c58274aabdfd24eddb3b35bca524124
-    
+
     [self loadTestAccount:accountConfigurationRequest];
     
     MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
