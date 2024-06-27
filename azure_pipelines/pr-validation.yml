@@ -98,7 +98,7 @@ jobs:
     clean: true
     submodules: true
     fetchDepth: 1
-    persistCredentials: true
+    persistCredentials: false
     path: s
 
   - script: |
