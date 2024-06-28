@@ -4,6 +4,9 @@ parameters:
   displayName: 'Run MSAL UI automation'
   createIssue: true
 
+variables:
+  isMain: ${{ parameters.createIssue }}
+
 jobs:
 - job: test_with_conf_file_execution
   displayName: ${{ parameters.displayName }}
@@ -84,16 +87,16 @@ jobs:
       publishLocation: 'pipeline'
 
   - task: UsePythonVersion@0
-    condition: and(failed(), eq(parameters.createIssue, true))
+    condition: and(failed(), eq(variables.isMain, true))
     displayName: Use Python 3.x
 
   - bash: python3 -m pip install github3.py==2.0.0
-    condition: and(failed(), eq(parameters.createIssue, true))
+    condition: and(failed(), eq(parameters.isMain, true))
     displayName: Install the github3.py REST API client for Python
 
   - task: PythonScript@0
     displayName: Create Issue if Pipeline fails
-    condition: and(failed(), eq(parameters.createIssue, true))
+    condition: and(failed(), eq(parameters.isMain, true))
     inputs:
       scriptSource: inline
       script: |
