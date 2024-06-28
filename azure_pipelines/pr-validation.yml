@@ -15,10 +15,6 @@ trigger:
     exclude:
     - '*'
 
-pool:
-  vmImage: 'macOS-13'
-  timeOutInMinutes: 30
-
 # Define parallel jobs that run build script for specified targets
 jobs:
 - job: 'Validate_Pull_Request'
@@ -30,6 +26,9 @@ jobs:
       MAC_FRAMEWORK: 
         target: "macFramework"
   displayName: Validate Pull Request
+  pool:
+    vmImage: 'macOS-13'
+    timeOutInMinutes: 30
 
   steps:
   - script: |
@@ -85,13 +84,14 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
-- job: e2e_test_native_auth
-  displayName: Run MSAL E2E tests for native auth
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
+- job: 'Validate_SPM_Integration'
+  displayName: Validate SPM Integration
+  pool:
+    vmImage: 'macOS-13'
+    timeOutInMinutes: 15
   workspace:
     clean: all
-  
+
   steps:
 
   - checkout: self
@@ -100,63 +100,45 @@ jobs:
     fetchDepth: 1
     persistCredentials: true
     path: s
-    
+
+  - script: |
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
+    displayName: 'Switch to use Xcode 14.3'
+
   - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.0.1.app"'
-  
-  - task: Bash@3
-    displayName: Go to project folder
+    displayName: Set variable BRANCH_NAME to a temporary branch
     inputs:
       targetType: 'inline'
       script: |
-        cd $(Agent.BuildDirectory)/s
-  
-  - script: 'gem install xcpretty'
-    displayName: 'Install xcpretty'
-
-
-  - task: DownloadSecureFile@1
-    name: configuration
-    displayName: 'Get Automation conf.json'
-    inputs:
-      secureFile: 'broker_automation_conf_new_api2.json'
-  
+        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
+      
   - task: Bash@3
-    displayName: Build for testing
+    displayName: Checkout to temporary branch
     inputs:
       targetType: 'inline'
       script: |
-        mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
-        ruby TestRubyFile.rb
-        xcodebuild build-for-testing \
-          -workspace MSAL.xcworkspace \
-          -scheme "MSAL iOS Native Auth E2E Tests" \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
-          -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
+        git checkout -b "${BRANCH_NAME}"
 
   - task: Bash@3
-    displayName: Run automations
+    displayName: Run SPM integration test script
     inputs:
       targetType: 'inline'
       script: |
-        ls build/Build/Products/
-        xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator17.0-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
-            -retry-tests-on-failure \
-            -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
+        sh spm-integration-test.sh "${BRANCH_NAME}"
+    continueOnError: false
 
-  # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
-  - task: PublishPipelineArtifact@1
-    condition: succeededOrFailed()
+  - task: Bash@3
+    condition: always()
+    displayName: Cleanup
     inputs:
-      targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
-      publishLocation: 'pipeline'
+      targetType: 'inline'
+      script: 
+        cd ../..
+        rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
+        git checkout -- .
+        git fetch --quiet
+        git switch "$(Build.SourceBranchName)"
+        git branch -D "$BRANCH_NAME"
+        git push origin --delete "$BRANCH_NAME"
+
