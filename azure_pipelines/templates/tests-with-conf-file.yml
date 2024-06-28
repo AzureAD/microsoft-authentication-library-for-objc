@@ -4,6 +4,7 @@ parameters:
   displayName: 'Run MSAL UI automation'
   createIssue: true
 
+jobs:
 - job: test_with_conf_file_execution
   displayName: ${{ parameters.displayName }}
   timeoutInMinutes: 360
