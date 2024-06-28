@@ -44,7 +44,7 @@ steps:
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
-          -scheme '${{ parameters.schema }}'' \
+          -scheme '${{ parameters.schema }}' \
           -sdk iphonesimulator \
           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
           -derivedDataPath 'build' \
