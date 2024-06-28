@@ -28,7 +28,7 @@ pool:
   vmImage: 'macOS-13'
 
 jobs:
-- job: test_with_conf_file_execution
+- job: ui_automation
   displayName: 'Run MSAL UI automation'
   timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
@@ -36,7 +36,7 @@ jobs:
     clean: all
 
   steps:
-  - template: templates/test_with_conf_file_execution.yml
+  - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
     condition: failed(),
