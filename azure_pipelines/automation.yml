@@ -39,7 +39,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
-    condition: failed(),
+    condition: failed()
     displayName: Use Python 3.x
 
   - bash: python3 -m pip install github3.py==2.0.0
