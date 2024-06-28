@@ -15,6 +15,9 @@ trigger:
     exclude:
     - '*'
 
+pool:
+  vmImage: 'macOS-13'
+
 # Define parallel jobs that run build script for specified targets
 jobs:
 - job: 'Validate_Pull_Request'
@@ -27,7 +30,6 @@ jobs:
         target: "macFramework"
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-13'
     timeOutInMinutes: 30
 
   steps:
@@ -84,10 +86,22 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
+- job: e2e_test_native_auth
+  displayName: 'Run MSAL E2E tests for native auth'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL iOS Native Auth E2E Tests'
+      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-13'
     timeOutInMinutes: 15
   workspace:
     clean: all
