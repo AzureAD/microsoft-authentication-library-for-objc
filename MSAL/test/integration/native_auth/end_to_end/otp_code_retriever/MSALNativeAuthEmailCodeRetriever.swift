@@ -66,7 +66,7 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
                 return nil
             }
             if dataDictionary.count > 0 {
-                dataDictionary.sort(by: {($0["date"] as? String ?? "") > ($1["date"] as? String ?? "")})
+                dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
                 return dataDictionary.first?["id"] as? Int
             } else {
                 // no emails found, retry
@@ -91,7 +91,9 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
                 return nil
             }
             let dataDictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            return (dataDictionary?["textBody"] as? String)?.components(separatedBy: CharacterSet.newlines).first(where: {$0.range(of: "[0-9]{4,}$", options: .regularExpression, range: nil, locale: nil) != nil })
+            let emailLines = (dataDictionary?["textBody"] as? String)?.components(separatedBy: CharacterSet.newlines) ?? []
+            // return the first line with only numbers, minimum 4 digits.
+            return emailLines.first(where: {$0.range(of: "[0-9]{4,}$", options: .regularExpression, range: nil, locale: nil) != nil })
         } catch {
             print(error)
             return nil
