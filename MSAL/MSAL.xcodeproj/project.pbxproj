@@ -5341,6 +5341,7 @@
 		};
 		B286864824037DCB004E83FC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -5358,6 +5359,7 @@
 		};
 		B286864F24037DE7004E83FC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -5379,8 +5381,10 @@
 			files = (
 			);
 			inputPaths = (
+				"~/aadtests/conf.json",
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/scriptOutput.data",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -5392,8 +5396,10 @@
 			files = (
 			);
 			inputPaths = (
+				"~/aadtests/conf.json",
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/scriptOutput.data",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
