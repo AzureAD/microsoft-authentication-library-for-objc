@@ -85,7 +85,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
     
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = getSignInUsernamePassword() else {
+        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword() else {
             XCTFail("Missing information")
             return
         }
