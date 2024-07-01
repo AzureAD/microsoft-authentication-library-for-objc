@@ -51,7 +51,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             XCTFail("conf.json file not found")
             return
         }
-        let confFile = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
+        let confFile = try JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
         confFileContent = confFile?[Constants.nativeAuthKey] as? [String: String]
     }
     
