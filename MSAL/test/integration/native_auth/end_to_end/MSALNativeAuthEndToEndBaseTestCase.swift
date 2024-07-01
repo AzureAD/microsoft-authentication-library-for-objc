@@ -26,54 +26,69 @@ import XCTest
 import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
-    let mockAPIHandler = MockAPIHandler()
+    private class Constants {
+        static let nativeAuthKey = "native_auth"
+        static let clientIdEmailPasswordKey = "email_password_client_id"
+        static let clientIdEmailCodeKey = "email_code_client_id"
+        static let clientIdEmailPasswordAttributesKey = "email_password_attributes_client_id"
+        static let clientIdEmailCodeAttributesKey = "email_code_attributes_client_id"
+        static let tenantSubdomainKey = "tenant_subdomain"
+        static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
+        static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        static let resetPasswordUsernameKey = "reset_password_username"
+    }
+    
     let correlationId = UUID()
-    var defaultTimeout: TimeInterval = 5
+    let defaultTimeout: TimeInterval = 20
 
-    var sut: MSALNativeAuthPublicClientApplication!
-    var usingMockAPI = false
-
-    class Configuration: NSObject {
-        static let clientId = ProcessInfo.processInfo.environment["clientId"] ?? "<clientId not set>"
-        static let authorityURLString = ProcessInfo.processInfo.environment["authorityURL"] ?? "<authorityURL not set>"
-    }
-
-    func mockResponse(_ response: MockAPIResponse, endpoint: MockAPIEndpoint) async throws {
-        try await mockAPIHandler.addResponse(
-            endpoint: endpoint,
-            correlationId: correlationId,
-            responses: [response]
-        )
-    }
-
-    override func tearDown() {
-        try? mockAPIHandler.clearQueues(correlationId: correlationId)
-    }
+    private var confFileContent: [String: String]? = nil
+    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let useMockAPIBooleanString = ProcessInfo.processInfo.environment["useMockAPI"] ?? "false"
-        usingMockAPI = Bool(useMockAPIBooleanString) ?? false
         
-        // mock API URL needs to contains a tenant
-        guard let authorityURL = URL(string: Configuration.authorityURLString + (usingMockAPI ? "/testTenant" : "")), let authority = try? MSALCIAMAuthority(url: authorityURL) else {
-            XCTFail("AuthorityURL not set or invalid")
+        guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
+            XCTFail("conf.json file not found")
             return
         }
-
-        sut = try MSALNativeAuthPublicClientApplication(
-            configuration: MSALPublicClientApplicationConfig(
-                clientId: Configuration.clientId,
-                redirectUri: nil,
-                authority: authority
-            ),
-            challengeTypes: [.OOB, .password]
-        )
-
-        if usingMockAPI {
-            print("🤖🤖🤖 Using mock API: \(Configuration.authorityURLString)")
-        } else {
-            print("👩‍💻👩‍💻👩‍💻 Using test tenant: \(Configuration.authorityURLString)")
+        let confFile = try JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
+        confFileContent = confFile?[Constants.nativeAuthKey] as? [String: String]
+    }
+    
+    func initialisePublicClientApplication(
+        clientIdType: ClientIdType = .password,
+        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
+    ) -> MSALNativeAuthPublicClientApplication? {
+        let clientIdKey = getClientIdKey(type: clientIdType)
+        guard let clientId = confFileContent?[clientIdKey] as? String, let tenantSubdomain = confFileContent?[Constants.tenantSubdomainKey] as? String else {
+            XCTFail("ClientId or tenantSubdomain not found in conf.json")
+            return nil
+        }
+        return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+    }
+    
+    func generateSignUpRandomEmail() -> String {
+        return codeRetriever.generateRandomEmailAddress()
+    }
+    
+    func retrieveCodeFor(email: String) async -> String? {
+        return await codeRetriever.retrieveEmailOTPCode(email: email)
+    }
+    
+    func getSignInUsernamePassword() -> String? {
+        return confFileContent?[Constants.signInEmailPasswordUsernameKey]
+    }
+    
+    private func getClientIdKey(type: ClientIdType) -> String {
+        switch type {
+        case .password:
+            return Constants.clientIdEmailPasswordKey
+        case .passwordAndAttributes:
+            return Constants.clientIdEmailPasswordAttributesKey
+        case .code:
+            return Constants.clientIdEmailCodeKey
+        case .codeAndAttributes:
+            return Constants.clientIdEmailCodeAttributesKey
         }
     }
 }
