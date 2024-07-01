@@ -49,6 +49,11 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
         }
         return emailOTPCode
     }
+    
+    func generateRandomEmailAddress() -> String {
+        let randomId = UUID().uuidString.prefix(8)
+        return "native-auth-signup-\(randomId)@1secmail.org"
+    }
 
     private func retrieveLastMessage(local: String, domain: String, retryCounter: Int) async -> Int? {
         guard retryCounter > 0, let url = URL(string: baseURLString + "getMessages&login=\(local)&domain=\(domain)") else {
@@ -60,15 +65,23 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
             guard let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 200,
-                    var dataDictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+                    httpResponse.statusCode == 200 else {
+                print("Unexpected response from 1secmail: \(code) status code")
+                return nil
+            }
+            guard var dataDictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
                 return nil
             }
             if dataDictionary.count > 0 {
                 dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
                 return dataDictionary.first?["id"] as? Int
             } else {
+                // log only for the final retry
+                if (retryCounter == 1) {
+                    print("Unexpected behaviour: no email received for the following local: \(local)")
+                }
                 // no emails found, retry
                 return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
             }

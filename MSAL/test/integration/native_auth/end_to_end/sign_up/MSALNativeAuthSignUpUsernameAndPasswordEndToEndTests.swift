@@ -237,7 +237,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
     func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
         throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication(useEmailPasswordClientId: false) else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
