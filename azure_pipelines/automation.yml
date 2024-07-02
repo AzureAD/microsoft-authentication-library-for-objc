@@ -78,7 +78,7 @@ jobs:
           -workspace MSAL.xcworkspace \
           -scheme "MSAL Test Automation (iOS)" \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
@@ -90,8 +90,8 @@ jobs:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator16.4-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' \
+            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.0-x86_64.xctestrun' \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
@@ -145,3 +145,51 @@ jobs:
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
   
+
+
+- job: cocoapods_lib_lint
+  displayName: Run Cocoapods lib lint
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  strategy:
+    maxParallel: 2
+    matrix:
+      STATIC_LIBRARY: 
+        args: "--fail-fast --swift-version=5 --allow-warnings --use-static-frameworks"
+      DYNAMIC_LIBRARY: 
+        args: "--fail-fast --swift-version=5 --allow-warnings"
+  workspace:
+    clean: all
+  
+  steps:
+
+  - checkout: self
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
+
+  - task: Bash@3
+    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec 
+    inputs:
+      targetType: 'inline'
+      script: |
+        sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+  - task: Bash@3
+    displayName: Run pod lib lint 
+    inputs:
+      targetType: 'inline'
+      script: |
+        pod lib lint $(args)
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+  - task: Bash@3
+    displayName: Discard temporary changes made to MSAL.podspec 
+    inputs:
+      targetType: 'inline'
+      script: |
+        git checkout -f -- MSAL.podspec
+      workingDirectory: '$(Build.SourcesDirectory)'
