@@ -31,12 +31,6 @@ class MSALNativeAuthCredentialsControllerMock: MSALNativeAuthCredentialsControll
     var refreshTokenResult: RefreshTokenCredentialControllerResponse!
     var accountResult: MSALNativeAuthUserAccountResult?
 
-    func refreshToken(context: MSALNativeAuthRequestContext,
-                      authTokens: MSALNativeAuthTokens,
-                      userAccountResult: MSALNativeAuthUserAccountResult) async -> RefreshTokenCredentialControllerResponse {
-        return refreshTokenResult
-    }
-
     func retrieveUserAccountResult(context: MSAL.MSALNativeAuthRequestContext) -> MSAL.MSALNativeAuthUserAccountResult? {
         return accountResult
     }

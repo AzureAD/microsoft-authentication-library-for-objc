@@ -66,7 +66,11 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         return await handleStartResponse(response, username: parameters.username, event: event, context: parameters.context)
     }
 
-    func resendCode(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordResendCodeControllerResponse {
+    func resendCode(
+        username: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) async -> ResetPasswordResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
         let response = await performChallengeRequest(continuationToken: continuationToken, context: context)
         return await handleResendCodeChallengeResponse(response, username: username, event: event, context: context)
@@ -139,7 +143,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                                      event: MSIDTelemetryAPIEvent?,
                                      context: MSALNativeAuthRequestContext) async -> ResetPasswordStartControllerResponse {
 
-        MSALLogger.log(level: .verbose, context: context, format: "Finished resetpassword/start request")
+        MSALLogger.log(level: .info, context: context, format: "Finished resetpassword/start request")
 
         switch response {
         case .success(let continuationToken):
@@ -329,6 +333,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         return responseValidator.validate(result, with: parameters.context)
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitCodeResponse(
         _ response: MSALNativeAuthResetPasswordContinueValidatedResponse,
         username: String,
@@ -484,14 +489,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
     ) async -> ResetPasswordSubmitPasswordControllerResponse {
-        MSALLogger.log(level: .verbose, context: context, format: "Performing poll completion request")
+        MSALLogger.log(level: .info, context: context, format: "Performing poll completion request")
 
         let pollCompletionResponse = await performPollCompletionRequest(
             continuationToken: continuationToken,
             context: context
         )
 
-        MSALLogger.log(level: .verbose, context: context, format: "Handling poll completion response")
+        MSALLogger.log(level: .info, context: context, format: "Handling poll completion response")
 
         return await handlePollCompletionResponse(
             pollCompletionResponse,

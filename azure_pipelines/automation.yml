@@ -61,18 +61,20 @@ jobs:
     displayName: 'Install xcpretty'
 
 
-  - task: DownloadSecureFile@1
-    name: configuration
-    displayName: 'Get Automation conf.json'
+  - task: AzureCLI@2
+    displayName: 'Read configuration from KeyVault'
     inputs:
-      secureFile: 'broker-automation-conf.json'
-  
+      azureSubscription: 'AuthSdkResourceManager'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'python get_automation_conf_file.py'
+      workingDirectory: azure_pipelines/scripts/
   - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
       script: |
-        mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
+        mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \

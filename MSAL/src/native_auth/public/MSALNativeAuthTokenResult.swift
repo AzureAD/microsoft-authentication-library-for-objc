@@ -26,10 +26,14 @@ import Foundation
 
 public class MSALNativeAuthTokenResult: NSObject {
 
-    let authTokens: MSALNativeAuthTokens
+    private let internalAccessToken: String
+    private let internalScopes: [String]
+    private let internalExpiresOn: Date?
 
-    init(authTokens: MSALNativeAuthTokens) {
-        self.authTokens = authTokens
+    init(accessToken: String, scopes: [String], expiresOn: Date?) {
+        internalAccessToken = accessToken
+        internalScopes = scopes
+        internalExpiresOn = expiresOn
     }
 
     /**
@@ -37,17 +41,17 @@ public class MSALNativeAuthTokenResult: NSObject {
      Note that if access token is not returned in token response, this property will be returned as an empty string.
      */
     @objc public var accessToken: String {
-        authTokens.accessToken.accessToken
+        internalAccessToken
     }
 
     /// Get the list of permissions for the access token for the account.
     @objc public var scopes: [String] {
-        authTokens.accessToken.scopes.array as? [String] ?? []
+        internalScopes
     }
 
     /// Get the expiration date for the access token for the account.
     /// This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
     @objc public var expiresOn: Date? {
-        authTokens.accessToken.expiresOn
+        internalExpiresOn
     }
 }
