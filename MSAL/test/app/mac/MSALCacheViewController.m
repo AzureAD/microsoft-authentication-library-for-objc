@@ -98,22 +98,15 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
 {
     id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     NSArray *otherAccessors = nil;
-    
-    if (@available(macOS 10.15, *))
+
+    dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainGroup error:nil];
+
+    id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
+
+    if (secondaryDataSource)
     {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainGroup error:nil];
-        
-        id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
-        
-        if (secondaryDataSource)
-        {
-            self.legacyAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:secondaryDataSource otherCacheAccessors:nil];
-            if (self.legacyAccessor) otherAccessors = @[self.legacyAccessor];
-        }
-    }
-    else
-    {
-        dataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
+        self.legacyAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:secondaryDataSource otherCacheAccessors:nil];
+        if (self.legacyAccessor) otherAccessors = @[self.legacyAccessor];
     }
     
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];

@@ -320,30 +320,19 @@
     id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = nil;
     NSError *dataSourceError = nil;
-    
-    if (@available(macOS 10.15, *)) {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
-        
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
-        
-        NSError *secondaryDataSourceError = nil;
-        secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                           trustedApplications:config.cacheConfig.trustedApplications
-                                                                         error:&secondaryDataSourceError];
-        
-        if (secondaryDataSourceError)
-        {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
-        }
-    }
-    else
+
+    dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
+
+    NSError *secondaryDataSourceError = nil;
+    secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+                                                       trustedApplications:config.cacheConfig.trustedApplications
+                                                                     error:&secondaryDataSourceError];
+
+    if (secondaryDataSourceError)
     {
-        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                  trustedApplications:config.cacheConfig.trustedApplications
-                                                                error:&dataSourceError];
-        
-        dataSource = macDataSource;
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
     }
     
     if (!dataSource)
