@@ -69,7 +69,7 @@ target_specifiers = [
 		"operations" : [ "build" ],
 		"platform" : "iOS",
         "target" : "iosTestApp"
-        
+
 	},
 	{
 		"name" : "Sample iOS App",
