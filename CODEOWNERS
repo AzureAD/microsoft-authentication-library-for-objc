@@ -11,7 +11,7 @@ CHANGELOG.md @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 /MSAL/src/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/unit/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/integration/native_auth/ @AzureAD/MSAL-ObjC-CIAM
-/MSAL/MSAL\ iOS\ Native\ Auth\ E2E\ Tests.xctestplan
+/MSAL/MSAL\ iOS\ Native\ Auth\ E2E\ Tests.xctestplan @AzureAD/MSAL-ObjC-CIAM
 /MSAL/NativeAuthEndToEndTestPlan.xctestplan @AzureAD/MSAL-ObjC-CIAM
 /MSAL/MSAL.xcodeproj/xcshareddata/xcschemes/unit-test-host.xcscheme @AzureAD/MSAL-ObjC-CIAM
 /MSAL/MSAL.xcodeproj/xcshareddata/xcschemes/unit-test-host-mac.xcscheme @AzureAD/MSAL-ObjC-CIAM
