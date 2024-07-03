@@ -27,44 +27,35 @@ import XCTest
 
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let unknownUsername = UUID().uuidString
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.userNotFound, endpoint: .signInToken)
-        }
+        let unknownUsername = UUID().uuidString + "@contoso.com"
 
         sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.invalidPassword, endpoint: .signInToken)
-        }
-
         sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
@@ -72,19 +63,17 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
         let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
@@ -93,5 +82,33 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+    }
+    
+    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
+        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let signInExpectation = expectation(description: "signing in")
+        let passwordRequiredExpectation = expectation(description: "verifying password")
+        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
+        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
+
+        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
+        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
+
+        // Now submit the password..
+
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
+
+        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
+
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
+        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
     }
 }

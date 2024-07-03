@@ -73,7 +73,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorNoMainViewController) : @(MSALInternalErrorNoViewController),
                                    @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALInternalErrorAttemptToOpenURLFromExtension),
                                    @(MSIDErrorUINotSupportedInExtension): @(MSALInternalErrorUINotSupportedInExtension),
-
+                                   @(MSIDErrorInsufficientDeviceStrength): @(MSALErrorInsufficientDeviceStrength),
                                    // Broker errors
                                    @(MSIDErrorBrokerResponseNotReceived): @(MSALInternalErrorBrokerResponseNotReceived),
                                    @(MSIDErrorBrokerNoResumeStateFound): @(MSALInternalErrorBrokerNoResumeStateFound),
