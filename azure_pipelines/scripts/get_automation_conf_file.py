@@ -19,11 +19,11 @@ print("Loading conf.json file...")
 output_1 = ""
 output_2 = ""
 # 2.1 Loading the 1st half and formatting 
-az_command_1 = "az keyvault secret show --name \"appleautomationconfjsonfile3\" --vault-name \"buildautomation\" --query \"value\""
+az_command_1 = "az keyvault secret show --name \"appleautomationconfjsonfile1\" --vault-name \"buildautomation\" --query \"value\""
 output_1_without_formatting = run_az_command(az_command_1)
 output_1 = output_1_without_formatting.replace('\n', '').replace('"', '')
 # 2.2 Loading the 2nd half and and formatting
-az_command_2 = "az keyvault secret show --name \"appleautomationconfjsonfile4\" --vault-name \"buildautomation\" --query \"value\""
+az_command_2 = "az keyvault secret show --name \"appleautomationconfjsonfile2\" --vault-name \"buildautomation\" --query \"value\""
 output_2_without_formatting = run_az_command(az_command_2)
 # 3.1 Combine 2 parts, decode and write into local conf.json file
 output_2 = output_2_without_formatting.replace('\n', '').replace('"', '')
