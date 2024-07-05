@@ -40,7 +40,7 @@
 
 #pragma mark - Get device info
 
-- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnNilAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenCurrentSSOExtensionRequestAlreadyPresent_shouldReturnNilAndFillError
 {
     XCTSkip("Skip flaky test.");
     
@@ -93,7 +93,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:2];
 }
 
-- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil
 {
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -129,7 +129,7 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil_noRegisterationInformation API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNil_noRegisterationInformation
 {
     
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
@@ -160,7 +160,7 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testWPJMetaDataDeviceInfoWithRequestParameters_tenantIdNonNil
 {
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -194,7 +194,7 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -232,7 +232,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo_withWPJRegisterationInfo
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -285,7 +285,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionPresent_encounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_encounteredError_shouldReturnError
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -341,7 +341,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -405,7 +405,7 @@
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionPresent_notConfiguredForJIT_shouldReturnMSALDeviceInfoWithoutMdmIdAndObjectId API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_notConfiguredForJIT_shouldReturnMSALDeviceInfoWithoutMdmIdAndObjectId
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -460,7 +460,7 @@
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
 #if TARGET_OS_OSX
-- (void)testGetDeviceInfo_whenSSOExtensionPresent_platformSSONotEnabled_shouldReturnPlatformSSONotEnabled API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_platformSSONotEnabled_shouldReturnPlatformSSONotEnabled
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -506,7 +506,7 @@
 }
 
 #endif
-- (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo_withWPJRegisterationInfo API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionPresent_andReturnedDeviceInfo_shouldReturnMSALDeviceInfo_withWPJRegisterationInfo
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]

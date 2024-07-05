@@ -3,6 +3,7 @@
 
 ## [1.4.1]:
 * Update Native Auth logging levels for improved clarity and consistency. #2184
+* Increased macOS minimum version to 10.15 #2220
 
 ## [1.4.0]:
 * Add platform sequence param. #2192

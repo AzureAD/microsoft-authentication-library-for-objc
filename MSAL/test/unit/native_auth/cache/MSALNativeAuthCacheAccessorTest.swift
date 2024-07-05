@@ -25,14 +25,24 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 final class MSALNativeAuthCacheAccessorTest: XCTestCase {
+#if os(iOS)
     private let tokenCache: MSIDDefaultTokenCacheAccessor = {
             let dataSource = MSIDKeychainTokenCache()
             return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
         }()
 
     private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
+#else
+    private let tokenCache: MSIDDefaultTokenCacheAccessor = {
+            let dataSource = MSIDTestCacheDataSource()
+            return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
+        }()
+
+    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource())
+#endif
 
     private lazy var cacheAccessor = MSALNativeAuthCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
 

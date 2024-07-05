@@ -60,10 +60,7 @@
         
     self.parentViewController = parentViewController;
         
-    if (@available(macOS 10.15, *))
-    {
-        self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
-    }
+    self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
         
         // Configure webview
 #pragma clang diagnostic push
