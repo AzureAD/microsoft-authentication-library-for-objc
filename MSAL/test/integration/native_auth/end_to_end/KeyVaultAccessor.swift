@@ -28,45 +28,26 @@ import XCTest
 import MSIDAutomation
 
 class KeyVaultAccessor: XCTestCase {
-    
-/*    MSIDClientCredentialHelper.getAccessToken(forAuthority: authority, resource: resource, clientId: self.clientId, certificate: self.certificateData, certificatePassword: self.certificatePassword, completionHandler: { (optionalAccessToken, error) in*/
+
+    var keyvaultAuthentication: KeyvaultAuthentication? = nil
     
     override func setUp() async throws {
-//        Authentication.authCallback = { (authority, resource, callback) in
-//
-//            MSIDClientCredentialHelper.getAccessToken(forAuthority: authority, resource: resource, clientId: self.clientId, certificate: self.certificateData, certificatePassword: self.certificatePassword, completionHandler: { (optionalAccessToken, error) in
-//
-//                guard let accessToken = optionalAccessToken else {
-//                    print("Got an error, can't continue \(String(describing: error))")
-//                    callback(.Failure(error!))
-//                    return
-//                }
-//
-//                print("Successfully received an access token, returning the keyvault callback")
-//
-//                DispatchQueue.global().async {
-//                    callback(.Success(accessToken))
-//                }
-//            })
-        
-        KeyvaultAuthentication(certContents: <#T##String#>, certPassword: <#T##String#>)
+        keyvaultAuthentication = KeyvaultAuthentication(certContents: "certContentHere", certPassword: "certPasswordhere")
     }
     
     func testRetrieveSomething() async {
-//        MSIDClientCredentialHelper.getAccessToken(forAuthority: "", resource: "", clientId: "", certificate: Data(), certificatePassword: "") { someString, error in
-//            
-//        }
-        
         let expectation = expectation(description: "test")
-        let passHandler = MSIDAutomationPasswordRequestHandler()
-        let account = MSIDTestAutomationAccount()
-        account.keyvaultName = "https://msidlabs.vault.azure.net:443/secrets/LabResetCode"
-        passHandler.loadPassword(forTest: account) { secret, error in
-            XCTAssertNil(error)
-            XCTAssertNotNil(secret)
-            print(secret)
+        let url = URL(string: "https://msidlabs.vault.azure.net:443/secrets/LabResetCode")!
+        Secret.get(url) { result in
+            switch result {
+            case .Success(let secret):
+                print(secret)
+            case .Failure(let error):
+                print(error)
+                XCTFail("something went wrong \(error)")
+            }
             expectation.fulfill()
         }
         await fulfillment(of: [expectation], timeout: 10.0)
     }
-    }
+}
