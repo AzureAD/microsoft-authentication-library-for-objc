@@ -40,8 +40,9 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     let correlationId = UUID()
     let defaultTimeout: TimeInterval = 20
-
-    private static var confFileContent: [String: String]? = nil
+    
+    static var confFileContent: [String: Any]? = nil
+    private static var nativeAuthConfFileContent: [String: String]? = nil
     private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
     
     override class func setUp() {
@@ -55,8 +56,9 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             XCTFail("conf.json file can't be parsed.")
             return
         }
+        confFileContent = confFile
         if let configurationFileContent = confFile[Constants.nativeAuthKey] as? [String: String] {
-            confFileContent = configurationFileContent
+            nativeAuthConfFileContent = configurationFileContent
         } else {
             XCTFail("native_auth section in conf.json file not found")
         }
@@ -67,7 +69,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
-        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.confFileContent?[clientIdKey] as? String, let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.confFileContent?[Constants.tenantSubdomainKey] as? String else {
+        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String, let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
             XCTFail("ClientId or tenantSubdomain not found in conf.json")
             return nil
         }
@@ -83,7 +85,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     func getSignInUsernamePassword() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.confFileContent?[Constants.signInEmailPasswordUsernameKey]
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
     }
     
     private func getClientIdKey(type: ClientIdType) -> String {

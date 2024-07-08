@@ -25,7 +25,7 @@
 import Foundation
 import XCTest
 
-final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
+final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
@@ -63,8 +63,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
@@ -72,12 +71,9 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
