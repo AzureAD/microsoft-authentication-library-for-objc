@@ -41,18 +41,25 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     let correlationId = UUID()
     let defaultTimeout: TimeInterval = 20
 
-    private var confFileContent: [String: String]? = nil
+    private static var confFileContent: [String: String]? = nil
     private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    
+    override class func setUp() {
+        super.setUp()
         
         guard let confURL = Bundle(for: Self.self).url(forResource: "conf", withExtension: "json"), let configurationData = try? Data(contentsOf: confURL) else {
             XCTFail("conf.json file not found")
             return
         }
-        let confFile = try JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any]
-        confFileContent = confFile?[Constants.nativeAuthKey] as? [String: String]
+        guard let confFile = try? JSONSerialization.jsonObject(with: configurationData, options: []) as? [String: Any] else {
+            XCTFail("conf.json file can't be parsed.")
+            return
+        }
+        if let configurationFileContent = confFile[Constants.nativeAuthKey] as? [String: String] {
+            confFileContent = configurationFileContent
+        } else {
+            XCTFail("native_auth section in conf.json file not found")
+        }
     }
     
     func initialisePublicClientApplication(
@@ -60,7 +67,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
-        guard let clientId = confFileContent?[clientIdKey] as? String, let tenantSubdomain = confFileContent?[Constants.tenantSubdomainKey] as? String else {
+        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.confFileContent?[clientIdKey] as? String, let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.confFileContent?[Constants.tenantSubdomainKey] as? String else {
             XCTFail("ClientId or tenantSubdomain not found in conf.json")
             return nil
         }
@@ -76,7 +83,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     func getSignInUsernamePassword() -> String? {
-        return confFileContent?[Constants.signInEmailPasswordUsernameKey]
+        return MSALNativeAuthEndToEndBaseTestCase.confFileContent?[Constants.signInEmailPasswordUsernameKey]
     }
     
     private func getClientIdKey(type: ClientIdType) -> String {
