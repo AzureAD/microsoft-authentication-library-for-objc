@@ -102,4 +102,5 @@ module MSAL_Unit_Test_Private {
 
 module MSAL_E2E_Test_Private {
     header "IdentityCore/IdentityCore/tests/automation/ui_tests_lib/MSIDClientCredentialHelper.h"
+    header "IdentityCore/IdentityCore/tests/automation/ui_tests_lib/lab_api/MSIDAutomationPasswordRequestHandler.h"
 }
