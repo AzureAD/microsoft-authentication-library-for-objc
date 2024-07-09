@@ -5314,7 +5314,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"~/aadtests/conf.json",
+				$HOME/aadtests/conf.json,
 			);
 			name = "Copy conf.json file";
 			outputFileListPaths = (
