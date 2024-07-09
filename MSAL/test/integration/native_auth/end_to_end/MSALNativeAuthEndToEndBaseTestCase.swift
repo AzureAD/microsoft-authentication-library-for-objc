@@ -42,7 +42,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     let defaultTimeout: TimeInterval = 20
     
     static var confFileContent: [String: Any]? = nil
-    private static var nativeAuthConfFileContent: [String: String]? = nil
+    static var nativeAuthConfFileContent: [String: String]? = nil
     private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
     
     override class func setUp() {

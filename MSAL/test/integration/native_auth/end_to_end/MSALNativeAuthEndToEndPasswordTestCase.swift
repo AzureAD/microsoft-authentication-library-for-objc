@@ -33,6 +33,7 @@ class MSALNativeAuthEndToEndPasswordTestCase: MSALNativeAuthEndToEndBaseTestCase
     private class PasswordConstants {
         static let certificatePasswordKey = "certificate_password"
         static let certificateContentKey = "certificate_data"
+        static let keyVaultKey = "keyvault_url"
     }
     
     private static var keyVaultAuthentication: KeyvaultAuthentication? = nil
@@ -41,23 +42,27 @@ class MSALNativeAuthEndToEndPasswordTestCase: MSALNativeAuthEndToEndBaseTestCase
         super.setUp()
         
         guard let certificatePassword = confFileContent?[PasswordConstants.certificatePasswordKey] as? String, let certificateContent = confFileContent?[PasswordConstants.certificateContentKey] as? String else {
-            XCTFail("Can't parse certificate password or data")
+            XCTFail("Can't parse certificate password or data from conf.json file")
             return
         }
         keyVaultAuthentication = KeyvaultAuthentication(certContents: certificateContent, certPassword: certificatePassword)
     }
     
     func retrievePasswordForSignInUsername() async -> String? {
-        // TODO: find correct url and move in conf.json
-        let url = URL(string: "KeyvaultString here")!
+        guard 
+            let keyVaultURLString = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[PasswordConstants.keyVaultKey] as? String,
+            let url = URL(string: keyVaultURLString)
+        else {
+            XCTFail("Key vault URL not found or invalid in conf.json")
+            return nil
+        }
         return await withCheckedContinuation { continuation in
             Secret.get(url) { result in
                 switch result {
                 case .Success(let secret):
-                    print(secret)
                     continuation.resume(returning: secret.value)
                 case .Failure(let error):
-                    print(error)
+                    print("Something went wrong retrieving the secret from keyVault: \(error)")
                     continuation.resume(returning: nil)
                 }
             }
