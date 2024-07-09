@@ -25,7 +25,6 @@
 
 import XCTest
 @testable import MSAL
-@_implementationOnly import MSAL_E2E_Test_Private
 import MSIDAutomation
 
 class MSALNativeAuthEndToEndPasswordTestCase: MSALNativeAuthEndToEndBaseTestCase {
