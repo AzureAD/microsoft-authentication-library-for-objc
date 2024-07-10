@@ -42,6 +42,7 @@
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
+static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
 @interface MSALAcquireTokenViewController ()
 
@@ -441,7 +442,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
-    
+    parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
