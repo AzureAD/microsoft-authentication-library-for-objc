@@ -5381,7 +5381,7 @@
 			files = (
 			);
 			inputPaths = (
-				"~/aadtests/conf.json",
+				"$(HOME)/aadtests/conf.json",
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/scriptOutput.data",
@@ -5396,7 +5396,7 @@
 			files = (
 			);
 			inputPaths = (
-				"~/aadtests/conf.json",
+				"$(HOME)/aadtests/conf.json",
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/scriptOutput.data",
