@@ -181,6 +181,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
         case .redirect:
+            print("DJB: Updating last telemetry from sign up controller...")
+            MSIDLastRequestTelemetry.sharedInstance().update(
+                withApiId: 777,
+                errorString: "error:redirect",
+                context: context
+            )
+
             let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.log(level: .error,

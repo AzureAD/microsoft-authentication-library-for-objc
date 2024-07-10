@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
 enum MSALNativeAuthSignInInitiateValidatedResponse {
     case success(continuationToken: String)
@@ -40,6 +41,14 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
     func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
         case .redirect:
+            print("DJB: Updating last telemetry from sign in error type...")
+
+            MSIDLastRequestTelemetry.sharedInstance().update(
+                withApiId: 888,
+                errorString: "error:redirect",
+                context: MSALNativeAuthRequestContext(correlationId: correlationId)
+            )
+
             return .init(type: .browserRequired, correlationId: correlationId)
         case .userNotFound(let apiError):
             return .init(
