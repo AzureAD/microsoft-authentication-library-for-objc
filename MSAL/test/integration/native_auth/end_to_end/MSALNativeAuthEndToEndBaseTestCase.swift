@@ -39,7 +39,6 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     let correlationId = UUID()
-    let defaultTimeout: TimeInterval = 20
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
@@ -84,8 +83,12 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return await codeRetriever.retrieveEmailOTPCode(email: email)
     }
     
-    func getSignInUsernamePassword() -> String? {
+    func retrieveUsernameForSignInUsernameAndPassword() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+    }
+    
+    func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {
+        await fulfillment(of: expectations, timeout: seconds, enforceOrder: false)
     }
     
     private func getClientIdKey(type: ClientIdType) -> String {

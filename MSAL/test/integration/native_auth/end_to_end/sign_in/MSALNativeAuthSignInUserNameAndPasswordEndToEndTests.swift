@@ -38,14 +38,14 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword() else {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
             XCTFail("Missing information")
             return
         }
@@ -55,7 +55,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
@@ -63,7 +63,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
@@ -73,7 +73,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
@@ -81,7 +81,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
     
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = getSignInUsernamePassword() else {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
             XCTFail("Missing information")
             return
         }
@@ -93,7 +93,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
@@ -102,7 +102,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
 
-        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExpectation])
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
         XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
