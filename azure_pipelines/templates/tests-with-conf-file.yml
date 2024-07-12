@@ -14,7 +14,7 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.0.1.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -25,7 +25,6 @@ steps:
   
   - script: 'gem install xcpretty'
     displayName: 'Install xcpretty'
-
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -46,7 +45,7 @@ steps:
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
@@ -58,8 +57,8 @@ steps:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/${{ parameters.build }}_iphonesimulator17.0-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+            -xctestrun 'build/Build/Products/${{ parameters.build }}_iphonesimulator17.5-x86_64.xctestrun' \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       

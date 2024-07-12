@@ -44,7 +44,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -54,7 +54,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [verifyCodeExpectation])
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
@@ -86,7 +86,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCa
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
