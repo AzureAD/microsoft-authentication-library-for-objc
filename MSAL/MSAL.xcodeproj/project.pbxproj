@@ -2331,6 +2331,7 @@
 		DE5738BD2A8F7AC600D9120D /* MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift; sourceTree = "<group>"; };
 		DE5738BF2A8F7C1F00D9120D /* MSALNativeAuthSignUpStartResponseErrorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpStartResponseErrorTests.swift; sourceTree = "<group>"; };
 		DE729ECC2A1793A100A761D9 /* MSALNativeAuthChannelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthChannelType.swift; sourceTree = "<group>"; };
+		DE869DCD2C4179FA000EF487 /* NativeAuthEndToEndTestPlan Mac.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "NativeAuthEndToEndTestPlan Mac.xctestplan"; sourceTree = "<group>"; };
 		DE87DE692A39E80B0032BF9E /* MSALNativeAuthUserAccountResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthUserAccountResultTests.swift; sourceTree = "<group>"; };
 		DE8BE7DB2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthUserAccountResult.swift; sourceTree = "<group>"; };
 		DE8EC86C2A026BA0003FA561 /* MSALNativeAuthSignInRequestProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInRequestProvider.swift; sourceTree = "<group>"; };
@@ -3885,6 +3886,7 @@
 				B24AC4872B646B4C00832D7A /* PrivacyInfo.xcprivacy */,
 				DE53C7D4293F9F5A00E5B2BB /* module.modulemap */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
+				DE869DCD2C4179FA000EF487 /* NativeAuthEndToEndTestPlan Mac.xctestplan */,
 				9B235D952A3CC71C00657331 /* NativeAuthEndToEndTestPlan.xctestplan */,
 				DE1BD1322C3C3E9A00B0888E /* MSAL iOS Native Auth E2E Tests.xctestplan */,
 				DE1BD13A2C3C3E9A00B0888E /* MSAL Mac Native Auth E2E Tests.xctestplan */,
