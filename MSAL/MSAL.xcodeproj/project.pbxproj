@@ -1053,6 +1053,8 @@
 		DE5738BC2A8F79A800D9120D /* MSALNativeAuthResetPasswordPollCompletionResponseErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5738BB2A8F79A800D9120D /* MSALNativeAuthResetPasswordPollCompletionResponseErrorTests.swift */; };
 		DE5738BE2A8F7AC600D9120D /* MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5738BD2A8F7AC600D9120D /* MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift */; };
 		DE5738C02A8F7C2000D9120D /* MSALNativeAuthSignUpStartResponseErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5738BF2A8F7C1F00D9120D /* MSALNativeAuthSignUpStartResponseErrorTests.swift */; };
+		DE6BF3242C418C8A000BB2D9 /* MSALNativeAuthEndToEndPasswordTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */; };
+		DE6BF32D2C419325000BB2D9 /* libIdentityAutomationTestLib Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */; };
 		DE729ECD2A1793A100A761D9 /* MSALNativeAuthChannelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE729ECC2A1793A100A761D9 /* MSALNativeAuthChannelType.swift */; };
 		DE87DE6A2A39E80B0032BF9E /* MSALNativeAuthUserAccountResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE87DE692A39E80B0032BF9E /* MSALNativeAuthUserAccountResultTests.swift */; };
 		DE8BE7DC2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE8BE7DB2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift */; };
@@ -2709,6 +2711,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE6BF32D2C419325000BB2D9 /* libIdentityAutomationTestLib Mac.a in Frameworks */,
 				DE1BD0FA2C3C282A00B0888E /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6971,6 +6974,7 @@
 				DE1BD1022C3C283F00B0888E /* MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests.swift in Sources */,
 				DE1BD10A2C3C285F00B0888E /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				DE1BD1082C3C284D00B0888E /* ResetPasswordDelegateSpies.swift in Sources */,
+				DE6BF3242C418C8A000BB2D9 /* MSALNativeAuthEndToEndPasswordTestCase.swift in Sources */,
 				DE1BD10B2C3C286100B0888E /* ClientIdType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
