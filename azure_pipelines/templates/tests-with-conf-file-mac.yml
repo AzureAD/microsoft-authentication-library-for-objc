@@ -60,7 +60,7 @@ steps:
         full_path="build/Build/Products/${{ parameters.build }}_macosx$macos_version-x86_64.xctestrun"
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun $full_path \
+            -xctestrun "$full_path" \
             -destination 'platform=macOS' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
