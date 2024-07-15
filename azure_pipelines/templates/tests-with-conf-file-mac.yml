@@ -49,15 +49,17 @@ steps:
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
-
   - task: Bash@3
     displayName: Run automations
     inputs:
       targetType: 'inline'
       script: |
+        # Get the macOS version
+        macos_version=$(sw_vers -productVersion)
+        echo "##vso[task.setvariable variable=MACOS_VERSION]$macos_version"      
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/${{ parameters.build }}_macosx14.5-x86_64.xctestrun' \
+            -xctestrun 'build/Build/Products/${{ parameters.build }}_macosx$(MACOS_VERSION)-x86_64.xctestrun' \
             -destination 'platform=macOS' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
