@@ -57,7 +57,7 @@ steps:
         # Get the macOS version
         macos_version=$(sw_vers -productVersion)
         echo "Mac Version $macos_version"      
-        full_path = "build/Build/Products/${{ parameters.build }}_macosx$macos_version-x86_64.xctestrun"
+        full_path="build/Build/Products/${{ parameters.build }}_macosx$macos_version-x86_64.xctestrun"
         ls build/Build/Products/
         xcodebuild test-without-building \
             -xctestrun $full_path \
