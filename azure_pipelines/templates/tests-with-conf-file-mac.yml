@@ -39,7 +39,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
+        cp azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
