@@ -39,7 +39,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
@@ -61,7 +61,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: "00000000", delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [verifyCodeExpectation])
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
@@ -109,7 +109,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [verifyCodeExpectation])
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
