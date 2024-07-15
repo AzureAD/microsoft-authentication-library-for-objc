@@ -46,7 +46,7 @@ steps:
           -scheme '${{ parameters.schema }}' \
           -sdk macosx \
           -destination 'platform=macOS' \
-          -derivedDataPath 'build' \
+          -derivedDataPath 'build-mac' \
           | tee xcodebuild.log \
           | xcpretty -c
 
@@ -57,11 +57,11 @@ steps:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/${{ parameters.build }}_iphonesimulator17.5-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+            -xctestrun 'build/Build/Products/${{ parameters.build }}_macosx.xctestrun' \
+            -destination 'platform=macOS' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report-mac.xcresult'       
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
