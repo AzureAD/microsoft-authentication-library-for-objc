@@ -57,7 +57,7 @@ steps:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/${{ parameters.build }}_macosx14.0-x86_64.xctestrun' \
+            -xctestrun 'build/Build/Products/${{ parameters.build }}_macosx14.0-arm64.xctestrun' \
             -destination 'platform=macOS' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
