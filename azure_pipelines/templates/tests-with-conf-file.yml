@@ -68,6 +68,6 @@ steps:
     condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
+      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - $(parameters.schema)'
       publishLocation: 'pipeline'
   
