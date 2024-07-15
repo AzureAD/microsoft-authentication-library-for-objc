@@ -79,7 +79,7 @@ jobs:
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
 
-- job: e2e_test_native_auth
+- job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for Mac native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
