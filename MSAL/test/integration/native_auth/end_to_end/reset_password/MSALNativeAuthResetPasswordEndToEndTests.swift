@@ -28,24 +28,20 @@ import XCTest
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
     private let usernameOTP = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
-    }
     
     // Hero Scenario 2.3.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprStartSuccess, endpoint: .resetPasswordStart)
-        }
-
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
@@ -56,41 +52,34 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprContinueSuccess, endpoint: .resetPasswordContinue)
-        }
-
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
-        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprSubmitSuccess, endpoint: .resetPasswordSubmit)
-        }
-
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
-        await fulfillment(of: [resetPasswordCompletedExp], timeout: defaultTimeout)
+        await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
     }
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprStartSuccess, endpoint: .resetPasswordStart)
-        }
-
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
@@ -101,26 +90,18 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprContinueSuccess, endpoint: .resetPasswordContinue)
-        }
-
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
-        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        if usingMockAPI {
-            try await mockResponse(.ssprSubmitSuccess, endpoint: .resetPasswordSubmit)
-        }
-
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
-        await fulfillment(of: [resetPasswordCompletedExp], timeout: defaultTimeout)
+        await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
 
         // Now sign in...
@@ -128,13 +109,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let signInAfterResetPasswordExp = expectation(description: "sign in after reset password")
         let signInAfterResetPasswordDelegate = SignInAfterResetPasswordDelegateSpy(expectation: signInAfterResetPasswordExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(delegate: signInAfterResetPasswordDelegate)
 
-        await fulfillment(of: [signInAfterResetPasswordExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInAfterResetPasswordExp])
         XCTAssertTrue(signInAfterResetPasswordDelegate.onSignInCompletedCalled)
         XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)

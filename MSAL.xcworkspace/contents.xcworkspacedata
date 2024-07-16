@@ -4,4 +4,7 @@
    <FileRef
       location = "group:MSAL/MSAL.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:MSAL/MSAL iOS Native Auth E2E Tests.xctestplan">
+   </FileRef>
 </Workspace>
