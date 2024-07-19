@@ -48,10 +48,10 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         case .failure(let signInChallengeResponseError):
             guard let signInChallengeResponseError =
                     signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
-                MSALLogger.log(
+                MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "signin/challenge: Unable to decode error response: \(signInChallengeResponseError)")
+                    format: "signin/challenge: Unable to decode error response: \(MSALLogMask.maskPII(signInChallengeResponseError))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return handleFailedSignInChallengeResult(error: signInChallengeResponseError)
@@ -74,10 +74,10 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
-                MSALLogger.log(
+                MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "signin/initiate: Unable to decode error response: \(responseError)")
+                    format: "signin/initiate: Unable to decode error response: \(MSALLogMask.maskPII(responseError))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return handleFailedSignInInitiateResult(error: initiateResponseError)

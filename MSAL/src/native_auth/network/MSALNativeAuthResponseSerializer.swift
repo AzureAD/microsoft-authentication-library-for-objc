@@ -40,7 +40,7 @@ final class MSALNativeAuthResponseSerializer<T: Decodable & MSALNativeAuthRespon
             response.correlationId = T.retrieveCorrelationIdFromHeaders(from: httpResponse)
             return response
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "ResponseSerializer failed decoding \(error)")
+            MSALLogger.logPII(level: .error, context: context, format: "ResponseSerializer failed decoding \(MSALLogMask.maskPII(error))")
             throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
         }
     }

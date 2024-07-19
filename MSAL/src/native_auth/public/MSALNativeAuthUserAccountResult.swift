@@ -65,10 +65,10 @@ import Foundation
                 context: context
             )
         } catch {
-            MSALLogger.log(
+            MSALLogger.logPII(
                 level: .error,
                 context: context,
-                format: "Clearing MSAL token cache for the current account failed with error %@: \(error)"
+                format: "Clearing MSAL token cache for the current account failed with error %@: \(MSALLogMaskWrapper.maskPII(error))"
             )
         }
     }
