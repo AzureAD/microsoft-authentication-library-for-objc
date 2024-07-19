@@ -28,6 +28,7 @@ import XCTest
 @_implementationOnly import MSAL_Unit_Test_Private
 
 final class MSALNativeAuthCacheAccessorTest: XCTestCase {
+    // Based on the OS the access to the Keychain is different
 #if os(iOS)
     private let tokenCache: MSIDDefaultTokenCacheAccessor = {
             let dataSource = MSIDKeychainTokenCache()
