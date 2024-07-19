@@ -64,13 +64,13 @@ steps:
             -destination 'platform=macOS' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output_mac/report-mac.xcresult'       
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'        
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
     inputs:
-      targetPath: '$(Agent.BuildDirectory)/s/test_output_mac/'
+      targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
   
