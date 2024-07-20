@@ -29,82 +29,14 @@ pool:
 
 jobs:
 - job: ui_automation
-  displayName: Run MSAL UI automation
+  displayName: 'Run MSAL UI automation'
   timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
-  
+
   steps:
-
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: true
-    path: s
-    
-  - task: Bash@3
-    displayName: 'Select Xcode version 15.4'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
-  
-  - task: Bash@3
-    displayName: Go to project folder
-    inputs:
-      targetType: 'inline'
-      script: |        
-        cd $(Agent.BuildDirectory)/s
-  
-  - script: 'gem install xcpretty'
-    displayName: 'Install xcpretty'
-
-
-  - task: AzureCLI@2
-    displayName: 'Read configuration from KeyVault'
-    inputs:
-      azureSubscription: 'AuthSdkResourceManager'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: 'python get_automation_conf_file.py'
-      workingDirectory: azure_pipelines/scripts/
-  - task: Bash@3
-    displayName: Build for testing
-    inputs:
-      targetType: 'inline'
-      script: |
-        mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
-        ruby TestRubyFile.rb
-        xcodebuild build-for-testing \
-          -workspace MSAL.xcworkspace \
-          -scheme "MSAL Test Automation (iOS)" \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
-          -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
-
-  - task: Bash@3
-    displayName: Run automations
-    inputs:
-      targetType: 'inline'
-      script: |
-        ls build/Build/Products/
-        xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
-            -retry-tests-on-failure \
-            -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
-
-  # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
-  - task: PublishPipelineArtifact@1
-    condition: succeededOrFailed()
-    inputs:
-      targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
-      publishLocation: 'pipeline'
+  - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
     condition: failed()
@@ -146,8 +78,19 @@ jobs:
         issue_title = "Automation tests failure"
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
-  
 
+- job: e2e_test_native_auth
+  displayName: 'Run MSAL E2E tests for native auth'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL iOS Native Auth E2E Tests'
+      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
 
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
