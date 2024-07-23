@@ -38,7 +38,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let resetPasswordUsernameKey = "reset_password_username"
     }
     
-    let correlationId = UUID()
+    let correlationId = UUID(uuidString: "EF4DCE40-CFB6-4CFB-832B-1547D004F5D0")
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
