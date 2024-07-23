@@ -145,7 +145,8 @@ static NSSet *s_recoverableErrorCode;
                              MSIDGrantedScopesKey: MSALGrantedScopesKey,
                              MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
                              MSIDBrokerVersionKey: MSALBrokerVersionKey,
-                             MSIDHomeAccountIdkey: MSALHomeAccountIdKey
+                             MSIDHomeAccountIdkey: MSALHomeAccountIdKey,
+                             MSIDThrottlingCacheHitKey: MSALThrottlingCacheHitKey
                              };
     
     s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), nil];
