@@ -73,14 +73,6 @@
         "identifier" : "28D1D56B29BF62E900CE75F4",
         "name" : "MSAL iOS Native Auth Integration Tests"
       }
-    },
-    {
-      "parallelizable" : true,
-      "target" : {
-        "containerPath" : "container:MSAL.xcodeproj",
-        "identifier" : "28CED2E72C21E0F9004320D1",
-        "name" : "MSAL iOS Native Auth E2E Tests"
-      }
     }
   ],
   "version" : 1

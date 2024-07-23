@@ -41,7 +41,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
@@ -54,7 +54,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
-        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
 
         // Now submit the password...
@@ -63,7 +63,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
-        await fulfillment(of: [resetPasswordCompletedExp], timeout: defaultTimeout)
+        await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
     }
 
@@ -79,7 +79,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
@@ -92,7 +92,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
 
-        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
 
         // Now submit the password...
@@ -101,7 +101,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
 
-        await fulfillment(of: [resetPasswordCompletedExp], timeout: defaultTimeout)
+        await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
 
         // Now sign in...
@@ -111,7 +111,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(delegate: signInAfterResetPasswordDelegate)
 
-        await fulfillment(of: [signInAfterResetPasswordExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInAfterResetPasswordExp])
         XCTAssertTrue(signInAfterResetPasswordDelegate.onSignInCompletedCalled)
         XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
