@@ -41,7 +41,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
             XCTFail("OTP not sent")
             return
@@ -59,7 +59,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -69,7 +69,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
@@ -86,7 +86,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -96,7 +96,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -106,7 +106,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
@@ -123,7 +123,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -133,7 +133,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -146,7 +146,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [attributesExp], timeout: defaultTimeout)
+        await fulfillment(of: [attributesExp])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -156,7 +156,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
@@ -173,7 +173,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
             XCTFail("OTP not sent")
             return
@@ -187,7 +187,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -200,7 +200,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [submitAttributesExp1], timeout: defaultTimeout)
+        await fulfillment(of: [submitAttributesExp1])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
 
         // Now submit more attributes...
@@ -213,7 +213,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [submitAttributesExp2], timeout: defaultTimeout)
+        await fulfillment(of: [submitAttributesExp2])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -223,7 +223,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
@@ -239,7 +239,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
             XCTFail("OTP not sent")
             return
@@ -257,7 +257,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
 

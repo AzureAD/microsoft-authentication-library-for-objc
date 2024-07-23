@@ -47,7 +47,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -57,7 +57,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -67,7 +67,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
 
@@ -89,7 +89,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -109,7 +109,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
 
@@ -130,7 +130,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -140,7 +140,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [credentialRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [credentialRequiredExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
 
         // Now submit the password...
@@ -153,7 +153,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpPasswordDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [attributesRequiredExp])
         XCTAssertTrue(signUpPasswordDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -163,7 +163,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpPasswordDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
 
@@ -184,7 +184,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -194,7 +194,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
 
         // Now submit the password...
@@ -207,7 +207,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpPasswordDelegate
         )
 
-        await fulfillment(of: [passwordRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -220,7 +220,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [attributesRequiredExp])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -230,7 +230,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
     
@@ -252,7 +252,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
@@ -261,7 +261,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
 
-        await fulfillment(of: [passwordRequiredExpectation], timeout: defaultTimeout)
+        await fulfillment(of: [passwordRequiredExpectation])
 
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
@@ -285,7 +285,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -295,7 +295,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
 
         // Now submit the password...
@@ -308,7 +308,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpPasswordDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp1], timeout: defaultTimeout)
+        await fulfillment(of: [attributesRequiredExp1])
         XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -321,7 +321,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp2], timeout: defaultTimeout)
+        await fulfillment(of: [attributesRequiredExp2])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
 
         // Now submit more attributes...
@@ -334,7 +334,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -344,7 +344,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
+        await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
     }
 
@@ -365,7 +365,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             delegate: signUpStartDelegate
         )
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -375,7 +375,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
 

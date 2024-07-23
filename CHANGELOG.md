@@ -1,6 +1,7 @@
 ## [TBD]:
 * Update common core submodule with changes related to upgrade registration.
 * Add a new flag MSALThrottlingCacheHitKey for error returned from client's throttling #2257
+* Update common core submodule with device register action with token protection hint.
 
 ## [1.4.1]:
 * Update Native Auth logging levels for improved clarity and consistency. #2184
