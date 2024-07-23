@@ -84,12 +84,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
 
         let initiateValidatedResponse = await performAndValidateSignInInitiate(username: params.username, telemetryInfo: telemetryInfo)
+        print("signin/inititate response: \(initiateValidatedResponse)")
         let result = await handleInitiateResponse(initiateValidatedResponse, telemetryInfo: telemetryInfo)
 
         switch result {
         case .success(let challengeValidatedResponse):
+            print("signin/inititate validation response: success")
             return await handleChallengeResponse(challengeValidatedResponse, params: params, telemetryInfo: telemetryInfo)
         case .failure(let error):
+            print("signin/inititate validation error: \(error)")
             return .init(
                 .error(error.convertToSignInStartError(correlationId: params.context.correlationId())),
                 correlationId: params.context.correlationId()
@@ -589,6 +592,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .error(.invalidRequest(.init(errorDescription: errorDescription)))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
+        print("signin/challenge response: \(challengeResponse)")
         return signInResponseValidator.validate(context: context, result: challengeResponse)
     }
 

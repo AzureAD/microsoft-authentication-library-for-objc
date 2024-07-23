@@ -56,6 +56,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         config: MSIDConfiguration,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthTokenValidatedResponse {
             let ciamTokenResponse: Result<MSIDCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
+            print("signin/token response: \(ciamTokenResponse)")
             return responseValidator.validate(
                 context: context,
                 msidConfiguration: config,
