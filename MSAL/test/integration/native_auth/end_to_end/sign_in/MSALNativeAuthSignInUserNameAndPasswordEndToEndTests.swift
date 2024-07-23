@@ -75,6 +75,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExpectation])
 
+        guard signInDelegateSpy.error == nil else {
+            XCTFail("Error: \(signInDelegateSpy.error?.errorDescription)")
+            return
+        }
+
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
