@@ -155,7 +155,8 @@ class MSALNativeAuthBaseController {
     ) async -> Result<T, Error> {
         return await withCheckedContinuation { continuation in
 
-            print("Performing request to: \(request.urlRequest). with body: \(request.parameters)")
+            print("PErforming request with correlationId: \(context.correlationId())")
+            print("Performing request to: \(request.urlRequest). with body: \(request.parameters). with headers: \(request.headers)")
 
             request.send { [weak self] result, error in
                 if let error = error {
