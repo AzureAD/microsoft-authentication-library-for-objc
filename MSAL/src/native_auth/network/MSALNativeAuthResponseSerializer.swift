@@ -42,6 +42,7 @@ final class MSALNativeAuthResponseSerializer<T: Decodable & MSALNativeAuthRespon
             return response
         } catch {
             print("ResponseSerializer failed decoding \(error)")
+            print("ResponseSerializer - content :\(String(data: data, encoding: .utf8))")
             MSALLogger.log(level: .error, context: context, format: "ResponseSerializer failed decoding \(error)")
             throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
         }
