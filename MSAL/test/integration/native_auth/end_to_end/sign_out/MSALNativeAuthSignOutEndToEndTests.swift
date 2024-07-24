@@ -50,6 +50,7 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTe
         // Sign out
 
         var userAccountResult = sut.getNativeAuthUserAccount()
+        XCTAssertNotNil(userAccountResult)
         userAccountResult?.signOut()
 
         userAccountResult = sut.getNativeAuthUserAccount()
