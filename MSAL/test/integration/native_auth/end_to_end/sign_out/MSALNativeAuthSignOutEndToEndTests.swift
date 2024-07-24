@@ -25,64 +25,19 @@
 import Foundation
 import XCTest
 
-final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    // Hero Scenario 1.3.1. Sign out – Local sign out from app on device (no SSO)
-    func test_signOutAfterSignInOTPSuccess() async throws {
-        throw XCTSkip("Skipping this test because email+code signIn username is missing")
-        guard let sut = initialisePublicClientApplication() else {
-            XCTFail("Missing information")
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let verifyCodeExpectation = expectation(description: "verifying code")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-        let otp = "<otp not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
-        XCTAssertNotNil(signInDelegateSpy.sentTo)
-
-        // Now submit the code..
-
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
-
-        await fulfillment(of: [verifyCodeExpectation])
-
-        XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
-        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
-
-        // Sign out
-
-        var userAccountResult = sut.getNativeAuthUserAccount()
-        userAccountResult?.signOut()
-
-        userAccountResult = sut.getNativeAuthUserAccount()
-        XCTAssertNil(userAccountResult)
-    }
-
+final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
     func test_signOutAfterSignInPasswordSuccess() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(),
+              let username = retrieveUsernameForSignInUsernameAndPassword(),
+              let password = await retrievePasswordForSignInUsername()
+        else {
             XCTFail("Missing information")
             return
         }
         
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
