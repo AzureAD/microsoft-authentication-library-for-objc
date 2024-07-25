@@ -39,10 +39,52 @@
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 
-@protocol ADBXPCServiceProtocol <NSObject>
+#define requireIsAPPLSignedAnchor    "anchor apple generic"
+
+#define requireIsAPPLSignedExternal "certificate 1[field.1.2.840.113635.100.6.2.6] exists"
+#define requireIsMSFTSignedExternal "certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = UBF8T346G9"
+
+#define coreRequirementExternal "(" requireIsAPPLSignedExternal    ") and (" requireIsMSFTSignedExternal ")"
+
+// For App Store, Microsoft certificates don't show up in certificate chain.
+// Instead, we check for the app to be Microsoft App Group.
+#define requireIsAppStoreSigned        "certificate leaf[field.1.2.840.113635.100.6.1.9] exists"
+#define requireBelongsToMSFTAppGroup "entitlement[\"com.apple.security.application-groups\"] = \"UBF8T346G9.\"*"
+
+#define coreRequirementAppStore "(" requireIsAppStoreSigned ") and (" requireBelongsToMSFTAppGroup ")"
+
+#define distributionRequirement "(" requireIsAPPLSignedAnchor ") and ((" coreRequirementAppStore ") or (" coreRequirementExternal "))"
+
+// For internal builds only we also recognize dev builds but exclude them from external builds
+// for sake of simplicity and performance
+
+#define requireIsAPPLSignedInternal "certificate 1[field.1.2.840.113635.100.6.2.1] exists"
+#define requireIsMSFTSignedInternal "certificate leaf[subject.CN] = \"%@\""
+
+// requireIsXctestApp comes from the generated XctestCodeRequirement.h above
+#define coreRequirementInternal "((" requireIsAPPLSignedInternal ") and (" requireIsMSFTSignedInternal "))"
+
+#define developmentRequirement "(" requireIsAPPLSignedAnchor ") and ((" coreRequirementAppStore ") or (" coreRequirementExternal ") or (" coreRequirementInternal "))"
+
+
+@protocol ADBParentXPCServiceProtocol <NSObject>
+
+- (void)connectToBrokerWithRequestInfo:(NSDictionary *)requestInfo
+                  connectionCompletion:(void (^)(NSString *listenerEndpoint, NSDictionary *params, NSError *error))completion;
+
+- (void)getBrokerInstanceEndpoint:(NSDictionary *)requestInfo
+                            reply:(void (^)(NSString  * _Nullable listenerEndpoint, NSDictionary<NSString *, id> * _Nullable params, NSError * _Nullable error))reply;
 
 - (void)acquireTokenSilentlyFromBroker:(NSString *)passedInParam
                        completionBlock:(void (^)(NSString *replyParam))blockName;
+
+@end
+
+@protocol ADBChildBrokerProtocol <NSObject>
+
+- (void)acquireTokenSilentlyFromBroker:(NSURL *)url 
+                       parentViewFrame:(NSRect)frame
+                       completionBlock:(void (^)(NSString *replyParam, NSDate* xpcStartDate, NSString *processId))blockName;
 
 @end
 
@@ -71,6 +113,9 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic) NSArray *selectedScopes;
 @property (atomic) NSArray<MSALAccount *> *accounts;
 
+@property (nonatomic, strong) NSTimer *repeatingTimer;
+@property (nonatomic) NSInteger counter;
+
 @end
 
 @implementation MSALAcquireTokenViewController
@@ -97,7 +142,7 @@ static NSString * const defaultScope = @"User.Read";
     self.selectedScopes = @[defaultScope];
     self.validateAuthoritySegment.selectedSegment = self.settings.validateAuthority ? 0 : 1;
     
-    [self startSvcConnection];
+//    [self tryBrokerXPCConnection];
 }
 
 - (void)populateProfiles
@@ -136,6 +181,23 @@ static NSString * const defaultScope = @"User.Read";
             {
                 [self.userPopup addItemWithTitle:account.username];
             }
+        }];
+        
+        [application getDeviceInformationWithParameters:nil completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (!error)
+                {
+                    NSString *resultText = [NSString stringWithFormat:@"%@", deviceInformation];
+                    [self.resultTextView setString:resultText];
+                    NSLog(@"%@", resultText);
+                }
+                else
+                {
+                    NSString *resultText = [NSString stringWithFormat:@"%@", error];
+                    [self.resultTextView setString:resultText];
+                    NSLog(@"%@", resultText);
+                }
+            });
         }];
     }
 }
@@ -491,9 +553,90 @@ static NSString * const defaultScope = @"User.Read";
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
+- (void)repeatingMethod {
+//    if (self.counter < 50) {
+        NSLog(@"ADBrokerXPC Counting: %ld", (long)self.counter);
+        self.counter ++;
+        NSError *error = nil;
+        MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
+        if (!application || error)
+        {
+            NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+            [self.resultTextView setString:resultText];
+            return;
+        }
+        
+        __block BOOL fBlockHit = NO;
+        
+        MSALAccount *currentAccount = [self selectedAccount];
+        
+        if (!currentAccount)
+        {
+            [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+            return;
+        }
+        
+        NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
+        MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
+        parameters.authority = self.settings.authority;
+        parameters.authenticationScheme = [self authScheme];
+        parameters.extraQueryParameters = extraQueryParameters;
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSDate *startTime = [NSDate date];
+            NSString *processIdentifier = [NSNumber numberWithInt:[NSProcessInfo processInfo].processIdentifier].stringValue;
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"dd MMM yyyy HH:mm:ss"]; // Customize the format as needed
+            NSString *dateString = [formatter stringFromDate:startTime];
+            
+            NSLog(@"[Entra broker] Client Start acquireTokenSilentWithParameters at %@, identifier: %@", dateString, processIdentifier);
+            [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+             {
+                NSDate *replyDate = [NSDate date];
+                NSTimeInterval elapsedTime = [replyDate timeIntervalSinceDate:startTime];
+                NSLog(@"[Entra broker] Client start acquireTokenSilentlyFromBroker at %@, used %.2f seconds, identifier: %@", dateString, elapsedTime, processIdentifier);
+                if (fBlockHit)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+                    });
+                    
+                    return;
+                }
+                fBlockHit = YES;
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (result)
+                    {
+                        [self updateResultView:result];
+                    }
+                    else
+                    {
+                        [self updateResultViewError:error];
+                    }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+                });
+            }];
+        });
+//    }
+}
+
+
 - (IBAction)acquireTokenSilent:(id)sender
 {
     (void)sender;
+//    NSInteger counter = 0;
+//    self.counter = 0;
+//    self.repeatingTimer = [NSTimer scheduledTimerWithTimeInterval:7.0
+//                                                           target:self
+//                                                         selector:@selector(repeatingMethod)
+//                                                         userInfo:nil
+//                                                          repeats:YES];
+    
+//    while (counter < 50) {
+//        [self repeatingMethod];
+//        counter ++;
+//    }
     NSError *error = nil;
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
     if (!application || error)
@@ -634,21 +777,82 @@ static NSString * const defaultScope = @"User.Read";
     return webviewParameters;
 }
 
-- (void)startSvcConnection
-{
-    NSLog(@"Start service connection to broker");
-//    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithServiceName:@"com.microsoft.EntraIdentityBroker"];
-    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"UBF8T346G9.com.microsoft.entrabroker.EntraIdentityBrokerXPC2" options:NSXPCConnectionPrivileged];
-    [connection setRemoteObjectInterface:[NSXPCInterface interfaceWithProtocol:@protocol(ADBXPCServiceProtocol)]];
-    [connection resume];
-    id<ADBXPCServiceProtocol> service = [connection remoteObjectProxyWithErrorHandler:^(NSError * _Nonnull error) {
-        NSLog(@"Error received while connection to service: %@", error);
-    }];
-    
-    [service acquireTokenSilentlyFromBroker:@"test" completionBlock:^(NSString * _Nonnull replyParam) {
-        NSLog(@"Received broker error: %@", replyParam);
-    }];
-}
+//- (void)tryBrokerXPCConnection
+//{
+//    NSLog(@"[Entra broker] CLIENT - started establishing connection %f", [[NSDate date] timeIntervalSince1970]);
+//    
+//    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"UBF8T346G9.com.microsoft.entrabroker.EntraIdentityBrokerXPC.Mach" options:0];
+//    
+//    NSString *codeSigningRequirement = [self codeSignRequirementForBundleId:@"com.microsoft.entrabroker.BrokerApp" devIdentity:@"Apple Development: Kai Song (4C4WFUGLAB)"];
+//    
+//    connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ADBParentXPCServiceProtocol)];
+//    if (@available(macOS 13.0, *)) {
+//        [connection setCodeSigningRequirement:codeSigningRequirement];
+//    } else {
+//        // Fallback on earlier versions
+//    }
+//    [connection resume];
+//    
+//    [connection setInvalidationHandler:^{
+//        NSLog(@"Connection invalidated");
+//    }];
+//    
+//    [connection setInterruptionHandler:^{
+//        NSLog(@"Connection interrupted");
+//    }];
+//    
+//    id service = [connection remoteObjectProxyWithErrorHandler:^(NSError * _Nonnull error) {
+//        
+//        NSLog(@"Error %@", error);
+//        // TODO: handle error
+//    }];
+//    
+//    [service connectToBrokerWithRequestInfo:@{} connectionCompletion:
+//    ^(__unused NSString * _Nonnull listenerEndpoint, __unused NSDictionary * _Nonnull params, __unused NSError * _Nonnull error)
+//    {
+//        NSLog(@"[Entra broker] CLIENT - connected to new service endpoint %@", listenerEndpoint);
+//        
+//        NSXPCConnection *directConnection = [[NSXPCConnection alloc] initWithListenerEndpoint:listenerEndpoint];
+//        directConnection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ADBChildBrokerProtocol)];
+//        
+//        NSString *clientCodeSigningRequirement = [self codeSignRequirementForBundleId:@"com.microsoft.EntraIdentityBroker.Service" devIdentity:@"Apple Development: Kai Song (4C4WFUGLAB)"];
+//        
+//        if (@available(macOS 13.0, *)) {
+//            [directConnection setCodeSigningRequirement:clientCodeSigningRequirement];
+//        } else {
+//            // Fallback on earlier versions
+//        }
+//        [directConnection resume];
+//        
+//        id<ADBChildBrokerProtocol> directService = [directConnection remoteObjectProxyWithErrorHandler:^(NSError * _Nonnull error) {
+//            NSLog(@"[Entra broker] CLIENT - received direct service error %@", error);
+//        }];
+//        
+//        // TODO: bundleId verification doesn't work :(
+//        // TODO: bundleId verification doesn't work :(
+//        NSDictionary *input = @{@"bundleId": @"com.microsoft.MSALMacTestApp", @"request": @"request"};
+//        
+//        [directService acquireTokenSilentlyFromBroker:input completionBlock:^(NSString * _Nonnull replyParam) {
+//            NSLog(@"[Entra broker] CLIENT - received response directly from a dedicated connection %@, %f", replyParam, [[NSDate date] timeIntervalSince1970]);
+//        }];
+//    }];
+//}
 
+- (NSString *)codeSignRequirementForBundleId:(NSString *)bundleId devIdentity:(NSString *)devIdentity
+{
+    // TODO: modify this for distribution. MSAL code should always talk to distribution signed agent only, and we can enable dev signed agent for MS_INTERNAL macro only
+    
+    NSString *baseRequirementWithDevIdentity = [NSString stringWithFormat:@developmentRequirement, devIdentity];
+    NSString *stringWithAdditionalRequirements = [NSString stringWithFormat:@"(identifier \"%@\") and %@"
+                        " and !(entitlement[\"com.apple.security.cs.allow-dyld-environment-variables\"] /* exists */)"
+                        " and !(entitlement[\"com.apple.security.cs.disable-library-validation\"] /* exists */)"
+                        " and !(entitlement[\"com.apple.security.cs.allow-unsigned-executable-memory\"] /* exists */)"
+                                                  " and !(entitlement[\"com.apple.security.cs.allow-jit\"] /* exists */)", bundleId, baseRequirementWithDevIdentity];
+    
+    
+    // TODO: add this for distribution to prohibit debugger
+    //" and !(entitlement[\"com.apple.security.get-task-allow\"] /* exists */)"
+    return stringWithAdditionalRequirements;
+}
 
 @end
