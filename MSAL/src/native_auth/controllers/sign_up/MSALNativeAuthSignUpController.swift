@@ -206,7 +206,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             stopTelemetryEvent(event, context: context, error: error)
             MSALLogger.logPII(level: .error,
                               context: context,
-                              format: "InvalidUsername in signup/start request \(MSALLogMask.maskPII(error.errorDescription))")
+                              format: "InvalidUsername in signup/start request \(MSALLogMask.maskEUII(error.errorDescription))")
             return .init(.error(error), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = SignUpStartError(

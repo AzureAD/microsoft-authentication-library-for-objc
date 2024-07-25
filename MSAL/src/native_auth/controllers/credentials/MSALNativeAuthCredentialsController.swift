@@ -94,7 +94,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             MSALLogger.logPII(
                 level: .error,
                 context: nil,
-                format: "Error retrieving accounts \(MSALLogMask.maskPII(error))")
+                format: "Error retrieving accounts \(MSALLogMask.maskEUII(error))")
         }
         return []
     }

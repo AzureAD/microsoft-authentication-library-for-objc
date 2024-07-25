@@ -68,7 +68,7 @@ import Foundation
             MSALLogger.logPII(
                 level: .error,
                 context: context,
-                format: "Clearing MSAL token cache for the current account failed with error %@: \(MSALLogMaskWrapper.maskPII(error))"
+                format: "Clearing MSAL token cache for the current account failed with error %@: \(MSALLogMaskWrapper.maskEUII(error))"
             )
         }
     }

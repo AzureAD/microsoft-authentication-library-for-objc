@@ -101,10 +101,10 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     let targetLabel = response.challengeTargetLabel,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
-                MSALLogger.log(
+                MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "signin/challenge: Invalid response with challenge type oob, response: \(response)")
+                    format: "signin/challenge: Invalid response with challenge type oob, response: \(MSALLogMask.maskPII(response))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .codeRequired(

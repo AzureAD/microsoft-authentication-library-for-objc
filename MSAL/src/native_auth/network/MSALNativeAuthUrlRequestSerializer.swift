@@ -67,7 +67,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
                     MSALLogger.log(
                         level: .error,
                         context: context,
-                        format: "HTTP body request serialization failed with error: \(error.localizedDescription)"
+                        format: "HTTP body request serialization failed with error: \(MSALLogMask.maskPII(error.localizedDescription))"
                     )
                 }
             } else {

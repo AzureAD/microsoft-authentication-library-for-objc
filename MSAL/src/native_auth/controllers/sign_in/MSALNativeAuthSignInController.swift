@@ -204,7 +204,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         MSALLogger.logPII(
                             level: .error,
                             context: context,
-                            format: "SignIn submit code, token request failed with error \(MSALLogMask.maskPII(error))"
+                            format: "SignIn submit code, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
                         guard let self = self else { return }
                         continuation.resume(returning: self.processSubmitCodeFailure(
@@ -279,7 +279,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         MSALLogger.logPII(
                             level: .error,
                             context: context,
-                            format: "SignIn submit password, token request failed with error \(MSALLogMask.maskPII(error))"
+                            format: "SignIn submit password, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
                         guard let self = self else { return }
                         continuation.resume(returning: self.processSubmitPasswordFailure(
@@ -322,7 +322,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.logPII(
                 level: .error,
                 context: context,
-                format: "SignIn ResendCode: received challenge error response: \(MSALLogMask.maskPII(challengeError))"
+                format: "SignIn ResendCode: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
