@@ -25,21 +25,19 @@
 import Foundation
 import XCTest
 
-final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-
-    private let usernameOTP = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-    
+final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 2.3.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(),
+              let username = retrieveUsernameForResetPassword()
+        else {
             XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -51,8 +49,13 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
+        
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("Missing information")
+            return
+        }
 
-        resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
+        resetPasswordStartDelegate.newState?.submitCode(code: code, delegate: resetPasswordVerifyDelegate)
 
         await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
@@ -61,7 +64,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
+        let uniquePassword = "password.\(Date().timeIntervalSince1970)"
+        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
@@ -69,15 +73,16 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(),
+              let username = retrieveUsernameForResetPassword()
+        else {
             XCTFail("Missing information")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        sut.resetPassword(username: usernameOTP, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -89,8 +94,13 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
+        
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("Missing information")
+            return
+        }
 
-        resetPasswordStartDelegate.newState?.submitCode(code: "1234", delegate: resetPasswordVerifyDelegate)
+        resetPasswordStartDelegate.newState?.submitCode(code: code, delegate: resetPasswordVerifyDelegate)
 
         await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
@@ -99,7 +109,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: "password", delegate: resetPasswordRequiredDelegate)
+        let uniquePassword = "password.\(Date().timeIntervalSince1970)"
+        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
@@ -113,8 +124,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         await fulfillment(of: [signInAfterResetPasswordExp])
         XCTAssertTrue(signInAfterResetPasswordDelegate.onSignInCompletedCalled)
-        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, usernameOTP)
+        XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, username)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
-        XCTAssertNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
+        XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
     }
 }
