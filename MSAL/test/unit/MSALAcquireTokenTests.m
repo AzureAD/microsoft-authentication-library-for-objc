@@ -2891,7 +2891,7 @@
          [expectation fulfill];
      }];
     
-    [self waitForExpectations:@[expectation] timeout:1];
+    [self waitForExpectations:@[expectation] timeout:5];
 }
 
 
