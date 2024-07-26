@@ -91,10 +91,10 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             let config = factory.makeMSIDConfiguration(scopes: [])
             return try cacheAccessor.getAllAccounts(configuration: config)
         } catch {
-            MSALLogger.log(
+            MSALLogger.logPII(
                 level: .error,
                 context: nil,
-                format: "Error retrieving accounts \(error)")
+                format: "Error retrieving accounts \(MSALLogMask.maskEUII(error))")
         }
         return []
     }
