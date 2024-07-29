@@ -29,7 +29,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     private let attributes = ["age": 40]
 
-    // Hero Scenario 1.1.1. Sign up – with Email Verification (Email & Email OTP)
+    // Hero Scenario 2.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
@@ -124,7 +124,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
@@ -178,7 +178,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
@@ -239,7 +239,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
-    // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
+    // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
