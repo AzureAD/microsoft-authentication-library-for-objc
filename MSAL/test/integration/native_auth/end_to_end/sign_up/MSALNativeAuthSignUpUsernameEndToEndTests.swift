@@ -27,8 +27,6 @@ import MSAL
 
 final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-    private let attributes = ["age": 40]
-
     // Hero Scenario 2.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
