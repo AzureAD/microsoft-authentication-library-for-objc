@@ -29,12 +29,13 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
 
         let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
@@ -48,6 +49,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
 
         // Now submit the code...
 
@@ -77,19 +83,14 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.3. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
-        guard
-            let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
-            let password = await retrievePasswordForSignInUsername()
-        else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
 
         let username = generateSignUpRandomEmail()
-        let attributes = [
-            "city": "Dublin",
-            "country": "Ireland"
-        ]
+        let password = generateRandomPassword()
+        let attributes = AttributesStub.allAttributes
 
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
@@ -104,6 +105,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
 
         // Now submit the code...
 
@@ -133,12 +139,13 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.4. Sign up - with Email verification as FIRST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsFirstStepAndThenSetPassword_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
 
         let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
@@ -151,6 +158,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
 
         // Now submit the code...
 
@@ -193,10 +205,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.6. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
-        guard
-            let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
-            let password = await retrievePasswordForSignInUsername() 
-        else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
@@ -205,10 +214,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         let username = generateSignUpRandomEmail()
-        let attributes = [
-            "city": "Dublin",
-            "country": "Ireland"
-        ]
+        let password = generateRandomPassword()
+        let attributes = AttributesStub.allAttributes
 
         sut.signUp(
             username: username,
@@ -218,6 +225,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
 
         // Now submit the code...
 
@@ -271,19 +283,17 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario xxx. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
+    // Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
-        guard
-            let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
-            let password = await retrievePasswordForSignInUsername()
-        else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
 
         let username = generateSignUpRandomEmail()
-        let attributesScreen1 = ["city": "Dublin"]
-        let attributesScreen2 = ["country": "Ireland"]
+        let password = generateRandomPassword()
+        let attributesScreen1 = AttributesStub.attribute1
+        let attributesScreen2 = AttributesStub.attribute2
 
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
@@ -296,6 +306,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
 
         // Now submit the code...
 
@@ -362,14 +377,15 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario xxx Sign up – without automatic sign in (Email & Password)
+    // Sign up – without automatic sign in (Email & Password)
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
-        guard let sut = initialisePublicClientApplication(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
 
         let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
@@ -383,6 +399,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP code not sent")
+            return
+        }
 
         // Now submit the code...
 
