@@ -133,7 +133,7 @@ class MSALNativeAuthBaseController {
         case .success:
             stopTelemetryEvent(event, context: context, error: controllerError)
         case .failure(let error):
-            MSALLogger.log(level: .error, context: context, format: "Error \(error.errorDescription ?? "No error description")")
+            MSALLogger.logPII(level: .error, context: context, format: "Error \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(event, context: context, error: error)
         }
     }
