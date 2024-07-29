@@ -76,7 +76,7 @@ jobs:
         pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
         git_commit = "$(Build.SourceVersionMessage) [$(Build.SourceVersion)] "
         issue_title = "Automation tests failure"
-        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
+        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri)
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
 
 - job: e2e_test_native_auth_ios
@@ -112,9 +112,9 @@ jobs:
   strategy:
     maxParallel: 2
     matrix:
-      STATIC_LIBRARY: 
+      STATIC_LIBRARY:
         args: "--fail-fast --swift-version=5 --allow-warnings --use-static-frameworks"
-      DYNAMIC_LIBRARY: 
+      DYNAMIC_LIBRARY:
         args: "--fail-fast --swift-version=5 --allow-warnings"
   workspace:
     clean: all
@@ -129,7 +129,7 @@ jobs:
     path: s
 
   - task: Bash@3
-    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec 
+    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
     inputs:
       targetType: 'inline'
       script: |
@@ -137,7 +137,7 @@ jobs:
       workingDirectory: '$(Build.SourcesDirectory)'
 
   - task: Bash@3
-    displayName: Run pod lib lint 
+    displayName: Run pod lib lint
     inputs:
       targetType: 'inline'
       script: |
@@ -145,7 +145,7 @@ jobs:
       workingDirectory: '$(Build.SourcesDirectory)'
 
   - task: Bash@3
-    displayName: Discard temporary changes made to MSAL.podspec 
+    displayName: Discard temporary changes made to MSAL.podspec
     inputs:
       targetType: 'inline'
       script: |
