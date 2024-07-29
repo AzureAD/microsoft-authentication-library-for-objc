@@ -68,7 +68,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
     private func handleStartFailed(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpStartValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpStartResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "signup/start: Unable to decode error response: \(error)")
+            MSALLogger.logPII(level: .error, context: context, format: "signup/start: Unable to decode error response: \(MSALLogMask.maskPII(error))")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
 
@@ -150,7 +150,11 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
     private func handleChallengeError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpChallengeValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpChallengeResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "signup/challenge: Unable to decode error response: \(error)")
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "signup/challenge: Unable to decode error response: \(MSALLogMask.maskPII(error))"
+            )
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
         if apiError.error == .unknown {
@@ -177,7 +181,11 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
-            MSALLogger.log(level: .error, context: context, format: "signup/continue: Unable to decode error response: \(error)")
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "signup/continue: Unable to decode error response: \(MSALLogMask.maskPII(error))"
+            )
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
 
