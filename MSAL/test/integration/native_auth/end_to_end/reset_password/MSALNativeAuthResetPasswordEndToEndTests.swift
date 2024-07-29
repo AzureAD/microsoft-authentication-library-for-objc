@@ -26,7 +26,7 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
-    // Hero Scenario 2.3.1. SSPR – without automatic sign in
+    // Hero Scenario 3.1.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
@@ -51,7 +51,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
         
         guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("Missing information")
+            XCTFail("OTP code not retrieved from email")
             return
         }
 
@@ -96,7 +96,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
         
         guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("Missing information")
+            XCTFail("OTP code not retrieved from email")
             return
         }
 
