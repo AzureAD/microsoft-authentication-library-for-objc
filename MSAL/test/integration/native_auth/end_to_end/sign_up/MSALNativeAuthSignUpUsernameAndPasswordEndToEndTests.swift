@@ -76,7 +76,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     // Hero Scenario 1.1.3. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
-    // DJB: Re-test when admin-consent is granted
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
         guard
             let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
@@ -193,7 +192,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     // Hero Scenario 1.1.6. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
-    // DJB: Re-test when admin-consent is granted
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
         guard
             let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
@@ -274,8 +272,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     // Hero Scenario xxx. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
-    // DJB: Re-test when admin-consent is granted
-    // DJB: This Hero scenario doesn't exist in the AC doc (only exists the OOB one)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
         guard
             let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes),
@@ -367,7 +363,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
 
     // Hero Scenario xxx Sign up – without automatic sign in (Email & Password)
-    // DJB: the scenario doesn't exist in AC doc
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
         guard let sut = initialisePublicClientApplication(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
