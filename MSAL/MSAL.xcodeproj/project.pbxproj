@@ -2552,7 +2552,6 @@
 				28D1D59129C2231C00CE75F4 /* MockAPIHandler.swift */,
 				28D1D57F29BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift */,
 				28D1D59B29C2266500CE75F4 /* Model.swift */,
-				E24CE9C32C57F0850069E2E4 /* AttributesStub.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -2813,6 +2812,7 @@
 				9B235DA22A3D15E400657331 /* sign_in */,
 				DEFB46E12A52B9B800DBC006 /* reset_password */,
 				DEFB46EB2A52BA1300DBC006 /* sign_out */,
+				E24CE9D82C592BA70069E2E4 /* mock */,
 				9B235D9E2A3CFB4300657331 /* MSALNativeAuthEndToEndBaseTestCase.swift */,
 				2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */,
 				280095EA2C32CAFC00F1653E /* ClientIdType.swift */,
@@ -3967,6 +3967,14 @@
 				E2BC027429D6E0C600041DBC /* MSALNativeAuthSignUpContinueIntegrationTests.swift */,
 			);
 			path = sign_up;
+			sourceTree = "<group>";
+		};
+		E24CE9D82C592BA70069E2E4 /* mock */ = {
+			isa = PBXGroup;
+			children = (
+				E24CE9C32C57F0850069E2E4 /* AttributesStub.swift */,
+			);
+			path = mock;
 			sourceTree = "<group>";
 		};
 		E25BC0902995559700588549 /* utils */ = {

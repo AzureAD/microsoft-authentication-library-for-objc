@@ -25,7 +25,7 @@
 import XCTest
 import MSAL
 
-final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
+final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
