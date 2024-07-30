@@ -51,7 +51,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
@@ -68,7 +68,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -107,7 +111,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
@@ -124,7 +128,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -160,7 +168,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
@@ -177,7 +185,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [credentialRequiredExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
@@ -190,7 +202,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpCompletedCalled)
+
+        guard signUpPasswordDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -227,7 +243,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
@@ -244,7 +260,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
@@ -257,7 +277,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
+
+        guard signUpPasswordDelegate.onSignUpAttributesRequiredCalled else {
+            XCTFail("onSignUpAttributesRequired not called")
+            return
+        }
 
         // Now submit the attributes...
 
@@ -270,7 +294,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [attributesRequiredExp])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
+
+        guard signUpAttributesRequiredDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -308,7 +336,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
@@ -325,7 +353,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
@@ -338,7 +370,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
+
+        guard signUpPasswordDelegate.onSignUpAttributesRequiredCalled else {
+            XCTFail("onSignUpAttributesRequired not called")
+            return
+        }
 
         // Now submit the attributes in screen 1...
 
@@ -351,7 +387,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [attributesRequiredExp1])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
+
+        guard signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled else {
+            XCTFail("expected onSignUpAttributesRequiredError not called")
+            return
+        }
 
         // Now submit attributes in screen 2...
 
@@ -364,7 +404,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [attributesRequiredExp2])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
+
+        guard signUpAttributesRequiredDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -401,7 +445,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP code not sent")
+            XCTFail("onSignUpCodeRequired not called")
             return
         }
 
