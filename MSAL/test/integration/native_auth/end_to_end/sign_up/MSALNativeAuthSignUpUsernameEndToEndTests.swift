@@ -27,9 +27,7 @@ import MSAL
 
 final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-    private let attributes = ["age": 40]
-
-    // Hero Scenario 1.1.1. Sign up – with Email Verification (Email & Email OTP)
+    // Hero Scenario 2.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
@@ -73,18 +71,17 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
-    // Hero Scenario 1.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)
+    // Hero Scenario 2.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping this test because application with custom attributes is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
-            XCTFail("Missing information")
+        guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
+            XCTFail("OTP code not retrieved from email")
             return
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, attributes: AttributesStub.allAttributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
@@ -93,8 +90,13 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
+        
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
+        }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -110,10 +112,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
-    // Hero Scenario 1.1.3. Sign up – with Email Verification as FIRST step & Custom Attributes (Email & Email OTP)
+    // Hero Scenario 2.1.3. Sign up – with Email Verification as FIRST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping this test because application with custom attributes is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
             XCTFail("Missing information")
             return
         }
@@ -121,7 +122,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
@@ -131,7 +132,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let submitCodeExp = expectation(description: "submit code")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
+        }
+        
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
@@ -142,7 +148,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesExp)
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
-            attributes: attributes,
+            attributes: AttributesStub.allAttributes,
             delegate: signUpAttributesRequiredDelegate
         )
 
@@ -160,10 +166,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
-    // Hero Scenario 1.1.4. Sign up – with Email Verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Email OTP)
-    func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
-        throw XCTSkip("Skipping this test because application with custom attributes is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+    // Hero Scenario 2.1.4. Sign up – with Email Verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Email OTP)
+    func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
             XCTFail("Missing information")
             return
         }
@@ -171,7 +176,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
@@ -184,8 +189,13 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let submitCodeExp = expectation(description: "submit code")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
+        
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
+        }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
@@ -196,7 +206,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: submitAttributesExp1)
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
-            attributes: attributes,
+            attributes: AttributesStub.attribute1,
             delegate: signUpAttributesRequiredDelegate
         )
 
@@ -209,7 +219,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         signUpAttributesRequiredDelegate.expectation = submitAttributesExp2
 
         signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
-            attributes: attributes,
+            attributes: AttributesStub.attribute2,
             delegate: signUpAttributesRequiredDelegate
         )
 
@@ -227,7 +237,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
-    // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
+    // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
