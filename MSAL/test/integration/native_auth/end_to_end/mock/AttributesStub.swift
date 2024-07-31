@@ -24,20 +24,20 @@
 
 import Foundation
 
-@_implementationOnly import MSAL_Private
+struct AttributesStub {
 
-final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativeAuthResponseCorrelatable>: NSObject, MSIDResponseSerialization {
-    func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
-        do {
-            var customError = try JSONDecoder().decode(T.self, from: data ?? Data())
-            customError.correlationId = T.retrieveCorrelationIdFromHeaders(from: httpResponse)
+    private static let _attribute1 = (key: "city", value: "Dublin")
+    private static let _attribute2 = (key: "country", value: "Ireland")
 
-            // the successfully constructed "customError" needs to be thrown,
-            // since the previous "try" command just validates the object (error) decoding
-            throw customError
-        } catch is DecodingError {
-            MSALLogger.log(level: .error, context: context, format: "CustomErrorSerializer failed decoding")
-            throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
-        }
+    static var attribute1: [String: String] {
+        [_attribute1.key: _attribute1.value]
+    }
+
+    static var attribute2: [String: String] {
+        [_attribute2.key: _attribute2.value]
+    }
+
+    static var allAttributes: [String: String] {
+        attribute1.merging(attribute2) { (current, new) in new }
     }
 }

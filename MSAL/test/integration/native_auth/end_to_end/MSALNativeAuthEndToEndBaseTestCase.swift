@@ -78,7 +78,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     func generateSignUpRandomEmail() -> String {
         return codeRetriever.generateRandomEmailAddress()
     }
-    
+
+    func generateRandomPassword() -> String {
+        return "password.\(Date().timeIntervalSince1970)"
+    }
+
     func retrieveCodeFor(email: String) async -> String? {
         return await codeRetriever.retrieveEmailOTPCode(email: email)
     }

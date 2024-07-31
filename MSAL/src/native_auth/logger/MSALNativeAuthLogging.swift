@@ -148,3 +148,7 @@ extension MSALLogger: MSALLogging {
                   getVaList(args))
     }
 }
+
+/// This class is a wrapper of the objc class `MSALLogMask`. In the Swift non-public classes where `MSALLogMask` is used, it is imported using `@_implementationOnly import MSAL_Private`.
+/// But in the Swift public classes we are not using `@_implementationOnly`, as it is an internal implementation detail, so this wrapper is used instead.
+class MSALLogMaskWrapper: MSALLogMask {}

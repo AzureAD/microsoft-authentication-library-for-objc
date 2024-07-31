@@ -26,22 +26,22 @@ import XCTest
 import MSAL
 
 final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    private let usernamePassword = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-    private let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-    private let attributes = ["age": 40]
-    
-    // Hero Scenario 2.1.1. Sign up - with Email verification as LAST step (Email & Password)
+
+    // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         sut.signUp(
-            username: usernamePassword,
+            username: username,
             password: password,
             correlationId: correlationId,
             delegate: signUpStartDelegate
@@ -50,15 +50,29 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -68,22 +82,26 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario 2.1.2. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
+    // Hero Scenario 1.1.3. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        let attributes = AttributesStub.allAttributes
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         sut.signUp(
-            username: usernamePassword,
-            password: "1234",
+            username: username,
+            password: password,
             attributes: attributes,
             correlationId: correlationId,
             delegate: signUpStartDelegate
@@ -92,15 +110,29 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -110,22 +142,24 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario 2.1.3. Sign up - with Email verification as FIRST step (Email & Password)
-    func test_signUpWithPassword_withEmailVerificationAsFirstStep_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
+    // Hero Scenario 1.1.4. Sign up - with Email verification as FIRST step (Email & Password)
+    func test_signUpWithPassword_withEmailVerificationAsFirstStepAndThenSetPassword_succeeds() async throws {
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         sut.signUp(
-            username: usernamePassword,
-            password: password,
+            username: username,
             correlationId: correlationId,
             delegate: signUpStartDelegate
         )
@@ -133,28 +167,46 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let credentialRequiredExp = expectation(description: "credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: credentialRequiredExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [credentialRequiredExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
-        let attributesRequiredExp = expectation(description: "attributes required")
-        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: attributesRequiredExp)
+        let passwordRequiredExp = expectation(description: "password required")
+        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
-            password: "1234",
+            password: password,
             delegate: signUpPasswordDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpCompletedCalled)
+        await fulfillment(of: [passwordRequiredExp])
+
+        guard signUpPasswordDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -164,22 +216,25 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpPasswordDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario 2.1.4. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
+    // Hero Scenario 1.1.6. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        let attributes = AttributesStub.allAttributes
+
         sut.signUp(
-            username: usernamePassword,
-            password: password,
+            username: username,
             correlationId: correlationId,
             delegate: signUpStartDelegate
         )
@@ -187,15 +242,29 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let submitCodeExp = expectation(description: "submit code, credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
@@ -203,12 +272,16 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
-            password: "1234",
+            password: password,
             delegate: signUpPasswordDelegate
         )
 
         await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
+
+        guard signUpPasswordDelegate.onSignUpAttributesRequiredCalled else {
+            XCTFail("onSignUpAttributesRequired not called")
+            return
+        }
 
         // Now submit the attributes...
 
@@ -221,7 +294,11 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         )
 
         await fulfillment(of: [attributesRequiredExp])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
+
+        guard signUpAttributesRequiredDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -231,56 +308,26 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
-    }
-    
-    // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
-    func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
-            XCTFail("Missing information")
-            return
-        }
-        
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation])
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.account.username, username)
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario 2.1.5. Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
+    // Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
         }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        let attributesScreen1 = AttributesStub.attribute1
+        let attributesScreen2 = AttributesStub.attribute2
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         sut.signUp(
-            username: usernamePassword,
-            password: password,
+            username: username,
             correlationId: correlationId,
             delegate: signUpStartDelegate
         )
@@ -288,54 +335,80 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let submitCodeExp = expectation(description: "submit code, credential required")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [submitCodeExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled)
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
 
-        let attributesRequiredExp1 = expectation(description: "attributes required 1")
-        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: attributesRequiredExp1)
+        let passwordRequiredExp = expectation(description: "password required")
+        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
 
         signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
-            password: "1234",
+            password: password,
             delegate: signUpPasswordDelegate
         )
 
-        await fulfillment(of: [attributesRequiredExp1])
-        XCTAssertTrue(signUpPasswordDelegate.onSignUpAttributesRequiredCalled)
+        await fulfillment(of: [passwordRequiredExp])
 
-        // Now submit the attributes...
+        guard signUpPasswordDelegate.onSignUpAttributesRequiredCalled else {
+            XCTFail("onSignUpAttributesRequired not called")
+            return
+        }
 
-        let attributesRequiredExp2 = expectation(description: "attributes required 2, sign-up complete")
-        let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesRequiredExp2)
+        // Now submit the attributes in screen 1...
+
+        let attributesRequiredExp1 = expectation(description: "attributes required screen 1")
+        let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesRequiredExp1)
 
         signUpPasswordDelegate.attributesRequiredState?.submitAttributes(
-            attributes: attributes,
+            attributes: attributesScreen1,
+            delegate: signUpAttributesRequiredDelegate
+        )
+
+        await fulfillment(of: [attributesRequiredExp1])
+
+        guard signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled else {
+            XCTFail("expected onSignUpAttributesRequiredError not called")
+            return
+        }
+
+        // Now submit attributes in screen 2...
+
+        let attributesRequiredExp2 = expectation(description: "attributes required screen 2")
+        signUpAttributesRequiredDelegate.expectation = attributesRequiredExp2
+
+        signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
+            attributes: attributesScreen2,
             delegate: signUpAttributesRequiredDelegate
         )
 
         await fulfillment(of: [attributesRequiredExp2])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
 
-        // Now submit more attributes...
-
-        let signUpCompleteExp = expectation(description: "sign-up complete")
-        signUpAttributesRequiredDelegate.expectation = signUpCompleteExp
-
-        signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
-            attributes: attributes,
-            delegate: signUpAttributesRequiredDelegate
-        )
-
-        await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
+        guard signUpAttributesRequiredDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
 
         // Now sign in...
 
@@ -345,21 +418,24 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
     }
 
-    // Hero Scenario 2.1.6. Sign up – without automatic sign in (Email & Password)
+    // Sign up – without automatic sign in (Email & Password)
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
-        throw XCTSkip("Skipping this test because native auth KeyVault is missing")
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
         sut.signUp(
-            username: usernamePassword,
+            username: username,
             password: password,
             correlationId: correlationId,
             delegate: signUpStartDelegate
@@ -368,12 +444,22 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
         // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
         await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
@@ -386,10 +472,10 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertNotNil(delegate.codeLength)
     }
 
-    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy) {
+    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, expectedUsername: String) {
         XCTAssertTrue(delegate.onSignInCompletedCalled)
-        XCTAssertEqual(delegate.result?.account.username, usernamePassword)
+        XCTAssertEqual(delegate.result?.account.username, expectedUsername)
         XCTAssertNotNil(delegate.result?.idToken)
-        XCTAssertNil(delegate.result?.account.accountClaims)
+        XCTAssertNotNil(delegate.result?.account.accountClaims)
     }
 }
