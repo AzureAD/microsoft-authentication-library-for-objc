@@ -86,7 +86,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     func retrieveCodeFor(email: String) async -> String? {
         return await codeRetriever.retrieveEmailOTPCode(email: email)
     }
-    
+
+    func retrieveUsernameForSignInCode() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+    }
+
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
     }
