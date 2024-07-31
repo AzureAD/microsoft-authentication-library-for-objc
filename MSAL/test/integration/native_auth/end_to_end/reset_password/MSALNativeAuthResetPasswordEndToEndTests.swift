@@ -41,6 +41,12 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
+        
+        guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
+            XCTFail("onResetPasswordCodeRequired not called")
+            return
+        }
+        
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
@@ -59,12 +65,17 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
 
         await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
+        
+        guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
+            XCTFail("onPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        let uniquePassword = "password.\(Date().timeIntervalSince1970)"
+        let uniquePassword = generateRandomPassword()
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
@@ -86,6 +97,12 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
+        
+        guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
+            XCTFail("onResetPasswordCodeRequired not called")
+            return
+        }
+        
         XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
@@ -104,6 +121,11 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
 
         await fulfillment(of: [passwordRequiredExp])
         XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
+        
+        guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
+            XCTFail("onPasswordRequired not called")
+            return
+        }
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
@@ -114,6 +136,11 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
+        
+        guard resetPasswordRequiredDelegate.onResetPasswordCompletedCalled else {
+            XCTFail("onResetPasswordCompleted not called")
+            return
+        }
 
         // Now sign in...
 
