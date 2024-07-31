@@ -25,7 +25,7 @@
 import Foundation
 import XCTest
 
-final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
+final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 3.1.1. SSPR – without automatic sign in
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
@@ -131,7 +131,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndPass
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        let uniquePassword = "password.\(Date().timeIntervalSince1970)"
+        let uniquePassword = generateRandomPassword()
         resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
