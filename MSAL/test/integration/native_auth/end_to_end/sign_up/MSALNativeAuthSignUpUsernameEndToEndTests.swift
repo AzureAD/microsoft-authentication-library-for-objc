@@ -81,7 +81,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let usernameOTP = generateSignUpRandomEmail()
         
-        sut.signUp(username: usernameOTP, attributes: ["city": "Dublin", "country": "Ireland"], correlationId: correlationId, delegate: signUpStartDelegate)
+        sut.signUp(username: usernameOTP, attributes: AttributesStub.allAttributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
@@ -148,7 +148,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesExp)
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
-            attributes: ["city": "Dublin", "country": "Ireland"],
+            attributes: AttributesStub.allAttributes,
             delegate: signUpAttributesRequiredDelegate
         )
 
@@ -206,7 +206,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: submitAttributesExp1)
 
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
-            attributes: ["city": "Dublin"],
+            attributes: AttributesStub.attribute1,
             delegate: signUpAttributesRequiredDelegate
         )
 
@@ -219,7 +219,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         signUpAttributesRequiredDelegate.expectation = submitAttributesExp2
 
         signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
-            attributes: ["country": "Ireland"],
+            attributes: AttributesStub.attribute2,
             delegate: signUpAttributesRequiredDelegate
         )
 
