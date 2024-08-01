@@ -84,8 +84,42 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
+- job: fetch_pr_labels
+  displayName: 'Check for PR Label'
+  timeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  steps:
+    - script: |
+        url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
+
+        echo "Fetching labels from $url"
+
+        # Temporary file to store the raw response
+        temp_file=$(mktemp)
+
+        # Store the response code and the raw response in separate variables
+        response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
+        response_content=$(cat "$temp_file")
+
+        echo "Response code: $response_code"
+        echo "Raw response: $response_content"
+
+        if [[ "$response_code" -eq 200 ]]; then
+          label_names=$(echo $response_content | jq -r '.[].name' | paste -sd ', ' -)
+          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]$label_names"
+          [ -z "$label_names" ] && echo "PR labels: <empty>" || echo "PR labels: $label_names"
+        else
+          echo "Request failed with status code: $response_code - Skipping Native Auth E2E tests as a preventive measure"
+          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]'skip-native-auth-e2e-tests'"
+        fi
+
+      name: fetchPrLabels
+
 - job: e2e_test_native_auth
   displayName: 'Run MSAL E2E tests for native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
