@@ -225,6 +225,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 context: context
             )
+        case .strongAuthRequired(_):
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: VerifyCodeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -301,6 +304,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 scopes: scopes
             )
+        case .strongAuthRequired(_):
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: PasswordRequiredError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -351,6 +357,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
+        case .introspectRequired:
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: ResendCodeError(correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -470,6 +479,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                            format: "SignIn completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
             onError(error)
+        case .strongAuthRequired(_):
+            return
+            // TODO: this will be handled in a separate PBI
         }
     }
 
@@ -592,6 +604,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                               format: "SignIn, completed with error: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
+        case .introspectRequired:
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(SignInStartError(type: .generalError, correlationId: telemetryInfo.context.correlationId())), correlationId: telemetryInfo.context.correlationId())
         }
     }
 

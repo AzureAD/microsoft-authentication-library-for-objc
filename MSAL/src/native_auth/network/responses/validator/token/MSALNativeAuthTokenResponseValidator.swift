@@ -102,6 +102,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             case .invalidGrant:
                 if responseError.subError == .invalidOOBValue {
                     return .error(.invalidOOBCode(responseError))
+                } else if responseError.subError == .mfaRequired {
+                    return .strongAuthRequired(responseError)
                 } else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
@@ -194,8 +196,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound(apiError)
         case .invalidCredentials:
             return .invalidPassword(apiError)
-        case .strongAuthRequired:
-            return .strongAuthRequired(apiError)
         case .userNotHaveAPassword,
              .invalidRequestParameter:
             return .generalError(apiError)
@@ -209,7 +209,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         switch errorCode {
         case .userNotFound,
             .invalidCredentials,
-            .strongAuthRequired,
             .userNotHaveAPassword,
             .invalidRequestParameter:
             return .invalidRequest(apiError)

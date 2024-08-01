@@ -26,6 +26,7 @@
 
 enum MSALNativeAuthTokenValidatedResponse {
     case success(MSIDTokenResponse)
+    case strongAuthRequired(MSALNativeAuthTokenResponseError)
     case error(MSALNativeAuthTokenValidatedErrorType)
 }
 
@@ -40,7 +41,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case invalidPassword(MSALNativeAuthTokenResponseError)
     case invalidOOBCode(MSALNativeAuthTokenResponseError)
     case unsupportedChallengeType(MSALNativeAuthTokenResponseError)
-    case strongAuthRequired(MSALNativeAuthTokenResponseError)
     case invalidScope(MSALNativeAuthTokenResponseError)
     case authorizationPending(MSALNativeAuthTokenResponseError)
     case slowDown(MSALNativeAuthTokenResponseError)
@@ -83,14 +83,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .invalidPassword(let apiError):
             return SignInStartError(
                 type: .invalidCredentials,
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        case .strongAuthRequired(let apiError):
-            return SignInStartError(
-                type: .browserRequired,
                 message: apiError.errorDescription,
                 correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
@@ -143,14 +135,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
-        case .strongAuthRequired(let apiError):
-            return RetrieveAccessTokenError(
-                type: .browserRequired,
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
         case .userNotFound(let apiError),
              .invalidPassword(let apiError),
              .invalidOOBCode(let apiError):
@@ -170,14 +154,6 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .invalidOOBCode(let apiError):
             return VerifyCodeError(
                 type: .invalidCode,
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        case .strongAuthRequired(let apiError):
-            return VerifyCodeError(
-                type: .browserRequired,
                 message: apiError.errorDescription,
                 correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
