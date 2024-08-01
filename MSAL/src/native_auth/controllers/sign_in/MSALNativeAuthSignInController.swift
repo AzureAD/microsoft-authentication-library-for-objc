@@ -620,11 +620,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private func createChallengeRequest(
         continuationToken: String,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        mfaAuthMethodId: String? = nil
     ) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 context: context,
+                mfaAuthMethodId: mfaAuthMethodId, 
                 continuationToken: continuationToken
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)

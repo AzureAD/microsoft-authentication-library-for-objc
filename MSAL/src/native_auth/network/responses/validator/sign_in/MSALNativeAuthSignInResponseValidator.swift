@@ -174,7 +174,11 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(error))
+                if error.subError == .introspectRequired {
+                    return .introspectRequired
+                } else {
+                    return .error(.invalidRequest(error))
+                }
             case .unauthorizedClient:
                 return .error(.unauthorizedClient(error))
             case .invalidGrant:
