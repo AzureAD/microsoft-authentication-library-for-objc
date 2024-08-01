@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSCameraUsageDescription</key>
-	<string>This app may need to scan QR codes.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -33,6 +31,7 @@
 				<string>msalb6c69a37df96-4db0-9088-2ab96e1d8215</string>
 				<string>msauth.com.microsoft.MSALTestApp</string>
 				<string>msauth.com.microsoft.MSALAutomationApp</string>
+				<string>companyportal</string>
 			</array>
 		</dict>
 	</array>
@@ -45,6 +44,8 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app may need to scan QR codes.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
 	<key>UIRequiredDeviceCapabilities</key>

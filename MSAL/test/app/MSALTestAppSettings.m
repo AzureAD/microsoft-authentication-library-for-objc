@@ -97,7 +97,7 @@ static NSDictionary *s_currentProfile = nil;
     s_authorities = authorities;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read", @"TASKS.read", @"https://outlook.office365.com/.default", @"https://microsoftgraph.chinacloudapi.cn/.default",
-        @"https://substrate.office.com/profile//User.Read"];
+        @"https://substrate.office.com/profile//User.Read", @"https://login.windows-ppe.net/.default", @"https://df.onecloud.azure-test.net/", @"https://graph.microsoft-ppe.com/.default", @"https://graph.ppe.windows.net/.default", @"https://msidlab0.spoppe.com/"];
 
     __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
     __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";

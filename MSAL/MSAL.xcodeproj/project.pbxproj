@@ -7340,7 +7340,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.companyportal-dev";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "iOS Team Provisioning Profile";
 				USER_HEADER_SEARCH_PATHS = (
