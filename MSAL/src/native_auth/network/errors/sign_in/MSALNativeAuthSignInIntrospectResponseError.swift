@@ -20,20 +20,41 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-enum MSALNativeAuthEndpoint: String, CaseIterable {
-    case signUpStart = "/signup/v1.0/start"
-    case signUpChallenge = "/signup/v1.0/challenge"
-    case signUpContinue = "/signup/v1.0/continue"
-    case signInInitiate = "/oauth2/v2.0/initiate"
-    case signInChallenge = "/oauth2/v2.0/challenge"
-    case signInIntrospect = "/oauth2/v2.0/introspect"
-    case token = "/oauth2/v2.0/token"
-    case resetPasswordStart = "/resetpassword/v1.0/start"
-    case resetPasswordChallenge = "/resetpassword/v1.0/challenge"
-    case resetPasswordContinue = "/resetpassword/v1.0/continue"
-    case resetPasswordComplete = "/resetpassword/v1.0/complete"
-    case resetPasswordSubmit = "/resetpassword/v1.0/submit"
-    case resetpasswordPollCompletion = "/resetpassword/v1.0/poll_completion"
+import Foundation
+
+struct MSALNativeAuthSignInIntrospectResponseError: MSALNativeAuthResponseError {
+
+    let error: MSALNativeAuthSignInIntrospectOauth2ErrorCode
+    let errorDescription: String?
+    let errorCodes: [Int]?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
+    var correlationId: UUID?
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorCodes = "error_codes"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthSignInIntrospectOauth2ErrorCode = .unknown,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.correlationId = correlationId
+    }
 }

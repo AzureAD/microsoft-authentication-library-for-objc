@@ -34,6 +34,11 @@ protocol MSALNativeAuthSignInRequestProviding {
         parameters: MSALNativeAuthSignInChallengeRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
+    
+    func introspect(
+        parameters: MSALNativeAuthSignInIntrospectRequestParameters,
+        context: MSIDRequestContext
+    ) throws -> MSIDHttpRequest
 }
 
 final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProviding {
@@ -76,6 +81,20 @@ final class MSALNativeAuthSignInRequestProvider: MSALNativeAuthSignInRequestProv
 
         let request = MSIDHttpRequest()
         try requestConfigurator.configure(configuratorType: .signIn(.challenge(parameters)),
+                                      request: request,
+                                      telemetryProvider: telemetryProvider)
+        return request
+    }
+    
+    // MARK: - SignIn Introspect
+    
+    func introspect(
+        parameters: MSALNativeAuthSignInIntrospectRequestParameters,
+        context: any MSIDRequestContext
+    ) throws -> MSIDHttpRequest {
+        
+        let request = MSIDHttpRequest()
+        try requestConfigurator.configure(configuratorType: .signIn(.introspect(parameters)),
                                       request: request,
                                       telemetryProvider: telemetryProvider)
         return request
