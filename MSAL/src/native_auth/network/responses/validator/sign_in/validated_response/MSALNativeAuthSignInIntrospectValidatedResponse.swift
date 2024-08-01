@@ -24,10 +24,14 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: MSALNativeAuthInternalChannelType
-    let loginHint: String
+enum MSALNativeAuthSignInIntrospectValidatedResponse {
+    case authMethodsRetrieved(continuationToken: String, authMethods: [MSALNativeAuthInternalAuthenticationMethod])
+    case error(MSALNativeAuthSignInIntrospectValidatedErrorType)
+}
+
+enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
+    case redirect
+    case expiredToken(MSALNativeAuthSignInIntrospectResponseError)
+    case invalidRequest(MSALNativeAuthSignInIntrospectResponseError)
+    case unexpectedError(MSALNativeAuthSignInIntrospectResponseError?)
 }
