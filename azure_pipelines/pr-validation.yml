@@ -84,6 +84,21 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
+- job: e2e_test_native_auth
+  displayName: 'Run MSAL E2E tests for native auth'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL iOS Native Auth E2E Tests'
+      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
