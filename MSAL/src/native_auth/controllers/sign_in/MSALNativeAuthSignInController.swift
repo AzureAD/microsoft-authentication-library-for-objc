@@ -606,7 +606,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         case .introspectRequired:
             // TODO: this will be handled in a separate PBI
-            return .init(.error(SignInStartError(type: .generalError, correlationId: telemetryInfo.context.correlationId())), correlationId: telemetryInfo.context.correlationId())
+            return .init(.error(
+                SignInStartError(
+                    type: .generalError,
+                    correlationId: telemetryInfo.context.correlationId()
+                )), correlationId: telemetryInfo.context.correlationId()
+            )
         }
     }
 
@@ -641,7 +646,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 context: context,
-                mfaAuthMethodId: mfaAuthMethodId, 
+                mfaAuthMethodId: mfaAuthMethodId,
                 continuationToken: continuationToken
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)
