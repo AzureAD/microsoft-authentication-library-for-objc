@@ -2,6 +2,7 @@ parameters:
   schema: 'MSAL Test Automation (iOS)'
   full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun'
   destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+  sdk: 'iphonesimulator'
 
 steps:
   - checkout: self
@@ -45,7 +46,7 @@ steps:
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
-          -sdk iphonesimulator \
+          -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
