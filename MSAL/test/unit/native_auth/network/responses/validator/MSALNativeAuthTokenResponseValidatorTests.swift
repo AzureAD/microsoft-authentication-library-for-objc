@@ -142,12 +142,12 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
-        errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .strongAuthRequired(createError(errorCodes)) = checkErrorCodes() else {
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue, unknownErrorCode1, unknownErrorCode2]
+        guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
-        errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .strongAuthRequired(createError(errorCodes)) = checkErrorCodes() else {
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue, unknownErrorCode1, unknownErrorCode2]
+        guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue, unknownErrorCode1, unknownErrorCode2]
@@ -199,7 +199,7 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         let unknownErrorCode1 = Int.max
         var errorCodes: [Int] = [unknownErrorCode1]
         checkErrorCodes()
-        errorCodes = [MSALNativeAuthESTSApiErrorCodes.strongAuthRequired.rawValue]
+        errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue]
         checkErrorCodes()
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue]
         checkErrorCodes()
