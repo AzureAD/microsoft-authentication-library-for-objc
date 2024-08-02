@@ -71,7 +71,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
         let request = MSIDHttpRequest()
         let params = MSALNativeAuthSignInChallengeRequestParameters(context: context, 
-                                                                    mfaAuthMethodId: nil,
+                                                                    mfaAuthMethodId: "1",
                                                                     continuationToken: "Test Credential Token")
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .signIn(.challenge(params)),
@@ -81,11 +81,38 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         let expectedBodyParams = [
             "client_id": DEFAULT_TEST_CLIENT_ID,
             "continuation_token": "Test Credential Token",
+            "id": "1",
             "challenge_type": "otp"
         ]
 
         XCTAssertEqual(request.parameters, expectedBodyParams)
         checkUrlRequest(request.urlRequest, endpoint: .signInChallenge)
+        checkHeaders(request: request)
+        checkTelemetry(request.serverTelemetry, telemetry)
+    }
+    
+    func test_signInIntrospect_getsConfiguredSuccessfully() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.otp], redirectUri: nil))
+        let telemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForSignIn(type: .signInIntrospect),
+            context: context
+        )
+
+        let request = MSIDHttpRequest()
+        let params = MSALNativeAuthSignInIntrospectRequestParameters(context: context,
+                                                                    continuationToken: "Test Credential Token")
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
+        try sut.configure(configuratorType: .signIn(.introspect(params)),
+                          request: request,
+                          telemetryProvider: telemetryProvider)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "continuation_token": "Test Credential Token"
+        ]
+
+        XCTAssertEqual(request.parameters, expectedBodyParams)
+        checkUrlRequest(request.urlRequest, endpoint: .signInIntrospect)
         checkHeaders(request: request)
         checkTelemetry(request.serverTelemetry, telemetry)
     }

@@ -25,17 +25,17 @@
 @_implementationOnly import MSAL_Private
 
 protocol MSALNativeAuthSignInResponseValidating {
-    func validate(
+    func validateInitiate(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse
 
-    func validate(
+    func validateChallenge(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse
 
-    func validate(
+    func validateIntrospect(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInIntrospectResponse, Error>
     ) -> MSALNativeAuthSignInIntrospectValidatedResponse
@@ -43,7 +43,7 @@ protocol MSALNativeAuthSignInResponseValidating {
 
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
-    func validate(
+    func validateChallenge(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInChallengeResponse, Error>
     ) -> MSALNativeAuthSignInChallengeValidatedResponse {
@@ -63,7 +63,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         }
     }
 
-    func validate(
+    func validateInitiate(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
     ) -> MSALNativeAuthSignInInitiateValidatedResponse {
@@ -89,7 +89,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         }
     }
 
-    func validate(
+    func validateIntrospect(
         context: any MSIDRequestContext,
         result: Result<MSALNativeAuthSignInIntrospectResponse, any Error>
     ) -> MSALNativeAuthSignInIntrospectValidatedResponse {

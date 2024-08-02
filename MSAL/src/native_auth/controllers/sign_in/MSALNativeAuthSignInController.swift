@@ -427,7 +427,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
 
         let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: telemetryInfo.context)
-        let validatedResponse = signInResponseValidator.validate(context: telemetryInfo.context, result: initiateResponse)
+        let validatedResponse = signInResponseValidator.validateInitiate(context: telemetryInfo.context, result: initiateResponse)
 
         return validatedResponse
     }
@@ -620,7 +620,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .error(.invalidRequest(.init(errorDescription: errorDescription)))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
-        return signInResponseValidator.validate(context: context, result: challengeResponse)
+        return signInResponseValidator.validateChallenge(context: context, result: challengeResponse)
     }
 
     private func createInitiateRequest(username: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {

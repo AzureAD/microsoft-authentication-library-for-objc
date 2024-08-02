@@ -40,8 +40,7 @@ struct MSALNativeAuthSignInChallengeResponseError: MSALNativeAuthResponseError {
         case errorCodes = "error_codes"
         case errorURI = "error_uri"
         case innerErrors = "inner_errors"
-        // DR: check with Mario if suberror or sub_error
-        case subError = "sub_error"
+        case subError = "suberror"
         case correlationId
     }
 

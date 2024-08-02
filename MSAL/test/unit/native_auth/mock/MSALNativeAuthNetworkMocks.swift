@@ -94,7 +94,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     ))
 
     
-    func validate(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
+    func validateChallenge(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInChallengeResponse, Error>) -> MSAL.MSALNativeAuthSignInChallengeValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successChallengeResponse) = result, let expectedChallengeResponse = expectedChallengeResponse {
             XCTAssertEqual(successChallengeResponse.challengeType, expectedChallengeResponse.challengeType)
@@ -110,7 +110,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         return challengeValidatedResponse
     }
     
-    func validate(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
+    func validateInitiate(context: MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInInitiateResponse, Error>) -> MSAL.MSALNativeAuthSignInInitiateValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successInitiateResponse) = result, let expectedInitiateResponse = expectedInitiateResponse {
             XCTAssertEqual(successInitiateResponse.challengeType, expectedInitiateResponse.challengeType)
@@ -123,7 +123,7 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
         return initiateValidatedResponse
     }
     
-    func validate(context: any MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInIntrospectResponse, any Error>) -> MSAL.MSALNativeAuthSignInIntrospectValidatedResponse {
+    func validateIntrospect(context: any MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInIntrospectResponse, any Error>) -> MSAL.MSALNativeAuthSignInIntrospectValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successIntrospectResponse) = result, let expectedIntrospectResponse = expectedIntrospectResponse {
             XCTAssertEqual(successIntrospectResponse.challengeType, expectedInitiateResponse?.challengeType)
