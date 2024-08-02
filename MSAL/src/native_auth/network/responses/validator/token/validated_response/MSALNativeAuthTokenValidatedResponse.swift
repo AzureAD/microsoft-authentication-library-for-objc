@@ -26,7 +26,7 @@
 
 enum MSALNativeAuthTokenValidatedResponse {
     case success(MSIDTokenResponse)
-    case strongAuthRequired(MSALNativeAuthTokenResponseError)
+    case strongAuthRequired(continuationToken: String)
     case error(MSALNativeAuthTokenValidatedErrorType)
 }
 

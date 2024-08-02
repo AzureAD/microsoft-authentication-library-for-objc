@@ -171,6 +171,34 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
             MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: nil, errorDescription: nil, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, continuationToken: nil)
         }
     }
+    
+    func test_invalidGrantMFARequired_triggerStrongAuthRequiredResponse() {
+        let continuationTokenResponse = "ct"
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: .mfaRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: continuationTokenResponse)
+
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        
+        guard case .strongAuthRequired(let continuationToken) = result else {
+            return XCTFail("Unexpected response")
+        }
+        XCTAssertEqual(continuationTokenResponse, continuationToken)
+    }
+    
+    func test_invalidGrantMFARequiredNoContinuationToken_validationFails() {
+        let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: .mfaRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)
+
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        
+        guard case .error(let errorType) = result else {
+            return XCTFail("Unexpected response")
+        }
+        guard case .generalError(let validatedError) = errorType else {
+            return XCTFail("Unexpected Error")
+        }
+        XCTAssertEqual(validatedError?.error, .unknown)
+    }
 
     func test_invalidGrantTokenResponse_withUnknownErrorCode_andKnownErrorCodes_isProperlyHandled() {
         let knownErrorCode = MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue

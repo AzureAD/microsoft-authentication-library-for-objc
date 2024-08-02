@@ -103,7 +103,16 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                 if responseError.subError == .invalidOOBValue {
                     return .error(.invalidOOBCode(responseError))
                 } else if responseError.subError == .mfaRequired {
-                    return .strongAuthRequired(responseError)
+                    guard let continuationToken = responseError.continuationToken else {
+                        MSALLogger.log(
+                            level: .error,
+                            context: context,
+                            format: "Token: MFA required response, expected continuation token not empty")
+                        return .error(.generalError(
+                            MSALNativeAuthTokenResponseError(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)
+                        ))
+                    }
+                    return .strongAuthRequired(continuationToken: continuationToken)
                 } else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
