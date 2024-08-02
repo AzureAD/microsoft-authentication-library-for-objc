@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable {
+struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
     // MARK: - Variables
     let id: String
     let challengeType: MSALNativeAuthInternalChallengeType

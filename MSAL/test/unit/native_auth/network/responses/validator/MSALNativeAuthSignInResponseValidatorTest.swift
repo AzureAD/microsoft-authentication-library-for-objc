@@ -178,4 +178,66 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
             XCTFail("Unexpected result: \(result)")
         }
     }
+    
+    // MARK: introspect API tests
+    
+    func test_whenIntrospectReturnsRedirect_validationShouldReturnRedirectError() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let challengeResponse = MSALNativeAuthSignInIntrospectResponse(continuationToken: nil, methods: nil, challengeType: .redirect)
+        let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
+        if case .error(.redirect) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenIntrospectReturnsInvalidRequest_validationShouldReturnRightError() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let introspectErrorResponse = MSALNativeAuthSignInIntrospectResponseError(error: .invalidRequest)
+        let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
+        if case .error(.invalidRequest(introspectErrorResponse)) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenIntrospectReturnsExpiredToken_validationShouldReturnRightError() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let introspectErrorResponse = MSALNativeAuthSignInIntrospectResponseError(error: .expiredToken)
+        let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
+        if case .error(.expiredToken(introspectErrorResponse)) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenIntrospectWithNilAuthMethod_validationShouldFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let challengeResponse = MSALNativeAuthSignInIntrospectResponse(continuationToken: continuationToken, methods: nil, challengeType: nil)
+        let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
+        if case .error(.unexpectedError(MSALNativeAuthSignInIntrospectResponseError(error: .unknown, errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody, errorCodes: nil, errorURI: nil, innerErrors: nil, correlationId: nil))) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenIntrospectWithEmptyAuthMethodList_validationShouldFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let challengeResponse = MSALNativeAuthSignInIntrospectResponse(continuationToken: continuationToken, methods: [], challengeType: nil)
+        let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
+        if case .error(.unexpectedError(MSALNativeAuthSignInIntrospectResponseError(error: .unknown, errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody, errorCodes: nil, errorURI: nil, innerErrors: nil, correlationId: nil))) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenIntrospectReturnsValidResult_validationNotFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let methods = [MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: .email, loginHint: "us******so.com")]
+        let challengeResponse = MSALNativeAuthSignInIntrospectResponse(continuationToken: continuationToken, methods: methods, challengeType: nil)
+        let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
+        if case .authMethodsRetrieved(continuationToken: continuationToken, authMethods: methods) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
 }
