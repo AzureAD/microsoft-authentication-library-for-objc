@@ -110,7 +110,7 @@ jobs:
         # Get the macOS version
         macos_version=$(sw_vers -productVersion)
         echo "Mac Version $macos_version"      
-        full_path="build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx$macos_version-arm64-x86_64.xctestrun"
+        full_path="build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx$macos_version-x86_64.xctestrun"
         echo "##vso[task.setvariable variable=macos_full_path]$full_path"
 
   - template: templates/tests-with-conf-file.yml
@@ -119,7 +119,7 @@ jobs:
       full_path: $(macos_full_path)
       destination: 'platform=macOS'
       sdk: 'macosx'
-      
+
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
   timeoutInMinutes: 30
