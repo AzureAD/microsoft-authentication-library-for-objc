@@ -84,6 +84,38 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - $(target)'
 
+- job: fetch_pr_labels
+  displayName: 'Check for PR Label'
+  timeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  steps:
+    - script: |
+        echo "Fetching labels from https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
+        response=$(curl -s "https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels")
+        echo "Raw response: $response"
+        temp=$(curl -s "https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels" | jq -jc '.[] | {name}')
+        echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]$temp"
+        [ -z "$temp" ] && echo "PR labels: <empty>" || echo "PR labels: $temp"
+      name: fetchPrLabels
+
+- job: e2e_test_native_auth
+  displayName: 'Run MSAL E2E tests for native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL iOS Native Auth E2E Tests'
+      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
