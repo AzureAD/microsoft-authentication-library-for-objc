@@ -1390,6 +1390,7 @@
 		E243F6AA29D42FE900DAC60F /* MSALNativeAuthSignUpContinueRequestProviderParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243F6A929D42FE900DAC60F /* MSALNativeAuthSignUpContinueRequestProviderParams.swift */; };
 		E243F6AF29D446FC00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243F6AD29D4427E00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift */; };
 		E248917A2A1CFA6B001ECBE2 /* MSALNativeAuthConfigStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F5BE9429894FCA00C67EC7 /* MSALNativeAuthConfigStubs.swift */; };
+		E24CE9CC2C57F1160069E2E4 /* AttributesStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24CE9C32C57F0850069E2E4 /* AttributesStub.swift */; };
 		E25BC07A2995423100588549 /* MSALNativeAuthNetworkMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0792995423100588549 /* MSALNativeAuthNetworkMocks.swift */; };
 		E25BC0832995429D00588549 /* MSALNativeAuthCacheMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0822995429D00588549 /* MSALNativeAuthCacheMocks.swift */; };
 		E25BC0852995430B00588549 /* MSALNativeAuthFactoriesMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25BC0842995430B00588549 /* MSALNativeAuthFactoriesMocks.swift */; };
@@ -2456,6 +2457,7 @@
 		E243F6A529D206BC00DAC60F /* MSALNativeAuthSignUpContinueResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpContinueResponse.swift; sourceTree = "<group>"; };
 		E243F6A929D42FE900DAC60F /* MSALNativeAuthSignUpContinueRequestProviderParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpContinueRequestProviderParams.swift; sourceTree = "<group>"; };
 		E243F6AD29D4427E00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignUpStartIntegrationTests.swift; sourceTree = "<group>"; };
+		E24CE9C32C57F0850069E2E4 /* AttributesStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributesStub.swift; sourceTree = "<group>"; };
 		E25BC0792995423100588549 /* MSALNativeAuthNetworkMocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthNetworkMocks.swift; sourceTree = "<group>"; };
 		E25BC0822995429D00588549 /* MSALNativeAuthCacheMocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheMocks.swift; sourceTree = "<group>"; };
 		E25BC0842995430B00588549 /* MSALNativeAuthFactoriesMocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthFactoriesMocks.swift; sourceTree = "<group>"; };
@@ -3174,6 +3176,7 @@
 				9B235DA22A3D15E400657331 /* sign_in */,
 				DEFB46E12A52B9B800DBC006 /* reset_password */,
 				DEFB46EB2A52BA1300DBC006 /* sign_out */,
+				E24CE9D82C592BA70069E2E4 /* mock */,
 				9B235D9E2A3CFB4300657331 /* MSALNativeAuthEndToEndBaseTestCase.swift */,
 				2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */,
 				280095EA2C32CAFC00F1653E /* ClientIdType.swift */,
@@ -4333,6 +4336,14 @@
 				E2BC027429D6E0C600041DBC /* MSALNativeAuthSignUpContinueIntegrationTests.swift */,
 			);
 			path = sign_up;
+			sourceTree = "<group>";
+		};
+		E24CE9D82C592BA70069E2E4 /* mock */ = {
+			isa = PBXGroup;
+			children = (
+				E24CE9C32C57F0850069E2E4 /* AttributesStub.swift */,
+			);
+			path = mock;
 			sourceTree = "<group>";
 		};
 		E25BC0902995559700588549 /* utils */ = {
@@ -6015,6 +6026,7 @@
 			files = (
 				281A0E182C21E1FD00CB30CB /* SignInDelegateSpies.swift in Sources */,
 				28A277D92C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift in Sources */,
+				E24CE9CC2C57F1160069E2E4 /* AttributesStub.swift in Sources */,
 				281A0E1B2C21E20600CB30CB /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				281A0E192C21E20000CB30CB /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
 				281A0E0C2C21E1F000CB30CB /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,

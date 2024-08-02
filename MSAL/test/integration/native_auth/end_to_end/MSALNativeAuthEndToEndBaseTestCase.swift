@@ -78,13 +78,25 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     func generateSignUpRandomEmail() -> String {
         return codeRetriever.generateRandomEmailAddress()
     }
-    
+
+    func generateRandomPassword() -> String {
+        return "password.\(Date().timeIntervalSince1970)"
+    }
+
     func retrieveCodeFor(email: String) async -> String? {
         return await codeRetriever.retrieveEmailOTPCode(email: email)
     }
-    
+
+    func retrieveUsernameForSignInCode() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+    }
+
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+    }
+    
+    func retrieveUsernameForResetPassword() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
     }
     
     func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {
