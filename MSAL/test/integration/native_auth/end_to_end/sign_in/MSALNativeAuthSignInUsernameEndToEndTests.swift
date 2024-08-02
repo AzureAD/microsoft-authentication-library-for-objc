@@ -26,6 +26,8 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
+
+    // Hero Scenario 2.2.2. Sign in - User is not registered with given email
     func test_signInWithUnknownUsernameResultsInError() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
@@ -45,19 +47,16 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
+    // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        throw XCTSkip("Skipping this test because email+code signIn username is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
 
         let signInExpectation = expectation(description: "signing in")
-        let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
-
-        let username = "missing email+code signIn username"
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
@@ -72,6 +71,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         // Now submit the code..
 
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
+
         signInDelegateSpy.newStateCodeRequired?.submitCode(code: "00000000", delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation])
@@ -81,33 +83,40 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertEqual(signInVerifyCodeDelegateSpy.error?.isInvalidCode, true)
     }
 
-    // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
+    // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        throw XCTSkip("Skipping this test because email+code signIn username is missing")
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
 
         let signInExpectation = expectation(description: "signing in")
-        let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-        let otp = "<otp not set>"
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
+        guard signInDelegateSpy.onSignInCodeRequiredCalled else {
+            XCTFail("onSignInCodeRequired not called")
+            return
+        }
+
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
+
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation])
 
