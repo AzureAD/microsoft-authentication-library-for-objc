@@ -5400,6 +5400,7 @@
 					};
 					1E614BD922558D8300EBF62F = {
 						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = UBF8T346G9;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 0;
