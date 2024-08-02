@@ -102,6 +102,17 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             case .invalidGrant:
                 if responseError.subError == .invalidOOBValue {
                     return .error(.invalidOOBCode(responseError))
+                } else if responseError.subError == .mfaRequired {
+                    guard let continuationToken = responseError.continuationToken else {
+                        MSALLogger.log(
+                            level: .error,
+                            context: context,
+                            format: "Token: MFA required response, expected continuation token not empty")
+                        return .error(.generalError(
+                            MSALNativeAuthTokenResponseError(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)
+                        ))
+                    }
+                    return .strongAuthRequired(continuationToken: continuationToken)
                 } else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
@@ -194,8 +205,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .userNotFound(apiError)
         case .invalidCredentials:
             return .invalidPassword(apiError)
-        case .strongAuthRequired:
-            return .strongAuthRequired(apiError)
         case .userNotHaveAPassword,
              .invalidRequestParameter:
             return .generalError(apiError)
@@ -209,7 +218,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         switch errorCode {
         case .userNotFound,
             .invalidCredentials,
-            .strongAuthRequired,
             .userNotHaveAPassword,
             .invalidRequestParameter:
             return .invalidRequest(apiError)

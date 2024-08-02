@@ -20,12 +20,21 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-// This enum contains all the handled error cases from eSTS in error_codes
-enum MSALNativeAuthESTSApiErrorCodes: Int {
-    case userNotFound = 50034
-    case invalidCredentials = 50126
-    case userNotHaveAPassword = 500222
-    case invalidRequestParameter = 90100
+@_implementationOnly import MSAL_Private
+
+struct MSALNativeAuthSignInIntrospectRequestParameters: MSALNativeAuthRequestable {
+    let endpoint: MSALNativeAuthEndpoint = .signInIntrospect
+    let context: MSALNativeAuthRequestContext
+    let continuationToken: String
+
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.continuationToken.rawValue: continuationToken
+        ].compactMapValues { $0 }
+    }
 }

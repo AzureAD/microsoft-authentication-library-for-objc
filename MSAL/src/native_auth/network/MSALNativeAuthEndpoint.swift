@@ -28,6 +28,7 @@ enum MSALNativeAuthEndpoint: String, CaseIterable {
     case signUpContinue = "/signup/v1.0/continue"
     case signInInitiate = "/oauth2/v2.0/initiate"
     case signInChallenge = "/oauth2/v2.0/challenge"
+    case signInIntrospect = "/oauth2/v2.0/introspect"
     case token = "/oauth2/v2.0/token"
     case resetPasswordStart = "/resetpassword/v1.0/start"
     case resetPasswordChallenge = "/resetpassword/v1.0/challenge"

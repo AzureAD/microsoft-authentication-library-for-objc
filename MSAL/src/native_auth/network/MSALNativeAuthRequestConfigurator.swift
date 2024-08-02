@@ -36,6 +36,7 @@ enum MSALNativeAuthRequestConfiguratorType {
     enum SignIn {
         case initiate(MSALNativeAuthSignInInitiateRequestParameters)
         case challenge(MSALNativeAuthSignInChallengeRequestParameters)
+        case introspect(MSALNativeAuthSignInIntrospectRequestParameters)
     }
 
     enum ResetPassword {
@@ -130,6 +131,15 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInChallengeResponse>()
             let telemetry = telemetryProvider.telemetryForSignIn(type: .signInChallenge)
             let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInChallengeResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
+                          responseSerializer: responseSerializer,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        case .introspect(let parameters):
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInIntrospectResponse>()
+            let telemetry = telemetryProvider.telemetryForSignIn(type: .signInIntrospect)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthSignInIntrospectResponseError>()
             try configure(request: request,
                           parameters: parameters,
                           responseSerializer: responseSerializer,

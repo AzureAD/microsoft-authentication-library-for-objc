@@ -33,6 +33,8 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, Equatable, MSALNativeAuthUnk
     case passwordBanned = "password_banned"
     case attributeValidationFailed = "attribute_validation_failed"
     case invalidOOBValue = "invalid_oob_value"
+    case introspectRequired = "introspect_required"
+    case mfaRequired = "mfa_required"
     case unknown
 
     var isAnyPasswordError: Bool {
@@ -46,6 +48,8 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, Equatable, MSALNativeAuthUnk
             return true
         case .attributeValidationFailed,
              .invalidOOBValue,
+             .introspectRequired,
+             .mfaRequired,
              .unknown:
             return false
         }

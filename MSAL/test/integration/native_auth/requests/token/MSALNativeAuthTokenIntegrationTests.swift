@@ -106,6 +106,15 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
             expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [55000], errorURI: nil, innerErrors: nil)
         )
     }
+    
+    func test_failRequest_mfaRequired() async throws {
+        let errorResponse = try await perform_testFail(
+            endpoint: .signInToken,
+            response: .mfaRequired,
+            expectedError: Error(error: .invalidGrant, subError: .mfaRequired,  errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
+        )
+        XCTAssertEqual(errorResponse.subError, .mfaRequired)
+    }
 
     func test_failRequest_invalidPassword() async throws {
         try await perform_testFail(

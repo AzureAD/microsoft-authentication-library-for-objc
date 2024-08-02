@@ -29,7 +29,7 @@ final class MSALNativeAuthSubErrorCodeTests: XCTestCase {
     private typealias sut = MSALNativeAuthSubErrorCode
 
     func test_allCases() {
-        XCTAssertEqual(sut.allCases.count, 9)
+        XCTAssertEqual(sut.allCases.count, 11)
     }
 
     func test_passwordTooWeak() {
@@ -62,5 +62,13 @@ final class MSALNativeAuthSubErrorCodeTests: XCTestCase {
 
     func test_invalidOOBValue() {
         XCTAssertEqual(sut.invalidOOBValue.rawValue, "invalid_oob_value")
+    }
+    
+    func test_introspectRequiredValue() {
+        XCTAssertEqual(sut.introspectRequired.rawValue, "introspect_required")
+    }
+    
+    func test_mfaRequiredValue() {
+        XCTAssertEqual(sut.mfaRequired.rawValue, "mfa_required")
     }
 }

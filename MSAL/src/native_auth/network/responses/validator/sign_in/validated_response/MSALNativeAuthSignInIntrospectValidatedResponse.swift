@@ -20,12 +20,18 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-// This enum contains all the handled error cases from eSTS in error_codes
-enum MSALNativeAuthESTSApiErrorCodes: Int {
-    case userNotFound = 50034
-    case invalidCredentials = 50126
-    case userNotHaveAPassword = 500222
-    case invalidRequestParameter = 90100
+import Foundation
+
+enum MSALNativeAuthSignInIntrospectValidatedResponse {
+    case authMethodsRetrieved(continuationToken: String, authMethods: [MSALNativeAuthInternalAuthenticationMethod])
+    case error(MSALNativeAuthSignInIntrospectValidatedErrorType)
+}
+
+enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
+    case redirect
+    case expiredToken(MSALNativeAuthSignInIntrospectResponseError)
+    case invalidRequest(MSALNativeAuthSignInIntrospectResponseError)
+    case unexpectedError(MSALNativeAuthSignInIntrospectResponseError?)
 }
