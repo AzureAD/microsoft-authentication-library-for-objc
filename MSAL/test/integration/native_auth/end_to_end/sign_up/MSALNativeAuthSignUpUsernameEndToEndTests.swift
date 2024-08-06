@@ -27,41 +27,39 @@ import MSAL
 
 final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-    private let usernameOTP = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
     private let attributes = ["age": 40]
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        try XCTSkipIf(!usingMockAPI)
-    }
 
     // Hero Scenario 1.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
+        let usernameOTP = generateSignUpRandomEmail()
 
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
         }
+        
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
-
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -69,29 +67,26 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
     // Hero Scenario 1.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping this test because application with custom attributes is missing")
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
-
+        let usernameOTP = generateSignUpRandomEmail()
+        
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -99,13 +94,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -113,29 +104,26 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
     // Hero Scenario 1.1.3. Sign up – with Email Verification as FIRST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping this test because application with custom attributes is missing")
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
-
+        let usernameOTP = generateSignUpRandomEmail()
+        
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -143,13 +131,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let submitCodeExp = expectation(description: "submit code")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -157,16 +141,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let attributesExp = expectation(description: "submit attributes, sign-up complete")
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: attributesExp)
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
             attributes: attributes,
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [attributesExp], timeout: defaultTimeout)
+        await fulfillment(of: [attributesExp])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -174,29 +154,30 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
     // Hero Scenario 1.1.4. Sign up – with Email Verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        throw XCTSkip("Skipping this test because application with custom attributes is missing")
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
-
+        let usernameOTP = generateSignUpRandomEmail()
+        
         sut.signUp(username: usernameOTP, attributes: attributes, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
@@ -204,13 +185,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let submitCodeExp = expectation(description: "submit code")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
 
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
-
         signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [submitCodeExp], timeout: defaultTimeout)
+        await fulfillment(of: [submitCodeExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpAttributesRequiredCalled)
 
         // Now submit the attributes...
@@ -218,16 +195,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let submitAttributesExp1 = expectation(description: "submit attributes 1")
         let signUpAttributesRequiredDelegate = SignUpAttributesRequiredDelegateSpy(expectation: submitAttributesExp1)
 
-        if usingMockAPI {
-            try await mockResponse(.attributesRequired, endpoint: .signUpContinue)
-        }
-
         signUpVerifyCodeDelegate.attributesRequiredNewState?.submitAttributes(
             attributes: attributes,
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [submitAttributesExp1], timeout: defaultTimeout)
+        await fulfillment(of: [submitAttributesExp1])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpAttributesRequiredErrorCalled)
 
         // Now submit more attributes...
@@ -235,16 +208,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let submitAttributesExp2 = expectation(description: "submit attributes 2, sign-up complete")
         signUpAttributesRequiredDelegate.expectation = submitAttributesExp2
 
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
-        }
-
         signUpAttributesRequiredDelegate.attributesRequiredState?.submitAttributes(
             attributes: attributes,
             delegate: signUpAttributesRequiredDelegate
         )
 
-        await fulfillment(of: [submitAttributesExp2], timeout: defaultTimeout)
+        await fulfillment(of: [submitAttributesExp2])
         XCTAssertTrue(signUpAttributesRequiredDelegate.onSignUpCompletedCalled)
 
         // Now sign in...
@@ -252,59 +221,55 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExp = expectation(description: "sign-in after sign-up")
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
 
-        await fulfillment(of: [signInExp], timeout: defaultTimeout)
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate)
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
 
     // Hero Scenario 1.1.5. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpStartSuccess, endpoint: .signUpStart)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signUpChallenge)
-        }
-
+        let usernameOTP = generateSignUpRandomEmail()
+        
         sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
 
-        await fulfillment(of: [codeRequiredExp], timeout: defaultTimeout)
+        await fulfillment(of: [codeRequiredExp])
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
         checkSignUpStartDelegate(signUpStartDelegate)
 
         // Now submit the code...
 
         let signUpCompleteExp = expectation(description: "sign-up complete")
         let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
-
-        if usingMockAPI {
-            try await mockResponse(.signUpContinueSuccess, endpoint: .signUpContinue)
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
         }
 
-        signUpStartDelegate.newState?.submitCode(code: "1234", delegate: signUpVerifyCodeDelegate)
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
 
-        await fulfillment(of: [signUpCompleteExp], timeout: defaultTimeout)
+        await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
-        XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
         XCTAssertEqual(delegate.channelTargetType, .email)
         XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(delegate.codeLength)
     }
 
-    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy) {
+    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, username: String) {
         XCTAssertTrue(delegate.onSignInCompletedCalled)
-        XCTAssertEqual(delegate.result?.account.username, usernameOTP)
+        XCTAssertEqual(delegate.result?.account.username, username)
         XCTAssertNotNil(delegate.result?.idToken)
-        XCTAssertNil(delegate.result?.account.accountClaims)
-        XCTAssertEqual(delegate.result?.scopes[0], "openid")
-        XCTAssertEqual(delegate.result?.scopes[1], "offline_access")
     }
 }

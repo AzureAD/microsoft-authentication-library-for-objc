@@ -25,84 +25,18 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-13'
+  vmImage: 'macOS-14'
 
 jobs:
 - job: ui_automation
-  displayName: Run MSAL UI automation
+  displayName: 'Run MSAL UI automation'
   timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
-  
+
   steps:
-
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: true
-    path: s
-    
-  - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.0.1.app"'
-  
-  - task: Bash@3
-    displayName: Go to project folder
-    inputs:
-      targetType: 'inline'
-      script: |        
-        cd $(Agent.BuildDirectory)/s
-  
-  - script: 'gem install xcpretty'
-    displayName: 'Install xcpretty'
-
-
-  - task: DownloadSecureFile@1
-    name: configuration
-    displayName: 'Get Automation conf.json'
-    inputs:
-      secureFile: 'broker_automation_conf_new_api.json'
-  
-  - task: Bash@3
-    displayName: Build for testing
-    inputs:
-      targetType: 'inline'
-      script: |
-        mv $(configuration.secureFilePath) MSAL/test/automation/conf.json
-        ruby TestRubyFile.rb
-        xcodebuild build-for-testing \
-          -workspace MSAL.xcworkspace \
-          -scheme "MSAL Test Automation (iOS)" \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
-          -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
-
-  - task: Bash@3
-    displayName: Run automations
-    inputs:
-      targetType: 'inline'
-      script: |
-        ls build/Build/Products/
-        xcodebuild test-without-building \
-            -xctestrun 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.0-x86_64.xctestrun' \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
-            -retry-tests-on-failure \
-            -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
-
-  # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
-  - task: PublishPipelineArtifact@1
-    condition: succeededOrFailed()
-    inputs:
-      targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
-      publishLocation: 'pipeline'
+  - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
     condition: failed()
@@ -142,10 +76,8 @@ jobs:
         pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
         git_commit = "$(Build.SourceVersionMessage) [$(Build.SourceVersion)] "
         issue_title = "Automation tests failure"
-        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri) 
+        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri)
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
-  
-
 
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
@@ -154,9 +86,9 @@ jobs:
   strategy:
     maxParallel: 2
     matrix:
-      STATIC_LIBRARY: 
+      STATIC_LIBRARY:
         args: "--fail-fast --swift-version=5 --allow-warnings --use-static-frameworks"
-      DYNAMIC_LIBRARY: 
+      DYNAMIC_LIBRARY:
         args: "--fail-fast --swift-version=5 --allow-warnings"
   workspace:
     clean: all
@@ -171,7 +103,7 @@ jobs:
     path: s
 
   - task: Bash@3
-    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec 
+    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
     inputs:
       targetType: 'inline'
       script: |
@@ -179,7 +111,7 @@ jobs:
       workingDirectory: '$(Build.SourcesDirectory)'
 
   - task: Bash@3
-    displayName: Run pod lib lint 
+    displayName: Run pod lib lint
     inputs:
       targetType: 'inline'
       script: |
@@ -187,7 +119,7 @@ jobs:
       workingDirectory: '$(Build.SourcesDirectory)'
 
   - task: Bash@3
-    displayName: Discard temporary changes made to MSAL.podspec 
+    displayName: Discard temporary changes made to MSAL.podspec
     inputs:
       targetType: 'inline'
       script: |

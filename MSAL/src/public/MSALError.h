@@ -126,6 +126,11 @@ extern NSString *MSALHomeAccountIdKey;
 extern NSString *MSALErrorDomain;
 
 /**
+Flag indicate the error returned from client-side throttling.
+ */
+extern NSString *MSALThrottlingCacheHitKey;
+
+/**
  MSALError enum contains all errors that should be considered for handling in runtime.
  */
 typedef NS_ENUM(NSInteger, MSALError)
@@ -177,6 +182,11 @@ typedef NS_ENUM(NSInteger, MSALError)
     The server error happens when server returns server_error
      */
     MSALErrorServerError                         = -50006,
+
+    /**
+     Workplacejoin migrate device registration is required to proceed.
+     */
+    MSALErrorInsufficientDeviceStrength          = -50007,
 };
 
 /**

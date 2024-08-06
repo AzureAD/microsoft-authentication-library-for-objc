@@ -76,8 +76,6 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
 
 
     func test_failRequest_unauthorizedClient() async throws {
-        throw XCTSkip()
-        
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .unauthorizedClient,
@@ -85,21 +83,12 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         )
     }
 
-    func test_failRequest_invalidPurposeToken() async throws {
-        throw XCTSkip()
-
-        let response = try await perform_testFail(
+    func test_failRequest_invalidContinuationToken() async throws {
+        try await perform_testFail(
             endpoint: .signInChallenge,
-            response: .invalidPurposeToken,
-            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
+            response: .invalidContinuationToken,
+            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [55000], errorURI: nil, innerErrors: nil)
         )
-
-        guard let innerError = response.innerErrors?.first else {
-            return XCTFail("There should be an inner error")
-        }
-
-        XCTAssertEqual(innerError.error, "invalid_purpose_token")
-        XCTAssertNotNil(innerError.errorDescription)
     }
 
     func test_failRequest_expiredToken() async throws {

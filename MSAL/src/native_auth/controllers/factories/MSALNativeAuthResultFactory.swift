@@ -59,10 +59,10 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
                     format: "Initialising account without claims")
             }
         } catch {
-            MSALLogger.log(
+            MSALLogger.logPII(
                 level: .warning,
                 context: context,
-                format: "Claims for account could not be created - \(error)" )
+                format: "Claims for account could not be created - \(MSALLogMask.maskEUII(error))" )
         }
         return MSALAccount.init(msidAccount: tokenResult.account,
                                 createTenantProfile: false,
