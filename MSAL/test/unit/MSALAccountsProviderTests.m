@@ -1115,7 +1115,7 @@
 
 #pragma mark - AllAccountsFromDevice
 
-- (void)testAllAccountsFromDevice_whenCurrentSSOExtensionAlreadyPresent_shouldReturnNilAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenCurrentSSOExtensionAlreadyPresent_shouldReturnNilAndFillError
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetAccountsRequest class]
@@ -1169,7 +1169,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
-- (void)testAllAccuntsFromDevice_whenSSOExtensionNotAvailable_shouldReturnLocalAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccuntsFromDevice_whenSSOExtensionNotAvailable_shouldReturnLocalAccounts
 {
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                              clientId:@"client_id"
@@ -1218,7 +1218,7 @@
     [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
 }
 
-- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_encounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_encounteredError_shouldReturnError
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetAccountsRequest class]
@@ -1262,7 +1262,7 @@
     [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
 }
 
-- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_shouldCombineWithLocalAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_shouldCombineWithLocalAccounts
 {
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.windows.net/tid"
          clientId:@"client_id"
@@ -1330,7 +1330,7 @@
     [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
 }
 
-- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_andReturnBrokerAccountsOnlyYES_shouldReturnBrokerAccountsOnly API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_andReturnBrokerAccountsOnlyYES_shouldReturnBrokerAccountsOnly
 {
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
          clientId:@"client_id"
