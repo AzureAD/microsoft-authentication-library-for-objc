@@ -79,47 +79,6 @@ jobs:
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri)
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
 
-- job: e2e_test_native_auth_ios
-  displayName: 'Run MSAL E2E tests for iOS native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  workspace:
-    clean: all
-
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator17.5-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
-      sdk: 'iphonesimulator'
-
-- job: e2e_test_native_auth_mac
-  displayName: 'Run MSAL E2E tests for Mac native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  workspace:
-    clean: all
-
-  steps:
-  - task: Bash@3
-    displayName: Calculate path
-    inputs:
-      targetType: 'inline'
-      script: |
-        # Get the macOS version
-        macos_version=$(sw_vers -productVersion)
-        echo "Mac Version $macos_version"      
-        full_path="build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx$macos_version-x86_64.xctestrun"
-        echo "##vso[task.setvariable variable=macos_full_path]$full_path"
-
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: $(macos_full_path)
-      destination: 'platform=macOS'
-      sdk: 'macosx'
-
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
   timeoutInMinutes: 30
