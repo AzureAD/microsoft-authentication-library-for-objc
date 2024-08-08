@@ -1,8 +1,6 @@
 parameters:
   schema: 'MSAL Test Automation (iOS)'
-  full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun'
-  destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
-  sdk: 'iphonesimulator'
+  build: 'MSAL Test Automation (iOS)'
 
 steps:
   - checkout: self
@@ -46,8 +44,8 @@ steps:
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
-          -sdk ${{ parameters.sdk }} \
-          -destination '${{ parameters.destination }}' \
+          -sdk iphonesimulator \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
@@ -59,8 +57,8 @@ steps:
       script: |
         ls build/Build/Products/
         xcodebuild test-without-building \
-            -xctestrun '${{ parameters.full_path }}' \
-            -destination '${{ parameters.destination }}' \
+            -xctestrun 'build/Build/Products/${{ parameters.build }}_iphonesimulator17.5-x86_64.xctestrun' \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
@@ -70,6 +68,6 @@ steps:
     condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
+      artifactName: 'TestOutputs Attempt - $(System.StageAttempt)'
       publishLocation: 'pipeline'
   
