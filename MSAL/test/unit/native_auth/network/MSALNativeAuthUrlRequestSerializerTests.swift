@@ -126,15 +126,21 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(resultingLog.contains("Header serialization failed"))
     }
 
+
     func test_when_error_happens_in_bodySerialization_it_logs_it() throws {
         let expectation = expectation(description: "Body request serialization error")
 
         Self.logger.expectation = expectation
-
-        let impossibleToEncode = [
+        var impossibleToEncode = [String: Any]()
+#if os(iOS)
+        impossibleToEncode = [
             "param": UIView()
         ]
-
+#elseif os(macOS)
+        impossibleToEncode = [
+            "param": NSView()
+        ]
+#endif
         _ = sut.serialize(with: request, parameters: impossibleToEncode, headers: [:])
 
         wait(for: [expectation], timeout: 1)
