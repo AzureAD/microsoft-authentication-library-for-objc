@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.social_media_url   = "https://twitter.com/azuread"
   s.platform     = :ios, :osx
   s.ios.deployment_target = "14.0"
-  s.osx.deployment_target = "10.13"
+  s.osx.deployment_target = "10.15"
   s.source       = { 
     :git => "https://github.com/AzureAD/microsoft-authentication-library-for-objc.git",
     :tag => s.version.to_s,
@@ -29,10 +29,10 @@ Pod::Spec.new do |s|
   s.subspec 'app-lib' do |app|
     app.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
     app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
-    app.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    app.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
+    app.ios.public_header_files = "MSAL/src/public/ios/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
+    app.osx.public_header_files = "MSAL/src/public/mac/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src/native_auth/**/*"
+    app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
     app.requires_arc = true
   end
 
@@ -40,9 +40,9 @@ Pod::Spec.new do |s|
     nat.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
     nat.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
     nat.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    nat.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
+    nat.osx.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     nat.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    nat.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src/native_auth/**/*", "MSAL/module.modulemap"
+    nat.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
     nat.requires_arc = true
   end
   

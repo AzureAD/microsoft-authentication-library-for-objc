@@ -1,5 +1,6 @@
 ## [TBD]:
 * Increased macOS minimum version to 10.15 #2220
+* Added Native Auth feature for MacOS to interact with the Microsoft Entra ID services
 
 ## [1.4.1]
 * Update Native Auth logging levels for improved clarity and consistency. (#2184)
