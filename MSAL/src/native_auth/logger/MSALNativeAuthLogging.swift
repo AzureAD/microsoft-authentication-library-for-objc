@@ -151,4 +151,19 @@ extension MSALLogger: MSALLogging {
 
 /// This class is a wrapper of the objc class `MSALLogMask`. In the Swift non-public classes where `MSALLogMask` is used, it is imported using `@_implementationOnly import MSAL_Private`.
 /// But in the Swift public classes we are not using `@_implementationOnly`, as it is an internal implementation detail, so this wrapper is used instead.
-class MSALLogMaskWrapper: MSALLogMask {}
+///
+///
+class MSALLogMask {
+    static func maskPII(_ paramter: Any?) -> MSIDMaskedLogParameter {
+        MSIDMaskedLogParameter(parameterValue: paramter)
+    }
+    static func maskEUII(_ paramter: Any?) -> MSIDMaskedLogParameter {
+        MSIDMaskedLogParameter(parameterValue: paramter, isEUII: true)
+    }
+    static func maskTrackablePII(_ paramter: Any?) -> MSIDMaskedHashableLogParameter {
+        MSIDMaskedHashableLogParameter(parameterValue: paramter)
+    }
+    static func maskUsername(_ paramter: Any?) -> MSIDMaskedUsernameLogParameter {
+        MSIDMaskedUsernameLogParameter(parameterValue: paramter)
+    }
+}
