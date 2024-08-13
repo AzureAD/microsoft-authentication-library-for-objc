@@ -920,6 +920,7 @@
 		D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
 		DE03478A2A39ED6A003CB3B6 /* MSALCIAMOauth2Provider.m in Sources */ = {isa = PBXBuildFile; fileRef = DE9244D72A31E1D500C0389F /* MSALCIAMOauth2Provider.m */; };
 		DE0347A82A41AD08003CB3B6 /* MSALNativeAuthUserAccountResultStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0347A72A41AD08003CB3B6 /* MSALNativeAuthUserAccountResultStub.swift */; };
+		DE0A5E892C6B670E004A4AEC /* MSALLogMaskTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DECC1FB229531032006D9FB1 /* MSALLogMaskTests.m */; };
 		DE0D656F29BF72F7005798B1 /* MSALNativeAuthSignInInitiateRequestParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0D656729BF72F6005798B1 /* MSALNativeAuthSignInInitiateRequestParameters.swift */; };
 		DE0D657629BF73CB005798B1 /* MSALNativeAuthSignInChallengeRequestParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0D657429BF73CB005798B1 /* MSALNativeAuthSignInChallengeRequestParameters.swift */; };
 		DE0D659529C1DCC9005798B1 /* MSALNativeAuthSignInInitiateRequestParametersTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0D658E29C1DCA6005798B1 /* MSALNativeAuthSignInInitiateRequestParametersTest.swift */; };
@@ -6859,6 +6860,8 @@
 				DE8DC50E2C6621EA00534E8F /* MSALNativeAuthResetPasswordControllerMock.swift in Sources */,
 				DE8DC5222C6621F500534E8F /* ResetPasswordResendCodeDelegateDispatcherTests.swift in Sources */,
 				DE8DC5472C66220D00534E8F /* MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift in Sources */,
+				DE8DC5332C6621FD00534E8F /* SignUpPasswordRequiredStateTests.swift in Sources */,
+				DE0A5E892C6B670E004A4AEC /* MSALLogMaskTests.m in Sources */,
 				DE8DC51F2C6621F100534E8F /* SignUpVerifyCodeDelegateDispatcherTests.swift in Sources */,
 				B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 				DECE10372BE3F0940036738C /* MSALNativeAuthSignInInitiateRequestParametersTest.swift in Sources */,
