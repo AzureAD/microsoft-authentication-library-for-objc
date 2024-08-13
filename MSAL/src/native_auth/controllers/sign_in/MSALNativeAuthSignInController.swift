@@ -225,6 +225,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 context: context
             )
+        case .strongAuthRequired(_):
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: VerifyCodeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -301,6 +304,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 scopes: scopes
             )
+        case .strongAuthRequired(_):
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: PasswordRequiredError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -351,6 +357,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
+        case .introspectRequired:
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(error: ResendCodeError(correlationId: UUID()), newState: nil), correlationId: UUID())
         }
     }
 
@@ -418,7 +427,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
 
         let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: telemetryInfo.context)
-        let validatedResponse = signInResponseValidator.validate(context: telemetryInfo.context, result: initiateResponse)
+        let validatedResponse = signInResponseValidator.validateInitiate(context: telemetryInfo.context, result: initiateResponse)
 
         return validatedResponse
     }
@@ -470,6 +479,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                            format: "SignIn completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
             onError(error)
+        case .strongAuthRequired(_):
+            return
+            // TODO: this will be handled in a separate PBI
         }
     }
 
@@ -592,6 +604,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                               format: "SignIn, completed with error: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
+        case .introspectRequired:
+            // TODO: this will be handled in a separate PBI
+            return .init(.error(
+                SignInStartError(
+                    type: .generalError,
+                    correlationId: telemetryInfo.context.correlationId()
+                )), correlationId: telemetryInfo.context.correlationId()
+            )
         }
     }
 
@@ -605,7 +625,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .error(.invalidRequest(.init(errorDescription: errorDescription)))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
-        return signInResponseValidator.validate(context: context, result: challengeResponse)
+        return signInResponseValidator.validateChallenge(context: context, result: challengeResponse)
     }
 
     private func createInitiateRequest(username: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
@@ -620,11 +640,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private func createChallengeRequest(
         continuationToken: String,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        mfaAuthMethodId: String? = nil
     ) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(
                 context: context,
+                mfaAuthMethodId: mfaAuthMethodId,
                 continuationToken: continuationToken
             )
             return try signInRequestProvider.challenge(parameters: params, context: context)

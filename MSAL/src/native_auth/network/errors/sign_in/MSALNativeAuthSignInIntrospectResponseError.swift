@@ -20,12 +20,41 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-// This enum contains all the handled error cases from eSTS in error_codes
-enum MSALNativeAuthESTSApiErrorCodes: Int {
-    case userNotFound = 50034
-    case invalidCredentials = 50126
-    case userNotHaveAPassword = 500222
-    case invalidRequestParameter = 90100
+import Foundation
+
+struct MSALNativeAuthSignInIntrospectResponseError: MSALNativeAuthResponseError {
+
+    let error: MSALNativeAuthSignInIntrospectOauth2ErrorCode
+    let errorDescription: String?
+    let errorCodes: [Int]?
+    let errorURI: String?
+    let innerErrors: [MSALNativeAuthInnerError]?
+    var correlationId: UUID?
+
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
+        case errorCodes = "error_codes"
+        case errorURI = "error_uri"
+        case innerErrors = "inner_errors"
+        case correlationId
+    }
+
+    init(
+        error: MSALNativeAuthSignInIntrospectOauth2ErrorCode = .unknown,
+        errorDescription: String? = nil,
+        errorCodes: [Int]? = nil,
+        errorURI: String? = nil,
+        innerErrors: [MSALNativeAuthInnerError]? = nil,
+        correlationId: UUID? = nil
+    ) {
+        self.error = error
+        self.errorDescription = errorDescription
+        self.errorCodes = errorCodes
+        self.errorURI = errorURI
+        self.innerErrors = innerErrors
+        self.correlationId = correlationId
+    }
 }
