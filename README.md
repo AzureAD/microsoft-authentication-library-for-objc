@@ -13,7 +13,7 @@ Using MSAL for iOS and macOS, you can acquire security tokens from the Microsoft
 
 #### Native authentication support in MSAL
 
-MSAL iOS and macOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their applications. With native authentication, users are guided through a rich, native, sign-up and sign-in journey without leaving the app. The native authentication feature is available for both mobile (iOS) and desktop (macOS) apps on [External ID for customers](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication). It is recommended to always use the most up-to-date version of the SDK.
+MSAL iOS and macOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their applications. With native authentication, users are guided through a rich, native, sign-up and sign-in journey without leaving the app. The native authentication feature is available for mobile (iOS) and desktop (macOS) apps on [External ID for customers](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication). It is recommended to always use the most up-to-date version of the SDK.
 
 ## Get started
 
