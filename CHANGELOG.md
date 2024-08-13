@@ -2,6 +2,9 @@
 * Increased macOS minimum version to 10.15 #2220
 * Added Native Auth feature for MacOS to interact with the Microsoft Entra ID services
 
+## [1.4.2]
+* Fix invalid cert auth request handling (hotfix). (#2278)
+
 ## [1.4.1]
 * Update Native Auth logging levels for improved clarity and consistency. (#2184)
 * Update common core submodule with changes related to upgrade registration. (#2180)
