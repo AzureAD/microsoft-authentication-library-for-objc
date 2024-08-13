@@ -192,7 +192,6 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenIntrospectReturnsInvalidRequest_validationShouldReturnRightError() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continuationToken = "continuationToken"
         let introspectErrorResponse = MSALNativeAuthSignInIntrospectResponseError(error: .invalidRequest)
         let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
         if case .error(.invalidRequest(introspectErrorResponse)) = result {} else {
@@ -202,7 +201,6 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenIntrospectReturnsExpiredToken_validationShouldReturnRightError() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continuationToken = "continuationToken"
         let introspectErrorResponse = MSALNativeAuthSignInIntrospectResponseError(error: .expiredToken)
         let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
         if case .error(.expiredToken(introspectErrorResponse)) = result {} else {

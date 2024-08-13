@@ -43,26 +43,6 @@ protocol MSALNativeAuthSignInResponseValidating {
 
 final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseValidating {
 
-    func validateChallenge(
-        context: MSIDRequestContext,
-        result: Result<MSALNativeAuthSignInChallengeResponse, Error>
-    ) -> MSALNativeAuthSignInChallengeValidatedResponse {
-        switch result {
-        case .success(let challengeResponse):
-            return handleSuccessfulSignInChallengeResult(context, response: challengeResponse)
-        case .failure(let signInChallengeResponseError):
-            guard let signInChallengeResponseError =
-                    signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
-                MSALLogger.logPII(
-                    level: .error,
-                    context: context,
-                    format: "signin/challenge: Unable to decode error response: \(MSALLogMask.maskPII(signInChallengeResponseError))")
-                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
-            }
-            return handleFailedSignInChallengeResult(error: signInChallengeResponseError)
-        }
-    }
-
     func validateInitiate(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthSignInInitiateResponse, Error>
@@ -89,6 +69,26 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         }
     }
 
+    func validateChallenge(
+        context: MSIDRequestContext,
+        result: Result<MSALNativeAuthSignInChallengeResponse, Error>
+    ) -> MSALNativeAuthSignInChallengeValidatedResponse {
+        switch result {
+        case .success(let challengeResponse):
+            return handleSuccessfulSignInChallengeResult(context, response: challengeResponse)
+        case .failure(let signInChallengeResponseError):
+            guard let signInChallengeResponseError =
+                    signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
+                MSALLogger.logPII(
+                    level: .error,
+                    context: context,
+                    format: "signin/challenge: Unable to decode error response: \(MSALLogMask.maskPII(signInChallengeResponseError))")
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
+            }
+            return handleFailedSignInChallengeResult(error: signInChallengeResponseError)
+        }
+    }
+
     func validateIntrospect(
         context: any MSIDRequestContext,
         result: Result<MSALNativeAuthSignInIntrospectResponse, any Error>
@@ -100,7 +100,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             }
             guard let continuationToken = introspectResponse.continuationToken,
                   let methods = introspectResponse.methods,
-                  methods.count > 0 else {
+                  !methods.isEmpty else {
                 MSALLogger.logPII(
                     level: .error,
                     context: context,

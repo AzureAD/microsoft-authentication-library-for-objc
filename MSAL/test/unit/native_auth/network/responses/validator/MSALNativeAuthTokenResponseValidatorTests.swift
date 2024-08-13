@@ -146,10 +146,6 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
         }
-        errorCodes = [MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue, unknownErrorCode1, unknownErrorCode2]
-        guard case .userNotFound(createError(errorCodes)) = checkErrorCodes() else {
-            return XCTFail("Unexpected Error")
-        }
         errorCodes = [MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue, unknownErrorCode1, unknownErrorCode2]
         guard case .invalidPassword(createError(errorCodes)) = checkErrorCodes() else {
             return XCTFail("Unexpected Error")
