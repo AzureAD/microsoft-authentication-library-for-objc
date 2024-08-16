@@ -16,22 +16,37 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-// TODO: this should not be an enum but something more similar to error
-/// The possible Channel Types via which a code was sent
+/**
+ * MSALAuthMethod represents a user's authentication methods.
+ */
 @objc
-public enum MSALNativeAuthChannelType: Int {
+public class MSALAuthMethod: NSObject {
 
-    /// Specifies if the channel type is Email
-    case email
+    //TODO: review comments
+    // Auth method ID
+    let id: String
 
-    /// Specifies if the channel type is Phone
-    case phone
+    // Auth method challenge type (oob, etc.)
+    let challengeType: String
+
+    // Auth method login hint (e.g. user@contoso.com)
+    let loginHint: String
+
+    // Auth method channel target (email, etc.)
+    let channelTargetType: MSALNativeAuthChannelType
+
+    init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
+        self.id = id
+        self.challengeType = challengeType
+        self.loginHint = loginHint
+        self.channelTargetType = channelTargetType
+    }
 }
