@@ -5179,9 +5179,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D65A6F551E3FD32D00C69FBA /* Build configuration list for PBXNativeTarget "MSAL (Mac Framework)" */;
 			buildPhases = (
+				D65A6F4D1E3FD32D00C69FBA /* Headers */,
 				D65A6F4B1E3FD32D00C69FBA /* Sources */,
 				D65A6F4C1E3FD32D00C69FBA /* Frameworks */,
-				D65A6F4D1E3FD32D00C69FBA /* Headers */,
 				D65A6F4E1E3FD32D00C69FBA /* Resources */,
 			);
 			buildRules = (
