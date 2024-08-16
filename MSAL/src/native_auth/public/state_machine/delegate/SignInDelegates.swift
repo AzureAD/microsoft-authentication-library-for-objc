@@ -67,6 +67,11 @@ public protocol SignInPasswordRequiredDelegate {
     ///   - error: An error object indicating why the operation failed.
     ///   - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onSignInPasswordRequiredError(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
+    
+    /// Notifies the delegate that a multi factor authentication (MFA) is required from the user to continue.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
+    /// - Parameter newState: An object representing the new state of the flow with follow on methods.
+    @MainActor @objc optional func onSignPasswordRequiredAwaitingMFA(newState: AwaitingMFAState)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordRequiredError(error:newState:)`` will be called.

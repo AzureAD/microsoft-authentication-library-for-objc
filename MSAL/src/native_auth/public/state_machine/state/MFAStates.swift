@@ -56,7 +56,7 @@ public class MFARequiredState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///   - challenge: Verification challenge that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func submitChallenge(challenge: String, delegate:  MFASubmitChallengeDelegate) {
+    public func submitChallenge(challenge: String, delegate: MFASubmitChallengeDelegate) {
 
     }
 }
