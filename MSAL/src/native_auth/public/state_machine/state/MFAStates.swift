@@ -33,7 +33,15 @@ public class AwaitingMFAState: MSALNativeAuthBaseState {
     public func sendChallenge(delegate: MFASendChallengeDelegate) {
         // TODO: remove this dummy logic once business logic will be available
         DispatchQueue.main.async {
-            delegate.onMFASendChallengeVerificationRequired?(newState: MFARequiredState(continuationToken: "CT", correlationId: UUID()), sentTo: "co****@***.com", channelTargetType: .email, codeLength: 8)
+            delegate.onMFASendChallengeVerificationRequired?(newState: 
+                                                                MFARequiredState(
+                                                                    continuationToken: "CT",
+                                                                    correlationId: UUID()
+                                                                ),
+                                                             sentTo: "co****@***.com",
+                                                             channelTargetType: .email,
+                                                             codeLength: 8
+            )
         }
     }
 }
@@ -71,6 +79,7 @@ public class MFARequiredState: MSALNativeAuthBaseState {
     public func submitChallenge(challenge: String, delegate: MFASubmitChallengeDelegate) {
         // TODO: remove this dummy logic once business logic will be available
         DispatchQueue.main.async {
-            delegate.onMFASubmitChallengeError(error: MFAError(type: .browserRequired, correlationId: UUID()))
+            delegate.onMFASubmitChallengeError(error: MFASubmitChallengeError(type: .invalidChallenge, correlationId: UUID()))
+        }
     }
 }

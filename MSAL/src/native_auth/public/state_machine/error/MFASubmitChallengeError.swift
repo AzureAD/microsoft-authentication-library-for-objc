@@ -20,16 +20,15 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-/// Class that defines the structure and type of a MFA error
+/// Class that defines the structure and type of a MFASubmitChallengeError
 @objcMembers
-// TODO: DR - check if we need dedicated error per subflow
-public class MFAError: MSALNativeAuthError {
+public class MFASubmitChallengeError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
-        case browserRequired
+        case invalidChallenge
         case generalError
     }
 
@@ -47,15 +46,15 @@ public class MFAError: MSALNativeAuthError {
         }
 
         switch type {
-        case .browserRequired:
-            return MSALNativeAuthErrorMessage.browserRequired
+        case .invalidChallenge:
+            return MSALNativeAuthErrorMessage.invalidChallenge
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
         }
     }
 
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
+    /// Returns `true` when the challenge introduced is not valid.
+    public var isInvalidChallenge: Bool {
+        return type == .invalidChallenge
     }
 }

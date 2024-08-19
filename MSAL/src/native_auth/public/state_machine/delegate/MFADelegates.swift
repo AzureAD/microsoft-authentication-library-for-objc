@@ -31,7 +31,7 @@ public protocol MFASendChallengeDelegate {
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
     // TODO: new state parameter here ?
-    @MainActor func onMFASendChallengeError(error: MFAError)
+    @MainActor func onMFASendChallengeError(error: MFASendChallengeError)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
@@ -61,7 +61,7 @@ public protocol MFAGetAuthMethodsDelegate {
     // TODO: new state parameter here ?
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onMFAGetAuthMethodsError(error: MFAError)
+    @MainActor func onMFAGetAuthMethodsError(error: MFAGetAuthMethodsError)
 
     /// Notifies the delegate that the list of authentication methods is now available.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFAGetAuthMethodsError(error:)`` will be called.
@@ -78,7 +78,7 @@ public protocol MFASubmitChallengeDelegate {
     // TODO: new state parameter here ?
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onMFASubmitChallengeError(error: MFAError)
+    @MainActor func onMFASubmitChallengeError(error: MFASubmitChallengeError)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASubmitChallengeError(error:newState:)`` will be called.

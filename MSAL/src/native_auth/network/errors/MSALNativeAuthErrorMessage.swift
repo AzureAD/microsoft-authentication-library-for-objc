@@ -39,6 +39,7 @@ enum MSALNativeAuthErrorMessage {
     static let invalidUsername = "Invalid username"
     static let generalError = "General error"
     static let invalidCode = "Invalid code"
+    static let invalidChallenge = "Invalid challenge"
     static let refreshTokenExpired = "Refresh token is expired"
     static let redirectUriNotSetWarning = "WARNING ⚠️: redirectUri not set during MSAL Native Auth initialization. Production apps must correctly configure a redirect URI and call acquireToken in response to all browserRequired errors. See https://learn.microsoft.com/entra/identity-platform/redirect-uris-ios"
     static let unexpectedResponseBody = "Unexpected response body received"
