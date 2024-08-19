@@ -79,7 +79,7 @@ public class MFARequiredState: MSALNativeAuthBaseState {
     public func submitChallenge(challenge: String, delegate: MFASubmitChallengeDelegate) {
         // TODO: remove this dummy logic once business logic will be available
         DispatchQueue.main.async {
-            delegate.onMFASubmitChallengeError(error: MFASubmitChallengeError(type: .invalidChallenge, correlationId: UUID()))
+            delegate.onMFASubmitChallengeError(error: MFASubmitChallengeError(type: .invalidChallenge, correlationId: UUID()), newState: nil)
         }
     }
 }

@@ -29,9 +29,10 @@ import Foundation
 public protocol MFASendChallengeDelegate {
 
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    // TODO: new state parameter here ?
-    @MainActor func onMFASendChallengeError(error: MFASendChallengeError)
+    /// - Parameters:
+    ///     - error: An error object indicating why the operation failed.
+    ///     - newState: An object representing the new state of the flow with follow on methods.
+    @MainActor func onMFASendChallengeError(error: MFASendChallengeError, newState: MFARequiredState?)
 
     /// Notifies the delegate that a verification code is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
@@ -58,10 +59,11 @@ public protocol MFASendChallengeDelegate {
 @objc
 public protocol MFAGetAuthMethodsDelegate {
 
-    // TODO: new state parameter here ?
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onMFAGetAuthMethodsError(error: MFAGetAuthMethodsError)
+    /// - Parameters:
+    ///     - error: An error object indicating why the operation failed.
+    ///     - newState: An object representing the new state of the flow with follow on methods.
+    @MainActor func onMFAGetAuthMethodsError(error: MFAGetAuthMethodsError, newState: MFARequiredState?)
 
     /// Notifies the delegate that the list of authentication methods is now available.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFAGetAuthMethodsError(error:)`` will be called.
@@ -75,10 +77,11 @@ public protocol MFAGetAuthMethodsDelegate {
 @objc
 public protocol MFASubmitChallengeDelegate {
 
-    // TODO: new state parameter here ?
     /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onMFASubmitChallengeError(error: MFASubmitChallengeError)
+    /// - Parameters:
+    ///     - error: An error object indicating why the operation failed.
+    ///     - newState: An object representing the new state of the flow with follow on methods.
+    @MainActor func onMFASubmitChallengeError(error: MFASubmitChallengeError, newState: MFARequiredState?)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASubmitChallengeError(error:newState:)`` will be called.
