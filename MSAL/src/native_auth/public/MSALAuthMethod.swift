@@ -30,18 +30,17 @@ import Foundation
 @objc
 public class MSALAuthMethod: NSObject {
 
-    //TODO: review comments
-    // Auth method ID
-    let id: String
+    /// Authentication method identifier
+    public let id: String
 
-    // Auth method challenge type (oob, etc.)
-    let challengeType: String
+    /// Authentication method challenge type (oob, etc.)
+    public let challengeType: String
 
-    // Auth method login hint (e.g. user@contoso.com)
-    let loginHint: String
+    /// Authentication method login hint (e.g. user@contoso.com)
+    public let loginHint: String
 
-    // Auth method channel target (email, etc.)
-    let channelTargetType: MSALNativeAuthChannelType
+    /// Authentication method channel target (email, etc.)
+    public let channelTargetType: MSALNativeAuthChannelType
 
     init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
         self.id = id

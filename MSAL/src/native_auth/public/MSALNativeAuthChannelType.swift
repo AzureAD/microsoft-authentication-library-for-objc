@@ -28,12 +28,15 @@ import Foundation
 @objcMembers
 public class MSALNativeAuthChannelType: NSObject {
 
+    /// Value of the channel used.
     public let value: String
 
+    /// Returns `true` if the channel is email.
     public var isEmailType: Bool {
         return value.lowercased() == "email"
     }
 
+    /// Returns `true` if the channel is phone.
     public var isPhoneType: Bool {
         return value.lowercased() == "phone"
     }
