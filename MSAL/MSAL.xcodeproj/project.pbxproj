@@ -7961,6 +7961,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -7989,6 +7990,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -8015,11 +8017,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "-";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
-				EXCLUDED_ARCHS = arm64;
+				EXCLUDED_ARCHS = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = $SRCROOT;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -8039,11 +8042,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "-";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
-				EXCLUDED_ARCHS = arm64;
+				EXCLUDED_ARCHS = "";
 				HEADER_SEARCH_PATHS = $SRCROOT;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
