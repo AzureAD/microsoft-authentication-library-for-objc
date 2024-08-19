@@ -76,10 +76,15 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let continuationToken = "continuationToken"
         let targetLabel = "targetLabel"
         let codeLength = 4
-        let channelType = MSALNativeAuthInternalChannelType.email
-        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        let channelTypeRawValue = "email"
+        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelTypeRawValue, codeLength: codeLength, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
-        if case .codeRequired(continuationToken: continuationToken, sentTo: targetLabel, channelType: .email, codeLength: codeLength) = result {} else {
+        if case .codeRequired(let validatedCT, let sentTo, let channelType, let validatedCodeLength) = result {
+            XCTAssertEqual(validatedCT, continuationToken)
+            XCTAssertEqual(sentTo, targetLabel)
+            XCTAssertTrue(channelType.isEmailType)
+            XCTAssertEqual(validatedCodeLength, codeLength)
+        } else {
             XCTFail("Unexpected result: \(result)")
         }
     }
@@ -89,7 +94,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
         let continuationToken = "continuationToken"
         let targetLabel = "targetLabel"
         let codeLength = 4
-        let channelType = MSALNativeAuthInternalChannelType.email
+        let channelType = "email"
         let missingCredentialToken = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .oob, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         var result = sut.validateChallenge(context: context, result: .success(missingCredentialToken))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
@@ -114,7 +119,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypeOTP_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTargetLabel: "some", challengeChannel: .email, codeLength: 2, interval: nil)
+        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTargetLabel: "some", challengeChannel: "email", codeLength: 2, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected challenge type"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -231,7 +236,7 @@ final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
     func test_whenIntrospectReturnsValidResult_validationNotFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
-        let methods = [MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: .email, loginHint: "us******so.com")]
+        let methods = [MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: "email", loginHint: "us******so.com")]
         let challengeResponse = MSALNativeAuthSignInIntrospectResponse(continuationToken: continuationToken, methods: methods, challengeType: nil)
         let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
         if case .authMethodsRetrieved(continuationToken: continuationToken, authMethods: methods) = result {} else {

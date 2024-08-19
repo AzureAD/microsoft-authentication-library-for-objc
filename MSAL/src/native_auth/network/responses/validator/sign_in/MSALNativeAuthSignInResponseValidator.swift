@@ -154,7 +154,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             return .codeRequired(
                 continuationToken: continuationToken,
                 sentTo: targetLabel,
-                channelType: channelType.toPublicChannelType(),
+                channelType: MSALNativeAuthChannelType(value: channelType),
                 codeLength: codeLength)
         case .password:
             guard let continuationToken = response.continuationToken else {

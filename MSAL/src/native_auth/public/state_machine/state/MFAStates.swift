@@ -39,7 +39,7 @@ public class AwaitingMFAState: MSALNativeAuthBaseState {
                                                                     correlationId: UUID()
                                                                 ),
                                                              sentTo: "co****@***.com",
-                                                             channelTargetType: .email,
+                                                             channelTargetType: MSALNativeAuthChannelType(value: "email"),
                                                              codeLength: 8
             )
         }
@@ -57,7 +57,7 @@ public class MFARequiredState: MSALNativeAuthBaseState {
         // TODO: remove this dummy logic once business logic will be available
         DispatchQueue.main.async {
             let state = MFARequiredState(continuationToken: "CT", correlationId: UUID())
-            delegate.onMFASendChallengeVerificationRequired?(newState: state, sentTo: "co****@***.com", channelTargetType: .email, codeLength: 8)
+            delegate.onMFASendChallengeVerificationRequired?(newState: state, sentTo: "co****@***.com", channelTargetType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         }
     }
 
@@ -66,7 +66,7 @@ public class MFARequiredState: MSALNativeAuthBaseState {
     public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
         // TODO: remove this dummy logic once business logic will be available
         DispatchQueue.main.async {
-            let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "co****@***.com", channelTargetType: .email)
+            let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "co****@***.com", channelTargetType: MSALNativeAuthChannelType(value: "email"))
             let state = MFARequiredState(continuationToken: "CT", correlationId: UUID())
             delegate.onMFAGetAuthMethodsSelectionRequired?(authMethods: [authMethod], newState: state)
         }

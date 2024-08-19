@@ -28,6 +28,6 @@ struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
     // MARK: - Variables
     let id: String
     let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: MSALNativeAuthInternalChannelType
+    let challengeChannel: String
     let loginHint: String
 }

@@ -24,14 +24,21 @@
 
 import Foundation
 
-// TODO: this should not be an enum but something more similar to error
-/// The possible Channel Types via which a code was sent
-@objc
-public enum MSALNativeAuthChannelType: Int {
+/// The channel type via which a code was sent
+@objcMembers
+public class MSALNativeAuthChannelType: NSObject {
 
-    /// Specifies if the channel type is Email
-    case email
+    public let value: String
 
-    /// Specifies if the channel type is Phone
-    case phone
+    public var isEmailType: Bool {
+        return value.lowercased() == "email"
+    }
+
+    public var isPhoneType: Bool {
+        return value.lowercased() == "phone"
+    }
+
+    init(value: String) {
+        self.value = value
+    }
 }
