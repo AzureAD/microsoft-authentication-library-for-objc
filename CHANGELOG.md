@@ -1,9 +1,15 @@
 ## [TBD]:
-* Update common core submodule with changes related to upgrade registration.
-* Update common core submodule with device register action with token protection hint.
+* Increased macOS minimum version to 10.15 #2220
 
-## [1.4.1]:
-* Update Native Auth logging levels for improved clarity and consistency. #2184
+## [1.4.2]
+* Fix invalid cert auth request handling (hotfix). (#2278)
+
+## [1.4.1]
+* Update Native Auth logging levels for improved clarity and consistency. (#2184)
+* Update common core submodule with changes related to upgrade registration. (#2180)
+* Add a new flag MSALThrottlingCacheHitKey for error returned from client's throttling. (#2257)
+* Update common core submodule with device register action with token protection hint. (#2244)
+* Native Auth logs are appropriately masked to ensure sensitive information is protected. (#2253)
 
 ## [1.4.0]:
 * Add platform sequence param. #2192

@@ -26,6 +26,8 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
+
+    // Hero Scenario 1.2.2. Sign in - User is not registered with given email
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
@@ -44,6 +46,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
+    // Hero Scenario 1.2.3. Sign in - Password is incorrect
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
             XCTFail("Missing information")
@@ -61,7 +64,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
     }
 
-    // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
+    // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
@@ -80,6 +83,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
     
+    // Sign in - Password is incorrect (sent over delegate.newStatePasswordRequired)
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
             XCTFail("Missing information")
@@ -95,7 +99,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         await fulfillment(of: [signInExpectation])
 
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
+        guard signInDelegateSpy.onSignInPasswordRequiredCalled else {
+            XCTFail("onSignInPasswordRequired not called")
+            return
+        }
+
         XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
 
         // Now submit the password..

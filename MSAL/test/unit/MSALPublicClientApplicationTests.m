@@ -2033,7 +2033,7 @@
     }];
 }
 #if TARGET_OS_OSX
-- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoWithPlatformSSOStatus API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoWithPlatformSSOStatus
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2278,7 +2278,7 @@
 #if TARGET_OS_IPHONE
 #pragma mark - All accounts from device
  
-- (void)testAllAccountsFromDevice_whenBrokerEnabled_andEncounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenBrokerEnabled_andEncounteredError_shouldReturnError
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2337,7 +2337,7 @@
     [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
 }
 
-- (void)testAllAccountsFromDevice_whenBrokerEnabled_andFoundAccounts_shouldReturnAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenBrokerEnabled_andFoundAccounts_shouldReturnAccounts
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2412,7 +2412,7 @@
     [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
 }
 
-- (void)testAllAccountsFromDevice_whenBrokerEnabled_andFoundAccounts_andAccountEnumerationParametersProvided_shouldReturnFilteredAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testAllAccountsFromDevice_whenBrokerEnabled_andFoundAccounts_andAccountEnumerationParametersProvided_shouldReturnFilteredAccounts
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2545,7 +2545,7 @@
 
 #pragma mark - Get device info
 
-- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoAndNilError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoAndNilError
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2600,7 +2600,7 @@
     [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
 }
 
-- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNil
 {
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -2642,7 +2642,7 @@
     [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
 }
 
-- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil
 {
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -2684,7 +2684,7 @@
     [self waitForExpectations:@[deviceInfoExpectation] timeout:1];
 }
 
-- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil_wpjMetaDatanil API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetWPJMetaDataDeviceWithParameters_whenTenantIdNonNil_wpjMetaDatanil
 {
     [MSIDTestSwizzle classMethod:@selector(getRegisteredDeviceMetadataInformation:tenantId:usePrimaryFormat:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -2724,7 +2724,7 @@
 
 #pragma mark - Get current account
 
-- (void)testCurrentAccount_whenBrokerDisabled_shouldReturnCurrentLocalAccount API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testCurrentAccount_whenBrokerDisabled_shouldReturnCurrentLocalAccount
 {
     [self msalStoreTokenResponseInCache];
     
@@ -2757,7 +2757,7 @@
     [self waitForExpectations:@[accountsExpectation] timeout:1];
 }
 
-- (void)testCurrentAccount_whenBrokerDisabled_andMultipleAccounts_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testCurrentAccount_whenBrokerDisabled_andMultipleAccounts_shouldReturnError
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"uid:@"myuid"
                                                 utid:@"utid"];
@@ -2795,7 +2795,7 @@
     [self waitForExpectations:@[accountsExpectation] timeout:1];
 }
 
-- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andNoPreviousAccount_shouldReturnCurrentAccount API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andNoPreviousAccount_shouldReturnCurrentAccount
 {
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
@@ -2854,7 +2854,7 @@
     [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
 }
 
-- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andPreviousAccount_shouldReturnCurrentAccount_andPreviousAccount API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testCurrentAccount_whenBrokerEnabled_andSingleAccount_andPreviousAccount_shouldReturnCurrentAccount_andPreviousAccount
 {
     [self msalStoreTokenResponseInCache];
     
