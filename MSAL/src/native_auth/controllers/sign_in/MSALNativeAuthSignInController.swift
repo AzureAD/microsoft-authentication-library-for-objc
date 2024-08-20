@@ -225,9 +225,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 context: context
             )
-        case .strongAuthRequired(_):
-            // TODO: this will be handled in a separate PBI
-            return .init(.error(error: VerifyCodeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
+        case .strongAuthRequired(let continuationToken):
+            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "SignIn verify code: received unexpected MFA required API result")
+            stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
