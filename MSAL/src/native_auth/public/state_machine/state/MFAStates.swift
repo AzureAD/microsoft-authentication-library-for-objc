@@ -24,9 +24,25 @@
 
 import Foundation
 
+/// Base class for the SignIn state
+@objcMembers public class MFABaseState: MSALNativeAuthBaseState {
+    let controller: MSALNativeAuthSignInControlling
+    let scopes: [String]
+
+    init(
+        controller: MSALNativeAuthSignInControlling,
+        scopes: [String],
+        continuationToken: String,
+        correlationId: UUID) {
+        self.controller = controller
+        self.scopes = scopes
+        super.init(continuationToken: continuationToken, correlationId: correlationId)
+    }
+}
+
 ///  An object of this type is created whenever a user needs to make a specific request to send the MFA challenge.
 @objcMembers
-public class AwaitingMFAState: MSALNativeAuthBaseState {
+public class AwaitingMFAState: MFABaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.

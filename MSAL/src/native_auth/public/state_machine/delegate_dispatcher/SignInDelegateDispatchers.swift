@@ -90,6 +90,21 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
         }
     }
+    
+    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+        if let onSignInAwaitingMFA = delegate.onSignInPasswordRequiredAwaitingMFA {
+            telemetryUpdate?(.success(()))
+            await onSignInAwaitingMFA(newState)
+        } else {
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInPasswordRequiredAwaitingMFA"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
+        }
+    }
 }
 
 final class SignInResendCodeDelegateDispatcher: DelegateDispatcher<SignInResendCodeDelegate> {

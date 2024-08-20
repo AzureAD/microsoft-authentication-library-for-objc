@@ -304,9 +304,20 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 scopes: scopes
             )
-        case .strongAuthRequired(_):
-            // TODO: this will be handled in a separate PBI
-            return .init(.error(error: PasswordRequiredError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
+        case .strongAuthRequired(let newContinuationToken):
+            MSALLogger.log(level: .info, context: context, format: "Strong authentication required.")
+            let state = AwaitingMFAState(
+                controller: self,
+                scopes: scopes,
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            return .init(
+                .awaitingMFA(newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                })
         }
     }
 

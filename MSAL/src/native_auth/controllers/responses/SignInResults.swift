@@ -35,6 +35,7 @@ typealias SignInResendCodeResult = CodeRequiredGenericResult<SignInCodeRequiredS
 
 enum SignInPasswordRequiredResult {
     case completed(MSALNativeAuthUserAccountResult)
+    case awaitingMFA(newState: AwaitingMFAState)
     case error(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 }
 
