@@ -97,6 +97,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func signIn(
         username: String,
         continuationToken: String?,
@@ -139,6 +140,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         returning: .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                         self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                     }))
+                },
+                onAwaitingMFA: { _ in
+                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
+                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
                 },
                 onError: { error in
                     let error = SignInAfterSignUpError(
@@ -472,6 +479,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
+        onAwaitingMFA: @escaping (AwaitingMFAState) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
         let config = factory.makeMSIDConfiguration(scopes: scopes)
@@ -492,9 +500,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                            format: "SignIn completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
             onError(error)
-        case .strongAuthRequired(_):
-            return
-            // TODO: this will be handled in a separate PBI
+        case .strongAuthRequired(let continuationToken):
+            let state = AwaitingMFAState(
+                controller: self,
+                scopes: scopes,
+                continuationToken: continuationToken,
+                correlationId: telemetryInfo.context.correlationId()
+            )
+            MSALLogger.log(level: .info, context: telemetryInfo.context, format: "Multi factor authentication required")
+            onAwaitingMFA(state)
         }
     }
 
@@ -512,7 +526,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             if let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) {
                 MSALLogger.log(level: .info, context: context, format: "SignIn completed successfully")
                 telemetryInfo.event?.setUserInformation(tokenResult.account)
-                stopTelemetryEvent(telemetryInfo)
                 onSuccess(userAccountResult)
             } else {
                 let errorType = MSALNativeAuthTokenValidatedErrorType.generalError(nil)
@@ -567,11 +580,18 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                                                 telemetryUpdate: { [weak self] result in
                             self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                         }))
-                        },
-                        onError: { error in
-                            continuation.resume(
-                                returning: SignInControllerResponse(.error(error), correlationId: telemetryInfo.context.correlationId())
-                            )
+                    }, onAwaitingMFA: { awaitingMFAState in
+                        continuation.resume(
+                            returning: SignInControllerResponse(
+                                .awaitingMFA(newState: awaitingMFAState),
+                                correlationId: telemetryInfo.context.correlationId(),
+                                telemetryUpdate: { [weak self] result in
+                                    self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
+                            })
+                        )
+                    }, onError: { error in
+                        continuation.resume(
+                            returning: SignInControllerResponse(.error(error), correlationId: telemetryInfo.context.correlationId()))
                         }
                     )
                 }

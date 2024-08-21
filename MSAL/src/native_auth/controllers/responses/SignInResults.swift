@@ -28,6 +28,7 @@ enum SignInStartResult {
     case completed(MSALNativeAuthUserAccountResult)
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(newState: SignInPasswordRequiredState)
+    case awaitingMFA(newState: AwaitingMFAState)
     case error(SignInStartError)
 }
 

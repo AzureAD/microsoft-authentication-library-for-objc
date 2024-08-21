@@ -62,6 +62,21 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
+    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+        if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
+            telemetryUpdate?(.success(()))
+            await onSignInAwaitingMFA(newState)
+        } else {
+            let error = SignInStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInAwaitingMFA"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInStartError(error: error)
+        }
+    }
+
     func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
