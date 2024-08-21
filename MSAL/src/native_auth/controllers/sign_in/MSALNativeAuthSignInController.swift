@@ -378,8 +378,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
         case .introspectRequired:
-            // TODO: this will be handled in a separate PBI
-            return .init(.error(error: ResendCodeError(correlationId: UUID()), newState: nil), correlationId: UUID())
+            let error = ResendCodeError(correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "ResendCode: received unexpected introspect required API result")
+            self.stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
