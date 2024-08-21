@@ -38,17 +38,10 @@ import Foundation
         self.scopes = scopes
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
-}
-
-///  An object of this type is created whenever a user needs to make a specific request to send the MFA challenge.
-@objcMembers
-public class AwaitingMFAState: MFABaseState {
-
-    /// Requests the server to send the challenge to the default authentication method.
-    /// - Parameter delegate: Delegate that receives callbacks for the operation.
-    public func sendChallenge(delegate: MFASendChallengeDelegate) {
+    
+    func baseSendChallenge(authMethod: MSALAuthMethod?, delegate: MFASendChallengeDelegate) {
         Task {
-            let controllerResponse = await sendChallengeInternal()
+            let controllerResponse = await sendChallengeInternal(authMethod: authMethod)
             let delegateDispatcher = MFASendChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
             switch controllerResponse.result {
             case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState):
@@ -72,6 +65,17 @@ public class AwaitingMFAState: MFABaseState {
     }
 }
 
+///  An object of this type is created whenever a user needs to make a specific request to send the MFA challenge.
+@objcMembers
+public class AwaitingMFAState: MFABaseState {
+
+    /// Requests the server to send the challenge to the default authentication method.
+    /// - Parameter delegate: Delegate that receives callbacks for the operation.
+    public func sendChallenge(delegate: MFASendChallengeDelegate) {
+        baseSendChallenge(authMethod: nil, delegate: delegate)
+    }
+}
+
 @objcMembers
 public class MFARequiredState: MFABaseState {
 
@@ -80,7 +84,7 @@ public class MFARequiredState: MFABaseState {
     ///   - authMethod: Optional. The authentication method you want to use for sending the challenge
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func sendChallenge(authMethod: MSALAuthMethod? = nil, delegate: MFASendChallengeDelegate) {
-        
+        baseSendChallenge(authMethod: authMethod, delegate: delegate)
     }
 
     /// Requests the available MFA authentication methods.
