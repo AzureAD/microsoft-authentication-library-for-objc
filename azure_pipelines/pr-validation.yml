@@ -93,7 +93,7 @@ jobs:
     - script: |
         url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
 
-        echo "Fetching labels from $url"
+        echo "Fetching labels from $url "
 
         # Temporary file to store the raw response
         temp_file=$(mktemp)
