@@ -26,7 +26,7 @@
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling {
+final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
 
     // MARK: - Variables
 
@@ -232,7 +232,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 context: context
             )
-        case .strongAuthRequired(let continuationToken):
+        case .strongAuthRequired(_):
             let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "SignIn verify code: received unexpected MFA required API result")
             stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
@@ -330,13 +330,18 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func resendCode(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInResendCodeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInResendCode, context: context)
-        let result = await performAndValidateChallengeRequest(continuationToken: continuationToken, context: context)
+        let result = await performAndValidateChallengeRequest(
+            continuationToken: continuationToken,
+            context: context,
+            errorDescription: "SignIn ResendCode: cannot create challenge request object"
+        )
         switch result {
         case .passwordRequired:
             let error = ResendCodeError(correlationId: context.correlationId())
@@ -382,6 +387,68 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .error, context: context, format: "ResendCode: received unexpected introspect required API result")
             self.stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func sendChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod?,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> MFASendChallengeControllerResponse {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFASendChallenge, context: context)
+        let result = await performAndValidateChallengeRequest(
+            continuationToken: continuationToken,
+            context: context,
+            errorDescription: "MFA SendChallenge: cannot create challenge request object",
+            mfaAuthMethodId: authMethod?.id
+        )
+        switch result {
+        case .passwordRequired:
+            let error = MFASendChallengeError(type: .generalError, correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "MFA send challenge: received unexpected password required API result")
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .error(let challengeError):
+            let error = challengeError.convertToMFASendChallengeError(correlationId: context.correlationId())
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "MFA send challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(
+                error: error,
+                newState: MFARequiredState(
+                    controller: self,
+                    scopes: scopes,
+                    continuationToken: continuationToken,
+                    correlationId: context.correlationId()
+                )
+            ), correlationId: context.correlationId())
+        case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
+            let state = MFARequiredState(
+                controller: self,
+                scopes: scopes,
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            return .init(
+                .verificationRequired(
+                    sentTo: sentTo,
+                    channelTargetType: channelType,
+                    codeLength: codeLength,
+                    newState: state
+                ),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
+                })
+        case .introspectRequired:
+            let telemetryInfo = TelemetryInfo(event: event, context: context)
+            let response = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
+            return handleIntrospectResponse(response, scopes: scopes, telemetryInfo: telemetryInfo)
         }
     }
 
@@ -462,7 +529,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .success(let continuationToken):
             let challengeValidatedResponse = await performAndValidateChallengeRequest(
                 continuationToken: continuationToken,
-                context: telemetryInfo.context
+                context: telemetryInfo.context,
+                errorDescription: "SignIn: cannot create challenge request object"
             )
             return .success(challengeValidatedResponse)
         case .error(let error):
@@ -473,6 +541,37 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             stopTelemetryEvent(telemetryInfo, error: error)
             return .failure(error)
+        }
+    }
+
+    private func handleIntrospectResponse(
+        _ response: MSALNativeAuthSignInIntrospectValidatedResponse,
+        scopes: [String],
+        telemetryInfo: TelemetryInfo
+    ) -> MFASendChallengeControllerResponse {
+        switch response {
+        case .authMethodsRetrieved(let continuationToken, let authMethods):
+            let newState = MFARequiredState(
+                controller: self,
+                scopes: scopes,
+                continuationToken: continuationToken,
+                correlationId: telemetryInfo.context.correlationId()
+            )
+            return .init(.selectionRequired(
+                authMethods: authMethods.map({$0.toPublicAuthMethod()}),
+                newState: newState
+            ), correlationId: telemetryInfo.context.correlationId())
+        case .error(let error):
+            MSALLogger.logPII(
+                level: .error,
+                context: telemetryInfo.context,
+                format: "MFA: an error occurred after calling /introspect API: \(MSALLogMask.maskPII(error))"
+            )
+            stopTelemetryEvent(telemetryInfo, error: error)
+            return .init(.error(
+                error: error.convertToMFASendChallengeError(correlationId: telemetryInfo.context.correlationId()),
+                newState: nil
+            ), correlationId: telemetryInfo.context.correlationId())
         }
     }
 
@@ -640,27 +739,45 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         case .introspectRequired:
-            // TODO: this will be handled in a separate PBI
-            return .init(.error(
-                SignInStartError(
-                    type: .generalError,
-                    correlationId: telemetryInfo.context.correlationId()
-                )), correlationId: telemetryInfo.context.correlationId()
-            )
+            let error = SignInStartError(type: .generalError, correlationId: telemetryInfo.context.correlationId())
+            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn, received unexpected introspect required API result")
+            self.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, error: error)
+            return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         }
     }
 
     private func performAndValidateChallengeRequest(
         continuationToken: String,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        errorDescription: String,
+        mfaAuthMethodId: String? = nil
     ) async -> MSALNativeAuthSignInChallengeValidatedResponse {
-        guard let challengeRequest = createChallengeRequest(continuationToken: continuationToken, context: context) else {
-            let errorDescription = "SignIn ResendCode: Cannot create Challenge request object"
+        guard let challengeRequest = createChallengeRequest(
+            continuationToken: continuationToken,
+            context: context,
+            mfaAuthMethodId: mfaAuthMethodId
+        ) else {
             MSALLogger.log(level: .error, context: context, format: errorDescription)
             return .error(.invalidRequest(.init(errorDescription: errorDescription)))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
         return signInResponseValidator.validateChallenge(context: context, result: challengeResponse)
+    }
+
+    private func performAndValidateIntrospectRequest(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) async -> MSALNativeAuthSignInIntrospectValidatedResponse {
+        guard let introspectRequest = createIntrospectRequest(
+            continuationToken: continuationToken,
+            context: context
+        ) else {
+            let errorDescription = "Unable to create signIn/initiate request"
+            MSALLogger.log(level: .error, context: context, format: errorDescription)
+            return .error(.invalidRequest(.init(errorDescription: errorDescription)))
+        }
+        let introspectResponse: Result<MSALNativeAuthSignInIntrospectResponse, Error> = await performRequest(introspectRequest, context: context)
+        return signInResponseValidator.validateIntrospect(context: context, result: introspectResponse)
     }
 
     private func createInitiateRequest(username: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
@@ -673,10 +790,20 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    private func createIntrospectRequest(continuationToken: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
+        let params = MSALNativeAuthSignInIntrospectRequestParameters(context: context, continuationToken: continuationToken)
+        do {
+            return try signInRequestProvider.introspect(parameters: params, context: context)
+        } catch {
+            MSALLogger.log(level: .error, context: context, format: "Error creating signIn introspect request: \(error)")
+            return nil
+        }
+    }
+
     private func createChallengeRequest(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
-        mfaAuthMethodId: String? = nil
+        mfaAuthMethodId: String?
     ) -> MSIDHttpRequest? {
         do {
             let params = MSALNativeAuthSignInChallengeRequestParameters(

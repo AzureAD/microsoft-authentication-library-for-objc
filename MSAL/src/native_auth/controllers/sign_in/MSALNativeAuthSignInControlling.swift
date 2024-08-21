@@ -58,8 +58,5 @@ protocol MSALNativeAuthSignInControlling {
     ) async -> SignInSubmitPasswordControllerResponse
 
     func resendCode(continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse
-    
-    // TODO: DR check if a dedicated MSALNativeAuthMFAController class needs to be created
-    
-    
+
 }

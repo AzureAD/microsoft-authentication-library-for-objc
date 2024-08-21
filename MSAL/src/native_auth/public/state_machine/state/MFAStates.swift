@@ -26,11 +26,11 @@ import Foundation
 
 /// Base class for the SignIn state
 @objcMembers public class MFABaseState: MSALNativeAuthBaseState {
-    let controller: MSALNativeAuthSignInControlling
+    let controller: MSALNativeAuthMFAControlling
     let scopes: [String]
 
     init(
-        controller: MSALNativeAuthSignInControlling,
+        controller: MSALNativeAuthMFAControlling,
         scopes: [String],
         continuationToken: String,
         correlationId: UUID) {
@@ -47,45 +47,46 @@ public class AwaitingMFAState: MFABaseState {
     /// Requests the server to send the challenge to the default authentication method.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func sendChallenge(delegate: MFASendChallengeDelegate) {
-        // TODO: remove this dummy logic once business logic will be available
-        DispatchQueue.main.async {
-            delegate.onMFASendChallengeVerificationRequired?(newState: 
-                                                                MFARequiredState(
-                                                                    continuationToken: "CT",
-                                                                    correlationId: UUID()
-                                                                ),
-                                                             sentTo: "co****@***.com",
-                                                             channelTargetType: MSALNativeAuthChannelType(value: "email"),
-                                                             codeLength: 8
-            )
+        Task {
+            let controllerResponse = await sendChallengeInternal()
+            let delegateDispatcher = MFASendChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            switch controllerResponse.result {
+            case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState):
+                await delegateDispatcher.dispatchVerificationRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
+                )
+            case .selectionRequired(let authMethods, let newState):
+                await delegateDispatcher.dispatchSelectionRequired(
+                    authMethods: authMethods,
+                    newState: newState,
+                    correlationId: controllerResponse.correlationId
+                )
+            case .error(let error, let newState):
+                await delegate.onMFASendChallengeError(error: error, newState: newState)
+            }
         }
     }
 }
 
 @objcMembers
-public class MFARequiredState: MSALNativeAuthBaseState {
+public class MFARequiredState: MFABaseState {
 
     /// Requests the server to send the challenge to the specified auth method or the default one.
     /// - Parameters:
     ///   - authMethod: Optional. The authentication method you want to use for sending the challenge
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func sendChallenge(authMethod: MSALAuthMethod? = nil, delegate: MFASendChallengeDelegate) {
-        // TODO: remove this dummy logic once business logic will be available
-        DispatchQueue.main.async {
-            let state = MFARequiredState(continuationToken: "CT", correlationId: UUID())
-            delegate.onMFASendChallengeVerificationRequired?(newState: state, sentTo: "co****@***.com", channelTargetType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
-        }
+        
     }
 
     /// Requests the available MFA authentication methods.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
-        // TODO: remove this dummy logic once business logic will be available
-        DispatchQueue.main.async {
-            let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "co****@***.com", channelTargetType: MSALNativeAuthChannelType(value: "email"))
-            let state = MFARequiredState(continuationToken: "CT", correlationId: UUID())
-            delegate.onMFAGetAuthMethodsSelectionRequired?(authMethods: [authMethod], newState: state)
-        }
+        
     }
 
     /// Submits the MFA challenge to the server for verification.
@@ -93,9 +94,6 @@ public class MFARequiredState: MSALNativeAuthBaseState {
     ///   - challenge: Verification challenge that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitChallenge(challenge: String, delegate: MFASubmitChallengeDelegate) {
-        // TODO: remove this dummy logic once business logic will be available
-        DispatchQueue.main.async {
-            delegate.onMFASubmitChallengeError(error: MFASubmitChallengeError(type: .invalidChallenge, correlationId: UUID()), newState: nil)
-        }
+        
     }
 }

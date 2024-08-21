@@ -34,4 +34,28 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
     case expiredToken(MSALNativeAuthSignInIntrospectResponseError)
     case invalidRequest(MSALNativeAuthSignInIntrospectResponseError)
     case unexpectedError(MSALNativeAuthSignInIntrospectResponseError?)
+    
+    func convertToMFASendChallengeError(correlationId: UUID) -> MFASendChallengeError {
+        switch self {
+        case .redirect:
+            return .init(type:.browserRequired, correlationId: correlationId)
+        case .invalidRequest(let apiError),
+                .expiredToken(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
 }

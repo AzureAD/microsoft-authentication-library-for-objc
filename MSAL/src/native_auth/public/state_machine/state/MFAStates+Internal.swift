@@ -24,19 +24,10 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: String
-    let loginHint: String
-    
-    func toPublicAuthMethod() -> MSALAuthMethod {
-        return MSALAuthMethod(
-            id: id, 
-            challengeType: challengeType.rawValue,
-            loginHint: loginHint,
-            channelTargetType: MSALNativeAuthChannelType(value: challengeChannel)
-        )
+extension AwaitingMFAState {
+    func sendChallengeInternal() async -> MSALNativeAuthMFAControlling.MFASendChallengeControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .info, context: context, format: "AwaitingMFAState, send challenge to default strong authentication method")
+        return await controller.sendChallenge(continuationToken: continuationToken, authMethod: nil, context: context, scopes: scopes)
     }
 }
