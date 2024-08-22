@@ -41,7 +41,7 @@ final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChalle
                 codeLength
             )
         } else {
-            let error = MFASendChallengeError(
+            let error = MFAError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onMFASendChallengeVerificationRequired"),
                 correlationId: correlationId
@@ -56,7 +56,7 @@ final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChalle
             telemetryUpdate?(.success(()))
             await onSelectionRequired(authMethods, newState)
         } else {
-            let error = MFASendChallengeError(
+            let error = MFAError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onMFASendChallengeSelectionRequired"),
                 correlationId: correlationId

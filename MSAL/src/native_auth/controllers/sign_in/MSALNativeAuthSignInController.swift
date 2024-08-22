@@ -406,7 +406,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
         switch result {
         case .passwordRequired:
-            let error = MFASendChallengeError(type: .generalError, correlationId: context.correlationId())
+            let error = MFAError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "MFA send challenge: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
@@ -448,8 +448,21 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .introspectRequired:
             let telemetryInfo = TelemetryInfo(event: event, context: context)
             let response = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
-            return handleIntrospectResponse(response, scopes: scopes, telemetryInfo: telemetryInfo)
+            let controllerResponse = handleIntrospectResponse(response, scopes: scopes, telemetryInfo: telemetryInfo)
+            switch controllerResponse.result {
+            case .selectionRequired(let authMethods, let newState):
+                return .init(.selectionRequired(authMethods: authMethods, newState: newState), correlationId: controllerResponse.correlationId)
+            case .error(let error, let newState):
+                return .init(.error(error: error, newState: newState), correlationId: controllerResponse.correlationId)
+            }
         }
+    }
+    
+    func getAuthMethods(continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> MFAGetAuthMethodsControllerResponse {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
+        let result = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
+        let telemetryInfo = TelemetryInfo(event: event, context: context)
+        return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo)
     }
 
     // MARK: - Private
@@ -548,7 +561,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         _ response: MSALNativeAuthSignInIntrospectValidatedResponse,
         scopes: [String],
         telemetryInfo: TelemetryInfo
-    ) -> MFASendChallengeControllerResponse {
+    ) -> MFAGetAuthMethodsControllerResponse {
         switch response {
         case .authMethodsRetrieved(let continuationToken, let authMethods):
             let newState = MFARequiredState(

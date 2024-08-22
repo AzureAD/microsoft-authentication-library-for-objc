@@ -24,9 +24,9 @@
 
 import Foundation
 
-/// Class that defines the structure and type of a MFASendChallengeError
+/// Class that defines the structure and type of a MFAError
 @objcMembers
-public class MFASendChallengeError: MSALNativeAuthError {
+public class MFAError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case generalError
