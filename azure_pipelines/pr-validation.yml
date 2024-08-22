@@ -98,7 +98,7 @@ jobs:
         # Temporary file to store the raw response
         temp_file=$(mktemp)
 
-        # Store the response code and the raw response in separate variables
+        # Store the response code and the raw response in separate variables  
         response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
         response_content=$(cat "$temp_file")
 
