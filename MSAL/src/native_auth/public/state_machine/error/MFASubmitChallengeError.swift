@@ -24,10 +24,37 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: String
-    let loginHint: String
+/// Class that defines the structure and type of a MFASubmitChallengeError
+@objcMembers
+public class MFASubmitChallengeError: MSALNativeAuthError {
+    enum ErrorType: CaseIterable {
+        case invalidChallenge
+        case generalError
+    }
+
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+        self.type = type
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
+
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .invalidChallenge:
+            return MSALNativeAuthErrorMessage.invalidChallenge
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
+    }
+
+    /// Returns `true` when the challenge introduced is not valid.
+    public var isInvalidChallenge: Bool {
+        return type == .invalidChallenge
+    }
 }

@@ -291,7 +291,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectedUsername = "username"
         let expectedPassword = "password"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -325,7 +325,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectedUsername = "username"
         let expectedPassword = "password"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -360,7 +360,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInWithCodeStartWithValidInfo_codeRequiredShouldBeCalled() async {
         let expectedUsername = "username"
         let sentTo = "sentTo"
-        let channelTargetType = MSALNativeAuthChannelType.email
+        let channelTargetType = MSALNativeAuthChannelType(value: "email")
         let codeLength = 4
         let continuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -667,7 +667,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_signInWithCodeResendCode_shouldSendNewCode() async {
         let expectedUsername = "username"
         let sentTo = "sentTo"
-        let channelTargetType = MSALNativeAuthChannelType.email
+        let channelTargetType = MSALNativeAuthChannelType(value: "email")
         let codeLength = 4
         let continuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)

@@ -336,7 +336,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         validatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
+        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 2"))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
@@ -349,7 +349,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onSignUpCodeRequiredCalled)
         XCTAssertEqual(helper.newState?.continuationToken, "continuationToken 2")
         XCTAssertEqual(helper.sentTo, "sentTo")
-        XCTAssertEqual(helper.channelTargetType, .email)
+        XCTAssertEqual(helper.channelTargetType?.isEmailType, true)
         XCTAssertEqual(helper.codeLength, 4)
         XCTAssertNil(helper.error)
 
@@ -726,7 +726,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         validatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken 1"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "continuationToken 1")
-        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
+        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 2"))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
@@ -739,7 +739,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onSignUpCodeRequiredCalled)
         XCTAssertEqual(helper.newState?.continuationToken, "continuationToken 2")
         XCTAssertEqual(helper.sentTo, "sentTo")
-        XCTAssertEqual(helper.channelTargetType, .email)
+        XCTAssertEqual(helper.channelTargetType?.isEmailType, true)
         XCTAssertEqual(helper.codeLength, 4)
         XCTAssertNil(helper.error)
 
@@ -879,7 +879,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpResendCode_succeeds_it_continuesTheFlow() async {
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken"))
+        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken"))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
@@ -892,7 +892,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onSignUpResendCodeCodeRequiredCalled)
         XCTAssertEqual(helper.newState?.continuationToken, "continuationToken")
         XCTAssertEqual(helper.sentTo, "sentTo")
-        XCTAssertEqual(helper.channelTargetType, .email)
+        XCTAssertEqual(helper.channelTargetType?.isEmailType, true)
         XCTAssertEqual(helper.codeLength, 4)
         XCTAssertNil(helper.error)
 
@@ -1297,7 +1297,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "continuationToken 2")
-        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("", .email, 4, "continuationToken 3"))
+        validatorMock.mockValidateSignUpChallengeFunc(.codeRequired("", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 3"))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
 

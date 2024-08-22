@@ -127,9 +127,10 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             return .redirect
         case .oob:
             if let sentTo = response.challengeTargetLabel,
-               let channelType = response.challengeChannel?.toPublicChannelType(),
+               let challengeChannel = response.challengeChannel,
                let codeLength = response.codeLength,
                let continuationToken = response.continuationToken {
+                let channelType = MSALNativeAuthChannelType(value: challengeChannel)
                 return .codeRequired(sentTo, channelType, codeLength, continuationToken)
             } else {
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = oob")

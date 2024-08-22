@@ -117,9 +117,10 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
             return .redirect
         case .oob:
             if let sentTo = response.challengeTargetLabel,
-               let channelTargetType = response.challengeChannel?.toPublicChannelType(),
+               let challengeChannel = response.challengeChannel,
                let codeLength = response.codeLength,
                let continuationToken = response.continuationToken {
+                let channelTargetType = MSALNativeAuthChannelType(value: challengeChannel)
                 return .success(
                     sentTo,
                     channelTargetType,
