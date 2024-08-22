@@ -102,6 +102,12 @@ jobs:
         response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
         response_content=$(cat "$temp_file")
 
+        for i in {1..60}
+        do
+          echo "Triggering throttling"
+          response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
+        done
+
         echo "Response code: $response_code"
         echo "Raw response: $response_content"
 
