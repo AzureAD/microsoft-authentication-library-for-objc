@@ -34,7 +34,7 @@ public protocol MFASendChallengeDelegate {
     ///     - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onMFASendChallengeError(error: MFASendChallengeError, newState: MFARequiredState?)
 
-    /// Notifies the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
