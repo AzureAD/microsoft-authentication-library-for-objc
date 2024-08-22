@@ -33,7 +33,7 @@ extension MFABaseState {
 }
 
 extension MFARequiredState {
-    func getInternalAuthMethods(delegate: MFAGetAuthMethodsDelegate) async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
+    func getInternalAuthMethods() async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "MFA, get authentication methods")
         return await controller.getAuthMethods(continuationToken: continuationToken, context: context, scopes: scopes)

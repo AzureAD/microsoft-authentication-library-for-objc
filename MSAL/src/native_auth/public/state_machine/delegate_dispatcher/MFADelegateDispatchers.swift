@@ -66,3 +66,21 @@ final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChalle
         }
     }
 }
+
+final class MFAGetAuthMethodsDelegateDispatcher: DelegateDispatcher<MFAGetAuthMethodsDelegate> {
+
+    func dispatchSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState, correlationId: UUID) async {
+        if let onSelectionRequired = delegate.onMFAGetAuthMethodsSelectionRequired {
+            telemetryUpdate?(.success(()))
+            await onSelectionRequired(authMethods, newState)
+        } else {
+            let error = MFAError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onMFAGetAuthMethodsSelectionRequired"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onMFAGetAuthMethodsError(error: error, newState: nil)
+        }
+    }
+}

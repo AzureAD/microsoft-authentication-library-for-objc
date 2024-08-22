@@ -38,7 +38,7 @@ import Foundation
         self.scopes = scopes
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
-    
+
     func baseSendChallenge(authMethod: MSALAuthMethod?, delegate: MFASendChallengeDelegate) {
         Task {
             let controllerResponse = await sendChallengeInternal(authMethod: authMethod)
@@ -90,7 +90,20 @@ public class MFARequiredState: MFABaseState {
     /// Requests the available MFA authentication methods.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
-        
+        Task {
+            let controllerResponse = await getInternalAuthMethods()
+            let delegateDispatcher = MFAGetAuthMethodsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            switch controllerResponse.result {
+            case .selectionRequired(let authMethods, let newState):
+                await delegateDispatcher.dispatchSelectionRequired(
+                    authMethods: authMethods,
+                    newState: newState,
+                    correlationId: controllerResponse.correlationId
+                )
+            case .error(let error, let newState):
+                await delegate.onMFAGetAuthMethodsError(error: error, newState: newState)
+            }
+        }
     }
 
     /// Submits the MFA challenge to the server for verification.
