@@ -78,9 +78,9 @@ public class AwaitingMFAState: MFABaseState {
 
 @objcMembers
 public class MFARequiredState: MFABaseState {
-    
+
     let inputValidator: MSALNativeAuthInputValidating
-    
+
     init(
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         controller: MSALNativeAuthMFAControlling,

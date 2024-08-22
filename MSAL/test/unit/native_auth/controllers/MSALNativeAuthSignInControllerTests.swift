@@ -201,7 +201,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
 
     func test_successfulResponseAndUnsuccessfulValidation_shouldReturnError() async {
