@@ -84,3 +84,21 @@ final class MFAGetAuthMethodsDelegateDispatcher: DelegateDispatcher<MFAGetAuthMe
         }
     }
 }
+
+final class MFASubmitChallengeDelegateDispatcher: DelegateDispatcher<MFASubmitChallengeDelegate> {
+
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
+        if let onSignInCompleted = delegate.onSignInCompleted {
+            telemetryUpdate?(.success(()))
+            await onSignInCompleted(result)
+        } else {
+            let error = MFASubmitChallengeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onMFASubmitChallengeError(error: error, newState: nil)
+        }
+    }
+}

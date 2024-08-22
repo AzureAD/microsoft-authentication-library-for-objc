@@ -78,6 +78,18 @@ public class AwaitingMFAState: MFABaseState {
 
 @objcMembers
 public class MFARequiredState: MFABaseState {
+    
+    let inputValidator: MSALNativeAuthInputValidating
+    
+    init(
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        controller: MSALNativeAuthMFAControlling,
+        scopes: [String],
+        continuationToken: String,
+        correlationId: UUID) {
+        self.inputValidator = inputValidator
+        super.init(controller: controller, scopes: scopes, continuationToken: continuationToken, correlationId: correlationId)
+    }
 
     /// Requests the server to send the challenge to the specified auth method or the default one.
     /// - Parameters:
@@ -91,7 +103,7 @@ public class MFARequiredState: MFABaseState {
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
         Task {
-            let controllerResponse = await getInternalAuthMethods()
+            let controllerResponse = await getAuthMethodsInternal()
             let delegateDispatcher = MFAGetAuthMethodsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
             switch controllerResponse.result {
             case .selectionRequired(let authMethods, let newState):
@@ -111,6 +123,15 @@ public class MFARequiredState: MFABaseState {
     ///   - challenge: Verification challenge that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
     public func submitChallenge(challenge: String, delegate: MFASubmitChallengeDelegate) {
-        
+        Task {
+            let controllerResponse = await submitChallengeInternal(challenge: challenge)
+            let delegateDispatcher = MFASubmitChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            switch controllerResponse.result {
+            case .completed(let result):
+                await delegateDispatcher.dispatchSignInCompleted(result: result, correlationId: controllerResponse.correlationId)
+            case .error(let error, let newState):
+                await delegate.onMFASubmitChallengeError(error: error, newState: newState)
+            }
+        }
     }
 }

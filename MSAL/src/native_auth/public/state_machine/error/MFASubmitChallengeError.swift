@@ -31,12 +31,28 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
         case invalidChallenge
         case generalError
     }
-
+    
     let type: ErrorType
-
+    
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
         super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
+    
+    init(error: VerifyCodeError) {
+        switch error.type {
+        case .browserRequired,
+                .generalError:
+            self.type = .generalError
+        case .invalidCode:
+            self.type = .invalidChallenge
+        }
+        super.init(
+            message: error.errorDescription,
+            correlationId: error.correlationId,
+            errorCodes: error.errorCodes,
+            errorUri: error.errorUri
+        )
     }
 
     /// Describes why an error occurred and provides more information about the error.

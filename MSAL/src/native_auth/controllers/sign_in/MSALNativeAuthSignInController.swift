@@ -160,84 +160,19 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_body_length
     func submitCode(
         _ code: String,
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitCodeControllerResponse {
-        let telemetryInfo = TelemetryInfo(
-            event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitCode, context: context),
-            context: context
-        )
-        guard let request = createTokenRequest(
-            scopes: scopes,
+        return await submitCode(
+            code,
             continuationToken: continuationToken,
-            oobCode: code,
-            grantType: .oobCode,
-            includeChallengeType: false,
-            context: context) else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn, submit code: unable to create token request")
-
-            return processSubmitCodeFailure(
-                errorType: .generalError(nil),
-                telemetryInfo: telemetryInfo,
-                scopes: scopes,
-                continuationToken: continuationToken,
-                context: context
-            )
-        }
-        let config = factory.makeMSIDConfiguration(scopes: scopes)
-        let response = await performAndValidateTokenRequest(request, config: config, context: context)
-        switch response {
-        case .success(let tokenResponse):
-            return await withCheckedContinuation { continuation in
-                handleMSIDTokenResponse(
-                    tokenResponse: tokenResponse,
-                    context: context,
-                    telemetryInfo: telemetryInfo,
-                    config: config,
-                    onSuccess: { accountResult in
-                        continuation.resume(
-                            returning: .init(
-                                .completed(accountResult),
-                                correlationId: context.correlationId(),
-                                telemetryUpdate: { [weak self] result in
-                            self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
-                        }))
-                    },
-                    onError: { [weak self] error in
-                        MSALLogger.logPII(
-                            level: .error,
-                            context: context,
-                            format: "SignIn submit code, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
-                        )
-                        guard let self = self else { return }
-                        continuation.resume(returning: self.processSubmitCodeFailure(
-                            errorType: .generalError(nil),
-                            telemetryInfo: telemetryInfo,
-                            scopes: scopes,
-                            continuationToken: continuationToken,
-                            context: context
-                        ))
-                    }
-                )
-            }
-        case .error(let errorType):
-            return processSubmitCodeFailure(
-                errorType: errorType,
-                telemetryInfo: telemetryInfo,
-                scopes: scopes,
-                continuationToken: continuationToken,
-                context: context
-            )
-        case .strongAuthRequired(_):
-            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
-            MSALLogger.log(level: .error, context: context, format: "SignIn verify code: received unexpected MFA required API result")
-            stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
-        }
+            context: context,
+            scopes: scopes,
+            telemetryEventId: .telemetryApiIdSignInSubmitCode
+        )
     }
 
     // swiftlint:disable:next function_body_length
@@ -457,15 +392,131 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         }
     }
-    
-    func getAuthMethods(continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> MFAGetAuthMethodsControllerResponse {
+
+    func getAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> MFAGetAuthMethodsControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
         let result = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
         let telemetryInfo = TelemetryInfo(event: event, context: context)
         return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo)
     }
 
+    func submitChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> MFASubmitChallengeControllerResponse {
+        let response = await submitCode(
+            challenge,
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            telemetryEventId: .telemetryApiIdMFASubmitChallenge
+        )
+        switch response.result {
+        case .completed(let accountResult):
+            return .init(.completed(accountResult), correlationId: response.correlationId)
+        case .error(let error, let newState):
+            let submitChallengeError = MFASubmitChallengeError(error: error)
+            var mfaState: MFARequiredState?
+            if let newState {
+                mfaState = MFARequiredState(
+                    controller: self,
+                    scopes: newState.scopes,
+                    continuationToken: newState.continuationToken,
+                    correlationId: newState.correlationId
+                )
+            }
+            return .init(.error(error: submitChallengeError, newState: mfaState), correlationId: response.correlationId)
+        }
+    }
+
     // MARK: - Private
+
+    // swiftlint:disable:next function_body_length
+    private func submitCode(
+        _ code: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        telemetryEventId: MSALNativeAuthTelemetryApiId
+    ) async -> SignInSubmitCodeControllerResponse {
+        let telemetryInfo = TelemetryInfo(
+            event: makeAndStartTelemetryEvent(id: telemetryEventId, context: context),
+            context: context
+        )
+        guard let request = createTokenRequest(
+            scopes: scopes,
+            continuationToken: continuationToken,
+            oobCode: code,
+            grantType: .oobCode,
+            includeChallengeType: false,
+            context: context) else {
+            MSALLogger.log(level: .error, context: context, format: "Submit code: unable to create token request")
+
+            return processSubmitCodeFailure(
+                errorType: .generalError(nil),
+                telemetryInfo: telemetryInfo,
+                scopes: scopes,
+                continuationToken: continuationToken,
+                context: context
+            )
+        }
+        let config = factory.makeMSIDConfiguration(scopes: scopes)
+        let response = await performAndValidateTokenRequest(request, config: config, context: context)
+        switch response {
+        case .success(let tokenResponse):
+            return await withCheckedContinuation { continuation in
+                handleMSIDTokenResponse(
+                    tokenResponse: tokenResponse,
+                    context: context,
+                    telemetryInfo: telemetryInfo,
+                    config: config,
+                    onSuccess: { accountResult in
+                        continuation.resume(
+                            returning: .init(
+                                .completed(accountResult),
+                                correlationId: context.correlationId(),
+                                telemetryUpdate: { [weak self] result in
+                            self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                        }))
+                    },
+                    onError: { [weak self] error in
+                        MSALLogger.logPII(
+                            level: .error,
+                            context: context,
+                            format: "Submit code, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
+                        )
+                        guard let self = self else { return }
+                        continuation.resume(returning: self.processSubmitCodeFailure(
+                            errorType: .generalError(nil),
+                            telemetryInfo: telemetryInfo,
+                            scopes: scopes,
+                            continuationToken: continuationToken,
+                            context: context
+                        ))
+                    }
+                )
+            }
+        case .error(let errorType):
+            return processSubmitCodeFailure(
+                errorType: errorType,
+                telemetryInfo: telemetryInfo,
+                scopes: scopes,
+                continuationToken: continuationToken,
+                context: context
+            )
+        case .strongAuthRequired(_):
+            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected MFA required API result")
+            stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        }
+    }
 
     private func processSubmitCodeFailure(
         errorType: MSALNativeAuthTokenValidatedErrorType,

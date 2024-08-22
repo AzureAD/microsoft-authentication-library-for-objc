@@ -33,9 +33,22 @@ extension MFABaseState {
 }
 
 extension MFARequiredState {
-    func getInternalAuthMethods() async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
+    func getAuthMethodsInternal() async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "MFA, get authentication methods")
         return await controller.getAuthMethods(continuationToken: continuationToken, context: context, scopes: scopes)
+    }
+
+    func submitChallengeInternal(challenge: String) async -> MSALNativeAuthMFAControlling.MFASubmitChallengeControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        MSALLogger.log(level: .info, context: context, format: "MFA, submit challenge")
+        guard inputValidator.isInputValid(challenge) else {
+            MSALLogger.log(level: .error, context: context, format: "MFA, invalid challenge")
+            return .init(
+                .error(error: MFASubmitChallengeError(type: .invalidChallenge, correlationId: correlationId), newState: self),
+                correlationId: context.correlationId()
+            )
+        }
+        return await controller.submitChallenge(challenge: challenge, continuationToken: continuationToken, context: context, scopes: scopes)
     }
 }
