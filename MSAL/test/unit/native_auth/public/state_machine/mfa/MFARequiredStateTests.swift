@@ -174,4 +174,14 @@ final class MFARequiredStateTests: XCTestCase {
         wait(for: [exp, exp2], timeout: 1.0)
     }
     
+    func test_submitInvalidChallenge_shouldReturnCorrectResponse() {
+        let exp = expectation(description: "mfa states")
+        let expectedError = MFASubmitChallengeError(type: .invalidChallenge, correlationId: correlationId)
+
+        let delegate = MFASubmitChallengeDelegateSpy(expectation: exp, expectedResult: nil, expectedError: expectedError)
+        
+        sut.submitChallenge(challenge: "", delegate: delegate)
+        wait(for: [exp], timeout: 1.0)
+    }
+    
 }
