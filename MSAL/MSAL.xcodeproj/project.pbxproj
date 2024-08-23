@@ -4992,6 +4992,7 @@
 					};
 					D672279E1EBD111900F3422A = {
 						CreatedOnToolsVersion = 8.3.2;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -7317,6 +7318,8 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UBF8T346G9;
@@ -7331,6 +7334,8 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UBF8T346G9;
