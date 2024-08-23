@@ -40,6 +40,11 @@ ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(17.5\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=17.5'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
+vision_sim_device_type = "Apple Vision Pro"
+vision_sim_device_exact_name = vision_sim_device_type + " Simulator \(1.2\)"
+vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_type + ",OS=1.2'"
+vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
+
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
 
@@ -95,6 +100,38 @@ target_specifiers = [
 		"platform" : "Mac",
         "target" : "macFramework"
 	},
+    {
+        "name" : "Vision Framework",
+        "scheme" : "MSAL (iOS Framework)",
+        "operations" : [ "build", "test" ],
+        "min_warn_codecov" : 70.0,
+        "platform" : "visionOS",
+        "target" : "visionOSFramework"
+    },
+    {
+        "name" : "iOS Test App",
+        "scheme" : "MSAL Test App (iOS)",
+        "operations" : [ "build" ],
+        "platform" : "visionOS",
+        "target" : "visionOSTestApp"
+
+    },
+    {
+        "name" : "Sample iOS App",
+        "scheme" : "SampleAppiOS",
+        "workspace" : "Samples/ios/SampleApp.xcworkspace",
+        "operations" : [ "build" ],
+        "platform" : "visionOS",
+        "target" : "visionOSSampleApp"
+    },
+    {
+        "name" : "Sample iOS App-iOS",
+        "scheme" : "SampleAppiOS-Swift",
+        "workspace" : "Samples/ios/SampleApp.xcworkspace",
+        "operations" : [ "build" ],
+        "platform" : "visionOS",
+        "target" : "visionOSSampleAppSwift"
+    },
 ]
 
 def print_operation_start(name, operation) :
@@ -165,6 +202,9 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
+   
+        if (self.platform == "visionOS") :
+            command += " " + vision_sim_flags + " " + vision_sim_dest
 		
 		if (xcpretty) :
 			command += " | xcpretty"
@@ -253,11 +293,14 @@ class BuildTarget:
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
 			return device_guids.get_ios(ios_sim_device_exact_name)
+   
+        if (self.platform == "visionOS") :
+            return device_guids.get_ios(vision_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
-		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
+		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\", \"visionOS\", and \"Mac\"")
 
 	def do_lint(self) :
 		if (self.linter != "swiftlint") :
@@ -346,7 +389,7 @@ class BuildTarget:
 		return exit_code
 	
 	def requires_simulator(self) :
-		if self.platform != "iOS" :
+		if self.platform == "Mac" :
 			return False
 		if "test" in self.operations :
 			return True
@@ -358,9 +401,16 @@ def requires_simulator(targets) :
 			return True
 	return False
 
-def launch_simulator() :
-	print("Booting simulator...")
-	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
+def launch_simulator(targets) :
+    for target in targets :
+        if target.platform == "iOS" :
+            print("Booting iOS simulator...")
+            command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
+            break
+        else :
+            print("Booting visionOS simulator...")
+            command = "xcrun simctl boot " + device_guids.get_ios(vision_sim_device_exact_name)
+            break
 	print(command)
 	
 	# This spawns a new process without us having to wait for it
@@ -389,7 +439,8 @@ for spec in target_specifiers :
 		targets.append(BuildTarget(spec))
 
 if requires_simulator(targets) :
-	launch_simulator()
+    launch_simulator()
+    launch_simulator(targets)
 
 # start by cleaning up any derived data that might be lying around
 if (clean) :
