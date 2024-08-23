@@ -4992,7 +4992,6 @@
 					};
 					D672279E1EBD111900F3422A = {
 						CreatedOnToolsVersion = 8.3.2;
-						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -7134,7 +7133,6 @@
 				);
 				MARKETING_VERSION = 1.1.24;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
@@ -7164,7 +7162,6 @@
 				);
 				MARKETING_VERSION = 1.1.24;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				USER_HEADER_SEARCH_PATHS = (
@@ -7320,8 +7317,9 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -7333,8 +7331,9 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
