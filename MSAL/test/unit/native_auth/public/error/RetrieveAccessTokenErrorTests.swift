@@ -30,7 +30,7 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     private var sut: RetrieveAccessTokenError!
 
     func test_totalCases() {
-        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 3)
+        XCTAssertEqual(RetrieveAccessTokenError.ErrorType.allCases.count, 4)
     }
 
     func test_customErrorDescription() {
@@ -43,13 +43,15 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
         let sut: [RetrieveAccessTokenError] = [
             .init(type: .browserRequired, correlationId: .init()),
             .init(type: .refreshTokenExpired, correlationId: .init()),
-            .init(type: .generalError, correlationId: .init())
+            .init(type: .generalError, correlationId: .init()),
+            .init(type: .invalidScope, correlationId: .init())
         ]
 
         let expectedIdentifiers = [
             MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.refreshTokenExpired,
-            MSALNativeAuthErrorMessage.generalError
+            MSALNativeAuthErrorMessage.generalError,
+            MSALNativeAuthErrorMessage.invalidScope
         ]
 
         let errorDescriptions = sut.map { $0.errorDescription }
@@ -68,6 +70,12 @@ final class RetrieveAccessTokenErrorTests: XCTestCase {
     func test_isRefreshTokenExpired() {
         sut = .init(type: .refreshTokenExpired, correlationId: .init())
         XCTAssertTrue(sut.isRefreshTokenExpired)
+        XCTAssertFalse(sut.isBrowserRequired)
+    }
+    
+    func test_isScopeInvalid() {
+        sut = .init(type: .invalidScope, correlationId: .init())
+        XCTAssertTrue(sut.isInvalidScope)
         XCTAssertFalse(sut.isBrowserRequired)
     }
 }

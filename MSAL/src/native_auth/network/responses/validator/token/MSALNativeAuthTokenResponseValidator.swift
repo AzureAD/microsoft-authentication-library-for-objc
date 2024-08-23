@@ -61,10 +61,10 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         case .failure(let tokenResponseError):
             guard let tokenResponseError =
                     tokenResponseError as? MSALNativeAuthTokenResponseError else {
-                MSALLogger.log(
+                MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "Token: Unable to decode error response: \(tokenResponseError)")
+                    format: "Token: Unable to decode error response: \(MSALLogMask.maskPII(tokenResponseError))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return handleFailedTokenResult(context, tokenResponseError)
@@ -160,7 +160,11 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: firstErrorCode) {
             validatedResponse = .error(errorCodesConverterFunction(knownErrorCode, apiError))
         } else {
-            MSALLogger.log(level: .error, context: context, format: "/token error - Unknown code received in error_codes: \(firstErrorCode)")
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "/token error - Unknown code received in error_codes: \(MSALLogMask.maskPII(firstErrorCode))"
+            )
             validatedResponse = useInvalidRequestAsDefaultResult ? .error(.invalidRequest(apiError)) : .error(.generalError(apiError))
         }
 
@@ -170,12 +174,12 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             let errorMessage: String
 
             if let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode) {
-                errorMessage = "/token error - ESTS error received in error_codes: \(knownErrorCode) (ignoring)"
+                errorMessage = "/token error - ESTS error received in error_codes: \(MSALLogMask.maskPII(knownErrorCode)) (ignoring)"
             } else {
-                errorMessage = "/token error - Unknown ESTS received in error_codes with code: \(errorCode) (ignoring)"
+                errorMessage = "/token error - Unknown ESTS received in error_codes with code: \(MSALLogMask.maskPII(errorCode)) (ignoring)"
             }
 
-            MSALLogger.log(level: .verbose, context: context, format: errorMessage)
+            MSALLogger.logPII(level: .verbose, context: context, format: errorMessage)
         }
 
         return validatedResponse

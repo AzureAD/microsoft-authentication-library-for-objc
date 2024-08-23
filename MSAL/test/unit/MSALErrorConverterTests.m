@@ -99,6 +99,7 @@
                                                correlationId:correlationId
                                                     userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
+                                                               MSIDThrottlingCacheHitKey : @1,
                                                                @"additional_user_info": @"unmapped_userinfo"}
                                               classifyErrors:YES
                                           msalOauth2Provider:nil
@@ -121,6 +122,7 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
     XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
     XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
+    XCTAssertTrue(msalError.userInfo[MSALThrottlingCacheHitKey]);
 }
 
 - (void)testErrorConversion_whenUnclassifiedInternalMSALErrorPassed_shouldMapToInternal
@@ -262,6 +264,7 @@
                                                correlationId:correlationId
                                                     userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
+                                                               MSIDThrottlingCacheHitKey: @1,
                                                                @"additional_user_info": @"unmapped_userinfo",
                                                                MSIDInvalidTokenResultKey : [self testTokenResult]}
                                               classifyErrors:YES
@@ -291,7 +294,7 @@
     XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
     MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
     XCTAssertEqualObjects(result.accessToken, @"access-token");
-    
+    XCTAssertTrue(msalError.userInfo[MSALThrottlingCacheHitKey]);
     NSError *mappedUnderlyingError = msalError.userInfo[NSUnderlyingErrorKey];
     XCTAssertEqualObjects(mappedUnderlyingError.domain, MSALErrorDomain);
     XCTAssertEqual(mappedUnderlyingError.code, MSALErrorInternal);

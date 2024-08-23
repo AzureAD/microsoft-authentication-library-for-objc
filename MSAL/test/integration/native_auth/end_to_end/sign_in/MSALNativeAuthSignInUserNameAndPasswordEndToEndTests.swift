@@ -25,73 +25,94 @@
 import Foundation
 import XCTest
 
-final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
+final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
+    // Hero Scenario 1.2.2. Sign in - User is not registered with given email
+    func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let unknownUsername = UUID().uuidString
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.userNotFound, endpoint: .signInToken)
-        }
+        let unknownUsername = UUID().uuidString + "@contoso.com"
 
         sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
+    // Hero Scenario 1.2.3. Sign in - Password is incorrect
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.invalidPassword, endpoint: .signInToken)
-        }
-
         sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
     }
 
-    // Hero Scenario 2.2.1. Sign in – Email and Password on SINGLE screen (Email & Password)
+    // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+    }
+    
+    // Sign in - Password is incorrect (sent over delegate.newStatePasswordRequired)
+    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let signInExpectation = expectation(description: "signing in")
+        let passwordRequiredExpectation = expectation(description: "verifying password")
+        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
+        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
+
+        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        guard signInDelegateSpy.onSignInPasswordRequiredCalled else {
+            XCTFail("onSignInPasswordRequired not called")
+            return
+        }
+
+        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
+
+        // Now submit the password..
+
+        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
+
+        await fulfillment(of: [passwordRequiredExpectation])
+
+        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
+        XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
     }
 }

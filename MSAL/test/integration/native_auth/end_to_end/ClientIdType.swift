@@ -16,22 +16,18 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-@_implementationOnly import MSAL_Private
 
-class MSALNativeAuthTokens {
-    let accessToken: MSIDAccessToken
-    let refreshToken: MSIDRefreshToken?
-    let rawIdToken: String?
+import Foundation
 
-    init(accessToken: MSIDAccessToken, refreshToken: MSIDRefreshToken?, rawIdToken: String?) {
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-        self.rawIdToken = rawIdToken
-    }
+enum ClientIdType {
+    case password
+    case passwordAndAttributes
+    case code
+    case codeAndAttributes
 }
