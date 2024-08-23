@@ -354,6 +354,27 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
     
+    func test_whenSignInWithPassowordReceiveIntrospectRequired_errorShouldBeReturned() async {
+        let expectedUsername = "username"
+        let expectedCredentialToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: expectedCredentialToken)
+        signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
+        
+        let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: "pwd", context: expectedContext, scopes: nil))
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
+        if case .error(let error) = result.result {
+            XCTAssertEqual(error.type, .generalError)
+        } else {
+            XCTFail("Expected error result")
+        }
+    }
+    
     // MARK: sign in with username and code
     
     func test_whenSignInWithCodeStartWithValidInfo_codeRequiredShouldBeCalled() async {
@@ -408,6 +429,26 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitCode, isSuccessful: true)
+    }
+    
+    func test_signInWithCodeSubmitCodeReceiveStrongAuthRequired_anErrorShouldBeReturned() {
+        let continuationToken = "continuationToken"
+        let expectedError = VerifyCodeError(type: .generalError, correlationId: defaultUUID)
+
+        let expectation = expectation(description: "SignInController")
+
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+
+        let userAccountResult = MSALNativeAuthUserAccountResultStub.result
+        tokenResponseValidatorMock.tokenValidatedResponse = .strongAuthRequired(continuationToken: continuationToken)
+
+        let state = SignInCodeRequiredState(scopes: [], controller: sut, inputValidator: MSALNativeAuthInputValidator(), continuationToken: continuationToken, correlationId: defaultUUID)
+        let delegate = SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: expectedError)
+        state.submitCode(code: "code", delegate: delegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitCode, isSuccessful: false)
     }
 
     func test_afterSignInWithCodeSubmitCode_whenTokenCacheIsNotValid_it_shouldReturnCorrectError() {
@@ -613,6 +654,27 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertNotNil(mockDelegate.newPasswordRequiredState)
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitPassword, isSuccessful: false)
+    }
+    
+    func test_whenSignInWithCodeReceiveIntrospectRequired_errorShouldBeReturned() async {
+        let expectedUsername = "username"
+        let expectedCredentialToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: expectedCredentialToken)
+        signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
+        
+        let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
+        if case .error(let error) = result.result {
+            XCTAssertEqual(error.type, .generalError)
+        } else {
+            XCTFail("Expected error result")
+        }
     }
     
     func test_whenSignInWithCodeSubmitPasswordTokenAPIReturnError_correctErrorShouldBeReturned() async {
