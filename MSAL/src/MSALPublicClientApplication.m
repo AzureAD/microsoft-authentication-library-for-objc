@@ -111,6 +111,8 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDRequestTelemetryConstants.h"
 #import "MSALWipeCacheForAllAccountsConfig.h"
+#import "NSString+MSIDTelemetryExtensions.h"
+#import "MSIDVersion.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -211,7 +213,7 @@
                                                                     bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
-    if (!msalRedirectUri)
+    if (!msalRedirectUri && !config.bypassRedirectURIValidation)
     {
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
@@ -318,30 +320,19 @@
     id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = nil;
     NSError *dataSourceError = nil;
-    
-    if (@available(macOS 10.15, *)) {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
-        
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
-        
-        NSError *secondaryDataSourceError = nil;
-        secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                           trustedApplications:config.cacheConfig.trustedApplications
-                                                                         error:&secondaryDataSourceError];
-        
-        if (secondaryDataSourceError)
-        {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
-        }
-    }
-    else
+
+    dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
+
+    NSError *secondaryDataSourceError = nil;
+    secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+                                                       trustedApplications:config.cacheConfig.trustedApplications
+                                                                     error:&secondaryDataSourceError];
+
+    if (secondaryDataSourceError)
     {
-        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                  trustedApplications:config.cacheConfig.trustedApplications
-                                                                error:&dataSourceError];
-        
-        dataSource = macDataSource;
-        self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
     }
     
     if (!dataSource)
@@ -865,6 +856,10 @@
     NSMutableDictionary *extraURLQueryParameters = [self.internalConfig.extraQueryParameters.extraURLQueryParameters mutableCopy];
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
+    
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
 
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
@@ -881,6 +876,7 @@
     // Nested auth protocol
     msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
     msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -1202,6 +1198,10 @@
     [extraURLQueryParameters addEntriesFromDictionary:parameters.extraQueryParameters];
     msidParams.extraURLQueryParameters = extraURLQueryParameters;
     
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
+    
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
@@ -1455,7 +1455,9 @@
     msidParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:requestAuthority];
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
-    
+    msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
+                                                                            srcVersion:[MSIDVersion sdkVersion]
+                                                                              sequence:nil];
     NSError *localError;
     BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
     

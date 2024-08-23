@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
         let parameters = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
             continuationToken: "<continuation-token"
@@ -49,7 +49,7 @@ final class MSALNativeAuthResetPasswordPollCompletionRequestParametersTest: XCTe
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: []))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
         let params = MSALNativeAuthResetPasswordPollCompletionRequestParameters(
             context: context,
             continuationToken: "<continuation-token"

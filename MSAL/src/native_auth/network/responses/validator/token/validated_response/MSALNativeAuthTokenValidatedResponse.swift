@@ -97,7 +97,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorUri: apiError.errorURI
             )
         case .expiredRefreshToken(let apiError):
-            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            MSALLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
             return SignInStartError(
                 type: .generalError,
                 message: apiError.errorDescription,
@@ -108,6 +108,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func convertToRetrieveAccessTokenError(correlationId: UUID) -> RetrieveAccessTokenError {
         switch self {
         case .expiredToken(let apiError),
@@ -153,7 +154,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .userNotFound(let apiError),
              .invalidPassword(let apiError),
              .invalidOOBCode(let apiError):
-            MSALLogger.log(level: .error, context: nil, format: "Error not treated - \(self))")
+            MSALLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError.errorDescription,

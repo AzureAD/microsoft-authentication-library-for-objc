@@ -26,223 +26,103 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
+
+    // Hero Scenario 2.2.2. Sign in - User is not registered with given email
     func test_signInWithUnknownUsernameResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        let unknownUsername = UUID().uuidString
-
-        if usingMockAPI {
-            try await mockResponse(.userNotFound, endpoint: .signInInitiate)
-        }
+        let unknownUsername = UUID().uuidString + "@contoso.com"
 
         sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isUserNotFound)
     }
 
-    func test_signInWithKnownUsernameResultsInOTPSent() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
-        XCTAssertNotNil(signInDelegateSpy.sentTo)
-    }
-
+    // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
-        let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
+        guard signInDelegateSpy.onSignInCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
 
-        if usingMockAPI {
-            try await mockResponse(.invalidOOBValue, endpoint: .signInToken)
-        }
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "badc0d3", delegate: signInVerifyCodeDelegateSpy)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: "00000000", delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
+        await fulfillment(of: [verifyCodeExpectation])
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInVerifyCodeErrorCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.error)
-        XCTAssertTrue(signInVerifyCodeDelegateSpy.error!.isInvalidCode)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.error?.isInvalidCode, true)
     }
 
-    // Hero Scenario 1.2.1. Sign in (Email & Email OTP)
+    // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+            XCTFail("Missing information")
+            return
+        }
 
         let signInExpectation = expectation(description: "signing in")
-        let verifyCodeExpectation = expectation(description: "verifying code")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingOTPUserEmail"] ?? "<existingOTPUserEmail not set>"
-        let otp = "<otp not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypeOOB, endpoint: .signInChallenge)
-        }
 
         sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
 
-        await fulfillment(of: [signInExpectation], timeout: 2)
+        await fulfillment(of: [signInExpectation])
 
-        XCTAssertTrue(signInDelegateSpy.onSignInCodeRequiredCalled)
+        guard signInDelegateSpy.onSignInCodeRequiredCalled else {
+            XCTFail("onSignInCodeRequired not called")
+            return
+        }
+
         XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
 
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        } else {
-            // TODO: Replace this with retrieving the OTP from email
-            XCTAssertNotEqual(otp, "<otp not set>")
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
         }
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: otp, delegate: signInVerifyCodeDelegateSpy)
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
 
-        await fulfillment(of: [verifyCodeExpectation], timeout: 2)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
+
+        await fulfillment(of: [verifyCodeExpectation])
 
         XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
         XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
-    }
-
-    func test_signInWithKnownPasswordUsernameResultsInPasswordSent() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-    }
-
-    func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
-        try XCTSkipIf(!usingMockAPI)
-
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        if usingMockAPI {
-            try await mockResponse(.invalidPassword, endpoint: .signInToken)
-        }
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: "An Invalid Password", delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.error!.isInvalidPassword)
-    }
-
-    // Hero Scenario 2.2.2. Sign in – Email and Password on MULTIPLE screens (Email & Password)
-    func test_signInAndSendingCorrectPasswordResultsInSuccess() async throws {
-        try XCTSkipIf(!usingMockAPI)
-        
-        let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
-
-        let username = ProcessInfo.processInfo.environment["existingPasswordUserEmail"] ?? "<existingPasswordUserEmail not set>"
-        let password = ProcessInfo.processInfo.environment["existingUserPassword"] ?? "<existingUserPassword not set>"
-
-        if usingMockAPI {
-            try await mockResponse(.initiateSuccess, endpoint: .signInInitiate)
-            try await mockResponse(.challengeTypePassword, endpoint: .signInChallenge)
-        }
-
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation], timeout: 2)
-
-        XCTAssertTrue(signInDelegateSpy.onSignInPasswordRequiredCalled)
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
-
-        // Now submit the password..
-
-        if usingMockAPI {
-            try await mockResponse(.tokenSuccess, endpoint: .signInToken)
-        }
-
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
-
-        await fulfillment(of: [passwordRequiredExpectation], timeout: 2)
-
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInPasswordRequiredDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInPasswordRequiredDelegateSpy.result?.account.username, username)
     }
 }
