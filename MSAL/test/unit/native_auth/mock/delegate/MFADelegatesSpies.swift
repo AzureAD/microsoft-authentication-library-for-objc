@@ -104,6 +104,7 @@ open class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             checkErrors(error: error, expectedError: expectedError)
+            self.newMFARequiredState = newState
             expectation.fulfill()
             return
         }
@@ -143,6 +144,7 @@ open class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
     let expectation: XCTestExpectation
     var expectedError: MFASubmitChallengeError?
     var expectedResult: MSALNativeAuthUserAccountResult?
+    private(set) var newMFARequiredState: MFARequiredState?
     
     init(expectation: XCTestExpectation, expectedResult: MSALNativeAuthUserAccountResult?, expectedError: MFASubmitChallengeError?) {
         self.expectation = expectation
@@ -153,6 +155,7 @@ open class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
     public func onMFASubmitChallengeError(error: MSAL.MFASubmitChallengeError, newState: MSAL.MFARequiredState?) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
+            self.newMFARequiredState = newState
             checkErrors(error: error, expectedError: expectedError)
             expectation.fulfill()
             return
