@@ -284,6 +284,8 @@
 		28A6009F2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */; };
 		28A600A12C78BA8900455666 /* MFAErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A02C78BA8900455666 /* MFAErrorTests.swift */; };
 		28A600A32C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */; };
+		28A600A62C78BDC100455666 /* AwaitingMFAStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */; };
+		28A600A82C78BDD200455666 /* MFARequiredStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */; };
 		28ABE1762C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */; };
 		28B28B832C6F46E50030D5C5 /* MFAStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B822C6F46E50030D5C5 /* MFAStates.swift */; };
 		28B28B8C2C6F4B570030D5C5 /* MFADelegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */; };
@@ -1611,6 +1613,8 @@
 		28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASubmitChallengeDelegateDispatcherTests.swift; sourceTree = "<group>"; };
 		28A600A02C78BA8900455666 /* MFAErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAErrorTests.swift; sourceTree = "<group>"; };
 		28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASubmitChallengeErrorTests.swift; sourceTree = "<group>"; };
+		28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwaitingMFAStateTests.swift; sourceTree = "<group>"; };
+		28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFARequiredStateTests.swift; sourceTree = "<group>"; };
 		28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectIntegrationTests.swift; sourceTree = "<group>"; };
 		28B28B822C6F46E50030D5C5 /* MFAStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAStates.swift; sourceTree = "<group>"; };
 		28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFADelegates.swift; sourceTree = "<group>"; };
@@ -2558,6 +2562,15 @@
 				28A6009A2C7898DA00455666 /* MFADelegatesSpies.swift */,
 			);
 			path = delegate;
+			sourceTree = "<group>";
+		};
+		28A600A42C78BD8B00455666 /* mfa */ = {
+			isa = PBXGroup;
+			children = (
+				28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */,
+				28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */,
+			);
+			path = mfa;
 			sourceTree = "<group>";
 		};
 		28B649412A09596300EF3DB7 /* responses */ = {
@@ -4263,6 +4276,7 @@
 		E2CD2E3F29FBE957009F8FFA /* state_machine */ = {
 			isa = PBXGroup;
 			children = (
+				28A600A42C78BD8B00455666 /* mfa */,
 				E20C21822A7A6C7300E31598 /* sign_in */,
 				E2CD2E4D29FC0435009F8FFA /* sign_up */,
 				9BD2764E2A0E7DA400FBD033 /* reset_password */,
@@ -6155,6 +6169,7 @@
 				04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				E2F4DB2D2A1F5714009FBCD0 /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift in Sources */,
 				287F6524298401AE00ED90BD /* MSALNativeAuthResponseSerializerTests.swift in Sources */,
+				28A600A62C78BDC100455666 /* AwaitingMFAStateTests.swift in Sources */,
 				E2CD2E4F29FC0451009F8FFA /* SignUpPasswordRequiredStateTests.swift in Sources */,
 				E22427F62B066E850006C55E /* SignInPasswordRequiredDelegateDispatcherTests.swift in Sources */,
 				E2CE910C2B0BA3BB0009AEDD /* SignUpStartErrorTests.swift in Sources */,
@@ -6252,6 +6267,7 @@
 				DE54B59F2A4452DB00460B34 /* MSALNativeAuthTokenResponseValidatorTests.swift in Sources */,
 				DE5738BA2A8F780E00D9120D /* MSALNativeAuthResetPasswordSubmitOauth2ErrorCodeTests.swift in Sources */,
 				E20C21842A7A6CA400E31598 /* SignInCodeRequiredStateTests.swift in Sources */,
+				28A600A82C78BDD200455666 /* MFARequiredStateTests.swift in Sources */,
 				B2725EAC22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */,
 				E22427FF2B06725C0006C55E /* ResetPasswordVerifyCodeDelegateDispatcherTests.swift in Sources */,
 				232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
