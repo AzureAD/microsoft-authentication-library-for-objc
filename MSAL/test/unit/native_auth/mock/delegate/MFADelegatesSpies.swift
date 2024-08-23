@@ -29,7 +29,6 @@ open class MFASendChallengeDelegateSpy: MFASendChallengeDelegate {
     
     let expectation: XCTestExpectation
     var expectedError: MFAError?
-    private(set) var newUserAccountResult: MSALNativeAuthUserAccountResult?
     private(set) var newSentTo: String?
     private(set) var newChannelTargetType: MSALNativeAuthChannelType?
     private(set) var newCodeLength: Int?
@@ -89,8 +88,109 @@ open class MFASendChallengeNotImplementedDelegateSpy: MFASendChallengeDelegate {
     }
 }
 
-fileprivate func checkErrors(error: MFAError, expectedError: MFAError?) {
-    XCTAssertEqual(error.type, expectedError?.type)
+open class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
+    
+    let expectation: XCTestExpectation
+    var expectedError: MFAError?
+    private(set) var newMFARequiredState: MFARequiredState?
+    private(set) var newAuthMethods: [MSALAuthMethod]?
+    
+    init(expectation: XCTestExpectation, expectedError: MFAError? = nil) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+    
+    public func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+        if let expectedError = expectedError {
+            XCTAssertTrue(Thread.isMainThread)
+            checkErrors(error: error, expectedError: expectedError)
+            expectation.fulfill()
+            return
+        }
+        XCTFail("This method should not be called")
+        expectation.fulfill()
+    }
+    
+    public func onMFAGetAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState) {
+        XCTAssertTrue(Thread.isMainThread)
+        newMFARequiredState = newState
+        newAuthMethods = authMethods
+
+        expectation.fulfill()
+    }
+}
+
+open class MFAGetAuthMethodsNotImplementedDelegateSpy: MFAGetAuthMethodsDelegate {
+    
+    let expectation: XCTestExpectation
+    let expectedError: MFAError
+
+    init(expectation: XCTestExpectation, expectedError: MFAError) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+    
+    public func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertNil(newState)
+        checkErrors(error: error, expectedError: expectedError)
+        expectation.fulfill()
+    }
+}
+
+open class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
+    
+    let expectation: XCTestExpectation
+    var expectedError: MFASubmitChallengeError?
+    var expectedResult: MSALNativeAuthUserAccountResult?
+    
+    init(expectation: XCTestExpectation, expectedResult: MSALNativeAuthUserAccountResult?, expectedError: MFASubmitChallengeError?) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+        self.expectedResult = expectedResult
+    }
+    
+    public func onMFASubmitChallengeError(error: MSAL.MFASubmitChallengeError, newState: MSAL.MFARequiredState?) {
+        if let expectedError = expectedError {
+            XCTAssertTrue(Thread.isMainThread)
+            checkErrors(error: error, expectedError: expectedError)
+            expectation.fulfill()
+            return
+        }
+        XCTFail("This method should not be called")
+        expectation.fulfill()
+    }
+    
+    public func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        if let expectedResult = expectedResult {
+            XCTAssertTrue(Thread.isMainThread)
+            XCTAssertEqual(expectedResult.idToken, result.idToken)
+        } else {
+            XCTFail("This method should not be called")
+        }
+        expectation.fulfill()
+    }
+}
+
+open class MFASubmitChallengeNotImplementedDelegateSpy: MFASubmitChallengeDelegate {
+    
+    let expectation: XCTestExpectation
+    let expectedError: MFASubmitChallengeError
+    
+    init(expectation: XCTestExpectation, expectedError: MFASubmitChallengeError) {
+        self.expectation = expectation
+        self.expectedError = expectedError
+    }
+    
+    public func onMFASubmitChallengeError(error: MSAL.MFASubmitChallengeError, newState: MSAL.MFARequiredState?) {
+        XCTAssertTrue(Thread.isMainThread)
+        checkErrors(error: error, expectedError: expectedError)
+        XCTAssertNil(newState)
+        expectation.fulfill()
+    }
+}
+
+fileprivate func checkErrors(error: MSALNativeAuthError, expectedError: MSALNativeAuthError?) {
     XCTAssertEqual(error.errorDescription, expectedError?.errorDescription)
     XCTAssertEqual(error.errorCodes, expectedError?.errorCodes)
     XCTAssertEqual(error.errorUri, expectedError?.errorUri)
