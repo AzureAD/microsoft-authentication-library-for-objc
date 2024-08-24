@@ -29,7 +29,7 @@
 
 @interface MSALSSOExtensionRequestHandler()
 
-@property (nullable, nonatomic) id currentRequest API_AVAILABLE(ios(13.0), macos(10.15));
+@property (nullable, nonatomic) id currentRequest;
 
 @end
 
@@ -37,7 +37,7 @@
 
 #pragma mark - Request tracking
 
-- (BOOL)setCurrentSSOExtensionRequest:(id)request API_AVAILABLE(ios(13.0), macos(10.15))
+- (BOOL)setCurrentSSOExtensionRequest:(id)request
 {
     @synchronized (self)
     {
@@ -54,7 +54,7 @@
     return NO;
 }
 
-- (id)copyAndClearCurrentSSOExtensionRequest API_AVAILABLE(ios(13.0), macos(10.15))
+- (id)copyAndClearCurrentSSOExtensionRequest
 {
     @synchronized (self)
     {
