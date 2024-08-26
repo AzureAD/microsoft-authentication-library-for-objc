@@ -202,9 +202,9 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
-            
-        if (self.platform == "visionOS") :
-            command += " " + vision_sim_flags + " " + vision_sim_dest
+
+		if (self.platform == "visionOS") :
+			command += " " + vision_sim_flags + " " + vision_sim_dest
 		
 		if (xcpretty) :
 			command += " | xcpretty"
@@ -294,8 +294,8 @@ class BuildTarget:
 		if (self.platform == "iOS") :
 			return device_guids.get_ios(ios_sim_device_exact_name)
    
-        if (self.platform == "visionOS") :
-            return device_guids.get_ios(vision_sim_device_exact_name)
+		if (self.platform == "visionOS") :
+			return device_guids.get_ios(vision_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
@@ -406,15 +406,16 @@ def launch_simulator(targets) :
         if target.platform == "iOS" :
             print("Booting iOS simulator...")
             command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
+            
             break
         else :
             print("Booting visionOS simulator...")
             command = "xcrun simctl boot " + device_guids.get_ios(vision_sim_device_exact_name)
+            print(command)
             break
-	print(command)
-	
+    print(command)
 	# This spawns a new process without us having to wait for it
-	subprocess.Popen(command, shell = True)
+    subprocess.Popen(command, shell = True)
 
 clean = True
 
@@ -439,7 +440,6 @@ for spec in target_specifiers :
 		targets.append(BuildTarget(spec))
 
 if requires_simulator(targets) :
-    launch_simulator()
     launch_simulator(targets)
 
 # start by cleaning up any derived data that might be lying around
