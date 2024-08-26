@@ -50,7 +50,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
 
-    // demo remove 2nd commit
+    // demo remove 2nd commit 
 
     private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
