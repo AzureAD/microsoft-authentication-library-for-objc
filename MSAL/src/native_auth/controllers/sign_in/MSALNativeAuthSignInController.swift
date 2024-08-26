@@ -166,12 +166,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> SignInSubmitCodeControllerResponse {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitCode, context: context)
         return await submitCode(
             code,
             continuationToken: continuationToken,
             context: context,
             scopes: scopes,
-            telemetryEventId: .telemetryApiIdSignInSubmitCode
+            telemetryEvent: event
         )
     }
 
@@ -420,16 +421,22 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         context: MSALNativeAuthRequestContext,
         scopes: [String]
     ) async -> MFASubmitChallengeControllerResponse {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFASubmitChallenge, context: context)
         let response = await submitCode(
             challenge,
             continuationToken: continuationToken,
             context: context,
             scopes: scopes,
-            telemetryEventId: .telemetryApiIdMFASubmitChallenge
+            telemetryEvent: event
         )
         switch response.result {
         case .completed(let accountResult):
-            return .init(.completed(accountResult), correlationId: response.correlationId)
+            return .init(
+                .completed(accountResult),
+                correlationId: response.correlationId,
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
+                })
         case .error(let error, let newState):
             let submitChallengeError = MFASubmitChallengeError(error: error)
             var mfaState: MFARequiredState?
@@ -453,10 +460,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
         scopes: [String],
-        telemetryEventId: MSALNativeAuthTelemetryApiId
+        telemetryEvent: MSIDTelemetryAPIEvent?
     ) async -> SignInSubmitCodeControllerResponse {
         let telemetryInfo = TelemetryInfo(
-            event: makeAndStartTelemetryEvent(id: telemetryEventId, context: context),
+            event: telemetryEvent,
             context: context
         )
         guard let request = createTokenRequest(

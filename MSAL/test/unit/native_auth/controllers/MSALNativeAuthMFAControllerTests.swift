@@ -284,6 +284,82 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
+    func test_whenSubmitChallengeTokenRequestFails_correctErrorShouldBeReturned() async {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        tokenRequestProviderMock.mockRequestTokenFunc(nil, throwError: MSALNativeAuthError(message: nil, correlationId: defaultUUID))
+        
+        let result = await sut.submitChallenge(challenge: "1234", continuationToken: "CT", context: expectedContext, scopes: [])
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFASubmitChallenge, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertNotNil(newState)
+        } else {
+            XCTFail("Expected error result")
+        }
+    }
+    
+    func test_whenSubmitChallengeTokenRequestReturnError_correctErrorShouldBeReturned() async {
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .authorizationPending(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .generalError(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .expiredToken(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .expiredRefreshToken(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .unauthorizedClient(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .invalidRequest(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .unexpectedError(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .userNotFound(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .invalidPassword(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .invalidOOBCode(.init()), expectedErrorType: .invalidChallenge)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .unsupportedChallengeType(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .invalidScope(.init()), expectedErrorType: .generalError)
+        await checkSubmitChallengeWithTokenValidatorError(validatedError: .slowDown(.init()), expectedErrorType: .generalError)
+    }
+    
+    func test_whenSubmitChallengeThirdFactorRequired_correctErrorShouldBeReturned() async {
+        let expectedContinuationToken = "continuationToken"
+        let expectedChallenge = "1234"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let expectedScope = "scope1"
+        
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenResponseValidatorMock.tokenValidatedResponse = .strongAuthRequired(continuationToken: expectedContinuationToken)
+        
+        let result = await sut.submitChallenge(challenge: expectedChallenge, continuationToken: expectedContinuationToken, context: expectedContext, scopes: [expectedScope])
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFASubmitChallenge, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .generalError)
+        } else {
+            XCTFail("Expected error result")
+        }
+    }
+    
+    func test_whenSubmitChallenge_signInShouldBeCompletedSuccessfully() async {
+        let expectedContinuationToken = "continuationToken"
+        let expectedChallenge = "1234"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+
+        tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
+        tokenResponseValidatorMock.expectedTokenResponse = tokenResponse
+        cacheAccessorMock.mockUserAccounts = [MSALNativeAuthUserAccountResultStub.account]
+        cacheAccessorMock.expectedMSIDTokenResult = tokenResult
+
+        let result = await sut.submitChallenge(challenge: expectedChallenge, continuationToken: expectedContinuationToken, context: expectedContext, scopes: [])
+        result.telemetryUpdate?(.success(()))
+
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFASubmitChallenge, isSuccessful: true)
+        guard case let .completed(result) = result.result else {
+            return XCTFail("Result should be .completed")
+        }
+    }
+    
     // MARK: Private methods
     
     private func checkGetAuthMethodsWithIntrospectValidatorError(validatedError: MSALNativeAuthSignInIntrospectValidatedErrorType, expectedType: MFAError.ErrorType) async {
@@ -305,5 +381,28 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         receivedEvents.removeAll()
     }
     
-    
+    private func checkSubmitChallengeWithTokenValidatorError(validatedError: MSALNativeAuthTokenValidatedErrorType, expectedErrorType: MFASubmitChallengeError.ErrorType) async {
+        let expectedContinuationToken = "continuationToken"
+        let expectedChallenge = "1234"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let expectedScope = "scope1"
+        
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.expectedContext = expectedContext
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScope, password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil)
+        
+        tokenResponseValidatorMock.tokenValidatedResponse = .error(validatedError)
+        
+        let result = await sut.submitChallenge(challenge: expectedChallenge, continuationToken: expectedContinuationToken, context: expectedContext, scopes: [expectedScope])
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFASubmitChallenge, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, expectedErrorType)
+            XCTAssertNotNil(newState)
+        } else {
+            XCTFail("Expected error result")
+        }
+        receivedEvents.removeAll()
+    }
 }
