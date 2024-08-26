@@ -30,10 +30,10 @@ struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
     let challengeType: MSALNativeAuthInternalChallengeType
     let challengeChannel: String
     let loginHint: String
-    
+
     func toPublicAuthMethod() -> MSALAuthMethod {
         return MSALAuthMethod(
-            id: id, 
+            id: id,
             challengeType: challengeType.rawValue,
             loginHint: loginHint,
             channelTargetType: MSALNativeAuthChannelType(value: challengeChannel)

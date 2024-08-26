@@ -383,12 +383,22 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .introspectRequired:
             let telemetryInfo = TelemetryInfo(event: event, context: context)
             let response = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
-            let controllerResponse = handleIntrospectResponse(response, scopes: scopes, telemetryInfo: telemetryInfo)
-            switch controllerResponse.result {
+            let introspectResponse = handleIntrospectResponse(
+                response, scopes: scopes,
+                telemetryInfo: telemetryInfo,
+                continuationToken: continuationToken
+            )
+            switch introspectResponse.result {
             case .selectionRequired(let authMethods, let newState):
-                return .init(.selectionRequired(authMethods: authMethods, newState: newState), correlationId: controllerResponse.correlationId)
+                return .init(.selectionRequired(
+                    authMethods: authMethods,
+                    newState: newState),
+                             correlationId: introspectResponse.correlationId,
+                             telemetryUpdate: { [weak self] result in
+                                 self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
+                             })
             case .error(let error, let newState):
-                return .init(.error(error: error, newState: newState), correlationId: controllerResponse.correlationId)
+                return .init(.error(error: error, newState: newState), correlationId: introspectResponse.correlationId)
             }
         }
     }
@@ -401,7 +411,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
         let result = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
         let telemetryInfo = TelemetryInfo(event: event, context: context)
-        return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo)
+        return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo, continuationToken: continuationToken)
     }
 
     func submitChallenge(
@@ -611,20 +621,24 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     private func handleIntrospectResponse(
         _ response: MSALNativeAuthSignInIntrospectValidatedResponse,
         scopes: [String],
-        telemetryInfo: TelemetryInfo
+        telemetryInfo: TelemetryInfo,
+        continuationToken: String
     ) -> MFAGetAuthMethodsControllerResponse {
         switch response {
-        case .authMethodsRetrieved(let continuationToken, let authMethods):
+        case .authMethodsRetrieved(let newContinuationToken, let authMethods):
             let newState = MFARequiredState(
                 controller: self,
                 scopes: scopes,
-                continuationToken: continuationToken,
+                continuationToken: newContinuationToken,
                 correlationId: telemetryInfo.context.correlationId()
             )
             return .init(.selectionRequired(
                 authMethods: authMethods.map({$0.toPublicAuthMethod()}),
                 newState: newState
-            ), correlationId: telemetryInfo.context.correlationId())
+            ), correlationId: telemetryInfo.context.correlationId(),
+            telemetryUpdate: { [weak self] result in
+                self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
+            })
         case .error(let error):
             MSALLogger.logPII(
                 level: .error,
@@ -634,7 +648,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(
                 error: error.convertToMFASendChallengeError(correlationId: telemetryInfo.context.correlationId()),
-                newState: nil
+                newState: MFARequiredState(
+                    controller: self,
+                    scopes: scopes,
+                    continuationToken: continuationToken,
+                    correlationId: telemetryInfo.context.correlationId()
+                )
             ), correlationId: telemetryInfo.context.correlationId())
         }
     }
