@@ -5951,6 +5951,7 @@
 				DE8EC8742A026BA0003FA561 /* MSALNativeAuthSignInRequestProvider.swift in Sources */,
 				232D616422485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m in Sources */,
 				285F58652C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift in Sources */,
+				28D811DA2C735D70002BE1AA /* MFAGetAuthMethodsError.swift in Sources */,
 				D61BD2BD1EBD0A010007E484 /* MSALTelemetry.m in Sources */,
 				DEE34F60D170B71C00BC302A /* MSALNativeAuthResetPasswordStartResponseError.swift in Sources */,
 				9BE7E3CB2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift in Sources */,

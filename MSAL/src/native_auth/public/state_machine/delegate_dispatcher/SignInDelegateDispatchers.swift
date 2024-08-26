@@ -107,7 +107,7 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
     }
 
     func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
-        if let onSignInAwaitingMFA = delegate.onSignInPasswordRequiredAwaitingMFA {
+        if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
             await onSignInAwaitingMFA(newState)
         } else {

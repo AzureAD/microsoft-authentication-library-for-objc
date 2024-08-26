@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// Base class for the SignIn state
+/// Base class for MFA state
 @objcMembers public class MFABaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthMFAControlling
     let scopes: [String]

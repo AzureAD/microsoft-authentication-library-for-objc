@@ -34,7 +34,7 @@ public protocol MFASendChallengeDelegate {
     ///     - newState: An object representing the new state of the flow with follow on methods.
     @MainActor func onMFASendChallengeError(error: MFAError, newState: MFARequiredState?)
 
-    /// Notifies the delegate that a verification code is required from the user to continue.
+    /// Notifies the delegate that a verification is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
@@ -48,6 +48,7 @@ public protocol MFASendChallengeDelegate {
         codeLength: Int)
 
     /// Notifies the delegate that the list of authentication methods is now available.
+    /// The user is required to choose an authentication method and then proceed with the "newState" to advance in the MFA process.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
     /// - Parameters:
     ///     - authMethods: list of authentication method
