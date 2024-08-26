@@ -34,11 +34,11 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
     case expiredToken(MSALNativeAuthSignInIntrospectResponseError)
     case invalidRequest(MSALNativeAuthSignInIntrospectResponseError)
     case unexpectedError(MSALNativeAuthSignInIntrospectResponseError?)
-    
+
     func convertToMFASendChallengeError(correlationId: UUID) -> MFAError {
         switch self {
         case .redirect:
-            return .init(type:.browserRequired, correlationId: correlationId)
+            return .init(type: .browserRequired, correlationId: correlationId)
         case .invalidRequest(let apiError),
                 .expiredToken(let apiError):
             return .init(

@@ -141,7 +141,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
             XCTAssertEqual(authMethods.first?.loginHint, internalAuthMethod.loginHint)
             XCTAssertEqual(newState.continuationToken, expectedContinuationToken)
         } else {
-            XCTFail("Expected verificationRequired result")
+            XCTFail("Expected selectionRequired result")
         }
     }
     
@@ -233,4 +233,77 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
             XCTFail("Expected error result")
         }
     }
+    
+    func test_whenGetAuthMethodsIntrospectRequestFail_anErrorShouldBeReturned() async {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        signInRequestProviderMock.expectedContext = expectedContext
+        signInRequestProviderMock.throwingIntrospectError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
+    
+        let result = await sut.getAuthMethods(continuationToken: "CT", context: expectedContext, scopes: [])
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFAGetAuthMethods, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertNotNil(newState)
+        } else {
+            XCTFail("Expected error result")
+        }
+    }
+    
+    func test_whenGetAuthMethodsIntrospectReturnsError_anErrorShouldBeReturned() async {
+        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .redirect, expectedType: .browserRequired)
+        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .invalidRequest(.init()), expectedType: .generalError)
+        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .expiredToken(.init()), expectedType: .generalError)
+        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .unexpectedError(.init()), expectedType: .generalError)
+    }
+    
+    func test_whenGetAuthMethods_correctResultShouldBeReturned() async {
+        let expectedContinuationToken = "continuationToken"
+        let internalAuthMethod = MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: "email", loginHint: "hint")
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        signInRequestProviderMock.mockIntrospectRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.introspectValidatedResponse = .authMethodsRetrieved(continuationToken: expectedContinuationToken, authMethods: [internalAuthMethod])
+        
+        let result = await sut.getAuthMethods(continuationToken: expectedContinuationToken, context: expectedContext, scopes: [])
+        result.telemetryUpdate?(.success(()))
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFAGetAuthMethods, isSuccessful: true)
+        if case .selectionRequired(let authMethods, let newState) = result.result {
+            XCTAssertEqual(authMethods.count, 1)
+            XCTAssertEqual(authMethods.first?.challengeType, internalAuthMethod.challengeType.rawValue)
+            XCTAssertEqual(authMethods.first?.id, internalAuthMethod.id)
+            XCTAssertEqual(authMethods.first?.channelTargetType.value, internalAuthMethod.challengeChannel)
+            XCTAssertEqual(authMethods.first?.loginHint, internalAuthMethod.loginHint)
+            XCTAssertEqual(newState.continuationToken, expectedContinuationToken)
+        } else {
+            XCTFail("Expected selectionRequired result")
+        }
+    }
+    
+    // MARK: Private methods
+    
+    private func checkGetAuthMethodsWithIntrospectValidatorError(validatedError: MSALNativeAuthSignInIntrospectValidatedErrorType, expectedType: MFAError.ErrorType) async {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        
+        signInRequestProviderMock.expectedContext = expectedContext
+        signInRequestProviderMock.mockIntrospectRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.introspectValidatedResponse = .error(validatedError)
+        let result = await sut.getAuthMethods(continuationToken: "CT", context: expectedContext, scopes: [])
+        
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFAGetAuthMethods, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, expectedType)
+            XCTAssertNotNil(newState)
+        } else {
+            XCTFail("Expected error result")
+        }
+        receivedEvents.removeAll()
+    }
+    
+    
 }
