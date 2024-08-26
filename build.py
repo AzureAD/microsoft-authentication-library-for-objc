@@ -202,7 +202,7 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
-   
+            
         if (self.platform == "visionOS") :
             command += " " + vision_sim_flags + " " + vision_sim_dest
 		
