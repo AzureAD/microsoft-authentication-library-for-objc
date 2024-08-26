@@ -196,6 +196,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
+    var expectedMFAAuthMethodId: String?
     var expectedContinuationToken: String?
     
     func mockInitiateRequestFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
@@ -224,6 +225,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
+        XCTAssertEqual(parameters.mfaAuthMethodId, expectedMFAAuthMethodId)
         if let expectedContinuationToken {
             XCTAssertEqual(expectedContinuationToken, parameters.continuationToken)
         }
