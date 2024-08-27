@@ -40,29 +40,29 @@ final class AwaitingMFAStateTests: XCTestCase {
 
     // MARK: - Delegates
 
-    // Send challenge
+    // Request challenge
 
-    func test_sendChallenge_delegate_withError_shouldReturnCorrectError() {
+    func test_requestChallenge_delegate_withError_shouldReturnCorrectError() {
         let exp = expectation(description: "mfa state")
 
         let expectedError = MFAError(type: .generalError, message: "test error", correlationId: correlationId)
         let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
 
-        let expectedResult: MFASendChallengeResult = .error(
+        let expectedResult: MFARequestChallengeResult = .error(
             error: expectedError,
             newState: expectedState
         )
-        controller.sendChallengeResponse = .init(expectedResult, correlationId: correlationId)
+        controller.requestChallengeResponse = .init(expectedResult, correlationId: correlationId)
 
-        let delegate = MFASendChallengeDelegateSpy(expectation: exp, expectedError: expectedError)
+        let delegate = MFARequestChallengeDelegateSpy(expectation: exp, expectedError: expectedError)
 
-        sut.sendChallenge(delegate: delegate)
+        sut.requestChallenge(delegate: delegate)
         wait(for: [exp], timeout: 1)
 
         XCTAssertNil(delegate.newMFARequiredState)
     }
 
-    func test_sendChallenge_delegateVerificationRequired_shouldReturnCorrectResult() {
+    func test_requestChallenge_delegateVerificationRequired_shouldReturnCorrectResult() {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
         let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken 2", correlationId: correlationId)
@@ -70,19 +70,19 @@ final class AwaitingMFAStateTests: XCTestCase {
         let expectedChannel = MSALNativeAuthChannelType(value: "email")
         let expectedSentTo = "sentTo"
 
-        let expectedResult: MFASendChallengeResult = .verificationRequired(
+        let expectedResult: MFARequestChallengeResult = .verificationRequired(
             sentTo: expectedSentTo,
             channelTargetType: expectedChannel,
             codeLength: expectedCodeLength,
             newState: expectedState
         )
-        controller.sendChallengeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
+        controller.requestChallengeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        let delegate = MFASendChallengeDelegateSpy(expectation: exp)
+        let delegate = MFARequestChallengeDelegateSpy(expectation: exp)
         
-        sut.sendChallenge(delegate: delegate)
+        sut.requestChallenge(delegate: delegate)
         wait(for: [exp, exp2], timeout: 1.0)
         
         XCTAssertEqual(delegate.newSentTo, expectedSentTo)
@@ -91,20 +91,20 @@ final class AwaitingMFAStateTests: XCTestCase {
         XCTAssertEqual(delegate.newMFARequiredState, expectedState)
     }
     
-    func test_sendChallenge_delegateSelectionRequired_shouldReturnCorrectResult() {
+    func test_requestChallenge_delegateSelectionRequired_shouldReturnCorrectResult() {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
         let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken 2", correlationId: correlationId)
         let expectedAuthMethods = [MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))]
 
-        let expectedResult: MFASendChallengeResult = .selectionRequired(authMethods: expectedAuthMethods, newState: expectedState)
-        controller.sendChallengeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
+        let expectedResult: MFARequestChallengeResult = .selectionRequired(authMethods: expectedAuthMethods, newState: expectedState)
+        controller.requestChallengeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        let delegate = MFASendChallengeDelegateSpy(expectation: exp)
+        let delegate = MFARequestChallengeDelegateSpy(expectation: exp)
         
-        sut.sendChallenge(delegate: delegate)
+        sut.requestChallenge(delegate: delegate)
         wait(for: [exp, exp2], timeout: 1.0)
         
         XCTAssertEqual(delegate.newAuthMethods, expectedAuthMethods)

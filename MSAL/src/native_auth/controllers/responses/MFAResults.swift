@@ -24,7 +24,7 @@
 
 import Foundation
 
-enum MFASendChallengeResult {
+enum MFARequestChallengeResult {
     case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: MFARequiredState)
     case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
     case error(error: MFAError, newState: MFARequiredState?)

@@ -327,31 +327,31 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     }
 
     // swiftlint:disable:next function_body_length
-    func sendChallenge(
+    func requestChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod?,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> MFASendChallengeControllerResponse {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFASendChallenge, context: context)
+    ) async -> MFARequestChallengeControllerResponse {
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFARequestChallenge, context: context)
         let result = await performAndValidateChallengeRequest(
             continuationToken: continuationToken,
             context: context,
-            errorDescription: "MFA SendChallenge: cannot create challenge request object",
+            errorDescription: "MFA RequestChallenge: cannot create challenge request object",
             mfaAuthMethodId: authMethod?.id
         )
         switch result {
         case .passwordRequired:
             let error = MFAError(type: .generalError, correlationId: context.correlationId())
-            MSALLogger.log(level: .error, context: context, format: "MFA send challenge: received unexpected password required API result")
+            MSALLogger.log(level: .error, context: context, format: "MFA request challenge: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .error(let challengeError):
-            let error = challengeError.convertToMFASendChallengeError(correlationId: context.correlationId())
+            let error = challengeError.convertToMFARequestChallengeError(correlationId: context.correlationId())
             MSALLogger.logPII(
                 level: .error,
                 context: context,
-                format: "MFA send challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
+                format: "MFA request challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
@@ -654,7 +654,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(
-                error: error.convertToMFASendChallengeError(correlationId: telemetryInfo.context.correlationId()),
+                error: error.convertToMFARequestChallengeError(correlationId: telemetryInfo.context.correlationId()),
                 newState: MFARequiredState(
                     controller: self,
                     scopes: scopes,

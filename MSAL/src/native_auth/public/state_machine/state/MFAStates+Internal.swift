@@ -25,10 +25,10 @@
 import Foundation
 
 extension MFABaseState {
-    func sendChallengeInternal(authMethod: MSALAuthMethod?) async -> MSALNativeAuthMFAControlling.MFASendChallengeControllerResponse {
+    func requestChallengeInternal(authMethod: MSALAuthMethod?) async -> MSALNativeAuthMFAControlling.MFARequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .info, context: context, format: "MFA, send challenge")
-        return await controller.sendChallenge(continuationToken: continuationToken, authMethod: authMethod, context: context, scopes: scopes)
+        MSALLogger.log(level: .info, context: context, format: "MFA, request challenge")
+        return await controller.requestChallenge(continuationToken: continuationToken, authMethod: authMethod, context: context, scopes: scopes)
     }
 }
 

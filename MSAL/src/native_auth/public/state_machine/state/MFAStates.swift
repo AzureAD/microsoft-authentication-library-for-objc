@@ -39,10 +39,10 @@ import Foundation
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    func baseSendChallenge(authMethod: MSALAuthMethod?, delegate: MFASendChallengeDelegate) {
+    func baseRequestChallenge(authMethod: MSALAuthMethod?, delegate: MFARequestChallengeDelegate) {
         Task {
-            let controllerResponse = await sendChallengeInternal(authMethod: authMethod)
-            let delegateDispatcher = MFASendChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            let controllerResponse = await requestChallengeInternal(authMethod: authMethod)
+            let delegateDispatcher = MFARequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
             switch controllerResponse.result {
             case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState):
                 await delegateDispatcher.dispatchVerificationRequired(
@@ -59,7 +59,7 @@ import Foundation
                     correlationId: controllerResponse.correlationId
                 )
             case .error(let error, let newState):
-                await delegate.onMFASendChallengeError(error: error, newState: newState)
+                await delegate.onMFARequestChallengeError(error: error, newState: newState)
             }
         }
     }
@@ -71,8 +71,8 @@ public class AwaitingMFAState: MFABaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
-    public func sendChallenge(delegate: MFASendChallengeDelegate) {
-        baseSendChallenge(authMethod: nil, delegate: delegate)
+    public func requestChallenge(delegate: MFARequestChallengeDelegate) {
+        baseRequestChallenge(authMethod: nil, delegate: delegate)
     }
 }
 
@@ -95,8 +95,8 @@ public class MFARequiredState: MFABaseState {
     /// - Parameters:
     ///   - authMethod: Optional. The authentication method you want to use for sending the challenge
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func sendChallenge(authMethod: MSALAuthMethod? = nil, delegate: MFASendChallengeDelegate) {
-        baseSendChallenge(authMethod: authMethod, delegate: delegate)
+    public func requestChallenge(authMethod: MSALAuthMethod? = nil, delegate: MFARequestChallengeDelegate) {
+        baseRequestChallenge(authMethod: authMethod, delegate: delegate)
     }
 
     /// Requests the available MFA authentication methods.

@@ -24,24 +24,24 @@
 
 import Foundation
 
-/// Protocol that defines the methods of a MFASendChallenge delegate
+/// Protocol that defines the methods of a MFARequestChallenge delegate
 @objc
-public protocol MFASendChallengeDelegate {
+public protocol MFARequestChallengeDelegate {
 
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///     - error: An error object indicating why the operation failed.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor func onMFASendChallengeError(error: MFAError, newState: MFARequiredState?)
+    @MainActor func onMFARequestChallengeError(error: MFAError, newState: MFARequiredState?)
 
     /// Notifies the delegate that a verification is required from the user to continue.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFARequestChallengeError(error:)`` will be called.
     /// - Parameters:
     ///   - newState: An object representing the new state of the flow with follow on methods.
     ///   - sentTo: The email/phone number that the code was sent to.
     ///   - channelTargetType: The channel (email/phone) the code was sent through.
     ///   - codeLength: The length of the code required.
-    @MainActor @objc optional func onMFASendChallengeVerificationRequired(
+    @MainActor @objc optional func onMFARequestChallengeVerificationRequired(
         newState: MFARequiredState,
         sentTo: String,
         channelTargetType: MSALNativeAuthChannelType,
@@ -49,11 +49,11 @@ public protocol MFASendChallengeDelegate {
 
     /// Notifies the delegate that the list of authentication methods is now available.
     /// The user is required to choose an authentication method and then proceed with the "newState" to advance in the MFA process.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFASendChallengeError(error:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFARequestChallengeError(error:)`` will be called.
     /// - Parameters:
     ///     - authMethods: list of authentication method
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onMFASendChallengeSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
+    @MainActor @objc optional func onMFARequestChallengeSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
 }
 
 /// Protocol that defines the methods of a MFAGetAuthMethodsDelegate delegate

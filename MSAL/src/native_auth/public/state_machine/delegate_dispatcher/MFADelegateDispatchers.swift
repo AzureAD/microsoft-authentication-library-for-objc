@@ -24,7 +24,7 @@
 
 import Foundation
 
-final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChallengeDelegate> {
+final class MFARequestChallengeDelegateDispatcher: DelegateDispatcher<MFARequestChallengeDelegate> {
 
     func dispatchVerificationRequired(newState: MFARequiredState,
                                       sentTo: String,
@@ -32,7 +32,7 @@ final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChalle
                                       codeLength: Int,
                                       correlationId: UUID
     ) async {
-        if let onVerificationRequired = delegate.onMFASendChallengeVerificationRequired {
+        if let onVerificationRequired = delegate.onMFARequestChallengeVerificationRequired {
             telemetryUpdate?(.success(()))
             await onVerificationRequired(
                 newState,
@@ -43,26 +43,26 @@ final class MFASendChallengeDelegateDispatcher: DelegateDispatcher<MFASendChalle
         } else {
             let error = MFAError(
                 type: .generalError,
-                message: requiredErrorMessage(for: "onMFASendChallengeVerificationRequired"),
+                message: requiredErrorMessage(for: "onMFARequestChallengeVerificationRequired"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))
-            await delegate.onMFASendChallengeError(error: error, newState: nil)
+            await delegate.onMFARequestChallengeError(error: error, newState: nil)
         }
     }
 
     func dispatchSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState, correlationId: UUID) async {
-        if let onSelectionRequired = delegate.onMFASendChallengeSelectionRequired {
+        if let onSelectionRequired = delegate.onMFARequestChallengeSelectionRequired {
             telemetryUpdate?(.success(()))
             await onSelectionRequired(authMethods, newState)
         } else {
             let error = MFAError(
                 type: .generalError,
-                message: requiredErrorMessage(for: "onMFASendChallengeSelectionRequired"),
+                message: requiredErrorMessage(for: "onMFARequestChallengeSelectionRequired"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))
-            await delegate.onMFASendChallengeError(error: error, newState: nil)
+            await delegate.onMFARequestChallengeError(error: error, newState: nil)
         }
     }
 }

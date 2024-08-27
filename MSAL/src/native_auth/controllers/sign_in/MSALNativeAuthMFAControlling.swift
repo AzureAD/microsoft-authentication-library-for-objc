@@ -26,16 +26,16 @@ import Foundation
 
 protocol MSALNativeAuthMFAControlling {
 
-    typealias MFASendChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFASendChallengeResult>
+    typealias MFARequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFARequestChallengeResult>
     typealias MFAGetAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFAGetAuthMethodsResult>
     typealias MFASubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFASubmitChallengeResult>
 
-    func sendChallenge(
+    func requestChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod?,
         context: MSALNativeAuthRequestContext,
         scopes: [String]
-    ) async -> MFASendChallengeControllerResponse
+    ) async -> MFARequestChallengeControllerResponse
 
     func getAuthMethods(
         continuationToken: String,

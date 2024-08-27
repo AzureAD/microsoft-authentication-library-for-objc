@@ -37,7 +37,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     var submitPasswordResult: SignInSubmitPasswordControllerResponse!
     var resendCodeResult: SignInResendCodeControllerResponse!
 
-    var sendChallengeResponse: MFASendChallengeControllerResponse!
+    var requestChallengeResponse: MFARequestChallengeControllerResponse!
     var getAuthMethodsResponse: MFAGetAuthMethodsControllerResponse!
     var submitChallengeResponse: MFASubmitChallengeControllerResponse!
 
@@ -65,8 +65,8 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         return resendCodeResult
     }
     
-    func sendChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFASendChallengeControllerResponse {
-        return sendChallengeResponse
+    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFARequestChallengeControllerResponse {
+        return requestChallengeResponse
     }
     
     func getAuthMethods(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFAGetAuthMethodsControllerResponse {

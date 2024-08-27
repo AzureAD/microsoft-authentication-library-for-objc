@@ -102,7 +102,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
         }
     }
 
-    func convertToMFASendChallengeError(correlationId: UUID) -> MFAError {
+    func convertToMFARequestChallengeError(correlationId: UUID) -> MFAError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired, correlationId: correlationId)

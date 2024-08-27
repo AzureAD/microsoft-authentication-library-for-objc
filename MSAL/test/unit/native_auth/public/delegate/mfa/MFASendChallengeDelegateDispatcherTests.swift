@@ -25,10 +25,10 @@
 @testable import MSAL
 import XCTest
 
-final class MFASendChallengeDelegateDispatcherTests: XCTestCase {
+final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
-    private var sut: MFASendChallengeDelegateDispatcher!
+    private var sut: MFARequestChallengeDelegateDispatcher!
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
     private let correlationId = UUID()
 
@@ -44,7 +44,7 @@ final class MFASendChallengeDelegateDispatcherTests: XCTestCase {
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
 
-        let delegate = MFASendChallengeDelegateSpy(expectation: delegateExp, expectedError: nil)
+        let delegate = MFARequestChallengeDelegateSpy(expectation: delegateExp, expectedError: nil)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
@@ -72,10 +72,10 @@ final class MFASendChallengeDelegateDispatcherTests: XCTestCase {
     func test_dispatchVerificationRequired_whenDelegateOptionalMethodNotImplemented() async {
         let expectedError = MFAError(
             type: .generalError,
-            message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFASendChallengeVerificationRequired"),
+            message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFARequestChallengeVerificationRequired"),
             correlationId: correlationId
         )
-        let delegate = MFASendChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        let delegate = MFARequestChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? MFAError else {
@@ -105,7 +105,7 @@ final class MFASendChallengeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSelection_whenDelegateMethodIsImplemented() async {
-        let delegate = MFASendChallengeDelegateSpy(expectation: delegateExp, expectedError: nil)
+        let delegate = MFARequestChallengeDelegateSpy(expectation: delegateExp, expectedError: nil)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
@@ -128,10 +128,10 @@ final class MFASendChallengeDelegateDispatcherTests: XCTestCase {
     func test_dispatchSelection_whenDelegateOptionalMethodNotImplemented() async {
         let expectedError = MFAError(
             type: .generalError,
-            message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFASendChallengeSelectionRequired"),
+            message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFARequestChallengeSelectionRequired"),
             correlationId: correlationId
         )
-        let delegate = MFASendChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        let delegate = MFARequestChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
 
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in

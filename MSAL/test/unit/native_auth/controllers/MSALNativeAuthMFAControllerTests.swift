@@ -90,7 +90,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengeDefaultStrongAuth_VerificationRequiredIsSentBackToUser() async {
+    func test_whenRequestChallengeDefaultStrongAuth_VerificationRequiredIsSentBackToUser() async {
         let expectedContinuationToken = "continuationToken"
         let expectedSentTo = "sentTo"
         let expectedChannelType = MSALNativeAuthChannelType(value: "email")
@@ -104,11 +104,11 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
             channelType: expectedChannelType,
             codeLength: expectedCodeLength
         )
-        let result = await sut.sendChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
         result.telemetryUpdate?(.success(()))
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: true)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: true)
         if case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState) = result.result {
             XCTAssertEqual(sentTo, expectedSentTo)
             XCTAssertEqual(channelTargetType, expectedChannelType)
@@ -119,7 +119,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengeDefaultStrongAuth_SelectionRequiredIsSentBackToUser() async {
+    func test_whenRequestChallengeDefaultStrongAuth_SelectionRequiredIsSentBackToUser() async {
         let expectedContinuationToken = "continuationToken"
         let internalAuthMethod = MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: "email", loginHint: "hint")
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -128,11 +128,11 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         signInRequestProviderMock.mockIntrospectRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
         signInResponseValidatorMock.introspectValidatedResponse = .authMethodsRetrieved(continuationToken: expectedContinuationToken, authMethods: [internalAuthMethod])
-        let result = await sut.sendChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
         result.telemetryUpdate?(.success(()))
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: true)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: true)
         if case .selectionRequired(let authMethods, let newState) = result.result {
             XCTAssertEqual(authMethods.count, 1)
             XCTAssertEqual(authMethods.first?.challengeType, internalAuthMethod.challengeType.rawValue)
@@ -145,16 +145,16 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengeRequestFails_ErrorShouldBeReturned() async {
+    func test_whenRequestChallengeRequestFails_ErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
     
-        let result = await sut.sendChallenge(continuationToken: "continuationToken", authMethod: nil, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: "continuationToken", authMethod: nil, context: expectedContext, scopes: [])
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
             XCTAssertEqual(error.type, .generalError)
             XCTAssertNotNil(newState)
@@ -163,7 +163,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengeIntrospectRequestFails_ErrorShouldBeReturned() async {
+    func test_whenRequestChallengeIntrospectRequestFails_ErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         signInRequestProviderMock.expectedContext = expectedContext
@@ -171,10 +171,10 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         signInRequestProviderMock.throwingIntrospectError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
     
-        let result = await sut.sendChallenge(continuationToken: "continuationToken", authMethod: nil, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: "continuationToken", authMethod: nil, context: expectedContext, scopes: [])
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
             XCTAssertEqual(error.type, .generalError)
             XCTAssertNotNil(newState)
@@ -183,7 +183,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengeCustomStrongAuth_VerificationRequiredIsSentBackToUser() async {
+    func test_whenRequestChallengeCustomStrongAuth_VerificationRequiredIsSentBackToUser() async {
         let expectedContinuationToken = "continuationToken"
         let expectedSentTo = "sentTo"
         let expectedChannelType = MSALNativeAuthChannelType(value: "email")
@@ -199,11 +199,11 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
             channelType: expectedChannelType,
             codeLength: expectedCodeLength
         )
-        let result = await sut.sendChallenge(continuationToken: expectedContinuationToken, authMethod: expectedAuthMethod, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: expectedContinuationToken, authMethod: expectedAuthMethod, context: expectedContext, scopes: [])
         result.telemetryUpdate?(.success(()))
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: true)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: true)
         if case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState) = result.result {
             XCTAssertEqual(sentTo, expectedSentTo)
             XCTAssertEqual(channelTargetType, expectedChannelType)
@@ -214,7 +214,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSendChallengePasswordRequiredResponse_anErrorShouldBeReturned() async {
+    func test_whenRequestChallengePasswordRequiredResponse_anErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let expectedContinuationToken = "continuationToken"
 
@@ -222,10 +222,10 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(continuationToken: expectedContinuationToken)
 
-        let result = await sut.sendChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
+        let result = await sut.requestChallenge(continuationToken: expectedContinuationToken, authMethod: nil, context: expectedContext, scopes: [])
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdMFASendChallenge, isSuccessful: false)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
             XCTAssertEqual(error.type, .generalError)
             XCTAssertNil(newState)
