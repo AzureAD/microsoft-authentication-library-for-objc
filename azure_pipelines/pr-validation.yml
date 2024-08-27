@@ -64,7 +64,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        if [ $(target) == 'vision_library' ]; then
+        if [ $(target) == 'visionOSFramework visionOSTestApp visionOSSampleApp visionOSSampleAppSwift' ]; then
             echo "Downloading simulator for visionOS"
             sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
             defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
