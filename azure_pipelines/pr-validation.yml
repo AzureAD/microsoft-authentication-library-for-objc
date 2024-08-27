@@ -26,7 +26,7 @@ jobs:
       MAC_FRAMEWORK: 
         target: "macFramework"
       VISION_FRAMEWORK:
-        target: "visionOSFramework visionOSTestApp visionOSSampleApp visionOSSampleAppSwift"
+        target: "visionOSFramework"
   displayName: Validate Pull Request
   pool:
     vmImage: 'macOS-14'
@@ -65,7 +65,7 @@ jobs:
       targetType: 'inline'
       script: |
         echo $(target)
-        if [ $(target) == 'visionOSFramework visionOSTestApp visionOSSampleApp visionOSSampleAppSwift' ]; then
+        if [ $(target) == 'visionOSFramework' ]; then
             echo "Downloading simulator for visionOS"
             sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
             defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
