@@ -6,8 +6,9 @@
 /MSAL/MSAL.xcodeproj/project.pbxproj @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 CHANGELOG.md @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 # @AzureAD/MSAL-ObjC-CIAM owns any files in the */native_auth
-# directories, subdirectories and the module.modulemap file.
+# directories, subdirectories and other files related to native auth.
 /MSAL/module.modulemap @AzureAD/MSAL-ObjC-CIAM
+/MSAL/.swiftlint.yml @AzureAD/MSAL-ObjC-CIAM
 /MSAL/src/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/unit/native_auth/ @AzureAD/MSAL-ObjC-CIAM
 /MSAL/test/integration/native_auth/ @AzureAD/MSAL-ObjC-CIAM
