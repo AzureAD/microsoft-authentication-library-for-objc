@@ -276,7 +276,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let result = await performAndValidateChallengeRequest(
             continuationToken: continuationToken,
             context: context,
-            errorDescription: "SignIn ResendCode: cannot create challenge request object"
+            logErrorMessage: "SignIn ResendCode: cannot create challenge request object"
         )
         switch result {
         case .passwordRequired:
@@ -337,7 +337,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let result = await performAndValidateChallengeRequest(
             continuationToken: continuationToken,
             context: context,
-            errorDescription: "MFA RequestChallenge: cannot create challenge request object",
+            logErrorMessage: "MFA RequestChallenge: cannot create challenge request object",
             mfaAuthMethodId: authMethod?.id
         )
         switch result {
@@ -527,7 +527,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 continuationToken: continuationToken,
                 context: context
             )
-        case .strongAuthRequired(_):
+        case .strongAuthRequired:
             let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected MFA required API result")
             stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
@@ -611,7 +611,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             let challengeValidatedResponse = await performAndValidateChallengeRequest(
                 continuationToken: continuationToken,
                 context: telemetryInfo.context,
-                errorDescription: "SignIn: cannot create challenge request object"
+                logErrorMessage: "SignIn: cannot create challenge request object"
             )
             return .success(challengeValidatedResponse)
         case .error(let error):
@@ -839,7 +839,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     private func performAndValidateChallengeRequest(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
-        errorDescription: String,
+        logErrorMessage: String,
         mfaAuthMethodId: String? = nil
     ) async -> MSALNativeAuthSignInChallengeValidatedResponse {
         guard let challengeRequest = createChallengeRequest(
@@ -847,8 +847,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             context: context,
             mfaAuthMethodId: mfaAuthMethodId
         ) else {
-            MSALLogger.log(level: .error, context: context, format: errorDescription)
-            return .error(.invalidRequest(.init(errorDescription: errorDescription)))
+            MSALLogger.log(level: .error, context: context, format: logErrorMessage)
+            return .error(.invalidRequest(.init()))
         }
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
         return signInResponseValidator.validateChallenge(context: context, result: challengeResponse)
@@ -862,9 +862,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             context: context
         ) else {
-            let errorDescription = "Unable to create signIn/initiate request"
-            MSALLogger.log(level: .error, context: context, format: errorDescription)
-            return .error(.invalidRequest(.init(errorDescription: errorDescription)))
+            MSALLogger.log(level: .error, context: context, format: "Unable to create signIn/introspect request")
+            return .error(.invalidRequest(.init()))
         }
         let introspectResponse: Result<MSALNativeAuthSignInIntrospectResponse, Error> = await performRequest(introspectRequest, context: context)
         return signInResponseValidator.validateIntrospect(context: context, result: introspectResponse)
