@@ -90,8 +90,8 @@ static NSDictionary *s_currentProfile = nil;
         }
     }
     
-    __auto_type authorityCIAM = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com"];
-    __auto_type authorityCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com"];
+    __auto_type authorityCIAM = [NSString stringWithFormat:@"https://msidlabciam2.ciamlogin.com"];
+    __auto_type authorityCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam2.ciamlogin.com/msidlabciam2.onmicrosoft.com"];
     [authorities addObjectsFromArray: @[authorityCIAM, authorityCIAMTenant]];
     
     s_authorities = authorities;
