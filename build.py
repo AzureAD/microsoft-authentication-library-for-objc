@@ -40,6 +40,8 @@ ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(17.5\\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=17.5'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
+mac_flags = "CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
+
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
 
@@ -165,7 +167,9 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
-		
+		else if (self.platform == "macOS") :
+            command += mac_flags
+
 		if (xcpretty and operation == "test") :
 			command += " --report junit --output ./build/reports/'" + target.name + ".xml'"
 		
