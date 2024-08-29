@@ -169,8 +169,8 @@ class BuildTarget:
 			command += " " + ios_sim_flags + " " + ios_sim_dest
 
 		if (self.platform == "Mac") :
-			command += mac_flags
-            
+			command += " " + mac_flags
+
 		if (xcpretty and operation == "test") :
 			command += " --report junit --output ./build/reports/'" + target.name + ".xml'"
 		
