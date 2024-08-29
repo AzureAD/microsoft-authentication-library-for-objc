@@ -43,14 +43,18 @@ steps:
       script: |
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
+        echo xcodebuild build-for-testing \
+          -workspace MSAL.xcworkspace \
+          -scheme '${{ parameters.schema }}' \
+          -sdk ${{ parameters.sdk }} \
+          -destination '${{ parameters.destination }}' \
+          -derivedDataPath 'build'
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
-          -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
+          -derivedDataPath 'build' 
 
   - task: Bash@3
     displayName: Run automations
@@ -58,6 +62,12 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
+        echo xcodebuild test-without-building \
+            -xctestrun '${{ parameters.full_path }}' \
+            -destination '${{ parameters.destination }}' \
+            -retry-tests-on-failure \
+            -parallel-testing-enabled NO \
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
         xcodebuild test-without-building \
             -xctestrun '${{ parameters.full_path }}' \
             -destination '${{ parameters.destination }}' \
