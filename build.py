@@ -167,7 +167,8 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
-		else if (self.platform == "macOS") :
+			
+		if (self.platform == "macOS") :
             command += mac_flags
 
 		if (xcpretty and operation == "test") :
