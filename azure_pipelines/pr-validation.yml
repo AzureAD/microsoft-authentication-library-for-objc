@@ -152,7 +152,7 @@ jobs:
       full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
-      additionalFlags: 'CODE_SIGN_IDENTITY=\"\"Apple Developer\"\" CODE_SIGNING_REQUIRED=NO'
+      additionalFlags: 'CODE_SIGN_IDENTITY="Apple Developer" CODE_SIGNING_REQUIRED=NO'
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
