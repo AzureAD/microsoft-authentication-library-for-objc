@@ -29,6 +29,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
 
     private(set) var username: String?
     private(set) var continuationToken: String?
+    private(set) var telemetryId: MSALNativeAuthTelemetryApiId?
     var expectation: XCTestExpectation?
 
     var signInStartResult: MSALNativeAuthSignInControlling.SignInControllerResponse!
@@ -45,9 +46,10 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         return signInStartResult
     }
 
-    func signIn(username: String, continuationToken: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> SignInAfterPreviousFlowControllerResponse {
+    func signIn(username: String, continuationToken: String?, scopes: [String]?, telemetryId: MSAL.MSALNativeAuthTelemetryApiId, context: MSAL.MSALNativeAuthRequestContext) async -> SignInAfterPreviousFlowControllerResponse {
         self.username = username
         self.continuationToken = continuationToken
+        self.telemetryId = telemetryId
         expectation?.fulfill()
 
         return continuationTokenResult

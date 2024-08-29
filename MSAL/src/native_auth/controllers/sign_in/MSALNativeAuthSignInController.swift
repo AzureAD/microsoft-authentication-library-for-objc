@@ -102,11 +102,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String?,
         scopes: [String]?,
+        telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
         MSALLogger.log(level: .info, context: context, format: "SignIn after previous flow started")
         let telemetryInfo = TelemetryInfo(
-            event: makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context),
+            event: makeAndStartTelemetryEvent(id: telemetryId, context: context),
             context: context
         )
         guard let continuationToken = continuationToken else {

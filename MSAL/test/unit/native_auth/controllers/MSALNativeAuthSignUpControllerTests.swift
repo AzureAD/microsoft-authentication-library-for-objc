@@ -1848,6 +1848,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         XCTAssertEqual(signInControllerMock.username, username)
         XCTAssertEqual(signInControllerMock.continuationToken, continuationToken)
+        XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterSignUp)
     }
 
     // MARK: - Common Methods

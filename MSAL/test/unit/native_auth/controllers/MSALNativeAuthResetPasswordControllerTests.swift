@@ -889,6 +889,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         XCTAssertEqual(signInControllerMock.username, username)
         XCTAssertEqual(signInControllerMock.continuationToken, continuationToken)
+        XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterPasswordReset)
     }
 
     // MARK: - Common Methods

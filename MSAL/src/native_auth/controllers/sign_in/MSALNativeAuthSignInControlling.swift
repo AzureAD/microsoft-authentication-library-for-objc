@@ -39,6 +39,7 @@ protocol MSALNativeAuthSignInControlling {
         username: String,
         continuationToken: String?,
         scopes: [String]?,
+        telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse
 
@@ -58,5 +59,4 @@ protocol MSALNativeAuthSignInControlling {
     ) async -> SignInSubmitPasswordControllerResponse
 
     func resendCode(continuationToken: String, context: MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse
-
 }
