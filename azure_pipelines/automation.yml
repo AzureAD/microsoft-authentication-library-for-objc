@@ -108,6 +108,7 @@ jobs:
       full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
+      additionalFlags: 'CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO'
 
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint

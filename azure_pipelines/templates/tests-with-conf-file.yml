@@ -3,6 +3,7 @@ parameters:
   full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun'
   destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
   sdk: 'iphonesimulator'
+  additionalFlags: ''
 
 steps:
   - checkout: self
@@ -43,18 +44,14 @@ steps:
       script: |
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
-        echo xcodebuild build-for-testing \
-          -workspace MSAL.xcworkspace \
-          -scheme '${{ parameters.schema }}' \
-          -sdk ${{ parameters.sdk }} \
-          -destination '${{ parameters.destination }}' \
-          -derivedDataPath 'build'
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
-          -derivedDataPath 'build' 
+          -derivedDataPath 'build' ${{ parameters.additionalFlags }}\
+          | tee xcodebuild.log \
+          | xcpretty -c
 
   - task: Bash@3
     displayName: Run automations
@@ -62,18 +59,12 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
-        echo xcodebuild test-without-building \
-            -xctestrun '${{ parameters.full_path }}' \
-            -destination '${{ parameters.destination }}' \
-            -retry-tests-on-failure \
-            -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
         xcodebuild test-without-building \
             -xctestrun '${{ parameters.full_path }}' \
             -destination '${{ parameters.destination }}' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'       
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult' ${{ parameters.additionalFlags }}      
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
