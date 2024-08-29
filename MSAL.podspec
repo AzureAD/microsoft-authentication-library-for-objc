@@ -20,6 +20,7 @@ Pod::Spec.new do |s|
     :tag => s.version.to_s,
     :submodules => true
   }
+  s.swift_versions = '5.0'
   s.resource_bundles = {"MSAL" => ["MSAL/PrivacyInfo.xcprivacy"]}
   s.default_subspecs ='app-lib'
   
@@ -51,13 +52,13 @@ Pod::Spec.new do |s|
     ext.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
     ext.compiler_flags = '-DADAL_EXTENSION_SAFE=1'
     ext.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
-    ext.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    ext.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
+    ext.ios.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
+    ext.osx.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
   
     # There is currently a bug in CocoaPods where it doesn't combine the public headers
     # for both the platform and overall.
     ext.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    ext.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src/native_auth/**/*"
+    ext.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
     ext.requires_arc = true
   end
 
