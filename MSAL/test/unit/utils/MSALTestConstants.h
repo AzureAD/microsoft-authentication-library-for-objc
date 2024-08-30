@@ -42,7 +42,7 @@
 #if TARGET_OS_IPHONE
 #define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
 #else
-#define UNIT_TEST_DEFAULT_REDIRECT_URI      @"msauth.com.microsoft.unit-test-host-mac://auth"
+#define UNIT_TEST_DEFAULT_REDIRECT_URI      @"msauth.com.microsoft.unit-test-host://auth"
 #endif
 
 #define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"

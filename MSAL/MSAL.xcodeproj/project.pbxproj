@@ -5449,7 +5449,6 @@
 					};
 					B295A16322D0348400FFB313 = {
 						CreatedOnToolsVersion = 10.2;
-						ProvisioningStyle = Automatic;
 					};
 					B29E2ACD21238F5200B170ED = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -7791,9 +7790,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = "unit-test-host-mac.entitlements";
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -7820,7 +7818,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.unit-test-host-mac";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.unit-test-host";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -7859,9 +7857,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = "unit-test-host-mac.entitlements";
-				CODE_SIGN_IDENTITY = "-";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -7885,7 +7882,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.unit-test-host-mac";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.unit-test-host";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -8401,7 +8398,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/Contents/MacOS/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/Contents/MacOS/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",
@@ -8423,7 +8420,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/Contents/MacOS/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/Contents/MacOS/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",
@@ -8550,7 +8547,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host";
 			};
 			name = Debug;
 		};
@@ -8619,7 +8616,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/Contents/MacOS/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/Contents/MacOS/unit-test-host";
 			};
 			name = Release;
 		};
@@ -8691,7 +8688,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host";
 			};
 			name = Debug;
 		};
@@ -8759,7 +8756,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host-mac.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host-mac";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/unit-test-host";
 			};
 			name = Release;
 		};

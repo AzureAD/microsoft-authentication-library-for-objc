@@ -1260,11 +1260,7 @@
 
 - (void)testAcquireScopesAddlScopesLoginHintuiBehaviorEQPAuthorityCorrelationId
 {
-#if TARGET_OS_OSX
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unit-test-host-mac"];
-#else
     [MSIDTestBundle overrideBundleId:@"com.microsoft.unit-test-host"];
-#endif
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
@@ -3949,12 +3945,7 @@
 
 - (MSALPublicClientApplication *)createSecondTestAppWithAuthority:(MSALAuthority *)authority
 {
-#if TARGET_OS_OSX
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.com.microsoft.unit-test-host-mac"] } ];
-#else
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.com.microsoft.unit-test-host"] } ];
-#endif
-
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSArray *schemes = @[@"msauthv2", @"msauthv3"];
