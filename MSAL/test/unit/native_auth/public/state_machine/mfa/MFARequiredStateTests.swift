@@ -183,5 +183,4 @@ final class MFARequiredStateTests: XCTestCase {
         sut.submitChallenge(challenge: "", delegate: delegate)
         wait(for: [exp], timeout: 1.0)
     }
-    
 }

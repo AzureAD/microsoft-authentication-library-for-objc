@@ -25,7 +25,6 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
-@_implementationOnly import MSAL_Unit_Test_Private
 
 class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
     
@@ -69,7 +68,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         }
     }
     
-    func test_whenSignInWithPassowordReceiveIntrospectRequired_errorShouldBeReturned() async {
+    func test_whenSignInWithPasswordReceiveIntrospectRequired_errorShouldBeReturned() async {
         let expectedUsername = "username"
         let expectedCredentialToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)

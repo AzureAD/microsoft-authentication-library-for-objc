@@ -126,8 +126,8 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     func validateIntrospect(context: any MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInIntrospectResponse, any Error>) -> MSAL.MSALNativeAuthSignInIntrospectValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successIntrospectResponse) = result, let expectedIntrospectResponse = expectedIntrospectResponse {
-            XCTAssertEqual(successIntrospectResponse.challengeType, expectedInitiateResponse?.challengeType)
-            XCTAssertEqual(successIntrospectResponse.continuationToken, expectedInitiateResponse?.continuationToken)
+            XCTAssertEqual(successIntrospectResponse.challengeType, expectedIntrospectResponse.challengeType)
+            XCTAssertEqual(successIntrospectResponse.continuationToken, expectedIntrospectResponse.continuationToken)
         }
         if case .failure(let introspectResponseError) = result, let expectedIntrospectResponseError = expectedResponseError {
             XCTAssertTrue(type(of: introspectResponseError) == type(of: expectedIntrospectResponseError))
