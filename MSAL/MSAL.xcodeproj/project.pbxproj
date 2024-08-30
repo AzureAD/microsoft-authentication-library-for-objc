@@ -2378,7 +2378,6 @@
 		DE94C9E529F19D9A00C1EC1F /* MSALNativeAuthResetPasswordSubmitRequestParametersTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthResetPasswordSubmitRequestParametersTest.swift; sourceTree = "<group>"; };
 		DE94C9E729F19E6B00C1EC1F /* MSALNativeAuthResetPasswordPollCompletionRequestParametersTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthResetPasswordPollCompletionRequestParametersTest.swift; sourceTree = "<group>"; };
 		DE94C9EE29F2AF3200C1EC1F /* MSALNativeAuthResetPasswordChallengeRequestParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthResetPasswordChallengeRequestParameters.swift; sourceTree = "<group>"; };
-		DE96A1462C64DC7400EAE76F /* unit-test-host-mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "unit-test-host-mac.entitlements"; sourceTree = "<group>"; };
 		DECC1F9229521E34006D9FB1 /* MSALLogMask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALLogMask.m; sourceTree = "<group>"; };
 		DECC1F9329521E34006D9FB1 /* MSALLogMask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALLogMask.h; sourceTree = "<group>"; };
 		DECC1FB229531032006D9FB1 /* MSALLogMaskTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLogMaskTests.m; sourceTree = "<group>"; };
@@ -3913,7 +3912,6 @@
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
-				DE96A1462C64DC7400EAE76F /* unit-test-host-mac.entitlements */,
 				B24AC4872B646B4C00832D7A /* PrivacyInfo.xcprivacy */,
 				DE53C7D4293F9F5A00E5B2BB /* module.modulemap */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
@@ -7308,11 +7306,11 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -7381,11 +7379,11 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -7790,7 +7788,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -7857,7 +7855,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
