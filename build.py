@@ -36,11 +36,9 @@ from timeit import default_timer as timer
 script_start_time = timer()
 
 ios_sim_device_type = "iPhone 15"
-ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(17.5\\)"
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(17.5\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=17.5'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
-
-mac_flags = "CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
@@ -167,13 +165,9 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
-
-		if (self.platform == "Mac") :
-			command += " " + mac_flags
-
+		
 		if (xcpretty) :
 			command += " | xcpretty"
-
 		if (xcpretty and operation == "test") :
 			command += " --report junit --output ./build/reports/'" + target.name + ".xml'"
 		
