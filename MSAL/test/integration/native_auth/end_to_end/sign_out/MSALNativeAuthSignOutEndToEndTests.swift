@@ -28,6 +28,10 @@ import XCTest
 final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
     func test_signOutAfterSignInPasswordSuccess() async throws {
+        // TOOD: This will be re-enabled as part of another PBI
+#if os(macOS)
+        throw XCTSkip("Keychain access is not active on the macOS app")
+#endif
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername()
