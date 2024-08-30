@@ -22,21 +22,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-import Foundation
+import XCTest
+@testable import MSAL
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: String
-    let loginHint: String
+final class MFAErrorTests: XCTestCase {
 
-    func toPublicAuthMethod() -> MSALAuthMethod {
-        return MSALAuthMethod(
-            id: id,
-            challengeType: challengeType.rawValue,
-            loginHint: loginHint,
-            channelTargetType: MSALNativeAuthChannelType(value: challengeChannel)
-        )
+    private var sut: MFAError!
+
+    func test_totalCases() {
+        XCTAssertEqual(MFAError.ErrorType.allCases.count, 2)
+    }
+
+    func test_customErrorDescription() {
+        let expectedMessage = "Custom error message"
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
+        XCTAssertEqual(sut.errorDescription, expectedMessage)
+    }
+
+    func test_defaultErrorDescription() {
+        let sut: [MFAError] = [
+            .init(type: .browserRequired, correlationId: .init()),
+            .init(type: .generalError, correlationId: .init())
+        ]
+
+        let expectedDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.generalError
+        ]
+
+        let errorDescriptions = sut.map { $0.errorDescription }
+
+        zip(errorDescriptions, expectedDescriptions).forEach {
+            XCTAssertEqual($0, $1)
+        }
+    }
+
+    func test_isBrowserRequired() {
+        sut = .init(type: .browserRequired, correlationId: .init())
+        XCTAssertTrue(sut.isBrowserRequired)
     }
 }

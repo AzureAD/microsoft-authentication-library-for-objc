@@ -63,7 +63,7 @@ class MSALNativeAuthSignInIntrospectIntegrationTests: MSALNativeAuthIntegrationB
             return XCTFail("No authentication method returned")
         }
         XCTAssertEqual(firstMethod.id, "F37D8C55-BE83-449F-8F99-131F6553871D")
-        XCTAssertEqual(firstMethod.challengeChannel, .email)
+        XCTAssertEqual(firstMethod.challengeChannel, "email")
         XCTAssertEqual(firstMethod.challengeType, .oob)
         XCTAssertEqual(firstMethod.loginHint, "**o*@c****so.com")
     }

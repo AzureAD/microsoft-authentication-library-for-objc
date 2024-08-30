@@ -25,10 +25,11 @@
 @testable import MSAL
 import XCTest
 
-class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
+class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
 
     private(set) var username: String?
     private(set) var continuationToken: String?
+    private(set) var telemetryId: MSALNativeAuthTelemetryApiId?
     var expectation: XCTestExpectation?
 
     var signInStartResult: MSALNativeAuthSignInControlling.SignInControllerResponse!
@@ -37,13 +38,18 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
     var submitPasswordResult: SignInSubmitPasswordControllerResponse!
     var resendCodeResult: SignInResendCodeControllerResponse!
 
+    var requestChallengeResponse: MFARequestChallengeControllerResponse!
+    var getAuthMethodsResponse: MFAGetAuthMethodsControllerResponse!
+    var submitChallengeResponse: MFASubmitChallengeControllerResponse!
+
     func signIn(params: MSAL.MSALNativeAuthSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         return signInStartResult
     }
 
-    func signIn(username: String, continuationToken: String?, scopes: [String]?, context: MSAL.MSALNativeAuthRequestContext) async -> SignInAfterPreviousFlowControllerResponse {
+    func signIn(username: String, continuationToken: String?, scopes: [String]?, telemetryId: MSAL.MSALNativeAuthTelemetryApiId, context: MSAL.MSALNativeAuthRequestContext) async -> SignInAfterPreviousFlowControllerResponse {
         self.username = username
         self.continuationToken = continuationToken
+        self.telemetryId = telemetryId
         expectation?.fulfill()
 
         return continuationTokenResult
@@ -59,5 +65,17 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling {
 
     func resendCode(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse {
         return resendCodeResult
+    }
+    
+    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFARequestChallengeControllerResponse {
+        return requestChallengeResponse
+    }
+    
+    func getAuthMethods(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFAGetAuthMethodsControllerResponse {
+        return getAuthMethodsResponse
+    }
+    
+    func submitChallenge(challenge: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFASubmitChallengeControllerResponse {
+        return submitChallengeResponse
     }
 }

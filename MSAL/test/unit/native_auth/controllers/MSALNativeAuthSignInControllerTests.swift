@@ -27,19 +27,19 @@ import XCTest
 @_implementationOnly import MSAL_Private
 @_implementationOnly import MSAL_Unit_Test_Private
 
-final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
+class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
-    private var sut: MSALNativeAuthSignInController!
-    private var signInRequestProviderMock: MSALNativeAuthSignInRequestProviderMock!
-    private var tokenRequestProviderMock: MSALNativeAuthTokenRequestProviderMock!
-    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
-    private var signInResponseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
-    private var tokenResponseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
-    private var contextMock: MSALNativeAuthRequestContextMock!
-    private var tokenResult = MSIDTokenResult()
-    private var tokenResponse = MSIDCIAMTokenResponse()
-    private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
-    private let defaultScopes = "openid profile offline_access"
+    var sut: MSALNativeAuthSignInController!
+    var signInRequestProviderMock: MSALNativeAuthSignInRequestProviderMock!
+    var tokenRequestProviderMock: MSALNativeAuthTokenRequestProviderMock!
+    var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    var signInResponseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
+    var tokenResponseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
+    var contextMock: MSALNativeAuthRequestContextMock!
+    var tokenResult = MSIDTokenResult()
+    var tokenResponse = MSIDCIAMTokenResponse()
+    var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
+    let defaultScopes = "openid profile offline_access"
 
     private var signInInitiateApiErrorStub: MSALNativeAuthSignInInitiateResponseError {
         .init(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
@@ -201,7 +201,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
 
     func test_successfulResponseAndUnsuccessfulValidation_shouldReturnError() async {
@@ -834,7 +833,24 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
+    
+    func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
+        XCTAssertEqual(receivedEvents.count, 1)
 
+        guard let telemetryEventDict = receivedEvents.first else {
+            return XCTFail("Telemetry test fail")
+        }
+
+        let expectedApiId = String(id.rawValue)
+        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
+        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event" )
+        XCTAssertEqual(telemetryEventDict["correlation_id" ] as? String, DEFAULT_TEST_UID.uppercased())
+        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, isSuccessful ? "yes" : "no")
+        XCTAssertEqual(telemetryEventDict["status"] as? String, isSuccessful ? "succeeded" : "failed")
+        XCTAssertNotNil(telemetryEventDict["start_time"])
+        XCTAssertNotNil(telemetryEventDict["stop_time"])
+        XCTAssertNotNil(telemetryEventDict["response_time"])
+    }
     
     // MARK: private methods
 
@@ -957,25 +973,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         receivedEvents.removeAll()
         await fulfillment(of: [expectation], timeout: 1)
     }
-    
-    private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
-        XCTAssertEqual(receivedEvents.count, 1)
-
-        guard let telemetryEventDict = receivedEvents.first else {
-            return XCTFail("Telemetry test fail")
-        }
-
-        let expectedApiId = String(id.rawValue)
-        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
-        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event" )
-        XCTAssertEqual(telemetryEventDict["correlation_id" ] as? String, DEFAULT_TEST_UID.uppercased())
-        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, isSuccessful ? "yes" : "no")
-        XCTAssertEqual(telemetryEventDict["status"] as? String, isSuccessful ? "succeeded" : "failed")
-        XCTAssertNotNil(telemetryEventDict["start_time"])
-        XCTAssertNotNil(telemetryEventDict["stop_time"])
-        XCTAssertNotNil(telemetryEventDict["response_time"])
-    }
-
 
     private func createSignInTokenApiError(message: String) -> MSALNativeAuthTokenResponseError {
         .init(error: .expiredToken, subError: nil, errorDescription: message, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)

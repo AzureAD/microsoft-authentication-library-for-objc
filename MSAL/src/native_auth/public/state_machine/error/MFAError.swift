@@ -24,11 +24,11 @@
 
 import Foundation
 
-/// Class that defines the structure and type of a MFASubmitChallengeError
+/// Class that defines the structure and type of a MFAError
 @objcMembers
-public class MFASubmitChallengeError: MSALNativeAuthError {
+public class MFAError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
-        case invalidChallenge
+        case browserRequired
         case generalError
     }
 
@@ -39,22 +39,6 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
         super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
     }
 
-    init(error: VerifyCodeError) {
-        switch error.type {
-        case .browserRequired,
-                .generalError:
-            self.type = .generalError
-        case .invalidCode:
-            self.type = .invalidChallenge
-        }
-        super.init(
-            message: error.errorDescription,
-            correlationId: error.correlationId,
-            errorCodes: error.errorCodes,
-            errorUri: error.errorUri
-        )
-    }
-
     /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
@@ -62,15 +46,15 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
         }
 
         switch type {
-        case .invalidChallenge:
-            return MSALNativeAuthErrorMessage.invalidChallenge
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
         }
     }
 
-    /// Returns `true` when the challenge introduced is not valid.
-    public var isInvalidChallenge: Bool {
-        return type == .invalidChallenge
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
     }
 }

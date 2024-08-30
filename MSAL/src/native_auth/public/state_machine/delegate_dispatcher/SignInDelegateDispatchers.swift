@@ -62,6 +62,21 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
+    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+        if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
+            telemetryUpdate?(.success(()))
+            await onSignInAwaitingMFA(newState)
+        } else {
+            let error = SignInStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInAwaitingMFA"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInStartError(error: error)
+        }
+    }
+
     func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
@@ -84,6 +99,21 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             let error = PasswordRequiredError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
+        }
+    }
+
+    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+        if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
+            telemetryUpdate?(.success(()))
+            await onSignInAwaitingMFA(newState)
+        } else {
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInPasswordRequiredAwaitingMFA"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))

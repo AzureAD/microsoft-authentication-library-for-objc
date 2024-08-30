@@ -24,19 +24,18 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: String
-    let loginHint: String
+enum MFARequestChallengeResult {
+    case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: MFARequiredState)
+    case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
+    case error(error: MFAError, newState: MFARequiredState?)
+}
 
-    func toPublicAuthMethod() -> MSALAuthMethod {
-        return MSALAuthMethod(
-            id: id,
-            challengeType: challengeType.rawValue,
-            loginHint: loginHint,
-            channelTargetType: MSALNativeAuthChannelType(value: challengeChannel)
-        )
-    }
+enum MFAGetAuthMethodsResult {
+    case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
+    case error(error: MFAError, newState: MFARequiredState?)
+}
+
+enum MFASubmitChallengeResult {
+    case completed(MSALNativeAuthUserAccountResult)
+    case error(error: MFASubmitChallengeError, newState: MFARequiredState?)
 }

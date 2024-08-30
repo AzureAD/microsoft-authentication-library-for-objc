@@ -126,8 +126,8 @@ class MSALNativeAuthSignInResponseValidatorMock: MSALNativeAuthSignInResponseVal
     func validateIntrospect(context: any MSIDRequestContext, result: Result<MSAL.MSALNativeAuthSignInIntrospectResponse, any Error>) -> MSAL.MSALNativeAuthSignInIntrospectValidatedResponse {
         checkConfAndContext(context)
         if case .success(let successIntrospectResponse) = result, let expectedIntrospectResponse = expectedIntrospectResponse {
-            XCTAssertEqual(successIntrospectResponse.challengeType, expectedInitiateResponse?.challengeType)
-            XCTAssertEqual(successIntrospectResponse.continuationToken, expectedInitiateResponse?.continuationToken)
+            XCTAssertEqual(successIntrospectResponse.challengeType, expectedIntrospectResponse.challengeType)
+            XCTAssertEqual(successIntrospectResponse.continuationToken, expectedIntrospectResponse.continuationToken)
         }
         if case .failure(let introspectResponseError) = result, let expectedIntrospectResponseError = expectedResponseError {
             XCTAssertTrue(type(of: introspectResponseError) == type(of: expectedIntrospectResponseError))
@@ -196,6 +196,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     var expectedContext: MSIDRequestContext?
     var expectedUsername: String?
+    var expectedMFAAuthMethodId: String?
     var expectedContinuationToken: String?
     
     func mockInitiateRequestFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
@@ -224,6 +225,7 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
     
     func challenge(parameters: MSAL.MSALNativeAuthSignInChallengeRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
+        XCTAssertEqual(parameters.mfaAuthMethodId, expectedMFAAuthMethodId)
         if let expectedContinuationToken {
             XCTAssertEqual(expectedContinuationToken, parameters.continuationToken)
         }
@@ -235,7 +237,12 @@ class MSALNativeAuthSignInRequestProviderMock: MSALNativeAuthSignInRequestProvid
             fatalError("Make sure to use mockChallengeRequestFunc()")
         }
     }
-    
+
+    func mockIntrospectRequestFunc(_ request: MSIDHttpRequest?, throwError: Error? = nil) {
+        self.requestIntrospect = request
+        self.throwingIntrospectError = throwError
+    }
+
     func introspect(parameters: MSAL.MSALNativeAuthSignInIntrospectRequestParameters, context: any MSIDRequestContext) throws -> MSIDHttpRequest {
         checkContext(context)
         if let expectedContinuationToken {

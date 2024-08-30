@@ -101,4 +101,32 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             )
         }
     }
+
+    func convertToMFARequestChallengeError(correlationId: UUID) -> MFAError {
+        switch self {
+        case .redirect:
+            return .init(type: .browserRequired, correlationId: correlationId)
+        case .invalidRequest(let apiError),
+             .expiredToken(let apiError),
+             .invalidToken(let apiError),
+             .unauthorizedClient(let apiError),
+             .userNotFound(let apiError),
+             .unsupportedChallengeType(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
 }

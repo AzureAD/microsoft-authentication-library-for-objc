@@ -24,19 +24,28 @@
 
 import Foundation
 
-struct MSALNativeAuthInternalAuthenticationMethod: Decodable, Equatable {
-    // MARK: - Variables
-    let id: String
-    let challengeType: MSALNativeAuthInternalChallengeType
-    let challengeChannel: String
-    let loginHint: String
+protocol MSALNativeAuthMFAControlling {
 
-    func toPublicAuthMethod() -> MSALAuthMethod {
-        return MSALAuthMethod(
-            id: id,
-            challengeType: challengeType.rawValue,
-            loginHint: loginHint,
-            channelTargetType: MSALNativeAuthChannelType(value: challengeChannel)
-        )
-    }
+    typealias MFARequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFARequestChallengeResult>
+    typealias MFAGetAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFAGetAuthMethodsResult>
+    typealias MFASubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFASubmitChallengeResult>
+
+    func requestChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod?,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> MFARequestChallengeControllerResponse
+
+    func getAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]
+    ) async -> MFAGetAuthMethodsControllerResponse
+
+    func submitChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String]) async -> MFASubmitChallengeControllerResponse
 }

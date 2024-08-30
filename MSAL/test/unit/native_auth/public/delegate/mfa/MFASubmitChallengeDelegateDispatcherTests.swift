@@ -20,15 +20,15 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 @testable import MSAL
 import XCTest
 
-final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
+final class MFASubmitChallengeDelegateDispatcherTests: XCTestCase {
     private var telemetryExp: XCTestExpectation!
     private var delegateExp: XCTestExpectation!
-    private var sut: SignInPasswordRequiredDelegateDispatcher!
+    private var sut: MFASubmitChallengeDelegateDispatcher!
     private let controllerFactoryMock = MSALNativeAuthControllerFactoryMock()
     private let correlationId = UUID()
 
@@ -38,9 +38,10 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
         delegateExp = expectation(description: "delegateDispatcher delegate exp")
     }
 
-    func test_dispatchSignInCompleted_whenDelegateMethodsAreImplemented() async {
+    func test_dispatchSignInCompleted_whenDelegateMethodIsImplemented() async {
         let expectedResult = MSALNativeAuthUserAccountResultStub.result
-        let delegate = SignInPasswordRequiredDelegateSpy(expectation: delegateExp, expectedUserAccountResult: expectedResult)
+
+        let delegate = MFASubmitChallengeDelegateSpy(expectation: delegateExp, expectedResult: expectedResult, expectedError: nil)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case .success = result else {
@@ -53,16 +54,19 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
         await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
 
-        XCTAssertEqual(delegate.expectedUserAccountResult, expectedResult)
+        XCTAssertEqual(delegate.expectedResult, expectedResult)
     }
 
-    func test_dispatchSignInCompleted_whenDelegateOptionalMethodsNotImplemented() async {
-        let expectedError = PasswordRequiredError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"), correlationId: correlationId)
-        let delegate = SignInPasswordRequiredDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-
+    func test_dispatchSignInCompleted_whenDelegateMethodIsNotImplemented() async {
+        let expectedError = MFASubmitChallengeError(
+            type: .generalError,
+            message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onSignInCompleted"),
+            correlationId: correlationId
+        )
+        let delegate = MFASubmitChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? PasswordRequiredError else {
+            guard case let .failure(error) = result, let customError = error as? MFASubmitChallengeError else {
                 return XCTFail("wrong result")
             }
 
@@ -70,14 +74,12 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedResult = MSALNativeAuthUserAccountResultStub.result
-
-        await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
+        await sut.dispatchSignInCompleted(result: MSALNativeAuthUserAccountResultStub.result, correlationId: correlationId)
 
         await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
-        checkError(delegate.delegateError)
+        checkError(delegate.expectedError)
 
-        func checkError(_ error: PasswordRequiredError?) {
+        func checkError(_ error: MFASubmitChallengeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
             XCTAssertEqual(error?.correlationId, expectedError.correlationId)

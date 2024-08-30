@@ -213,7 +213,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
-        // TODO: .verificationRequired is not supported by the API team yet. We treat it as an unexpectedError
+        // TODO: .verificationRequired is returned by server when user submits attribute but email isn't verified yet. It needs to be handled by SDK
         case .verificationRequired:
             MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
