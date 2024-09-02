@@ -43,7 +43,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:NativeAuthEndToEndTestPlan Mac.xctestplan"
+            reference = "container:test/testplan/NativeAuthEndToEndTestPlan Mac.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>
