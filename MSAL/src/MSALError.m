@@ -31,6 +31,7 @@ NSString *MSALErrorDomain = @"MSALErrorDomain";
 NSString *MSALOAuthErrorKey = @"MSALOAuthErrorKey";
 NSString *MSALOAuthSubErrorKey = @"MSALOAuthSubErrorKey";
 NSString *MSALErrorDescriptionKey = @"MSALErrorDescriptionKey";
+NSString *MSALSTSErrorCodesKey = @"MSALSTSErrorCodesKey";
 NSString *MSALInternalErrorCodeKey = @"MSALInternalErrorCodeKey";
 NSString *MSALHTTPHeadersKey = @"MSALHTTPHeadersKey";
 NSString *MSALHTTPResponseCodeKey = @"MSALHTTPResponseCodeKey";

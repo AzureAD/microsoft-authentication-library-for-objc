@@ -139,6 +139,7 @@ static NSSet *s_recoverableErrorCode;
                              MSIDHTTPResponseCodeKey : MSALHTTPResponseCodeKey,
                              MSIDCorrelationIdKey : MSALCorrelationIDKey,
                              MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
+                             MSIDSTSErrorCodesKey : MSALSTSErrorCodesKey,
                              MSIDOAuthErrorKey: MSALOAuthErrorKey,
                              MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
                              MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
@@ -249,8 +250,12 @@ static NSSet *s_recoverableErrorCode;
     if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
     if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
-    
-    if (underlyingError) msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
+        
+    if (underlyingError) {
+        msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
+        NSArray<NSNumber *>* stsErrorCodes = underlyingError.userInfo[MSIDSTSErrorCodesKey];
+        if (stsErrorCodes) msalUserInfo[MSALSTSErrorCodesKey] = stsErrorCodes;
+    }
     
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
