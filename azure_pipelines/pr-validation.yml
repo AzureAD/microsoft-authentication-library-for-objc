@@ -116,8 +116,8 @@ jobs:
 
       name: fetchPrLabels
 
-- job: e2e_test_native_auth
-  displayName: 'Run MSAL E2E tests for native auth'
+- job: e2e_test_native_auth_ios
+  displayName: 'Run MSAL E2E tests for iOS native auth'
   dependsOn: fetch_pr_labels
   condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
   timeoutInMinutes: 30
@@ -131,7 +131,28 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator17.5-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+      sdk: 'iphonesimulator'
+
+- job: e2e_test_native_auth_mac
+  displayName: 'Run MSAL E2E tests for macOS native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
+      destination: 'platform=macOS'
+      sdk: 'macosx'
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
