@@ -63,8 +63,8 @@ steps:
             -destination '${{ parameters.destination }}' \
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'      
-
+            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+            | xcpretty -c
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
