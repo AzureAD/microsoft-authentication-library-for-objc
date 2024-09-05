@@ -1732,8 +1732,6 @@
 			remoteGlobalIDString = D626FF681FBA6EDF00EE4487;
 			remoteInfo = "IdentityCoreTests Mac";
 		};
-<<<<<<< HEAD
-=======
 		D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -1769,7 +1767,6 @@
 			remoteGlobalIDString = B295A16322D0348400FFB313;
 			remoteInfo = "unit-test-host-mac";
 		};
->>>>>>> dev
 		E7A6569524FEE45300931BAE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -7272,8 +7269,6 @@
 			target = D672279E1EBD111900F3422A /* unit-test-host */;
 			targetProxy = D67227B61EBD112800F3422A /* PBXContainerItemProxy */;
 		};
-<<<<<<< HEAD
-=======
 		D6BFE3DB1EB42D3200F2B7E8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
@@ -7299,7 +7294,6 @@
 			target = B295A16322D0348400FFB313 /* unit-test-host-mac */;
 			targetProxy = DE1BD1252C3C374600B0888E /* PBXContainerItemProxy */;
 		};
->>>>>>> dev
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
