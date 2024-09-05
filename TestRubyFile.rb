@@ -10,7 +10,7 @@ group = project.main_group['test/automation']
 file = group.new_file('conf.json')
 #add the file reference to the projects first target
 project.targets.each do |target|
-    if target.name == "MultiAppiOSTests" || target.name == "InteractiveiOSTests" || target.name == "MSAL iOS Native Auth E2E Tests"
+    if target.name == "MultiAppiOSTests" || target.name == "InteractiveiOSTests" || target.name == "MSAL iOS Native Auth E2E Tests" || target.name == "MSAL Mac Native Auth E2E Tests"
         target.add_resources([file])
     end
 end

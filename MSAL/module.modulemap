@@ -80,7 +80,6 @@ module MSAL_Private {
     header "IdentityCore/IdentityCore/src/util/NSString+MSIDExtensions.h"
     header "IdentityCore/IdentityCore/src/workplacejoin/MSIDWorkPlaceJoinConstants.h"
     header "IdentityCore/IdentityCore/src/webview/embeddedWebview/challangeHandlers/MSIDPKeyAuthHandler.h"
-    header "src/configuration/external/ios/MSALLegacySharedADALAccount.h"
     header "src/MSALPublicClientApplication+Internal.h"
     header "IdentityCore/IdentityCore/src/MSIDError.h"
     header "src/MSALAccount+Internal.h"
@@ -98,4 +97,5 @@ module MSAL_Unit_Test_Private {
     header "IdentityCore/IdentityCore/tests/util/MSIDTestIdentifiers.h"
     header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLResponse.h"
     header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLSession.h"
+    header "IdentityCore/IdentityCore/tests/util/MSIDTestCacheDataSource.h"
 }
