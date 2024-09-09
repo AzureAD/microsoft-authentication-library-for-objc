@@ -1,6 +1,7 @@
 ## [TBD]:
 * Increased macOS minimum version to 10.15 #2220
 * Added Native Auth feature for MacOS to interact with the Microsoft Entra ID services
+* VisionOS support added (#2139)
 
 ## [1.4.2]
 * Fix invalid cert auth request handling (hotfix). (#2278)
