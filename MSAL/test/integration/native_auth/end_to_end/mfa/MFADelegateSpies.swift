@@ -76,7 +76,7 @@ final class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
     
     private let expectation: XCTestExpectation
     private(set) var onSignInCompletedCalled = false
-    private(set) var onMFASubmitChallengeError = false
+    private(set) var onMFASubmitChallengeErrorCalled = false
     private(set) var error: MSAL.MFASubmitChallengeError?
     private(set) var result: MSAL.MSALNativeAuthUserAccountResult?
     private(set) var newStateMFARequiredState: MSAL.MFARequiredState?
@@ -86,7 +86,7 @@ final class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
     }
     
     func onMFASubmitChallengeError(error: MSAL.MFASubmitChallengeError, newState: MSAL.MFARequiredState?) {
-        onMFASubmitChallengeError = true
+        onMFASubmitChallengeErrorCalled = true
         self.error = error
 
         expectation.fulfill()
@@ -96,6 +96,35 @@ final class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
         onSignInCompletedCalled = true
         self.result = result
 
+        expectation.fulfill()
+    }
+}
+
+final class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
+    
+    private let expectation: XCTestExpectation
+    private(set) var onSelectionRequiredCalled = false
+    private(set) var onMFAGetAuthMethodsErrorCalled = false
+    private(set) var authMethods: [MSALAuthMethod]?
+    private(set) var error: MSAL.MFAError?
+    private(set) var newStateMFARequired: MSAL.MFARequiredState?
+    
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+    
+    func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+        onMFAGetAuthMethodsErrorCalled = true
+        self.error = error
+
+        expectation.fulfill()
+    }
+    
+    func onMFAGetAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState) {
+        onSelectionRequiredCalled = true
+        self.newStateMFARequired = newState
+        self.authMethods = authMethods
+        
         expectation.fulfill()
     }
 }
