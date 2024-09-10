@@ -82,28 +82,12 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         }
 
         // Now retrieve and submit the email OTP code
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-
-        let submitChallengeExpectation = expectation(description: "submitChallenge")
-        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
-
-        mfaRequiredState.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
-
-        await fulfillment(of: [submitChallengeExpectation])
-
-        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
-        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
+        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
         throw XCTSkip("Missing username for MFA user")
-        guard let sut = initialisePublicClientApplication(),
-              let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
+        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
               let password = await retrievePasswordForSignInUsername(),
               let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)
         else {
@@ -153,23 +137,8 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             return
         }
         
-        // Now submit the email OTP code
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-
-        let submitChallengeExpectation = expectation(description: "submitChallenge")
-        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
-
-        mfaRequiredState.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
-
-        await fulfillment(of: [submitChallengeExpectation])
-
-        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
-        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
+        // Now retrieve and submit the email OTP code
+        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
     }
     
     func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
@@ -210,23 +179,8 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             return
         }
         
-        // Now submit the email OTP code
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-
-        let submitChallengeExpectation = expectation(description: "submitChallenge")
-        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
-
-        mfaRequiredState.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
-
-        await fulfillment(of: [submitChallengeExpectation])
-
-        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
-        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
+        // Now retrieve and submit the email OTP code
+        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
     }
     
     // MARK: private methods
@@ -249,5 +203,24 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             return nil
         }
         return awaitingMFAState
+    }
+    
+    private func retrieveAndSubmitCode(state: MFARequiredState, username: String) async {
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let submitChallengeExpectation = expectation(description: "submitChallenge")
+        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
+
+        state.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
+
+        await fulfillment(of: [submitChallengeExpectation])
+
+        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
+        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
+        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
     }
 }
