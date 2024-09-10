@@ -87,6 +87,7 @@ final class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
     
     func onMFASubmitChallengeError(error: MSAL.MFASubmitChallengeError, newState: MSAL.MFARequiredState?) {
         onMFASubmitChallengeErrorCalled = true
+        self.newStateMFARequiredState = newState
         self.error = error
 
         expectation.fulfill()

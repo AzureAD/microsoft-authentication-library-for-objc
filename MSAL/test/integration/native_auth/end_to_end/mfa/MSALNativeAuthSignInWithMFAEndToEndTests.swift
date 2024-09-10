@@ -28,7 +28,7 @@ import MSAL
 
 final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
-    func test_signInUsingPasswordWithMFA_completeSuccessfully() async throws {
+    func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
         XCTSkip("Missing username for MFA user")
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(), 
                 let password = await retrievePasswordForSignInUsername(),
@@ -50,8 +50,38 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             XCTFail("Challenge not sent to MFA method")
             return
         }
+        
+        // Now submit the wrong email OTP code
+        let submitWrongChallengeExpectation = expectation(description: "submitChallenge")
+        let mfaSubmitWrongChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitWrongChallengeExpectation)
 
-        // Now submit the email OTP code
+        mfaRequiredState.submitChallenge(challenge: "000000", delegate: mfaSubmitWrongChallengeDelegateSpy)
+
+        await fulfillment(of: [submitWrongChallengeExpectation])
+
+        XCTAssertTrue(mfaSubmitWrongChallengeDelegateSpy.onMFASubmitChallengeErrorCalled)
+        XCTAssertEqual(mfaSubmitWrongChallengeDelegateSpy.error?.isInvalidChallenge, true)
+        
+        guard let mfaRequiredState = mfaSubmitWrongChallengeDelegateSpy.newStateMFARequiredState else {
+            XCTFail("New state not received after SDK error")
+            return
+        }
+        
+        // Resend code to default auth method
+        
+        let mfaResendChallengeExpectation = expectation(description: "mfa")
+        let mfaResendChallengeDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaResendChallengeExpectation)
+        
+        mfaRequiredState.requestChallenge(delegate: mfaResendChallengeDelegateSpy)
+        
+        await fulfillment(of: [mfaResendChallengeExpectation])
+        
+        guard mfaResendChallengeDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
+            XCTFail("Challenge not sent to MFA method")
+            return
+        }
+
+        // Now retrieve and submit the email OTP code
         guard let code = await retrieveCodeFor(email: username) else {
             XCTFail("OTP code could not be retrieved")
             return
@@ -68,42 +98,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
         XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
         XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
-    }
-    
-    func test_signInUsingPasswordWithMFASendWrongChallenge_returnExpectedError() async throws {
-        XCTSkip("Missing username for MFA user")
-        guard let sut = initialisePublicClientApplication(),
-              let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
-              let password = await retrievePasswordForSignInUsername(),
-              let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)
-        else {
-            XCTFail("Something went wrong")
-            return
-        }
-        
-        // Request to send challenge to the default strong auth method
-        let mfaExpectation = expectation(description: "mfa")
-        let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
-        
-        awaitingMFAState.requestChallenge(delegate: mfaDelegateSpy)
-        
-        await fulfillment(of: [mfaExpectation])
-        
-        guard mfaDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
-            XCTFail("Challenge not sent to MFA method")
-            return
-        }
-
-        // Now submit the wrong email OTP code
-        let submitChallengeExpectation = expectation(description: "submitChallenge")
-        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
-
-        mfaRequiredState.submitChallenge(challenge: "000000", delegate: mfaSubmitChallengeDelegateSpy)
-
-        await fulfillment(of: [submitChallengeExpectation])
-
-        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onMFASubmitChallengeErrorCalled)
-        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.error?.isInvalidChallenge, true)
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
@@ -178,6 +172,63 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
     }
     
+    func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
+        XCTSkip("Missing username for MFA user with no default auth method")
+        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod(),
+                let password = await retrievePasswordForSignInUsername(),
+                let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)
+        else {
+            XCTFail("Something went wrong")
+            return
+        }
+        
+        // Request to send challenge to the default strong auth method
+        let mfaExpectation = expectation(description: "mfa")
+        let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
+        
+        awaitingMFAState.requestChallenge(delegate: mfaDelegateSpy)
+        
+        await fulfillment(of: [mfaExpectation])
+        
+        guard mfaDelegateSpy.onSelectionRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired, let authMethod = mfaDelegateSpy.authMethods?.first else {
+            XCTFail("Selection required not triggered")
+            return
+        }
+        
+        XCTAssertTrue(authMethod.channelTargetType.isEmailType)
+        
+        // Request to send challenge to a specific strong auth method
+        
+        let mfaSendChallengeExpectation = expectation(description: "mfa")
+        let mfaSendChallengeDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaSendChallengeExpectation)
+        mfaRequiredState.requestChallenge(authMethod: authMethod, delegate: mfaSendChallengeDelegateSpy)
+        
+        await fulfillment(of: [mfaSendChallengeExpectation])
+        
+        guard mfaSendChallengeDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaSendChallengeDelegateSpy.newStateMFARequired else {
+            XCTFail("Challenge not sent to MFA method")
+            return
+        }
+        
+        // Now submit the email OTP code
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let submitChallengeExpectation = expectation(description: "submitChallenge")
+        let mfaSubmitChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
+
+        mfaRequiredState.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
+
+        await fulfillment(of: [submitChallengeExpectation])
+
+        XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
+        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
+        XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
+    }
+    
     // MARK: private methods
     
     private func signInUsernameAndPassword(username: String, password: String) async -> AwaitingMFAState? {
@@ -199,5 +250,4 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         }
         return awaitingMFAState
     }
-
 }
