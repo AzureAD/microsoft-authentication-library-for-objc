@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1530"
+   LastUpgradeVersion = "1500"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES"
-      buildArchitectures = "Automatic">
+      buildImplicitDependencies = "YES">
    </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
@@ -14,7 +13,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:test/testplan/MSAL iOS Native Auth E2E Tests.xctestplan"
+            reference = "container:test/testplan/MSAL Mac Native Auth E2E Tests.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>
@@ -24,9 +23,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "28CED2E72C21E0F9004320D1"
-               BuildableName = "MSAL iOS Native Auth E2E Tests.xctest"
-               BlueprintName = "MSAL iOS Native Auth E2E Tests"
+               BlueprintIdentifier = "DE1BD0F52C3C282900B0888E"
+               BuildableName = "MSAL Mac Native Auth E2E Tests.xctest"
+               BlueprintName = "MSAL Mac Native Auth E2E Tests"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
          </TestableReference>

@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,23 +16,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+import Foundation
 
-NS_ASSUME_NONNULL_BEGIN
+struct AttributesStub {
 
-@interface MSALSSOExtensionRequestHandler : NSObject
+    private static let _attribute1 = (key: "city", value: "Dublin")
+    private static let _attribute2 = (key: "country", value: "Ireland")
 
-- (BOOL)setCurrentSSOExtensionRequest:(id)request;
-- (id)copyAndClearCurrentSSOExtensionRequest;
+    static var attribute1: [String: String] {
+        [_attribute1.key: _attribute1.value]
+    }
 
-@end
+    static var attribute2: [String: String] {
+        [_attribute2.key: _attribute2.value]
+    }
 
-NS_ASSUME_NONNULL_END
+    static var allAttributes: [String: String] {
+        attribute1.merging(attribute2) { (current, new) in new }
+    }
+}

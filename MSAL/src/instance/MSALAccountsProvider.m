@@ -350,10 +350,7 @@
 {
     BOOL shouldCallBroker = NO;
     
-    if (@available(macOS 10.15, *))
-    {
-        shouldCallBroker = [MSIDSSOExtensionGetAccountsRequest canPerformRequest] && [requestParameters shouldUseBroker];
-    }
+    shouldCallBroker = [MSIDSSOExtensionGetAccountsRequest canPerformRequest] && [requestParameters shouldUseBroker];
     
     if (!shouldCallBroker)
     {
@@ -363,17 +360,14 @@
         return;
     }
     
-    if (@available(macOS 10.15, *))
-    {
-        [self allAccountsFromSSOExtension:parameters
+    [self allAccountsFromSSOExtension:parameters
                         requestParameters:requestParameters
                           completionBlock:completionBlock];
-    }
 }
 
 - (void)allAccountsFromSSOExtension:(MSALAccountEnumerationParameters *)parameters
                   requestParameters:(MSIDRequestParameters *)requestParameters
-                    completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                    completionBlock:(MSALAccountsCompletionBlock)completionBlock
 {
     NSError *requestError;
     MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
