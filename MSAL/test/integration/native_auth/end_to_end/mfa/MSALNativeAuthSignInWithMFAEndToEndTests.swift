@@ -82,7 +82,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         }
 
         // Now retrieve and submit the email OTP code
-        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
+        await completeSignInWithMFAFlow(state: mfaRequiredState, username: username)
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
@@ -138,7 +138,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         }
         
         // Now retrieve and submit the email OTP code
-        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
+        await completeSignInWithMFAFlow(state: mfaRequiredState, username: username)
     }
     
     func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
@@ -180,13 +180,13 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         }
         
         // Now retrieve and submit the email OTP code
-        await retrieveAndSubmitCode(state: mfaRequiredState, username: username)
+        await completeSignInWithMFAFlow(state: mfaRequiredState, username: username)
     }
     
     // MARK: private methods
     
     private func signInUsernameAndPassword(username: String, password: String) async -> AwaitingMFAState? {
-        guard let sut = initialisePublicClientApplication()
+        guard let application = initialisePublicClientApplication()
         else {
             XCTFail("Missing information")
             return nil
@@ -194,7 +194,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        application.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
         
@@ -205,7 +205,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         return awaitingMFAState
     }
     
-    private func retrieveAndSubmitCode(state: MFARequiredState, username: String) async {
+    private func completeSignInWithMFAFlow(state: MFARequiredState, username: String) async {
         guard let code = await retrieveCodeFor(email: username) else {
             XCTFail("OTP code could not be retrieved")
             return
