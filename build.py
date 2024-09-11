@@ -107,30 +107,6 @@ target_specifiers = [
         "platform" : "visionOS",
         "target" : "visionOSFramework"
     },
-    {
-        "name" : "iOS Test App",
-        "scheme" : "MSAL Test App (iOS)",
-        "operations" : [ "build" ],
-        "platform" : "visionOS",
-        "target" : "visionOSTestApp"
-
-    },
-    {
-        "name" : "Sample iOS App",
-        "scheme" : "SampleAppiOS",
-        "workspace" : "Samples/ios/SampleApp.xcworkspace",
-        "operations" : [ "build" ],
-        "platform" : "visionOS",
-        "target" : "visionOSSampleApp"
-    },
-    {
-        "name" : "Sample iOS App-iOS",
-        "scheme" : "SampleAppiOS-Swift",
-        "workspace" : "Samples/ios/SampleApp.xcworkspace",
-        "operations" : [ "build" ],
-        "platform" : "visionOS",
-        "target" : "visionOSSampleAppSwift"
-    },
 ]
 
 def print_operation_start(name, operation) :
