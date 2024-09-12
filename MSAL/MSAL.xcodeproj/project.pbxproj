@@ -1783,6 +1783,13 @@
 			remoteGlobalIDString = D626FF681FBA6EDF00EE4487;
 			remoteInfo = "IdentityCoreTests Mac";
 		};
+		D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 962E37A61E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
+		};
 		DE1BD0D42C3C275200B0888E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -7437,6 +7444,11 @@
 			isa = PBXTargetDependency;
 			target = D672279E1EBD111900F3422A /* unit-test-host */;
 			targetProxy = D67227B61EBD112800F3422A /* PBXContainerItemProxy */;
+		};
+		D6BFE3DB1EB42D3200F2B7E8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
+			targetProxy = D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */;
 		};
 		DE1BD0D52C3C275200B0888E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
