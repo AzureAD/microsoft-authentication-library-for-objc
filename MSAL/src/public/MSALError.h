@@ -63,6 +63,12 @@ extern NSString *MSALOAuthSubErrorKey;
 extern NSString *MSALErrorDescriptionKey;
 
 /**
+    A list of STS-specific error codes returned by the service that can help in diagnostics. Note that error codes can change and should
+    not be relied upon for any error handling logic.
+ */
+extern NSString *MSALSTSErrorCodesKey;
+
+/**
  Internal error code returned together with MSALErrorInternal error.
  */
 extern NSString *MSALInternalErrorCodeKey;

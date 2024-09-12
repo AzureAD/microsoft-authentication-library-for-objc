@@ -1,4 +1,5 @@
 ## [TBD]:
+* Parse and add STS error codes in token error result (#2319)
 * VisionOS support added (#2139)
 
 ## [1.5.0]
