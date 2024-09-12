@@ -128,6 +128,28 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALSTSErrorCodesKey], stsErrorCodes);
 }
 
+- (void)testErrorConversion_ErrorCodesAreAlsoRetrievedFromUnderlyingError_ErrorShouldBeParsedCorrectly {
+    NSArray<NSNumber *> *stsErrorCodes = @[@123];
+    NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:@{MSIDSTSErrorCodesKey : stsErrorCodes}];
+    
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDKeychainErrorDomain
+                                                        code:1
+                                            errorDescription:@"description"
+                                                  oauthError:@"oauthError"
+                                                    subError:@"subError"
+                                             underlyingError:underlyingError
+                                               correlationId:[NSUUID UUID]
+                                                    userInfo:nil
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
+    
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALSTSErrorCodesKey], stsErrorCodes);
+}
+
 - (void)testErrorConversion_whenUnclassifiedInternalMSALErrorPassed_shouldMapToInternal
 {
     NSInteger errorCode = -42400;
