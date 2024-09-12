@@ -132,11 +132,11 @@ final class MSALNativeAuthUrlRequestSerializerTests: MSALNativeAuthTestCase {
 
         Self.logger.expectation = expectation
         var impossibleToEncode = [String: Any]()
-#if os(iOS)
+#if !os(macOS)
         impossibleToEncode = [
             "param": UIView()
         ]
-#elseif os(macOS)
+#else
         impossibleToEncode = [
             "param": NSView()
         ]

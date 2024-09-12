@@ -48,7 +48,7 @@ cd "$SAMPLE_APP_TEMP_DIR"
 git clone https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample.git
 cd ms-identity-ciam-native-auth-ios-sample
 
-sed -i '' 's#kind = upToNextMinorVersion;#kind = branch;#' NativeAuthSampleApp.xcodeproj/project.pbxproj
+sed -i '' 's#kind = upToNextMajorVersion;#kind = branch;#' NativeAuthSampleApp.xcodeproj/project.pbxproj
 sed -i '' "s#minimumVersion = [0-9.]*;#branch = $BRANCH_NAME;#" NativeAuthSampleApp.xcodeproj/project.pbxproj
 
 rm -f NativeAuthSampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
