@@ -55,7 +55,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         let submitWrongChallengeExpectation = expectation(description: "submitChallenge")
         let mfaSubmitWrongChallengeDelegateSpy = MFASubmitChallengeDelegateSpy(expectation: submitWrongChallengeExpectation)
 
-        mfaRequiredState.submitChallenge(challenge: "000000", delegate: mfaSubmitWrongChallengeDelegateSpy)
+        mfaRequiredState.submitChallenge(challenge: "wrong_code", delegate: mfaSubmitWrongChallengeDelegateSpy)
 
         await fulfillment(of: [submitWrongChallengeExpectation])
 
