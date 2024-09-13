@@ -44,6 +44,7 @@ enum MSALNativeAuthErrorMessage {
     static let redirectUriNotSetWarning = "WARNING ⚠️: redirectUri not set during MSAL Native Auth initialization. Production apps must correctly configure a redirect URI and call acquireToken in response to all browserRequired errors. See https://learn.microsoft.com/entra/identity-platform/redirect-uris-ios"
     static let unexpectedResponseBody = "Unexpected response body received"
     static let unexpectedChallengeType = "Unexpected challenge type"
+    static let refreshTokenMFARequiredError = "Multi-factor authentication is required, which can't be fulfilled as part of this flow. Please sign out and perform a new sign in operation. More information: "
 }
 
 // swiftlint:enable line_length
