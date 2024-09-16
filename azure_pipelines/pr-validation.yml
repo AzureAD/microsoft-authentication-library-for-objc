@@ -39,6 +39,7 @@ jobs:
     displayName: 'Trigger pipeline in ADO clone for PRAssistant bot'
     env:
       AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+    failOnStderr: false
   - script: |
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
     displayName: 'Switch to use Xcode 15.4'
