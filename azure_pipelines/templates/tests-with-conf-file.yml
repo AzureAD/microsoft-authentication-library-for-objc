@@ -3,7 +3,7 @@ parameters:
   full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun'
   destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
   sdk: 'iphonesimulator'
-  retry-tests: true
+  retry-tests: 'true'
 
 steps:
   - checkout: self
@@ -59,7 +59,7 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
-        if [ '${{ parameters.retry-tests }}' == true ]; then
+        if ['${{ parameters.retry-tests }}' == 'true']; then
             xcodebuild test-without-building \
                 -xctestrun '${{ parameters.full_path }}' \
                 -destination '${{ parameters.destination }}' \
