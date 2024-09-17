@@ -25,7 +25,7 @@ jobs:
   steps:
   - bash: |
       echo "Source branch : $(System.PullRequest.SourceBranch) Target branch : $(System.PullRequest.targetBranchName)"
-      az pipelines run --project 'IDDP' --id 2727 --branch 'ameyapat/clone-pr-hackathon' --organization 'https://identitydivision.visualstudio.com' --variables "source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)"
+      az pipelines run --project 'IDDP' --id 2727 --branch 'ameyapat/clone-pr-hackathon' --organization 'https://identitydivision.visualstudio.com' --variables source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)
     displayName: 'Trigger pipeline in ADO clone for PRAssistant bot'
     env:
       AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
