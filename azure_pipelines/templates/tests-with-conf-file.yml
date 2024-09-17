@@ -66,7 +66,7 @@ steps:
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
-       else 
+       else
           xcodebuild test-without-building \
             -xctestrun '${{ parameters.full_path }}' \
             -destination '${{ parameters.destination }}' \
