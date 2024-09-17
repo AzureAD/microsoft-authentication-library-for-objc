@@ -29,6 +29,13 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
     private let baseURLString = "https://www.1secmail.com/api/v1/?action="
     private let secondsToWait = 4.0
     private let numberOfRetry = 3
+    static var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) //We ignore the timezone
+        return dateFormatter
+    }()
 
     func retrieveEmailOTPCode(email: String) async -> String? {
         let comps = email.components(separatedBy: "@")
@@ -76,7 +83,19 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
             }
             if dataDictionary.count > 0 {
                 dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
-                return dataDictionary.first?["id"] as? Int
+                if let emailDateString = dataDictionary.first?["date"] as? String,
+                   let emailDate = MSALNativeAuthEmailCodeRetriever.dateFormatter.date(from: emailDateString) {
+                    let currentDate = Date()
+                    // Email should be newer than 5 seconds otherwise it could be from previous test
+                    // This retry will help with the delay in receiving the emails
+                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < 5 {
+                        print ("Email is ok, last receive date: \(emailDate) current date: \(currentDate)")
+                        return dataDictionary.first?["id"] as? Int
+                    } else {
+                        print ("Email is older, last receive date: \(emailDate) current date: \(currentDate)")
+                    }
+                }
+                return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
             } else {
                 // log only for the final retry
                 if (retryCounter == 1) {
