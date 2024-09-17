@@ -35,7 +35,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let tenantSubdomainKey = "tenant_subdomain"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
+        #else
+        static let resetPasswordUsernameKey = "reset_password_username_macos"
+        #endif
     }
     
     let correlationId = UUID()
