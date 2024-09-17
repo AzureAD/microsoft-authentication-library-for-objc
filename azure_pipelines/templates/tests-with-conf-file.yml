@@ -59,7 +59,7 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
-        if [ "${{ parameters.retry-tests }}" == true ]; then
+        if [ '${{ parameters.retry-tests }}' == true ]; then
             xcodebuild test-without-building \
                 -xctestrun '${{ parameters.full_path }}' \
                 -destination '${{ parameters.destination }}' \
