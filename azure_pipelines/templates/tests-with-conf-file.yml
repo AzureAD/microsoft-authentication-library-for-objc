@@ -66,14 +66,14 @@ steps:
             -retry-tests-on-failure \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
-
+            
        else
           xcodebuild test-without-building \
             -xctestrun '${{ parameters.full_path }}' \
             -destination '${{ parameters.destination }}' \
             -parallel-testing-enabled NO \
             -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
-            
+
        fi 
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
