@@ -69,6 +69,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL wipeCacheForAllAccounts;
 
 /**
+ Key-value pairs to pass to the logout endpoint. This should not be url-encoded value.
+ */
+@property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
+
+/**
  Initialize MSALSignoutParameters with web parameters.
  
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
