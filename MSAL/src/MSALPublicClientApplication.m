@@ -1467,6 +1467,10 @@
     msidParams.platformSequence = [NSString msidUpdatePlatformSequenceParamWithSrcName:[MSIDVersion platformName]
                                                                             srcVersion:[MSIDVersion sdkVersion]
                                                                               sequence:nil];
+    
+    // Extra parameters to be added to the /authorize endpoint.
+    msidParams.extraURLQueryParameters = signoutParameters.extraQueryParameters;
+    
     NSError *localError;
     BOOL localRemovalResult = [self removeAccountImpl:account wipeAccount:signoutParameters.wipeAccount error:&localError];
     
