@@ -22,43 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-import XCTest
-@testable import MSAL
+import Foundation
 
-final class MFASubmitChallengeErrorTests: XCTestCase {
-
-    private var sut: MFASubmitChallengeError!
-
-    func test_totalCases() {
-        XCTAssertEqual(MFASubmitChallengeError.ErrorType.allCases.count, 2)
+/// Class that defines the structure and type of a MFARequestChallengeError
+@objcMembers
+public class MFARequestChallengeError: MSALNativeAuthError {
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case generalError
     }
 
-    func test_customErrorDescription() {
-        let expectedMessage = "Custom error message"
-        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
-        XCTAssertEqual(sut.errorDescription, expectedMessage)
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+        self.type = type
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
     }
 
-    func test_defaultErrorDescription() {
-        let sut: [MFASubmitChallengeError] = [
-            .init(type: .invalidChallenge, correlationId: .init()),
-            .init(type: .generalError, correlationId: .init())
-        ]
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
 
-        let expectedDescriptions = [
-            MSALNativeAuthErrorMessage.invalidChallenge,
-            MSALNativeAuthErrorMessage.generalError
-        ]
-
-        let errorDescriptions = sut.map { $0.errorDescription }
-
-        zip(errorDescriptions, expectedDescriptions).forEach {
-            XCTAssertEqual($0, $1)
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
         }
     }
 
-    func test_isInvalidChallenge() {
-        sut = .init(type: .invalidChallenge, correlationId: .init())
-        XCTAssertTrue(sut.isInvalidChallenge)
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
     }
 }

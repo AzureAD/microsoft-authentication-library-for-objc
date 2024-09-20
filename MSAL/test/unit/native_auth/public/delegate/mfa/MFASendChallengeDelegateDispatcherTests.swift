@@ -70,7 +70,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchVerificationRequired_whenDelegateOptionalMethodNotImplemented() async {
-        let expectedError = MFAError(
+        let expectedError = MFARequestChallengeError(
             type: .generalError,
             message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFARequestChallengeVerificationRequired"),
             correlationId: correlationId
@@ -78,7 +78,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
         let delegate = MFARequestChallengeNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? MFAError else {
+            guard case let .failure(error) = result, let customError = error as? MFARequestChallengeError else {
                 return XCTFail("wrong result")
             }
 
@@ -97,7 +97,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
         checkError(delegate.expectedError)
 
-        func checkError(_ error: MFAError?) {
+        func checkError(_ error: MFARequestChallengeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
             XCTAssertEqual(error?.correlationId, expectedError.correlationId)
@@ -126,7 +126,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSelection_whenDelegateOptionalMethodNotImplemented() async {
-        let expectedError = MFAError(
+        let expectedError = MFARequestChallengeError(
             type: .generalError,
             message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFARequestChallengeSelectionRequired"),
             correlationId: correlationId
@@ -135,7 +135,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
 
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? MFAError else {
+            guard case let .failure(error) = result, let customError = error as? MFARequestChallengeError else {
                 return XCTFail("wrong result")
             }
 
@@ -150,7 +150,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
         checkError(delegate.expectedError)
 
-        func checkError(_ error: MFAError?) {
+        func checkError(_ error: MFARequestChallengeError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
             XCTAssertEqual(error?.correlationId, expectedError.correlationId)

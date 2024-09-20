@@ -60,7 +60,7 @@ final class MFAGetAuthMethodsDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSelection_whenDelegateOptionalMethodNotImplemented() async {
-        let expectedError = MFAError(
+        let expectedError = MFAGetAuthMethodsError(
             type: .generalError,
             message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onMFAGetAuthMethodsSelectionRequired"),
             correlationId: correlationId
@@ -68,7 +68,7 @@ final class MFAGetAuthMethodsDelegateDispatcherTests: XCTestCase {
         let delegate = MFAGetAuthMethodsNotImplementedDelegateSpy(expectation: delegateExp, expectedError: expectedError)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
-            guard case let .failure(error) = result, let customError = error as? MFAError else {
+            guard case let .failure(error) = result, let customError = error as? MFAGetAuthMethodsError else {
                 return XCTFail("wrong result")
             }
 
@@ -83,7 +83,7 @@ final class MFAGetAuthMethodsDelegateDispatcherTests: XCTestCase {
         await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
         checkError(delegate.expectedError)
 
-        func checkError(_ error: MFAError?) {
+        func checkError(_ error: MFAGetAuthMethodsError?) {
             XCTAssertEqual(error?.type, expectedError.type)
             XCTAssertEqual(error?.errorDescription, expectedError.errorDescription)
             XCTAssertEqual(error?.correlationId, expectedError.correlationId)

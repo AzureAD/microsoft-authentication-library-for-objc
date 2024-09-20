@@ -24,9 +24,9 @@
 
 import Foundation
 
-/// Class that defines the structure and type of a MFAError
+/// Class that defines the structure and type of a MFAGetAuthMethodsError
 @objcMembers
-public class MFAError: MSALNativeAuthError {
+public class MFAGetAuthMethodsError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case generalError
@@ -56,5 +56,22 @@ public class MFAError: MSALNativeAuthError {
     /// Returns `true` if a browser is required to continue the operation.
     public var isBrowserRequired: Bool {
         return type == .browserRequired
+    }
+
+    func toMFARequestChallengeError() -> MFARequestChallengeError {
+        var requestChallengeType = MFARequestChallengeError.ErrorType.browserRequired
+        switch type {
+        case .browserRequired:
+            requestChallengeType = .browserRequired
+        case .generalError:
+            requestChallengeType = .generalError
+        }
+        return MFARequestChallengeError(
+            type: requestChallengeType,
+            message: errorDescription,
+            correlationId: correlationId,
+            errorCodes: errorCodes,
+            errorUri: errorUri
+        )
     }
 }

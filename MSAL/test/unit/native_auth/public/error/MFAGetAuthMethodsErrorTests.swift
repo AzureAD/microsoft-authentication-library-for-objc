@@ -25,12 +25,12 @@
 import XCTest
 @testable import MSAL
 
-final class MFASubmitChallengeErrorTests: XCTestCase {
+final class MFAGetAuthMethodsErrorTests: XCTestCase {
 
-    private var sut: MFASubmitChallengeError!
+    private var sut: MFAGetAuthMethodsError!
 
     func test_totalCases() {
-        XCTAssertEqual(MFASubmitChallengeError.ErrorType.allCases.count, 2)
+        XCTAssertEqual(MFAGetAuthMethodsError.ErrorType.allCases.count, 2)
     }
 
     func test_customErrorDescription() {
@@ -40,13 +40,13 @@ final class MFASubmitChallengeErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        let sut: [MFASubmitChallengeError] = [
-            .init(type: .invalidChallenge, correlationId: .init()),
+        let sut: [MFAGetAuthMethodsError] = [
+            .init(type: .browserRequired, correlationId: .init()),
             .init(type: .generalError, correlationId: .init())
         ]
 
         let expectedDescriptions = [
-            MSALNativeAuthErrorMessage.invalidChallenge,
+            MSALNativeAuthErrorMessage.browserRequired,
             MSALNativeAuthErrorMessage.generalError
         ]
 
@@ -57,8 +57,8 @@ final class MFASubmitChallengeErrorTests: XCTestCase {
         }
     }
 
-    func test_isInvalidChallenge() {
-        sut = .init(type: .invalidChallenge, correlationId: .init())
-        XCTAssertTrue(sut.isInvalidChallenge)
+    func test_isBrowserRequired() {
+        sut = .init(type: .browserRequired, correlationId: .init())
+        XCTAssertTrue(sut.isBrowserRequired)
     }
 }

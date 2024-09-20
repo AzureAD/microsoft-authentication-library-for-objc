@@ -28,19 +28,19 @@ import XCTest
 open class MFARequestChallengeDelegateSpy: MFARequestChallengeDelegate {
     
     let expectation: XCTestExpectation
-    var expectedError: MFAError?
+    var expectedError: MFARequestChallengeError?
     private(set) var newSentTo: String?
     private(set) var newChannelTargetType: MSALNativeAuthChannelType?
     private(set) var newCodeLength: Int?
     private(set) var newMFARequiredState: MFARequiredState?
     private(set) var newAuthMethods: [MSALAuthMethod]?
     
-    init(expectation: XCTestExpectation, expectedError: MFAError? = nil) {
+    init(expectation: XCTestExpectation, expectedError: MFARequestChallengeError? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
     }
     
-    public func onMFARequestChallengeError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    public func onMFARequestChallengeError(error: MSAL.MFARequestChallengeError, newState: MSAL.MFARequiredState?) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             checkErrors(error: error, expectedError: expectedError)
@@ -73,14 +73,14 @@ open class MFARequestChallengeDelegateSpy: MFARequestChallengeDelegate {
 open class MFARequestChallengeNotImplementedDelegateSpy: MFARequestChallengeDelegate {
     
     let expectation: XCTestExpectation
-    let expectedError: MFAError
+    let expectedError: MFARequestChallengeError
 
-    init(expectation: XCTestExpectation, expectedError: MFAError) {
+    init(expectation: XCTestExpectation, expectedError: MFARequestChallengeError) {
         self.expectation = expectation
         self.expectedError = expectedError
     }
     
-    public func onMFARequestChallengeError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    public func onMFARequestChallengeError(error: MSAL.MFARequestChallengeError, newState: MSAL.MFARequiredState?) {
         XCTAssertTrue(Thread.isMainThread)
         XCTAssertNil(newState)
         checkErrors(error: error, expectedError: expectedError)
@@ -91,16 +91,16 @@ open class MFARequestChallengeNotImplementedDelegateSpy: MFARequestChallengeDele
 open class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
     
     let expectation: XCTestExpectation
-    var expectedError: MFAError?
+    var expectedError: MFAGetAuthMethodsError?
     private(set) var newMFARequiredState: MFARequiredState?
     private(set) var newAuthMethods: [MSALAuthMethod]?
     
-    init(expectation: XCTestExpectation, expectedError: MFAError? = nil) {
+    init(expectation: XCTestExpectation, expectedError: MFAGetAuthMethodsError? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
     }
     
-    public func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    public func onMFAGetAuthMethodsError(error: MSAL.MFAGetAuthMethodsError, newState: MSAL.MFARequiredState?) {
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             checkErrors(error: error, expectedError: expectedError)
@@ -124,14 +124,14 @@ open class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
 open class MFAGetAuthMethodsNotImplementedDelegateSpy: MFAGetAuthMethodsDelegate {
     
     let expectation: XCTestExpectation
-    let expectedError: MFAError
+    let expectedError: MFAGetAuthMethodsError
 
-    init(expectation: XCTestExpectation, expectedError: MFAError) {
+    init(expectation: XCTestExpectation, expectedError: MFAGetAuthMethodsError) {
         self.expectation = expectation
         self.expectedError = expectedError
     }
     
-    public func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    public func onMFAGetAuthMethodsError(error: MSAL.MFAGetAuthMethodsError, newState: MSAL.MFARequiredState?) {
         XCTAssertTrue(Thread.isMainThread)
         XCTAssertNil(newState)
         checkErrors(error: error, expectedError: expectedError)
