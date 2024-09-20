@@ -145,6 +145,21 @@ static NSDictionary *s_currentProfile = nil;
     return s_settings;
 }
 
++ (NSURL *)modifyURL:(NSURL *)url {
+    NSString *urlString = [url absoluteString];
+    if ([urlString containsString:@"sso_nonce"]) {
+        NSRange range = [urlString rangeOfString:@"sso_nonce"];
+        NSString *newURLString = [urlString substringToIndex:range.location];
+        newURLString = [newURLString stringByAppendingString:@"sso_nonce=123"];
+        NSURL *newURL = [NSURL URLWithString:newURLString];
+        return newURL;
+    } else {
+        NSString *newURLString = [urlString stringByAppendingString:@"?sso_nonce=123"];
+        NSURL *newURL = [NSURL URLWithString:newURLString];
+        return newURL;
+    }
+}
+
 + (NSArray<NSString *> *)aadAuthorities
 {
     return s_authorities;

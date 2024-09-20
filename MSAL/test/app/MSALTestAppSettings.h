@@ -51,6 +51,7 @@ extern NSString* MSALTestAppCacheChangeNotification;
 + (NSArray<NSString *> *)b2cAuthorities;
 + (NSArray<NSString *> *)authorityTypes;
 + (NSArray<NSString *> *)availableScopes;
++ (NSURL *)modifyURL:(NSURL *)url;
 
 + (NSDictionary *)profiles;
 + (NSString *)currentProfileName;
