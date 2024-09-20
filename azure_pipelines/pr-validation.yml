@@ -20,7 +20,7 @@ jobs:
 - job: 'PRAssitant'
   pool:
     vmImage: 'ubuntu-latest'
-    timeOutInMinutes: 20
+    timeOutInMinutes: 5
   displayName: Clone PR in ADO
   steps:
   - bash: |
