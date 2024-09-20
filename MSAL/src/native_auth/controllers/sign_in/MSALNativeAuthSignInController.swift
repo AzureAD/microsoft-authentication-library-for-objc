@@ -343,7 +343,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
         switch result {
         case .passwordRequired:
-            let error = MFAError(type: .generalError, correlationId: context.correlationId())
+            let error = MFARequestChallengeError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "MFA request challenge: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
@@ -400,7 +400,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                  self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                              })
             case .error(let error, let newState):
-                return .init(.error(error: error, newState: newState), correlationId: introspectResponse.correlationId)
+                let mfaRequestChallengeError = error.toMFARequestChallengeError()
+                return .init(.error(error: mfaRequestChallengeError, newState: newState), correlationId: introspectResponse.correlationId)
             }
         }
     }
@@ -655,7 +656,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(
-                error: error.convertToMFARequestChallengeError(correlationId: telemetryInfo.context.correlationId()),
+                error: error.convertToMFAGetAuthMethodsError(correlationId: telemetryInfo.context.correlationId()),
                 newState: MFARequiredState(
                     controller: self,
                     scopes: scopes,

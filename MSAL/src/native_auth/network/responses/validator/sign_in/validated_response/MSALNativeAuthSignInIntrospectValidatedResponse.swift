@@ -35,7 +35,7 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
     case invalidRequest(MSALNativeAuthSignInIntrospectResponseError)
     case unexpectedError(MSALNativeAuthSignInIntrospectResponseError?)
 
-    func convertToMFARequestChallengeError(correlationId: UUID) -> MFAError {
+    func convertToMFAGetAuthMethodsError(correlationId: UUID) -> MFAGetAuthMethodsError {
         switch self {
         case .redirect:
             return .init(type: .browserRequired, correlationId: correlationId)

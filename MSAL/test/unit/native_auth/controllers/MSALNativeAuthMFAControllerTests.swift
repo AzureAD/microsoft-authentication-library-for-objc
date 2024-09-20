@@ -361,7 +361,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
     
     // MARK: Private methods
     
-    private func checkGetAuthMethodsWithIntrospectValidatorError(validatedError: MSALNativeAuthSignInIntrospectValidatedErrorType, expectedType: MFAError.ErrorType) async {
+    private func checkGetAuthMethodsWithIntrospectValidatorError(validatedError: MSALNativeAuthSignInIntrospectValidatedErrorType, expectedType: MFAGetAuthMethodsError.ErrorType) async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         
         signInRequestProviderMock.expectedContext = expectedContext

@@ -41,7 +41,7 @@ final class MFARequestChallengeDelegateDispatcher: DelegateDispatcher<MFARequest
                 codeLength
             )
         } else {
-            let error = MFAError(
+            let error = MFARequestChallengeError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onMFARequestChallengeVerificationRequired"),
                 correlationId: correlationId
@@ -56,7 +56,7 @@ final class MFARequestChallengeDelegateDispatcher: DelegateDispatcher<MFARequest
             telemetryUpdate?(.success(()))
             await onSelectionRequired(authMethods, newState)
         } else {
-            let error = MFAError(
+            let error = MFARequestChallengeError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onMFARequestChallengeSelectionRequired"),
                 correlationId: correlationId
@@ -74,7 +74,7 @@ final class MFAGetAuthMethodsDelegateDispatcher: DelegateDispatcher<MFAGetAuthMe
             telemetryUpdate?(.success(()))
             await onSelectionRequired(authMethods, newState)
         } else {
-            let error = MFAError(
+            let error = MFAGetAuthMethodsError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onMFAGetAuthMethodsSelectionRequired"),
                 correlationId: correlationId

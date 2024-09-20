@@ -30,7 +30,7 @@ class MFARequestChallengeDelegateSpy: MFARequestChallengeDelegate {
     
     private let expectation: XCTestExpectation
     private(set) var onMFARequestChallengeError = false
-    private(set) var error: MSAL.MFAError?
+    private(set) var error: MSAL.MFARequestChallengeError?
     
     private(set) var onVerificationRequiredCalled = false
     private(set) var newStateMFARequired: MSAL.MFARequiredState?
@@ -45,7 +45,7 @@ class MFARequestChallengeDelegateSpy: MFARequestChallengeDelegate {
         self.expectation = expectation
     }
     
-    func onMFARequestChallengeError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    func onMFARequestChallengeError(error: MSAL.MFARequestChallengeError, newState: MSAL.MFARequiredState?) {
         onMFARequestChallengeError = true
         self.newStateMFARequired = newState
         self.error = error
@@ -107,14 +107,14 @@ final class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
     private(set) var onSelectionRequiredCalled = false
     private(set) var onMFAGetAuthMethodsErrorCalled = false
     private(set) var authMethods: [MSALAuthMethod]?
-    private(set) var error: MSAL.MFAError?
+    private(set) var error: MSAL.MFAGetAuthMethodsError?
     private(set) var newStateMFARequired: MSAL.MFARequiredState?
     
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
     }
     
-    func onMFAGetAuthMethodsError(error: MSAL.MFAError, newState: MSAL.MFARequiredState?) {
+    func onMFAGetAuthMethodsError(error: MSAL.MFAGetAuthMethodsError, newState: MSAL.MFARequiredState?) {
         onMFAGetAuthMethodsErrorCalled = true
         self.error = error
 

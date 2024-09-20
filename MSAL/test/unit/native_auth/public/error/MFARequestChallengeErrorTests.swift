@@ -25,12 +25,12 @@
 import XCTest
 @testable import MSAL
 
-final class MFAErrorTests: XCTestCase {
+final class MFARequestChallengeErrorTests: XCTestCase {
 
-    private var sut: MFAError!
+    private var sut: MFARequestChallengeError!
 
     func test_totalCases() {
-        XCTAssertEqual(MFAError.ErrorType.allCases.count, 2)
+        XCTAssertEqual(MFARequestChallengeError.ErrorType.allCases.count, 2)
     }
 
     func test_customErrorDescription() {
@@ -40,7 +40,7 @@ final class MFAErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        let sut: [MFAError] = [
+        let sut: [MFAGetAuthMethodsError] = [
             .init(type: .browserRequired, correlationId: .init()),
             .init(type: .generalError, correlationId: .init())
         ]

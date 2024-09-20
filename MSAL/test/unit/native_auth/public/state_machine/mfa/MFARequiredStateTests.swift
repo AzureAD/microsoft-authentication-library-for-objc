@@ -98,7 +98,7 @@ final class MFARequiredStateTests: XCTestCase {
     func test_getAuthMethods_delegate_withError_shouldReturnCorrectError() {
         let exp = expectation(description: "mfa state")
 
-        let expectedError = MFAError(type: .generalError, message: "test error", correlationId: correlationId)
+        let expectedError = MFAGetAuthMethodsError(type: .generalError, message: "test error", correlationId: correlationId)
         let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: MFAGetAuthMethodsResult = .error(
