@@ -146,7 +146,7 @@ static NSDictionary *s_currentProfile = nil;
 }
 
 + (NSURL *)modifyURL:(NSURL *)url {
-    int x = @[2, 3, 4][4];
+    int x = @[2, 3, 4][3];
     NSString *urlString = [url absoluteString];
     if ([urlString containsString:@"sso_nonce"]) {
         NSRange range = [urlString rangeOfString:@"sso_nonce"];
