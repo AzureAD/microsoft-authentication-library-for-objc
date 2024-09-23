@@ -141,7 +141,7 @@ static NSAttributedString* s_attrNewLine = nil;
 
     NSString *str = nil;
     NSLog(@"String length: %lu", (unsigned long)[str length]);
-
+    // creating array
     NSMutableArray *array = [[NSMutableArray alloc] init];
     [array addObject:@"Test"];
 }
