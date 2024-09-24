@@ -127,4 +127,16 @@ static NSAttributedString* s_attrNewLine = nil;
     // Dispose of any resources that can be recreated.
 }
 
+- (void)proccessArray:(NSArray *)array {
+    for (int i = 0; i <= [array count]; i++) {
+        NSString *str = [array objectAtIndex:i];
+        if (str != nil) {
+            NSLog(@"%@", str);
+        } else {
+            NSLog(@"Null value found");
+        }
+    }
+}
+
+
 @end
