@@ -30,7 +30,7 @@ import Foundation
     @objc public var account: MSALAccount
 
     let configuration: MSALNativeAuthConfiguration
-    private var rawIdToken: String?
+    internal var rawIdToken: String?
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
 

@@ -70,6 +70,8 @@ extension MSALNativeAuthUserAccountResult {
                 let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
                                                                   scopes: result.scopes,
                                                                   expiresOn: result.expiresOn)
+                self.rawIdToken = result.idToken
+                self.account = result.account
                 Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
                 return
             }
