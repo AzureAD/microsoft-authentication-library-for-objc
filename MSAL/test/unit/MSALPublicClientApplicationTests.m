@@ -3565,6 +3565,7 @@
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     parameters.signoutFromBrowser = YES;
+    parameters.extraQueryParameters = @{@"key1": @"value1"};
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTAssertEqual([application allAccounts:nil].count, 1);
@@ -3581,6 +3582,7 @@
         
         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"fakeuser@contoso.com");
         XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"myuid.utid");
+        XCTAssertEqualObjects(params.extraURLQueryParameters[@"key1"], @"value1");
         
         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
         XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
