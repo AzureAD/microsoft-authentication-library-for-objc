@@ -127,23 +127,4 @@ static NSAttributedString* s_attrNewLine = nil;
     // Dispose of any resources that can be recreated.
 }
 
-- (void)proccessData:(NSArray *)data {
-
-    if (data == nil) {
-        NSLog(@"Data is null");
-        return;
-    }
-
-    for (int i = 0; i <= [data count]; i++) {
-        NSString *item = [data objectAtIndex:i];
-        NSLog(@"Item: %@", item);
-    }
-
-    NSString *str = nil;
-    NSLog(@"String length: %lu", (unsigned long)[str length]);
-    // creating array
-    NSMutableArray *array = [[NSMutableArray alloc] init];
-    [array addObject:@"Test"];
-}
-
 @end
