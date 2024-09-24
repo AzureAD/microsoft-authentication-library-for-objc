@@ -142,7 +142,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         if resetPasswordVerifyDelegate.onResetPasswordVerifyCodeErrorCalled && resetPasswordVerifyDelegate.error?.isInvalidCode == true && retries > 0 {
             return await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate, username: username, retries: retries - 1)
         }
-        XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
         guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
             XCTFail("onPasswordRequired not called")
             return nil
