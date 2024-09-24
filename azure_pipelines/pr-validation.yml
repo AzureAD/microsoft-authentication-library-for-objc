@@ -20,7 +20,7 @@ jobs:
 - job: 'PRAssistant'
   pool:
     vmImage: 'ubuntu-latest'
-    timeOutInMinutes: 5
+    timeOutInMinutes: 10
   displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
   steps:
   - bash: |
