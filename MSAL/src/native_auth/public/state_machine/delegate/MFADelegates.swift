@@ -69,7 +69,7 @@ public protocol MFAGetAuthMethodsDelegate {
     /// Notifies the delegate that the list of authentication methods is now available.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFAGetAuthMethodsError(error:)`` will be called.
     /// - Parameters:
-    ///     - authMethods: list of authentication method
+    ///     - authMethods: list of authentication method.
     ///     - newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onMFAGetAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
 }
