@@ -20,7 +20,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          MSAL 1.5.0 Docs
+          MSAL 1.5.1 Docs
         </a>
          (92% documented)
       </p>
@@ -296,6 +296,9 @@
                 <a class="nav-group-task-link" href="Constants.html#/c:@MSALOAuthSubErrorKey">MSALOAuthSubErrorKey</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Constants.html#/c:@MSALSTSErrorCodesKey">MSALSTSErrorCodesKey</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Constants.html#/c:@MSALThrottlingCacheHitKey">MSALThrottlingCacheHitKey</a>
               </li>
               <li class="nav-group-task">
@@ -541,14 +544,14 @@
 <p>Using MSAL for iOS and macOS, you can acquire security tokens from the Microsoft identity platform to authenticate users and access secure web APIs for their applications. The library supports multiple authentication scenarios, such as single sign-on (SSO), Conditional Access, and brokered authentication. </p>
 <h4 id='native-authentication-support-in-msal' class='heading'>Native authentication support in MSAL</h4>
 
-<p>MSAL iOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their mobile applications. With native authentication, users are guided through a rich, native, mobile-first sign-up and sign-in journey without leaving the app. The native authentication feature is only available for mobile apps on <a href="https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication">External ID for customers</a>. macOS is not supported. It is recommended to always use the most up-to-date version of the SDK.</p>
+<p>MSAL iOS and macOS also provides native authentication APIs that allow applications to implement a native experience with end-to-end customizable flows in their applications. With native authentication, users are guided through a rich, native, sign-up and sign-in journey without leaving the app. The native authentication feature is available for mobile (iOS) and desktop (macOS) apps on <a href="https://learn.microsoft.com/en-us/entra/external-id/customers/concept-native-authentication">External ID for customers</a>. It is recommended to always use the most up-to-date version of the SDK.</p>
 <h2 id='get-started' class='heading'>Get started</h2>
 
 <p>To use MSAL iOS and macOS in your application, you need to register your application in the Microsoft Entra Admin center and configure your project. Since the SDK supports both browser-delegated and native authentication experiences, follow the steps in the one of these quickstarts based on your scenario.</p>
 
 <ul>
 <li><p>For browser-delegated authentication scenarios, refer to the quickstart, <a href="https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-mobile-app-ios-sign-in">Sign in users and call Microsoft Graph from an iOS or macOS app</a>.</p></li>
-<li><p>For native authentication scenarios on iOS apps, refer to the Microsoft Entra External ID sample guide, <a href="https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app">Run iOS sample app</a>.</p></li>
+<li><p>For native authentication scenarios, refer to the Microsoft Entra External ID sample guides, for <a href="https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-ios-app">iOS sample app</a> or <a href="https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-run-native-authentication-sample-macos-app">macOS sample app</a></p></li>
 </ul>
 <h2 id='migrate-from-adal-objective-c' class='heading'>Migrate from ADAL Objective-C</h2>
 
@@ -627,7 +630,7 @@ end
 
 <p><strong>For native-authentication:</strong></p>
 
-<p>To use the native authentication capabilities provided by MSAL in your iOS application, you need to specify <code>native-auth</code> as subspec for the <code>MSAL</code> dependency as follows:</p>
+<p>To use the native authentication capabilities provided by MSAL in your iOS or macOS application, you need to specify <code>native-auth</code> as subspec for the <code>MSAL</code> dependency as follows:</p>
 <pre class="highlight plaintext"><code>use_frameworks!
 
 target 'your-target-here' do
@@ -699,7 +702,7 @@ Workarounds for some bugs we encountered :</p>
 
 <p><strong>iOS</strong> - MSAL supports iOS 14 and above.</p>
 
-<p><strong>macOS</strong> - MSAL supports macOS (OSX) 10.13 and above.</p>
+<p><strong>macOS</strong> - MSAL supports macOS (OSX) 10.15 and above.</p>
 <h2 id='community-help-and-support' class='heading'>Community help and support</h2>
 
 <p>We use <a href="http://stackoverflow.com/questions/tagged/msal">Stack Overflow</a> with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before. </p>
@@ -732,8 +735,8 @@ Workarounds for some bugs we encountered :</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-09-10)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-09-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
 </html>
