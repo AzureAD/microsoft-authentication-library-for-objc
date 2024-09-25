@@ -141,7 +141,7 @@
     MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
     MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
-    #if TARGET_OS_IPHONE && !AD_BROKER
+    #if TARGET_OS_IPHONE && !AD_BROKER && !MSID_EXCLUDE_SYSTEMWV
         [MSIDCertAuthHandler setUseAuthSession:YES];
     #endif
 }
@@ -621,6 +621,7 @@
 + (BOOL)handleMSALResponse:(NSURL *)response
          sourceApplication:(NSString *)sourceApplication
 {
+#if !MSID_EXCLUDE_SYSTEMWV
     if ([MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response])
     {
         return YES;
@@ -630,6 +631,7 @@
     {
         return YES;
     }
+#endif
 
     // Only AAD is supported in broker at this time. If we need to support something else, we need to change this to dynamically read authority from response and create factory
     MSIDDefaultBrokerResponseHandler *brokerResponseHandler = [[MSIDDefaultBrokerResponseHandler alloc] initWithOauthFactory:[MSIDAADV2Oauth2Factory new]
