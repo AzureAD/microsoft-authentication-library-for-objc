@@ -27,10 +27,12 @@ import Foundation
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 class MSALNativeAuthUserAccountResultTests: XCTestCase {
     var sut: MSALNativeAuthUserAccountResult!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    private var silentTokenProviderFactoryMock: MSALNativeAuthSilentTokenProviderFactoryMock!
     private var account: MSALAccount!
     private let innerCorrelationId = UUID().uuidString
     private let withInnerCorrelationId = UUID().uuidString
@@ -92,15 +94,101 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let rawIdToken = "rawIdToken"
 
         cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
+        silentTokenProviderFactoryMock = MSALNativeAuthSilentTokenProviderFactoryMock()
 
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: cacheAccessorMock
+            cacheAccessor: cacheAccessorMock,
+            silentTokenProviderFactory: silentTokenProviderFactoryMock
         )
         try super.setUpWithError()
     }
+
+    // MARK: - get access token tests
+
+    func test_getAcessToken_succesfullyReturnsAccessToken() async {
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "accessToken"
+        accessToken.scopes = ["scope1", "scope2"]
+        let contextCorrelationId = UUID()
+        let homeAccountId = MSALAccountId(accountIdentifier: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff", objectId: "", tenantId: "https://contoso.com/tfp/tenantName")
+        let idToken = "newIdToken"
+        let account = MSALAccount(username: "1234567890", homeAccountId: homeAccountId, environment: "contoso.com", tenantProfiles: [])!
+        let silentTokenResult = MSALNativeAuthSilentTokenResult(accessTokenResult: MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                                                                             scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                                                                             expiresOn: nil),
+                                                                rawIdToken: idToken,
+                                                                account: account,
+                                                                correlationId: contextCorrelationId)
+        silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                       scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                       expiresOn: accessToken.expiresOn)
+
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
+        delegate.expectedAccessToken = accessToken.accessToken
+        delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
+        sut.getAccessToken(delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
+
+        XCTAssertEqual(delegate.expectedResult, expectedResult)
+        XCTAssertEqual(sut.idToken, idToken)
+        XCTAssertEqual(sut.account, account)
+    }
+
+    func test_getAcessTokenScopesAndForceRefresh_succesfullyReturnsNewAccessToken() async {
+        let accessToken = MSIDAccessToken()
+        accessToken.accessToken = "newAccessToken"
+        accessToken.scopes = ["scope1", "scope2"]
+        let contextCorrelationId = UUID()
+        let homeAccountId = MSALAccountId(accountIdentifier: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff", objectId: "", tenantId: "https://contoso.com/tfp/tenantName")
+        let idToken = "newIdToken"
+        let account = MSALAccount(username: "1234567890", homeAccountId: homeAccountId, environment: "contoso.com", tenantProfiles: [])!
+        let silentTokenResult = MSALNativeAuthSilentTokenResult(accessTokenResult: MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                                                                             scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                                                                             expiresOn: nil),
+                                                                rawIdToken: idToken,
+                                                                account: account,
+                                                                correlationId: contextCorrelationId)
+        silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
+                                                       scopes: accessToken.scopes?.array as? [String] ?? [],
+                                                       expiresOn: accessToken.expiresOn)
+
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
+        delegate.expectedAccessToken = accessToken.accessToken
+        delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
+        sut.getAccessToken(scopes: accessToken.scopes?.array as? [String] ?? [],
+                           forceRefresh: true,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
+
+        XCTAssertEqual(delegate.expectedResult, expectedResult)
+        XCTAssertEqual(sut.idToken, idToken)
+        XCTAssertEqual(sut.account, account)
+    }
+
+    func test_getAcessToken_succesfullyReturnsError() async {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = sut.createRetrieveAccessTokenError(error: errorWithInnerErrorMock,
+                                                               context: context)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
+    }
+
 
     // MARK: - sign-out tests
 

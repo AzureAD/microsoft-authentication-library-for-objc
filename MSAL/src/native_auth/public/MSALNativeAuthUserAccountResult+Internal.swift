@@ -43,7 +43,7 @@ extension MSALNativeAuthUserAccountResult {
                                                        authority: authority)
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
-        guard let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
+        guard let client = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
             MSALLogger.log(
                             level: .error,
@@ -55,8 +55,7 @@ extension MSALNativeAuthUserAccountResult {
                                                 correlationId: correlationId ?? context.correlationId())) }
             return
         }
-
-        client.acquireTokenSilent(with: params) { [weak self] result, error in
+        client.acquireTokenSilent(parameters: params) { [weak self] result, error in
             guard let self = self else { return }
 
             if let error = error as? NSError {
@@ -67,12 +66,10 @@ extension MSALNativeAuthUserAccountResult {
 
             if let result = result {
                 let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                                  scopes: result.scopes,
-                                                                  expiresOn: result.expiresOn)
-                self.rawIdToken = result.idToken
+                self.rawIdToken = result.rawIdToken
                 self.account = result.account
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
+                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: result.accessTokenResult,
+                                                                                     correlationId: result.correlationId) }
                 return
             }
 
