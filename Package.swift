@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
   name: "MSAL",
   platforms: [
-        .macOS(.v10_13),.iOS(.v14)
+        .macOS(.v10_15),.iOS(.v14)
   ],
   products: [
       .library(
@@ -13,6 +13,6 @@ let package = Package(
           targets: ["MSAL"]),
   ],
   targets: [
-      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/1.5.0/MSAL.zip", checksum: "c2379d94286b9f3d410171aaee4a4201e7208a404f1bf2ce275b4ca0963a00dd")
+      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/1.5.1/MSAL.zip", checksum: "4eb7e3978ca9ed0ea22b6be16904d4b8a523b2d566af19e6cfbffabacd27e2c4")
   ]
 )

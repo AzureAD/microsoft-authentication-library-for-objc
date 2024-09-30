@@ -51,7 +51,7 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
 
         await sut.dispatchResetPasswordResendCodeRequired(
@@ -85,7 +85,7 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
 
         let expectedState = ResetPasswordCodeRequiredState(controller: controllerFactoryMock.resetPasswordController, username: "", continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
 
         await sut.dispatchResetPasswordResendCodeRequired(

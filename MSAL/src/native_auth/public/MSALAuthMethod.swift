@@ -22,16 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-enum MSALNativeAuthInternalChannelType: String, Decodable {
-    case phone
-    case email
+import Foundation
 
-    func toPublicChannelType() -> MSALNativeAuthChannelType {
-        switch self {
-        case .phone:
-            return .phone
-        case .email:
-            return .email
-        }
+/**
+ * MSALAuthMethod represents a user's authentication methods.
+ */
+@objc
+public class MSALAuthMethod: NSObject {
+
+    /// Authentication method identifier
+    public let id: String
+
+    /// Authentication method challenge type (oob, etc.)
+    public let challengeType: String
+
+    /// Authentication method login hint (e.g. user@contoso.com)
+    public let loginHint: String
+
+    /// Authentication method channel target (email, etc.)
+    public let channelTargetType: MSALNativeAuthChannelType
+
+    init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
+        self.id = id
+        self.challengeType = challengeType
+        self.loginHint = loginHint
+        self.channelTargetType = channelTargetType
     }
 }

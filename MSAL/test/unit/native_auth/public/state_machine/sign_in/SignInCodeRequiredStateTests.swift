@@ -72,14 +72,14 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         let expectedResult: SignInResendCodeResult = .codeRequired(
             newState: expectedState,
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controller.resendCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
 
-        let delegate = SignInResendCodeDelegateSpy(expectation: exp, expectedSentTo: "sentTo", expectedChannelTargetType: .email, expectedCodeLength: 1)
+        let delegate = SignInResendCodeDelegateSpy(expectation: exp, expectedSentTo: "sentTo", expectedChannelTargetType: MSALNativeAuthChannelType(value: "email"), expectedCodeLength: 1)
 
         sut.resendCode(delegate: delegate)
         wait(for: [exp, exp2])
@@ -94,7 +94,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
         let expectedResult: SignInResendCodeResult = .codeRequired(
             newState: expectedState,
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controller.resendCodeResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in

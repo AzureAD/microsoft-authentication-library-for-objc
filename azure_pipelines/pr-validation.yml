@@ -17,6 +17,19 @@ trigger:
 
 # Define parallel jobs that run build script for specified targets
 jobs:
+- job: 'PRAssistant'
+  pool:
+    vmImage: 'ubuntu-latest'
+    timeOutInMinutes: 10
+  displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
+  steps:
+  - bash: |
+      echo "Source branch : $(System.PullRequest.SourceBranch) Target branch : $(System.PullRequest.targetBranchName)"
+      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)
+    displayName: 'Invoke pipeline PRAssistantInvoker'
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+    failOnStderr: false
 - job: 'Validate_Pull_Request'
   strategy:
     maxParallel: 3
