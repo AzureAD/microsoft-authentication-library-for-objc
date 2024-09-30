@@ -29,8 +29,7 @@ import MSAL
 final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
-        throw XCTSkip("Missing username for MFA user")
-        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(), 
+        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
                 let password = await retrievePasswordForSignInUsername(),
                 let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)
         else {
@@ -86,7 +85,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
-        throw XCTSkip("Missing username for MFA user")
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
               let password = await retrievePasswordForSignInUsername(),
               let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)
@@ -142,7 +140,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     }
     
     func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
-        throw XCTSkip("Missing username for MFA user with no default auth method")
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod(),
                 let password = await retrievePasswordForSignInUsername(),
                 let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password)

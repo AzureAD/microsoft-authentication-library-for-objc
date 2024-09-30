@@ -25,6 +25,6 @@
 import Foundation
 
 enum MSALNativeAuthLogMessage {
-    static let privatePreviewLog = 
+    static let privatePreviewLog =
     "Warning ⚠️: this API is experimental. It may be changed in the future without notice. Do not use in production applications."
 }
