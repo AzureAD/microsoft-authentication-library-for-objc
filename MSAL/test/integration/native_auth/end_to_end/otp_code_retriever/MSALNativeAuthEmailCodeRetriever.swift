@@ -90,10 +90,10 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
                     // Email should be newer than 5 seconds otherwise it could be from previous test
                     // This retry will help with the delay in receiving the emails
                     if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < secondsToWaitForEmail {
-                        print ("Email is ok, last receive date: \(emailDate) current date: \(currentDate)")
+                        print ("Email is for current test, last receive date: \(emailDate) current date: \(currentDate)")
                         return dataDictionary.first?["id"] as? Int
                     } else {
-                        print ("Email is older, last receive date: \(emailDate) current date: \(currentDate)")
+                        print ("Email is from previous tests, last receive date: \(emailDate) current date: \(currentDate)")
                     }
                 }
                 return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
