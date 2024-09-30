@@ -28,6 +28,8 @@ import MSAL
 
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 3.1.1. SSPR – without automatic sign in
+    let numberOfRetries = 3
+
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
@@ -55,7 +57,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         // Now submit the code...
         let newPasswordRequiredState = await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
                    username: username,
-                   retries: 3)
+                   retries: numberOfRetries)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
@@ -96,7 +98,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         // Now submit the code...
         let newPasswordRequiredState = await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
                    username: username,
-                   retries: 3)
+                   retries: numberOfRetries)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
