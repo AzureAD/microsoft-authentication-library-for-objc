@@ -30,7 +30,7 @@ struct MSALNativeAuthResetPasswordChallengeResponse: Decodable, MSALNativeAuthRe
     let challengeType: MSALNativeAuthInternalChallengeType
     let bindingMethod: String?
     let challengeTargetLabel: String?
-    let challengeChannel: MSALNativeAuthInternalChannelType?
+    let challengeChannel: String?
     let continuationToken: String?
     let codeLength: Int?
     var correlationId: UUID?

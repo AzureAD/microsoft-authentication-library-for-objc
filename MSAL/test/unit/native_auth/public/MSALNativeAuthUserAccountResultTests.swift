@@ -246,4 +246,79 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(result.errorCodes, [])
         XCTAssertEqual(result.correlationId, contextCorrelationId)
     }
+    
+    func test_errorWithValidExternalErrorCodes_ParseShouldWorks() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        let errorCodes = [1, 2, 3]
+        let userInfo: [String : Any] = [
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let error = NSError(domain: "", code: 1, userInfo: userInfo)
+        
+        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
+        
+        XCTAssertEqual(result.errorCodes, errorCodes)
+    }
+    
+    func test_errorWithInvalidExternalErrorCodes_ParseShouldWorks() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        let errorCodes = ["123"]
+        let userInfo: [String : Any] = [
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let error = NSError(domain: "", code: 1, userInfo: userInfo)
+        
+        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
+        
+        XCTAssertEqual(result.errorCodes, [])
+    }
+    
+    func test_errorWithValidInnerErrorWithErrorCodes_ParseShouldWorks() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        let errorCodes = [1, 2, 3]
+        let userInfo: [String : Any] = [
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let innerError = NSError(domain: "", code: 1, userInfo: userInfo)
+        let error = NSError(domain: "", code: 1, userInfo: [NSUnderlyingErrorKey: innerError])
+        
+        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
+        
+        XCTAssertEqual(result.errorCodes, errorCodes)
+    }
+    
+    func test_errorWithInvalidInnerErrorWithErrorCodes_ParseShouldWorks() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        let errorCodes = ["123"]
+        let userInfo: [String : Any] = [
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let innerError = NSError(domain: "", code: 1, userInfo: userInfo)
+        let error = NSError(domain: "", code: 1, userInfo: [NSUnderlyingErrorKey: innerError])
+        
+        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
+        
+        XCTAssertEqual(result.errorCodes, [])
+    }
+    
+    func test_errorWithMFARequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() {
+        let contextCorrelationId = UUID()
+        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+        let errorCodes = [50076]
+        let message = "message"
+        let userInfo: [String : Any] = [
+            MSALErrorDescriptionKey: message,
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let error = NSError(domain: "", code: 1, userInfo: userInfo)
+        
+        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
+        
+        XCTAssertEqual(result.errorCodes, errorCodes)
+        XCTAssertEqual(result.errorDescription, MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message)
+    }
 }

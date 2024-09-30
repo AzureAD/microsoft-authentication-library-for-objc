@@ -246,7 +246,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: "token",
             codeLength: 6)
         )
@@ -258,7 +258,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         }
 
         XCTAssertEqual(displayName, "challenge-type-label")
-        XCTAssertEqual(displayType, .email)
+        XCTAssertTrue(displayType.isEmailType)
         XCTAssertEqual(codeLength, 6)
         XCTAssertEqual(continuationToken, "token")
     }
@@ -269,7 +269,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: "token",
             codeLength: nil)
         )
@@ -289,7 +289,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: nil,
             codeLength: nil)
         )

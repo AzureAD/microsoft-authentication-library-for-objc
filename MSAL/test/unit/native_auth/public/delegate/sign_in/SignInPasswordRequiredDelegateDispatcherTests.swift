@@ -51,7 +51,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
         await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
-        await fulfillment(of: [telemetryExp, delegateExp])
+        await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
 
         XCTAssertEqual(delegate.expectedUserAccountResult, expectedResult)
     }
@@ -74,7 +74,7 @@ final class SignInPasswordRequiredDelegateDispatcherTests: XCTestCase {
 
         await sut.dispatchSignInCompleted(result: expectedResult, correlationId: correlationId)
 
-        await fulfillment(of: [telemetryExp, delegateExp])
+        await fulfillment(of: [telemetryExp, delegateExp], timeout: 1)
         checkError(delegate.delegateError)
 
         func checkError(_ error: PasswordRequiredError?) {

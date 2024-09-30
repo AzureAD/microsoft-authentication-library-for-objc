@@ -33,6 +33,7 @@ enum MockAPIError: Error {
 enum MockAPIEndpoint: String {
     case signInInitiate = "SignInInitiate"
     case signInChallenge = "SignInChallenge"
+    case signInIntrospect = "SignInIntrospect"
     case signInToken = "SignInToken"
     case signUpStart = "SignUpStart"
     case signUpChallenge = "SignUpChallenge"
@@ -77,6 +78,9 @@ enum MockAPIResponse: String {
     case verificationRequired = "VerificationRequired"
     case attributeValidationFailed = "AttributeValidationFailed"
     case invalidContinuationToken = "InvalidContinuationToken"
+    case signInIntrospectSuccess = "IntrospectSuccess"
+    case mfaRequired = "MFARequired"
+    case introspectRequired = "IntrospectRequired"
     case ssprStartSuccess = "SSPRStartSuccess"
     case ssprContinueSuccess = "SSPRContinueSuccess"
     case ssprSubmitSuccess = "SSPRSubmitSuccess"

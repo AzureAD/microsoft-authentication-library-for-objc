@@ -272,7 +272,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
-        XCTAssertEqual(delegate.channelTargetType, .email)
+        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(delegate.codeLength)
     }
