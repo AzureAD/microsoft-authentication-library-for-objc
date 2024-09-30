@@ -43,7 +43,7 @@ extension MSALNativeAuthUserAccountResult {
                                                        authority: authority)
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
-        guard let client = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
+        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
             MSALLogger.log(
                             level: .error,
@@ -55,7 +55,7 @@ extension MSALNativeAuthUserAccountResult {
                                                 correlationId: correlationId ?? context.correlationId())) }
             return
         }
-        client.acquireTokenSilent(parameters: params) { [weak self] result, error in
+        silentTokenProvider.acquireTokenSilent(parameters: params) { [weak self] result, error in
             guard let self = self else { return }
 
             if let error = error as? NSError {

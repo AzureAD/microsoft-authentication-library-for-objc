@@ -108,7 +108,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     // MARK: - get access token tests
 
-    func test_getAcessToken_succesfullyReturnsAccessToken() async {
+    func test_getAccessToken_successfullyReturnsAccessToken() async {
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "accessToken"
         accessToken.scopes = ["scope1", "scope2"]
@@ -141,7 +141,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(sut.account, account)
     }
 
-    func test_getAcessTokenScopesAndForceRefresh_succesfullyReturnsNewAccessToken() async {
+    func test_getAccessTokenScopesAndForceRefresh_successfullyReturnsNewAccessToken() async {
         let accessToken = MSIDAccessToken()
         accessToken.accessToken = "newAccessToken"
         accessToken.scopes = ["scope1", "scope2"]
@@ -176,7 +176,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(sut.account, account)
     }
 
-    func test_getAcessToken_succesfullyReturnsError() async {
+    func test_getAccessToken_successfullyReturnsError() async {
         let contextCorrelationId = UUID()
         let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
         silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
