@@ -29,6 +29,9 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
 
     // Sign in with username and password to get access token and force refresh
     func test_signInAndForceRefreshSucceeds() async throws {
+#if os(macOS)
+        throw XCTSkip("Bundle id for macOS is not added to the client id, test is not needed on both iOS and macOS")
+#endif
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
@@ -61,6 +64,9 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
 
     // Sign in with username and password to get access token and force refresh with existing scopes
     func test_signInAndForceRefreshWithExistingScopesSucceeds() async throws {
+#if os(macOS)
+        throw XCTSkip("Bundle id for macOS is not added to the client id, test is not needed on both iOS and macOS")
+#endif
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
@@ -81,7 +87,7 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let refreshAccessTokenExpectation = expectation(description: "refreshing access token")
         let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: refreshAccessTokenExpectation)
 
-        signInDelegateSpy.result?.getAccessToken(scopes: ["profile"], forceRefresh: true, delegate: credentialsDelegateSpy)
+        signInDelegateSpy.result?.getAccessToken(scopes: ["User.Read"], forceRefresh: true, delegate: credentialsDelegateSpy)
 
         await fulfillment(of: [refreshAccessTokenExpectation])
 
