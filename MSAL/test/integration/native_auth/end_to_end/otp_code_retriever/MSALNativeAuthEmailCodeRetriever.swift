@@ -96,15 +96,13 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
                         print ("Email is from previous tests, last receive date: \(emailDate) current date: \(currentDate)")
                     }
                 }
-                return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
-            } else {
-                // log only for the final retry
-                if (retryCounter == 1) {
-                    print("Unexpected behaviour: no email received for the following local: \(local)")
-                }
-                // no emails found, retry
-                return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
             }
+            // log only for the final retry
+            if (retryCounter == 1) {
+                print("Unexpected behaviour: no email received for the following local: \(local)")
+            }
+            // no emails found, retry
+            return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
         } catch {
             print(error)
             return nil

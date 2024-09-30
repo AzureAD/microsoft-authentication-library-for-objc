@@ -59,6 +59,7 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
+        #Use retry-tests-on-failure only if tests don't already use "Maximum Test Repetitions"
         if ['${{ parameters.retry_tests }}' == true]; then
             xcodebuild test-without-building \
                 -xctestrun '${{ parameters.full_path }}' \
