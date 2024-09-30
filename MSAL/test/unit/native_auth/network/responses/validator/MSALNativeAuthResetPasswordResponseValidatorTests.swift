@@ -151,7 +151,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .redirect,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: "token",
             codeLength: nil)
         )
@@ -165,7 +165,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .oob,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: "token",
             codeLength: 6)
         )
@@ -177,7 +177,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         }
 
         XCTAssertEqual(sentTo, "challenge-type-label")
-        XCTAssertEqual(channelTargetType, .email)
+        XCTAssertTrue(channelTargetType.isEmailType)
         XCTAssertEqual(codeLength, 6)
         XCTAssertEqual(continuationToken, "token")
     }
@@ -187,7 +187,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
             challengeType: .oob,
             bindingMethod: nil,
             challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .email,
+            challengeChannel: "email",
             continuationToken: nil,
             codeLength: 6)
         )

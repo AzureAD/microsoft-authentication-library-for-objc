@@ -47,7 +47,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
             return
         }
         
-        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
+        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
@@ -103,7 +103,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
             return
         }
         
-        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
+        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 

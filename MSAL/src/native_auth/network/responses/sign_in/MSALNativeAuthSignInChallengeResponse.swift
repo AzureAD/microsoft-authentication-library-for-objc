@@ -31,7 +31,7 @@ struct MSALNativeAuthSignInChallengeResponse: Decodable, MSALNativeAuthResponseC
     let challengeType: MSALNativeAuthInternalChallengeType
     let bindingMethod: String?
     let challengeTargetLabel: String?
-    let challengeChannel: MSALNativeAuthInternalChannelType?
+    let challengeChannel: String?
     let codeLength: Int?
     let interval: Int?
     var correlationId: UUID?

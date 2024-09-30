@@ -87,12 +87,21 @@ extension MSALNativeAuthUserAccountResult {
         if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError {
            return createRetrieveAccessTokenError(error: innerError, context: context)
         }
-        let message = error.userInfo[MSALErrorDescriptionKey] as? String ?? error.localizedDescription
+        var message = error.userInfo[MSALErrorDescriptionKey] as? String ?? error.localizedDescription
+        let errorCodes = error.userInfo[MSALSTSErrorCodesKey] as? [Int] ?? []
+        if isMFARequiredError(errorCodes: errorCodes) {
+            message = MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message
+        }
         let correlationId = correlationIdFromMSALError(error: error) ?? context.correlationId()
-        return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: [])
+        return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: errorCodes)
     }
 
     private func correlationIdFromMSALError(error: NSError) -> UUID? {
         return UUID(uuidString: error.userInfo[MSALCorrelationIDKey] as? String ?? "")
+    }
+
+    private func isMFARequiredError(errorCodes: [Int]) -> Bool {
+        let mfaRequiredErrorCode = 50076
+        return errorCodes.contains(mfaRequiredErrorCode)
     }
 }

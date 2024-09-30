@@ -32,7 +32,7 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
         Task {
-            let controllerResponse = await signInInternal(scopes: scopes)
+            let controllerResponse = await signInInternal(scopes: scopes, telemetryId: .telemetryApiIdSignInAfterPasswordReset)
             let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
                 delegate: delegate,
                 telemetryUpdate: controllerResponse.telemetryUpdate

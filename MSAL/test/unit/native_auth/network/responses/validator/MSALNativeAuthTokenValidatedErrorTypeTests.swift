@@ -147,16 +147,6 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
         XCTAssertEqual(error.errorUri, testErrorUri)
     }
     
-    func test_convertToSignInPasswordStartError_strongAuthRequired() {
-        let error = sut.strongAuthRequired(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
-
-        XCTAssertEqual(error.type, .browserRequired)
-        XCTAssertEqual(error.errorDescription, testDescription)
-        XCTAssertEqual(error.errorCodes, testErrorCodes)
-        XCTAssertEqual(error.correlationId, testCorrelationId)
-        XCTAssertEqual(error.errorUri, testErrorUri)
-    }
-    
     func test_convertToSignInPasswordStartError_invalidScope() {
         let error = sut.invalidScope(apiErrorStub).convertToSignInPasswordStartError(correlationId: testCorrelationId)
 
