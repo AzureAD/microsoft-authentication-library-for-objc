@@ -22,6 +22,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
+/// Class used to extract infromation from MSALResult required by the UserAccountResult to be updated and returned
+/// MSALResult cannot be directly created from Swift
 class MSALNativeAuthSilentTokenResult {
     let accessTokenResult: MSALNativeAuthTokenResult
     let rawIdToken: String?

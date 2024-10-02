@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
+/// Wrapper class around PublicClientApplication which helps with testability
 class MSALNativeAuthSilentTokenProvider: MSALNativeAuthSilentTokenProviding {
 
     private let application: MSALNativeAuthPublicClientApplication?
