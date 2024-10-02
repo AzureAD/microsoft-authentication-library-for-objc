@@ -494,7 +494,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             let result = await performAndValidateChallengeRequest(continuationToken: newContinuationToken, context: context)
             return handlePerformChallengeAfterContinueRequest(result, username: username, event: event, context: context)
         case .attributesRequired(let newContinuationToken, let attributes, _):
-            MSALLogger.logPII(level: .info, 
+            MSALLogger.logPII(level: .info,
                               context: context,
                               format: "attributes_required received in signup/continue request: \(MSALLogMask.maskEUII(attributes))")
 

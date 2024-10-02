@@ -176,7 +176,7 @@ open class SignInCodeStartDelegateSpy: SignInStartDelegate {
     public func onSignInCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
         newSignInCodeRequiredState = newState
         XCTAssertEqual(sentTo, expectedSentTo)
-        XCTAssertEqual(channelTargetType, expectedChannelTargetType)
+        XCTAssertEqual(channelTargetType.value, expectedChannelTargetType?.value)
         XCTAssertEqual(codeLength, expectedCodeLength)
         XCTAssertTrue(Thread.isMainThread)
         if let verifyCodeDelegate = verifyCodeDelegate {
@@ -211,7 +211,7 @@ class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
 
     func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
         XCTAssertEqual(sentTo, expectedSentTo)
-        XCTAssertEqual(channelTargetType, expectedChannelTargetType)
+        XCTAssertEqual(channelTargetType.value, expectedChannelTargetType?.value)
         XCTAssertEqual(codeLength, expectedCodeLength)
         XCTAssertTrue(Thread.isMainThread)
         newSignInCodeRequiredState = newState

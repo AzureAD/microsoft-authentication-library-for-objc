@@ -229,6 +229,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 await delegateDispatcher.dispatchSignInCompleted(result: result, correlationId: controllerResponse.correlationId)
             case .error(let error):
                 await delegate.onSignInStartError(error: error)
+            case .awaitingMFA(let newState):
+                await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
             }
         }
     }
