@@ -32,7 +32,7 @@ import XCTest
 class MSALNativeAuthUserAccountResultTests: XCTestCase {
     var sut: MSALNativeAuthUserAccountResult!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
-    private var silentTokenProviderFactoryMock: MSALNativeAuthSilentTokenProviderFactoryMock!
+    private var silentTokenProviderMock: MSALNativeAuthSilentTokenProviderMock!
     private var account: MSALAccount!
     private let innerCorrelationId = UUID().uuidString
     private let withInnerCorrelationId = UUID().uuidString
@@ -94,14 +94,14 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let rawIdToken = "rawIdToken"
 
         cacheAccessorMock = MSALNativeAuthCacheAccessorMock()
-        silentTokenProviderFactoryMock = MSALNativeAuthSilentTokenProviderFactoryMock()
+        silentTokenProviderMock = MSALNativeAuthSilentTokenProviderMock()
 
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
             cacheAccessor: cacheAccessorMock,
-            silentTokenProviderFactory: silentTokenProviderFactoryMock
+            silentTokenProvider: silentTokenProviderMock
         )
         try super.setUpWithError()
     }
@@ -122,7 +122,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                                 rawIdToken: idToken,
                                                                 account: account,
                                                                 correlationId: contextCorrelationId)
-        silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+        silentTokenProviderMock.result = silentTokenResult
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
@@ -155,7 +155,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                                 rawIdToken: idToken,
                                                                 account: account,
                                                                 correlationId: contextCorrelationId)
-        silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+        silentTokenProviderMock.result = silentTokenResult
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
@@ -179,7 +179,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     func test_getAccessToken_successfullyReturnsError() async {
         let contextCorrelationId = UUID()
         let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
+        silentTokenProviderMock.error = errorWithInnerErrorMock
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = sut.createRetrieveAccessTokenError(error: errorWithInnerErrorMock,
                                                                context: context)

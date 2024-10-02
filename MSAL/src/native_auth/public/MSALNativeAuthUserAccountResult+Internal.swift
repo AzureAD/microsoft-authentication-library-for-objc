@@ -43,18 +43,18 @@ extension MSALNativeAuthUserAccountResult {
                                                        authority: authority)
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
-        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
-        else {
-            MSALLogger.log(
-                            level: .error,
-                            context: context,
-                            format: "Config or challenge types unexpectedly found nil."
-                        )
-            Task { await delegate.onAccessTokenRetrieveError(
-                error: RetrieveAccessTokenError(type: .generalError,
-                                                correlationId: correlationId ?? context.correlationId())) }
-            return
-        }
+//        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
+//        else {
+//            MSALLogger.log(
+//                            level: .error,
+//                            context: context,
+//                            format: "Config or challenge types unexpectedly found nil."
+//                        )
+//            Task { await delegate.onAccessTokenRetrieveError(
+//                error: RetrieveAccessTokenError(type: .generalError,
+//                                                correlationId: correlationId ?? context.correlationId())) }
+//            return
+//        }
         silentTokenProvider.acquireTokenSilent(parameters: params) { [weak self] result, error in
             guard let self = self else { return }
 

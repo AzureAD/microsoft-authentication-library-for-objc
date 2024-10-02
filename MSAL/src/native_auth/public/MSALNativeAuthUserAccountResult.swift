@@ -33,7 +33,7 @@ import Foundation
     internal var rawIdToken: String?
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
-    internal let silentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable
+    internal let silentTokenProvider: MSALNativeAuthSilentTokenProviding
 
     /// Get the latest ID token for the account.
     @objc public var idToken: String? {
@@ -46,14 +46,14 @@ import Foundation
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
-        silentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable = MSALNativeAuthSilentTokenProviderFactory()
+        silentTokenProvider: MSALNativeAuthSilentTokenProviding
     ) {
         self.account = account
         self.rawIdToken = rawIdToken
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
         self.inputValidator = inputValidator
-        self.silentTokenProviderFactory = silentTokenProviderFactory
+        self.silentTokenProvider = silentTokenProvider
     }
 
     /// Removes all the data from the cache.

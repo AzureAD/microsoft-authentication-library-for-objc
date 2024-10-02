@@ -70,12 +70,33 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
     }
 
     func makeUserAccountResult(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALNativeAuthUserAccountResult? {
-        let account =  makeAccount(tokenResult: tokenResult, context: context)
-        return .init(account: account, rawIdToken: tokenResult.rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
+        let account = makeAccount(tokenResult: tokenResult, context: context)
+        return makeUserAccountResult(account: account, rawIdToken: tokenResult.rawIdToken)
     }
 
     func makeUserAccountResult(account: MSALAccount, rawIdToken: String?) -> MSALNativeAuthUserAccountResult? {
-        return .init(account: account, rawIdToken: rawIdToken, configuration: config, cacheAccessor: cacheAccessor)
+        let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(config.challengeTypes)
+        let authority = try? MSALCIAMAuthority(url: config.authority.url)
+
+        let configuration = MSALPublicClientApplicationConfig(
+            clientId: config.clientId,
+            redirectUri: config.redirectUri,
+            authority: authority
+        )
+
+        guard let silentTokenProvider = try? MSALNativeAuthSilentTokenProvider(configuration: configuration, challengeTypes: challengeTypes) else {
+            //MSALLogger.log(level: .error, context: context, format: "Error creating SilentTokenProvider")
+            print("Error creating SilentTokenProvider")
+            return nil
+        }
+
+        return .init(
+            account: account,
+            rawIdToken: rawIdToken,
+            configuration: config,
+            cacheAccessor: cacheAccessor,
+            silentTokenProvider: silentTokenProvider
+        )
     }
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {

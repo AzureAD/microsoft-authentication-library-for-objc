@@ -36,7 +36,8 @@ struct MSALNativeAuthUserAccountResultStub {
             account: account,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            silentTokenProvider: MSALNativeAuthSilentTokenProviderMock()
         )
     }
 

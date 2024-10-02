@@ -65,7 +65,8 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
                                                                     MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken:rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         let tokenResponse = MSIDCIAMTokenResponse()
         factory.mockMakeUserAccountResult(userAccountResult)
         let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .success(tokenResponse))

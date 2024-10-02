@@ -592,7 +592,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
         
         let tokenResult = MSIDTokenResult()
@@ -697,7 +698,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(), 
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
         
         let tokenResult = MSIDTokenResult()
@@ -797,7 +799,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
         
         let tokenResult = MSIDTokenResult()
@@ -890,7 +893,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
         
         let tokenResult = MSIDTokenResult()
@@ -993,7 +997,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResult(account: MSALNativeAuthUserAccountResultStub.account,
                                                                 rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
                                                                 configuration: MSALNativeAuthConfigStubs.configuration,
-                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock())
+                                                                cacheAccessor: MSALNativeAuthCacheAccessorMock(), 
+                                                                silentTokenProvider: MSALNativeAuthSilentTokenProviderMock())
         authResultFactoryMock.mockMakeUserAccountResult(userAccountResult)
         delegateSignInAfterResetPassword.expectedUserAccountResult = userAccountResult
 

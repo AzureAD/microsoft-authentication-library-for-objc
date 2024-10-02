@@ -86,7 +86,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
             account: account,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            silentTokenProvider: MSALNativeAuthSilentTokenProviderMock()
         )
         factory.mockMakeUserAccountResult(userAccountResult)
         cacheAccessorMock.mockUserAccounts = [account]
@@ -103,7 +104,8 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
             account: account,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            silentTokenProvider: MSALNativeAuthSilentTokenProviderMock()
         )
 
         factory.mockMakeUserAccountResult(userAccountResult)

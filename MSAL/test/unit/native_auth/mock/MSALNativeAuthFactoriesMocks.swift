@@ -51,7 +51,8 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
             account: MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false),
             rawIdToken: tokenResult.rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            silentTokenProvider: MSALNativeAuthSilentTokenProviderMock()
         )
     }
 
@@ -60,7 +61,8 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
             account: account,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: MSALNativeAuthCacheAccessorMock(),
+            silentTokenProvider: MSALNativeAuthSilentTokenProviderMock()
         )
     }
 
