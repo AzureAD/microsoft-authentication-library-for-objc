@@ -43,7 +43,7 @@ extension MSALNativeAuthUserAccountResult {
                                                        authority: authority)
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
-        guard let client = try? MSALNativeAuthPublicClientApplication(configuration: config, challengeTypes: challengeTypes)
+        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
             MSALLogger.log(
                             level: .error,
@@ -55,8 +55,7 @@ extension MSALNativeAuthUserAccountResult {
                                                 correlationId: correlationId ?? context.correlationId())) }
             return
         }
-
-        client.acquireTokenSilent(with: params) { [weak self] result, error in
+        silentTokenProvider.acquireTokenSilent(parameters: params) { [weak self] result, error in
             guard let self = self else { return }
 
             if let error = error as? NSError {
@@ -67,10 +66,10 @@ extension MSALNativeAuthUserAccountResult {
 
             if let result = result {
                 let delegateDispatcher = CredentialsDelegateDispatcher(delegate: delegate, telemetryUpdate: nil)
-                let accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
-                                                                  scopes: result.scopes,
-                                                                  expiresOn: result.expiresOn)
-                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: accessTokenResult, correlationId: result.correlationId) }
+                self.rawIdToken = result.rawIdToken
+                self.account = result.account
+                Task { await delegateDispatcher.dispatchAccessTokenRetrieveCompleted(result: result.accessTokenResult,
+                                                                                     correlationId: result.correlationId) }
                 return
             }
 
@@ -83,7 +82,7 @@ extension MSALNativeAuthUserAccountResult {
         }
     }
 
-    func createRetrieveAccessTokenError(error: NSError, context: MSALNativeAuthRequestContext) -> RetrieveAccessTokenError {
+    private func createRetrieveAccessTokenError(error: NSError, context: MSALNativeAuthRequestContext) -> RetrieveAccessTokenError {
         if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError {
            return createRetrieveAccessTokenError(error: innerError, context: context)
         }
