@@ -24,18 +24,15 @@
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
-class MSALNativeAuthSilentTokenProviderMock : MSALNativeAuthSilentTokenProviding {
+class MSALNativeAuthSilentTokenProviderFactoryConfigTester: MSALNativeAuthSilentTokenProviderBuildable {
+    var silentTokenProvider = MSALNativeAuthSilentTokenProviderMock()
+    var expectedBypassRedirectURIValidation = true
 
-    var result: MSALNativeAuthSilentTokenResult?
-    var error: (any Error)?
-    var expectedParameters: MSALSilentTokenParameters?
-
-    func acquireTokenSilent(parameters: MSALSilentTokenParameters, completionBlock: @escaping MSAL.MSALNativeAuthSilentTokenResponse) {
-        if let expectedParameters = expectedParameters {
-            XCTAssertEqual(expectedParameters.forceRefresh, parameters.forceRefresh)
-            XCTAssertEqual(expectedParameters.correlationId, parameters.correlationId)
-        }
-        completionBlock(result, error)
+    func makeSilentTokenProvider(configuration: MSALPublicClientApplicationConfig,
+                                 challengeTypes: MSALNativeAuthChallengeTypes) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
+        XCTAssertEqual(configuration.bypassRedirectURIValidation, expectedBypassRedirectURIValidation)
+        return silentTokenProvider
     }
 }

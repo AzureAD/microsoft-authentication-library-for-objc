@@ -34,10 +34,10 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var silentTokenProviderFactoryMock: MSALNativeAuthSilentTokenProviderFactoryMock!
     private var account: MSALAccount!
-    private let innerCorrelationId = UUID().uuidString
-    private let withInnerCorrelationId = UUID().uuidString
-    private let withoutInnerCorrelationId = UUID().uuidString
-    
+    private let innerCorrelationId = UUID()
+    private let withInnerCorrelationId = UUID()
+    private let withoutInnerCorrelationId = UUID()
+
     private var innerErrorMock: NSError {
         let innerUserInfo: [String : Any] = [
             MSALInternalErrorCodeKey : -42002,
@@ -47,7 +47,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 401, userInfo: innerUserInfo)
     }
-    
+
     private var errorWithInnerErrorMock: NSError {
         let userInfo: [String : Any] = [
             NSUnderlyingErrorKey : innerErrorMock ,
@@ -57,7 +57,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 501, userInfo: userInfo)
     }
-    
+
     private var errorWithoutInnerErrorMock: NSError {
         let userInfo: [String : Any] = [
             MSALInternalErrorCodeKey : -3003,
@@ -67,7 +67,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 601, userInfo: userInfo)
     }
-    
+
     private var errorWithoutInnerErrorWithoutDescriptionMock: NSError {
         let userInfo: [String : Any] = [
             MSALOAuthErrorKey: "invalid_request",
@@ -75,7 +75,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 701, userInfo: userInfo)
     }
-    
+
     private var errorWithoutInnerErrorWithoutCorrelationIdMock: NSError {
         let userInfo: [String : Any] = [
             MSALOAuthErrorKey: "invalid_request",
@@ -122,7 +122,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                                 rawIdToken: idToken,
                                                                 account: account,
                                                                 correlationId: contextCorrelationId)
+        let params = MSALSilentTokenParameters(scopes: accessToken.scopes?.array as? [String] ?? [], account: account)
+        params.forceRefresh = false
+        params.correlationId = contextCorrelationId
+
         silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = params
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
@@ -132,7 +137,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
         delegate.expectedAccessToken = accessToken.accessToken
         delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
-        sut.getAccessToken(delegate: delegate)
+        sut.getAccessToken(correlationId: contextCorrelationId, delegate: delegate)
 
         await fulfillment(of: [delegateExp])
 
@@ -155,7 +160,13 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
                                                                 rawIdToken: idToken,
                                                                 account: account,
                                                                 correlationId: contextCorrelationId)
+
+        let params = MSALSilentTokenParameters(scopes: accessToken.scopes?.array as? [String] ?? [], account: account)
+        params.forceRefresh = true
+        params.correlationId = contextCorrelationId
+
         silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = params
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
@@ -167,6 +178,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
         sut.getAccessToken(scopes: accessToken.scopes?.array as? [String] ?? [],
                            forceRefresh: true,
+                           correlationId: contextCorrelationId,
                            delegate: delegate)
 
         await fulfillment(of: [delegateExp])
@@ -176,19 +188,68 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(sut.account, account)
     }
 
-    func test_getAccessToken_successfullyReturnsError() async {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
+    func test_getAccessTokenWithRedirectURI_thenInternalConfigIsCreatedCorrectly() async {
+        let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
+        factory.expectedBypassRedirectURIValidation = false
+        let correlationId = UUID()
+        let configuration = try! MSALNativeAuthConfiguration (
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!
+            ),
+            challengeTypes: [.redirect], redirectUri: "contoso.com"
+        )
+        sut = MSALNativeAuthUserAccountResult(
+            account: account!,
+            rawIdToken: "rawIdToken",
+            configuration: configuration,
+            cacheAccessor: cacheAccessorMock,
+            silentTokenProviderFactory: factory
+        )
+
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: nil, correlationId: correlationId, errorCodes: [], errorUri: nil)
+        factory.silentTokenProvider.error = expectedError
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
-        let expectedError = sut.createRetrieveAccessTokenError(error: errorWithInnerErrorMock,
-                                                               context: context)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        sut.getAccessToken(delegate: delegate)
+        sut.getAccessToken(scopes: ["scope"],
+                           forceRefresh: true,
+                           correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
 
+    func test_getAccessTokenWithoutRedirectURI_thenInternalConfigIsCreatedCorrectly() async {
+        let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
+        factory.expectedBypassRedirectURIValidation = true
+        let correlationId = UUID()
+        let configuration = try! MSALNativeAuthConfiguration (
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!
+            ),
+            challengeTypes: [.redirect],
+            redirectUri: nil
+        )
+        sut = MSALNativeAuthUserAccountResult(
+            account: account!,
+            rawIdToken: "rawIdToken",
+            configuration: configuration,
+            cacheAccessor: cacheAccessorMock,
+            silentTokenProviderFactory: factory
+        )
+
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: nil, correlationId: correlationId, errorCodes: [], errorUri: nil)
+        factory.silentTokenProvider.error = expectedError
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(scopes: ["scope"],
+                           forceRefresh: true,
+                           correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
+    }
 
     // MARK: - sign-out tests
 
@@ -196,118 +257,127 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         sut.signOut()
         XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
     }
-    
+
     // MARK: - error tests
-    
-    func test_errorWithInnerError() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        
-        let result = sut.createRetrieveAccessTokenError(error: errorWithInnerErrorMock,
-                                                        context: context)
-        
-        XCTAssertEqual(result.errorDescription, "inner_user_info_error_description")
-        XCTAssertEqual(result.errorCodes, [])
-        XCTAssertEqual(result.correlationId.uuidString, innerCorrelationId)
+
+    func test_errorWithInnerError() async {
+        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "inner_user_info_error_description", correlationId: innerCorrelationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithoutInnerError() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        
-        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorMock,
-                                                        context: context)
-        
-        XCTAssertEqual(result.errorDescription, "user_info_error_description")
-        XCTAssertEqual(result.errorCodes, [])
-        XCTAssertEqual(result.correlationId.uuidString, withoutInnerCorrelationId)
+
+    func test_errorWithoutInnerError() async {
+        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithoutInnerErrorMock
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "user_info_error_description", correlationId: withoutInnerCorrelationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithoutInnerErrorWithoutDescription() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        
-        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorWithoutDescriptionMock,
-                                                        context: context)
-        
-        XCTAssertEqual(result.errorDescription, errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription)
-        XCTAssertEqual(result.errorCodes, [])
-        XCTAssertEqual(result.correlationId.uuidString, withoutInnerCorrelationId)
+
+    func test_errorWithoutInnerErrorWithoutDescription() async {
+        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithoutInnerErrorWithoutDescriptionMock
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription, correlationId: withoutInnerCorrelationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithoutInnerErrorWithoutCorrelationId() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
-        
-        let result = sut.createRetrieveAccessTokenError(error: errorWithoutInnerErrorWithoutCorrelationIdMock,
-                                                        context: context)
-        
-        XCTAssertEqual(result.errorDescription, "user_info_error_description")
-        XCTAssertEqual(result.errorCodes, [])
-        XCTAssertEqual(result.correlationId, contextCorrelationId)
+
+    func test_errorWithoutInnerErrorWithoutCorrelationId() async {
+        let correlationId = UUID()
+        silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithoutInnerErrorWithoutCorrelationIdMock
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "user_info_error_description", correlationId: correlationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithValidExternalErrorCodes_ParseShouldWorks() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+
+    func test_errorWithValidExternalErrorCodes_ParseShouldWorks() async {
+        let correlationId = UUID()
         let errorCodes = [1, 2, 3]
         let userInfo: [String : Any] = [
             MSALSTSErrorCodesKey: errorCodes
         ]
         let error = NSError(domain: "", code: 1, userInfo: userInfo)
-        
-        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
-        
-        XCTAssertEqual(result.errorCodes, errorCodes)
+
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithInvalidExternalErrorCodes_ParseShouldWorks() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+
+    func test_errorWithInvalidExternalErrorCodes_ParseShouldWorks() async {
+        let correlationId = UUID()
         let errorCodes = ["123"]
         let userInfo: [String : Any] = [
             MSALSTSErrorCodesKey: errorCodes
         ]
         let error = NSError(domain: "", code: 1, userInfo: userInfo)
-        
-        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
-        
-        XCTAssertEqual(result.errorCodes, [])
+
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithValidInnerErrorWithErrorCodes_ParseShouldWorks() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+
+    func test_errorWithValidInnerErrorWithErrorCodes_ParseShouldWorks() async {
+        let correlationId = UUID()
         let errorCodes = [1, 2, 3]
         let userInfo: [String : Any] = [
             MSALSTSErrorCodesKey: errorCodes
         ]
         let innerError = NSError(domain: "", code: 1, userInfo: userInfo)
         let error = NSError(domain: "", code: 1, userInfo: [NSUnderlyingErrorKey: innerError])
-        
-        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
-        
-        XCTAssertEqual(result.errorCodes, errorCodes)
+
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [1, 2, 3], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithInvalidInnerErrorWithErrorCodes_ParseShouldWorks() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+
+    func test_errorWithInvalidInnerErrorWithErrorCodes_ParseShouldWorks() async {
+        let correlationId = UUID()
         let errorCodes = ["123"]
         let userInfo: [String : Any] = [
             MSALSTSErrorCodesKey: errorCodes
         ]
         let innerError = NSError(domain: "", code: 1, userInfo: userInfo)
         let error = NSError(domain: "", code: 1, userInfo: [NSUnderlyingErrorKey: innerError])
-        
-        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
-        
-        XCTAssertEqual(result.errorCodes, [])
+
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
-    
-    func test_errorWithMFARequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() {
-        let contextCorrelationId = UUID()
-        let context = MSALNativeAuthRequestContext(correlationId: contextCorrelationId)
+
+    func test_errorWithMFARequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() async {
+        let correlationId = UUID()
         let errorCodes = [50076]
         let message = "message"
         let userInfo: [String : Any] = [
@@ -315,10 +385,13 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             MSALSTSErrorCodesKey: errorCodes
         ]
         let error = NSError(domain: "", code: 1, userInfo: userInfo)
-        
-        let result = sut.createRetrieveAccessTokenError(error: error, context: context)
-        
-        XCTAssertEqual(result.errorCodes, errorCodes)
-        XCTAssertEqual(result.errorDescription, MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message)
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message, correlationId: correlationId, errorCodes: [50076], errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
     }
 }
