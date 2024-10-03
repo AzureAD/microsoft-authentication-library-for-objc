@@ -43,7 +43,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             MSALInternalErrorCodeKey : -42002,
             MSALErrorDescriptionKey: "inner_user_info_error_description",
             MSALOAuthErrorKey: "inner_invalid_request",
-            MSALCorrelationIDKey: innerCorrelationId
+            MSALCorrelationIDKey: innerCorrelationId.uuidString
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 401, userInfo: innerUserInfo)
     }
@@ -53,7 +53,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             NSUnderlyingErrorKey : innerErrorMock ,
             MSALErrorDescriptionKey: "user_info_error_description",
             MSALOAuthErrorKey: "invalid_request",
-            MSALCorrelationIDKey: withInnerCorrelationId
+            MSALCorrelationIDKey: withInnerCorrelationId.uuidString
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 501, userInfo: userInfo)
     }
@@ -63,7 +63,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
             MSALInternalErrorCodeKey : -3003,
             MSALErrorDescriptionKey: "user_info_error_description",
             MSALOAuthErrorKey: "invalid_request",
-            MSALCorrelationIDKey: withoutInnerCorrelationId
+            MSALCorrelationIDKey: withoutInnerCorrelationId.uuidString
         ]
         return NSError(domain: "HttpResponseErrorDomain", code: 601, userInfo: userInfo)
     }
@@ -281,11 +281,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
     }
 
     func test_errorWithoutInnerErrorWithoutDescription() async {
+        let correlationId = UUID()
         silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithoutInnerErrorWithoutDescriptionMock
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription, correlationId: withoutInnerCorrelationId, errorCodes: [], errorUri: nil)
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription, correlationId: correlationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        sut.getAccessToken(delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId, delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }

@@ -96,7 +96,7 @@ extension MSALNativeAuthUserAccountResult {
     }
 
     private func correlationIdFromMSALError(error: NSError) -> UUID? {
-        return error.userInfo[MSALCorrelationIDKey] as? UUID? ?? nil
+        return UUID(uuidString: error.userInfo[MSALCorrelationIDKey] as? String ?? "")
     }
 
     private func isMFARequiredError(errorCodes: [Int]) -> Bool {
