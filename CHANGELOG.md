@@ -1,4 +1,4 @@
-## [TBD]:
+## [1.6.0]:
 * Support extra query parameters on logout endpoint (#2339)
 
 ## [1.5.1]:
