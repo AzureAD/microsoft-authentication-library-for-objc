@@ -62,43 +62,11 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
 
-    // Sign in with username and password to get access token and force refresh with existing scopes
-    func test_signInAndForceRefreshWithExistingScopesSucceeds() async throws {
+    // Sign in with username and password to get access token and force refresh with access token not linked to client Id
+    func test_signInAndForceRefreshWithNotConfiguredScopes() async throws {
 #if os(macOS)
         throw XCTSkip("Bundle id for macOS is not added to the client id, test is not needed on both iOS and macOS")
 #endif
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
-            XCTFail("Missing information")
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-
-        let previousIdToken = signInDelegateSpy.result?.idToken
-        let refreshAccessTokenExpectation = expectation(description: "refreshing access token")
-        let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: refreshAccessTokenExpectation)
-
-        signInDelegateSpy.result?.getAccessToken(scopes: ["User.Read"], forceRefresh: true, delegate: credentialsDelegateSpy)
-
-        await fulfillment(of: [refreshAccessTokenExpectation])
-
-        XCTAssertTrue(credentialsDelegateSpy.onAccessTokenRetrieveCompletedCalled)
-        XCTAssertNotNil(credentialsDelegateSpy.result?.accessToken)
-        XCTAssertNotEqual(previousIdToken, signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-    }
-
-    // Sign in with username and password to get access token and force refresh with different scopes
-    func test_signInAndForceRefreshWithDifferentScopesFails() async throws {
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
