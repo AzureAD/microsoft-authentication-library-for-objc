@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          MSAL 1.5.1 Docs
+          MSAL 1.6.0 Docs
         </a>
          (92% documented)
       </p>
@@ -57,6 +57,24 @@
                 <a class="nav-group-task-link" href="Classes/AttributesRequiredError.html">AttributesRequiredError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/AwaitingMFAState.html">AwaitingMFAState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFAGetAuthMethodsError.html">MFAGetAuthMethodsError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFARequestChallengeError.html">MFARequestChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFARequiredState.html">MFARequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFASubmitChallengeError.html">MFASubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAADAuthority.html">MSALAADAuthority</a>
               </li>
               <li class="nav-group-task">
@@ -70,6 +88,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthMethod.html">MSALAuthMethod</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
@@ -121,6 +142,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a>
@@ -388,9 +412,6 @@
                 <a class="nav-group-task-link" href="Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Enums/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALPlatformSSOStatus.html">MSALPlatformSSOStatus</a>
               </li>
               <li class="nav-group-task">
@@ -409,6 +430,15 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/CredentialsDelegate.html">CredentialsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFAGetAuthMethodsDelegate.html">MFAGetAuthMethodsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFARequestChallengeDelegate.html">MFARequestChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFASubmitChallengeDelegate.html">MFASubmitChallengeDelegate</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALAccount.html">MSALAccount</a>
@@ -1639,6 +1669,11 @@ Use it to achieve SSO or migration scenarios between ADAL Objective-C for macOS 
 <span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">)</span> <span class="n">BOOL</span> <span class="n">wipeCacheForAllAccounts</span><span class="p">;</span>
 
 <span class="cm">/**
+ Key-value pairs to pass to the logout endpoint. This should not be url-encoded value.
+ */</span>
+<span class="k">@property</span> <span class="p">(</span><span class="n">nonatomic</span><span class="p">,</span> <span class="n">nullable</span><span class="p">)</span> <span class="n">NSDictionary</span> <span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*</span><span class="p">,</span> <span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="n">extraQueryParameters</span><span class="p">;</span>
+
+<span class="cm">/**
  Initialize MSALSignoutParameters with web parameters.
  
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
@@ -1970,6 +2005,64 @@ MSALTenantProfile represents information about the account record in a particula
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALAuthMethod"></a>
+                    <a name="//apple_ref/swift/Class/MSALAuthMethod" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALAuthMethod">MSALAuthMethod</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>MSALAuthMethod represents a user&rsquo;s authentication methods.</p>
+
+                        <a href="Classes/MSALAuthMethod.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALAuthMethod</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthChannelType"></a>
+                    <a name="//apple_ref/swift/Class/MSALNativeAuthChannelType" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthChannelType">MSALNativeAuthChannelType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The channel type via which a code was sent</p>
+
+                        <a href="Classes/MSALNativeAuthChannelType.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthChannelType</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthPublicClientApplication"></a>
                     <a name="//apple_ref/swift/Class/MSALNativeAuthPublicClientApplication" class="dashAnchor"></a>
                     <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthPublicClientApplication">MSALNativeAuthPublicClientApplication</a>
@@ -2123,6 +2216,93 @@ to the initialiser method.</p>
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@objc</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="kt">AttributesRequiredError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MFAGetAuthMethodsError"></a>
+                    <a name="//apple_ref/swift/Class/MFAGetAuthMethodsError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MFAGetAuthMethodsError">MFAGetAuthMethodsError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that defines the structure and type of a MFAGetAuthMethodsError</p>
+
+                        <a href="Classes/MFAGetAuthMethodsError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MFAGetAuthMethodsError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MFARequestChallengeError"></a>
+                    <a name="//apple_ref/swift/Class/MFARequestChallengeError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MFARequestChallengeError">MFARequestChallengeError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that defines the structure and type of a MFARequestChallengeError</p>
+
+                        <a href="Classes/MFARequestChallengeError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MFARequestChallengeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MFASubmitChallengeError"></a>
+                    <a name="//apple_ref/swift/Class/MFASubmitChallengeError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MFASubmitChallengeError">MFASubmitChallengeError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that defines the structure and type of a MFASubmitChallengeError</p>
+
+                        <a href="Classes/MFASubmitChallengeError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MFASubmitChallengeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
 
                         </div>
                       </div>
@@ -2413,6 +2593,92 @@ to the initialiser method.</p>
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="kt">VerifyCodeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MFABaseState"></a>
+                    <a name="//apple_ref/swift/Class/MFABaseState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Base class for MFA state</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MFABaseState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)AwaitingMFAState"></a>
+                    <a name="//apple_ref/swift/Class/AwaitingMFAState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)AwaitingMFAState">AwaitingMFAState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An object of this type is created whenever a user needs to make a specific request to send the MFA challenge.</p>
+
+                        <a href="Classes/AwaitingMFAState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">AwaitingMFAState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MFARequiredState"></a>
+                    <a name="//apple_ref/swift/Class/MFARequiredState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MFARequiredState">MFARequiredState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/MFARequiredState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MFARequiredState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a></span></code></pre>
 
                         </div>
                       </div>
@@ -2828,7 +3094,7 @@ to the initialiser method.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-09-25)</p>
+      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-10-08)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
