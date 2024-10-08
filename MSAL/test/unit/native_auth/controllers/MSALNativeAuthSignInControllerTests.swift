@@ -27,19 +27,19 @@ import XCTest
 @_implementationOnly import MSAL_Private
 @_implementationOnly import MSAL_Unit_Test_Private
 
-final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
+class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
-    private var sut: MSALNativeAuthSignInController!
-    private var signInRequestProviderMock: MSALNativeAuthSignInRequestProviderMock!
-    private var tokenRequestProviderMock: MSALNativeAuthTokenRequestProviderMock!
-    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
-    private var signInResponseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
-    private var tokenResponseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
-    private var contextMock: MSALNativeAuthRequestContextMock!
-    private var tokenResult = MSIDTokenResult()
-    private var tokenResponse = MSIDCIAMTokenResponse()
-    private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
-    private let defaultScopes = "openid profile offline_access"
+    var sut: MSALNativeAuthSignInController!
+    var signInRequestProviderMock: MSALNativeAuthSignInRequestProviderMock!
+    var tokenRequestProviderMock: MSALNativeAuthTokenRequestProviderMock!
+    var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    var signInResponseValidatorMock: MSALNativeAuthSignInResponseValidatorMock!
+    var tokenResponseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
+    var contextMock: MSALNativeAuthRequestContextMock!
+    var tokenResult = MSIDTokenResult()
+    var tokenResponse = MSIDCIAMTokenResponse()
+    var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
+    let defaultScopes = "openid profile offline_access"
 
     private var signInInitiateApiErrorStub: MSALNativeAuthSignInInitiateResponseError {
         .init(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil)
@@ -123,7 +123,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -152,7 +152,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.password, scope: expectedScopes, password: expectedPassword, oobCode: nil, includeChallengeType: true, refreshToken: nil)
@@ -181,7 +181,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -201,7 +201,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         await fulfillment(of: [expectation], timeout: 1)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: true)
     }
 
     func test_successfulResponseAndUnsuccessfulValidation_shouldReturnError() async {
@@ -218,7 +217,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -286,44 +285,12 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .invalidCredentials, correlationId: defaultUUID), validatorError: .invalidPassword(signInTokenApiErrorStub))
         await checkDelegateErrorWithValidatorError(delegateError: SignInStartError(type: .generalError, message: "Error message", correlationId: defaultUUID), validatorError: .unexpectedError(.init(errorDescription: "Error message")))
     }
-    
-    func test_whenCredentialsAreRequired_browserRequiredErrorIsReturned() async {
-        let expectedUsername = "username"
-        let expectedPassword = "password"
-        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continuationToken = "continuationToken"
-
-        signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: continuationToken)
-        signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(continuationToken: continuationToken)
-
-        signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
-        signInRequestProviderMock.expectedContext = expectedContext
-
-        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        tokenRequestProviderMock.expectedCredentialToken = continuationToken
-
-        let expectation = expectation(description: "SignInController")
-
-        let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation, expectedError: .init(type: .browserRequired, message: MSALNativeAuthErrorMessage.unsupportedMFA, correlationId: defaultUUID))
-
-        tokenResponseValidatorMock.tokenValidatedResponse = .error(.strongAuthRequired(.init(error: .unauthorizedClient, subError: nil, errorDescription: MSALNativeAuthErrorMessage.unsupportedMFA, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)))
-
-        let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: expectedPassword, context: expectedContext, scopes: nil))
-
-        helper.onSignInPasswordError(result)
-
-        await fulfillment(of: [expectation], timeout: 1)
-        checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
-    }
 
     func test_whenSignInUsingPassword_apiReturnsChallengeTypeOOB_codeRequiredShouldBeCalled() async {
         let expectedUsername = "username"
         let expectedPassword = "password"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -336,7 +303,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation)
@@ -357,7 +324,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectedUsername = "username"
         let expectedPassword = "password"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -370,7 +337,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         let helper = SignInPasswordStartTestsValidatorHelper(expectation: expectation)
@@ -392,7 +359,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInWithCodeStartWithValidInfo_codeRequiredShouldBeCalled() async {
         let expectedUsername = "username"
         let sentTo = "sentTo"
-        let channelTargetType = MSALNativeAuthChannelType.email
+        let channelTargetType = MSALNativeAuthChannelType(value: "email")
         let codeLength = 4
         let continuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -402,7 +369,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         let helper = SignInCodeStartTestsValidatorHelper(expectation: expectation, expectedSentTo: sentTo, expectedChannelTargetType: channelTargetType, expectedCodeLength: codeLength)
@@ -657,7 +624,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, message: "User does not exist", correlationId: defaultUUID), validatorError: .userNotFound(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidOOBCode(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .unsupportedChallengeType(signInTokenApiErrorStub))
-        await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .browserRequired, correlationId: defaultUUID), validatorError: .strongAuthRequired(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidScope(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .authorizationPending(signInTokenApiErrorStub))
         await checkSubmitPasswordPublicErrorWithTokenValidatorError(publicError: PasswordRequiredError(type: .generalError, correlationId: defaultUUID), validatorError: .slowDown(signInTokenApiErrorStub))
@@ -691,7 +657,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .userNotFound(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .invalidCode, validatorError: .invalidOOBCode(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .unsupportedChallengeType(signInTokenApiErrorStub))
-        checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .browserRequired, validatorError: .strongAuthRequired(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .invalidScope(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .authorizationPending(signInTokenApiErrorStub))
         checkSubmitCodeDelegateErrorWithTokenValidatorError(delegateError: .generalError, validatorError: .slowDown(signInTokenApiErrorStub))
@@ -701,7 +666,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_signInWithCodeResendCode_shouldSendNewCode() async {
         let expectedUsername = "username"
         let sentTo = "sentTo"
-        let channelTargetType = MSALNativeAuthChannelType.email
+        let channelTargetType = MSALNativeAuthChannelType(value: "email")
         let codeLength = 4
         let continuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -710,7 +675,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         let helper = SignInResendCodeTestsValidatorHelper(expectation: expectation, expectedSentTo: sentTo, expectedChannelTargetType: channelTargetType, expectedCodeLength: codeLength)
@@ -868,7 +833,24 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
+    
+    func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
+        XCTAssertEqual(receivedEvents.count, 1)
 
+        guard let telemetryEventDict = receivedEvents.first else {
+            return XCTFail("Telemetry test fail")
+        }
+
+        let expectedApiId = String(id.rawValue)
+        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
+        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event" )
+        XCTAssertEqual(telemetryEventDict["correlation_id" ] as? String, DEFAULT_TEST_UID.uppercased())
+        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, isSuccessful ? "yes" : "no")
+        XCTAssertEqual(telemetryEventDict["status"] as? String, isSuccessful ? "succeeded" : "failed")
+        XCTAssertNotNil(telemetryEventDict["start_time"])
+        XCTAssertNotNil(telemetryEventDict["stop_time"])
+        XCTAssertNotNil(telemetryEventDict["response_time"])
+    }
     
     // MARK: private methods
 
@@ -973,7 +955,7 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         signInRequestProviderMock.mockInitiateRequestFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
         signInRequestProviderMock.mockChallengeRequestFunc((MSALNativeAuthHTTPRequestMock.prepareMockRequest()))
         signInRequestProviderMock.expectedUsername = expectedUsername
-        signInRequestProviderMock.expectedCredentialToken = continuationToken
+        signInRequestProviderMock.expectedContinuationToken = continuationToken
         signInRequestProviderMock.expectedContext = expectedContext
 
         let expectation = expectation(description: "SignInController")
@@ -991,25 +973,6 @@ final class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         receivedEvents.removeAll()
         await fulfillment(of: [expectation], timeout: 1)
     }
-    
-    private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
-        XCTAssertEqual(receivedEvents.count, 1)
-
-        guard let telemetryEventDict = receivedEvents.first else {
-            return XCTFail("Telemetry test fail")
-        }
-
-        let expectedApiId = String(id.rawValue)
-        XCTAssertEqual(telemetryEventDict["api_id"] as? String, expectedApiId)
-        XCTAssertEqual(telemetryEventDict["event_name"] as? String, "api_event" )
-        XCTAssertEqual(telemetryEventDict["correlation_id" ] as? String, DEFAULT_TEST_UID.uppercased())
-        XCTAssertEqual(telemetryEventDict["is_successfull"] as? String, isSuccessful ? "yes" : "no")
-        XCTAssertEqual(telemetryEventDict["status"] as? String, isSuccessful ? "succeeded" : "failed")
-        XCTAssertNotNil(telemetryEventDict["start_time"])
-        XCTAssertNotNil(telemetryEventDict["stop_time"])
-        XCTAssertNotNil(telemetryEventDict["response_time"])
-    }
-
 
     private func createSignInTokenApiError(message: String) -> MSALNativeAuthTokenResponseError {
         .init(error: .expiredToken, subError: nil, errorDescription: message, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: nil)

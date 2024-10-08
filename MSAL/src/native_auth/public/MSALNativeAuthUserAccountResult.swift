@@ -29,10 +29,11 @@ import Foundation
     /// The account object that holds account information.
     @objc public var account: MSALAccount
 
-    let configuration: MSALNativeAuthConfiguration
-    private var rawIdToken: String?
+    internal let configuration: MSALNativeAuthConfiguration
+    internal var rawIdToken: String?
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
+    internal let silentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable
 
     /// Get the latest ID token for the account.
     @objc public var idToken: String? {
@@ -44,13 +45,15 @@ import Foundation
         rawIdToken: String?,
         configuration: MSALNativeAuthConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface,
-        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator()
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        silentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable = MSALNativeAuthSilentTokenProviderFactory()
     ) {
         self.account = account
         self.rawIdToken = rawIdToken
         self.configuration = configuration
         self.cacheAccessor = cacheAccessor
         self.inputValidator = inputValidator
+        self.silentTokenProviderFactory = silentTokenProviderFactory
     }
 
     /// Removes all the data from the cache.

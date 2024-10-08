@@ -69,7 +69,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
             newState: expectedState,
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controller.resendCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -83,7 +83,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
 
         XCTAssertEqual(delegate.newState?.continuationToken, expectedState.continuationToken)
         XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
+        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
         XCTAssertEqual(delegate.codeLength, 1)
     }
 
@@ -95,7 +95,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
         let expectedResult: ResetPasswordResendCodeResult = .codeRequired(
             newState: expectedState,
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controller.resendCodeResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in

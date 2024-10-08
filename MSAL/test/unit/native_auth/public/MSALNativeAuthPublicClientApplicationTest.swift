@@ -107,7 +107,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -130,7 +130,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -208,7 +208,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -231,7 +231,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignUpStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.signUpController, username: "", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -345,12 +345,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInPasswordStartDelegateSpy(expectation: exp1)
         delegate.expectedSentTo = "sentTo"
         delegate.expectedCodeLength = 1
-        delegate.expectedChannelTargetType = .email
+        delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         
@@ -373,7 +373,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
 
@@ -401,12 +401,12 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateSpy(expectation: exp1)
         delegate.expectedSentTo = "sentTo"
         delegate.expectedCodeLength = 1
-        delegate.expectedChannelTargetType = .email
+        delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
 
@@ -428,7 +428,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: SignInStartResult = .codeRequired(
             newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
 
@@ -499,7 +499,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: ResetPasswordStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.resetPasswordController, username: "username", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
 
@@ -513,7 +513,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertEqual(delegate.newState?.continuationToken, "continuationToken")
         XCTAssertEqual(delegate.newState?.username, "username")
         XCTAssertEqual(delegate.sentTo, "sentTo")
-        XCTAssertEqual(delegate.channelTargetType, .email)
+        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
         XCTAssertEqual(delegate.codeLength, 1)
     }
 
@@ -525,7 +525,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedResult: ResetPasswordStartResult = .codeRequired(
             newState: .init(controller: controllerFactoryMock.resetPasswordController, username: "username", continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "sentTo",
-            channelTargetType: .email,
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
         )
         controllerFactoryMock.resetPasswordController.resetPasswordResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -566,7 +566,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
-        signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
+        signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 2"))
         signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
 
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
@@ -671,7 +671,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let signUpResponseValidatorMock = MSALNativeAuthSignUpResponseValidatorMock()
         signUpResponseValidatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
-        signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", .email, 4, "continuationToken 2"))
+        signUpResponseValidatorMock.mockValidateSignUpChallengeFunc(.codeRequired("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 2"))
         signUpResponseValidatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: "continuationToken"))
 
         let signInRequestProviderMock = MSALNativeAuthSignInRequestProviderMock()
@@ -771,7 +771,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         signInRequestProviderMock.expectedContext = contextMock
         let continuationToken = "<continuationToken>"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         let signInResponseValidatorMock = MSALNativeAuthSignInResponseValidatorMock()
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: continuationToken)
@@ -860,7 +860,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let continuationToken = "<continuationToken>"
         let expectedSentTo = "sentTo"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
         delegateCodeStart.expectedSentTo = expectedSentTo
         delegateCodeStart.expectedChannelTargetType = expectedChannelTargetType
@@ -962,7 +962,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let resetPasswordResponseValidator = MSALNativeAuthResetPasswordResponseValidatorMock()
         resetPasswordResponseValidator.mockValidateResetPasswordStartFunc(.success(continuationToken: "continuationToken"))
-        resetPasswordResponseValidator.mockValidateResetPasswordChallengeFunc(.success("sentTo", .email, 4, "continuationToken 2"))
+        resetPasswordResponseValidator.mockValidateResetPasswordChallengeFunc(.success("sentTo", MSALNativeAuthChannelType(value: "email"), 4, "continuationToken 2"))
         resetPasswordResponseValidator.mockValidateResetPasswordContinueFunc(.success(continuationToken: "continuationToken"))
         resetPasswordResponseValidator.mockValidateResetPasswordSubmitFunc(.success(continuationToken: "continuationToken 3", pollInterval: 0))
         resetPasswordResponseValidator.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded, continuationToken: "continuationToken"))

@@ -241,6 +241,10 @@
 		23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		280095EB2C32CAFC00F1653E /* ClientIdType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280095EA2C32CAFC00F1653E /* ClientIdType.swift */; };
 		2809E8352C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */; };
+		28188F622C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28188F5F2C8F482D00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift */; };
+		28188F632C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28188F5F2C8F482D00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift */; };
+		28188F652C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28188F642C8F4C1100CFDD05 /* MFADelegateSpies.swift */; };
+		28188F662C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28188F642C8F4C1100CFDD05 /* MFADelegateSpies.swift */; };
 		281A0E0C2C21E1F000CB30CB /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E272C4EA2A4447520013B805 /* MSALNativeAuthSignUpUsernameEndToEndTests.swift */; };
 		281A0E142C21E1F200CB30CB /* MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26E391A2A4C2BE200063C07 /* MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests.swift */; };
 		281A0E152C21E1F500CB30CB /* SignUpDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26E39232A4C2D7400063C07 /* SignUpDelegateSpies.swift */; };
@@ -254,10 +258,16 @@
 		2826932A2A0974750037B93A /* MSALNativeAuthTokenRequestParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 282693272A0974740037B93A /* MSALNativeAuthTokenRequestParameters.swift */; };
 		2826933B2A0B98750037B93A /* MSALNativeAuthSignInParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2826933A2A0B98750037B93A /* MSALNativeAuthSignInParameters.swift */; };
 		285D0D692B99C14F002A1D4A /* MSALNativeAuthTokenResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285D0D682B99C14F002A1D4A /* MSALNativeAuthTokenResult.swift */; };
+		285E09F72C93340000492A2E /* MSALNativeAuthLogMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28BBB7CD2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift */; };
 		285F36082A24DF8300A2190F /* MSALNativeAuthSignInControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F36072A24DF8300A2190F /* MSALNativeAuthSignInControlling.swift */; };
+		285F58542C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58532C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift */; };
+		285F585D2C5BA4F700F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F585C2C5BA4F600F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift */; };
+		285F585F2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F585E2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift */; };
+		285F58612C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58602C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift */; };
+		285F58632C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58622C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift */; };
+		285F58652C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58642C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift */; };
 		28664DDF2C382A440007D6A5 /* libIdentityAutomationTestLib iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */; };
 		2877081F2A14F67400E371ED /* MSALNativeAuthSignInChallengeValidatedResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2877081E2A14F67400E371ED /* MSALNativeAuthSignInChallengeValidatedResponse.swift */; };
-		287708222A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287708212A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift */; };
 		287708252A178DC500E371ED /* MSALNativeAuthSignInInitiateValidatedResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287708242A178DC500E371ED /* MSALNativeAuthSignInInitiateValidatedResponse.swift */; };
 		287F64D4297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */; };
 		287F64D5297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */; };
@@ -270,10 +280,30 @@
 		289747B129799C6B00838C80 /* MSALNativeAuthInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289747AF29799A8700838C80 /* MSALNativeAuthInputValidator.swift */; };
 		289E15592948E601006104D9 /* MSALNativeAuthCacheInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E15582948E601006104D9 /* MSALNativeAuthCacheInterface.swift */; };
 		289E156D2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E156C2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift */; };
+		289E44AC2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44AB2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift */; };
+		289E44AD2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44AB2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift */; };
+		289E44B62C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44B52C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift */; };
+		289E44B72C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44B52C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift */; };
+		289E44B92C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44B82C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift */; };
+		289E44BA2C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289E44B82C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift */; };
 		28A277C82C21F08800D95E00 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		28A277D92C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A277D82C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift */; };
 		28A472EC2A276C3B003F988B /* MSALNativeAuthTokenValidatedResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A472EB2A276C3B003F988B /* MSALNativeAuthTokenValidatedResponse.swift */; };
+		28A600962C78843C00455666 /* MFASendChallengeDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600942C78843300455666 /* MFASendChallengeDelegateDispatcherTests.swift */; };
+		28A6009B2C7898DA00455666 /* MFADelegatesSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009A2C7898DA00455666 /* MFADelegatesSpies.swift */; };
+		28A6009D2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009C2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift */; };
+		28A6009F2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */; };
+		28A600A12C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A02C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift */; };
+		28A600A32C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */; };
+		28A600A62C78BDC100455666 /* AwaitingMFAStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */; };
+		28A600A82C78BDD200455666 /* MFARequiredStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */; };
+		28A600AA2C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A92C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift */; };
+		28ABE1762C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */; };
+		28B28B832C6F46E50030D5C5 /* MFAStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B822C6F46E50030D5C5 /* MFAStates.swift */; };
+		28B28B8C2C6F4B570030D5C5 /* MFADelegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */; };
+		28B28B922C6F611F0030D5C5 /* MSALAuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B912C6F611F0030D5C5 /* MSALAuthMethod.swift */; };
 		28B6494D2A0959EB00EF3DB7 /* MSALNativeAuthSignInResponseValidatorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B6494A2A0959DC00EF3DB7 /* MSALNativeAuthSignInResponseValidatorTest.swift */; };
+		28BBB7CE2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28BBB7CD2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift */; };
 		28CA6F5D29689F34004DB11D /* MSALNativeAuthCacheAccessorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CA6F5429689F26004DB11D /* MSALNativeAuthCacheAccessorTest.swift */; };
 		28D1D57029BF62E900CE75F4 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		28D1D58029BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D1D57F29BF883D00CE75F4 /* MSALNativeAuthIntegrationBaseTests.swift */; };
@@ -281,6 +311,11 @@
 		28D1D59C29C2266500CE75F4 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D1D59B29C2266500CE75F4 /* Model.swift */; };
 		28D1D59E29C2392000CE75F4 /* MockAPIHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D1D59D29C2392000CE75F4 /* MockAPIHandlerTest.swift */; };
 		28D5B05D2A028D2B0066E32B /* MSALNativeAuthControllerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D5B05C2A028D2B0066E32B /* MSALNativeAuthControllerFactory.swift */; };
+		28D811E52C735D98002BE1AA /* MFASubmitChallengeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E42C735D98002BE1AA /* MFASubmitChallengeError.swift */; };
+		28D811E72C75FB10002BE1AA /* MFAStates+Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E62C75FB10002BE1AA /* MFAStates+Internal.swift */; };
+		28D811E92C75FFC3002BE1AA /* MFADelegateDispatchers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E82C75FFC3002BE1AA /* MFADelegateDispatchers.swift */; };
+		28D811EB2C7602A1002BE1AA /* MFAResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811EA2C7602A1002BE1AA /* MFAResults.swift */; };
+		28D811ED2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811EC2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift */; };
 		28DCD09229D7166F00C4601E /* SignUpDelegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DCD09129D7166F00C4601E /* SignUpDelegates.swift */; };
 		28DCD09A29D7192F00C4601E /* MSALNativeAuthError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DCD09929D7192F00C4601E /* MSALNativeAuthError.swift */; };
 		28DCD0A029D7260B00C4601E /* MSALNativeAuthBaseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DCD09F29D7260B00C4601E /* MSALNativeAuthBaseState.swift */; };
@@ -298,6 +333,30 @@
 		28E4D9032A30ABA200280921 /* ResendCodeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E4D9022A30ABA200280921 /* ResendCodeError.swift */; };
 		28EDF93E29E6D43900A99F2A /* SignUpStartError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EDF93D29E6D43900A99F2A /* SignUpStartError.swift */; };
 		28EDF94129E6D52E00A99F2A /* SignInStartError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EDF94029E6D52E00A99F2A /* SignInStartError.swift */; };
+		28EE65062C8B01D500015F90 /* MSALNativeAuthMFAControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811EC2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift */; };
+		28EE650E2C8B027D00015F90 /* MFAResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811EA2C7602A1002BE1AA /* MFAResults.swift */; };
+		28EE650F2C8B039600015F90 /* MSALNativeAuthSignInIntrospectResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58602C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift */; };
+		28EE65102C8B03AA00015F90 /* MSALNativeAuthSignInIntrospectRequestParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58532C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift */; };
+		28EE65112C8B03BD00015F90 /* MSALNativeAuthInternalAuthenticationMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F585E2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift */; };
+		28EE65122C8B0E3600015F90 /* MSALNativeAuthSignInIntrospectResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F585C2C5BA4F600F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift */; };
+		28EE65132C8B0E4500015F90 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58642C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift */; };
+		28EE65142C8B0E5500015F90 /* MSALAuthMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B912C6F611F0030D5C5 /* MSALAuthMethod.swift */; };
+		28EE65152C8B0E6B00015F90 /* MFADelegates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */; };
+		28EE65162C8B0E7600015F90 /* MFADelegateDispatchers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E82C75FFC3002BE1AA /* MFADelegateDispatchers.swift */; };
+		28EE65182C8B0FB200015F90 /* MFASubmitChallengeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E42C735D98002BE1AA /* MFASubmitChallengeError.swift */; };
+		28EE65192C8B0FBA00015F90 /* MFAStates+Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D811E62C75FB10002BE1AA /* MFAStates+Internal.swift */; };
+		28EE651A2C8B0FC200015F90 /* MFAStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B28B822C6F46E50030D5C5 /* MFAStates.swift */; };
+		28EE651B2C8B0FDD00015F90 /* MSALNativeAuthSignInIntrospectIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */; };
+		28EE651C2C8B0FF500015F90 /* MSALNativeAuthMFAControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A92C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift */; };
+		28EE651D2C8B101000015F90 /* MFADelegatesSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009A2C7898DA00455666 /* MFADelegatesSpies.swift */; };
+		28EE651E2C8B103B00015F90 /* MFAGetAuthMethodsDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009C2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift */; };
+		28EE651F2C8B107100015F90 /* MFASendChallengeDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600942C78843300455666 /* MFASendChallengeDelegateDispatcherTests.swift */; };
+		28EE65202C8B107D00015F90 /* MFASubmitChallengeDelegateDispatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */; };
+		28EE65212C8B108A00015F90 /* MFAGetAuthMethodsErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A02C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift */; };
+		28EE65222C8B109300015F90 /* MFASubmitChallengeErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */; };
+		28EE65232C8B109D00015F90 /* AwaitingMFAStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */; };
+		28EE65242C8B10AA00015F90 /* MFARequiredStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */; };
+		28EE65252C8B10F000015F90 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285F58622C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift */; };
 		28F19BEB2A2F884D00575581 /* Array+joinScopes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F19BEA2A2F884D00575581 /* Array+joinScopes.swift */; };
 		28FDC49C2A38BFA900E38BE1 /* SignInAfterSignUpState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FDC49B2A38BFA900E38BE1 /* SignInAfterSignUpState.swift */; };
 		28FDC4A62A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FDC4A52A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift */; };
@@ -947,6 +1006,8 @@
 		DE14D75D29897D8000F37BEF /* MSALNativeAuthTelemetryApiId.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D995296EC35A006CB384 /* MSALNativeAuthTelemetryApiId.swift */; };
 		DE14D75E29897D9500F37BEF /* MSALNativeAuthUrlRequestSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2ACA49B2953576C00E98964 /* MSALNativeAuthUrlRequestSerializer.swift */; };
 		DE14D76129898CF900F37BEF /* MSALNativeAuthTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE14D76029898CF900F37BEF /* MSALNativeAuthTestCase.swift */; };
+		DE1560E32CAE8F3F00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1560E22CAE8F3E00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift */; };
+		DE1560E42CAE8F3F00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1560E22CAE8F3E00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift */; };
 		DE1BD0D32C3C275200B0888E /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
 		DE1BD0E02C3C27C100B0888E /* MSALNativeAuthSignUpStartIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243F6AD29D4427E00DAC60F /* MSALNativeAuthSignUpStartIntegrationTests.swift */; };
 		DE1BD0E12C3C27C300B0888E /* MSALNativeAuthSignUpChallengeIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23E955E29D4B9F7001DC59C /* MSALNativeAuthSignUpChallengeIntegrationTests.swift */; };
@@ -1144,7 +1205,6 @@
 		DE8DC4EB2C6621D300534E8F /* MSALNativeAuthTokenOauth2ErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB29A729DDAEB3008DA85B /* MSALNativeAuthTokenOauth2ErrorCode.swift */; };
 		DE8DC4EC2C6621D300534E8F /* MSALNativeAuthTokenResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB29AB29DDAF53008DA85B /* MSALNativeAuthTokenResponseError.swift */; };
 		DE8DC4ED2C6621D300534E8F /* MSALNativeAuthInternalChallengeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E235613329C9D528000E01CA /* MSALNativeAuthInternalChallengeType.swift */; };
-		DE8DC4EE2C6621D300534E8F /* MSALNativeAuthInternalChannelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287708212A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift */; };
 		DE8DC4EF2C6621D600534E8F /* MSALNativeAuthServerTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26097C62948FC720060DD7C /* MSALNativeAuthServerTelemetry.swift */; };
 		DE8DC4F02C6621D600534E8F /* MSALNativeAuthTelemetryApiId.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D995296EC35A006CB384 /* MSALNativeAuthTelemetryApiId.swift */; };
 		DE8DC4F12C6621D600534E8F /* MSALNativeAuthTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D99E296F08CE006CB384 /* MSALNativeAuthTelemetryProvider.swift */; };
@@ -1363,6 +1423,22 @@
 		DEF9D989296EC26A006CB384 /* MSALNativeAuthCurrentRequestTelemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D988296EC26A006CB384 /* MSALNativeAuthCurrentRequestTelemetry.swift */; };
 		DEF9D999296EC848006CB384 /* MSALNativeAuthOperationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D998296EC848006CB384 /* MSALNativeAuthOperationTypes.swift */; };
 		DEF9D99F296F08CE006CB384 /* MSALNativeAuthTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF9D99E296F08CE006CB384 /* MSALNativeAuthTelemetryProvider.swift */; };
+		DEFE87602CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875A2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift */; };
+		DEFE87612CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87592CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift */; };
+		DEFE87622CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875C2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift */; };
+		DEFE87632CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875D2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift */; };
+		DEFE87642CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875A2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift */; };
+		DEFE87652CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87592CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift */; };
+		DEFE87662CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875C2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift */; };
+		DEFE87672CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE875D2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift */; };
+		DEFE876A2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87692CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift */; };
+		DEFE876B2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87682CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift */; };
+		DEFE876C2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87692CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift */; };
+		DEFE876D2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE87682CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift */; };
+		DEFE87712CA6BC91009D11DC /* CredentialsDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE876E2CA6BC91009D11DC /* CredentialsDelegateSpies.swift */; };
+		DEFE87722CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE876F2CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift */; };
+		DEFE87732CA6BC91009D11DC /* CredentialsDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE876E2CA6BC91009D11DC /* CredentialsDelegateSpies.swift */; };
+		DEFE87742CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFE876F2CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift */; };
 		E2025CC92B2A182200E32871 /* MSALNativeAuthSubErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2025CC82B2A182200E32871 /* MSALNativeAuthSubErrorCode.swift */; };
 		E2025D202B2B8EEA00E32871 /* MSALNativeAuthSubErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2025D1F2B2B8EEA00E32871 /* MSALNativeAuthSubErrorCodeTests.swift */; };
 		E205D62E29B783FF003887BC /* MSALNativeAuthConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E205D62D29B783FF003887BC /* MSALNativeAuthConfiguration.swift */; };
@@ -1732,13 +1808,6 @@
 			remoteGlobalIDString = D626FF681FBA6EDF00EE4487;
 			remoteInfo = "IdentityCoreTests Mac";
 		};
-		D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 962E37A61E720C5D00DE71FE;
-			remoteInfo = "MSAL Test Automation (iOS)";
-		};
 		DE1BD0D42C3C275200B0888E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -1938,12 +2007,19 @@
 		23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonDeserializable.h; sourceTree = "<group>"; };
 		280095EA2C32CAFC00F1653E /* ClientIdType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientIdType.swift; sourceTree = "<group>"; };
 		2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthEndToEndPasswordTestCase.swift; sourceTree = "<group>"; };
+		28188F5F2C8F482D00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInWithMFAEndToEndTests.swift; sourceTree = "<group>"; };
+		28188F642C8F4C1100CFDD05 /* MFADelegateSpies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFADelegateSpies.swift; sourceTree = "<group>"; };
 		282693272A0974740037B93A /* MSALNativeAuthTokenRequestParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenRequestParameters.swift; sourceTree = "<group>"; };
 		2826933A2A0B98750037B93A /* MSALNativeAuthSignInParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInParameters.swift; sourceTree = "<group>"; };
 		285D0D682B99C14F002A1D4A /* MSALNativeAuthTokenResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenResult.swift; sourceTree = "<group>"; };
 		285F36072A24DF8300A2190F /* MSALNativeAuthSignInControlling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInControlling.swift; sourceTree = "<group>"; };
+		285F58532C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectRequestParameters.swift; sourceTree = "<group>"; };
+		285F585C2C5BA4F600F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectResponse.swift; sourceTree = "<group>"; };
+		285F585E2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthInternalAuthenticationMethod.swift; sourceTree = "<group>"; };
+		285F58602C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectResponseError.swift; sourceTree = "<group>"; };
+		285F58622C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift; sourceTree = "<group>"; };
+		285F58642C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectValidatedResponse.swift; sourceTree = "<group>"; };
 		2877081E2A14F67400E371ED /* MSALNativeAuthSignInChallengeValidatedResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInChallengeValidatedResponse.swift; sourceTree = "<group>"; };
-		287708212A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthInternalChannelType.swift; sourceTree = "<group>"; };
 		287708242A178DC500E371ED /* MSALNativeAuthSignInInitiateValidatedResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInInitiateValidatedResponse.swift; sourceTree = "<group>"; };
 		287F64D2297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTelemetryProviderTests.swift; sourceTree = "<group>"; };
 		287F64D3297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCurrentRequestTelemetryTests.swift; sourceTree = "<group>"; };
@@ -1956,9 +2032,26 @@
 		289747AF29799A8700838C80 /* MSALNativeAuthInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthInputValidator.swift; sourceTree = "<group>"; };
 		289E15582948E601006104D9 /* MSALNativeAuthCacheInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheInterface.swift; sourceTree = "<group>"; };
 		289E156C2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheAccessor.swift; sourceTree = "<group>"; };
+		289E44AB2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFARequestChallengeError.swift; sourceTree = "<group>"; };
+		289E44B52C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAGetAuthMethodsError.swift; sourceTree = "<group>"; };
+		289E44B82C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFARequestChallengeErrorTests.swift; sourceTree = "<group>"; };
 		28A277D82C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthEmailCodeRetriever.swift; sourceTree = "<group>"; };
 		28A472EB2A276C3B003F988B /* MSALNativeAuthTokenValidatedResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenValidatedResponse.swift; sourceTree = "<group>"; };
+		28A600942C78843300455666 /* MFASendChallengeDelegateDispatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASendChallengeDelegateDispatcherTests.swift; sourceTree = "<group>"; };
+		28A6009A2C7898DA00455666 /* MFADelegatesSpies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFADelegatesSpies.swift; sourceTree = "<group>"; };
+		28A6009C2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAGetAuthMethodsDelegateDispatcherTests.swift; sourceTree = "<group>"; };
+		28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASubmitChallengeDelegateDispatcherTests.swift; sourceTree = "<group>"; };
+		28A600A02C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAGetAuthMethodsErrorTests.swift; sourceTree = "<group>"; };
+		28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASubmitChallengeErrorTests.swift; sourceTree = "<group>"; };
+		28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwaitingMFAStateTests.swift; sourceTree = "<group>"; };
+		28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFARequiredStateTests.swift; sourceTree = "<group>"; };
+		28A600A92C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAControllerTests.swift; sourceTree = "<group>"; };
+		28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInIntrospectIntegrationTests.swift; sourceTree = "<group>"; };
+		28B28B822C6F46E50030D5C5 /* MFAStates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAStates.swift; sourceTree = "<group>"; };
+		28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFADelegates.swift; sourceTree = "<group>"; };
+		28B28B912C6F611F0030D5C5 /* MSALAuthMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALAuthMethod.swift; sourceTree = "<group>"; };
 		28B6494A2A0959DC00EF3DB7 /* MSALNativeAuthSignInResponseValidatorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInResponseValidatorTest.swift; sourceTree = "<group>"; };
+		28BBB7CD2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthLogMessage.swift; sourceTree = "<group>"; };
 		28CA6F5429689F26004DB11D /* MSALNativeAuthCacheAccessorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCacheAccessorTest.swift; sourceTree = "<group>"; };
 		28CED2E82C21E0F9004320D1 /* MSAL iOS Native Auth E2E Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MSAL iOS Native Auth E2E Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		28D1D56C29BF62E900CE75F4 /* MSAL iOS Native Auth Integration Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MSAL iOS Native Auth Integration Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1967,6 +2060,11 @@
 		28D1D59B29C2266500CE75F4 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		28D1D59D29C2392000CE75F4 /* MockAPIHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIHandlerTest.swift; sourceTree = "<group>"; };
 		28D5B05C2A028D2B0066E32B /* MSALNativeAuthControllerFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthControllerFactory.swift; sourceTree = "<group>"; };
+		28D811E42C735D98002BE1AA /* MFASubmitChallengeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFASubmitChallengeError.swift; sourceTree = "<group>"; };
+		28D811E62C75FB10002BE1AA /* MFAStates+Internal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MFAStates+Internal.swift"; sourceTree = "<group>"; };
+		28D811E82C75FFC3002BE1AA /* MFADelegateDispatchers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFADelegateDispatchers.swift; sourceTree = "<group>"; };
+		28D811EA2C7602A1002BE1AA /* MFAResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAResults.swift; sourceTree = "<group>"; };
+		28D811EC2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAControlling.swift; sourceTree = "<group>"; };
 		28DCD09129D7166F00C4601E /* SignUpDelegates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpDelegates.swift; sourceTree = "<group>"; };
 		28DCD09929D7192F00C4601E /* MSALNativeAuthError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthError.swift; sourceTree = "<group>"; };
 		28DCD09F29D7260B00C4601E /* MSALNativeAuthBaseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthBaseState.swift; sourceTree = "<group>"; };
@@ -2363,6 +2461,7 @@
 		DE14096A2A38DE0E008E6F1E /* CredentialsDelegateSpies.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CredentialsDelegateSpies.swift; sourceTree = "<group>"; };
 		DE14096C2A38DF40008E6F1E /* MSALNativeAuthCredentialsControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthCredentialsControllerTests.swift; sourceTree = "<group>"; };
 		DE14D76029898CF900F37BEF /* MSALNativeAuthTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTestCase.swift; sourceTree = "<group>"; };
+		DE1560E22CAE8F3E00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift; sourceTree = "<group>"; };
 		DE1BD0CF2C3C275200B0888E /* MSAL Mac Native Auth Integration Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MSAL Mac Native Auth Integration Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE1BD0F62C3C282900B0888E /* MSAL Mac Native Auth E2E Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MSAL Mac Native Auth E2E Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE1BD1322C3C3E9A00B0888E /* MSAL iOS Native Auth E2E Tests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "MSAL iOS Native Auth E2E Tests.xctestplan"; sourceTree = "<group>"; };
@@ -2452,6 +2551,14 @@
 		DEFB46EC2A52BA3700DBC006 /* MSALNativeAuthSignOutEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignOutEndToEndTests.swift; sourceTree = "<group>"; };
 		DEFB46F12A52C11400DBC006 /* MSALNativeAuthResetPasswordEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthResetPasswordEndToEndTests.swift; sourceTree = "<group>"; };
 		DEFB46F32A52C28100DBC006 /* ResetPasswordDelegateSpies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordDelegateSpies.swift; sourceTree = "<group>"; };
+		DEFE87592CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviderBuildable.swift; sourceTree = "<group>"; };
+		DEFE875A2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviderFactory.swift; sourceTree = "<group>"; };
+		DEFE875C2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProvider.swift; sourceTree = "<group>"; };
+		DEFE875D2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviding.swift; sourceTree = "<group>"; };
+		DEFE87682CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviderFactoryMock.swift; sourceTree = "<group>"; };
+		DEFE87692CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSilentTokenProviderMock.swift; sourceTree = "<group>"; };
+		DEFE876E2CA6BC91009D11DC /* CredentialsDelegateSpies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsDelegateSpies.swift; sourceTree = "<group>"; };
+		DEFE876F2CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthUserAccountEndToEndTests.swift; sourceTree = "<group>"; };
 		E02396F31E79E2F4004D6278 /* MSALTelemetryApiId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryApiId.h; sourceTree = "<group>"; };
 		E2025CC82B2A182200E32871 /* MSALNativeAuthSubErrorCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSubErrorCode.swift; sourceTree = "<group>"; };
 		E2025D1F2B2B8EEA00E32871 /* MSALNativeAuthSubErrorCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSubErrorCodeTests.swift; sourceTree = "<group>"; };
@@ -2793,12 +2900,22 @@
 			path = controllers;
 			sourceTree = "<group>";
 		};
+		28188F572C8F480300CFDD05 /* mfa */ = {
+			isa = PBXGroup;
+			children = (
+				28188F5F2C8F482D00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift */,
+				28188F642C8F4C1100CFDD05 /* MFADelegateSpies.swift */,
+			);
+			path = mfa;
+			sourceTree = "<group>";
+		};
 		282693392A0B98490037B93A /* sign_in */ = {
 			isa = PBXGroup;
 			children = (
 				285F36072A24DF8300A2190F /* MSALNativeAuthSignInControlling.swift */,
 				E206FCEE2979BC4600AF4400 /* MSALNativeAuthSignInController.swift */,
 				2826933A2A0B98750037B93A /* MSALNativeAuthSignInParameters.swift */,
+				28D811EC2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift */,
 			);
 			path = sign_in;
 			sourceTree = "<group>";
@@ -2808,6 +2925,7 @@
 			children = (
 				2877081E2A14F67400E371ED /* MSALNativeAuthSignInChallengeValidatedResponse.swift */,
 				287708242A178DC500E371ED /* MSALNativeAuthSignInInitiateValidatedResponse.swift */,
+				285F58642C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift */,
 			);
 			path = validated_response;
 			sourceTree = "<group>";
@@ -2844,6 +2962,8 @@
 		287F64F42981A7B800ED90BD /* mock */ = {
 			isa = PBXGroup;
 			children = (
+				DE1560E22CAE8F3E00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift */,
+				28A600992C7898AE00455666 /* delegate */,
 				E25BC0822995429D00588549 /* MSALNativeAuthCacheMocks.swift */,
 				E2F5BE9429894FCA00C67EC7 /* MSALNativeAuthConfigStubs.swift */,
 				DE0347A72A41AD08003CB3B6 /* MSALNativeAuthUserAccountResultStub.swift */,
@@ -2856,14 +2976,12 @@
 				E2CD2EB42A0404DA009F8FFA /* MSALNativeAuthSignUpControllerSpy.swift */,
 				28DE3FCF2A0921E2003148A4 /* SignInTestsValidatorHelpers.swift */,
 				9BD276582A0E7E6700FBD033 /* ResetPasswordTestValidatorHelpers.swift */,
-				DE14096A2A38DE0E008E6F1E /* CredentialsDelegateSpies.swift */,
 				E2EBD6202A1BB4640049467A /* MSALNativeAuthSignUpRequestProviderMock.swift */,
 				E2EBD6292A1BB7700049467A /* MSALNativeAuthSignUpResponseValidatorMock.swift */,
 				28FDC4AB2A38D7D200E38BE1 /* MSALNativeAuthSignInControllerMock.swift */,
-				E20C217D2A7A61CC00E31598 /* ResetPasswordDelegateSpies.swift */,
-				E20C21742A7A61B600E31598 /* SignUpDelegateSpies.swift */,
-				E2F626B22A781CE300C4A303 /* SignInDelegatesSpies.swift */,
 				DE946FE42B0F713A00978493 /* MSALNativeAuthHTTPRequestMock.swift */,
+				DEFE87682CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift */,
+				DEFE87692CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift */,
 				9B61C91D2A27E5E200CE9E3A /* reset_password */,
 			);
 			path = mock;
@@ -2915,6 +3033,37 @@
 				E2F8900D2B75546A001FBC7C /* MSALNativeAuthUnknownCaseProtocolTests.swift */,
 			);
 			path = network;
+			sourceTree = "<group>";
+		};
+		28A600932C7883EA00455666 /* mfa */ = {
+			isa = PBXGroup;
+			children = (
+				28A600942C78843300455666 /* MFASendChallengeDelegateDispatcherTests.swift */,
+				28A6009C2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift */,
+				28A6009E2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift */,
+			);
+			path = mfa;
+			sourceTree = "<group>";
+		};
+		28A600992C7898AE00455666 /* delegate */ = {
+			isa = PBXGroup;
+			children = (
+				E2F626B22A781CE300C4A303 /* SignInDelegatesSpies.swift */,
+				DE14096A2A38DE0E008E6F1E /* CredentialsDelegateSpies.swift */,
+				E20C217D2A7A61CC00E31598 /* ResetPasswordDelegateSpies.swift */,
+				E20C21742A7A61B600E31598 /* SignUpDelegateSpies.swift */,
+				28A6009A2C7898DA00455666 /* MFADelegatesSpies.swift */,
+			);
+			path = delegate;
+			sourceTree = "<group>";
+		};
+		28A600A42C78BD8B00455666 /* mfa */ = {
+			isa = PBXGroup;
+			children = (
+				28A600A52C78BDC100455666 /* AwaitingMFAStateTests.swift */,
+				28A600A72C78BDD200455666 /* MFARequiredStateTests.swift */,
+			);
+			path = mfa;
 			sourceTree = "<group>";
 		};
 		28B649412A09596300EF3DB7 /* responses */ = {
@@ -2997,6 +3146,7 @@
 				DE9245112A38736600C0389F /* CredentialsDelegates.swift */,
 				28FDC4A52A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift */,
 				E224F7462B18F29F000A7B2E /* SignInAfterResetPasswordDelegate.swift */,
+				28B28B8B2C6F4B570030D5C5 /* MFADelegates.swift */,
 			);
 			path = delegate;
 			sourceTree = "<group>";
@@ -3015,6 +3165,8 @@
 				E2F626AF2A78130700C4A303 /* SignInAfterPreviousFlowBaseState+Internal.swift */,
 				28FDC49B2A38BFA900E38BE1 /* SignInAfterSignUpState.swift */,
 				E224F73D2B18F11F000A7B2E /* SignInAfterResetPasswordState.swift */,
+				28B28B822C6F46E50030D5C5 /* MFAStates.swift */,
+				28D811E62C75FB10002BE1AA /* MFAStates+Internal.swift */,
 			);
 			path = state;
 			sourceTree = "<group>";
@@ -3033,6 +3185,9 @@
 				DE9245142A3875D700C0389F /* RetrieveAccessTokenError.swift */,
 				28FDC4A82A38C0D000E38BE1 /* SignInAfterSignUpError.swift */,
 				E224F7482B18F2FE000A7B2E /* SignInAfterResetPasswordError.swift */,
+				28D811E42C735D98002BE1AA /* MFASubmitChallengeError.swift */,
+				289E44AB2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift */,
+				289E44B52C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift */,
 			);
 			path = error;
 			sourceTree = "<group>";
@@ -3259,11 +3414,13 @@
 		9B5D6D042A3CA0C600521576 /* end_to_end */ = {
 			isa = PBXGroup;
 			children = (
+				28188F572C8F480300CFDD05 /* mfa */,
 				28A277D02C22ED2A00D95E00 /* otp_code_retriever */,
 				E272C4E92A4447520013B805 /* sign_up */,
 				9B235DA22A3D15E400657331 /* sign_in */,
 				DEFB46E12A52B9B800DBC006 /* reset_password */,
 				DEFB46EB2A52BA1300DBC006 /* sign_out */,
+				DEFE87702CA6BC91009D11DC /* credentials */,
 				E24CE9D82C592BA70069E2E4 /* mock */,
 				9B235D9E2A3CFB4300657331 /* MSALNativeAuthEndToEndBaseTestCase.swift */,
 				2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */,
@@ -4196,6 +4353,8 @@
 			children = (
 				DE0D65AB29CC6A59005798B1 /* MSALNativeAuthSignInInitiateResponse.swift */,
 				DE0D65B529CC6BBA005798B1 /* MSALNativeAuthSignInChallengeResponse.swift */,
+				285F585C2C5BA4F600F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift */,
+				285F585E2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift */,
 			);
 			path = sign_in;
 			sourceTree = "<group>";
@@ -4224,6 +4383,8 @@
 				DEDB29A429DDA9DC008DA85B /* MSALNativeAuthSignInInitiateResponseError.swift */,
 				DEDB29A629DDAEB3008DA85B /* MSALNativeAuthSignInChallengeOauth2ErrorCode.swift */,
 				DEDB29AA29DDAF52008DA85B /* MSALNativeAuthSignInChallengeResponseError.swift */,
+				285F58602C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift */,
+				285F58622C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift */,
 			);
 			path = sign_in;
 			sourceTree = "<group>";
@@ -4233,6 +4394,7 @@
 			children = (
 				DE0D65C529D344F1005798B1 /* MSALNativeAuthSignInInitiateIntegrationTests.swift */,
 				DE0D65CA29D5CD6D005798B1 /* MSALNativeAuthSignInChallengeIntegrationTests.swift */,
+				28ABE1752C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift */,
 			);
 			path = sign_in;
 			sourceTree = "<group>";
@@ -4315,6 +4477,42 @@
 			path = sign_out;
 			sourceTree = "<group>";
 		};
+		DEFE875B2CA6BBE5009D11DC /* factory */ = {
+			isa = PBXGroup;
+			children = (
+				DEFE87592CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift */,
+				DEFE875A2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift */,
+			);
+			path = factory;
+			sourceTree = "<group>";
+		};
+		DEFE875E2CA6BBE5009D11DC /* silent_token */ = {
+			isa = PBXGroup;
+			children = (
+				DEFE875B2CA6BBE5009D11DC /* factory */,
+				DEFE875C2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift */,
+				DEFE875D2CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift */,
+			);
+			path = silent_token;
+			sourceTree = "<group>";
+		};
+		DEFE875F2CA6BBE5009D11DC /* client_application_wrapper */ = {
+			isa = PBXGroup;
+			children = (
+				DEFE875E2CA6BBE5009D11DC /* silent_token */,
+			);
+			path = client_application_wrapper;
+			sourceTree = "<group>";
+		};
+		DEFE87702CA6BC91009D11DC /* credentials */ = {
+			isa = PBXGroup;
+			children = (
+				DEFE876F2CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift */,
+				DEFE876E2CA6BC91009D11DC /* CredentialsDelegateSpies.swift */,
+			);
+			path = credentials;
+			sourceTree = "<group>";
+		};
 		E02396F51E7AFFF7004D6278 /* telemetry */ = {
 			isa = PBXGroup;
 			children = (
@@ -4351,6 +4549,7 @@
 		E22427E02B0650670006C55E /* delegate */ = {
 			isa = PBXGroup;
 			children = (
+				28A600932C7883EA00455666 /* mfa */,
 				E22427F02B06686C0006C55E /* sign_in */,
 				E22427EF2B06685B0006C55E /* sign_up */,
 				E22427FB2B0670E90006C55E /* reset_password */,
@@ -4459,6 +4658,7 @@
 				28DCD08829D70FA000C4601E /* state_machine */,
 				E2DC31BB29AFA1E700051CE7 /* MSALNativeAuthPublicClientApplication.swift */,
 				E2F6269C2A780DDE00C4A303 /* MSALNativeAuthPublicClientApplication+Internal.swift */,
+				28B28B912C6F611F0030D5C5 /* MSALAuthMethod.swift */,
 				DE729ECC2A1793A100A761D9 /* MSALNativeAuthChannelType.swift */,
 				9BD78D7A2A126A1500AA7E12 /* MSALNativeAuthChallengeTypes.h */,
 				DE8BE7DB2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift */,
@@ -4547,7 +4747,9 @@
 			isa = PBXGroup;
 			children = (
 				E206FC5E296D65DE00AF4400 /* MSALNativeAuthInternalError.swift */,
+				28BBB7CD2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift */,
 				E26097942948FB660060DD7C /* cache */,
+				DEFE875F2CA6BBE5009D11DC /* client_application_wrapper */,
 				E205D62C29B783D6003887BC /* configuration */,
 				289747AE29799A6600838C80 /* input_validator */,
 				2811CDCF296F16DE007BA21B /* controllers */,
@@ -4601,6 +4803,7 @@
 			children = (
 				DE0D656729BF72F6005798B1 /* MSALNativeAuthSignInInitiateRequestParameters.swift */,
 				DE0D657429BF73CB005798B1 /* MSALNativeAuthSignInChallengeRequestParameters.swift */,
+				285F58532C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift */,
 			);
 			path = sign_in;
 			sourceTree = "<group>";
@@ -4635,7 +4838,6 @@
 				DE0FECA92993AD3700B139A8 /* responses */,
 				DEDB29A229DDA992008DA85B /* errors */,
 				E235613329C9D528000E01CA /* MSALNativeAuthInternalChallengeType.swift */,
-				287708212A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift */,
 			);
 			path = network;
 			sourceTree = "<group>";
@@ -4656,6 +4858,7 @@
 		E2CD2E3F29FBE957009F8FFA /* state_machine */ = {
 			isa = PBXGroup;
 			children = (
+				28A600A42C78BD8B00455666 /* mfa */,
 				E20C21822A7A6C7300E31598 /* sign_in */,
 				E2CD2E4D29FC0435009F8FFA /* sign_up */,
 				9BD2764E2A0E7DA400FBD033 /* reset_password */,
@@ -4686,6 +4889,9 @@
 				E2CE911B2B0BA48D0009AEDD /* RetrieveAccessTokenErrorTests.swift */,
 				E2CE911D2B0BA4A60009AEDD /* SignInAfterSignUpErrorTests.swift */,
 				E2C190762B20DF4300095534 /* SignInAfterResetPasswordErrorTests.swift */,
+				28A600A02C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift */,
+				28A600A22C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift */,
+				289E44B82C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift */,
 			);
 			path = error;
 			sourceTree = "<group>";
@@ -4700,6 +4906,7 @@
 				E22427DA2B0594670006C55E /* CredentialsDelegateDispatcher.swift */,
 				E22427DD2B05981A0006C55E /* SignInAfterSignUpDelegateDispatcher.swift */,
 				E224F74A2B18F891000A7B2E /* SignInAfterResetPasswordDelegateDispatcher.swift */,
+				28D811E82C75FFC3002BE1AA /* MFADelegateDispatchers.swift */,
 			);
 			path = delegate_dispatcher;
 			sourceTree = "<group>";
@@ -4711,6 +4918,7 @@
 				E2EFACFD2A69915100D6C3DE /* SignInResults.swift */,
 				E2EFAD0B2A69B45100D6C3DE /* SignUpResults.swift */,
 				E2EFAD0E2A69BBB800D6C3DE /* ResetPasswordResults.swift */,
+				28D811EA2C7602A1002BE1AA /* MFAResults.swift */,
 			);
 			path = responses;
 			sourceTree = "<group>";
@@ -4724,6 +4932,7 @@
 				E286E2DC2A1BAEA800666DD0 /* MSALNativeAuthSignUpControllerTests.swift */,
 				9B4EE9CD2A1686A900F243C1 /* MSALNativeAuthResetPasswordControllerTests.swift */,
 				DE14096C2A38DF40008E6F1E /* MSALNativeAuthCredentialsControllerTests.swift */,
+				28A600A92C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift */,
 			);
 			path = controllers;
 			sourceTree = "<group>";
@@ -6159,11 +6368,15 @@
 				28A277D92C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift in Sources */,
 				E24CE9CC2C57F1160069E2E4 /* AttributesStub.swift in Sources */,
 				281A0E1B2C21E20600CB30CB /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
+				28188F652C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				281A0E192C21E20000CB30CB /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
 				281A0E0C2C21E1F000CB30CB /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
 				281A0E152C21E1F500CB30CB /* SignUpDelegateSpies.swift in Sources */,
+				28188F622C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */,
 				281A0E172C21E1FB00CB30CB /* MSALNativeAuthSignInUsernameEndToEndTests.swift in Sources */,
 				281A0E1C2C21E3A400CB30CB /* MSALNativeAuthSignOutEndToEndTests.swift in Sources */,
+				DEFE87732CA6BC91009D11DC /* CredentialsDelegateSpies.swift in Sources */,
+				DEFE87742CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift in Sources */,
 				281A0E162C21E1F800CB30CB /* MSALNativeAuthSignInUsernameAndPasswordEndToEndTests.swift in Sources */,
 				281A0E142C21E1F200CB30CB /* MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests.swift in Sources */,
 				281A0E1A2C21E20300CB30CB /* ResetPasswordDelegateSpies.swift in Sources */,
@@ -6191,6 +6404,7 @@
 				E2BC027529D6E0C600041DBC /* MSALNativeAuthSignUpContinueIntegrationTests.swift in Sources */,
 				E23E955F29D4B9F7001DC59C /* MSALNativeAuthSignUpChallengeIntegrationTests.swift in Sources */,
 				28D1D59229C2231C00CE75F4 /* MockAPIHandler.swift in Sources */,
+				28ABE1762C5D213700F5275D /* MSALNativeAuthSignInIntrospectIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6335,6 +6549,7 @@
 				E2F626AD2A78119900C4A303 /* ResetPasswordStates+Internal.swift in Sources */,
 				9626D14E225828780019417B /* MSALGlobalConfig.m in Sources */,
 				28A472EC2A276C3B003F988B /* MSALNativeAuthTokenValidatedResponse.swift in Sources */,
+				28B28B8C2C6F4B570030D5C5 /* MFADelegates.swift in Sources */,
 				96B5E6DC2256D15A002232F9 /* MSALHTTPConfig.m in Sources */,
 				E2ACA48B2952302B00E98964 /* MSALNativeAuthRequestContext.swift in Sources */,
 				DEE34F7DD170B71C00BC302A /* MSALNativeAuthResetPasswordSubmitRequestParameters.swift in Sources */,
@@ -6350,21 +6565,29 @@
 				28DCD0AA29D7344000C4601E /* SignInStates.swift in Sources */,
 				E243F69429D1976700DAC60F /* MSALNativeAuthSignUpStartResponse.swift in Sources */,
 				E2C1D287299BA15D00B26449 /* MSALNativeAuthBaseController.swift in Sources */,
+				28B28B922C6F611F0030D5C5 /* MSALAuthMethod.swift in Sources */,
 				B2E2A9432393191D00BA2EA3 /* MSIDInteractiveRequestParameters+MSALRequest.m in Sources */,
 				DEF9D99F296F08CE006CB384 /* MSALNativeAuthTelemetryProvider.swift in Sources */,
 				DE9245152A3875D700C0389F /* RetrieveAccessTokenError.swift in Sources */,
 				DE8BE7DC2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift in Sources */,
 				E224F73E2B18F11F000A7B2E /* SignInAfterResetPasswordState.swift in Sources */,
 				287708252A178DC500E371ED /* MSALNativeAuthSignInInitiateValidatedResponse.swift in Sources */,
+				289E44AC2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift in Sources */,
 				DEE34F89D170B71C00BC302A /* MSALNativeAuthResetPasswordPollCompletionStatus.swift in Sources */,
+				DEFE87602CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift in Sources */,
+				DEFE87612CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift in Sources */,
+				DEFE87622CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift in Sources */,
+				DEFE87632CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift in Sources */,
 				9BE7E3D52A1CF51500CC3A62 /* MSALNativeAuthResetPasswordValidatedResponses.swift in Sources */,
 				287F65182983F77D00ED90BD /* MSALNativeAuthRequestParametersKey.swift in Sources */,
 				04D32CAE1FD615B3000B123E /* MSALErrorConverter.m in Sources */,
 				B26756D222921C6D000F01D7 /* MSALADFSOauth2Provider.m in Sources */,
 				E26097C32948FC4D0060DD7C /* MSALNativeAuthLogging.swift in Sources */,
+				285F585F2C5BA71600F4EFA4 /* MSALNativeAuthInternalAuthenticationMethod.swift in Sources */,
 				232D614C2248484C00260C42 /* MSALClaimsRequest.m in Sources */,
 				B203459621AF77FB00B221AA /* MSALRedirectUri.m in Sources */,
 				E2025CC92B2A182200E32871 /* MSALNativeAuthSubErrorCode.swift in Sources */,
+				285F585D2C5BA4F700F4EFA4 /* MSALNativeAuthSignInIntrospectResponse.swift in Sources */,
 				DEE34F7BD170B71C00BC302A /* MSALNativeAuthResetPasswordContinueOauth2ErrorCode.swift in Sources */,
 				DEE34F7FD170B71C00BC302A /* MSALNativeAuthResetPasswordSubmitResponse.swift in Sources */,
 				E284F5D929F28B4200DBED7D /* MSALNativeAuthSignUpController.swift in Sources */,
@@ -6398,6 +6621,7 @@
 				DE92450C2A385ED800C0389F /* MSALNativeAuthCredentialsController.swift in Sources */,
 				B28BDA90217E9EAB003E5670 /* MSALOauth2ProviderFactory.m in Sources */,
 				B2AA5D6A23A353F200BD47D8 /* MSALSignoutParameters.m in Sources */,
+				28D811E52C735D98002BE1AA /* MFASubmitChallengeError.swift in Sources */,
 				DEE34F65D170B71C00BC302A /* MSALNativeAuthResetPasswordChallengeResponse.swift in Sources */,
 				D61BD2B01EBD09F90007E484 /* MSALPublicClientApplication.m in Sources */,
 				DEDB29AD29DDAF53008DA85B /* MSALNativeAuthTokenResponseError.swift in Sources */,
@@ -6440,7 +6664,7 @@
 				28F19BEB2A2F884D00575581 /* Array+joinScopes.swift in Sources */,
 				DE8EC8742A026BA0003FA561 /* MSALNativeAuthSignInRequestProvider.swift in Sources */,
 				232D616422485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m in Sources */,
-				287708222A151A8500E371ED /* MSALNativeAuthInternalChannelType.swift in Sources */,
+				285F58652C5BCA8900F4EFA4 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift in Sources */,
 				D61BD2BD1EBD0A010007E484 /* MSALTelemetry.m in Sources */,
 				DEE34F60D170B71C00BC302A /* MSALNativeAuthResetPasswordStartResponseError.swift in Sources */,
 				9BE7E3CB2A1CB70700CC3A62 /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift in Sources */,
@@ -6458,6 +6682,7 @@
 				289E156D2948EB8A006104D9 /* MSALNativeAuthCacheAccessor.swift in Sources */,
 				E2C61FE729DED73700F15203 /* MSALNativeAuthSignUpChallengeResponseError.swift in Sources */,
 				289747B129799C6B00838C80 /* MSALNativeAuthInputValidator.swift in Sources */,
+				285F58632C5BC67900F4EFA4 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift in Sources */,
 				DEE34F7AD170B71C00BC302A /* MSALNativeAuthResetPasswordContinueResponseError.swift in Sources */,
 				28E4D9032A30ABA200280921 /* ResendCodeError.swift in Sources */,
 				E2F6269D2A780DDE00C4A303 /* MSALNativeAuthPublicClientApplication+Internal.swift in Sources */,
@@ -6473,6 +6698,7 @@
 				E2F890052B755355001FBC7C /* MSALNativeAuthUnknownCaseProtocol.swift in Sources */,
 				E2EFAD092A69A34300D6C3DE /* CodeRequiredGenericResult.swift in Sources */,
 				E2EFAD0C2A69B45100D6C3DE /* SignUpResults.swift in Sources */,
+				289E44B62C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift in Sources */,
 				DE0D65AC29CC6A5A005798B1 /* MSALNativeAuthSignInInitiateResponse.swift in Sources */,
 				B266391C22B4B84600FEB673 /* NSString+MSALAccountIdenfiers.m in Sources */,
 				DEE34F87D170B71C00BC302A /* MSALNativeAuthResetPasswordPollCompletionResponse.swift in Sources */,
@@ -6489,11 +6715,13 @@
 				B2C17B0A1FC8DB2E0070A514 /* MSIDVersion.m in Sources */,
 				E2DC31C829B0FDB100051CE7 /* MSALNativeAuthAuthorityProvider.swift in Sources */,
 				28DCD0AE29D737E600C4601E /* VerifyCodeError.swift in Sources */,
+				285F58612C5BC1EC00F4EFA4 /* MSALNativeAuthSignInIntrospectResponseError.swift in Sources */,
 				E22427C82B0526660006C55E /* SignUpDelegateDispatchers.swift in Sources */,
 				E224F7472B18F29F000A7B2E /* SignInAfterResetPasswordDelegate.swift in Sources */,
 				E2F626B02A78130700C4A303 /* SignInAfterPreviousFlowBaseState+Internal.swift in Sources */,
 				E22427DE2B05981A0006C55E /* SignInAfterSignUpDelegateDispatcher.swift in Sources */,
 				E22427DB2B0594670006C55E /* CredentialsDelegateDispatcher.swift in Sources */,
+				28D811ED2C760303002BE1AA /* MSALNativeAuthMFAControlling.swift in Sources */,
 				B26756C622921C42000F01D7 /* MSALAADOauth2Provider.m in Sources */,
 				DEE34F12D170B71C00BC302A /* MSALNativeAuthResetPasswordStartRequestParameters.swift in Sources */,
 				8D35C8E72A97BD0000BEC29A /* MSALNativeAuthErrorBasicAttribute.swift in Sources */,
@@ -6502,20 +6730,24 @@
 				E2F626AA2A780F8200C4A303 /* SignInStates+Internal.swift in Sources */,
 				2338295722D7E49F001B8AD6 /* MSALWebviewParameters.m in Sources */,
 				E2F626A72A780F3D00C4A303 /* SignUpStates+Internal.swift in Sources */,
+				28BBB7CE2C80C5740055AF64 /* MSALNativeAuthLogMessage.swift in Sources */,
 				2826932A2A0974750037B93A /* MSALNativeAuthTokenRequestParameters.swift in Sources */,
 				28EDF93E29E6D43900A99F2A /* SignUpStartError.swift in Sources */,
+				28D811E92C75FFC3002BE1AA /* MFADelegateDispatchers.swift in Sources */,
 				285D0D692B99C14F002A1D4A /* MSALNativeAuthTokenResult.swift in Sources */,
 				DE94C9F029F2AF5E00C1EC1F /* MSALNativeAuthResetPasswordChallengeRequestParameters.swift in Sources */,
 				D61BD2B31EBD09F90007E484 /* MSALPromptType.m in Sources */,
 				DEC1E425298BE18A00948BED /* MSALNativeAuthServerTelemetry.swift in Sources */,
 				E224F74D2B18FC9C000A7B2E /* SignInAfterPreviousFlowBaseState.swift in Sources */,
 				9B4EE9D82A1687AE00F243C1 /* MSALNativeAuthResetPasswordResponseValidator.swift in Sources */,
+				28D811EB2C7602A1002BE1AA /* MFAResults.swift in Sources */,
 				DEE34F61D170B71C00BC302A /* MSALNativeAuthResetPasswordStartOauth2ErrorCode.swift in Sources */,
 				28FDC49C2A38BFA900E38BE1 /* SignInAfterSignUpState.swift in Sources */,
 				28DCD0B029D738DD00C4601E /* ResetPasswordStartError.swift in Sources */,
 				B28BBD352211DC7D00F51723 /* MSALPublicClientStatusNotifications.m in Sources */,
 				23A68A8220F538DE0071E435 /* MSALADFSAuthority.m in Sources */,
 				B29A56C222826EE20023F5E6 /* MSALSerializedADALCacheProvider.m in Sources */,
+				28B28B832C6F46E50030D5C5 /* MFAStates.swift in Sources */,
 				B2C0E79F23AC7996006C9CAD /* MSALParameters.m in Sources */,
 				DE8EC8B62A053D80003FA561 /* MSALNativeAuthESTSApiErrorCodes.swift in Sources */,
 				B21E07B3210E542C007E3A3C /* MSALRedirectUriVerifier.m in Sources */,
@@ -6525,6 +6757,7 @@
 				96B5E6EE2256D180002232F9 /* MSALSliceConfig.m in Sources */,
 				9B839A102A4D7CF600BCC6F6 /* MSAL.docc in Sources */,
 				B2A3C28B2145FD0F0082525C /* MSALAccountsProvider.m in Sources */,
+				28D811E72C75FB10002BE1AA /* MFAStates+Internal.swift in Sources */,
 				E2ACA47B29520C2200E98964 /* MSALNativeAuthEndpoint.swift in Sources */,
 				1EE776C6246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */,
 				E2DC31BC29AFA1E700051CE7 /* MSALNativeAuthPublicClientApplication.swift in Sources */,
@@ -6535,6 +6768,7 @@
 				232D68D8223DB8C200594BBD /* MSALSilentTokenParameters.m in Sources */,
 				DE729ECD2A1793A100A761D9 /* MSALNativeAuthChannelType.swift in Sources */,
 				E2EFAD162A70300B00D6C3DE /* MSALNativeAuthControllerTelemetryWrapper.swift in Sources */,
+				285F58542C5BA33B00F4EFA4 /* MSALNativeAuthSignInIntrospectRequestParameters.swift in Sources */,
 				28DE70D629FAC16700EB75AA /* MSALNativeAuthSignInResponseValidator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6543,6 +6777,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEFE87642CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderFactory.swift in Sources */,
+				DEFE87652CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviderBuildable.swift in Sources */,
+				DEFE87662CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProvider.swift in Sources */,
+				DEFE87672CA6BBE5009D11DC /* MSALNativeAuthSilentTokenProviding.swift in Sources */,
 				DE8DC4802C6621A100534E8F /* RetrieveAccessTokenError.swift in Sources */,
 				232D68CD223DB00500594BBD /* MSALTokenParameters.m in Sources */,
 				DE8DC47E2C6621A100534E8F /* SignInStartError.swift in Sources */,
@@ -6555,6 +6793,7 @@
 				DECE0F772BE3EB410036738C /* MSALNativeAuthSignInRequestProvider.swift in Sources */,
 				DECE0F852BE3EB4B0036738C /* MSALNativeAuthSignUpStartRequestParameters.swift in Sources */,
 				DECE0F5D2BE3EB360036738C /* ResetPasswordStates+Internal.swift in Sources */,
+				28EE65162C8B0E7600015F90 /* MFADelegateDispatchers.swift in Sources */,
 				DECE0FA42BE3EB6E0036738C /* MSALNativeAuthResetPasswordPollCompletionStatus.swift in Sources */,
 				DECE0F532BE3EB330036738C /* ResetPasswordStartError.swift in Sources */,
 				DECE0FB62BE3EB780036738C /* MSALNativeAuthSignInChallengeResponseError.swift in Sources */,
@@ -6573,6 +6812,7 @@
 				232D614D2248484C00260C42 /* MSALClaimsRequest.m in Sources */,
 				DE8DC47C2C6621A100534E8F /* SignInAfterSignUpError.swift in Sources */,
 				B203459721AF77FC00B221AA /* MSALRedirectUri.m in Sources */,
+				28EE65142C8B0E5500015F90 /* MSALAuthMethod.swift in Sources */,
 				DE8DC49B2C6621A900534E8F /* MSALNativeAuthSignUpRequestProvider.swift in Sources */,
 				DE8DC4B22C6621B800534E8F /* MSALNativeAuthResetPasswordStartRequestParameters.swift in Sources */,
 				DE8DC4A32C6621B100534E8F /* MSALNativeAuthRequestParametersKey.swift in Sources */,
@@ -6614,13 +6854,16 @@
 				DE9244DD2A31E1D500C0389F /* MSALCIAMOauth2Provider.m in Sources */,
 				DE8DC4B82C6621BA00534E8F /* MSALNativeAuthTokenRequestParameters.swift in Sources */,
 				23A68A7720F5386A0071E435 /* MSALAADAuthority.m in Sources */,
+				28EE65112C8B03BD00015F90 /* MSALNativeAuthInternalAuthenticationMethod.swift in Sources */,
 				DE8DC4712C66219E00534E8F /* ResetPasswordDelegateDispatchers.swift in Sources */,
 				DE8DC45C2C66219600534E8F /* MSALNativeAuthResetPasswordControlling.swift in Sources */,
 				2338295822D7E49F001B8AD6 /* MSALWebviewParameters.m in Sources */,
+				28EE65062C8B01D500015F90 /* MSALNativeAuthMFAControlling.swift in Sources */,
 				DECE0F362BE3EB160036738C /* CodeRequiredGenericResult.swift in Sources */,
 				DECE0F702BE3EB3C0036738C /* MSALNativeAuthPublicClientApplication.swift in Sources */,
 				1EF39600246DFAD200647FDB /* MSALAuthScheme.m in Sources */,
 				583BFD1024DC8EE80035B901 /* MSALRedirectUriVerifier.m in Sources */,
+				28EE651A2C8B0FC200015F90 /* MFAStates.swift in Sources */,
 				DE8DC4D62C6621CC00534E8F /* MSALNativeAuthErrorBasicAttribute.swift in Sources */,
 				DE8DC4C52C6621C500534E8F /* MSALNativeAuthSignUpContinueResponse.swift in Sources */,
 				DE8DC48D2C6621A300534E8F /* SignInAfterPreviousFlowBaseState.swift in Sources */,
@@ -6629,6 +6872,7 @@
 				9B839A112A4D7CF600BCC6F6 /* MSAL.docc in Sources */,
 				DE8DC47B2C6621A100534E8F /* AttributesRequiredError.swift in Sources */,
 				DE8DC4C42C6621C500534E8F /* MSALNativeAuthSignInInitiateResponse.swift in Sources */,
+				28EE65122C8B0E3600015F90 /* MSALNativeAuthSignInIntrospectResponse.swift in Sources */,
 				DE8DC4BD2C6621C100534E8F /* MSALNativeAuthSignUpResponseValidator.swift in Sources */,
 				DE8DC48F2C6621A600534E8F /* SignUpDelegates.swift in Sources */,
 				DE8DC4E92C6621D000534E8F /* MSALNativeAuthResetPasswordChallengeOauth2ErrorCode.swift in Sources */,
@@ -6666,22 +6910,27 @@
 				DE8DC4632C66219600534E8F /* MSALNativeAuthInputValidator.swift in Sources */,
 				DE8DC4F02C6621D600534E8F /* MSALNativeAuthTelemetryApiId.swift in Sources */,
 				23B1D36A22EA6E2F000954AF /* MSALPublicClientApplicationConfig.m in Sources */,
+				28EE65192C8B0FBA00015F90 /* MFAStates+Internal.swift in Sources */,
 				B221CEDE20C0AC60002F5E94 /* MSALAccountId.m in Sources */,
 				DE8DC4AF2C6621B600534E8F /* MSALNativeAuthSignInChallengeRequestParameters.swift in Sources */,
+				28EE650F2C8B039600015F90 /* MSALNativeAuthSignInIntrospectResponseError.swift in Sources */,
 				DE8DC4992C6621A600534E8F /* SignInDelegates.swift in Sources */,
 				DE8DC4832C6621A100534E8F /* SignUpStartError.swift in Sources */,
 				DE8DC4742C66219E00534E8F /* SignInAfterResetPasswordDelegateDispatcher.swift in Sources */,
-				DE8DC4EE2C6621D300534E8F /* MSALNativeAuthInternalChannelType.swift in Sources */,
+				28EE65102C8B03AA00015F90 /* MSALNativeAuthSignInIntrospectRequestParameters.swift in Sources */,
 				DE8DC4B72C6621B800534E8F /* MSALNativeAuthRequestable.swift in Sources */,
 				DE8DC4E82C6621D000534E8F /* MSALNativeAuthResetPasswordStartResponseError.swift in Sources */,
 				DE8DC4682C66219600534E8F /* MSALNativeAuthControllerFactory.swift in Sources */,
 				DE8DC46C2C66219600534E8F /* MSALNativeAuthSignUpControlling.swift in Sources */,
 				DE8DC4CC2C6621C700534E8F /* MSALNativeAuthResetPasswordSubmitResponse.swift in Sources */,
 				DE8DC4EC2C6621D300534E8F /* MSALNativeAuthTokenResponseError.swift in Sources */,
+				28EE65152C8B0E6B00015F90 /* MFADelegates.swift in Sources */,
 				886F516529CCA58900F09471 /* MSALCIAMAuthority.m in Sources */,
 				232D615F22485B4600260C42 /* MSALIndividualClaimRequest.m in Sources */,
+				285E09F72C93340000492A2E /* MSALNativeAuthLogMessage.swift in Sources */,
 				DE8DC46D2C66219600534E8F /* MSALNativeAuthSignInController.swift in Sources */,
 				B26756C122921A71000F01D7 /* MSALOauth2Provider.m in Sources */,
+				28EE650E2C8B027D00015F90 /* MFAResults.swift in Sources */,
 				DE8DC47A2C6621A100534E8F /* ResendCodeError.swift in Sources */,
 				D673F0921E4CE6D70018BA91 /* MSALPublicClientApplication.m in Sources */,
 				DE8DC4E72C6621D000534E8F /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCode.swift in Sources */,
@@ -6689,6 +6938,7 @@
 				DE8DC4662C66219600534E8F /* MSALNativeAuthResultFactory.swift in Sources */,
 				DE8DC4842C6621A300534E8F /* SignInStates+Internal.swift in Sources */,
 				DE8DC49F2C6621AE00534E8F /* MSALNativeAuthResetPasswordStartRequestProviderParameters.swift in Sources */,
+				289E44AD2C9D7A9E00F6B9D7 /* MFARequestChallengeError.swift in Sources */,
 				DE8DC4B02C6621B600534E8F /* MSALNativeAuthSignInInitiateRequestParameters.swift in Sources */,
 				B2C17B0B1FC8DB2E0070A514 /* MSIDVersion.m in Sources */,
 				DE8DC4BF2C6621C100534E8F /* MSALNativeAuthResetPasswordResponseValidator.swift in Sources */,
@@ -6713,6 +6963,7 @@
 				B253151C23DD607600432133 /* MSALDeviceInformation.m in Sources */,
 				DE8DC4BB2C6621BD00534E8F /* MSALNativeAuthSignInChallengeValidatedResponse.swift in Sources */,
 				94E876CE1E492D6000FB96ED /* MSALAuthority.m in Sources */,
+				289E44B72C9D7B0900F6B9D7 /* MFAGetAuthMethodsError.swift in Sources */,
 				DE8DC4DB2C6621CC00534E8F /* MSALNativeAuthSignUpStartResponseError.swift in Sources */,
 				DE8DC4E52C6621D000534E8F /* MSALNativeAuthResetPasswordContinueResponseError.swift in Sources */,
 				DE8DC4B12C6621B800534E8F /* MSALNativeAuthResetPasswordContinueRequestParameters.swift in Sources */,
@@ -6741,6 +6992,7 @@
 				DE8DC4762C66219E00534E8F /* MSALNativeAuthLogging.swift in Sources */,
 				DE8DC49C2C6621A900534E8F /* MSALNativeAuthSignUpStartRequestProviderParameters.swift in Sources */,
 				1EE776C7246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */,
+				28EE65182C8B0FB200015F90 /* MFASubmitChallengeError.swift in Sources */,
 				23A68A7D20F538B90071E435 /* MSALB2CAuthority.m in Sources */,
 				DE8DC4E62C6621D000534E8F /* MSALNativeAuthResetPasswordChallengeResponseError.swift in Sources */,
 				DE8DC4B42C6621B800534E8F /* MSALNativeAuthRequestContext.swift in Sources */,
@@ -6753,12 +7005,14 @@
 				DE8DC4D52C6621CC00534E8F /* MSALNativeAuthSignUpChallengeResponseError.swift in Sources */,
 				DE8DC4852C6621A300534E8F /* SignInAfterPreviousFlowBaseState+Internal.swift in Sources */,
 				DE8DC49E2C6621AE00534E8F /* MSALNativeAuthResetPasswordRequestProvider.swift in Sources */,
+				28EE65252C8B10F000015F90 /* MSALNativeAuthSignInIntrospectOauth2ErrorCode.swift in Sources */,
 				DE8DC4E32C6621D000534E8F /* MSALNativeAuthResetPasswordContinueOauth2ErrorCode.swift in Sources */,
 				DE8DC4722C66219E00534E8F /* SignInAfterSignUpDelegateDispatcher.swift in Sources */,
 				DE8DC4952C6621A600534E8F /* CredentialsDelegates.swift in Sources */,
 				DE8DC4672C66219600534E8F /* MSALNativeAuthSignInParameters.swift in Sources */,
 				0D96DB3827850E8200DEAF87 /* MSALWipeCacheForAllAccountsConfig.m in Sources */,
 				DE8DC4C92C6621C700534E8F /* MSALNativeAuthResetPasswordChallengeResponse.swift in Sources */,
+				28EE65132C8B0E4500015F90 /* MSALNativeAuthSignInIntrospectValidatedResponse.swift in Sources */,
 				DE8DC4D82C6621CC00534E8F /* MSALNativeAuthRequiredAttributeInternal.swift in Sources */,
 				232D68D9223DB8C200594BBD /* MSALSilentTokenParameters.m in Sources */,
 				DE8DC4612C66219600534E8F /* SignUpResults.swift in Sources */,
@@ -6772,6 +7026,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				23A169B52073325500B051F3 /* MSALPublicClientApplicationTests.m in Sources */,
+				28A600A12C78BA8900455666 /* MFAGetAuthMethodsErrorTests.swift in Sources */,
 				D61F5BC01E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m in Sources */,
 				B2725ED022C04689009B454A /* MSALLegacySharedAccountFactoryTests.m in Sources */,
 				E22427EE2B06637C0006C55E /* SignUpAttributesRequiredDelegateDispatcherTests.swift in Sources */,
@@ -6811,6 +7066,7 @@
 				04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				E2F4DB2D2A1F5714009FBCD0 /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift in Sources */,
 				287F6524298401AE00ED90BD /* MSALNativeAuthResponseSerializerTests.swift in Sources */,
+				28A600A62C78BDC100455666 /* AwaitingMFAStateTests.swift in Sources */,
 				E2CD2E4F29FC0451009F8FFA /* SignUpPasswordRequiredStateTests.swift in Sources */,
 				E22427F62B066E850006C55E /* SignInPasswordRequiredDelegateDispatcherTests.swift in Sources */,
 				E2CE910C2B0BA3BB0009AEDD /* SignUpStartErrorTests.swift in Sources */,
@@ -6822,11 +7078,14 @@
 				B2725E7F22BD88BE009B454A /* NSStringAccountIdentifiersTest.m in Sources */,
 				287F64D4297EC29400ED90BD /* MSALNativeAuthTelemetryProviderTests.swift in Sources */,
 				E22952682A1A4FCB00EDD58C /* MSALNativeAuthSignUpResponseValidatorTests.swift in Sources */,
+				289E44B92C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift in Sources */,
 				E286E2DD2A1BAEA800666DD0 /* MSALNativeAuthSignUpControllerTests.swift in Sources */,
 				B2725EC522BF4865009B454A /* MSALMockExternalAccountHandler.m in Sources */,
 				E2C190772B20DF4300095534 /* SignInAfterResetPasswordErrorTests.swift in Sources */,
 				9BD2765F2A0E81CE00FBD033 /* ResetPasswordRequiredStateTests.swift in Sources */,
 				D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */,
+				DEFE876A2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift in Sources */,
+				DEFE876B2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift in Sources */,
 				DE94C9E829F19E6B00C1EC1F /* MSALNativeAuthResetPasswordPollCompletionRequestParametersTest.swift in Sources */,
 				E22427FD2B0671A10006C55E /* ResetPasswordStartDelegateDispatcherTests.swift in Sources */,
 				DE0D659529C1DCC9005798B1 /* MSALNativeAuthSignInInitiateRequestParametersTest.swift in Sources */,
@@ -6841,10 +7100,12 @@
 				233E970B226571AB007FCE2A /* MSALTelemetryAggregatedTests.m in Sources */,
 				B2725ECA22C04661009B454A /* MSALLegacySharedAccountTests.m in Sources */,
 				28B6494D2A0959EB00EF3DB7 /* MSALNativeAuthSignInResponseValidatorTest.swift in Sources */,
+				DE1560E42CAE8F3F00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift in Sources */,
 				B253153B23DD717900432133 /* MSALDeviceInfoProviderTests.m in Sources */,
 				9B61C91C2A27E57C00CE9E3A /* MSALNativeAuthResetPasswordResponseValidatorMock.swift in Sources */,
 				DE40A4D32A8F80C100928CEE /* MSALNativeAuthSignUpContinueResponseErrorTests.swift in Sources */,
 				E2CE91162B0BA4490009AEDD /* VerifyCodeErrorTests.swift in Sources */,
+				28A6009F2C78A27C00455666 /* MFASubmitChallengeDelegateDispatcherTests.swift in Sources */,
 				DE94C9E029F198D600C1EC1F /* MSALNativeAuthResetPasswordStartRequestParametersTest.swift in Sources */,
 				DE14096D2A38DF41008E6F1E /* MSALNativeAuthCredentialsControllerTests.swift in Sources */,
 				DE5738B42A8E74DC00D9120D /* MSALNativeAuthSignInInitiateValidatedErrorTypeTests.swift in Sources */,
@@ -6876,6 +7137,7 @@
 				287F64D5297EC29400ED90BD /* MSALNativeAuthCurrentRequestTelemetryTests.swift in Sources */,
 				E22428072B0676970006C55E /* DispatchAccessTokenRetrieveCompletedTests.swift in Sources */,
 				A0274CBE24B432B100BD198D /* MSALAuthSchemeTests.m in Sources */,
+				28A600A32C78BA9C00455666 /* MFASubmitChallengeErrorTests.swift in Sources */,
 				E22427F22B0668910006C55E /* SignInPasswordStartDelegateDispatcherTests.swift in Sources */,
 				E2F8900E2B75546A001FBC7C /* MSALNativeAuthUnknownCaseProtocolTests.swift in Sources */,
 				E2025D202B2B8EEA00E32871 /* MSALNativeAuthSubErrorCodeTests.swift in Sources */,
@@ -6887,6 +7149,7 @@
 				E22427FA2B0670600006C55E /* SignInVerifyCodeDelegateDispatcherTests.swift in Sources */,
 				E2EBD62A2A1BB7700049467A /* MSALNativeAuthSignUpResponseValidatorMock.swift in Sources */,
 				E25BC0852995430B00588549 /* MSALNativeAuthFactoriesMocks.swift in Sources */,
+				28A600962C78843C00455666 /* MFASendChallengeDelegateDispatcherTests.swift in Sources */,
 				E2CE91122B0BA3FC0009AEDD /* SignInStartErrorTests.swift in Sources */,
 				E2BC029C29D766CB00041DBC /* MSALNativeAuthSignUpContinueRequestParametersTest.swift in Sources */,
 				E2960A112A1F4D2F000F441B /* MSALNativeAuthSignUpChallengeResponseErrorTests.swift in Sources */,
@@ -6896,6 +7159,7 @@
 				DE946FE52B0F713A00978493 /* MSALNativeAuthHTTPRequestMock.swift in Sources */,
 				B2725ED222C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m in Sources */,
 				E2BC029A29D766B200041DBC /* MSALNativeAuthSignUpStartRequestParametersTest.swift in Sources */,
+				28A600AA2C78E09F00455666 /* MSALNativeAuthMFAControllerTests.swift in Sources */,
 				E2C1D2D429A3992100B26449 /* MSALNativeAuthBaseControllerTests.swift in Sources */,
 				DE40A4CA2A8F801200928CEE /* MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests.swift in Sources */,
 				E23E956929D5BD6B001DC59C /* MSALNativeAuthSignUpRequestProviderTests.swift in Sources */,
@@ -6905,6 +7169,7 @@
 				DE54B59F2A4452DB00460B34 /* MSALNativeAuthTokenResponseValidatorTests.swift in Sources */,
 				DE5738BA2A8F780E00D9120D /* MSALNativeAuthResetPasswordSubmitOauth2ErrorCodeTests.swift in Sources */,
 				E20C21842A7A6CA400E31598 /* SignInCodeRequiredStateTests.swift in Sources */,
+				28A600A82C78BDD200455666 /* MFARequiredStateTests.swift in Sources */,
 				B2725EAC22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */,
 				E22427FF2B06725C0006C55E /* ResetPasswordVerifyCodeDelegateDispatcherTests.swift in Sources */,
 				232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
@@ -6912,10 +7177,12 @@
 				E25E6E5A2AA7727D0094461E /* MSALNativeAuthCredentialsControllerMock.swift in Sources */,
 				B286B9FD238A07A5007833AD /* MSALAcquireTokenTests.m in Sources */,
 				E22427F42B066BBC0006C55E /* SignInStartDelegateDispatcherTests.swift in Sources */,
+				28A6009D2C78A26D00455666 /* MFAGetAuthMethodsDelegateDispatcherTests.swift in Sources */,
 				DE5738B22A8E71D500D9120D /* MSALNativeAuthResetPasswordContinueResponseErrorTests.swift in Sources */,
 				9B6EECEF2A3146ED008ABA50 /* MSALNativeAuthResetPasswordResponseValidatorTests.swift in Sources */,
 				E2CE911E2B0BA4A60009AEDD /* SignInAfterSignUpErrorTests.swift in Sources */,
 				E2CE910E2B0BA3D30009AEDD /* PasswordRequiredErrorTests.swift in Sources */,
+				28A6009B2C7898DA00455666 /* MFADelegatesSpies.swift in Sources */,
 				28FDC4AE2A38D81100E38BE1 /* MSALNativeAuthSignInControllerMock.swift in Sources */,
 				B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
 				E2F5BE9A29896ADB00C67EC7 /* MSALNativeAuthSignInControllerTests.swift in Sources */,
@@ -6934,9 +7201,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28EE651E2C8B103B00015F90 /* MFAGetAuthMethodsDelegateDispatcherTests.swift in Sources */,
 				DE55549D2C0A1E0C008ECA1A /* SignInTestsValidatorHelpers.swift in Sources */,
 				DECE10182BE3F07C0036738C /* MSALNativeAuthTelemetryProviderTests.swift in Sources */,
 				DE5554AA2C0A1E0C008ECA1A /* MSALNativeAuthSignInControllerMock.swift in Sources */,
+				28EE651F2C8B107100015F90 /* MFASendChallengeDelegateDispatcherTests.swift in Sources */,
 				DE5554B52C0A1E16008ECA1A /* SignUpResendCodeDelegateDispatcherTests.swift in Sources */,
 				DECE10282BE3F0830036738C /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests.swift in Sources */,
 				DE5554D62C0A1E35008ECA1A /* MSALNativeAuthSignUpResponseValidatorTests.swift in Sources */,
@@ -6951,12 +7220,15 @@
 				DE8DC4FF2C6621EA00534E8F /* MSALNativeAuthFactoriesMocks.swift in Sources */,
 				DE8DC5632C66221A00534E8F /* MSALNativeAuthSignUpRequestProviderTests.swift in Sources */,
 				DE8DC56A2C66221A00534E8F /* MSALNativeAuthCustomErrorSerializerTests.swift in Sources */,
+				28EE65232C8B109D00015F90 /* AwaitingMFAStateTests.swift in Sources */,
 				DE8DC51B2C6621F100534E8F /* SignUpStartDelegateDispatcherTests.swift in Sources */,
 				DE8DC5562C66221300534E8F /* MSALNativeAuthSignUpContinueRequestParametersTest.swift in Sources */,
 				DE8DC50D2C6621EA00534E8F /* MSALNativeAuthConfigStubs.swift in Sources */,
 				B2725EB622BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m in Sources */,
 				DE8DC5082C6621EA00534E8F /* MSALNativeAuthHTTPRequestMock.swift in Sources */,
 				DE8DC5462C66220D00534E8F /* MSALNativeAuthResetPasswordSubmitOauth2ErrorCodeTests.swift in Sources */,
+				DEFE876C2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderMock.swift in Sources */,
+				DEFE876D2CA6BC3A009D11DC /* MSALNativeAuthSilentTokenProviderFactoryMock.swift in Sources */,
 				DE8DC4FB2C6621E700534E8F /* MSALNativeAuthCredentialsControllerTests.swift in Sources */,
 				DE8DC5582C66221300534E8F /* MSALNativeAuthSignUpStartRequestParametersTest.swift in Sources */,
 				DE8DC5372C66220000534E8F /* ResetPasswordRequiredStateTests.swift in Sources */,
@@ -6974,6 +7246,7 @@
 				23F32F0D1FF4789200B2905E /* MSIDTestURLResponse+MSAL.m in Sources */,
 				DE8DC5602C66221A00534E8F /* MSALNativeAuthResponseCorrelatableTests.swift in Sources */,
 				DE8DC4FC2C6621E700534E8F /* MSALNativeAuthSignUpControllerTests.swift in Sources */,
+				28EE65212C8B108A00015F90 /* MFAGetAuthMethodsErrorTests.swift in Sources */,
 				DE8DC5492C66220D00534E8F /* MSALNativeAuthResetPasswordChallengeOauth2ErrorCodeTests.swift in Sources */,
 				DE8DC52A2C6621F700534E8F /* SignUpStartErrorTests.swift in Sources */,
 				DE8DC53C2C66220700534E8F /* MSALNativeAuthTelemetryProviderTests.swift in Sources */,
@@ -6990,6 +7263,7 @@
 				6525115A29CD84A000D3B876 /* MSALPublicClientApplicationTests.m in Sources */,
 				DECE10112BE3F0760036738C /* SignUpPasswordRequiredStateTests.swift in Sources */,
 				DE5554B02C0A1E12008ECA1A /* SignInPasswordRequiredDelegateDispatcherTests.swift in Sources */,
+				28EE651D2C8B101000015F90 /* MFADelegatesSpies.swift in Sources */,
 				DECE10202BE3F07F0036738C /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift in Sources */,
 				DE5554992C0A1E07008ECA1A /* MSALNativeAuthBaseControllerTests.swift in Sources */,
 				DECE10252BE3F0830036738C /* MSALNativeAuthESTSApiErrorDescriptionsTests.swift in Sources */,
@@ -7004,9 +7278,11 @@
 				DE8DC50E2C6621EA00534E8F /* MSALNativeAuthResetPasswordControllerMock.swift in Sources */,
 				DE8DC5422C66220A00534E8F /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift in Sources */,
 				DE8DC5222C6621F500534E8F /* ResetPasswordResendCodeDelegateDispatcherTests.swift in Sources */,
+				28EE65242C8B10AA00015F90 /* MFARequiredStateTests.swift in Sources */,
 				DE8DC5472C66220D00534E8F /* MSALNativeAuthResetPasswordStartOauth2ErrorCodeTests.swift in Sources */,
 				DE8DC5332C6621FD00534E8F /* SignUpPasswordRequiredStateTests.swift in Sources */,
 				DE0A5E892C6B670E004A4AEC /* MSALLogMaskTests.m in Sources */,
+				28EE65202C8B107D00015F90 /* MFASubmitChallengeDelegateDispatcherTests.swift in Sources */,
 				DE8DC51F2C6621F100534E8F /* SignUpVerifyCodeDelegateDispatcherTests.swift in Sources */,
 				B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 				DECE10372BE3F0940036738C /* MSALNativeAuthSignInInitiateRequestParametersTest.swift in Sources */,
@@ -7042,8 +7318,10 @@
 				D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */,
 				DE8DC5112C6621EA00534E8F /* MSALNativeAuthSignUpResponseValidatorMock.swift in Sources */,
 				DE8DC52E2C6621F800534E8F /* ResendCodeErrorTests.swift in Sources */,
+				28EE65222C8B109300015F90 /* MFASubmitChallengeErrorTests.swift in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				DE8DC5382C66220000534E8F /* MSALNativeAuthUserAccountResultTests.swift in Sources */,
+				DE1560E32CAE8F3F00C85E51 /* MSALNativeAuthSilentTokenProviderFactoryConfigTester.swift in Sources */,
 				DE8DC4F62C6621E200534E8F /* MSALNativeAuthTelemetryTestDispatcher.swift in Sources */,
 				DE8DC5662C66221A00534E8F /* MSALNativeAuthResponseSerializerTests.swift in Sources */,
 				DE8DC5252C6621F500534E8F /* DispatchAccessTokenRetrieveCompletedTests.swift in Sources */,
@@ -7094,6 +7372,8 @@
 				DE8DC5522C66221000534E8F /* MSALNativeAuthResetPasswordResponseValidatorTests.swift in Sources */,
 				DE8DC5202C6621F500534E8F /* ResetPasswordStartDelegateDispatcherTests.swift in Sources */,
 				DE8DC55C2C66221700534E8F /* MSALNativeAuthResetPasswordStartRequestParametersTest.swift in Sources */,
+				28EE651C2C8B0FF500015F90 /* MSALNativeAuthMFAControllerTests.swift in Sources */,
+				289E44BA2C9D843F00F6B9D7 /* MFARequestChallengeErrorTests.swift in Sources */,
 				DE8DC56C2C66221C00534E8F /* MSALNativeLoggingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -7127,6 +7407,7 @@
 				DE1BD0E02C3C27C100B0888E /* MSALNativeAuthSignUpStartIntegrationTests.swift in Sources */,
 				DE1BD0E62C3C27CD00B0888E /* MSALNativeAuthResetPasswordChallengeIntegrationTests.swift in Sources */,
 				DE1BD0E42C3C27C900B0888E /* MSALNativeAuthSignInChallengeIntegrationTests.swift in Sources */,
+				28EE651B2C8B0FDD00015F90 /* MSALNativeAuthSignInIntrospectIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7138,11 +7419,15 @@
 				DE1BD1072C3C284C00B0888E /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
 				DE9EB8622C5CE44B00328AA4 /* AttributesStub.swift in Sources */,
 				DE1BD1012C3C283C00B0888E /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
+				28188F662C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				DE1BD1032C3C284100B0888E /* SignUpDelegateSpies.swift in Sources */,
 				DE1BD1092C3C285D00B0888E /* MSALNativeAuthSignOutEndToEndTests.swift in Sources */,
 				DE1BD1052C3C284700B0888E /* MSALNativeAuthSignInUsernameEndToEndTests.swift in Sources */,
+				28188F632C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */,
 				DE1BD1002C3C283900B0888E /* MSALNativeAuthEmailCodeRetriever.swift in Sources */,
 				DE1BD1042C3C284400B0888E /* MSALNativeAuthSignInUsernameAndPasswordEndToEndTests.swift in Sources */,
+				DEFE87712CA6BC91009D11DC /* CredentialsDelegateSpies.swift in Sources */,
+				DEFE87722CA6BC91009D11DC /* MSALNativeAuthUserAccountEndToEndTests.swift in Sources */,
 				DE1BD1022C3C283F00B0888E /* MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests.swift in Sources */,
 				DE1BD10A2C3C285F00B0888E /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				DE1BD1082C3C284D00B0888E /* ResetPasswordDelegateSpies.swift in Sources */,
@@ -7268,11 +7553,6 @@
 			isa = PBXTargetDependency;
 			target = D672279E1EBD111900F3422A /* unit-test-host */;
 			targetProxy = D67227B61EBD112800F3422A /* PBXContainerItemProxy */;
-		};
-		D6BFE3DB1EB42D3200F2B7E8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
-			targetProxy = D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */;
 		};
 		DE1BD0D52C3C275200B0888E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8729,6 +9009,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 1.2;
 			};
 			name = Debug;
 		};
@@ -8744,6 +9025,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 1.2;
 			};
 			name = Release;
 		};

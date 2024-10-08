@@ -41,7 +41,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
     func test_dispatchSignInCodeRequired_whenDelegateMethodsAreImplemented() async {
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
 
         let delegate = SignInCodeStartDelegateSpy(expectation: delegateExp, expectedSentTo: expectedSentTo, expectedChannelTargetType: expectedChannelTargetType, expectedCodeLength: expectedCodeLength)
@@ -85,7 +85,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
 
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
-        let expectedChannelTargetType = MSALNativeAuthChannelType.email
+        let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
 
         await sut.dispatchSignInCodeRequired(
