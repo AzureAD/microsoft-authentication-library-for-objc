@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          MSAL 1.5.1 Docs
+          MSAL 1.6.0 Docs
         </a>
          (92% documented)
       </p>
@@ -57,6 +57,24 @@
                 <a class="nav-group-task-link" href="Classes/AttributesRequiredError.html">AttributesRequiredError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/AwaitingMFAState.html">AwaitingMFAState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFAGetAuthMethodsError.html">MFAGetAuthMethodsError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFARequestChallengeError.html">MFARequestChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFARequiredState.html">MFARequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MFASubmitChallengeError.html">MFASubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAADAuthority.html">MSALAADAuthority</a>
               </li>
               <li class="nav-group-task">
@@ -70,6 +88,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALAuthMethod.html">MSALAuthMethod</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
@@ -121,6 +142,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a>
@@ -388,9 +412,6 @@
                 <a class="nav-group-task-link" href="Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Enums/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/MSALPlatformSSOStatus.html">MSALPlatformSSOStatus</a>
               </li>
               <li class="nav-group-task">
@@ -409,6 +430,15 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/CredentialsDelegate.html">CredentialsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFAGetAuthMethodsDelegate.html">MFAGetAuthMethodsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFARequestChallengeDelegate.html">MFARequestChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MFASubmitChallengeDelegate.html">MFASubmitChallengeDelegate</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/MSALAccount.html">MSALAccount</a>
@@ -1097,35 +1127,6 @@ This enum exists only for the debugging and error information purposes, you shou
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@MSAL@E@MSALNativeAuthChannelType"></a>
-                    <a name="//apple_ref/swift/Enum/MSALNativeAuthChannelType" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@E@MSALNativeAuthChannelType">MSALNativeAuthChannelType</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The possible Channel Types via which a code was sent</p>
-
-                        <a href="Enums/MSALNativeAuthChannelType.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="kd">enum</span> <span class="kt">MSALNativeAuthChannelType</span> <span class="p">:</span> <span class="kt">Int</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
           </div>
@@ -1134,7 +1135,7 @@ This enum exists only for the debugging and error information purposes, you shou
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-09-25)</p>
+      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-10-08)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
