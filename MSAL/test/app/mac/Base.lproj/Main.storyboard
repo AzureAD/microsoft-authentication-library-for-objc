@@ -973,7 +973,7 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="F9V-qA-F54">
-                                        <rect key="frame" x="0.0" y="381" width="368" height="27"/>
+                                        <rect key="frame" x="0.0" y="381" width="425" height="27"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cX6-iR-xHs">
                                                 <rect key="frame" x="-2" y="11" width="148" height="16"/>
@@ -984,7 +984,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ato-Jb-i4X">
-                                                <rect key="frame" x="150" y="4" width="220" height="24"/>
+                                                <rect key="frame" x="150" y="4" width="277" height="24"/>
                                                 <segmentedCell key="cell" borderStyle="border" alignment="left" segmentDistribution="fill" style="rounded" trackingMode="selectOne" id="9aL-a9-bRn">
                                                     <font key="font" metaFont="system"/>
                                                     <segments>
@@ -992,6 +992,7 @@
                                                         <segment label="Login" tag="1"/>
                                                         <segment label="Consent"/>
                                                         <segment label="Create"/>
+                                                        <segment label="Default"/>
                                                     </segments>
                                                 </segmentedCell>
                                             </segmentedControl>
