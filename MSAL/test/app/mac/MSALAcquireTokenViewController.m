@@ -46,6 +46,7 @@ static NSString * const defaultScope = @"User.Read";
 @interface MSALAcquireTokenViewController ()
 
 @property (atomic, weak) IBOutlet NSPopUpButton *profilesPopUp;
+@property (atomic, weak) IBOutlet NSPopUpButton *authorityPopUp;
 @property (atomic, weak) IBOutlet NSTextField *clientIdTextField;
 @property (atomic, weak) IBOutlet NSTextField *redirectUriTextField;
 @property (atomic, weak) IBOutlet NSTextField *scopesTextField;
@@ -96,6 +97,10 @@ static NSString * const defaultScope = @"User.Read";
     [self.profilesPopUp removeAllItems];
     [self.profilesPopUp addItemsWithTitles:[[MSALTestAppSettings profiles] allKeys]];
     [self.profilesPopUp selectItemWithTitle:[MSALTestAppSettings currentProfileName]];
+    [self.authorityPopUp removeAllItems];
+    [self.authorityPopUp addItemsWithTitles:[MSALTestAppSettings aadAuthorities]];
+    [self.authorityPopUp addItemsWithTitles:[MSALTestAppSettings b2cAuthorities]];
+    [self.authorityPopUp selectItemWithTitle:@"https://login.microsoftonline.com/common"];
     self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
     self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
 }
@@ -350,7 +355,7 @@ static NSString * const defaultScope = @"User.Read";
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
     NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
-    NSString *authorityString = currentProfile[@"authority"] ?: @"https://login.microsoftonline.com/common";
+    NSString *authorityString = self.authorityPopUp.selectedItem.title ?: @"https://login.microsoftonline.com/common";
     __auto_type authorityUrl =  [NSURL URLWithString:authorityString];
     MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     
