@@ -152,8 +152,6 @@ jobs:
 
 - job: e2e_test_native_auth_ios
   displayName: 'Run MSAL E2E tests for iOS native auth'
-  dependsOn: fetch_pr_labels
-  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
@@ -172,8 +170,6 @@ jobs:
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
-  dependsOn: fetch_pr_labels
-  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
