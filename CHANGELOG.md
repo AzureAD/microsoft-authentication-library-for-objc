@@ -1,4 +1,4 @@
-## [TBD]:
+## [1.6.1]:
 * Support extra query parameters on logout endpoint (#2339)
 * Add support functions to help broker improve cross cloud experience (#2361)
 
