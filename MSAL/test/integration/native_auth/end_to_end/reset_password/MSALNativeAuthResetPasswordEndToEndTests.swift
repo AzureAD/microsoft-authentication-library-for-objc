@@ -28,7 +28,7 @@ import MSAL
 
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 3.1.1. SSPR – without automatic sign in
-    let codeRetryCount = 3
+    private let codeRetryCount = 3
 
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
