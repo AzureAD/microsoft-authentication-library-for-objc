@@ -28,7 +28,7 @@ import MSAL
 
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 3.1.1. SSPR – without automatic sign in
-    let numberOfRetries = 3
+    let codeRetryCount = 3
 
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
@@ -55,9 +55,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
         // Now submit the code...
-        let newPasswordRequiredState = await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
+        let newPasswordRequiredState = await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
                    username: username,
-                   retries: numberOfRetries)
+                   retries: codeRetryCount)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
@@ -96,9 +96,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
         // Now submit the code...
-        let newPasswordRequiredState = await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
+        let newPasswordRequiredState = await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
                    username: username,
-                   retries: numberOfRetries)
+                   retries: codeRetryCount)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
@@ -129,7 +129,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
     }
 
-    func submitCode(resetPasswordStartDelegate: ResetPasswordStartDelegateSpy, username: String, retries: Int) async -> ResetPasswordRequiredState? {
+    // This method tries to fetch a code from 1secmail API and submit it
+    private func retrieveAndSubmitCode(resetPasswordStartDelegate: ResetPasswordStartDelegateSpy, username: String, retries: Int) async -> ResetPasswordRequiredState? {
         let passwordRequiredExp = expectation(description: "password required")
         let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
 
@@ -142,7 +143,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
         await fulfillment(of: [passwordRequiredExp])
         if resetPasswordVerifyDelegate.onResetPasswordVerifyCodeErrorCalled && resetPasswordVerifyDelegate.error?.isInvalidCode == true && retries > 0 {
-            return await submitCode(resetPasswordStartDelegate: resetPasswordStartDelegate, username: username, retries: retries - 1)
+            return await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate, username: username, retries: retries - 1)
         }
         guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
             XCTFail("onPasswordRequired not called")

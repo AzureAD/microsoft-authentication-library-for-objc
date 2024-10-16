@@ -36,7 +36,7 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) //We ignore the timezone
         return dateFormatter
     }()
-    private let secondsToWaitForEmail = 5.0
+    private let maximumSecondsSinceEmailReceive = 5.0
 
     func retrieveEmailOTPCode(email: String) async -> String? {
         let comps = email.components(separatedBy: "@")
@@ -89,7 +89,7 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
                     let currentDate = Date()
                     // Email should be newer than 5 seconds otherwise it could be from previous test
                     // This retry will help with the delay in receiving the emails
-                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < secondsToWaitForEmail {
+                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < maximumSecondsSinceEmailReceive {
                         print ("Email is for current test, last receive date: \(emailDate) current date: \(currentDate)")
                         return dataDictionary.first?["id"] as? Int
                     } else {
