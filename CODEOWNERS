@@ -2,9 +2,10 @@
 # Unless a later match takes precedence, these users will be requested
 # for review whenever someone opens a pull request.
 *       @AzureAD/AppleIdentityTeam
-# @AzureAD/AppleIdentityTeam and @AzureAD/MSAL-ObjC-CIAM will be the co-owners of MSAL.project and CHANGELOG.md files
+# @AzureAD/AppleIdentityTeam and @AzureAD/MSAL-ObjC-CIAM will be the co-owners of MSAL.project, CHANGELOG.md and all files under azure_pipelines
 /MSAL/MSAL.xcodeproj/project.pbxproj @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 CHANGELOG.md @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
+/azure_pipelines/ @AzureAD/AppleIdentityTeam @AzureAD/MSAL-ObjC-CIAM
 # @AzureAD/MSAL-ObjC-CIAM owns any files in the */native_auth
 # directories, subdirectories and other files related to native auth.
 /MSAL/module.modulemap @AzureAD/MSAL-ObjC-CIAM
