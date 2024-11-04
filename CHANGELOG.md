@@ -1,6 +1,9 @@
-## [TBD]:
+## [1.6.1]:
 * Support extra query parameters on logout endpoint (#2339)
 * Add support functions to help broker improve cross cloud experience (#2361)
+
+## [1.6.0]:
+* Support extra query parameters on logout endpoint (#2339)
 
 ## [1.5.1]:
 * Parse and add STS error codes in token error result (#2319)
