@@ -1,3 +1,6 @@
+## [Next release]:
+* Add native auth instructions to error description when reset password required is returned (#2582)
+
 ## [1.6.1]:
 * Support extra query parameters on logout endpoint (#2339)
 * Add support functions to help broker improve cross cloud experience (#2361)
