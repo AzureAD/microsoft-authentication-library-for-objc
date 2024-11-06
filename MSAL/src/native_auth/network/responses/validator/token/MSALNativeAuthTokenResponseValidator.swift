@@ -140,7 +140,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         context: MSIDRequestContext
     ) -> MSALNativeAuthTokenValidatedResponse {
         var apiError = apiError
-        if (apiError.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.resetPasswordRequired.rawValue) ?? false) {
+        if apiError.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.resetPasswordRequired.rawValue) ?? false {
             let customErrorDescription = MSALNativeAuthErrorMessage.passwordResetRequired + (apiError.errorDescription ?? "")
             apiError = MSALNativeAuthTokenResponseError(
                 error: apiError.error,
