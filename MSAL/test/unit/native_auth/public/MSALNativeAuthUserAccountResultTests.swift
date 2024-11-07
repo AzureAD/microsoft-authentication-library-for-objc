@@ -388,7 +388,26 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let error = NSError(domain: "", code: 1, userInfo: userInfo)
         silentTokenProviderFactoryMock.silentTokenProvider.error = error
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message, correlationId: correlationId, errorCodes: [50076], errorUri: nil)
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
+        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
+        await fulfillment(of: [delegateExp])
+    }
+    
+    func test_errorWithResetPasswordRequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() async {
+        let correlationId = UUID()
+        let errorCodes = [50142]
+        let message = "message"
+        let userInfo: [String : Any] = [
+            MSALErrorDescriptionKey: message,
+            MSALSTSErrorCodesKey: errorCodes
+        ]
+        let error = NSError(domain: "", code: 1, userInfo: userInfo)
+        silentTokenProviderFactoryMock.silentTokenProvider.error = error
+        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
+        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.passwordResetRequired + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
         sut.getAccessToken(correlationId: correlationId,
                            delegate: delegate)
