@@ -36,6 +36,8 @@ jobs:
     clean: all
 
   steps:
+  - bash: xcrun simctl list
+    displayName: Show simulator versions
   - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
