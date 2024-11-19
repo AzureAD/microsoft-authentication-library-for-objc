@@ -57,6 +57,11 @@ extern NSString *MSALOAuthErrorKey;
 extern NSString *MSALOAuthSubErrorKey;
 
 /**
+    The suberror description returned by the service.
+ */
+extern NSString *MSALOAuthSubErrorDescriptionKey;
+
+/**
     The extended error description. Note that this string can change and should
     not be relied upon for any error handling logic.
  */

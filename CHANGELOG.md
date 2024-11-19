@@ -1,3 +1,8 @@
+## [1.6.2]:
+* Add native auth instructions to error description when reset password required is returned (#2582)
+* Save error received from ESTS, and return it to the client on silent broker calls (#2379)
+* Support web_page_uri (#2384)
+
 ## [1.6.1]:
 * Support extra query parameters on logout endpoint (#2339)
 * Add support functions to help broker improve cross cloud experience (#2361)
