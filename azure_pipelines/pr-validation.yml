@@ -50,10 +50,16 @@ jobs:
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
     displayName: 'Switch to use Xcode 15.4'
   - task: CmdLine@2
+    displayName: Installing xcpretty
+    inputs:
+      script: |
+        gem install xcpretty -N -v 0.3.0
+      failOnStderr: true
+  - task: CmdLine@2
     displayName: Installing dependencies
     inputs:
       script: |
-        gem install xcpretty slather bundler -N
+        gem install slather bundler -N
       failOnStderr: true
   - checkout: self
     clean: true
