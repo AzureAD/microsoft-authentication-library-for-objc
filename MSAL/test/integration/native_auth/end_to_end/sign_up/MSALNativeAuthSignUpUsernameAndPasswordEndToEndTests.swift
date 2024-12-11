@@ -653,6 +653,72 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
     }
     
+    // Use case 1.1.5. Sign up - with Email & Password, Verify email address using email OTP, resend OTP and then set password
+    func test_signUpWithEmailOTP_andSetPasswordAfterOTP_success() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+
+        let codeRequiredExp = expectation(description: "code required")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
+
+        sut.signUp(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+
+        await fulfillment(of: [codeRequiredExp])
+        checkSignUpStartDelegate(signUpStartDelegate)
+
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("onSignUpCodeRequired not called")
+            return
+        }
+
+        // First attempt to get code
+        guard let initialCode = await retrieveCodeFor(email: username) else {
+            XCTFail("Initial OTP code could not be retrieved")
+            return
+        }
+        
+        // Resend code expectation
+        let resendCodeRequiredExp = expectation(description: "code resend required")
+        let signUpResendCodeDelegate = SignUpResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
+        
+        // Call resend code method
+        signUpStartDelegate.newState?.resendCode(delegate: signUpResendCodeDelegate)
+        
+        await fulfillment(of: [resendCodeRequiredExp])
+            
+        // Verify resend code was triggered
+        XCTAssertTrue(signUpResendCodeDelegate.onSignUpResendCodeCodeRequiredCalled,
+                    "Resend code method should have been called")
+
+        // Get new code after resend
+        guard let newCode = await retrieveCodeFor(email: username) else {
+            XCTFail("Resent OTP code could not be retrieved")
+            return
+        }
+        
+        // Verify that the new code is different from the initial code
+        XCTAssertNotEqual(initialCode, newCode, "Resent code should be different from the initial code")
+
+        // Complete sign up with the new code
+        let signUpCompleteExp = expectation(description: "sign-up complete")
+        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
+
+        signUpStartDelegate.newState?.submitCode(code: newCode, delegate: signUpVerifyCodeDelegate)
+
+        await fulfillment(of: [signUpCompleteExp])
+        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled, "Sign-up should be completed successfully")
+    }
+    
 
     private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
         XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
@@ -666,12 +732,5 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertEqual(delegate.result?.account.username, expectedUsername)
         XCTAssertNotNil(delegate.result?.idToken)
         XCTAssertNotNil(delegate.result?.account.accountClaims)
-    }
-    
-    private func checkSignUpResendCodeDelegate(_ delegate: SignUpResendCodeDelegateSpy) {
-        XCTAssertTrue(delegate.onSignUpResendCodeErrorCalled)
-        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
-        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertNotNil(delegate.codeLength)
     }
 }
