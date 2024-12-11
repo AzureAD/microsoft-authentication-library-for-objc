@@ -572,6 +572,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [signUpFailureExp])
         
         // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
         XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
     }
     
@@ -598,6 +599,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [signUpFailureExp])
         
         // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
         XCTAssertTrue(signUpStartDelegate.error!.isInvalidPassword)
     }
     

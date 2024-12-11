@@ -288,6 +288,29 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         // Verify that the codes are different
         XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
     }
+    
+    // use case 2.1.6. Sign Up - with Email & OTP, User already exists with given email as email-otp account
+    func test_signUpWithEmailOTP_andExistingAccount() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpStartDelegate = SignUpStartDelegateSpy(expectation: signUpFailureExp)
+        
+        sut.signUp(
+            username: username,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [signUpFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpErrorCalled)
+        XCTAssertTrue(signUpStartDelegate.error!.isUserAlreadyExists)
+    }
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
