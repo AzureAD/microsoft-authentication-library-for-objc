@@ -271,6 +271,32 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
     
+    // Use case 2.1.10 Sign up - with Email & Password, Server requires password authentication, which is not supported by the developer (aka redirect flow)
+    func test_signUpWithEmailPassword_butChallengeTypeOOB_fails() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, challengeTypes: [.OOB]) else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        
+        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
+        
+        sut.signUp(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [signUpFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.error!.isBrowserRequired)
+    }
+    
     // Hero Scenario 2.1.11. Sign up – Server requires password authentication, which is supported by the developer
     // The same as 1.1.4
     func test_signUpWithCode_withPasswordConfiguration_succeeds() async throws {
