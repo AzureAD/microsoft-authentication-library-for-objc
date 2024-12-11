@@ -556,6 +556,30 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
         
+        let username = "invalid"
+        let password = generateRandomPassword()
+        
+        let codeRequiredExp = expectation(description: "code required")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
+        
+        sut.signUp(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [codeRequiredExp])
+        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+    }
+    
+    // Use case 1.1.13. Sign up - with Email & Password, Developer makes a request with password that does not match password complexity requirements set on portal
+    func test_signUpWithEmailPassword_invalidPassword_fails() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+        
         let username = generateSignUpRandomEmail()
         let password = "invalid"
         
@@ -572,6 +596,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
     }
+    
+    // Use case 1.1.2. Sign up - with Email & Password, Resend email OOB
     
     
 
