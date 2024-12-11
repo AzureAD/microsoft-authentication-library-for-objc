@@ -270,6 +270,61 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         await fulfillment(of: [signUpCompleteExp])
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
+    
+    // Hero Scenario 2.1.11. Sign up – Server requires password authentication, which is supported by the developer
+    // The same as 1.1.4
+    func test_signUpWithCode_withPasswordConfiguration_succeeds() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+        let codeRequiredExp = expectation(description: "code required")
+        let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
+        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        
+        sut.signUp(username: username, correlationId: correlationId, delegate: signUpStartDelegate)
+
+        await fulfillment(of: [codeRequiredExp])
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
+        checkSignUpStartDelegate(signUpStartDelegate)
+
+        // Now submit the code...
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let submitCodeExp = expectation(description: "submit code, credential required")
+        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
+
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
+
+        await fulfillment(of: [submitCodeExp])
+
+        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
+            XCTFail("onSignUpPasswordRequired not called")
+            return
+        }
+
+        // Now submit the password...
+
+        let passwordRequiredExp = expectation(description: "password required")
+        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
+
+        signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
+            password: password,
+            delegate: signUpPasswordDelegate
+        )
+
+        await fulfillment(of: [passwordRequiredExp])
+        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+    }
+    
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
         XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
@@ -282,4 +337,6 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertEqual(delegate.result?.account.username, username)
         XCTAssertNotNil(delegate.result?.idToken)
     }
+    
+    // User already exists with given email as email-pw account
 }
