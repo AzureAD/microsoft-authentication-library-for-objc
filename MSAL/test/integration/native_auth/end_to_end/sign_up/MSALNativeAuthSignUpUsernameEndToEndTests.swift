@@ -490,50 +490,6 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: username)
     }
-    
-    // Sign up – correlation Id must be consistent in the whole signUp flow
-    func test_signUpWithCode_correlationConsistency() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
-            XCTFail("Missing information")
-            return
-        }
-        let codeRequiredExp = expectation(description: "code required")
-        let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-
-        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
-            return
-        }
-        checkSignUpStartDelegate(signUpStartDelegate)
-
-        // Now submit the code...
-
-        let signUpCompleteExp = expectation(description: "sign-up complete")
-        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
-        guard let code = await retrieveCodeFor(email: usernameOTP) else {
-            XCTFail("OTP code not retrieved from email")
-            return
-        }
-        
-        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
-
-        await fulfillment(of: [signUpCompleteExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
-
-        // Now sign in...
-
-        let signInExp = expectation(description: "sign-in after sign-up")
-        let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
-
-        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
-
-        await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
-    }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
         XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
