@@ -339,17 +339,16 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
     }
     
-    // Use case 2.1.8. Sign up - with Email & Password, Developer makes a request with invalid format email address
+    // Use case 2.1.8. Sign up - with Email & OTP, Developer makes a request with invalid format email address
     func test_signUpWithEmailPassword_invalidEmailFormat_fails() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
         
         let username = "invalid"
-        let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with invalid email format fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -362,7 +361,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
     }
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
