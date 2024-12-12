@@ -237,7 +237,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
     }
     
-    // use case 2.1.5. Sign up - with Email & Password, resend email OTP
+    // use case 2.1.5. Sign up - with Email & OTP resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
@@ -245,14 +245,12 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
             
         let username = generateSignUpRandomEmail()
-        let password = generateRandomPassword()
             
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
             
         sut.signUp(
             username: username,
-            password: password,
             correlationId: correlationId,
             delegate: signUpStartDelegate
         )
