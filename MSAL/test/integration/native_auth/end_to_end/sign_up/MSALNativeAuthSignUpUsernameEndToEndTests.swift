@@ -294,7 +294,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             return
         }
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with existing email fails")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -307,7 +307,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpErrorCalled)
-        XCTAssertTrue(signUpStartDelegate.error!.isUserAlreadyExists)
+        XCTAssertEqual(signUpStartDelegate.error!.isUserAlreadyExists, true)
     }
     
     // Use case 2.1.7. Sign up - with Email & Password, User already exists with given email as social account
