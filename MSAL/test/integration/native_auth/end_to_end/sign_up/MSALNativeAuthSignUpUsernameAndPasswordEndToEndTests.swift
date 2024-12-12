@@ -549,6 +549,35 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(newSignUpStartDelegate.error!.isUserAlreadyExists)
     }
     
+    // Use case 1.1.11. Sign up - with Email & Password, User already exists with given email as social account
+    func test_signUpWithEmailPassword_socialAccount_fails() async throws {
+        throw XCTSkip("Skipping test as it requires a Social account, not present in MSIDLAB")
+        
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let username = "social_account"
+        let password = generateRandomPassword()
+        
+        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
+        
+        sut.signUp(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [signUpFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
+        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+    }
+    
     // Use case 1.1.12. Sign up - with Email & Password, Developer makes a request with invalid format email address
     func test_signUpWithEmailPassword_invalidEmail_fails() async throws {
         guard let sut = initialisePublicClientApplication() else {

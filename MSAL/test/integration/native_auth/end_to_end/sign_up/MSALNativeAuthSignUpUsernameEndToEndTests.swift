@@ -311,6 +311,61 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signUpStartDelegate.onSignUpErrorCalled)
         XCTAssertTrue(signUpStartDelegate.error!.isUserAlreadyExists)
     }
+    
+    // Use case 2.1.7. Sign up - with Email & Password, User already exists with given email as social account
+    func test_signUpWithEmailPassword_socialAccount_fails() async throws {
+        throw XCTSkip("Skipping test as it requires a Social account, not present in MSIDLAB")
+        
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let username = "invalid"
+        let password = generateRandomPassword()
+        
+        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
+        
+        sut.signUp(
+            username: username,
+            password: password,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [signUpFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
+        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+    }
+    
+    // Use case 2.1.8. Sign up - with Email & Password, Developer makes a request with invalid format email address
+    func test_signUpWithEmailPassword_invalidEmailFormat_fails() async throws {
+        guard let sut = initialisePublicClientApplication() else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let username = "invalid"
+        let password = generateRandomPassword()
+        
+        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
+        
+        sut.signUp(
+            username: username,
+            correlationId: correlationId,
+            delegate: signUpStartDelegate
+        )
+        
+        await fulfillment(of: [signUpFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
+        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+    }
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
@@ -375,7 +430,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     // Hero Scenario 2.1.11. Sign up – Server requires password authentication, which is supported by the developer
     // The same as 1.1.4
     func test_signUpWithCode_withPasswordConfiguration_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -426,6 +481,49 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
     }
     
+    // Sign up – correlation Id must be consistent in the whole signUp flow
+    func test_signUpWithCode_correlationConsistency() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+            XCTFail("Missing information")
+            return
+        }
+        let codeRequiredExp = expectation(description: "code required")
+        let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
+        let usernameOTP = generateSignUpRandomEmail()
+
+        sut.signUp(username: usernameOTP, correlationId: correlationId, delegate: signUpStartDelegate)
+
+        await fulfillment(of: [codeRequiredExp])
+        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
+        checkSignUpStartDelegate(signUpStartDelegate)
+
+        // Now submit the code...
+
+        let signUpCompleteExp = expectation(description: "sign-up complete")
+        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
+        guard let code = await retrieveCodeFor(email: usernameOTP) else {
+            XCTFail("OTP code not retrieved from email")
+            return
+        }
+        
+        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
+
+        await fulfillment(of: [signUpCompleteExp])
+        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        // Now sign in...
+
+        let signInExp = expectation(description: "sign-in after sign-up")
+        let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
+
+        signUpVerifyCodeDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
+
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
+    }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
         XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
