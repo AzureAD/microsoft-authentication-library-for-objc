@@ -430,7 +430,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     // Hero Scenario 2.1.11. Sign up – Server requires password authentication, which is supported by the developer
     // The same as 1.1.4
     func test_signUpWithCode_withPasswordConfiguration_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password) else {
             XCTFail("Missing information")
             return
         }
@@ -476,9 +476,22 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             password: password,
             delegate: signUpPasswordDelegate
         )
-
+        
         await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(signUpVerifyCodeDelegate.onSignUpCompletedCalled)
+
+        guard signUpPasswordDelegate.onSignUpCompletedCalled else {
+            XCTFail("onSignUpCompleted not called")
+            return
+        }
+
+        // Now sign in...
+        let signInExp = expectation(description: "sign-in after sign-up")
+        let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
+
+        signUpPasswordDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
+
+        await fulfillment(of: [signInExp])
+        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: username)
     }
     
     // Sign up – correlation Id must be consistent in the whole signUp flow
