@@ -592,7 +592,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with existing email fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -621,7 +621,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let username = "social_account"
         let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with social account email fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -648,7 +648,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let username = "invalid"
         let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with invalid format email fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -675,7 +675,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let username = generateSignUpRandomEmail()
         let password = "invalid"
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with invalid password complexity fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(

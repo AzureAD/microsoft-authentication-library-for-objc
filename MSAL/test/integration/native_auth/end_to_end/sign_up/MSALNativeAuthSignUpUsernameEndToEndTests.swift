@@ -403,7 +403,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Use case 2.1.10 Sign up - with Email & Password, Server requires password authentication, which is not supported by the developer (aka redirect flow)
     func test_signUpWithEmailPassword_butChallengeTypeOOB_fails() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, challengeTypes: [.OOB]) else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: [.OOB]) else {
             XCTFail("Missing information")
             return
         }
@@ -411,7 +411,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = generateSignUpRandomEmail()
         let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with invalid challenge type fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
