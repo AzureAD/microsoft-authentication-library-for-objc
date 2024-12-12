@@ -37,6 +37,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        static let customDomainFormat = [
+            "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com",
+            "https://<tenantName>.ciamlogin.com/<tenantId>",
+            "https://<tenantName>.ciamlogin.com/",
+        ]
         #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
         #else
@@ -71,14 +76,46 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     func initialisePublicClientApplication(
         clientIdType: ClientIdType = .password,
-        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
+        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password],
+        customSubdomainFormat: Int? = nil
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
-        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String, let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
-            XCTFail("ClientId or tenantSubdomain not found in conf.json")
+        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String else {
+            XCTFail("ClientId not found in conf.json")
             return nil
         }
-        return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+        
+        guard let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
+            XCTFail("TenantName not found in conf.json")
+            return nil
+        }
+        
+        
+        if customSubdomainFormat != nil {
+            let customSubdomain = getCustomTenantSubdomain(
+                tenantName: tenantSubdomain,
+                tenantId: "", // TODO: Upload the tenant id into the config
+                format: customSubdomainFormat!
+            )
+            
+            let authority =  try? MSALCIAMAuthority(
+                url: URL(string: customSubdomain)!, 
+                validateFormat: false
+            )
+            
+            let configuration = MSALPublicClientApplicationConfig(
+                clientId: clientId,
+                redirectUri: nil,
+                authority: authority
+            )
+
+            return try? MSALNativeAuthPublicClientApplication(
+                configuration: configuration,
+                challengeTypes: challengeTypes
+            )
+        } else {
+            return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+        }
     }
     
     func generateSignUpRandomEmail() -> String {
@@ -128,5 +165,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         case .codeAndAttributes:
             return Constants.clientIdEmailCodeAttributesKey
         }
+    }
+    
+    private func getCustomTenantSubdomain(tenantName: String?, tenantId: String?, format: Int) -> String {
+        return Constants.customDomainFormat[format]
+            .replacingOccurrences(of: "<tenantName>", with: tenantName!)
+            .replacingOccurrences(of: "<tenantId>", with: tenantId!)
     }
 }

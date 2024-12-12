@@ -115,4 +115,58 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInPasswordRequiredErrorCalled)
         XCTAssertEqual(signInPasswordRequiredDelegateSpy.error?.isInvalidPassword, true)
     }
+    
+    // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
+    func test_signInCustomDomain1InSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(customSubdomainFormat: 0) else {
+            XCTFail("Failed to initialise auth client")
+            return
+        }
+
+        guard let username = retrieveUsernameForSignInUsernameAndPassword(),
+              let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing username or password")
+            return
+        }
+
+        let signInExpectation = expectation(description: "Signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        // Perform the sign-in asynchronously
+        Task {
+            await sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+            await fulfillment(of: [signInExpectation])
+
+            XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+            XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+            XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+        }
+    }
+    
+    // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
+    func test_signInCustomDomain3InSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(customSubdomainFormat: 2) else {
+            XCTFail("Failed to initialise auth client")
+            return
+        }
+
+        guard let username = retrieveUsernameForSignInUsernameAndPassword(),
+              let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing username or password")
+            return
+        }
+
+        let signInExpectation = expectation(description: "Signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        // Perform the sign-in asynchronously
+        Task {
+            await sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+            await fulfillment(of: [signInExpectation])
+
+            XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+            XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+            XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+        }
+    }
 }
