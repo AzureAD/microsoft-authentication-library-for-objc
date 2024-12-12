@@ -522,7 +522,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Use case 1.1.12. Sign up - with Email & Password, Developer makes a request with invalid format email address
     func test_signUpWithEmailPassword_invalidEmail_fails() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password) else {
             XCTFail("Missing information")
             return
         }
@@ -549,7 +549,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Use case 1.1.13. Sign up - with Email & Password, Developer makes a request with password that does not match password complexity requirements set on portal
     func test_signUpWithEmailPassword_invalidPassword_fails() async throws {
-        guard let sut = initialisePublicClientApplication() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password) else {
             XCTFail("Missing information")
             return
         }
@@ -571,7 +571,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertTrue(signUpStartDelegate.error!.isInvalidPassword)
+        XCTAssertEqual(signUpStartDelegate.error!.isInvalidPassword, true)
     }
     
     // Use case 1.1.2. Sign up - with Email & Password, Resend email OOB
