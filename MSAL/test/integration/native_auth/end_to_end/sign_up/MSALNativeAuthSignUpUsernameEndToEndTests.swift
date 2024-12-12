@@ -322,7 +322,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let username = "invalid"
         let password = generateRandomPassword()
         
-        let signUpFailureExp = expectation(description: "sign-up with invalid email fails")
+        let signUpFailureExp = expectation(description: "sign-up with social account email fails")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: signUpFailureExp)
         
         sut.signUp(
@@ -336,7 +336,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertTrue(signUpStartDelegate.error!.isInvalidUsername)
+        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
     }
     
     // Use case 2.1.8. Sign up - with Email & Password, Developer makes a request with invalid format email address
