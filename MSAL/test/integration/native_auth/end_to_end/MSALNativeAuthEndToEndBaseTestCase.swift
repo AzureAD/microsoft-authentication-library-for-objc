@@ -33,6 +33,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let clientIdEmailPasswordAttributesKey = "email_password_attributes_client_id"
         static let clientIdEmailCodeAttributesKey = "email_code_attributes_client_id"
         static let tenantSubdomainKey = "tenant_subdomain"
+        static let tenantIdKey = "tenant_id"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
@@ -90,11 +91,16 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             return nil
         }
         
+        guard let tenantId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantIdKey] as? String else {
+            XCTFail("TenantId not found in conf.json")
+            return nil
+        }
+        
         
         if customSubdomainFormat != nil {
             let customSubdomain = getCustomTenantSubdomain(
                 tenantName: tenantSubdomain,
-                tenantId: "", // TODO: Upload the tenant id into the config
+                tenantId: tenantId,
                 format: customSubdomainFormat!
             )
             

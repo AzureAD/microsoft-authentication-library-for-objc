@@ -123,9 +123,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        guard let username = retrieveUsernameForSignInUsernameAndPassword(),
-              let password = await retrievePasswordForSignInUsername() else {
-            XCTFail("Missing username or password")
+        guard let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
             return
         }
 
@@ -144,17 +143,14 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
-    func test_signInCustomDomain1InSuccess() async throws {
-        throw XCTSkip("Skipping test as it requires a tenantId, not present in MSIDLAB config file")
-        
+    func test_signInCustomDomain2InSuccess() async throws {
         guard let sut = initialisePublicClientApplication(customSubdomainFormat: 1) else {
             XCTFail("Failed to initialise auth client")
             return
         }
 
-        guard let username = retrieveUsernameForSignInUsernameAndPassword(),
-              let password = await retrievePasswordForSignInUsername() else {
-            XCTFail("Missing username or password")
+        guard let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
             return
         }
 
@@ -179,9 +175,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        guard let username = retrieveUsernameForSignInUsernameAndPassword(),
-              let password = await retrievePasswordForSignInUsername() else {
-            XCTFail("Missing username or password")
+        guard let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
             return
         }
 
