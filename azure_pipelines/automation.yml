@@ -36,6 +36,10 @@ jobs:
     clean: all
 
   steps:
+  - script: |
+      system_profiler SPHardwareDataType | grep "Processor Name"
+    displayName: 'Check System Information'
+    
   - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
