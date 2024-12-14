@@ -91,7 +91,8 @@ jobs:
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
       full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.2-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.2'
+      destination: 'generic/platform=iOS'
+      # destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.2'
       sdk: 'iphonesimulator'
       retry_tests: false
 
