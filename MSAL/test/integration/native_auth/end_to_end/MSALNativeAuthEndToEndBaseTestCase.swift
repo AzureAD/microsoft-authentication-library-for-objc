@@ -91,7 +91,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             return nil
         }
         
-        guard let tenantId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantIdKey] as? String else {
+        guard let tenantId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
             XCTFail("TenantId not found in conf.json")
             return nil
         }
