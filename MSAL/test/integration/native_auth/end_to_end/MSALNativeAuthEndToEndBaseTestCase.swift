@@ -38,11 +38,6 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
-        static let customDomainFormat = [
-            "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com",
-            "https://<tenantName>.ciamlogin.com/<tenantId>",
-            "https://<tenantName>.ciamlogin.com/",
-        ]
         #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
         #else
@@ -78,7 +73,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     func initialisePublicClientApplication(
         clientIdType: ClientIdType = .password,
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password],
-        customSubdomainFormat: Int? = nil
+        customAuthorityURLFormat: AuthorityURLFormat? = nil
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
         guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String else {
@@ -87,7 +82,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
         
         guard let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
-            XCTFail("TenantName not found in conf.json")
+            XCTFail("TenantSubdomain not found in conf.json")
             return nil
         }
         
@@ -97,15 +92,15 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
         
         
-        if customSubdomainFormat != nil {
+        if let customAuthorityURLFormat = customAuthorityURLFormat {
             let customSubdomain = getCustomTenantSubdomain(
                 tenantName: tenantSubdomain,
                 tenantId: tenantId,
-                format: customSubdomainFormat!
+                format: customAuthorityURLFormat
             )
             
-            let authority =  try? MSALCIAMAuthority(
-                url: URL(string: customSubdomain)!, 
+            let authority = try? MSALCIAMAuthority(
+                url: URL(string: customSubdomain)!,
                 validateFormat: false
             )
             
@@ -120,7 +115,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
                 challengeTypes: challengeTypes
             )
         } else {
-            return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+            return try? MSALNativeAuthPublicClientApplication(
+                clientId: clientId,
+                tenantSubdomain: tenantSubdomain,
+                challengeTypes: challengeTypes
+            )
         }
     }
     
@@ -173,9 +172,14 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
     }
     
-    private func getCustomTenantSubdomain(tenantName: String?, tenantId: String?, format: Int) -> String {
-        return Constants.customDomainFormat[format]
-            .replacingOccurrences(of: "<tenantName>", with: tenantName!)
-            .replacingOccurrences(of: "<tenantId>", with: tenantId!)
+    private func getCustomTenantSubdomain(tenantName: String, tenantId: String, format: AuthorityURLFormat) -> String {
+        switch format {
+        case .tenantSubdomainShortVersion:
+            return String(format: "https://%@.ciamlogin.com/", tenantName)
+        case .tenantSubdomainLongVersion:
+            return String(format: "https://%@.ciamlogin.com/%@.onmicrosoft.com", tenantName, tenantName)
+        case .tenantSubdomainTenantId:
+            return String(format: "https://%@.ciamlogin.com/%@", tenantName, tenantId)
+        }
     }
 }

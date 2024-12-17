@@ -118,7 +118,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
     func test_signInCustomDomain1InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(customSubdomainFormat: 0) else {
+        guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainLongVersion) else {
             XCTFail("Failed to initialise auth client")
             return
         }
@@ -131,20 +131,18 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "Signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        // Perform the sign-in asynchronously
-        Task {
-            await sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
-            await fulfillment(of: [signInExpectation])
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-            XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-            XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-            XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-        }
+        await fulfillment(of: [signInExpectation])
+
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     func test_signInCustomDomain2InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(customSubdomainFormat: 1) else {
+        guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainTenantId) else {
             XCTFail("Failed to initialise auth client")
             return
         }
@@ -157,20 +155,16 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "Signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        // Perform the sign-in asynchronously
-        Task {
-            await sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
-            await fulfillment(of: [signInExpectation])
+        await fulfillment(of: [signInExpectation])
 
-            XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-            XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-            XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-        }
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
     func test_signInCustomDomain3InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(customSubdomainFormat: 2) else {
+        guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainShortVersion) else {
             XCTFail("Failed to initialise auth client")
             return
         }
@@ -183,14 +177,12 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "Signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        // Perform the sign-in asynchronously
-        Task {
-            await sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
-            await fulfillment(of: [signInExpectation])
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
-            XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-            XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-            XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-        }
+        await fulfillment(of: [signInExpectation])
+
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
 }
