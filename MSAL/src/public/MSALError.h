@@ -265,7 +265,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      Un expected http response with status code 403 or 404
      */
-    MSALInternalErrorUnExpectedHttpResponse             = -42009,
+    MSALInternalErrorUnexpectedHttpResponse             = -42009,
     
     /**
      The passed in authority URL does not pass validation.
