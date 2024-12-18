@@ -105,7 +105,6 @@ jobs:
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
-
   steps:
   - template: templates/tests-with-conf-file.yml
     parameters:
@@ -115,7 +114,7 @@ jobs:
       sdk: 'macosx'
       retry_tests: false
 
-  - job: cocoapods_lib_lint
+- job: cocoapods_lib_lint
     displayName: Run Cocoapods lib lint
     timeoutInMinutes: 30
     cancelTimeoutInMinutes: 5
@@ -127,10 +126,8 @@ jobs:
         DYNAMIC_LIBRARY:
           args: "--fail-fast --allow-warnings"
     workspace:
-      clean: all
-  
+      clean: all  
     steps:
-
     - checkout: self
       clean: true
       submodules: true
