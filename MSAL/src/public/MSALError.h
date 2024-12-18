@@ -263,6 +263,11 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorUnexpected                         = -42008,
     
     /**
+     Un expected http response with status code 403 or 404
+     */
+    MSALInternalErrorUnExpectedHttpResponse             = -42009,
+    
+    /**
      The passed in authority URL does not pass validation.
      If you're trying to use B2C, you must disable authority validation by
      setting validateAuthority of MSALPublicClientApplication to NO.
@@ -525,4 +530,5 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      JIT - Error Handling config invalid or not found
      */
     MSALErrorJITErrorHandlingConfigNotFound             = -42738,
+    
 };
