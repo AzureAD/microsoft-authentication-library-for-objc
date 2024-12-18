@@ -95,6 +95,8 @@
 		0D96DB3C27850F0F00DEAF87 /* MSALWipeCacheForAllAccountsConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D96DB2E27850E1300DEAF87 /* MSALWipeCacheForAllAccountsConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D96DB3D27850F1100DEAF87 /* MSALWipeCacheForAllAccountsConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D96DB2E27850E1300DEAF87 /* MSALWipeCacheForAllAccountsConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0D96DB3E27850F1200DEAF87 /* MSALWipeCacheForAllAccountsConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D96DB2E27850E1300DEAF87 /* MSALWipeCacheForAllAccountsConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		12E2160B2D11D3920000F44C /* AuthorityURLFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12E2160A2D11D3920000F44C /* AuthorityURLFormat.swift */; };
+		12E2160C2D11D3920000F44C /* AuthorityURLFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12E2160A2D11D3920000F44C /* AuthorityURLFormat.swift */; };
 		1E04572324BD5A7D00444756 /* MSALCacheItemDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E04572024BD5A7D00444756 /* MSALCacheItemDetailViewController.m */; };
 		1E06CD6524D116F800E3D0E5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
 		1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
@@ -1922,6 +1924,7 @@
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
 		0D96DB2E27850E1300DEAF87 /* MSALWipeCacheForAllAccountsConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALWipeCacheForAllAccountsConfig.h; sourceTree = "<group>"; };
 		0D96DB3627850E3900DEAF87 /* MSALWipeCacheForAllAccountsConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALWipeCacheForAllAccountsConfig.m; sourceTree = "<group>"; };
+		12E2160A2D11D3920000F44C /* AuthorityURLFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorityURLFormat.swift; sourceTree = "<group>"; };
 		1E04571F24BD5A7D00444756 /* MSALCacheItemDetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALCacheItemDetailViewController.h; sourceTree = "<group>"; };
 		1E04572024BD5A7D00444756 /* MSALCacheItemDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCacheItemDetailViewController.m; sourceTree = "<group>"; };
 		1E1A2E052256D194001009ED /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -3425,6 +3428,7 @@
 				9B235D9E2A3CFB4300657331 /* MSALNativeAuthEndToEndBaseTestCase.swift */,
 				2809E8342C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift */,
 				280095EA2C32CAFC00F1653E /* ClientIdType.swift */,
+				12E2160A2D11D3920000F44C /* AuthorityURLFormat.swift */,
 			);
 			path = end_to_end;
 			sourceTree = "<group>";
@@ -6367,6 +6371,7 @@
 				281A0E182C21E1FD00CB30CB /* SignInDelegateSpies.swift in Sources */,
 				28A277D92C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift in Sources */,
 				E24CE9CC2C57F1160069E2E4 /* AttributesStub.swift in Sources */,
+				12E2160B2D11D3920000F44C /* AuthorityURLFormat.swift in Sources */,
 				281A0E1B2C21E20600CB30CB /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				28188F652C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				281A0E192C21E20000CB30CB /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
@@ -7418,6 +7423,7 @@
 				DE1BD1062C3C284900B0888E /* SignInDelegateSpies.swift in Sources */,
 				DE1BD1072C3C284C00B0888E /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
 				DE9EB8622C5CE44B00328AA4 /* AttributesStub.swift in Sources */,
+				12E2160C2D11D3920000F44C /* AuthorityURLFormat.swift in Sources */,
 				DE1BD1012C3C283C00B0888E /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
 				28188F662C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				DE1BD1032C3C284100B0888E /* SignUpDelegateSpies.swift in Sources */,
