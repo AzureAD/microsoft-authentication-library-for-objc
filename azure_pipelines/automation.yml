@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-15'
+  vmImage: 'macOS-14'
 
 jobs:
 - job: ui_automation
@@ -94,8 +94,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.2-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.2'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
       sdk: 'iphonesimulator'
       retry_tests: false
 
@@ -110,58 +110,54 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.2-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
 
-# commented out the below code due to the issue reported on Xcode 16.2 for MSAL automation
-# https://github.com/actions/runner-images/issues/10925
-# https://github.com/actions/runner-images/issues/10925#issuecomment-2529630539
-
-# - job: cocoapods_lib_lint
-#   displayName: Run Cocoapods lib lint
-#   timeoutInMinutes: 30
-#   cancelTimeoutInMinutes: 5
-#   strategy:
-#     maxParallel: 2
-#     matrix:
-#       STATIC_LIBRARY:
-#         args: "--fail-fast --allow-warnings --use-static-frameworks"
-#       DYNAMIC_LIBRARY:
-#         args: "--fail-fast --allow-warnings"
-#   workspace:
-#     clean: all
+- job: cocoapods_lib_lint
+  displayName: Run Cocoapods lib lint
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  strategy:
+    maxParallel: 2
+    matrix:
+      STATIC_LIBRARY:
+        args: "--fail-fast --allow-warnings --use-static-frameworks"
+      DYNAMIC_LIBRARY:
+        args: "--fail-fast --allow-warnings"
+  workspace:
+    clean: all
   
-#   steps:
+  steps:
 
-#   - checkout: self
-#     clean: true
-#     submodules: true
-#     fetchDepth: 1
-#     persistCredentials: true
-#     path: s
+  - checkout: self
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
 
-#   - task: Bash@3
-#     displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
-#       workingDirectory: '$(Build.SourcesDirectory)'
+  - task: Bash@3
+    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
+    inputs:
+      targetType: 'inline'
+      script: |
+        sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+      workingDirectory: '$(Build.SourcesDirectory)'
 
-#   - task: Bash@3
-#     displayName: Run pod lib lint
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         pod lib lint $(args)
-#       workingDirectory: '$(Build.SourcesDirectory)'
+  - task: Bash@3
+    displayName: Run pod lib lint
+    inputs:
+      targetType: 'inline'
+      script: |
+        pod lib lint $(args)
+      workingDirectory: '$(Build.SourcesDirectory)'
 
-#   - task: Bash@3
-#     displayName: Discard temporary changes made to MSAL.podspec
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         git checkout -f -- MSAL.podspec
-#       workingDirectory: '$(Build.SourcesDirectory)'
+  - task: Bash@3
+    displayName: Discard temporary changes made to MSAL.podspec
+    inputs:
+      targetType: 'inline'
+      script: |
+        git checkout -f -- MSAL.podspec
+      workingDirectory: '$(Build.SourcesDirectory)'
