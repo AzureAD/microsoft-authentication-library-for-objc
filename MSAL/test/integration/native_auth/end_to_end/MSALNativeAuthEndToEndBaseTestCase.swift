@@ -93,8 +93,8 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         
         
         if let customAuthorityURLFormat = customAuthorityURLFormat {
-            let customSubdomain = getCustomTenantSubdomain(
-                tenantName: tenantSubdomain,
+            let customSubdomain = getAuthorityURLString(
+                tenantSubdomain: tenantSubdomain,
                 tenantId: tenantId,
                 format: customAuthorityURLFormat
             )
