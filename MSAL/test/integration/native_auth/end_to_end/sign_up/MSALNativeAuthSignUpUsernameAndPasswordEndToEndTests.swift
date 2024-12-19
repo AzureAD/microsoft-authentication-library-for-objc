@@ -635,7 +635,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isInvalidUsername, true)
     }
     
     // Use case 1.1.12. Sign up - with Email & Password, Developer makes a request with invalid format email address
@@ -662,7 +662,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isInvalidUsername, true)
     }
     
     // Use case 1.1.13. Sign up - with Email & Password, Developer makes a request with password that does not match password complexity requirements set on portal
@@ -689,7 +689,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isInvalidPassword, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isInvalidPassword, true)
     }
     
     private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {

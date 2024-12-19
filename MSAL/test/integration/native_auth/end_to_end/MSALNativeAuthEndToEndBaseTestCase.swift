@@ -172,14 +172,14 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
     }
     
-    private func getCustomTenantSubdomain(tenantName: String, tenantId: String, format: AuthorityURLFormat) -> String {
+    private func getAuthorityURLString(tenantSubdomain: String, tenantId: String, format: AuthorityURLFormat) -> String {
         switch format {
         case .tenantSubdomainShortVersion:
-            return String(format: "https://%@.ciamlogin.com/", tenantName)
+            return String(format: "https://%@.ciamlogin.com/", tenantSubdomain)
         case .tenantSubdomainLongVersion:
-            return String(format: "https://%@.ciamlogin.com/%@.onmicrosoft.com", tenantName, tenantName)
+            return String(format: "https://%@.ciamlogin.com/%@.onmicrosoft.com", tenantSubdomain, tenantSubdomain)
         case .tenantSubdomainTenantId:
-            return String(format: "https://%@.ciamlogin.com/%@", tenantName, tenantId)
+            return String(format: "https://%@.ciamlogin.com/%@", tenantSubdomain, tenantId)
         }
     }
 }

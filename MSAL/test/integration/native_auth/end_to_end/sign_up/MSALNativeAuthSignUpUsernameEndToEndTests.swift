@@ -307,7 +307,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isUserAlreadyExists, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isUserAlreadyExists, true)
     }
     
     // Use case 2.1.7. Sign up - with Email & Password, User already exists with given email as social account
@@ -336,7 +336,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isInvalidUsername, true)
     }
     
     // Use case 2.1.8. Sign up - with Email & OTP, Developer makes a request with invalid format email address
@@ -361,7 +361,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify error condition
         XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
-        XCTAssertEqual(signUpStartDelegate.error!.isInvalidUsername, true)
+        XCTAssertEqual(signUpStartDelegate.error?.isInvalidUsername, true)
     }
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
@@ -426,70 +426,6 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Hero Scenario 2.1.11. Sign up – Server requires password authentication, which is supported by the developer
     // The same as 1.1.4
-    func test_signUpWithCode_withPasswordConfiguration_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .password) else {
-            XCTFail("Missing information")
-            return
-        }
-        let codeRequiredExp = expectation(description: "code required")
-        let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let username = generateSignUpRandomEmail()
-        let password = generateRandomPassword()
-        
-        sut.signUp(username: username, correlationId: correlationId, delegate: signUpStartDelegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
-            XCTFail("OTP not sent")
-            return
-        }
-        checkSignUpStartDelegate(signUpStartDelegate)
-
-        // Now submit the code...
-
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-
-        let submitCodeExp = expectation(description: "submit code, credential required")
-        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: submitCodeExp)
-
-        signUpStartDelegate.newState?.submitCode(code: code, delegate: signUpVerifyCodeDelegate)
-
-        await fulfillment(of: [submitCodeExp])
-
-        guard signUpVerifyCodeDelegate.onSignUpPasswordRequiredCalled else {
-            XCTFail("onSignUpPasswordRequired not called")
-            return
-        }
-
-        // Now submit the password...
-
-        let passwordRequiredExp = expectation(description: "password required")
-        let signUpPasswordDelegate = SignUpPasswordRequiredDelegateSpy(expectation: passwordRequiredExp)
-
-        signUpVerifyCodeDelegate.passwordRequiredState?.submitPassword(
-            password: password,
-            delegate: signUpPasswordDelegate
-        )
-        
-        await fulfillment(of: [passwordRequiredExp])
-
-        guard signUpPasswordDelegate.onSignUpCompletedCalled else {
-            XCTFail("onSignUpCompleted not called")
-            return
-        }
-
-        // Now sign in...
-        let signInExp = expectation(description: "sign-in after sign-up")
-        let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
-
-        signUpPasswordDelegate.signInAfterSignUpState?.signIn(delegate: signInAfterSignUpDelegate)
-
-        await fulfillment(of: [signInExp])
-        checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: username)
-    }
 
     private func checkSignUpStartDelegate(_ delegate: SignUpStartDelegateSpy) {
         XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)

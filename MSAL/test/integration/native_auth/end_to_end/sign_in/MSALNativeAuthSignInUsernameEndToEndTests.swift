@@ -127,8 +127,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
-    func test_signInCustomDomain1InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainLongVersion), let username = retrieveUsernameForSignInCode() else {
+    func test_signInCustomSubdomainLongInSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
@@ -169,8 +169,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
-    func test_signInCustomDomain2InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainTenantId), let username = retrieveUsernameForSignInCode() else {
+    func test_signInCustomSubdomainIdInSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
@@ -211,8 +211,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
-    func test_signInCustomDomain3InSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: AuthorityURLFormat.tenantSubdomainShortVersion), let username = retrieveUsernameForSignInCode() else {
+    func test_signInCustomSubdomainShortInSuccess() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
