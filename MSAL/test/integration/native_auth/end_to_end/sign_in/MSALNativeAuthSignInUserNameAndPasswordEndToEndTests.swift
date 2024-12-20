@@ -66,9 +66,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-#if os(macOS)
-        throw XCTSkip("Keychain access is not active on the macOS app and is used by Keyvault")
-#endif
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
