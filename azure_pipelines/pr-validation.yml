@@ -191,7 +191,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
