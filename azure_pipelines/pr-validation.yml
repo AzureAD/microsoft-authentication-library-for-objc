@@ -50,10 +50,16 @@ jobs:
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
     displayName: 'Switch to use Xcode 15.4'
   - task: CmdLine@2
+    displayName: Installing xcpretty
+    inputs:
+      script: |
+        gem install xcpretty -N -v 0.3.0
+      failOnStderr: true
+  - task: CmdLine@2
     displayName: Installing dependencies
     inputs:
       script: |
-        gem install xcpretty slather bundler -N
+        gem install slather bundler -N
       failOnStderr: true
   - checkout: self
     clean: true
@@ -193,7 +199,7 @@ jobs:
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-13'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 15
   workspace:
     clean: all
@@ -208,8 +214,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
-    displayName: 'Switch to use Xcode 14.3'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
+    displayName: 'Switch to use Xcode 15.4'
 
   - task: Bash@3
     displayName: Set variable BRANCH_NAME to a temporary branch
