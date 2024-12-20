@@ -30,7 +30,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
 #if os(macOS)
-        throw XCTSkip("Keychain access is not active on the macOS app and is used by Keyvault")
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
                 let password = await retrievePasswordForSignInUsername(),
@@ -89,7 +89,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
 #if os(macOS)
-        throw XCTSkip("Keychain access is not active on the macOS app and is used by Keyvault")
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
               let password = await retrievePasswordForSignInUsername(),
@@ -147,7 +147,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     
     func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
 #if os(macOS)
-        throw XCTSkip("Keychain access is not active on the macOS app and is used by Keyvault")
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod(),
                 let password = await retrievePasswordForSignInUsername(),
