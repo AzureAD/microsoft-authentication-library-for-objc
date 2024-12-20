@@ -20,7 +20,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          MSAL 1.6.2 Docs
+          MSAL 1.6.3 Docs
         </a>
          (92% documented)
       </p>
@@ -619,31 +619,31 @@
 <span class="p">}</span>
 </code></pre>
 <h4 id='objective-c' class='heading'>Objective-C</h4>
-<pre class="highlight plaintext"><code>NSError *msalError = nil;
+<pre class="highlight objective_c"><code><span class="n">NSError</span> <span class="o">*</span><span class="n">msalError</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
 
-MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"&lt;your-client-id-here&gt;"];
-NSArray&lt;NSString *&gt; *scopes = @[@"your-scope1-here", @"your-scope2-here"];
+<span class="n">MSALPublicClientApplicationConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MSALPublicClientApplicationConfig</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithClientId</span><span class="p">:</span><span class="s">@"&lt;your-client-id-here&gt;"</span><span class="p">];</span>
+<span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="n">scopes</span> <span class="o">=</span> <span class="p">@[</span><span class="s">@"your-scope1-here"</span><span class="p">,</span> <span class="s">@"your-scope2-here"</span><span class="p">];</span>
 
-MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&amp;msalError];
+<span class="n">MSALPublicClientApplication</span> <span class="o">*</span><span class="n">application</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MSALPublicClientApplication</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithConfiguration</span><span class="p">:</span><span class="n">config</span> <span class="nf">error</span><span class="p">:</span><span class="o">&amp;</span><span class="n">msalError</span><span class="p">];</span>
 
-MSALViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
-MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
+<span class="n">MSALViewController</span> <span class="o">*</span><span class="n">viewController</span> <span class="o">=</span> <span class="p">...;</span> <span class="c1">// Pass a reference to the view controller that should be used when getting a token interactively</span>
+<span class="n">MSALWebviewParameters</span> <span class="o">*</span><span class="n">webParameters</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MSALWebviewParameters</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithAuthPresentationViewController</span><span class="p">:</span><span class="n">viewController</span><span class="p">];</span>
 
-MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
-[application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
-    if (!error)
-    {
-        // You'll want to get the account identifier to retrieve and reuse the account
-        // for later acquireToken calls
-        NSString *accountIdentifier = result.account.identifier;
+<span class="n">MSALInteractiveTokenParameters</span> <span class="o">*</span><span class="n">interactiveParams</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MSALInteractiveTokenParameters</span> <span class="nf">alloc</span><span class="p">]</span> <span class="nf">initWithScopes</span><span class="p">:</span><span class="n">scopes</span> <span class="nf">webviewParameters</span><span class="p">:</span><span class="n">webParameters</span><span class="p">];</span>
+<span class="p">[</span><span class="n">application</span> <span class="nf">acquireTokenWithParameters</span><span class="p">:</span><span class="n">interactiveParams</span> <span class="nf">completionBlock</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="n">MSALResult</span> <span class="o">*</span><span class="n">result</span><span class="p">,</span> <span class="n">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// You'll want to get the account identifier to retrieve and reuse the account</span>
+        <span class="c1">// for later acquireToken calls</span>
+        <span class="n">NSString</span> <span class="o">*</span><span class="n">accountIdentifier</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">account</span><span class="p">.</span><span class="n">identifier</span><span class="p">;</span>
 
-        NSString *accessToken = result.accessToken;
-    }
-    else
-    {
-        // Check the error
-    }
-}];
+        <span class="n">NSString</span> <span class="o">*</span><span class="n">accessToken</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="n">accessToken</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="c1">// Check the error</span>
+    <span class="p">}</span>
+<span class="p">}];</span>
 </code></pre>
 <h2 id='master-branch-deprecation' class='heading'>Master branch deprecation</h2>
 
@@ -768,7 +768,7 @@ Workarounds for some bugs we encountered :</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-11-19)</p>
+      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-12-20)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
