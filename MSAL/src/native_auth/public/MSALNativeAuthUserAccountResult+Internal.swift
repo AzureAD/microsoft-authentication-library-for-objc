@@ -90,6 +90,8 @@ extension MSALNativeAuthUserAccountResult {
         let errorCodes = error.userInfo[MSALSTSErrorCodesKey] as? [Int] ?? []
         if isMFARequiredError(errorCodes: errorCodes) {
             message = MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message
+        } else if isResetPasswordRequiredError(errorCodes: errorCodes) {
+            message = MSALNativeAuthErrorMessage.passwordResetRequired + message
         }
         let correlationId = correlationIdFromMSALError(error: error) ?? context.correlationId()
         return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: errorCodes)
@@ -102,5 +104,9 @@ extension MSALNativeAuthUserAccountResult {
     private func isMFARequiredError(errorCodes: [Int]) -> Bool {
         let mfaRequiredErrorCode = 50076
         return errorCodes.contains(mfaRequiredErrorCode)
+    }
+    
+    private func isResetPasswordRequiredError(errorCodes: [Int]) -> Bool {
+        return errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.resetPasswordRequired.rawValue)
     }
 }

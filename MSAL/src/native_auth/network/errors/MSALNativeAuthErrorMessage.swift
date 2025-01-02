@@ -45,6 +45,7 @@ enum MSALNativeAuthErrorMessage {
     static let unexpectedResponseBody = "Unexpected response body received"
     static let unexpectedChallengeType = "Unexpected challenge type"
     static let refreshTokenMFARequiredError = "Multi-factor authentication is required, which can't be fulfilled as part of this flow. Please sign out and perform a new sign in operation. More information: "
+    static let passwordResetRequired = "User password change is required, which can't be fulfilled as part of this flow. Please reset the password and perform a new sign in operation. More information: "
 }
 
 // swiftlint:enable line_length
