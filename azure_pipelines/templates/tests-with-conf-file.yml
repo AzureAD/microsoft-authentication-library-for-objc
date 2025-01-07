@@ -26,8 +26,11 @@ steps:
       script: |        
         cd $(Agent.BuildDirectory)/s
   
+  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+    displayName: 'Uninstall xcpretty v0.4.0'
+  
   - script: 'gem install xcpretty -v 0.3.0'
-    displayName: 'Install xcpretty'
+    displayName: 'Install xcpretty v0.3.0'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
