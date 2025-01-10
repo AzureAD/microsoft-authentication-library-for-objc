@@ -168,6 +168,29 @@ final class MSALNativeAuthTokenResponseValidatorTest: MSALNativeAuthTestCase {
         }
     }
     
+    func test_invalidRequestResetPasswordRequired_theErrorDescriptionContainsCorrectInformation() {
+        let continuationTokenResponse = "ct"
+        let description = "reset password required"
+        let errorCodes = [50142]
+        let error = MSALNativeAuthTokenResponseError(error: .invalidRequest, subError: nil, errorDescription: description, errorCodes: errorCodes, errorURI: nil, innerErrors: nil, continuationToken: continuationTokenResponse)
+
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let result = sut.validate(context: context, msidConfiguration: MSALNativeAuthConfigStubs.msidConfiguration, result: .failure(error))
+        
+        guard case .error(let errorType) = result else {
+            return XCTFail("Unexpected response")
+        }
+        guard case .invalidRequest(let validatedError) = errorType else {
+            return XCTFail("Unexpected Error")
+        }
+        XCTAssertEqual(validatedError.error, .invalidRequest)
+        XCTAssertEqual(validatedError.errorDescription, MSALNativeAuthErrorMessage.passwordResetRequired + description)
+        XCTAssertEqual(validatedError.errorCodes, errorCodes)
+        XCTAssertNil(validatedError.subError)
+        XCTAssertNil(validatedError.innerErrors)
+        XCTAssertNil(validatedError.errorURI)
+    }
+    
     func test_invalidGrantMFARequired_triggerStrongAuthRequiredResponse() {
         let continuationTokenResponse = "ct"
         let error = MSALNativeAuthTokenResponseError(error: .invalidGrant, subError: .mfaRequired, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, continuationToken: continuationTokenResponse)

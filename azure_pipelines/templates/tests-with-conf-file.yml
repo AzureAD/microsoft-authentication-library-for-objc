@@ -1,8 +1,9 @@
 parameters:
   schema: 'MSAL Test Automation (iOS)'
-  full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator17.5-x86_64.xctestrun'
-  destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+  full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
+  destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
   sdk: 'iphonesimulator'
+  retry_tests: true
 
 steps:
   - checkout: self
@@ -16,7 +17,7 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -25,8 +26,11 @@ steps:
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: 'gem install xcpretty'
-    displayName: 'Install xcpretty'
+  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+    displayName: 'Uninstall xcpretty v0.4.0'
+  
+  - script: 'gem install xcpretty -v 0.3.0'
+    displayName: 'Install xcpretty v0.3.0'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -58,12 +62,23 @@ steps:
       targetType: 'inline'
       script: |
         ls build/Build/Products/
-        xcodebuild test-without-building \
-            -xctestrun '${{ parameters.full_path }}' \
-            -destination '${{ parameters.destination }}' \
-            -retry-tests-on-failure \
-            -parallel-testing-enabled NO \
-            -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'      
+        #Use retry-tests-on-failure only if tests don't already use "Maximum Test Repetitions"
+        if ['${{ parameters.retry_tests }}' == true]; then
+            xcodebuild test-without-building \
+                -xctestrun '${{ parameters.full_path }}' \
+                -destination '${{ parameters.destination }}' \
+                -retry-tests-on-failure \
+                -parallel-testing-enabled NO \
+                -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+
+        else
+            xcodebuild test-without-building \
+                -xctestrun '${{ parameters.full_path }}' \
+                -destination '${{ parameters.destination }}' \
+                -parallel-testing-enabled NO \
+                -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+
+        fi 
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1

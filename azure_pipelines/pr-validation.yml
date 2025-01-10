@@ -50,10 +50,22 @@ jobs:
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
     displayName: 'Switch to use Xcode 15.4'
   - task: CmdLine@2
+    displayName: Uninstalling xcpretty v0.4.0
+    inputs:
+      script: |
+        gem uninstall xcpretty -I --version 0.4.0
+      failOnStderr: false
+  - task: CmdLine@2
+    displayName: Installing xcpretty v0.3.0
+    inputs:
+      script: |
+        gem install xcpretty -N -v 0.3.0
+      failOnStderr: true
+  - task: CmdLine@2
     displayName: Installing dependencies
     inputs:
       script: |
-        gem install xcpretty slather bundler -N
+        gem install slather bundler -N
       failOnStderr: true
   - checkout: self
     clean: true
@@ -165,9 +177,10 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator17.5-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
       sdk: 'iphonesimulator'
+      retry_tests: false
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
@@ -184,14 +197,15 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
+      retry_tests: false
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-13'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 15
   workspace:
     clean: all
@@ -206,8 +220,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
-    displayName: 'Switch to use Xcode 14.3'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
+    displayName: 'Switch to use Xcode 15.4'
 
   - task: Bash@3
     displayName: Set variable BRANCH_NAME to a temporary branch

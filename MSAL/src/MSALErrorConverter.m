@@ -142,6 +142,7 @@ static NSSet *s_recoverableErrorCode;
                              MSIDSTSErrorCodesKey : MSALSTSErrorCodesKey,
                              MSIDOAuthErrorKey: MSALOAuthErrorKey,
                              MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
+                             MSIDOAuthSubErrorDescriptionKey: MSALOAuthSubErrorDescriptionKey,
                              MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
                              MSIDGrantedScopesKey: MSALGrantedScopesKey,
                              MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,

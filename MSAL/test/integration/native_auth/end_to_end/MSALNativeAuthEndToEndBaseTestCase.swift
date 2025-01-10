@@ -33,11 +33,16 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let clientIdEmailPasswordAttributesKey = "email_password_attributes_client_id"
         static let clientIdEmailCodeAttributesKey = "email_code_attributes_client_id"
         static let tenantSubdomainKey = "tenant_subdomain"
+        static let tenantIdKey = "tenant_id"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
+        #else
+        static let resetPasswordUsernameKey = "reset_password_username_macos"
+        #endif
     }
     
     let correlationId = UUID()
@@ -67,14 +72,55 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     func initialisePublicClientApplication(
         clientIdType: ClientIdType = .password,
-        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password]
+        challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password],
+        customAuthorityURLFormat: AuthorityURLFormat? = nil
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
-        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String, let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
-            XCTFail("ClientId or tenantSubdomain not found in conf.json")
+        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String else {
+            XCTFail("ClientId not found in conf.json")
             return nil
         }
-        return try? MSALNativeAuthPublicClientApplication(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+        
+        guard let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
+            XCTFail("TenantSubdomain not found in conf.json")
+            return nil
+        }
+        
+        guard let tenantId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantIdKey] as? String else {
+            XCTFail("TenantId not found in conf.json")
+            return nil
+        }
+        
+        
+        if let customAuthorityURLFormat = customAuthorityURLFormat {
+            let customSubdomain = getAuthorityURLString(
+                tenantSubdomain: tenantSubdomain,
+                tenantId: tenantId,
+                format: customAuthorityURLFormat
+            )
+            
+            let authority = try? MSALCIAMAuthority(
+                url: URL(string: customSubdomain)!,
+                validateFormat: false
+            )
+            
+            let configuration = MSALPublicClientApplicationConfig(
+                clientId: clientId,
+                redirectUri: nil,
+                authority: authority
+            )
+
+            return try? MSALNativeAuthPublicClientApplication(
+                configuration: configuration,
+                challengeTypes: challengeTypes
+            )
+        } else {
+            return try? MSALNativeAuthPublicClientApplication(
+                clientId: clientId,
+                tenantSubdomain: tenantSubdomain,
+                challengeTypes: challengeTypes
+            )
+        }
     }
     
     func generateSignUpRandomEmail() -> String {
@@ -123,6 +169,17 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             return Constants.clientIdEmailCodeKey
         case .codeAndAttributes:
             return Constants.clientIdEmailCodeAttributesKey
+        }
+    }
+    
+    private func getAuthorityURLString(tenantSubdomain: String, tenantId: String, format: AuthorityURLFormat) -> String {
+        switch format {
+        case .tenantSubdomainShortVersion:
+            return String(format: "https://%@.ciamlogin.com/", tenantSubdomain)
+        case .tenantSubdomainLongVersion:
+            return String(format: "https://%@.ciamlogin.com/%@.onmicrosoft.com", tenantSubdomain, tenantSubdomain)
+        case .tenantSubdomainTenantId:
+            return String(format: "https://%@.ciamlogin.com/%@", tenantSubdomain, tenantId)
         }
     }
 }
