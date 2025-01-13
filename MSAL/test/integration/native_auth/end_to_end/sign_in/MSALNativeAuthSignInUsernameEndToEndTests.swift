@@ -49,8 +49,6 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        throw XCTSkip("1secmail service is down. Ignoring test for now.")
-
         guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
