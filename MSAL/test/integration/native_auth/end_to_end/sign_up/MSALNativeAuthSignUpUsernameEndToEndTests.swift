@@ -29,6 +29,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.1.1. Sign up – with Email Verification (Email & Email OTP)
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
@@ -73,6 +75,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
             XCTFail("OTP code not retrieved from email")
             return
@@ -114,6 +118,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.1.3. Sign up – with Email Verification as FIRST step & Custom Attributes (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
             XCTFail("Missing information")
             return
@@ -168,6 +174,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.1.4. Sign up – with Email Verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Email OTP)
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .codeAndAttributes) else {
             XCTFail("Missing information")
             return
@@ -239,6 +247,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // use case 2.1.5. Sign up - with Email & OTP resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
@@ -366,6 +376,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     func test_signUpWithoutAutomaticSignIn() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return

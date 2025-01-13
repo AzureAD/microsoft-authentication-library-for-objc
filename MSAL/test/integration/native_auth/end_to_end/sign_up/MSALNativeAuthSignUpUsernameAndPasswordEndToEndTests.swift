@@ -29,6 +29,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
@@ -87,6 +89,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Use case 1.1.2. Sign up - with Email & Password, Resend email OOB
     func test_signUpWithEmailPassword_resendEmail_success() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
@@ -139,6 +143,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.3. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
@@ -199,6 +205,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.4. Sign up - with Email verification as FIRST step (Email & Password)
     func test_signUpWithPassword_withEmailVerificationAsFirstStepAndThenSetPassword_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
@@ -273,6 +281,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // Use case 1.1.5. Sign up - with Email & Password, Verify email address using email OTP, resend OTP and then set password
     func test_signUpWithEmailOTP_andSetPasswordAfterOTP_success() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
@@ -339,6 +349,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Hero Scenario 1.1.6. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
@@ -431,6 +443,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .passwordAndAttributes) else {
             XCTFail("Missing information")
             return
@@ -541,6 +555,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
     // Sign up – without automatic sign in (Email & Password)
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
