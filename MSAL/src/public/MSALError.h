@@ -525,4 +525,14 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      JIT - Error Handling config invalid or not found
      */
     MSALErrorJITErrorHandlingConfigNotFound             = -42738,
+    
+    /**
+     PSSO passkey - Biometric policy flag doesnt match with the loginConfig settings
+     */
+    MSALErrorPSSOBiometricPolicyMismatch                = -42739,
+    
+    /**
+     PSSO passkey - Invalid Passkey extension trying to access passkey
+     */
+    MSALErrorPSSOInvalidPasskeyExtension                    = -42740,
 };
