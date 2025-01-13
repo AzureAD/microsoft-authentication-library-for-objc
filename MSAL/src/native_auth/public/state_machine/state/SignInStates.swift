@@ -128,6 +128,8 @@ import Foundation
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
+            case .awaitingMFA(let newState):
+                await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
             }
         }
     }

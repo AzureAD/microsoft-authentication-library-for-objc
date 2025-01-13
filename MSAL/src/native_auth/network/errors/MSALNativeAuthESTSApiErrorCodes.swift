@@ -26,7 +26,7 @@
 enum MSALNativeAuthESTSApiErrorCodes: Int {
     case userNotFound = 50034
     case invalidCredentials = 50126
-    case strongAuthRequired = 50076
     case userNotHaveAPassword = 500222
     case invalidRequestParameter = 90100
+    case resetPasswordRequired = 50142
 }

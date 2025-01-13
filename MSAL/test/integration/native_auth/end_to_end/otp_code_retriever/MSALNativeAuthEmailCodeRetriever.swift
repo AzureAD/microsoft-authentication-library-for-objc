@@ -29,6 +29,14 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
     private let baseURLString = "https://www.1secmail.com/api/v1/?action="
     private let secondsToWait = 4.0
     private let numberOfRetry = 3
+    private let dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) //We ignore the timezone
+        return dateFormatter
+    }()
+    private let maximumSecondsSinceEmailReceive = 5.0
 
     func retrieveEmailOTPCode(email: String) async -> String? {
         let comps = email.components(separatedBy: "@")
@@ -76,15 +84,25 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
             }
             if dataDictionary.count > 0 {
                 dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
-                return dataDictionary.first?["id"] as? Int
-            } else {
-                // log only for the final retry
-                if (retryCounter == 1) {
-                    print("Unexpected behaviour: no email received for the following local: \(local)")
+                if let emailDateString = dataDictionary.first?["date"] as? String,
+                   let emailDate = dateFormatter.date(from: emailDateString) {
+                    let currentDate = Date()
+                    // Email should be newer than 5 seconds otherwise it could be from previous test
+                    // This retry will help with the delay in receiving the emails
+                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < maximumSecondsSinceEmailReceive {
+                        print ("Email is for current test, last receive date: \(emailDate) current date: \(currentDate)")
+                        return dataDictionary.first?["id"] as? Int
+                    } else {
+                        print ("Email is from previous tests, last receive date: \(emailDate) current date: \(currentDate)")
+                    }
                 }
-                // no emails found, retry
-                return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
             }
+            // log only for the final retry
+            if (retryCounter == 1) {
+                print("Unexpected behaviour: no email received for the following local: \(local)")
+            }
+            // no emails found, retry
+            return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
         } catch {
             print(error)
             return nil

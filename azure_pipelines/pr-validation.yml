@@ -17,14 +17,29 @@ trigger:
 
 # Define parallel jobs that run build script for specified targets
 jobs:
+- job: 'PRAssistant'
+  pool:
+    vmImage: 'ubuntu-latest'
+    timeOutInMinutes: 10
+  displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
+  steps:
+  - bash: |
+      echo "Source branch : $(System.PullRequest.SourceBranch) Target branch : $(System.PullRequest.targetBranchName)"
+      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)
+    displayName: 'Invoke pipeline PRAssistantInvoker'
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+    failOnStderr: false
 - job: 'Validate_Pull_Request'
   strategy:
-    maxParallel: 2
+    maxParallel: 3
     matrix:
       IOS_FRAMEWORK: 
         target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
       MAC_FRAMEWORK: 
         target: "macFramework"
+      VISION_FRAMEWORK:
+        target: "visionOSFramework"
   displayName: Validate Pull Request
   pool:
     vmImage: 'macOS-14'
@@ -35,10 +50,22 @@ jobs:
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
     displayName: 'Switch to use Xcode 15.4'
   - task: CmdLine@2
+    displayName: Uninstalling xcpretty v0.4.0
+    inputs:
+      script: |
+        gem uninstall xcpretty -I --version 0.4.0
+      failOnStderr: false
+  - task: CmdLine@2
+    displayName: Installing xcpretty v0.3.0
+    inputs:
+      script: |
+        gem install xcpretty -N -v 0.3.0
+      failOnStderr: true
+  - task: CmdLine@2
     displayName: Installing dependencies
     inputs:
       script: |
-        gem install xcpretty slather bundler -N
+        gem install slather bundler -N
       failOnStderr: true
   - checkout: self
     clean: true
@@ -54,6 +81,25 @@ jobs:
   - task: ComponentGovernanceComponentDetection@0
     inputs:
       alertWarningLevel: Low
+# The following is needed to install the visionOS SDK on macos-14 vm image which
+# doesn't have visionOS installed by default.
+# TODO: Remove when macos-14-arm64 is supported on ADO.
+  - task: Bash@3
+    displayName: download visionOS SDK
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo $(target)
+        if [ $(target) == 'visionOSFramework' ]; then
+            echo "Downloading simulator for visionOS"
+            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+            defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
+            defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
+            xcodebuild -downloadPlatform visionOS
+        else
+            echo "Not visionOS job, no download needed"
+        fi
+      failOnStderr: false
   - task: Bash@3
     displayName: Run Build script & check for Errors
     inputs:
@@ -116,8 +162,8 @@ jobs:
 
       name: fetchPrLabels
 
-- job: e2e_test_native_auth
-  displayName: 'Run MSAL E2E tests for native auth'
+- job: e2e_test_native_auth_ios
+  displayName: 'Run MSAL E2E tests for iOS native auth'
   dependsOn: fetch_pr_labels
   condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
   timeoutInMinutes: 30
@@ -131,12 +177,35 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: false
+
+- job: e2e_test_native_auth_mac
+  displayName: 'Run MSAL E2E tests for macOS native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      destination: 'platform=macOS'
+      sdk: 'macosx'
+      retry_tests: false
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-13'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 15
   workspace:
     clean: all
@@ -151,8 +220,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_14.3.app"
-    displayName: 'Switch to use Xcode 14.3'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
+    displayName: 'Switch to use Xcode 15.4'
 
   - task: Bash@3
     displayName: Set variable BRANCH_NAME to a temporary branch

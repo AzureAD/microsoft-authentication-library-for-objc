@@ -36,6 +36,10 @@ jobs:
     clean: all
 
   steps:
+  - script: |
+      system_profiler SPHardwareDataType | grep "Processor Name"
+    displayName: 'Check System Information'
+    
   - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
@@ -79,8 +83,8 @@ jobs:
         issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri)
         github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
 
-- job: e2e_test_native_auth
-  displayName: 'Run MSAL E2E tests for native auth'
+- job: e2e_test_native_auth_ios
+  displayName: 'Run MSAL E2E tests for iOS native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   workspace:
@@ -90,7 +94,26 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      build: 'MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: false
+
+- job: e2e_test_native_auth_mac
+  displayName: 'Run MSAL E2E tests for macOS native auth'
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      destination: 'platform=macOS'
+      sdk: 'macosx'
+      retry_tests: false
 
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
@@ -100,9 +123,9 @@ jobs:
     maxParallel: 2
     matrix:
       STATIC_LIBRARY:
-        args: "--fail-fast --swift-version=5 --allow-warnings --use-static-frameworks"
+        args: "--fail-fast --allow-warnings --use-static-frameworks"
       DYNAMIC_LIBRARY:
-        args: "--fail-fast --swift-version=5 --allow-warnings"
+        args: "--fail-fast --allow-warnings"
   workspace:
     clean: all
   

@@ -24,9 +24,12 @@
 
 import Foundation
 import XCTest
+import MSAL
 
 final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 3.1.1. SSPR – without automatic sign in
+    private let codeRetryCount = 3
+
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
@@ -47,36 +50,21 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
             return
         }
         
-        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
+        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
         // Now submit the code...
-
-        let passwordRequiredExp = expectation(description: "password required")
-        let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
-        
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code not retrieved from email")
-            return
-        }
-
-        resetPasswordStartDelegate.newState?.submitCode(code: code, delegate: resetPasswordVerifyDelegate)
-
-        await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
-        
-        guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
-            XCTFail("onPasswordRequired not called")
-            return
-        }
+        let newPasswordRequiredState = await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
+                   username: username,
+                   retries: codeRetryCount)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
         let uniquePassword = generateRandomPassword()
-        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
+        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
@@ -103,36 +91,21 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
             return
         }
         
-        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType, .email)
+        XCTAssertEqual(resetPasswordStartDelegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(resetPasswordStartDelegate.sentTo?.isEmpty ?? true)
         XCTAssertNotNil(resetPasswordStartDelegate.codeLength)
 
         // Now submit the code...
-
-        let passwordRequiredExp = expectation(description: "password required")
-        let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
-        
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code not retrieved from email")
-            return
-        }
-
-        resetPasswordStartDelegate.newState?.submitCode(code: code, delegate: resetPasswordVerifyDelegate)
-
-        await fulfillment(of: [passwordRequiredExp])
-        XCTAssertTrue(resetPasswordVerifyDelegate.onPasswordRequiredCalled)
-        
-        guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
-            XCTFail("onPasswordRequired not called")
-            return
-        }
+        let newPasswordRequiredState = await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
+                   username: username,
+                   retries: codeRetryCount)
 
         // Now submit the password...
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
         let uniquePassword = generateRandomPassword()
-        resetPasswordVerifyDelegate.newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
+        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
@@ -154,5 +127,28 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         XCTAssertEqual(signInAfterResetPasswordDelegate.result?.account.username, username)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.idToken)
         XCTAssertNotNil(signInAfterResetPasswordDelegate.result?.account.accountClaims)
+    }
+
+    // This method tries to fetch a code from 1secmail API and submit it
+    private func retrieveAndSubmitCode(resetPasswordStartDelegate: ResetPasswordStartDelegateSpy, username: String, retries: Int) async -> ResetPasswordRequiredState? {
+        let passwordRequiredExp = expectation(description: "password required")
+        let resetPasswordVerifyDelegate = ResetPasswordVerifyCodeDelegateSpy(expectation: passwordRequiredExp)
+
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code not retrieved from email")
+            return nil
+        }
+
+        resetPasswordStartDelegate.newState?.submitCode(code: code, delegate: resetPasswordVerifyDelegate)
+
+        await fulfillment(of: [passwordRequiredExp])
+        if resetPasswordVerifyDelegate.onResetPasswordVerifyCodeErrorCalled && resetPasswordVerifyDelegate.error?.isInvalidCode == true && retries > 0 {
+            return await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate, username: username, retries: retries - 1)
+        }
+        guard resetPasswordVerifyDelegate.onPasswordRequiredCalled else {
+            XCTFail("onPasswordRequired not called")
+            return nil
+        }
+        return resetPasswordVerifyDelegate.newPasswordRequiredState
     }
 }

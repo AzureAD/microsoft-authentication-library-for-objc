@@ -30,8 +30,10 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
     private let expectation: XCTestExpectation
     private(set) var onSignInPasswordErrorCalled = false
     private(set) var onSignInCompletedCalled = false
+    private(set) var onSignInAwaitingMFACalled = false
     private(set) var error: MSAL.SignInStartError?
     private(set) var result: MSAL.MSALNativeAuthUserAccountResult?
+    private(set) var newStateAwaitingMFA: MSAL.AwaitingMFAState?
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
@@ -48,6 +50,13 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
         onSignInCompletedCalled = true
         self.result = result
 
+        expectation.fulfill()
+    }
+    
+    public func onSignInAwaitingMFA(newState: AwaitingMFAState) {
+        onSignInAwaitingMFACalled = true
+        
+        self.newStateAwaitingMFA = newState
         expectation.fulfill()
     }
 }
