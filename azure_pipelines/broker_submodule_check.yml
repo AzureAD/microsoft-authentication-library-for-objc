@@ -61,7 +61,7 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
         git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
-        git submodule update --init ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc/MSAL/IdentityCore'
+        git submodule update --init ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc/MSAL/IdentityCore
 
   - checkout: WorkplaceJoin-for-iOS
     displayName: 'Checkout WPJ'
