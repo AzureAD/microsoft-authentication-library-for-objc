@@ -1,13 +1,4 @@
-# Xcode
-# Build, test, and archive an Xcode workspace on macOS.
-# Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
-
-trigger:
-  branches:
-    include:
-    - dev
-
+# Pipeline will be triggered for PR & any updates on the PR on all branches
 pr:
   autoCancel: true
   branches:
@@ -15,128 +6,81 @@ pr:
     - '*'
   drafts: true
 
-pool:
-  name: 'Azure Pipelines'
+# Trigger CI for only main/release branches
+trigger:
+  branches:
+    include:
+    - main
+    - release/*
+    exclude:
+    - '*'
 
-resources:
- repositories:
-   - repository: azure-activedirectory-tokenbroker-for-objc
-     type: github
-     endpoint: 'MSAL ObjC Service Connection'
-     name: AzureAD/azure-activedirectory-tokenbroker-for-objc
-
-   - repository: WorkplaceJoin-for-iOS
-     type: github
-     endpoint: 'MSAL ObjC Service Connection'
-     name: AzureAD/WorkplaceJoin-for-iOS
-
+# Define parallel jobs that run build script for specified targets
 jobs:
+- job: 'PRAssistant'
+  pool:
+    vmImage: 'ubuntu-latest'
+    timeOutInMinutes: 10
+  displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
+  steps:
+  - bash: |
+      echo "Source branch : $(System.PullRequest.SourceBranch) Target branch : $(System.PullRequest.targetBranchName)"
+      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)
+    displayName: 'Invoke pipeline PRAssistantInvoker'
+    env:
+      AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+    failOnStderr: false
 - job: 'Validate_Pull_Request'
+  strategy:
+    maxParallel: 3
+    matrix:
+      IOS_FRAMEWORK: 
+        target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
+      MAC_FRAMEWORK: 
+        target: "macFramework"
+      VISION_FRAMEWORK:
+        target: "visionOSFramework"
   displayName: Validate Pull Request
   pool:
     vmImage: 'macOS-14'
     timeOutInMinutes: 30
 
   steps:
-  - checkout: azure-activedirectory-tokenbroker-for-objc
-    displayName: 'Checkout Broker'
-    clean: false
-    submodules: false
-    fetchTags: true
-    persistCredentials: true
-
+  - script: |
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
+    displayName: 'Switch to use Xcode 15.4'
+  - task: CmdLine@2
+    displayName: Uninstalling xcpretty v0.4.0
+    inputs:
+      script: |
+        gem uninstall xcpretty -I --version 0.4.0
+      failOnStderr: false
+  - task: CmdLine@2
+    displayName: Installing xcpretty v0.3.0
+    inputs:
+      script: |
+        gem install xcpretty -N -v 0.3.0
+      failOnStderr: true
+  - task: CmdLine@2
+    displayName: Installing dependencies
+    inputs:
+      script: |
+        gem install slather bundler -N
+      failOnStderr: true
   - checkout: self
-    displayName: 'Checkout MSAL'
-    clean: false
-    submodules: false
-    fetchTags: true
-    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc'
-    persistCredentials: true
-
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: false
   - task: Bash@3
-    displayName: 'Checkout MSAL submodules + ADAL'
+    displayName: Removing any lingering codecov files. These can cause issues when the xcode version changes
     inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
       targetType: 'inline'
       script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
-        cd ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc
-        git submodule update --init --recursive
-
-  - checkout: WorkplaceJoin-for-iOS
-    displayName: 'Checkout WPJ'
-    clean: false
-    submodules: false
-    fetchTags: true
-    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS'
-    persistCredentials: true
-
-  - task: AzureCLI@2
+        find . -name "*.gcda" -print0 | xargs -0 rm
+  - task: ComponentGovernanceComponentDetection@0
     inputs:
-      azureSubscription: 'AuthSdkResourceManager'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # if this fails, check out this bash script that includes diagnostics:
-        # https://gist.github.com/johnterickson/19f80a3e969e39f1000d118739176e62
-        # uncomment these for more debugging spew
-        # GIT_TRACE=1
-        # GIT_CURL_VERBOSE=1
-        
-        # Note that the resoruce is specified to limit the token to Azure DevOps
-        $token = az account get-access-token --query accessToken --resource 499b84ac-1321-427f-aa17-267ca6975798 -o tsv
-        Write-Host "##vso[task.setvariable variable=aadToken;issecret=true]$token"
-  - task: Bash@3
-    displayName: 'Checkout NGC Submodules'
-    env:
-      AccessToken: $(MSAzureToken_encoded)
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCAuthentication.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init AD-MFA-NGCAuthentication
-        cd AD-MFA-NGCAuthentication
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCKeyProvider-ios.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init NGCKeyProvider
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-MSAuthNetworking.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init MSAuthNetworking
-
-  - task: Bash@3
-    displayName: 'Checkout WPJ openssl-msft submodule'
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/PlatformCrypto/_git/openssl-msft.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init Frameworks/openssl-msft
-
-  - task: Bash@3
-    displayName: 'Update WPJ submodules'
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
-        
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
-    displayName: 'Uninstall xcpretty v0.4.0'
-
-  - script: 'gem install xcpretty -N -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
-    
-  - script: 'gem install slather -N'
-    displayName: 'Install slather'
-
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.x'
-
-  - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
-
+      alertWarningLevel: Low
 # The following is needed to install the visionOS SDK on macos-14 vm image which
 # doesn't have visionOS installed by default.
 # TODO: Remove when macos-14-arm64 is supported on ADO.
@@ -145,20 +89,174 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        echo "Downloading simulator for visionOS"
-        sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-        defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
-        defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
-        xcodebuild -downloadPlatform visionOS
+        echo $(target)
+        if [ $(target) == 'visionOSFramework' ]; then
+            echo "Downloading simulator for visionOS"
+            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+            defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
+            defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
+            xcodebuild -downloadPlatform visionOS
+        else
+            echo "Not visionOS job, no download needed"
+        fi
       failOnStderr: false
-
-
   - task: Bash@3
-    displayName: 'Run a python script for Broker'
+    displayName: Run Build script & check for Errors
     inputs:
       targetType: 'inline'
       script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        echo "executing build:./build.py"
-        python3 ./build.py
+        { output=$(./build.py --target $(target) 2>&1 1>&3-) ;} 3>&1
+        final_status=$(<./build/status.txt)
+        echo "FINAL STATUS  = ${final_status}"
+        echo "POSSIBLE ERRORS: ${output}"
         
+        if [ $final_status != "0" ]; then
+          echo "Build & Testing Failed! \n ${output}" >&2
+        fi
+      failOnStderr: true
+  - task: Bash@3
+    condition: always()
+    displayName: Cleanup
+    inputs:
+      targetType: 'inline'
+      script: |
+        rm -rf ./build/status.txt
+  - task: PublishTestResults@2
+    condition: always()
+    displayName: Publish Test Report
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
+      failTaskOnFailedTests: true
+      testRunTitle: 'Test Run - $(target)'
+
+- job: fetch_pr_labels
+  displayName: 'Check for PR Label'
+  timeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  steps:
+    - script: |
+        url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
+
+        echo "Fetching labels from $url "
+
+        # Temporary file to store the raw response
+        temp_file=$(mktemp)
+
+        # Store the response code and the raw response in separate variables
+        response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
+        response_content=$(cat "$temp_file")
+
+        echo "Response code: $response_code"
+        echo "Raw response: $response_content"
+
+        if [[ "$response_code" -eq 200 ]]; then
+          label_names=$(echo $response_content | jq -r '.[].name' | paste -sd ', ' -)
+          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]$label_names"
+          [ -z "$label_names" ] && echo "PR labels: <empty>" || echo "PR labels: $label_names"
+        else
+          echo "Request failed with status code: $response_code - Skipping Native Auth E2E tests as a preventive measure"
+          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]'skip-native-auth-e2e-tests'"
+        fi
+
+      name: fetchPrLabels
+
+- job: e2e_test_native_auth_ios
+  displayName: 'Run MSAL E2E tests for iOS native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL iOS Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: false
+
+- job: e2e_test_native_auth_mac
+  displayName: 'Run MSAL E2E tests for macOS native auth'
+  dependsOn: fetch_pr_labels
+  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+  timeoutInMinutes: 30
+  cancelTimeoutInMinutes: 5
+  pool:
+    vmImage: 'macOS-14'
+  workspace:
+    clean: all
+
+  steps:
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      destination: 'platform=macOS'
+      sdk: 'macosx'
+      retry_tests: false
+
+- job: 'Validate_SPM_Integration'
+  displayName: Validate SPM Integration
+  pool:
+    vmImage: 'macOS-14'
+    timeOutInMinutes: 15
+  workspace:
+    clean: all
+
+  steps:
+
+  - checkout: self
+    clean: true
+    submodules: true
+    fetchDepth: 1
+    persistCredentials: true
+    path: s
+
+  - script: |
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
+    displayName: 'Switch to use Xcode 15.4'
+
+  - task: Bash@3
+    displayName: Set variable BRANCH_NAME to a temporary branch
+    inputs:
+      targetType: 'inline'
+      script: |
+        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
+      
+  - task: Bash@3
+    displayName: Checkout to temporary branch
+    inputs:
+      targetType: 'inline'
+      script: |
+        git checkout -b "${BRANCH_NAME}"
+
+  - task: Bash@3
+    displayName: Run SPM integration test script
+    inputs:
+      targetType: 'inline'
+      script: |
+        sh spm-integration-test.sh "${BRANCH_NAME}"
+    continueOnError: false
+
+  - task: Bash@3
+    condition: always()
+    displayName: Cleanup
+    inputs:
+      targetType: 'inline'
+      script: 
+        cd ../..
+        rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
+        git checkout -- .
+        git fetch --quiet
+        git switch "$(Build.SourceBranchName)"
+        git branch -D "$BRANCH_NAME"
+        git push origin --delete "$BRANCH_NAME"
+
