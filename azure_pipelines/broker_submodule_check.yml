@@ -61,7 +61,8 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
         git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
-        git submodule update --init ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc/MSAL/IdentityCore
+        cd ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc
+        git submodule update --init --recursive
 
   - checkout: WorkplaceJoin-for-iOS
     displayName: 'Checkout WPJ'
@@ -106,12 +107,8 @@ jobs:
       workingDirectory: $(Pipeline.Workspace)/s
       targetType: 'inline'
       script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        REV=$(git rev-parse HEAD:ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS)
-        cd ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git pull origin $REV
-        cd Frameworks
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/PlatformCrypto/_git/openssl-msft.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init openssl-msft
+        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
+        git -c http.https://msazure.visualstudio.com/DefaultCollection/PlatformCrypto/_git/openssl-msft.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init Frameworks/openssl-msft
 
   - task: Bash@3
     displayName: 'Update WPJ submodules'
@@ -119,9 +116,7 @@ jobs:
       workingDirectory: $(Pipeline.Workspace)/s
       targetType: 'inline'
       script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        cd ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git submodule update --init --recursive
+        git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
         
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
     displayName: 'Uninstall xcpretty v0.4.0'
