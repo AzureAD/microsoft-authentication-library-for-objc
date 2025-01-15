@@ -116,6 +116,7 @@ jobs:
       workingDirectory: $(Pipeline.Workspace)/s
       targetType: 'inline'
       script: |
+        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
         
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
