@@ -1,0 +1,164 @@
+# Xcode
+# Build, test, and archive an Xcode workspace on macOS.
+# Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
+
+trigger:
+  branches:
+    include:
+    - dev
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - '*'
+  drafts: true
+
+pool:
+  name: 'Azure Pipelines'
+
+resources:
+ repositories:
+   - repository: azure-activedirectory-tokenbroker-for-objc
+     type: github
+     endpoint: 'MSAL ObjC Service Connection'
+     name: AzureAD/azure-activedirectory-tokenbroker-for-objc
+
+   - repository: WorkplaceJoin-for-iOS
+     type: github
+     endpoint: 'MSAL ObjC Service Connection'
+     name: AzureAD/WorkplaceJoin-for-iOS
+
+jobs:
+- job: 'Validate_Pull_Request'
+  displayName: Validate Pull Request
+  pool:
+    vmImage: 'macOS-14'
+    timeOutInMinutes: 30
+
+  steps:
+  - checkout: azure-activedirectory-tokenbroker-for-objc
+    displayName: 'Checkout Broker'
+    clean: false
+    submodules: false
+    fetchTags: true
+    persistCredentials: true
+
+  - checkout: self
+    displayName: 'Checkout MSAL'
+    clean: false
+    submodules: false
+    fetchTags: true
+    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc'
+    persistCredentials: true
+
+  - task: Bash@3
+    displayName: 'Checkout MSAL submodules + ADAL'
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s
+      targetType: 'inline'
+      script: |
+        cd azure-activedirectory-tokenbroker-for-objc
+        git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
+        cd ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc
+        git submodule update --init --recursive
+
+  - checkout: WorkplaceJoin-for-iOS
+    displayName: 'Checkout WPJ'
+    clean: false
+    submodules: false
+    fetchTags: true
+    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS'
+    persistCredentials: true
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'AuthSdkResourceManager'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # if this fails, check out this bash script that includes diagnostics:
+        # https://gist.github.com/johnterickson/19f80a3e969e39f1000d118739176e62
+        # uncomment these for more debugging spew
+        # GIT_TRACE=1
+        # GIT_CURL_VERBOSE=1
+        
+        # Note that the resoruce is specified to limit the token to Azure DevOps
+        $token = az account get-access-token --query accessToken --resource 499b84ac-1321-427f-aa17-267ca6975798 -o tsv
+        Write-Host "##vso[task.setvariable variable=aadToken;issecret=true]$token"
+  - task: Bash@3
+    displayName: 'Checkout NGC Submodules'
+    env:
+      AccessToken: $(MSAzureToken_encoded)
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s
+      targetType: 'inline'
+      script: |
+        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks
+        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCAuthentication.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init AD-MFA-NGCAuthentication
+        cd AD-MFA-NGCAuthentication
+        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCKeyProvider-ios.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init NGCKeyProvider
+        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-MSAuthNetworking.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init MSAuthNetworking
+
+  - task: Bash@3
+    displayName: 'Checkout WPJ openssl-msft submodule'
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s
+      targetType: 'inline'
+      script: |
+        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
+        git -c http.https://msazure.visualstudio.com/DefaultCollection/PlatformCrypto/_git/openssl-msft.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init Frameworks/openssl-msft
+
+  - task: Bash@3
+    displayName: 'Update WPJ submodules'
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s
+      targetType: 'inline'
+      script: |
+        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
+        git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
+        
+  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+    displayName: 'Uninstall xcpretty v0.4.0'
+
+  - script: 'gem install xcpretty -N -v 0.3.0'
+    displayName: 'Install xcpretty v0.3.0'
+    
+  - script: 'gem install slather -N'
+    displayName: 'Install slather'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.x'
+
+  - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
+
+# The following is needed to install the visionOS SDK on macos-14 vm image which
+# doesn't have visionOS installed by default.
+# TODO: Remove when macos-14-arm64 is supported on ADO.
+  - task: Bash@3
+    displayName: download visionOS SDK
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Downloading simulator for visionOS"
+        sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+        defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
+        defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
+        xcodebuild -downloadPlatform visionOS
+      failOnStderr: false
+
+
+  - task: Bash@3
+    displayName: 'Run a python script for Broker'
+    inputs:
+      targetType: 'inline'
+      script: |
+        cd azure-activedirectory-tokenbroker-for-objc
+        echo "executing build:./build.py"
+        python3 ./build.py
+        

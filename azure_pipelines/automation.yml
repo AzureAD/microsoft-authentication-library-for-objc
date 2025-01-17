@@ -36,6 +36,10 @@ jobs:
     clean: all
 
   steps:
+  - script: |
+      system_profiler SPHardwareDataType | grep "Processor Name"
+    displayName: 'Check System Information'
+    
   - template: templates/tests-with-conf-file.yml
 
   - task: UsePythonVersion@0
@@ -90,8 +94,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator17.5-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
       sdk: 'iphonesimulator'
       retry_tests: false
 
@@ -106,7 +110,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx14.5-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
