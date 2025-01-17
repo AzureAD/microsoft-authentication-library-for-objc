@@ -57,7 +57,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: expectedCredentialToken)
         signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
         
-        let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
+        let result = await sut.signIn(params: MSALNativeAuthInternalSignInParameters(username: expectedUsername, password: nil, context: expectedContext, scopes: nil))
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithCodeStart, isSuccessful: false)
@@ -78,7 +78,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: expectedCredentialToken)
         signInResponseValidatorMock.challengeValidatedResponse = .introspectRequired
         
-        let result = await sut.signIn(params: MSALNativeAuthSignInParameters(username: expectedUsername, password: "pwd", context: expectedContext, scopes: nil))
+        let result = await sut.signIn(params: MSALNativeAuthInternalSignInParameters(username: expectedUsername, password: "pwd", context: expectedContext, scopes: nil))
 
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)

@@ -42,7 +42,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     var getAuthMethodsResponse: MFAGetAuthMethodsControllerResponse!
     var submitChallengeResponse: MFASubmitChallengeControllerResponse!
 
-    func signIn(params: MSAL.MSALNativeAuthSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
+    func signIn(params: MSAL.MSALNativeAuthInternalSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         return signInStartResult
     }
 

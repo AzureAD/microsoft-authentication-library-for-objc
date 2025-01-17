@@ -105,7 +105,7 @@ extension MSALNativeAuthUserAccountResult {
         let mfaRequiredErrorCode = 50076
         return errorCodes.contains(mfaRequiredErrorCode)
     }
-    
+
     private func isResetPasswordRequiredError(errorCodes: [Int]) -> Bool {
         return errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.resetPasswordRequired.rawValue)
     }

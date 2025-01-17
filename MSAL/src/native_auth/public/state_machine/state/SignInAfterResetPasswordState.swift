@@ -28,11 +28,11 @@ import Foundation
 @objcMembers public class SignInAfterResetPasswordState: SignInAfterPreviousFlowBaseState {
     /// Sign in the user that just reset the password.
     /// - Parameters:
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - parameters: parameters used for signInAfterSignUp operation..
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
+    public func signIn(parameters: MSALNativeAuthSignInAfterResetPasswordParameters, delegate: SignInAfterResetPasswordDelegate) {
         Task {
-            let controllerResponse = await signInInternal(scopes: scopes, telemetryId: .telemetryApiIdSignInAfterPasswordReset)
+            let controllerResponse = await signInInternal(scopes: parameters.scopes, telemetryId: .telemetryApiIdSignInAfterPasswordReset)
             let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
                 delegate: delegate,
                 telemetryUpdate: controllerResponse.telemetryUpdate
@@ -50,5 +50,17 @@ import Foundation
                 await delegate.onSignInAfterResetPasswordError(error: error)
             }
         }
+    }
+
+    /// Sign in the user that just reset the password.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
+        signIn(
+            parameters: MSALNativeAuthSignInAfterResetPasswordParameters(scopes: scopes),
+            delegate: delegate
+        )
     }
 }
