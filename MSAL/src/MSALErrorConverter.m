@@ -115,6 +115,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorJITErrorHandlingConfigNotFound) : @(MSALErrorJITErrorHandlingConfigNotFound),
                                    @(MSIDErrorPSSOBiometricPolicyMismatch) : @(MSALErrorPSSOBiometricPolicyMismatch),
                                    @(MSIDErrorPSSOInvalidPasskeyExtension) : @(MSALErrorPSSOInvalidPasskeyExtension),
+                                   @(MSIDErrorPSSOSaveLoginConfigFailure) :@(MSALErrorPSSOSaveLoginConfigFailure),
                                    
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),

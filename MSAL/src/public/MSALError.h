@@ -534,5 +534,11 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      PSSO passkey - Invalid Passkey extension trying to access passkey
      */
-    MSALErrorPSSOInvalidPasskeyExtension                    = -42740,
+    MSALErrorPSSOInvalidPasskeyExtension                = -42740,
+    
+    /**
+     PSSO save login config failure
+     */
+    
+    MSALErrorPSSOSaveLoginConfigFailure                = -42741,
 };
