@@ -28,7 +28,6 @@ import XCTest
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-
         guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
@@ -90,10 +89,10 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // User Case 2.2.3 Sign In - User email is registered with password method, which is not supported by client (aka redirect flow)
-    func test_signInWithInsufficientChallengeInError() async throws {
+    func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
         throw XCTSkip("Retrieving OTP failure")
 
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: .OOB), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
@@ -109,7 +108,60 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
         XCTAssertEqual(signInDelegateSpy.error?.isBrowserRequired, true)
     }
+    
+    // User Case 2.2.5 Sign In - Resend email OTP
+    func test_signUpWithEmailOTP_resendEmail_success() async throws {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+            XCTFail("Missing information")
+            return
+        }
 
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegate = SignInStartDelegateSpy(expectation: signInExpectation)
+
+        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegate)
+
+        await fulfillment(of: [signInExpectation])
+
+        guard signInDelegate.onSignInCodeRequiredCalled else {
+            XCTFail("OTP not sent")
+            return
+        }
+        XCTAssertNotNil(signInDelegate.newStateCodeRequired)
+        XCTAssertNotNil(signInDelegate.sentTo)
+        
+        // Now get code1...
+        guard let code1 = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+        
+        // Resend code
+        let resendCodeRequiredExp = expectation(description: "code required again")
+        let signInResendCodeDelegate = SignInResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
+        
+        // Call resend code method
+        signInDelegate.newStateCodeRequired?.resendCode(delegate: signInResendCodeDelegate)
+        
+        await fulfillment(of: [resendCodeRequiredExp])
+            
+        // Verify that resend code method was called
+        XCTAssertTrue(signInResendCodeDelegate.onSignInResendCodeCodeRequiredCalled,
+                          "Resend code method should have been called")
+            
+        // Now get code2...
+        guard let code2 = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+        
+        // Verify that the codes are different
+        XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
+    }
+    
+    /* User Case 2.2.6 Sign In - Ability to provide scope to control auth strength of the token
+    Please refer to SignInUsernameAndPasswordEndToEndTests 1.2.6 for the test*/
+    
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
         throw XCTSkip("The test account is locked")
