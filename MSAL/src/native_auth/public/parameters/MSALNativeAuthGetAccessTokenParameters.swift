@@ -34,4 +34,12 @@ public class MSALNativeAuthGetAccessTokenParameters {
 
     /// UUID to correlate this request with the server for debugging.
     var correlationId: UUID?
+
+    init (forceRefresh: Bool? = nil,
+          scopes: [String]? = nil,
+          correlationId: UUID? = nil) {
+        self.forceRefresh = forceRefresh
+        self.scopes = scopes
+        self.correlationId = correlationId
+    }
 }
