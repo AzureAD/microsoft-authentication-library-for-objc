@@ -101,6 +101,7 @@ import Foundation
     ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'getAccessToken(parameters:)' instead.")
     @objc public func getAccessToken(forceRefresh: Bool = false,
                                      correlationId: UUID? = nil,
                                      delegate: CredentialsDelegate) {
@@ -124,6 +125,7 @@ import Foundation
     ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'getAccessToken(parameters:)' instead.")
     public func getAccessToken(scopes: [String],
                                forceRefresh: Bool = false,
                                correlationId: UUID? = nil,
