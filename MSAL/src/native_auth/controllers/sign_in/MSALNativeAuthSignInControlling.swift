@@ -33,7 +33,7 @@ protocol MSALNativeAuthSignInControlling {
     typealias SignInSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordRequiredResult>
     typealias SignInResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInResendCodeResult>
 
-    func signIn(params: MSALNativeAuthSignInParameters) async -> SignInControllerResponse
+    func signIn(params: MSALNativeAuthInternalSignInParameters) async -> SignInControllerResponse
 
     func signIn(
         username: String,

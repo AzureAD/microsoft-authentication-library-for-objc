@@ -16,28 +16,35 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-@_implementationOnly import MSAL_Private
+/// Encapsulates the parameters passed to the signIn methods of MSALNativeAuthPublicClientApplication
+public class MSALNativeAuthSignInParameters {
 
-class MSALNativeAuthSignInParameters {
-    let username: String
-    let password: String?
-    let context: MSALNativeAuthRequestContext
-    let scopes: [String]?
+    /// username of the account to sign in.
+    var username: String
 
-    init(
-        username: String,
-        password: String?,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String]?) {
+    /// assword of the account to sign in.
+    var password: String?
+
+    /// Permissions you want included in the access token received.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    var scopes: [String]?
+
+    /// UUID to correlate this request with the server for debugging.
+    var correlationId: UUID?
+
+    init(username: String,
+         password: String? = nil,
+         scopes: [String]? = nil,
+         correlationId: UUID? = nil) {
         self.username = username
         self.password = password
-        self.context = context
         self.scopes = scopes
+        self.correlationId = correlationId
     }
 }

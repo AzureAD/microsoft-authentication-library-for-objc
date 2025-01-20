@@ -74,7 +74,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     // MARK: - Internal
 
-    func signIn(params: MSALNativeAuthSignInParameters) async -> SignInControllerResponse {
+    func signIn(params: MSALNativeAuthInternalSignInParameters) async -> SignInControllerResponse {
         let eventId: MSALNativeAuthTelemetryApiId =
         params.password == nil ? .telemetryApiIdSignInWithCodeStart : .telemetryApiIdSignInWithPasswordStart
         MSALLogger.log(level: .info, context: params.context, format: "SignIn started")
@@ -737,7 +737,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     // swiftlint:disable:next function_body_length
     private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
-        params: MSALNativeAuthSignInParameters,
+        params: MSALNativeAuthInternalSignInParameters,
         telemetryInfo: TelemetryInfo
     ) async -> SignInControllerResponse {
         let scopes = joinScopes(params.scopes)
