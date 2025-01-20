@@ -833,7 +833,93 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
-    
+
+    // MARK: signIn using ContinuationToken with parameters
+
+    func test_whenSignInUsingParametersWithContinuationToken_signInIsCompletedSuccessfully() {
+        let continuationToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        let expectation = expectation(description: "SignInController")
+
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.expectedContext = expectedContext
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: "", continuationToken: continuationToken, grantType: .continuationToken, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: false, refreshToken: nil)
+
+        let userAccountResult = MSALNativeAuthUserAccountResultStub.result
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedUserAccountResult: userAccountResult)
+        tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
+        tokenResponseValidatorMock.expectedTokenResponse = tokenResponse
+
+        cacheAccessorMock.expectedMSIDTokenResult = tokenResult
+
+        let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        state.signIn(parameters: parameters, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: true)
+    }
+
+    func test_whenSignInUsingParametersWithContinuationTokenTokenRequestCreationFail_errorShouldBeReturned() {
+        let continuationToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        let exp = expectation(description: "SignInController")
+
+        tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
+        signInRequestProviderMock.expectedContext = expectedContext
+
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(correlationId: defaultUUID))
+
+        let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        state.signIn(parameters: parameters, delegate: mockDelegate)
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+
+    func test_whenSignInUsingParametersWithContinuationTokenTokenReturnError_shouldReturnAnError() {
+        let continuationToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        let expectation = expectation(description: "SignInController")
+
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.expectedContext = expectedContext
+
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
+
+        tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(signInTokenApiErrorStub))
+
+        let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        state.signIn(parameters: parameters, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+
+    func test_whenSignInUsingParametersWithContinuationTokenHaveTokenNil_shouldReturnAnError() {
+        let expectation = expectation(description: "SignInController")
+
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
+
+        let state = SignInAfterSignUpState(controller: sut, username: "username", continuationToken: nil, correlationId: defaultUUID)
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        state.signIn(parameters: parameters, delegate: mockDelegate)
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
+    }
+
+    // MARK: telemetry
+
     func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {
         XCTAssertEqual(receivedEvents.count, 1)
 
