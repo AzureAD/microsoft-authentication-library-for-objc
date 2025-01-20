@@ -267,6 +267,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         signIn(
             parameters: MSALNativeAuthSignInParameters(username: username,
                                                        password: password,
+                                                       scopes: scopes,
                                                        correlationId: correlationId),
             delegate: delegate
         )
