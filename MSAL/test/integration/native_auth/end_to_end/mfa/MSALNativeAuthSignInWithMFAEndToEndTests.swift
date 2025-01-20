@@ -29,6 +29,7 @@ import MSAL
 final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
+        throw XCTSkip("Retrieving OTP failure")
 #if os(macOS)
         throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
@@ -88,6 +89,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethods_thenCompleteSuccessfully() async throws {
+        throw XCTSkip("Retrieving OTP failure")
 #if os(macOS)
         throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
@@ -146,6 +148,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     }
     
     func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
+        throw XCTSkip("Retrieving OTP failure")
 #if os(macOS)
         throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
