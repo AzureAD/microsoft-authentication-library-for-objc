@@ -200,11 +200,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignUpStartDelegate
     ) {
         Task {
+            let parameters = MSALNativeAuthSignUpParameters(username: username)
+            parameters.password = password
+            parameters.attributes = attributes
+            parameters.correlationId = correlationId
             signUp(
-                parameters: MSALNativeAuthSignUpParameters(username: username,
-                                                           password: password,
-                                                           attributes: attributes,
-                                                           correlationId: correlationId),
+                parameters: parameters,
                 delegate: delegate
             )
         }
@@ -264,11 +265,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: SignInStartDelegate
     ) {
+        let parameters = MSALNativeAuthSignInParameters(username: username)
+        parameters.password = password
+        parameters.scopes = scopes
+        parameters.correlationId = correlationId
         signIn(
-            parameters: MSALNativeAuthSignInParameters(username: username,
-                                                       password: password,
-                                                       scopes: scopes,
-                                                       correlationId: correlationId),
+            parameters: parameters,
             delegate: delegate
         )
     }
@@ -313,9 +315,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         correlationId: UUID? = nil,
         delegate: ResetPasswordStartDelegate
     ) {
+        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
+        parameters.correlationId = correlationId
         resetPassword(
-            parameters: MSALNativeAuthResetPasswordParameters(username: username,
-                                                              correlationId: correlationId),
+            parameters: parameters,
             delegate: delegate
         )
     }

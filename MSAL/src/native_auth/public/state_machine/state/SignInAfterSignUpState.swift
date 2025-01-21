@@ -53,8 +53,10 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
     public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        parameters.scopes = scopes
         signIn(
-            parameters: MSALNativeAuthSignInAfterSignUpParameters(scopes: scopes),
+            parameters: parameters,
             delegate: delegate)
     }
 }

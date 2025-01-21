@@ -39,13 +39,7 @@ public class MSALNativeAuthSignInParameters: NSObject {
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 
-    public init(username: String,
-                password: String? = nil,
-                scopes: [String]? = nil,
-                correlationId: UUID? = nil) {
+    public init(username: String) {
         self.username = username
-        self.password = password
-        self.scopes = scopes
-        self.correlationId = correlationId
     }
 }

@@ -32,9 +32,7 @@ public class MSALNativeAuthResetPasswordParameters: NSObject {
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 
-    public init(username: String,
-                correlationId: UUID? = nil) {
+    public init(username: String) {
         self.username = username
-        self.correlationId = correlationId
     }
 }

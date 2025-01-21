@@ -36,19 +36,6 @@ public class MSALNativeAuthGetAccessTokenParameters: NSObject {
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 
-    public init (forceRefresh: Bool? = nil,
-                 scopes: [String]? = nil,
-                 correlationId: UUID? = nil) {
-        self.forceRefresh = forceRefresh
-        self.scopes = scopes
-        self.correlationId = correlationId
-    }
-
-    // Needed for Objective C, if all properties are optional, this initialiser is required
-    override public init() {
-
-    }
-
     // Needed for Objective C, because Bool? is not a recognised type ih Objective C
     public func setForceRefresh(_ forceRefresh: Bool) {
         self.forceRefresh = forceRefresh

@@ -195,7 +195,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpUsingParametersPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        let parameters = MSALNativeAuthSignUpParameters(username: "correct", password: "")
+        let parameters = MSALNativeAuthSignUpParameters(username: "correct")
+        parameters.password = ""
         sut.signUp(parameters: parameters, delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidPassword)
@@ -204,7 +205,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignUpUsingParametersPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let exp = expectation(description: "sign-up public interface")
         let delegate = SignUpPasswordStartDelegateSpy(expectation: exp)
-        let parameters = MSALNativeAuthSignUpParameters(username: "", password: "")
+        let parameters = MSALNativeAuthSignUpParameters(username: "")
+        parameters.password = ""
         sut.signUp(parameters: parameters, delegate: delegate)
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(delegate.error?.type, .invalidUsername)
@@ -224,7 +226,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         controllerFactoryMock.signUpController.startResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         })
-        let parameters = MSALNativeAuthSignUpParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignUpParameters(username: "correct")
+        parameters.password = "correct"
         sut.signUp(parameters: parameters, delegate: delegate)
 
         wait(for: [exp1, exp2])
@@ -248,7 +251,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignUpParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignUpParameters(username: "correct")
+        parameters.password = "correct"
         sut.signUp(parameters: parameters, delegate: delegate)
 
         wait(for: [exp, exp2])
@@ -272,7 +276,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignUpParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignUpParameters(username: "correct")
+        parameters.password = "correct"
         sut.signUp(parameters: parameters, delegate: delegate)
 
         wait(for: [exp, exp2])
@@ -291,7 +296,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignUpParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignUpParameters(username: "correct")
+        parameters.password = "correct"
         sut.signUp(parameters: parameters, delegate: delegate)
 
         wait(for: [exp, exp2])
@@ -592,7 +598,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignInUsingParametersPassword_delegate_whenInvalidUsernameUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
         let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidUsername, correlationId: correlationId))
-        let parameters = MSALNativeAuthSignInParameters(username: "", password: "", correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInParameters(username: "")
+        parameters.password = ""
+        parameters.correlationId = correlationId
         sut.signIn(parameters: parameters, delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
@@ -600,7 +608,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     func testSignInUsingParametersPassword_delegate_whenInvalidPasswordUsed_shouldReturnCorrectError() {
         let expectation = expectation(description: "sign-in public interface")
         let delegate = SignInPasswordStartDelegateSpy(expectation: expectation, expectedError: .init(type: .invalidCredentials, correlationId: correlationId))
-        let parameters = MSALNativeAuthSignInParameters(username: "correct", password: "", correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInParameters(username: "correct")
+        parameters.password = ""
+        parameters.correlationId = correlationId
         sut.signIn(parameters: parameters, delegate: delegate)
         wait(for: [expectation], timeout: 1)
     }
@@ -613,7 +623,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         controllerFactoryMock.signInController.signInStartResult = .init(.init(.completed(MSALNativeAuthUserAccountResultStub.result), correlationId: correlationId, telemetryUpdate: { _ in
             exp2.fulfill()
         }))
-        let parameters = MSALNativeAuthSignInParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignInParameters(username: "correct")
+        parameters.password = "correct"
         sut.signIn(parameters: parameters, delegate: delegate)
 
         wait(for: [exp1, exp2], timeout: 1)
@@ -632,7 +643,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignInParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignInParameters(username: "correct")
+        parameters.password = "correct"
         sut.signIn(parameters: parameters, delegate: delegate)
 
         wait(for: [exp, exp2], timeout: 1)
@@ -658,7 +670,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignInParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignInParameters(username: "correct")
+        parameters.password = "correct"
         sut.signIn(parameters: parameters, delegate: delegate)
 
         wait(for: [exp1, exp2], timeout: 1)
@@ -682,7 +695,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             exp2.fulfill()
         })
 
-        let parameters = MSALNativeAuthSignInParameters(username: "correct", password: "correct")
+        let parameters = MSALNativeAuthSignInParameters(username: "correct")
+        parameters.password = "correct"
         sut.signIn(parameters: parameters, delegate: delegate)
 
         wait(for: [exp, exp2], timeout: 1)
@@ -1610,10 +1624,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
         // MSALNativeAuthSignUpRequestProviderMock class - checkStartParameters and checkChallengeParameters functions
-        let parametersSignUp = MSALNativeAuthSignUpParameters(username: "username",
-                                                        password: "password",
-                                                        attributes: ["key": "value"],
-                                                        correlationId: correlationId)
+        let parametersSignUp = MSALNativeAuthSignUpParameters(username: "username")
+        parametersSignUp.password = "password"
+        parametersSignUp.attributes = ["key": "value"]
+        parametersSignUp.correlationId = correlationId
         sut.signUp(parameters: parametersSignUp, delegate: delegatePasswordStart)
 
         wait(for: [expectationPasswordStart])
@@ -1626,7 +1640,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against expectedTokenParams in the
         // MSALNativeAuthTokenRequestProviderMock class - checkContext function
-        let parametersSingInAfterSignUp = MSALNativeAuthSignInAfterSignUpParameters(scopes: ["scope1", "scope2"])
+        let parametersSingInAfterSignUp = MSALNativeAuthSignInAfterSignUpParameters()
+        parametersSingInAfterSignUp.scopes = ["scope1", "scope2"]
         delegateVerifyCode.newSignInAfterSignUpState?.signIn(parameters: parametersSingInAfterSignUp,
                                                              delegate: delegateSignInAfterSignUp)
 
@@ -1721,9 +1736,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
         // MSALNativeAuthSignUpRequestProviderMock class - checkStartParameters and checkChallengeParameters functions
-        let parametersSignUp = MSALNativeAuthSignUpParameters(username: "username",
-                                                        attributes: ["key": "value"],
-                                                        correlationId: correlationId)
+        let parametersSignUp = MSALNativeAuthSignUpParameters(username: "username")
+        parametersSignUp.attributes = ["key": "value"]
+        parametersSignUp.correlationId = correlationId
         sut.signUp(parameters: parametersSignUp, delegate: delegateCodeStart)
 
         wait(for: [expectationCodeStart])
@@ -1736,7 +1751,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against expectedTokenParams in the
         // MSALNativeAuthTokenRequestProviderMock class - checkContext function
-        let parametersSignInAfterSignUp = MSALNativeAuthSignInAfterSignUpParameters(scopes: ["scope1", "scope2"])
+        let parametersSignInAfterSignUp = MSALNativeAuthSignInAfterSignUpParameters()
+        parametersSignInAfterSignUp.scopes = ["scope1", "scope2"]
         delegateVerifyCode.newSignInAfterSignUpState?.signIn(parameters: parametersSignInAfterSignUp,
                                                              delegate: delegateSignInAfterSignUp)
         wait(for: [expectationSignInAfterSingUp])
@@ -1821,7 +1837,10 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against contextMock on both initiate and challenge in the
         // MSALNativeAuthSignInRequestProviderMock class - checkContext function
-        let parameters = MSALNativeAuthSignInParameters(username: "username", password: "password", scopes: ["scope1", "scope2"], correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInParameters(username: "username")
+        parameters.password = "password"
+        parameters.scopes = ["scope1", "scope2"]
+        parameters.correlationId = correlationId
         sut.signIn(parameters: parameters, delegate: delegatePasswordStart)
 
         wait(for: [expectationPasswordStart])
@@ -1915,7 +1934,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against contextMock on both initiate and challenge in the
         // MSALNativeAuthSignInRequestProviderMock class - checkContext function
-        let parameters = MSALNativeAuthSignInParameters(username: "username", scopes: ["scope1", "scope2"], correlationId: correlationId)
+        let parameters = MSALNativeAuthSignInParameters(username: "username")
+        parameters.scopes = ["scope1", "scope2"]
+        parameters.correlationId = correlationId
         sut.signIn(parameters: parameters, delegate: delegateCodeStart)
         wait(for: [expectationCodeStart])
 
@@ -2021,7 +2042,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         // Correlation Id is validated internally against expectedStartRequestParameters and expectedChallengeRequestParameters in the
         // MSALNativeAuthResetPasswordRequestProviderMock class - checkParameters(params: MSALNativeAuthResetPasswordStartRequestProviderParameters)
         // and checkParameters(token: String, context: MSIDRequestContext) functions
-        let parametersResetPassword = MSALNativeAuthResetPasswordParameters(username: "username", correlationId: correlationId)
+        let parametersResetPassword = MSALNativeAuthResetPasswordParameters(username: "username")
+        parametersResetPassword.correlationId = correlationId
         sut.resetPassword(parameters: parametersResetPassword, delegate: delegatePasswordResetStart)
 
         wait(for: [expectationPasswordResetStart])
@@ -2043,7 +2065,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         // Correlation Id is validated internally against expectedTokenParams in the
         // MSALNativeAuthTokenRequestProviderMock class - checkContext function
-        let parametersSingInAfterResetPassword = MSALNativeAuthSignInAfterResetPasswordParameters(scopes: ["scope1", "scope2"])
+        let parametersSingInAfterResetPassword = MSALNativeAuthSignInAfterResetPasswordParameters()
+        parametersSingInAfterResetPassword.scopes = ["scope1", "scope2"]
         delegatePasswordResetRequired.signInAfterResetPasswordState?.signIn(parameters: parametersSingInAfterResetPassword,
                                                                             delegate: delegateSignInAfterResetPassword)
         wait(for: [expectationSignInAfterResetPassword])

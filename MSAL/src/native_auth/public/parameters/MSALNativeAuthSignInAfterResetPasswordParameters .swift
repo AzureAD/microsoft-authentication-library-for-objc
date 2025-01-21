@@ -29,8 +29,4 @@ public class MSALNativeAuthSignInAfterResetPasswordParameters: NSObject {
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
     public var scopes: [String]?
-
-    public init(scopes: [String]? = nil) {
-        self.scopes = scopes
-    }
 }
