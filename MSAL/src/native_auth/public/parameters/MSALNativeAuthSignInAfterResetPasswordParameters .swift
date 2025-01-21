@@ -23,13 +23,14 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the signIn methods after  resetPassword
-public class MSALNativeAuthSignInAfterResetPasswordParameters {
+@objcMembers
+public class MSALNativeAuthSignInAfterResetPasswordParameters: NSObject {
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
-    var scopes: [String]?
+    public var scopes: [String]?
 
-    init(scopes: [String]? = nil) {
+    public init(scopes: [String]? = nil) {
         self.scopes = scopes
     }
 }

@@ -23,16 +23,17 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the resetPassword methods of MSALNativeAuthPublicClientApplication
-public class MSALNativeAuthResetPasswordParameters {
+@objcMembers
+public class MSALNativeAuthResetPasswordParameters: NSObject {
 
     /// username of the account to reset password.
-    var username: String
+    public var username: String
 
     /// UUID to correlate this request with the server for debugging.
-    var correlationId: UUID?
+    public var correlationId: UUID?
 
-    init(username: String,
-         correlationId: UUID? = nil) {
+    public init(username: String,
+                correlationId: UUID? = nil) {
         self.username = username
         self.correlationId = correlationId
     }

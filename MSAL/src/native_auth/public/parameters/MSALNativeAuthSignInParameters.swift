@@ -23,25 +23,26 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the signIn methods of MSALNativeAuthPublicClientApplication
-public class MSALNativeAuthSignInParameters {
+@objcMembers
+public class MSALNativeAuthSignInParameters: NSObject {
 
     /// username of the account to sign in.
-    var username: String
+    public var username: String
 
     /// assword of the account to sign in.
-    var password: String?
+    public var password: String?
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
-    var scopes: [String]?
+    public var scopes: [String]?
 
     /// UUID to correlate this request with the server for debugging.
-    var correlationId: UUID?
+    public var correlationId: UUID?
 
-    init(username: String,
-         password: String? = nil,
-         scopes: [String]? = nil,
-         correlationId: UUID? = nil) {
+    public init(username: String,
+                password: String? = nil,
+                scopes: [String]? = nil,
+                correlationId: UUID? = nil) {
         self.username = username
         self.password = password
         self.scopes = scopes

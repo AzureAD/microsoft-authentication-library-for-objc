@@ -23,23 +23,34 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the getAccessToken methods of MSALNativeAuthUserAccountResult
-public class MSALNativeAuthGetAccessTokenParameters {
+@objcMembers
+public class MSALNativeAuthGetAccessTokenParameters: NSObject {
 
     /// Set to true to ignore any existing access token in the cache and force MSAL to get a new access token from the service.
-    var forceRefresh: Bool?
+    public var forceRefresh: Bool?
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
-    var scopes: [String]?
+    public var scopes: [String]?
 
     /// UUID to correlate this request with the server for debugging.
-    var correlationId: UUID?
+    public var correlationId: UUID?
 
-    init (forceRefresh: Bool? = nil,
-          scopes: [String]? = nil,
-          correlationId: UUID? = nil) {
+    public init (forceRefresh: Bool? = nil,
+                 scopes: [String]? = nil,
+                 correlationId: UUID? = nil) {
         self.forceRefresh = forceRefresh
         self.scopes = scopes
         self.correlationId = correlationId
+    }
+
+    // Needed for Objective C, if all properties are optional, this initialiser is required
+    override public init() {
+
+    }
+
+    // Needed for Objective C, because Bool? is not a recognised type ih Objective C
+    public func setForceRefresh(_ forceRefresh: Bool) {
+        self.forceRefresh = forceRefresh
     }
 }

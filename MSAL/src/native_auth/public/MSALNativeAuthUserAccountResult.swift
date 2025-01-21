@@ -81,8 +81,8 @@ import Foundation
     ///   - parameters: parameters used for getAccessToken operation.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     ///
-    func getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters,
-                        delegate: CredentialsDelegate) {
+    @objc public func getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters,
+                                     delegate: CredentialsDelegate) {
 
         MSALLogger.log(
             level: .info,

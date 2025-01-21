@@ -23,24 +23,25 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the signUp methods of MSALNativeAuthPublicClientApplication
-public class MSALNativeAuthSignUpParameters {
+@objcMembers
+public class MSALNativeAuthSignUpParameters: NSObject {
 
     /// username of the account to sign up.
-    var username: String
+    public var username: String
 
     /// password of the account to sign up.
-    var password: String?
+    public var password: String?
 
     /// user attributes to be used during account creation.
-    var attributes: [String: Any]?
+    public var attributes: [String: Any]?
 
     /// UUID to correlate this request with the server for debugging.
-    var correlationId: UUID?
+    public var correlationId: UUID?
 
-    init(username: String,
-         password: String? = nil,
-         attributes: [String: Any]? = nil,
-         correlationId: UUID? = nil) {
+    public init(username: String,
+                password: String? = nil,
+                attributes: [String: Any]? = nil,
+                correlationId: UUID? = nil) {
         self.username = username
         self.password = password
         self.attributes = attributes
