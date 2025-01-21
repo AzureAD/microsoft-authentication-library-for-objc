@@ -76,7 +76,7 @@ import Foundation
         }
     }
 
-    // Retrieves the access token for the default OIDC(openid, offline_access, profile) scopes from the cache.
+    // Retrieves the access token for the currently signed in account from the cache for the provided parameters.
     /// - Parameters:
     ///   - parameters: parameters used for getAccessToken operation.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
