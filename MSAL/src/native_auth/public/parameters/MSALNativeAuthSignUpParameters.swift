@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-/// Encapsulates the parameters passed to the signUp methods of MSALNativeAuthPublicClientApplication
+/// Encapsulates the parameters passed to the signUp method of MSALNativeAuthPublicClientApplication
 @objcMembers
 public class MSALNativeAuthSignUpParameters: NSObject {
 
