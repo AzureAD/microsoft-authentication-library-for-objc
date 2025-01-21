@@ -149,9 +149,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
-    /// Sign up a user for a provided parameters.
+    /// Sign up a user using parameters.
     /// - Parameters:
-    ///   - parameters: parameters used for signUp operation.
+    ///   - parameters: Parameters used for signUp operation.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
     public func signUp(
         parameters: MSALNativeAuthSignUpParameters,
@@ -210,9 +210,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Sign in a user with a given username and password.
+    /// Sign in a user using parameters.
     /// - Parameters:
-    ///   - parameters: parameters used for signUp operation.
+    ///   - parameters: Parameters used for signIn operation.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
@@ -273,9 +273,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
     }
 
-    /// Reset the password for a given username.
+    /// Reset the password using parameters
     /// - Parameters:
-    ///   - parameters: parameters used for resetPassword operation.
+    ///   - parameters: Parameters used for resetPassword operation.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
     public func resetPassword(
         parameters: MSALNativeAuthResetPasswordParameters,

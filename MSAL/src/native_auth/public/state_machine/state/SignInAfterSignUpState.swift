@@ -29,7 +29,7 @@ import Foundation
 
     /// Sign in the user that signed up.
     /// - Parameters:
-    ///   - parameters: parameters used for signInAfterSignUp operation..
+    ///   - parameters: Parameters used to signIn the user after sign up operation..
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(parameters: MSALNativeAuthSignInAfterSignUpParameters, delegate: SignInAfterSignUpDelegate) {
         Task {
