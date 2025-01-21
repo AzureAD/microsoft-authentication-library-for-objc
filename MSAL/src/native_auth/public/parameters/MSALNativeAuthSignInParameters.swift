@@ -29,7 +29,7 @@ public class MSALNativeAuthSignInParameters: NSObject {
     /// username of the account to sign in.
     public var username: String
 
-    /// assword of the account to sign in.
+    /// password of the account to sign in.
     public var password: String?
 
     /// Permissions you want included in the access token received.
