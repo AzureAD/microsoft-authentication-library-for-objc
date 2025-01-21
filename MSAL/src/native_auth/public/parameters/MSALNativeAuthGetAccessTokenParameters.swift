@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-/// Encapsulates the parameters passed to the getAccessToken methods of MSALNativeAuthUserAccountResult
+/// Encapsulates the parameters passed to the getAccessToken method of MSALNativeAuthUserAccountResult
 @objcMembers
 public class MSALNativeAuthGetAccessTokenParameters: NSObject {
 
