@@ -78,7 +78,7 @@ import Foundation
 
     // Retrieves the access token for the currently signed in account from the cache for the provided parameters.
     /// - Parameters:
-    ///   - parameters: Parameters used for getAccessToken operation.
+    ///   - parameters: Parameters used for the Get Access Token flow.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
     ///
     @objc public func getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters,
