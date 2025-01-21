@@ -28,7 +28,7 @@ import Foundation
 @objcMembers public class SignInAfterResetPasswordState: SignInAfterPreviousFlowBaseState {
     /// Sign in the user that just reset the password.
     /// - Parameters:
-    ///   - parameters: parameters used for signInAfterSignUp operation..
+    ///   - parameters: parameters used to signIn the user after reset password operation.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(parameters: MSALNativeAuthSignInAfterResetPasswordParameters, delegate: SignInAfterResetPasswordDelegate) {
         Task {
