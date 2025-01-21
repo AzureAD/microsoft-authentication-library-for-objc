@@ -149,7 +149,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: delegate methods
 
-    /// Sign up a user with a given username and password.
+    /// Sign up a user for a provided parameters.
     /// - Parameters:
     ///   - parameters: parameters used for signUp operation.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
