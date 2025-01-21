@@ -27,7 +27,7 @@
 public class MSALNativeAuthGetAccessTokenParameters: NSObject {
 
     /// Set to true to ignore any existing access token in the cache and force MSAL to get a new access token from the service.
-    public var forceRefresh: Bool?
+    public var forceRefresh: Bool = false
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
@@ -35,9 +35,4 @@ public class MSALNativeAuthGetAccessTokenParameters: NSObject {
 
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
-
-    // Needed for Objective C, because Bool? is not a recognised type ih Objective C
-    public func setForceRefresh(_ forceRefresh: Bool) {
-        self.forceRefresh = forceRefresh
-    }
 }
