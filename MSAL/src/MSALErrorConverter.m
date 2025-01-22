@@ -130,7 +130,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerError) : @(MSALErrorServerError),
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse)
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse),
+                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse)
                                    }
                            };
     
