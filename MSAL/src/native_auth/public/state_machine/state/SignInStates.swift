@@ -28,14 +28,17 @@ import Foundation
 @objcMembers public class SignInBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthSignInControlling
     let inputValidator: MSALNativeAuthInputValidating
+    let claimsRequestJson: String?
 
     init(
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.controller = controller
         self.inputValidator = inputValidator
+        self.claimsRequestJson = claimsRequestJson
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 }
@@ -49,10 +52,11 @@ import Foundation
         scopes: [String],
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.scopes = scopes
-        super.init(controller: controller, inputValidator: inputValidator, continuationToken: continuationToken, correlationId: correlationId)
+            super.init(controller: controller, inputValidator: inputValidator, claimsRequestJson: claimsRequestJson, continuationToken: continuationToken, correlationId: correlationId)
     }
 
     /// Requests the server to resend the verification code to the user.
@@ -107,11 +111,12 @@ import Foundation
         username: String,
         controller: MSALNativeAuthSignInControlling,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.scopes = scopes
         self.username = username
-        super.init(controller: controller, inputValidator: inputValidator, continuationToken: continuationToken, correlationId: correlationId)
+            super.init(controller: controller, inputValidator: inputValidator, claimsRequestJson: claimsRequestJson, continuationToken: continuationToken, correlationId: correlationId)
     }
 
     /// Submits the password to the server for verification.
