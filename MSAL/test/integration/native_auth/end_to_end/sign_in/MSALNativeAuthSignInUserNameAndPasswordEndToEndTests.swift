@@ -26,7 +26,28 @@ import Foundation
 import XCTest
 
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
+    // Hero Scenario 1.2.1. Sign in - Use email and password to get token
+    func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
+    #if os(macOS)
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
+    #endif
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
+            return
+        }
 
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+    }
+    
     // Hero Scenario 1.2.2. Sign in - User is not registered with given email
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
         guard let sut = initialisePublicClientApplication() else {
@@ -62,28 +83,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isInvalidCredentials)
-    }
-
-    // Hero Scenario 1.2.1. Sign in - Use email and password to get token
-    func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
-            XCTFail("Missing information")
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
     
     // Sign in - Password is incorrect (sent over delegate.newStatePasswordRequired)
