@@ -117,11 +117,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.failure(error), correlationId: context.correlationId())
         }
         let scopes = joinScopes(scopes)
+        // currently, we don't support claimsRequest in signIn after signUp/SSPR
         guard let request = createTokenRequest(
             username: username,
             scopes: scopes,
             continuationToken: continuationToken,
             grantType: .continuationToken,
+            claimsRequestJson: nil,
             context: context
         ) else {
             let error = SignInAfterSignUpError(correlationId: context.correlationId())
@@ -496,6 +498,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             oobCode: code,
             grantType: .oobCode,
             includeChallengeType: false,
+            claimsRequestJson: claimsRequestJson,
             context: context) else {
             MSALLogger.log(level: .error, context: context, format: "Submit code: unable to create token request")
 
