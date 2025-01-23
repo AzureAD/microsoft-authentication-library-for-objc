@@ -1,3 +1,6 @@
+## [TBD]
+* Added parameters for Native Auth public interfaces
+
 ## [1.6.3]
 * Merge 1.6.1-hotfix
 
