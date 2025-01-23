@@ -1,4 +1,4 @@
-## [TBD]
+## [1.7.0]
 * Move native auth public methods to parameter class
 
 ## [1.6.3]
