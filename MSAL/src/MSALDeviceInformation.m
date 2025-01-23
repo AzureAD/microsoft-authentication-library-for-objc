@@ -116,6 +116,8 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
             return MSALPlatformSSOEnabledNotRegistered;
         case MSIDPlatformSSOEnabledAndRegistered:
             return MSALPlatformSSOEnabledAndRegistered;
+        case MSIDPlatformSSORegistrationNeedsRepair:
+            return MSALPlatformSSORegistrationNeedsRepair;
             
         default:
             return MSALPlatformSSONotEnabled;
