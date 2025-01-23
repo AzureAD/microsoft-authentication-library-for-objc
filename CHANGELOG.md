@@ -1,3 +1,6 @@
+## [1.7.0]
+* Add support for claims request in native authentication signIn (#2496)
+
 ## [1.6.3]
 * Merge 1.6.1-hotfix
 
