@@ -113,6 +113,9 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorDeviceNotPSSORegistered) : @(MSALErrorDeviceNotPSSORegistered),
                                    @(MSIDErrorPSSOKeyIdMismatch) : @(MSALErrorPSSOKeyIdMismatch),
                                    @(MSIDErrorJITErrorHandlingConfigNotFound) : @(MSALErrorJITErrorHandlingConfigNotFound),
+                                   @(MSIDErrorPSSOBiometricPolicyMismatch) : @(MSALErrorPSSOBiometricPolicyMismatch),
+                                   @(MSIDErrorPSSOInvalidPasskeyExtension) : @(MSALErrorPSSOInvalidPasskeyExtension),
+                                   @(MSIDErrorPSSOSaveLoginConfigFailure) :@(MSALErrorPSSOSaveLoginConfigFailure),
                                    
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
@@ -130,7 +133,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerError) : @(MSALErrorServerError),
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse)
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse),
+                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse)
                                    }
                            };
     
