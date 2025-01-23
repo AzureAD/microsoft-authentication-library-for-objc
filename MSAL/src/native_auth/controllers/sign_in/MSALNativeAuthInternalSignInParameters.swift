@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthSignInParameters {
+class MSALNativeAuthInternalSignInParameters {
     let username: String
     let password: String?
     let context: MSALNativeAuthRequestContext

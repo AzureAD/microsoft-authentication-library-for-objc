@@ -73,7 +73,7 @@ extension MSALNativeAuthPublicClientApplication {
 
         let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
 
-        let params = MSALNativeAuthSignInParameters(
+        let params = MSALNativeAuthInternalSignInParameters(
             username: username,
             password: password,
             context: context,
