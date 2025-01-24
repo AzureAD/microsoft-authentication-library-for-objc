@@ -93,7 +93,13 @@ public class MFARequiredState: MFABaseState {
         continuationToken: String,
         correlationId: UUID) {
         self.inputValidator = inputValidator
-            super.init(controller: controller, scopes: scopes, claimsRequestJson: claimsRequestJson, continuationToken: continuationToken, correlationId: correlationId)
+        super.init(
+            controller: controller,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
+            continuationToken: continuationToken,
+            correlationId: correlationId
+        )
     }
 
     /// Requests the server to send the challenge to the specified auth method or the default one.
