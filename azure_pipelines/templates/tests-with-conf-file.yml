@@ -84,4 +84,11 @@ steps:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
+  - task: PublishPipelineArtifact@1
+    condition: failed()
+    displayName: "Publish crash report if any"
+    inputs:
+      targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
+      artifactName: "${{ configuration.testPlan }} crash folder - $(System.StageAttempt)"
+      publishLocation: "pipeline"
   
