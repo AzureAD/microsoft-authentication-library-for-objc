@@ -69,6 +69,7 @@ steps:
                 -destination '${{ parameters.destination }}' \
                 -retry-tests-on-failure \
                 -parallel-testing-enabled NO \
+                -quiet \
                 -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
         else
