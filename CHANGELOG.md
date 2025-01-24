@@ -1,5 +1,6 @@
 ## [1.7.0]
-* Move native auth public methods to parameter class
+* Add support for claims request in native authentication signIn (#2496)
+* Move native auth public methods to parameter class (#2492)
 
 ## [1.6.3]
 * Merge 1.6.1-hotfix

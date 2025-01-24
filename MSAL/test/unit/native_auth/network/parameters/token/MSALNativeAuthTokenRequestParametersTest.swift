@@ -45,7 +45,8 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
                                                                     password: "password",
                                                                     oobCode: "Test OTP Code",
                                                                     includeChallengeType: true,
-                                                                    refreshToken: nil)
+                                                                    refreshToken: nil,
+                                                                    claimsRequestJson: nil)
         var resultUrl: URL? = nil
         XCTAssertNoThrow(resultUrl = try parameters.makeEndpointUrl(config: config))
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/token")
@@ -62,7 +63,8 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
             password: "password",
             oobCode: "oob",
             includeChallengeType: true,
-            refreshToken: nil
+            refreshToken: nil,
+            claimsRequestJson: nil
         )
 
         let body = params.makeRequestBody(config: config)
@@ -93,7 +95,8 @@ final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
             password: nil,
             oobCode: nil,
             includeChallengeType: false,
-            refreshToken: nil
+            refreshToken: nil,
+            claimsRequestJson: nil
         )
 
         let body = params.makeRequestBody(config: config)

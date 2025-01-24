@@ -133,7 +133,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                           password: "password",
                                                           oobCode: "oob",
                                                           includeChallengeType: true,
-                                                          refreshToken: nil)
+                                                          refreshToken: nil,
+                                                          claimsRequestJson: nil)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .token(.signInWithPassword(params)),
@@ -413,7 +414,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
                                                           password: nil,
                                                           oobCode: nil,
                                                           includeChallengeType: false,
-                                                          refreshToken: "refreshToken")
+                                                          refreshToken: "refreshToken",
+                                                          claimsRequestJson: nil)
 
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .token(.refreshToken(params)),

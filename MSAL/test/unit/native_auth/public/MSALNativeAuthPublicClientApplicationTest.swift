@@ -555,7 +555,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -569,6 +569,37 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         wait(for: [exp1, exp2], timeout: 1)
     }
+    
+    func testSignInPasswordDelegate_checkClaimsParameterRequestShouldReturnedInCodeRequired() {
+        let exp1 = expectation(description: "sign-in public interface")
+        let exp2 = expectation(description: "expectation Telemetry")
+        var error: NSError? = nil
+        let claimsRequestJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c3\"}}}"
+        let claimsRequest = MSALClaimsRequest(jsonString: claimsRequestJson , error: &error)
+
+        let delegate = SignInPasswordStartDelegateSpy(expectation: exp1)
+        delegate.expectedSentTo = "sentTo"
+        delegate.expectedCodeLength = 1
+        delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
+
+        let expectedResult: SignInStartResult = .codeRequired(
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: claimsRequestJson, continuationToken: "", correlationId: correlationId),
+            sentTo: "sentTo",
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 1
+        )
+        
+        controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
+            exp2.fulfill()
+        })
+        
+        let params = MSALNativeAuthSignInParameters(username: "correct")
+        params.password = "correct"
+        params.claimsRequest = claimsRequest
+        sut.signIn(parameters: params, delegate: delegate)
+
+        wait(for: [exp1, exp2], timeout: 1)
+    }
 
     func testSignInPassword_delegate_whenCodeIsRequiredButUserHasNotImplementedOptionalDelegate_shouldReturnError() {
         let exp = expectation(description: "sign-in public interface")
@@ -578,7 +609,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -660,7 +691,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -685,7 +716,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInPasswordStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -720,7 +751,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -742,7 +773,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -763,7 +794,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let delegate = SignInCodeStartDelegateWithPasswordRequiredSpy(expectation: exp1)
 
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedResult: SignInStartResult = .passwordRequired(newState: expectedState)
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -785,7 +816,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
-            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId)
+            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId)
         )
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -816,7 +847,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         delegate.expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -839,7 +870,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateOptionalMethodNotImplemented(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .codeRequired(
-            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId),
+            newState: SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId),
             sentTo: "sentTo",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 1
@@ -861,7 +892,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let delegate = SignInCodeStartDelegateWithPasswordRequiredSpy(expectation: exp1)
 
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedResult: SignInStartResult = .passwordRequired(newState: expectedState)
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -884,7 +915,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let delegate = SignInCodeStartDelegateSpy(expectation: exp, expectedError: expectedError)
 
         let expectedResult: SignInStartResult = .passwordRequired(
-            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, continuationToken: "", correlationId: correlationId)
+            newState: SignInPasswordRequiredState(scopes: [], username: "", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "", correlationId: correlationId)
         )
 
         controllerFactoryMock.signInController.signInStartResult = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
@@ -1063,7 +1094,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
@@ -1168,7 +1199,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
@@ -1268,7 +1299,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
@@ -1361,7 +1392,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         
@@ -1458,7 +1489,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: .continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: .continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
@@ -1576,7 +1607,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
@@ -1688,7 +1719,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
@@ -1794,7 +1825,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
@@ -1891,7 +1922,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenResponse.refreshToken = "refreshToken"
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
@@ -1991,7 +2022,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: .continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil)
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: .continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 

@@ -291,6 +291,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
             XCTAssertEqual(expectedTokenParams.password, parameters.password)
             XCTAssertEqual(expectedTokenParams.oobCode, parameters.oobCode)
             XCTAssertEqual(expectedTokenParams.context.correlationId(), parameters.context.correlationId())
+            XCTAssertEqual(expectedTokenParams.claimsRequestJson, parameters.claimsRequestJson)
         }
         if let requestToken {
             return requestToken

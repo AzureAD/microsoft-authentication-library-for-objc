@@ -81,6 +81,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
         includeChallengeType: Bool = true,
+        claimsRequestJson: String? = nil,
         context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
             do {
                 let params = MSALNativeAuthTokenRequestParameters(
@@ -92,7 +93,8 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     password: password,
                     oobCode: oobCode,
                     includeChallengeType: includeChallengeType,
-                    refreshToken: nil)
+                    refreshToken: nil,
+                    claimsRequestJson: claimsRequestJson)
                 return try requestProvider.signInWithPassword(parameters: params, context: context)
             } catch {
                 MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
@@ -118,7 +120,8 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     password: nil,
                     oobCode: nil,
                     includeChallengeType: false,
-                    refreshToken: refreshToken)
+                    refreshToken: refreshToken,
+                    claimsRequestJson: nil)
                 return try requestProvider.refreshToken(parameters: params, context: context)
             } catch {
                 MSALLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request: \(error)")

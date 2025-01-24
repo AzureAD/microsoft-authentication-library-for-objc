@@ -36,6 +36,9 @@ public class MSALNativeAuthSignInParameters: NSObject {
     /// Not all scopes are guaranteed to be included in the access token returned.
     public var scopes: [String]?
 
+    /// The claims parameter that needs to be sent to the service.
+    public var claimsRequest: MSALClaimsRequest?
+
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 

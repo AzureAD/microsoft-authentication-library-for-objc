@@ -29,15 +29,18 @@ class MSALNativeAuthInternalSignInParameters {
     let password: String?
     let context: MSALNativeAuthRequestContext
     let scopes: [String]?
+    let claimsRequestJson: String?
 
     init(
         username: String,
         password: String?,
         context: MSALNativeAuthRequestContext,
-        scopes: [String]?) {
+        scopes: [String]?,
+        claimsRequestJson: String?) {
         self.username = username
         self.password = password
         self.context = context
         self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
     }
 }

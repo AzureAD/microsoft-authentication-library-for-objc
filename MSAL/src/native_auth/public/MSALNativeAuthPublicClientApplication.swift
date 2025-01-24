@@ -220,10 +220,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: SignInStartDelegate
     ) {
         Task {
+            let claimsRequestJson = parameters.claimsRequest?.jsonString()
             let controllerResponse = await signInInternal(
                 username: parameters.username,
                 password: parameters.password,
                 scopes: parameters.scopes,
+                claimsRequestJson: claimsRequestJson,
                 correlationId: parameters.correlationId
             )
 
