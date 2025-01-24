@@ -89,6 +89,6 @@ steps:
     displayName: "Publish crash report if any"
     inputs:
       targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
-      artifactName: "${{ configuration.testPlan }} crash folder - $(System.StageAttempt)"
+      artifactName: "crash folder"
       publishLocation: "pipeline"
   
