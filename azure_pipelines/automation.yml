@@ -41,6 +41,12 @@ jobs:
     displayName: 'Check System Information'
     
   - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Test Automation (iOS)'
+      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: 'true'
 
   - task: UsePythonVersion@0
     condition: failed()
