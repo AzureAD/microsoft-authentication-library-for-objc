@@ -92,6 +92,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }
     else
     {
+        sleep(10);
         XCUIElement *registerButton = self.testApp.buttons[@"Allow"];
         XCUIElement *result = [self waitForEitherElements:registerButton and:webElement];
         [result msidTap];
