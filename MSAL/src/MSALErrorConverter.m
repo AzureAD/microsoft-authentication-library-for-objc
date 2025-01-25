@@ -116,6 +116,10 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorPSSOBiometricPolicyMismatch) : @(MSALErrorPSSOBiometricPolicyMismatch),
                                    @(MSIDErrorPSSOInvalidPasskeyExtension) : @(MSALErrorPSSOInvalidPasskeyExtension),
                                    @(MSIDErrorPSSOSaveLoginConfigFailure) :@(MSALErrorPSSOSaveLoginConfigFailure),
+                                   @(MSIDErrorPSSOPasskeyLAError) :@(MSALErrorPSSOPasskeyLAError),
+                                   @(MSIDErrorPSSOBiometricsNotAvailable): @(MSALErrorPSSOBiometricsNotAvailable),
+                                   @(MSIDErrorPSSOBiometricsNotEnrolled): @(MSALErrorPSSOBiometricsNotEnrolled),
+                                
                                    
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
