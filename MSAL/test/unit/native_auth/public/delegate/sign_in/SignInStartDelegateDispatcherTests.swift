@@ -39,7 +39,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchSignInCodeRequired_whenDelegateMethodsAreImplemented() async {
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
@@ -83,7 +83,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
@@ -116,7 +116,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignInPasswordRequired(newState: expectedState, correlationId: correlationId)
 
@@ -139,7 +139,7 @@ final class SignInStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInPasswordRequiredState(scopes: [], username: "username", controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSignInPasswordRequired(newState: expectedState, correlationId: correlationId)
 

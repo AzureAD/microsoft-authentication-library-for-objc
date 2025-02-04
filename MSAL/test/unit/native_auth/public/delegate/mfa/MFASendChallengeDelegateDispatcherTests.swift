@@ -39,7 +39,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
     }
 
     func test_dispatchVerificationRequired_whenDelegateMethodIsImplemented() async {
-        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
@@ -87,7 +87,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
         })
 
         await sut.dispatchVerificationRequired(
-            newState: MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], continuationToken: "continuationToken", correlationId: correlationId),
+            newState: MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId),
             sentTo: "user@contoso.com",
             channelTargetType: MSALNativeAuthChannelType(value: "email"),
             codeLength: 4,
@@ -114,7 +114,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedAuthMethods = [MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "us**@**oso.com", channelTargetType: MSALNativeAuthChannelType(value: "email"))]
 
         await sut.dispatchSelectionRequired(authMethods: expectedAuthMethods, newState: expectedState, correlationId: correlationId)
@@ -143,7 +143,7 @@ final class MFARequestChallengeDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controllerFactoryMock.signInController, scopes: [], claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
 
         await sut.dispatchSelectionRequired(authMethods: [], newState: expectedState, correlationId: correlationId)
 

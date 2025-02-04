@@ -42,7 +42,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     var getAuthMethodsResponse: MFAGetAuthMethodsControllerResponse!
     var submitChallengeResponse: MFASubmitChallengeControllerResponse!
 
-    func signIn(params: MSAL.MSALNativeAuthSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
+    func signIn(params: MSAL.MSALNativeAuthInternalSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         return signInStartResult
     }
 
@@ -55,27 +55,27 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         return continuationTokenResult
     }
 
-    func submitCode(_ code: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInSubmitCodeControllerResponse {
+    func submitCode(_ code: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> SignInSubmitCodeControllerResponse {
         submitCodeResult
     }
 
-    func submitPassword(_ password: String, username: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInSubmitPasswordControllerResponse {
+    func submitPassword(_ password: String, username: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> SignInSubmitPasswordControllerResponse {
         return submitPasswordResult
     }
 
-    func resendCode(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> SignInResendCodeControllerResponse {
+    func resendCode(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> SignInResendCodeControllerResponse {
         return resendCodeResult
     }
     
-    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFARequestChallengeControllerResponse {
+    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFARequestChallengeControllerResponse {
         return requestChallengeResponse
     }
     
-    func getAuthMethods(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFAGetAuthMethodsControllerResponse {
+    func getAuthMethods(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFAGetAuthMethodsControllerResponse {
         return getAuthMethodsResponse
     }
     
-    func submitChallenge(challenge: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String]) async -> MFASubmitChallengeControllerResponse {
+    func submitChallenge(challenge: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFASubmitChallengeControllerResponse {
         return submitChallengeResponse
     }
 }
