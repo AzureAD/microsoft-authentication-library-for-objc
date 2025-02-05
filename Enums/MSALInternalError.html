@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 1.6.3 Docs
+          MSAL 1.7.0 Docs
         </a>
          (92% documented)
       </p>
@@ -152,10 +152,28 @@
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthError.html">MSALNativeAuthError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthGetAccessTokenParameters.html">MSALNativeAuthGetAccessTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthResetPasswordParameters.html">MSALNativeAuthResetPasswordParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInAfterResetPasswordParameters.html">MSALNativeAuthSignInAfterResetPasswordParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInAfterSignUpParameters.html">MSALNativeAuthSignInAfterSignUpParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInParameters.html">MSALNativeAuthSignInParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignUpParameters.html">MSALNativeAuthSignUpParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthTokenResult.html">MSALNativeAuthTokenResult</a>
@@ -871,6 +889,38 @@ server could not be more specific on what the exact problem is.</p>
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="k">case</span> <span class="n">internalErrorUnexpected</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42008</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALInternalErrorUnexpectedHttpResponse"></a>
+                    <a name="//apple_ref/swift/Case/MSALInternalErrorUnexpectedHttpResponse" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALInternalErrorUnexpectedHttpResponse">MSALInternalErrorUnexpectedHttpResponse</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Un expected http response with status code 403 or 404</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALInternalErrorUnexpectedHttpResponse</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42009</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">internalErrorUnexpectedHttpResponse</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42009</span></code></pre>
 
                         </div>
                       </div>
@@ -2522,6 +2572,198 @@ the json response does not contain &ldquo;key1&rdquo; elements</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOBiometricPolicyMismatch"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOBiometricPolicyMismatch" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOBiometricPolicyMismatch">MSALErrorPSSOBiometricPolicyMismatch</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>PSSO passkey - Biometric policy flag doesnt match with the loginConfig settings</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOBiometricPolicyMismatch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42739</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOBiometricPolicyMismatch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42739</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOInvalidPasskeyExtension"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOInvalidPasskeyExtension" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOInvalidPasskeyExtension">MSALErrorPSSOInvalidPasskeyExtension</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>PSSO passkey - Invalid Passkey extension trying to access passkey</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOInvalidPasskeyExtension</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42740</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOInvalidPasskeyExtension</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42740</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOSaveLoginConfigFailure"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOSaveLoginConfigFailure" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOSaveLoginConfigFailure">MSALErrorPSSOSaveLoginConfigFailure</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>PSSO save login config failure</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOSaveLoginConfigFailure</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42741</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOSaveLoginConfigFailure</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42741</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOPasskeyLAError"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOPasskeyLAError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOPasskeyLAError">MSALErrorPSSOPasskeyLAError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Error thrown when uses tries to acces passkey without biometric when biometric policy configured</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOPasskeyLAError</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42742</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOPasskeyLAError</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42742</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOBiometricsNotAvailable"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOBiometricsNotAvailable" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOBiometricsNotAvailable">MSALErrorPSSOBiometricsNotAvailable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Error is thrown when PSSO user registration attempted with no biometrics available and sekey biometric policy is configured</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOBiometricsNotAvailable</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42743</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOBiometricsNotAvailable</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42743</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MSALInternalError@MSALErrorPSSOBiometricsNotEnrolled"></a>
+                    <a name="//apple_ref/swift/Case/MSALErrorPSSOBiometricsNotEnrolled" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MSALInternalError@MSALErrorPSSOBiometricsNotEnrolled">MSALErrorPSSOBiometricsNotEnrolled</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="n">MSALErrorPSSOBiometricsNotEnrolled</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42744</span></code></pre>
+
+                        </div>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">errorPSSOBiometricsNotEnrolled</span> <span class="o">=</span> <span class="o">-</span><span class="mi">42744</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
@@ -2530,7 +2772,7 @@ the json response does not contain &ldquo;key1&rdquo; elements</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2024 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2024-12-20)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-02-05)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
