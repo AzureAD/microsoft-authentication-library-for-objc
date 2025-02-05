@@ -76,11 +76,32 @@ import Foundation
         }
     }
 
+    // Retrieves the access token for the currently signed in account from the cache for the provided parameters.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Get Access Token flow.
+    ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    ///
+    @objc public func getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters,
+                                     delegate: CredentialsDelegate) {
+
+        MSALLogger.log(
+            level: .info,
+            context: nil,
+            format: "Retrieving access token with parameters started."
+        )
+
+        getAccessTokenInternal(forceRefresh: parameters.forceRefresh ?? false,
+                               scopes: parameters.scopes ?? [],
+                               correlationId: parameters.correlationId,
+                               delegate: delegate)
+    }
+
     /// Retrieves the access token for the default OIDC(openid, offline_access, profile) scopes from the cache.
     /// - Parameters:
     ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'getAccessToken(parameters:)' instead.")
     @objc public func getAccessToken(forceRefresh: Bool = false,
                                      correlationId: UUID? = nil,
                                      delegate: CredentialsDelegate) {
@@ -104,6 +125,7 @@ import Foundation
     ///   - forceRefresh: Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
     ///   - delegate: Delegate that receives callbacks for the Get Access Token flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'getAccessToken(parameters:)' instead.")
     public func getAccessToken(scopes: [String],
                                forceRefresh: Bool = false,
                                correlationId: UUID? = nil,

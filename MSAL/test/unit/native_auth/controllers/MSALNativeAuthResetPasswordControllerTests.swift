@@ -892,6 +892,58 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterPasswordReset)
     }
 
+    // MARK: - Sign-in with continuationToken using parameters
+
+    func test_whenResetPasswordSucceeds_and_userCallsSignInUsingParametersWithContinuationToken_ResetPasswordControllerPassesCorrectParams() async {
+        let username = "username"
+        let continuationToken = "continuationToken"
+
+        class SignInAfterResetPasswordDelegateStub: SignInAfterResetPasswordDelegate {
+            func onSignInAfterResetPasswordError(error: MSAL.SignInAfterResetPasswordError) {}
+        }
+
+        let signInControllerMock = MSALNativeAuthSignInControllerMock()
+
+        sut = .init(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseValidator: validatorMock,
+            signInController: signInControllerMock
+        )
+
+        requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
+        validatorMock.mockValidateResetPasswordSubmitFunc(.success(continuationToken: "continuationToken", pollInterval: 0))
+        requestProviderMock.mockPollCompletionRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedPollCompletionParameters = expectedPollCompletionParameters()
+        validatorMock.mockValidateResetPasswordPollCompletionFunc(.success(status: .succeeded, continuationToken: continuationToken))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword(password: "password", username: username, continuationToken: "continuationToken", context: contextMock)
+        result.telemetryUpdate?(.success(()))
+
+        helper.onResetPasswordCompleted(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onResetPasswordCompletedCalled)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: true)
+
+        let exp2 = expectation(description: "SignInAfterResetPassword expectation")
+        signInControllerMock.expectation = exp2
+        signInControllerMock.continuationTokenResult = .init(.failure(SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
+
+        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        helper.signInAfterResetPasswordState?.signIn(parameters: parameters, delegate: SignInAfterResetPasswordDelegateStub())
+        await fulfillment(of: [exp2], timeout: 1)
+
+        XCTAssertEqual(signInControllerMock.username, username)
+        XCTAssertEqual(signInControllerMock.continuationToken, continuationToken)
+        XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterPasswordReset)
+    }
+
     // MARK: - Common Methods
 
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {

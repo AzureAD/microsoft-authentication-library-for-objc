@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,27 +16,33 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// THE SOFTWARE.  
 
-#define MSAL_VER_HIGH       1
-#define MSAL_VER_LOW        7
-#define MSAL_VER_PATCH      0
+/// Encapsulates the parameters passed to the signIn method of MSALNativeAuthPublicClientApplication
+@objcMembers
+public class MSALNativeAuthSignInParameters: NSObject {
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+    /// username of the account to sign in.
+    public var username: String
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+    /// password of the account to sign in.
+    public var password: String?
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+    /// Permissions you want included in the access token received.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    public var scopes: [String]?
+
+    /// The claims parameter that needs to be sent to the service.
+    public var claimsRequest: MSALClaimsRequest?
+
+    /// UUID to correlate this request with the server for debugging.
+    public var correlationId: UUID?
+
+    public init(username: String) {
+        self.username = username
+    }
+}
