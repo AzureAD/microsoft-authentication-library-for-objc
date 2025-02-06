@@ -152,6 +152,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
     CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
                                     nil, CFNotificationSuspensionBehaviorDeliverImmediately);
+    [self addAccessibilityIdentifiers];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -792,6 +793,45 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 - (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
 {
     self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
+}
+
+- (void)addAccessibilityIdentifiers
+{
+    for (UIView *view in self.validateAuthoritySegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"validateAuthorityYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"validateAuthorityNo";
+        }
+    }
+    
+    for (UIView *view in self.instanceAwareSegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"instanceAwareYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"instanceAwareNo";
+        }
+    }
+    
+    for (UIView *view in self.systemWebviewSSOSegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"systemWebViewYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"systemWebViewNo";
+        }
+    }
 }
 
 @end
