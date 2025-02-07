@@ -215,7 +215,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 
         parameters.claimsRequest = MSALClaimsRequest(jsonString: authenticationContextRequestClaimJson,
                                                      error: &error)
-        parameters.correlationId = correlationId
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
@@ -275,7 +274,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 
         XCTAssertTrue(mfaSubmitChallengeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result)
-        XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
         XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
         XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
 
