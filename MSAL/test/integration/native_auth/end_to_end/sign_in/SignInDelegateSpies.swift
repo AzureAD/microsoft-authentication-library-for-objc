@@ -159,3 +159,33 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
         expectation.fulfill()
     }
 }
+
+class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
+    private let expectation: XCTestExpectation
+    private(set) var onSignInResendCodeErrorCalled = false
+    private(set) var error: ResendCodeError?
+    private(set) var onSignInResendCodeCodeRequiredCalled = false
+    private(set) var signInCodeRequiredState: SignInCodeRequiredState?
+    private(set) var sentTo: String?
+    private(set) var channelTargetType: MSALNativeAuthChannelType?
+    private(set) var codeLength: Int?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
+        onSignInResendCodeErrorCalled = true
+        self.error = error
+    }
+
+    func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+        onSignInResendCodeCodeRequiredCalled = true
+        signInCodeRequiredState = newState
+        self.sentTo = sentTo
+        self.channelTargetType = channelTargetType
+        self.codeLength = codeLength
+
+        expectation.fulfill()
+    }
+}
