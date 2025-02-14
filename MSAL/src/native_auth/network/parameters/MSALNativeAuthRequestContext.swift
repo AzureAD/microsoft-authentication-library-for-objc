@@ -29,10 +29,17 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
     private let _correlationId: UUID
     private let _telemetryRequestId: String
     private var _serverCorrelationId: UUID? // TODO: Setting the server correlation id here is wrong. Needs refactoring.
+    var disableFRT: Bool
 
     init(correlationId: UUID? = nil, telemetryRequestId: String = MSIDTelemetry.sharedInstance().generateRequestId()) {
         _correlationId = correlationId ?? UUID()
         _telemetryRequestId = telemetryRequestId
+        
+        /**
+         Temporal property to disable Family Refresh Token. This will be removed in future, added to allow 1P apps to disable this feature themselves.
+         Always disabled for MSALNative.
+         */
+        disableFRT = true
     }
 
     func correlationId() -> UUID {
